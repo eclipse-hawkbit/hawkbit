@@ -917,6 +917,14 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     private void handleDeleteRollout(final JpaRollout rollout) {
 
+        // check if there are actions beyond schedule
+        boolean hardDeleteRolloutGroups = !actionRepository.existsByRolloutIdAndStatusNotIn(rollout.getId(),
+                Status.SCHEDULED);
+        if (hardDeleteRolloutGroups) {
+            hardDeleteRollout(rollout);
+            return;
+        }
+
         // clean up all scheduled actions
         final Slice<JpaAction> scheduledActions = findScheduledActionsByRollout(rollout);
         deleteScheduledActions(rollout, scheduledActions);
@@ -931,7 +939,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         // only hard delete the rollout if no actions are left for the rollout.
         // In case actions are left, they are probably are running or were
         // running before, so only soft delete.
-        final boolean hardDeleteRolloutGroups = !actionRepository.existsByRolloutId(rollout.getId());
+        hardDeleteRolloutGroups = !actionRepository.existsByRolloutId(rollout.getId());
         if (hardDeleteRolloutGroups) {
             hardDeleteRollout(rollout);
             return;
@@ -947,10 +955,6 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     private void hardDeleteRollout(final JpaRollout rollout) {
         try {
-            final List<Long> rolloutGroupIds = rolloutGroupRepository.findByRolloutOrderByIdAsc(rollout).stream()
-                    .map(group -> group.getId()).collect(Collectors.toList());
-            rolloutTargetGroupRepository.deleteByRolloutGroupIds(rolloutGroupIds);
-            rolloutGroupRepository.deleteByIds(rolloutGroupIds);
             rolloutRepository.delete(rollout);
         } catch (final RuntimeException e) {
             LOGGER.error("Exception during deletion of rollout-groups of rollout {}", rollout, e);
@@ -963,8 +967,8 @@ public class JpaRolloutManagement implements RolloutManagement {
         if (hasScheduledActions) {
             try {
                 final Iterable<JpaAction> iterable = scheduledActions::iterator;
-                final List<Long> actionIds = StreamSupport.stream(iterable.spliterator(), false)
-                        .map(action -> action.getId()).collect(Collectors.toList());
+                final List<Long> actionIds = StreamSupport.stream(iterable.spliterator(), false).map(Action::getId)
+                        .collect(Collectors.toList());
                 actionRepository.deleteByIdIn(actionIds);
                 afterCommit.afterCommit(() -> eventPublisher.publishEvent(
                         new RolloutUpdatedEvent(rollout, EventPublisherHolder.getInstance().getApplicationId())));

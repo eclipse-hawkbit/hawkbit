@@ -83,6 +83,9 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     protected RolloutGroupRepository rolloutGroupRepository;
 
     @Autowired
+    protected RolloutTargetGroupRepository rolloutTargetGroupRepository;
+
+    @Autowired
     protected RolloutRepository rolloutRepository;
 
     @Autowired

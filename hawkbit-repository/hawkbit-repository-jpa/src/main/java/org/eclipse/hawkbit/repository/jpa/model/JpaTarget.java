@@ -87,22 +87,21 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
     @CascadeOnDelete
     @ManyToMany(targetEntity = JpaTargetTag.class)
     @JoinTable(name = "sp_target_target_tag", joinColumns = {
-            @JoinColumn(name = "target", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_target")) }, inverseJoinColumns = {
-                    @JoinColumn(name = "tag", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_tag")) })
+            @JoinColumn(name = "target", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_target")) }, inverseJoinColumns = {
+                    @JoinColumn(name = "tag", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_tag")) })
     private Set<TargetTag> tags;
 
     @CascadeOnDelete
-    @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = {
-            CascadeType.REMOVE }, targetEntity = JpaAction.class)
-    @JoinColumn(name = "target", insertable = false, updatable = false, nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_act_hist_targ"))
-    private List<Action> actions;
+    @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, targetEntity = JpaAction.class)
+    private List<JpaAction> actions;
 
     @ManyToOne(optional = true, fetch = FetchType.LAZY, targetEntity = JpaDistributionSet.class)
     @JoinColumn(name = "assigned_distribution_set", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_assign_ds"))
     private JpaDistributionSet assignedDistributionSet;
 
     @CascadeOnDelete
-    @OneToOne(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY, targetEntity = JpaTargetInfo.class)
+    @OneToOne(cascade = { CascadeType.PERSIST,
+            CascadeType.MERGE }, fetch = FetchType.LAZY, targetEntity = JpaTargetInfo.class)
     @PrimaryKeyJoinColumn
     private JpaTargetInfo targetInfo;
 
@@ -110,14 +109,13 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
      * the security token of the target which allows if enabled to authenticate
      * with this security token.
      */
-    @Column(name = "sec_token", insertable = true, updatable = true, nullable = false, length = 128)
+    @Column(name = "sec_token", updatable = true, nullable = false, length = 128)
     @Size(max = 64)
     @NotEmpty
     private String securityToken;
 
     @CascadeOnDelete
-    @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE, CascadeType.PERSIST })
-    @JoinColumn(name = "target_Id", insertable = false, updatable = false)
+    @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
     private List<RolloutTargetGroup> rolloutTargetGroup;
 
     /**
@@ -214,7 +212,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
             actions = new ArrayList<>();
         }
 
-        return actions.add(action);
+        return actions.add((JpaAction) action);
     }
 
     @Override

@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
+import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.annotations.ConversionValue;
 import org.eclipse.persistence.annotations.Convert;
 import org.eclipse.persistence.annotations.ObjectTypeConverter;
@@ -60,15 +61,16 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
     private static final long serialVersionUID = 1L;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rollout", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rolloutgroup_rollout"))
+    @JoinColumn(name = "rollout", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rolloutgroup_rollout"))
     private JpaRollout rollout;
 
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
     @Convert("rolloutgroupstatus")
     private RolloutGroupStatus status = RolloutGroupStatus.CREATING;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST }, targetEntity = RolloutTargetGroup.class)
-    @JoinColumn(name = "rolloutGroup_Id", insertable = false, updatable = false)
+    @CascadeOnDelete
+    @OneToMany(mappedBy = "rolloutGroup", fetch = FetchType.LAZY, cascade = {
+            CascadeType.PERSIST }, targetEntity = RolloutTargetGroup.class)
     private List<RolloutTargetGroup> rolloutTargetGroup;
 
     @ManyToOne(fetch = FetchType.LAZY)

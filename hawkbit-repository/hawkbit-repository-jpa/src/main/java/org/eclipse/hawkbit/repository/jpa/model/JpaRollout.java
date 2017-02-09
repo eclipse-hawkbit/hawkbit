@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
+import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.annotations.ConversionValue;
 import org.eclipse.persistence.annotations.Convert;
 import org.eclipse.persistence.annotations.ObjectTypeConverter;
@@ -69,9 +70,9 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
 
     private static final long serialVersionUID = 1L;
 
-    @OneToMany(targetEntity = JpaRolloutGroup.class)
-    @JoinColumn(name = "rollout", insertable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollout_rolloutgroup"))
-    private List<RolloutGroup> rolloutGroups;
+    @CascadeOnDelete
+    @OneToMany(targetEntity = JpaRolloutGroup.class, fetch = FetchType.LAZY, mappedBy = "rollout")
+    private List<JpaRolloutGroup> rolloutGroups;
 
     @Column(name = "target_filter", length = 1024, nullable = false)
     @Size(max = 1024)
@@ -79,12 +80,13 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     private String targetFilterQuery;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "distribution_set", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rolltout_ds"))
+    @JoinColumn(name = "distribution_set", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rolltout_ds"))
     @NotNull
     private JpaDistributionSet distributionSet;
 
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
     @Convert("rolloutstatus")
+    @NotNull
     private RolloutStatus status = RolloutStatus.CREATING;
 
     @Column(name = "last_check")
@@ -216,9 +218,8 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
 
     @Override
     public String toString() {
-        return "Rollout [rolloutGroups=" + rolloutGroups + ", targetFilterQuery=" + targetFilterQuery
-                + ", distributionSet=" + distributionSet + ", status=" + status + ", lastCheck=" + lastCheck
-                + ", getName()=" + getName() + ", getId()=" + getId() + "]";
+        return "Rollout [ targetFilterQuery=" + targetFilterQuery + ", distributionSet=" + distributionSet + ", status="
+                + status + ", lastCheck=" + lastCheck + ", getName()=" + getName() + ", getId()=" + getId() + "]";
     }
 
     @Override

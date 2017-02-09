@@ -1371,6 +1371,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         // verify
         final JpaRollout deletedRollout = rolloutRepository.findOne(createdRollout.getId());
         assertThat(deletedRollout).isNull();
+        assertThat(rolloutGroupRepository.count()).isZero();
+        assertThat(rolloutTargetGroupRepository.count()).isZero();
     }
 
     @Test

@@ -8,17 +8,11 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.Collection;
-
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroupId;
-import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,16 +32,4 @@ public interface RolloutTargetGroupRepository
      * @return count of targets in the group
      */
     Long countByRolloutGroup(final JpaRolloutGroup rolloutGroup);
-
-    /**
-     * Deletes all {@link RolloutTargetGroupId} by the given
-     * {@link RolloutGroup} IDs.
-     * 
-     * @param rolloutGroupIds
-     *            the IDs of the rollout groups to delete the
-     *            {@link RolloutTargetGroup}
-     */
-    @Query("DELETE FROM RolloutTargetGroup g WHERE g.rolloutGroup IN :rolloutGroupIds")
-    @Modifying
-    void deleteByRolloutGroupIds(@Param("rolloutGroupIds") final Collection<Long> rolloutGroupIds);
 }
