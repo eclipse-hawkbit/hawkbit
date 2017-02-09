@@ -940,9 +940,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(
                         jsonPath("$._links.resume.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/resume"))))
                 .andExpect(jsonPath("$._links.groups.href",
-                        allOf(startsWith(HREF_ROLLOUT_PREFIX), containsString("/deploygroups"))))
-
-        ;
+                        allOf(startsWith(HREF_ROLLOUT_PREFIX), containsString("/deploygroups"))));
     }
 
     private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId,
@@ -958,21 +956,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         return rolloutManagement.findRolloutById(rollout.getId());
     }
 
-    protected boolean success(final Rollout result) {
-        if (result != null && result.getStatus() == RolloutStatus.RUNNING) {
-            return true;
-        }
-        return false;
-    }
-
-    protected boolean hardDeleted(final Rollout result) {
-        if (result == null) {
-            return true;
-        }
-        return false;
-    }
-
-    protected boolean softDeleted(final Rollout result) {
+      protected boolean success(final Rollout result) {
         if (result != null && result.getStatus() == RolloutStatus.RUNNING) {
             return true;
         }
