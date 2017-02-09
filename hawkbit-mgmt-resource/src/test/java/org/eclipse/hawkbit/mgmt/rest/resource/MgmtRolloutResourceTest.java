@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -786,6 +787,23 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
     }
 
     @Test
+    @Description("Deletion of a rollout")
+    public void deleteRollout() throws Exception {
+        final int amountTargets = 10;
+        testdataFactory.createTargets(amountTargets, "rolloutDelete", "rolloutDelete");
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
+
+        // create rollout including the created targets with prefix 'rollout'
+        final Rollout rollout = createRollout("rolloutDelete", 4, dsA.getId(), "controllerId==rolloutDelete*");
+
+        // delete rollout
+        mvc.perform(delete("/rest/v1/rollouts/{rolloutid}", rollout.getId())).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+
+        assertThat(getRollout(rollout.getId()).getStatus()).isEqualTo(RolloutStatus.DELETING);
+    }
+
+    @Test
     @Description("Testing that rollout paged list with rsql parameter")
     public void getRolloutWithRSQLParam() throws Exception {
 
@@ -922,9 +940,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(
                         jsonPath("$._links.resume.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/resume"))))
                 .andExpect(jsonPath("$._links.groups.href",
-                        allOf(startsWith(HREF_ROLLOUT_PREFIX), containsString("/deploygroups"))))
-
-        ;
+                        allOf(startsWith(HREF_ROLLOUT_PREFIX), containsString("/deploygroups"))));
     }
 
     private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId,
@@ -940,8 +956,8 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         return rolloutManagement.findRolloutById(rollout.getId());
     }
 
-    protected boolean success(final Rollout result) {
-        if (null != result && result.getStatus() == RolloutStatus.RUNNING) {
+      protected boolean success(final Rollout result) {
+        if (result != null && result.getStatus() == RolloutStatus.RUNNING) {
             return true;
         }
         return false;
