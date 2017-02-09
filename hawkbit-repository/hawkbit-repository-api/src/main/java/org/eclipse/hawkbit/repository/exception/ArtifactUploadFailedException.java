@@ -18,9 +18,6 @@ import org.eclipse.hawkbit.exception.SpServerError;
  */
 public final class ArtifactUploadFailedException extends AbstractServerRtException {
 
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     /**

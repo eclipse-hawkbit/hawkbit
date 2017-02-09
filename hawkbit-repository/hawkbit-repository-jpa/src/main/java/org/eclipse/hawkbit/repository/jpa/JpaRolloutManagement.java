@@ -101,17 +101,17 @@ import com.google.common.collect.Lists;
 @Validated
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public class JpaRolloutManagement implements RolloutManagement {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RolloutManagement.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JpaRolloutManagement.class);
 
     /**
      * Max amount of targets that are handled in one transaction.
      */
-    private static final int TRANSACTION_TARGETS = 10_000;
+    private static final int TRANSACTION_TARGETS = 1_000;
 
     /**
      * Maximum amount of actions that are deleted in one transaction.
      */
-    private static final int TRANSACTION_ACTIONS = 10_000;
+    private static final int TRANSACTION_ACTIONS = 1_000;
 
     @Autowired
     private RolloutRepository rolloutRepository;
@@ -322,7 +322,9 @@ public class JpaRolloutManagement implements RolloutManagement {
                 .afterCommit(() -> eventPublisher.publishEvent(new RolloutGroupCreatedEvent(group, context.getId())));
     }
 
-    private void handleCreateRollout(final JpaRollout rollout, final Lock lock) {
+    private void handleCreateRollout(final JpaRollout rollout) {
+        LOGGER.debug("handleCreateRollout called for rollout {}", rollout.getId());
+
         final List<RolloutGroup> rolloutGroups = RolloutHelper.getOrderedGroups(rollout);
         int readyGroups = 0;
         int totalTargets = 0;
@@ -343,6 +345,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         // When all groups are ready the rollout status can be changed to be
         // ready, too.
         if (readyGroups == rolloutGroups.size()) {
+            LOGGER.debug("rollout {} creatin done. Switch to READY.", rollout.getId());
             rollout.setStatus(RolloutStatus.READY);
             rollout.setLastCheck(0);
             rollout.setTotalTargets(totalTargets);
@@ -513,6 +516,8 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public Rollout startRollout(final Long rolloutId) {
+        LOGGER.debug("startRollout called for rollout {}", rolloutId);
+
         final JpaRollout rollout = Optional.ofNullable(rolloutRepository.findOne(rolloutId))
                 .orElseThrow(() -> new EntityNotFoundException(String.format(ROLLOUT_NOT_FOUND, rolloutId)));
         RolloutHelper.checkIfRolloutCanStarted(rollout, rollout);
@@ -522,6 +527,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private void startFirstRolloutGroup(final Rollout rollout) {
+        LOGGER.debug("startFirstRolloutGroup called for rollout {}", rollout.getId());
         RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.STARTING);
         final JpaRollout jpaRollout = (JpaRollout) rollout;
 
@@ -620,19 +626,6 @@ public class JpaRolloutManagement implements RolloutManagement {
      * Creates an action entry into the action repository. In case of existing
      * scheduled actions the scheduled actions gets canceled. A scheduled action
      * is created in-active.
-     *
-     * @param targets
-     *            the targets to create scheduled actions for
-     * @param distributionSet
-     *            the distribution set for the actions
-     * @param actionType
-     *            the action type for the action
-     * @param forcedTime
-     *            the forcedTime of the action
-     * @param rollout
-     *            the roll out for this action
-     * @param rolloutGroup
-     *            the roll out group for this action
      */
     private void createScheduledAction(final Collection<Target> targets, final DistributionSet distributionSet,
             final ActionType actionType, final Long forcedTime, final Rollout rollout,
@@ -691,8 +684,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private void handleRunningRollout(final JpaRollout rollout) {
-
-        LOGGER.debug("Checking rollout {}", rollout);
+        LOGGER.debug("handleRunningRollout called for rollout {}", rollout.getId());
 
         final List<JpaRolloutGroup> rolloutGroupsRunning = rolloutGroupRepository.findByRolloutAndStatus(rollout,
                 RolloutGroupStatus.RUNNING);
@@ -709,7 +701,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         }
 
         if (isRolloutComplete(rollout)) {
-            LOGGER.info("Rollout {} is finished, setting finished status", rollout);
+            LOGGER.info("Rollout {} is finished, setting FINISHED status", rollout);
             rollout.setStatus(RolloutStatus.FINISHED);
             rolloutRepository.save(rollout);
         }
@@ -843,6 +835,8 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private void handleRollout(final Long rolloutId) {
+        LOGGER.debug("handleRollout called for rollout {}", rolloutId);
+
         final String tenant = tenantAware.getCurrentTenant();
 
         final String handlerId = tenant + "-rollout-" + rolloutId;
@@ -851,7 +845,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         try {
             acquired = lock.tryLock();
             if (acquired) {
-                runInNewTransaction(handlerId, status -> executeFittingHandler(rolloutId, lock));
+                runInNewTransaction(handlerId, status -> executeFittingHandler(rolloutId));
             }
 
         } finally {
@@ -861,12 +855,12 @@ public class JpaRolloutManagement implements RolloutManagement {
         }
     }
 
-    private int executeFittingHandler(final Long rolloutId, final Lock lock) {
+    private int executeFittingHandler(final Long rolloutId) {
         final JpaRollout rollout = rolloutRepository.findOne(rolloutId);
 
         switch (rollout.getStatus()) {
         case CREATING:
-            handleCreateRollout(rollout, lock);
+            handleCreateRollout(rollout);
             break;
         case DELETING:
             handleDeleteRollout(rollout);
@@ -889,6 +883,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private void handleStartingRollout(final Rollout rollout) {
+        LOGGER.debug("handleStartingRollout called for rollout {}", rollout.getId());
 
         if (ensureAllGroupsAreScheduled(rollout)) {
             startFirstRolloutGroup(rollout);
@@ -897,13 +892,15 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     private void handleReadyRollout(final Rollout rollout) {
         if (rollout.getStartAt() != null && rollout.getStartAt() <= System.currentTimeMillis()) {
+            LOGGER.debug(
+                    "handleReadyRollout called for rollout {} with autostart beyond define time. Switch to STARTING",
+                    rollout.getId());
             startRollout(rollout.getId());
         }
     }
 
-    // TODO why new?
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void deleteRollout(final long rolloutId) {
         final JpaRollout jpaRollout = rolloutRepository.findOne(rolloutId);
@@ -916,11 +913,13 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private void handleDeleteRollout(final JpaRollout rollout) {
+        LOGGER.debug("handleDeleteRollout called for {}", rollout.getId());
 
         // check if there are actions beyond schedule
         boolean hardDeleteRolloutGroups = !actionRepository.existsByRolloutIdAndStatusNotIn(rollout.getId(),
                 Status.SCHEDULED);
         if (hardDeleteRolloutGroups) {
+            LOGGER.debug("Rollout {} has no actions other than scheduled -> hard delete", rollout.getId());
             hardDeleteRollout(rollout);
             return;
         }

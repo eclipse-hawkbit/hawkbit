@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.RolloutGroupsValidation;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,7 +43,32 @@ import org.springframework.util.concurrent.ListenableFuture;
  */
 public interface RolloutManagement {
 
-    // TODO
+    /**
+     * Process rollout based on its current {@link Rollout#getStatus()}.
+     * 
+     * For {@link RolloutStatus#CREATING} that means creating the
+     * {@link RolloutGroup}s with {@link Target}s and when finished switch to
+     * {@link RolloutStatus#READY}.
+     * 
+     * For {@link RolloutStatus#READY} that means switching to
+     * {@link RolloutStatus#STARTING} if the {@link Rollout#getStartAt()} is set
+     * and time of calling this method is beyond this point in time. This auto
+     * start mechanism is optional. Call {@link #startRollout(Long)} otherwise.
+     * 
+     * For {@link RolloutStatus#STARTING} that means starting the first
+     * {@link RolloutGroup}s in line and when finished switch to
+     * {@link RolloutStatus#RUNNING}.
+     * 
+     * For {@link RolloutStatus#RUNNING} that means checking to activate further
+     * groups based on the defined thresholds. Switched to
+     * {@link RolloutStatus#FINISHED} is all groups are finished.
+     * 
+     * For {@link RolloutStatus#DELETING} that means either soft delete in case
+     * rollout was already {@link RolloutStatus#RUNNING} which results in status
+     * change {@link RolloutStatus#DELETED} or hard delete from the persistence
+     * otherwise.
+     * 
+     */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     void handleRollouts();
 
