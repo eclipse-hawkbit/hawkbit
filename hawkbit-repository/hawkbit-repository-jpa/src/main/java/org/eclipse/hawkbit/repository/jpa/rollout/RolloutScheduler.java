@@ -76,9 +76,10 @@ public class RolloutScheduler {
     @Scheduled(initialDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER)
     public void runningRolloutScheduler() {
         LOGGER.debug("rollout schedule checker has been triggered.");
+
         // run this code in system code privileged to have the necessary
         // permission to query and create entities.
-        systemSecurityContext.runAsSystem(() -> {
+        final int tasks = systemSecurityContext.runAsSystem(() -> {
             // workaround eclipselink that is currently not possible to
             // execute a query without multitenancy if MultiTenant
             // annotation is used.
@@ -93,15 +94,18 @@ public class RolloutScheduler {
                     return null;
                 }));
             }
-            return null;
+            return tenants.size();
         });
 
-        waitUntilHandlersAreComplete(completionService);
+        waitUntilHandlersAreComplete(completionService, tasks);
     }
 
-    private void waitUntilHandlersAreComplete(final ExecutorCompletionService<Void> completionService) {
+    private void waitUntilHandlersAreComplete(final ExecutorCompletionService<Void> completionService,
+            final int tenants) {
         try {
-            completionService.take().get();
+            for (int i = 0; i < tenants; i++) {
+                completionService.take().get();
+            }
         } catch (InterruptedException | ExecutionException e) {
             Thread.currentThread().interrupt();
             throw Throwables.propagate(e);
