@@ -15,11 +15,11 @@ import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -101,16 +101,20 @@ public interface ArtifactManagement {
             String providedMd5Sum, String providedSha1Sum, boolean overrideExisting, String contentType);
 
     /**
-     * Garbage collects local artifact binary file if only referenced by given
-     * {@link Artifact} metadata object.
+     * Garbage collects artifact binaries if only referenced by given
+     * {@link SoftwareModule#getId()} or {@link SoftwareModules} that are marged
+     * as deleted.
+     * 
      *
-     * @param artifactId
-     *            the related local artifact
+     * @param artifactSha1Hash
+     *            no longer needed
+     * @param moduleId
+     *            the garbage colelction call is made for
      * 
      * @return <code>true</code> if an binary was actually garbage collected
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
-    boolean clearArtifactBinary(@NotNull Long artifactId);
+    boolean clearArtifactBinary(@NotEmpty String artifactSha1Hash, @NotNull Long moduleId);
 
     /**
      * Deletes {@link Artifact} based on given id.

@@ -76,7 +76,7 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
 
     @CascadeOnDelete
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "softwareModule", cascade = {
-            CascadeType.PERSIST }, targetEntity = JpaArtifact.class)
+            CascadeType.PERSIST }, targetEntity = JpaArtifact.class, orphanRemoval = true)
     private List<JpaArtifact> artifacts;
 
     @CascadeOnDelete
