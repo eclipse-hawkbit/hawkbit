@@ -259,7 +259,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             group.setTargetPercentage(1.0F / (amountOfGroups - i) * 100);
 
             lastSavedGroup = rolloutGroupRepository.save(group);
-            publishRolloutGroupCreatedEventAfterCommit(lastSavedGroup);
+            publishRolloutGroupCreatedEventAfterCommit(lastSavedGroup, rollout);
         }
 
         savedRollout.setRolloutGroupsCreated(amountOfGroups);
@@ -310,16 +310,16 @@ public class JpaRolloutManagement implements RolloutManagement {
             group.setErrorActionExp(srcGroup.getErrorActionExp());
 
             lastSavedGroup = rolloutGroupRepository.save(group);
-            publishRolloutGroupCreatedEventAfterCommit(lastSavedGroup);
+            publishRolloutGroupCreatedEventAfterCommit(lastSavedGroup, rollout);
         }
 
         savedRollout.setRolloutGroupsCreated(groups.size());
         return rolloutRepository.save(savedRollout);
     }
 
-    private void publishRolloutGroupCreatedEventAfterCommit(final RolloutGroup group) {
-        afterCommit
-                .afterCommit(() -> eventPublisher.publishEvent(new RolloutGroupCreatedEvent(group, context.getId())));
+    private void publishRolloutGroupCreatedEventAfterCommit(final RolloutGroup group, final Rollout rollout) {
+        afterCommit.afterCommit(() -> eventPublisher
+                .publishEvent(new RolloutGroupCreatedEvent(group, rollout.getId(), context.getId())));
     }
 
     private void handleCreateRollout(final JpaRollout rollout) {
@@ -404,6 +404,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     private int runInNewTransaction(final String transactionName, final TransactionCallback<Integer> action) {
         final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         def.setName(transactionName);
+        def.setReadOnly(false);
         def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         def.setIsolationLevel(Isolation.READ_UNCOMMITTED.value());
         return new TransactionTemplate(txManager, def).execute(action);

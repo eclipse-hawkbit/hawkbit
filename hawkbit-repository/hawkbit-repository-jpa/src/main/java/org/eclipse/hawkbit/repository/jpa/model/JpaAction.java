@@ -33,6 +33,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -184,13 +185,15 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @Override
     public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new ActionCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+                .publishEvent(new ActionCreatedEvent(this, BaseEntity.getIdOrNull(rollout),
+                        BaseEntity.getIdOrNull(rolloutGroup), EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new ActionUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+                .publishEvent(new ActionUpdatedEvent(this, BaseEntity.getIdOrNull(rollout),
+                        BaseEntity.getIdOrNull(rolloutGroup), EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override

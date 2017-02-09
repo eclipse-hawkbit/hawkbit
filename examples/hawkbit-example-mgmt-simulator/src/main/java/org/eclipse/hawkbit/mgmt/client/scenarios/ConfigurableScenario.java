@@ -135,6 +135,7 @@ public class ConfigurableScenario {
         LOGGER.info("Cleaning repository -> Done");
     }
 
+    // FIXME ignore 404
     private void deleteRollouts() {
         LOGGER.info("Delete Rollouts");
 

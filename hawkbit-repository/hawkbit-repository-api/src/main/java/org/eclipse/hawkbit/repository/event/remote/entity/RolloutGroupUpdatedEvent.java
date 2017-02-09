@@ -15,7 +15,9 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
  */
 public class RolloutGroupUpdatedEvent extends RemoteEntityEvent<RolloutGroup> {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
+
+    private Long rolloutId;
 
     /**
      * Default constructor.
@@ -32,8 +34,12 @@ public class RolloutGroupUpdatedEvent extends RemoteEntityEvent<RolloutGroup> {
      * @param applicationId
      *            the origin application id
      */
-    public RolloutGroupUpdatedEvent(final RolloutGroup rolloutGroup, final String applicationId) {
+    public RolloutGroupUpdatedEvent(final RolloutGroup rolloutGroup, final Long rolloutId, final String applicationId) {
         super(rolloutGroup, applicationId);
+    }
+
+    public Long getRolloutId() {
+        return rolloutId;
     }
 
 }

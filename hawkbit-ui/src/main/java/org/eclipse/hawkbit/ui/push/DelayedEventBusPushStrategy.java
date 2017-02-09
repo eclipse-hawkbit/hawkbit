@@ -30,6 +30,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.ui.push.event.RolloutChangeEvent;
+import org.eclipse.hawkbit.ui.push.event.RolloutDeleteEvent;
 import org.eclipse.hawkbit.ui.push.event.RolloutGroupChangeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -279,7 +280,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
 
     private void offerEvent(final org.eclipse.hawkbit.repository.event.TenantAwareEvent event) {
         if (!queue.offer(event)) {
-            LOG.warn("Deque limit is reached, cannot add more events!!! Dropped event is {}", event);
+            LOG.trace("Deque limit is reached, cannot add more events!!! Dropped event is {}", event);
         }
     }
 
@@ -287,24 +288,23 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
         Long rolloutId = null;
         Long rolloutGroupId = null;
         if (event instanceof ActionCreatedEvent) {
-            rolloutId = getRolloutId(((ActionCreatedEvent) event).getEntity().getRollout());
-            rolloutGroupId = getRolloutGroupId(((ActionCreatedEvent) event).getEntity().getRolloutGroup());
+            rolloutId = ((ActionCreatedEvent) event).getRolloutId();
+            rolloutGroupId = ((ActionCreatedEvent) event).getRolloutGroupId();
         } else if (event instanceof ActionUpdatedEvent) {
-            rolloutId = getRolloutId(((ActionUpdatedEvent) event).getEntity().getRollout());
-            rolloutGroupId = getRolloutGroupId(((ActionUpdatedEvent) event).getEntity().getRolloutGroup());
+            rolloutId = ((ActionUpdatedEvent) event).getRolloutId();
+            rolloutGroupId = ((ActionUpdatedEvent) event).getRolloutGroupId();
         } else if (event instanceof RolloutUpdatedEvent) {
             rolloutId = ((RolloutUpdatedEvent) event).getEntityId();
         } else if (event instanceof RolloutGroupCreatedEvent) {
             rolloutId = ((RolloutGroupCreatedEvent) event).getRolloutId();
             rolloutGroupId = ((RolloutGroupCreatedEvent) event).getEntityId();
         } else if (event instanceof RolloutGroupUpdatedEvent) {
-            final RolloutGroup rolloutGroup = ((RolloutGroupUpdatedEvent) event).getEntity();
-            rolloutId = rolloutGroup.getRollout().getId();
-            rolloutGroupId = rolloutGroup.getId();
+            rolloutId = ((RolloutGroupUpdatedEvent) event).getRolloutId();
+            rolloutGroupId = ((RolloutGroupUpdatedEvent) event).getEntityId();
         } else if (event instanceof RolloutDeletedEvent) {
-            rolloutId = ((RolloutDeletedEvent) event).getEntityId();
-            offerEventIfNotContains(new RolloutDeletedEvent(event.getTenant(),
-                    ((RolloutDeletedEvent) event).getEntityId(), getClass().getName(), appContextId));
+            offerEventIfNotContains(
+                    new RolloutDeleteEvent(event.getTenant(), ((RolloutDeletedEvent) event).getEntityId()));
+            return;
         }
 
         offerEventIfNotContains(new RolloutChangeEvent(event.getTenant(), rolloutId));

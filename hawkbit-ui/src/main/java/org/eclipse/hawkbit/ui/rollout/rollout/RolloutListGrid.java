@@ -40,7 +40,6 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -56,7 +55,7 @@ import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.RolloutRenderer;
 import org.eclipse.hawkbit.ui.push.RolloutChangeEventContainer;
-import org.eclipse.hawkbit.ui.push.RolloutDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.RolloutDeleteEventContainer;
 import org.eclipse.hawkbit.ui.push.event.RolloutChangeEvent;
 import org.eclipse.hawkbit.ui.rollout.DistributionBarHelper;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
@@ -194,12 +193,7 @@ public class RolloutListGrid extends AbstractGrid {
      *            container which holds the rollout delete event
      */
     @EventBusListenerMethod(scope = EventScope.UI)
-    public void onRolloutDeletedEvent(final RolloutDeletedEventContainer eventContainer) {
-        eventContainer.getEvents().forEach(this::handleEvent);
-    }
-
-    private void handleEvent(final RolloutDeletedEvent event) {
-        LOGGER.info("Refresh Rollout Grid after performing deletion of Rollout with Id " + event.getId());
+    public void onRolloutDeletedEvent(final RolloutDeleteEventContainer eventContainer) {
         refreshContainer();
     }
 

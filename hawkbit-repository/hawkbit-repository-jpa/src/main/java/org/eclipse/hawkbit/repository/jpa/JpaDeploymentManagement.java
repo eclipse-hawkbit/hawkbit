@@ -457,6 +457,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final RolloutGroup rolloutGroupParent, final int limit) {
         final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         def.setName("startScheduledActions");
+        def.setReadOnly(false);
+        def.setIsolationLevel(Isolation.READ_UNCOMMITTED.value());
         def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         return new TransactionTemplate(txManager, def).execute(status -> {
             final Page<Action> rolloutGroupActions = findActionsByRolloutAndRolloutGroupParent(rollout,

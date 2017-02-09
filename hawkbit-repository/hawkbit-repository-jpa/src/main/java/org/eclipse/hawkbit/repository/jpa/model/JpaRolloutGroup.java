@@ -289,8 +289,7 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new RolloutGroupUpdatedEvent(this,
-
-                EventPublisherHolder.getInstance().getApplicationId()));
+                this.getRollout().getId(), EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
