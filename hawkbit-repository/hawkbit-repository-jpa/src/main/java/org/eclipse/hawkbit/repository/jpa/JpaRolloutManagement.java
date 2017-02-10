@@ -912,7 +912,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private JpaRollout getRolloutAndThrowExceptionIfNotFound(final Long rolloutId) {
-        return Optional.ofNullable(rolloutRepository.findOne(rolloutId))
+        return rolloutRepository.findById(rolloutId)
                 .orElseThrow(() -> new EntityNotFoundException("Rollout with id " + rolloutId + " not found."));
     }
 
@@ -958,9 +958,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     public float getFinishedPercentForRunningGroup(final Long rolloutId, final Long rolloutGroupId) {
-        final RolloutGroup rolloutGroup = Optional.ofNullable(rolloutGroupRepository.findOne(rolloutGroupId))
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Rollout group with given ID " + rolloutGroupId + " not found."));
+        final RolloutGroup rolloutGroup = rolloutGroupRepository.findById(rolloutGroupId).orElseThrow(
+                () -> new EntityNotFoundException("Rollout group with given ID " + rolloutGroupId + " not found."));
 
         final long totalGroup = rolloutGroup.getTotalTargets();
         final Long finished = actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rolloutId,

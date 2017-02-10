@@ -592,9 +592,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteDistributionSetType(final Long typeId) {
 
-        final JpaDistributionSetType toDelete = Optional.ofNullable(distributionSetTypeRepository.findOne(typeId))
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "DistributionSet Type with given ID " + typeId + " does not exist"));
+        final JpaDistributionSetType toDelete = distributionSetTypeRepository.findById(typeId).orElseThrow(
+                () -> new EntityNotFoundException("DistributionSet Type with given ID " + typeId + " does not exist"));
 
         if (distributionSetRepository.countByTypeId(typeId) > 0) {
             toDelete.setDeleted(true);

@@ -105,7 +105,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public boolean clearArtifactBinary(final Long existing) {
-        return clearArtifactBinary(Optional.ofNullable(localArtifactRepository.findOne(existing))
+        return clearArtifactBinary(localArtifactRepository.findById(existing)
                 .orElseThrow(() -> new EntityNotFoundException("Artifact with given ID" + existing + " not found.")));
     }
 

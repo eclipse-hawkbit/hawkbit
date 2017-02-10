@@ -135,7 +135,7 @@ public class JpaTagManagement implements TagManagement {
     public TargetTag updateTargetTag(final TagUpdate u) {
         final GenericTagUpdate update = (GenericTagUpdate) u;
 
-        final JpaTargetTag tag = Optional.ofNullable(targetTagRepository.findOne(update.getId()))
+        final JpaTargetTag tag = targetTagRepository.findById(update.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Target tag with ID " + update.getId() + " not found"));
 
         update.getName().ifPresent(tag::setName);
@@ -151,9 +151,8 @@ public class JpaTagManagement implements TagManagement {
     public DistributionSetTag updateDistributionSetTag(final TagUpdate u) {
         final GenericTagUpdate update = (GenericTagUpdate) u;
 
-        final JpaDistributionSetTag tag = Optional.ofNullable(distributionSetTagRepository.findOne(update.getId()))
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Distribution set tag with ID " + update.getId() + " not found"));
+        final JpaDistributionSetTag tag = distributionSetTagRepository.findById(update.getId()).orElseThrow(
+                () -> new EntityNotFoundException("Distribution set tag with ID " + update.getId() + " not found"));
 
         update.getName().ifPresent(tag::setName);
         update.getDescription().ifPresent(tag::setDescription);

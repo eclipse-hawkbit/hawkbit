@@ -206,7 +206,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     private JpaTargetFilterQuery findTargetFilterQueryOrThrowExceptionIfNotFound(final Long queryId) {
-        return Optional.ofNullable(targetFilterQueryRepository.findOne(queryId)).orElseThrow(
+        return targetFilterQueryRepository.findById(queryId).orElseThrow(
                 () -> new EntityNotFoundException("TargetFilterQuery with given ID " + queryId + " not found!"));
     }
 

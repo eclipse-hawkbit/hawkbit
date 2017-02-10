@@ -160,8 +160,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Slice<Target> findTargetsByTargetFilterQuery(final Long targetFilterQueryId, final Pageable pageable) {
-        final TargetFilterQuery targetFilterQuery = Optional
-                .ofNullable(targetFilterQueryRepository.findOne(targetFilterQueryId))
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryRepository.findById(targetFilterQueryId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "TargetFilterQuery with given ID" + targetFilterQueryId + " not found"));
 
@@ -387,7 +386,7 @@ public class JpaTargetManagement implements TargetManagement {
         final List<JpaTarget> allTargets = targetRepository
                 .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(controllerIds));
 
-        final JpaTargetTag tag = Optional.ofNullable(targetTagRepository.findOne(tagId))
+        final JpaTargetTag tag = targetTagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException("Tag with given ID " + tagId + "does not exist"));
 
         allTargets.forEach(target -> target.addTag(tag));
@@ -410,7 +409,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public List<Target> unAssignAllTargetsByTag(final Long targetTagId) {
 
-        final TargetTag tag = Optional.ofNullable(targetTagRepository.findOne(targetTagId)).orElseThrow(
+        final TargetTag tag = targetTagRepository.findById(targetTagId).orElseThrow(
                 () -> new EntityNotFoundException("TargetTag with given ID " + targetTagId + " does not exist."));
 
         if (tag.getAssignedToTargets().isEmpty()) {
@@ -427,7 +426,7 @@ public class JpaTargetManagement implements TargetManagement {
         final List<Target> allTargets = Collections.unmodifiableList(targetRepository
                 .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(Arrays.asList(controllerID))));
 
-        final TargetTag tag = Optional.ofNullable(targetTagRepository.findOne(targetTagId)).orElseThrow(
+        final TargetTag tag = targetTagRepository.findById(targetTagId).orElseThrow(
                 () -> new EntityNotFoundException("TargetTag with given ID " + targetTagId + " does not exist."));
 
         final List<Target> unAssignTag = unAssignTag(allTargets, tag);
@@ -601,8 +600,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Long countTargetByTargetFilterQuery(final Long targetFilterQueryId) {
-        final TargetFilterQuery targetFilterQuery = Optional
-                .ofNullable(targetFilterQueryRepository.findOne(targetFilterQueryId))
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryRepository.findById(targetFilterQueryId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "TargetFilterQuery with given ID" + targetFilterQueryId + " not found"));
 

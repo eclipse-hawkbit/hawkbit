@@ -177,7 +177,7 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Override
     public Optional<Action> findActionWithDetails(final Long actionId) {
-        return actionRepository.findById(actionId);
+        return actionRepository.getById(actionId);
     }
 
     @Override
@@ -428,7 +428,7 @@ public class JpaControllerManagement implements ControllerManagement {
      *         {@link Status#RETRIEVED}
      */
     private Action handleRegisterRetrieved(final Long actionId, final String message) {
-        final JpaAction action = (JpaAction) actionRepository.findById(actionId).orElseThrow(
+        final JpaAction action = actionRepository.findById(actionId).orElseThrow(
                 () -> new EntityNotFoundException("Actionw ith given ID " + actionId + " doesn not exist."));
         // do a manual query with CriteriaBuilder to avoid unnecessary field
         // queries and an extra

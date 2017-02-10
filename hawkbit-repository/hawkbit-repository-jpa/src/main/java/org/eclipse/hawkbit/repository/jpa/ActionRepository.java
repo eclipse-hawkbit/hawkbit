@@ -52,7 +52,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return the found {@link Action}
      */
     @EntityGraph(value = "Action.all", type = EntityGraphType.LOAD)
-    Optional<Action> findById(Long actionId);
+    Optional<Action> getById(Long actionId);
 
     /**
      * Retrieves all {@link Action}s which are referring the given

@@ -365,7 +365,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     public Action cancelAction(final Long actionId) {
         LOG.debug("cancelAction({})", actionId);
 
-        final JpaAction action = Optional.ofNullable(actionRepository.findOne(actionId))
+        final JpaAction action = actionRepository.findById(actionId)
                 .orElseThrow(() -> new EntityNotFoundException("Action with given ID " + actionId + " not found"));
 
         if (action.isCancelingOrCanceled()) {
@@ -412,7 +412,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Action forceQuitAction(final Long actionId) {
-        final JpaAction action = Optional.ofNullable(actionRepository.findOne(actionId))
+        final JpaAction action = actionRepository.findById(actionId)
                 .orElseThrow(() -> new EntityNotFoundException("Action with given ID " + actionId + " not found"));
 
         if (!action.isCancelingOrCanceled()) {
@@ -548,7 +548,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     public Optional<Action> findActionWithDetails(final Long actionId) {
-        return actionRepository.findById(actionId);
+        return actionRepository.getById(actionId);
     }
 
     @Override
@@ -622,7 +622,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public Action forceTargetAction(final Long actionId) {
-        final JpaAction action = Optional.ofNullable(actionRepository.findOne(actionId))
+        final JpaAction action = actionRepository.findById(actionId)
                 .orElseThrow(() -> new EntityNotFoundException("Action with Id {" + actionId + "} does not exist"));
 
         if (!action.isForced()) {

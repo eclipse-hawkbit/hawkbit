@@ -122,7 +122,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     public SoftwareModule updateSoftwareModule(final SoftwareModuleUpdate u) {
         final GenericSoftwareModuleUpdate update = (GenericSoftwareModuleUpdate) u;
 
-        final JpaSoftwareModule module = Optional.ofNullable(softwareModuleRepository.findOne(update.getId()))
+        final JpaSoftwareModule module = softwareModuleRepository.findById(update.getId())
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Software module cannot be updated as it does not exixt" + update.getId()));
 
@@ -198,7 +198,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     public Optional<SoftwareModule> findSoftwareModuleByNameAndVersion(final String name, final String version,
             final Long typeId) {
 
-        return Optional.ofNullable(softwareModuleRepository.findOneByNameAndVersionAndTypeId(name, version, typeId));
+        return softwareModuleRepository.findOneByNameAndVersionAndTypeId(name, version, typeId);
     }
 
     private boolean isUnassigned(final JpaSoftwareModule bsmMerged) {
@@ -485,9 +485,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteSoftwareModuleType(final Long typeId) {
-        final JpaSoftwareModuleType toDelete = Optional.ofNullable(softwareModuleTypeRepository.findOne(typeId))
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Software Module Type with giben ID " + typeId + " does not exist."));
+        final JpaSoftwareModuleType toDelete = softwareModuleTypeRepository.findById(typeId).orElseThrow(
+                () -> new EntityNotFoundException("Software Module Type with giben ID " + typeId + " does not exist."));
 
         if (softwareModuleRepository.countByType(toDelete) > 0
                 || distributionSetTypeRepository.countByElementsSmType(toDelete) > 0) {
