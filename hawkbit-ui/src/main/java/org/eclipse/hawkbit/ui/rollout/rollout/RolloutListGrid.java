@@ -256,7 +256,7 @@ public class RolloutListGrid extends AbstractGrid {
         rolloutGridContainer.addContainerProperty(VAR_MODIFIED_DATE, String.class, null, false, false);
         rolloutGridContainer.addContainerProperty(VAR_CREATED_USER, String.class, null, false, false);
         rolloutGridContainer.addContainerProperty(VAR_MODIFIED_BY, String.class, null, false, false);
-        rolloutGridContainer.addContainerProperty(VAR_NUMBER_OF_GROUPS, Long.class, 0, false, false);
+        rolloutGridContainer.addContainerProperty(VAR_NUMBER_OF_GROUPS, Long.class, 0L, false, false);
         rolloutGridContainer.addContainerProperty(VAR_TOTAL_TARGETS, String.class, "0", false, false);
         rolloutGridContainer.addContainerProperty(VAR_TOTAL_TARGETS_COUNT_STATUS, TotalTargetCountStatus.class, null,
                 false, false);

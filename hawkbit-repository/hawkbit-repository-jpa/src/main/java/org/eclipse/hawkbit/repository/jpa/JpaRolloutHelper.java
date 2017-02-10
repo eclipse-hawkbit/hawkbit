@@ -73,18 +73,25 @@ final class JpaRolloutHelper {
     }
 
     /**
+     * Builds a {@link Specification} to search a rollout by name or
+     * description.
+     * 
      * @param searchText
      *            search string
+     * @param isDeleted
+     *            <code>true</code> if deleted rollouts should be included in
+     *            the search. Otherwise <code>false</code>
      * @return criteria specification with a query for name or description of a
      *         rollout
      */
-    static Specification<JpaRollout> likeNameOrDescription(final String searchText) {
+    static Specification<JpaRollout> likeNameOrDescription(final String searchText, final boolean isDeleted) {
         return (rolloutRoot, query, criteriaBuilder) -> {
             final String searchTextToLower = searchText.toLowerCase();
-            return criteriaBuilder.or(
+            return criteriaBuilder.and(criteriaBuilder.or(
                     criteriaBuilder.like(criteriaBuilder.lower(rolloutRoot.get(JpaRollout_.name)), searchTextToLower),
                     criteriaBuilder.like(criteriaBuilder.lower(rolloutRoot.get(JpaRollout_.description)),
-                            searchTextToLower));
+                            searchTextToLower)),
+                    criteriaBuilder.equal(rolloutRoot.get(JpaRollout_.deleted), isDeleted));
         };
     }
 
