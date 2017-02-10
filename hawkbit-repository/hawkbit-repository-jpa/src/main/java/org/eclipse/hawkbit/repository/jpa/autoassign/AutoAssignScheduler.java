@@ -72,35 +72,37 @@ public class AutoAssignScheduler {
         LOGGER.debug("auto assign schedule checker has been triggered.");
         // run this code in system code privileged to have the necessary
         // permission to query and create entities.
-        systemSecurityContext.runAsSystem(() -> {
-            // workaround eclipselink that is currently not possible to
-            // execute a query without multitenancy if MultiTenant
-            // annotation is used.
-            // https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So
-            // iterate through all tenants and execute the rollout check for
-            // each tenant separately.
-            final List<String> tenants = systemManagement.findTenants();
-            LOGGER.info("Checking target filter queries for tenants: {}", tenants.size());
-            for (final String tenant : tenants) {
+        systemSecurityContext.runAsSystem(() -> executeAutoAssign());
+    }
 
-                final Lock lock = lockRegistry.obtain(tenant + "-autoassign");
-                boolean acquired = false;
-                try {
-                    acquired = lock.tryLock();
-                    if (acquired) {
+    private Object executeAutoAssign() {
+        // workaround eclipselink that is currently not possible to
+        // execute a query without multitenancy if MultiTenant
+        // annotation is used.
+        // https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So
+        // iterate through all tenants and execute the rollout check for
+        // each tenant separately.
+        final List<String> tenants = systemManagement.findTenants();
+        LOGGER.info("Checking target filter queries for tenants: {}", tenants.size());
+        for (final String tenant : tenants) {
 
-                        tenantAware.runAsTenant(tenant, () -> {
-                            autoAssignChecker.check();
-                            return null;
-                        });
-                    }
-                } finally {
-                    if (acquired) {
-                        lock.unlock();
-                    }
+            final Lock lock = lockRegistry.obtain(tenant + "-autoassign");
+            boolean acquired = false;
+            try {
+                acquired = lock.tryLock();
+                if (acquired) {
+
+                    tenantAware.runAsTenant(tenant, () -> {
+                        autoAssignChecker.check();
+                        return null;
+                    });
+                }
+            } finally {
+                if (acquired) {
+                    lock.unlock();
                 }
             }
-            return null;
-        });
+        }
+        return null;
     }
 }

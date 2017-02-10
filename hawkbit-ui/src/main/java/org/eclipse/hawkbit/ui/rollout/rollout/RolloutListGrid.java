@@ -67,8 +67,6 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -120,8 +118,6 @@ public class RolloutListGrid extends AbstractGrid {
     private final RolloutUIState rolloutUIState;
 
     private static final Map<RolloutStatus, StatusFontIcon> statusIconMap = new EnumMap<>(RolloutStatus.class);
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(RolloutListGrid.class);
 
     static {
         statusIconMap.put(RolloutStatus.FINISHED,
