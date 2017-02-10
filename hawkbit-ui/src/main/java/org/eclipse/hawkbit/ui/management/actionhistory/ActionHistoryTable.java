@@ -509,7 +509,6 @@ public class ActionHistoryTable extends TreeTable {
         final ActionStatusIconMapper mapping = ActionStatusIconMapper.MAPPINGS.get(status);
 
         if (mapping == null) {
-            LOG.error("Unknown status icon mapping");
             label.setDescription("");
             label.setValue("");
             return label;

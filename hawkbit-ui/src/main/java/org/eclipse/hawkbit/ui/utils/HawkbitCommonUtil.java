@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.utils;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TimeZone;
@@ -19,7 +18,6 @@ import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -504,35 +502,6 @@ public final class HawkbitCommonUtil {
             break;
         }
         return String.format("%.1f", tmpFinishedPercentage);
-    }
-
-    /**
-     * Reset the values of status progress bar on change of values.
-     *
-     * @param bar
-     *            DistributionBar
-     * @param item
-     *            row of the table
-     */
-    private static void setProgressBarDetails(final DistributionBar bar, final Item item) {
-        bar.setNumberOfParts(6);
-        final Long notStartedTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED, item);
-        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.NOTSTARTED.toString().toLowerCase(),
-                notStartedTargetsCount.intValue(), 0);
-        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.SCHEDULED.toString().toLowerCase(),
-                getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED, item).intValue(), 1);
-        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.RUNNING.toString().toLowerCase(),
-                getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING, item).intValue(), 2);
-        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.ERROR.toString().toLowerCase(),
-                getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR, item).intValue(), 3);
-        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.FINISHED.toString().toLowerCase(),
-                getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED, item).intValue(), 4);
-        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.CANCELLED.toString().toLowerCase(),
-                getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED, item).intValue(), 5);
-    }
-
-    private static boolean isNoTargets(final Long... statusCount) {
-        return (Arrays.asList(statusCount).stream().filter(value -> value > 0).toArray().length) == 0;
     }
 
     private static Long getStatusCount(final String propertName, final Item item) {

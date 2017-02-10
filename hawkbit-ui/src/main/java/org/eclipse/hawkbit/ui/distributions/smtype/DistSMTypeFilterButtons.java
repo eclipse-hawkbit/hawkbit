@@ -42,10 +42,10 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
 
     private static final long serialVersionUID = 6804534533362387433L;
 
-	private final ManageDistUIState manageDistUIState;
+    private final ManageDistUIState manageDistUIState;
 
     private final DistributionsViewClientCriterion distributionsViewClientCriterion;
-    
+
     DistSMTypeFilterButtons(final UIEventBus eventBus, final ManageDistUIState manageDistUIState,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final SoftwareManagement softwareManagement) {

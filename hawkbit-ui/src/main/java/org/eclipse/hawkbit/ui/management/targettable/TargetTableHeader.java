@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -81,14 +82,15 @@ public class TargetTableHeader extends AbstractTableHeader {
             final ManagementViewClientCriterion managementViewClientCriterion, final TargetManagement targetManagement,
             final DeploymentManagement deploymentManagement, final UiProperties uiproperties, final UIEventBus eventBus,
             final EntityFactory entityFactory, final UINotification uinotification, final TagManagement tagManagement,
-            final DistributionSetManagement distributionSetManagement) {
+            final DistributionSetManagement distributionSetManagement, final Executor uiExecutor) {
         super(i18n, permChecker, eventbus, managementUIState, null, null);
         this.notification = notification;
         this.managementViewClientCriterion = managementViewClientCriterion;
         this.targetAddUpdateWindow = new TargetAddUpdateWindowLayout(i18n, targetManagement, eventBus, uinotification,
                 entityFactory);
         this.targetBulkUpdateWindow = new TargetBulkUpdateWindowLayout(i18n, targetManagement, eventBus,
-                managementUIState, deploymentManagement, uiproperties, permChecker, uinotification, tagManagement);
+                managementUIState, deploymentManagement, uiproperties, permChecker, uinotification, tagManagement,
+                distributionSetManagement, entityFactory, uiExecutor);
         this.distributionSetManagement = distributionSetManagement;
         onLoadRestoreState();
     }

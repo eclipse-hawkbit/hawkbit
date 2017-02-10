@@ -8,9 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.rollout.groupschart.client;
 
-import com.vaadin.shared.AbstractComponentState;
-
 import java.util.List;
+
+import com.vaadin.shared.AbstractComponentState;
 
 /**
  * State to transfer for the groups pie chart between server and client.
