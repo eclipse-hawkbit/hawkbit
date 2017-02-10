@@ -232,13 +232,15 @@ public class ConfigurableScenario {
     }
 
     private static List<MgmtRolloutGroup> createRolloutGroups(final Scenario scenario) {
-        final List<MgmtRolloutGroup> result = Lists.newArrayListWithCapacity(scenario.getDeviceGroups().size() * 2);
+        final List<MgmtRolloutGroup> result = Lists
+                .newArrayListWithExpectedSize((scenario.getDeviceGroups().size() * 3) + 1);
 
         scenario.getDeviceGroups().forEach(groupname -> {
             result.add(createGroup(1, groupname, 10F));
             result.add(createGroup(2, groupname, 50F));
             result.add(createGroup(3, groupname, 100F));
         });
+        result.add(createFinalGroup());
 
         return result;
     }
@@ -249,6 +251,15 @@ public class ConfigurableScenario {
         one.setDescription("Group of " + groupname);
         one.setTargetFilterQuery("tag==" + groupname);
         one.setTargetPercentage(percent);
+        return one;
+    }
+
+    private static MgmtRolloutGroup createFinalGroup() {
+        final MgmtRolloutGroup one = new MgmtRolloutGroup();
+        one.setName("final");
+        one.setDescription("Group of non tagged devices");
+        one.setTargetFilterQuery("name==*");
+        one.setTargetPercentage(100F);
         return one;
     }
 

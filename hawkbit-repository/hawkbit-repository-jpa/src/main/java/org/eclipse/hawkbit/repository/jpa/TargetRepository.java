@@ -47,6 +47,15 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     JpaTarget findByControllerId(String controllerID);
 
     /**
+     * Checks if target with given id exists.
+     * 
+     * @param controllerId to check 
+     * @return <code>true</code> if target with given id exists
+     */
+    @Query("SELECT CASE WHEN COUNT(t)>0 THEN 'true' ELSE 'false' END FROM JpaTarget t WHERE t.controllerId=:controllerId")
+    boolean existsByControllerId(@Param("controllerId") String controllerId);
+
+    /**
      * Deletes the {@link Target}s with the given target IDs.
      *
      * @param targetIDs

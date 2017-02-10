@@ -196,6 +196,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      *            the status which the actions should not have
      * @return the found list of {@link Action}s
      */
+    @EntityGraph(attributePaths = { "target" }, type = EntityGraphType.LOAD)
     @Query("SELECT a FROM JpaAction a WHERE a.active = true AND a.distributionSet.requiredMigrationStep = false AND a.target IN ?1 AND a.status != ?2")
     List<JpaAction> findByActiveAndTargetIdInAndActionStatusNotEqualToAndDistributionSetRequiredMigrationStep(
             Collection<Long> targetIds, Action.Status notStatus);
@@ -320,6 +321,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return the actions referring a specific rollout and a specific parent
      *         rolloutgroup in a specific status
      */
+    @EntityGraph(attributePaths = { "target" }, type = EntityGraphType.LOAD)
     Page<Action> findByRolloutAndRolloutGroupParentAndStatus(Pageable pageable, JpaRollout rollout,
             JpaRolloutGroup rolloutGroupParent, Status actionStatus);
 
@@ -335,6 +337,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return the actions referring a specific rollout and a specific parent
      *         rolloutgroup in a specific status
      */
+    @EntityGraph(attributePaths = { "target" }, type = EntityGraphType.LOAD)
     Page<Action> findByRolloutAndRolloutGroupParentIsNullAndStatus(Pageable pageable, JpaRollout rollout,
             Status actionStatus);
 
