@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
-import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
@@ -30,7 +29,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.ui.push.event.RolloutChangeEvent;
-import org.eclipse.hawkbit.ui.push.event.RolloutDeleteEvent;
 import org.eclipse.hawkbit.ui.push.event.RolloutGroupChangeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -301,9 +299,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
         } else if (event instanceof RolloutGroupUpdatedEvent) {
             rolloutId = ((RolloutGroupUpdatedEvent) event).getRolloutId();
             rolloutGroupId = ((RolloutGroupUpdatedEvent) event).getEntityId();
-        } else if (event instanceof RolloutDeletedEvent) {
-            offerEventIfNotContains(
-                    new RolloutDeleteEvent(event.getTenant(), ((RolloutDeletedEvent) event).getEntityId()));
+        } else {
             return;
         }
 

@@ -55,7 +55,7 @@ import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.RolloutRenderer;
 import org.eclipse.hawkbit.ui.push.RolloutChangeEventContainer;
-import org.eclipse.hawkbit.ui.push.RolloutDeleteEventContainer;
+import org.eclipse.hawkbit.ui.push.RolloutDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.event.RolloutChangeEvent;
 import org.eclipse.hawkbit.ui.rollout.DistributionBarHelper;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
@@ -193,7 +193,7 @@ public class RolloutListGrid extends AbstractGrid {
      *            container which holds the rollout delete event
      */
     @EventBusListenerMethod(scope = EventScope.UI)
-    public void onRolloutDeletedEvent(final RolloutDeleteEventContainer eventContainer) {
+    public void onRolloutDeletedEvent(final RolloutDeletedEventContainer eventContainer) {
         refreshContainer();
     }
 

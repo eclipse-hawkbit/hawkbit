@@ -10,21 +10,21 @@ package org.eclipse.hawkbit.ui.push;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.ui.push.event.RolloutDeleteEvent;
+import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 
 /**
- * EventHolder for {@link RolloutDeleteEvent}s.
+ * EventHolder for {@link RolloutDeletedEvent}s.
  *
  */
-public class RolloutDeleteEventContainer implements EventContainer<RolloutDeleteEvent> {
-    private final List<RolloutDeleteEvent> events;
+public class RolloutDeletedEventContainer implements EventContainer<RolloutDeletedEvent> {
+    private final List<RolloutDeletedEvent> events;
 
-    RolloutDeleteEventContainer(final List<RolloutDeleteEvent> events) {
+    RolloutDeletedEventContainer(final List<RolloutDeletedEvent> events) {
         this.events = events;
     }
 
     @Override
-    public List<RolloutDeleteEvent> getEvents() {
+    public List<RolloutDeletedEvent> getEvents() {
         return events;
     }
 
