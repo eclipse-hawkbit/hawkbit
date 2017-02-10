@@ -153,6 +153,7 @@ public class DeviceSimulatorUpdater {
             if (device.getProgress() <= 0 && modules != null) {
                 device.setUpdateStatus(simulateDownloads(device.getTargetSecurityToken()));
                 if (isErrorResponse(device.getUpdateStatus())) {
+                    device.setProgress(1.0);
                     callback.updateFinished(device, actionId);
                     eventbus.post(new ProgressUpdate(device));
                     return;

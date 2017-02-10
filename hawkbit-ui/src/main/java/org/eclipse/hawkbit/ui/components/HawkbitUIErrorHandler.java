@@ -11,6 +11,13 @@ package org.eclipse.hawkbit.ui.components;
 import static com.vaadin.ui.themes.ValoTheme.NOTIFICATION_CLOSABLE;
 import static com.vaadin.ui.themes.ValoTheme.NOTIFICATION_FAILURE;
 import static com.vaadin.ui.themes.ValoTheme.NOTIFICATION_SMALL;
+import static java.lang.System.lineSeparator;
+import static java.util.stream.Collectors.joining;
+
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
@@ -91,10 +98,31 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
      * @return a hawkbit error notification message
      */
     protected HawkbitErrorNotificationMessage buildNotification(final Throwable ex) {
+
         LOG.error("Error in UI: ", ex);
+
+        final String errorMessage = extractMessageFrom(ex);
+
         final I18N i18n = SpringContextHelper.getBean(I18N.class);
         return new HawkbitErrorNotificationMessage(STYLE, i18n.get("caption.error"),
-                i18n.get("message.error.temp", ex.getClass().getSimpleName()), false);
+                i18n.get("message.error.temp", errorMessage), false);
     }
 
+    private String extractMessageFrom(final Throwable ex) {
+
+        String errorMessage = ex.getClass().getSimpleName();
+
+        if (ConstraintViolationException.class.isAssignableFrom(ex.getClass())) {
+
+            final Set<ConstraintViolation<?>> violations = ((ConstraintViolationException) ex)
+                    .getConstraintViolations();
+
+            if (violations != null) {
+                errorMessage = violations.stream().map(v -> v.getPropertyPath() + " " + v.getMessage())
+                        .collect(joining(lineSeparator()));
+            }
+        }
+
+        return errorMessage;
+    }
 }

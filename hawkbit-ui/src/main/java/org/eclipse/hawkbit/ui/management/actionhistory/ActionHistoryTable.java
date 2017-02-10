@@ -505,8 +505,8 @@ public class ActionHistoryTable extends TreeTable {
     private Label getStatusIcon(final Action.Status status) {
         final Label label = new LabelBuilder().name("").buildLabel();
         label.setContentMode(ContentMode.HTML);
-
-        final ActionStatusIconMapper mapping = ActionStatusIconMapper.MAPPINGS.get(status);
+        
+      final ActionStatusIconMapper mapping = ActionStatusIconMapper.MAPPINGS.get(status);
 
         if (mapping == null) {
             label.setDescription("");
@@ -517,7 +517,6 @@ public class ActionHistoryTable extends TreeTable {
         label.setDescription(i18n.get(mapping.getDescriptionI18N()));
         label.setStyleName(mapping.getStyleName());
         label.setValue(mapping.getIcon().getHtml());
-
         return label;
 
     }
@@ -568,7 +567,7 @@ public class ActionHistoryTable extends TreeTable {
             label.setStyleName("statusIconActive");
         } else if (SPUIDefinitions.IN_ACTIVE.equals(activeValue)) {
             if (endedWithError) {
-                label.setStyleName("statusIconRed");
+                label.setStyleName(SPUIStyleDefinitions.STATUS_ICON_RED);
             } else {
                 label.setStyleName("statusIconNeutral");
             }

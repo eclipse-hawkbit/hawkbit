@@ -105,23 +105,16 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public boolean clearArtifactBinary(final Long existing) {
-        return clearArtifactBinary(Optional.ofNullable(localArtifactRepository.findOne(existing))
-                .orElseThrow(() -> new EntityNotFoundException("Artifact with given ID" + existing + " not found.")));
-    }
+    public boolean clearArtifactBinary(final String sha1Hash, final Long moduleId) {
 
-    private boolean clearArtifactBinary(final JpaArtifact existing) {
-
-        for (final Artifact lArtifact : localArtifactRepository.findBySha1Hash(existing.getSha1Hash())) {
-            if (!lArtifact.getSoftwareModule().isDeleted()
-                    && Long.compare(lArtifact.getSoftwareModule().getId(), existing.getSoftwareModule().getId()) != 0) {
-                return false;
-            }
+        if (localArtifactRepository.existsWithSha1HashAndSoftwareModuleIdIsNot(sha1Hash, moduleId)) {
+            // there are still other artifacts that need the binary
+            return false;
         }
 
         try {
-            LOG.debug("deleting artifact from repository {}", existing.getSha1Hash());
-            artifactRepository.deleteBySha1(existing.getSha1Hash());
+            LOG.debug("deleting artifact from repository {}", sha1Hash);
+            artifactRepository.deleteBySha1(sha1Hash);
             return true;
         } catch (final ArtifactStoreException e) {
             throw new ArtifactDeleteFailedException(e);
@@ -138,7 +131,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
             return;
         }
 
-        clearArtifactBinary(existing);
+        clearArtifactBinary(existing.getSha1Hash(), existing.getSoftwareModule().getId());
 
         ((JpaSoftwareModule) existing.getSoftwareModule()).removeArtifact(existing);
         softwareModuleRepository.save((JpaSoftwareModule) existing.getSoftwareModule());

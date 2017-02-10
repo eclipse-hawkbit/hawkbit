@@ -12,6 +12,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
@@ -49,7 +50,7 @@ public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Art
     @NotEmpty
     private String filename;
 
-    @ManyToOne(optional = false, cascade = { CascadeType.PERSIST })
+    @ManyToOne(optional = false, cascade = { CascadeType.PERSIST }, fetch = FetchType.LAZY)
     @JoinColumn(name = "software_module", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_assigned_sm"))
     private JpaSoftwareModule softwareModule;
 

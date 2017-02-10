@@ -35,6 +35,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
@@ -43,15 +44,18 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
+import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
+import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
 import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.RolloutRenderer;
 import org.eclipse.hawkbit.ui.push.RolloutChangeEventContainer;
+import org.eclipse.hawkbit.ui.push.RolloutDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.event.RolloutChangeEvent;
 import org.eclipse.hawkbit.ui.rollout.DistributionBarHelper;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
@@ -72,6 +76,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
+import com.vaadin.data.Container.Indexed;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.converter.Converter;
 import com.vaadin.server.FontAwesome;
@@ -93,6 +98,8 @@ public class RolloutListGrid extends AbstractGrid {
     private static final String PAUSE_OPTION = "Pause";
 
     private static final String RUN_OPTION = "Run";
+
+    private static final String DELETE_OPTION = "Delete";
 
     private static final String DS_TYPE = "type";
 
@@ -128,6 +135,7 @@ public class RolloutListGrid extends AbstractGrid {
                 new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_RED));
         statusIconMap.put(RolloutStatus.ERROR_STARTING,
                 new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_RED));
+        statusIconMap.put(RolloutStatus.DELETING, new StatusFontIcon(null, SPUIStyleDefinitions.STATUS_SPINNER_RED));
     }
 
     RolloutListGrid(final I18N i18n, final UIEventBus eventBus, final RolloutManagement rolloutManagement,
@@ -141,6 +149,19 @@ public class RolloutListGrid extends AbstractGrid {
                 uiNotification, uiProperties, entityFactory, i18n, eventBus, targetFilterQueryManagement);
         this.uiNotification = uiNotification;
         this.rolloutUIState = rolloutUIState;
+        handleNoData(rolloutUIState);
+    }
+
+    @Override
+    protected void handleNoData(final RolloutUIState rolloutUIState) {
+        int size = 0;
+        final Indexed container = getContainerDataSource();
+        if (container != null) {
+            size = container.size();
+        }
+        if (size == 0 && rolloutUIState.isShowRollOuts()) {
+            setData(SPUIDefinitions.NO_DATA);
+        }
     }
 
     /**
@@ -162,40 +183,55 @@ public class RolloutListGrid extends AbstractGrid {
     }
 
     /**
+     * Handles the RolloutDeletedEvent to refresh the grid.
+     *
+     * @param eventContainer
+     *            container which holds the rollout delete event
+     */
+    @EventBusListenerMethod(scope = EventScope.UI)
+    public void onRolloutDeletedEvent(final RolloutDeletedEventContainer eventContainer) {
+        refreshContainer();
+    }
+
+    /**
      * Handles the RolloutChangeEvent to refresh the item in the grid.
      *
      * @param eventContainer
      *            container which holds the rollout change event
      */
-    @SuppressWarnings("unchecked")
     @EventBusListenerMethod(scope = EventScope.UI)
     public void onRolloutChangeEvent(final RolloutChangeEventContainer eventContainer) {
         eventContainer.getEvents().forEach(this::handleEvent);
     }
 
     private void handleEvent(final RolloutChangeEvent rolloutChangeEvent) {
-        if (!rolloutUIState.isShowRollOuts()) {
+        if (!rolloutUIState.isShowRollOuts() || rolloutChangeEvent.getRolloutId() == null) {
             return;
         }
-        final Rollout rollout = rolloutManagement.findRolloutWithDetailedStatus(rolloutChangeEvent.getRolloutId());
-        final TotalTargetCountStatus totalTargetCountStatus = rollout.getTotalTargetCountStatus();
-        final LazyQueryContainer rolloutContainer = (LazyQueryContainer) getContainerDataSource();
-        final Item item = rolloutContainer.getItem(rolloutChangeEvent.getRolloutId());
-        if (item == null) {
-            refreshContainer();
-            return;
+        final Rollout rollout = rolloutManagement.findRolloutWithDetailedStatus(rolloutChangeEvent.getRolloutId(),
+                false);
+
+        // rollout is null if rollout was deleted
+        if (rollout != null) {
+            final TotalTargetCountStatus totalTargetCountStatus = rollout.getTotalTargetCountStatus();
+            final LazyQueryContainer rolloutContainer = (LazyQueryContainer) getContainerDataSource();
+            final Item item = rolloutContainer.getItem(rolloutChangeEvent.getRolloutId());
+            if (item == null) {
+                refreshContainer();
+                return;
+            }
+            item.getItemProperty(VAR_STATUS).setValue(rollout.getStatus());
+            item.getItemProperty(VAR_TOTAL_TARGETS_COUNT_STATUS).setValue(totalTargetCountStatus);
+            final Long groupCount = (Long) item.getItemProperty(VAR_NUMBER_OF_GROUPS).getValue();
+            final int groupsCreated = rollout.getRolloutGroupsCreated();
+            if (groupsCreated != 0) {
+                item.getItemProperty(VAR_NUMBER_OF_GROUPS).setValue(Long.valueOf(groupsCreated));
+            } else if (rollout.getRolloutGroups() != null && groupCount != rollout.getRolloutGroups().size()) {
+                item.getItemProperty(VAR_NUMBER_OF_GROUPS).setValue(Long.valueOf(rollout.getRolloutGroups().size()));
+            }
+            item.getItemProperty(ROLLOUT_RENDERER_DATA)
+                    .setValue(new RolloutRendererData(rollout.getName(), rollout.getStatus().toString()));
         }
-        item.getItemProperty(VAR_STATUS).setValue(rollout.getStatus());
-        item.getItemProperty(VAR_TOTAL_TARGETS_COUNT_STATUS).setValue(totalTargetCountStatus);
-        final Long groupCount = (Long) item.getItemProperty(VAR_NUMBER_OF_GROUPS).getValue();
-        final int groupsCreated = rollout.getRolloutGroupsCreated();
-        if (groupsCreated != 0) {
-            item.getItemProperty(VAR_NUMBER_OF_GROUPS).setValue(Long.valueOf(groupsCreated));
-        } else if (rollout.getRolloutGroups() != null && groupCount != rollout.getRolloutGroups().size()) {
-            item.getItemProperty(VAR_NUMBER_OF_GROUPS).setValue(Long.valueOf(rollout.getRolloutGroups().size()));
-        }
-        item.getItemProperty(ROLLOUT_RENDERER_DATA)
-                .setValue(new RolloutRendererData(rollout.getName(), rollout.getStatus().toString()));
     }
 
     @Override
@@ -220,13 +256,12 @@ public class RolloutListGrid extends AbstractGrid {
         rolloutGridContainer.addContainerProperty(VAR_MODIFIED_DATE, String.class, null, false, false);
         rolloutGridContainer.addContainerProperty(VAR_CREATED_USER, String.class, null, false, false);
         rolloutGridContainer.addContainerProperty(VAR_MODIFIED_BY, String.class, null, false, false);
-        rolloutGridContainer.addContainerProperty(VAR_NUMBER_OF_GROUPS, Long.class, 0, false, false);
+        rolloutGridContainer.addContainerProperty(VAR_NUMBER_OF_GROUPS, Long.class, 0L, false, false);
         rolloutGridContainer.addContainerProperty(VAR_TOTAL_TARGETS, String.class, "0", false, false);
         rolloutGridContainer.addContainerProperty(VAR_TOTAL_TARGETS_COUNT_STATUS, TotalTargetCountStatus.class, null,
                 false, false);
 
         rolloutGridContainer.addContainerProperty(RUN_OPTION, String.class, FontAwesome.PLAY.getHtml(), false, false);
-
         rolloutGridContainer.addContainerProperty(PAUSE_OPTION, String.class, FontAwesome.PAUSE.getHtml(), false,
                 false);
 
@@ -238,6 +273,8 @@ public class RolloutListGrid extends AbstractGrid {
             rolloutGridContainer.addContainerProperty(COPY_OPTION, String.class, FontAwesome.COPY.getHtml(), false,
                     false);
         }
+        rolloutGridContainer.addContainerProperty(DELETE_OPTION, String.class, FontAwesome.TRASH_O.getHtml(), false,
+                false);
     }
 
     @Override
@@ -266,14 +303,16 @@ public class RolloutListGrid extends AbstractGrid {
 
         if (permissionChecker.hasRolloutUpdatePermission()) {
             getColumn(UPDATE_OPTION).setMinimumWidth(25);
-            getColumn(UPDATE_OPTION).setMaximumWidth(40);
-        } else {
-            getColumn(PAUSE_OPTION).setMaximumWidth(60);
+            getColumn(UPDATE_OPTION).setMaximumWidth(25);
         }
+
         if (permissionChecker.hasRolloutCreatePermission()) {
             getColumn(COPY_OPTION).setMinimumWidth(25);
             getColumn(COPY_OPTION).setMaximumWidth(25);
         }
+
+        getColumn(DELETE_OPTION).setMinimumWidth(25);
+        getColumn(DELETE_OPTION).setMaximumWidth(40);
 
         getColumn(VAR_TOTAL_TARGETS_COUNT_STATUS).setMinimumWidth(280);
     }
@@ -301,17 +340,29 @@ public class RolloutListGrid extends AbstractGrid {
         if (permissionChecker.hasRolloutUpdatePermission()) {
             getColumn(UPDATE_OPTION).setHeaderCaption(i18n.get("header.action.update"));
         }
+
         if (permissionChecker.hasRolloutCreatePermission()) {
             getColumn(COPY_OPTION).setHeaderCaption(i18n.get("header.action.copy"));
         }
 
+        getColumn(DELETE_OPTION).setHeaderCaption(i18n.get("header.action.delete"));
+
+        final HeaderCell join = joinColumns();
+        join.setText(i18n.get("header.action"));
+    }
+
+    private HeaderCell joinColumns() {
         HeaderCell join;
-        if (permissionChecker.hasRolloutUpdatePermission()) {
-            join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION, UPDATE_OPTION, COPY_OPTION);
+        if (permissionChecker.hasRolloutUpdatePermission() && permissionChecker.hasRolloutCreatePermission()) {
+            join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION, UPDATE_OPTION, COPY_OPTION, DELETE_OPTION);
+        } else if (permissionChecker.hasRolloutUpdatePermission()) {
+            join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION, UPDATE_OPTION, DELETE_OPTION);
+        } else if (permissionChecker.hasRolloutCreatePermission()) {
+            join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION, COPY_OPTION, DELETE_OPTION);
         } else {
             join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION);
         }
-        join.setText(i18n.get("header.action"));
+        return join;
     }
 
     @Override
@@ -341,6 +392,7 @@ public class RolloutListGrid extends AbstractGrid {
         if (permissionChecker.hasRolloutCreatePermission()) {
             columnList.add(COPY_OPTION);
         }
+        columnList.add(DELETE_OPTION);
 
         columnList.add(VAR_CREATED_DATE);
         columnList.add(VAR_CREATED_USER);
@@ -399,6 +451,9 @@ public class RolloutListGrid extends AbstractGrid {
             getColumn(COPY_OPTION)
                     .setRenderer(new HtmlButtonRenderer(clickEvent -> copyRollout((Long) clickEvent.getItemId())));
         }
+
+        getColumn(DELETE_OPTION)
+                .setRenderer(new HtmlButtonRenderer(clickEvent -> deleteRollout((Long) clickEvent.getItemId())));
 
     }
 
@@ -465,6 +520,37 @@ public class RolloutListGrid extends AbstractGrid {
         addTargetWindow.setVisible(Boolean.TRUE);
     }
 
+    private void deleteRollout(final Long rolloutId) {
+        final String formattedConfirmationQuestion = getConfirmationQuestion(rolloutId);
+        final ConfirmationDialog confirmationDialog = new ConfirmationDialog(i18n.get("caption.confirm.delete.rollout"),
+                formattedConfirmationQuestion, i18n.get("button.ok"), i18n.get("button.cancel"), ok -> {
+                    if (ok) {
+                        final Item row = getContainerDataSource().getItem(rolloutId);
+                        final String rolloutName = (String) row.getItemProperty(VAR_NAME).getValue();
+                        rolloutManagement.deleteRollout(rolloutId);
+                        uiNotification.displaySuccess(i18n.get("message.rollout.deleted", rolloutName));
+                    }
+                });
+        UI.getCurrent().addWindow(confirmationDialog.getWindow());
+        confirmationDialog.getWindow().bringToFront();
+    }
+
+    private String getConfirmationQuestion(final Long rolloutId) {
+        final Rollout rolloutData = rolloutManagement.findRolloutWithDetailedStatus(rolloutId, false);
+        final Map<Status, Long> statusTotalCount = rolloutData.getTotalTargetCountStatus().getStatusTotalCountMap();
+        Long scheduledActions = statusTotalCount.get(Status.SCHEDULED);
+        if (scheduledActions == null) {
+            scheduledActions = 0L;
+        }
+        final Long runningActions = statusTotalCount.get(Status.RUNNING);
+        String rolloutDetailsMessage = StringUtils.EMPTY;
+        if ((scheduledActions > 0) || (runningActions > 0)) {
+            rolloutDetailsMessage = i18n.get("message.delete.rollout.details", runningActions, scheduledActions);
+        }
+
+        return i18n.get("message.delete.rollout", rolloutData.getName(), rolloutDetailsMessage);
+    }
+
     private String getDescription(final CellReference cell) {
 
         String description = null;
@@ -487,6 +573,7 @@ public class RolloutListGrid extends AbstractGrid {
     private static String getDSDetails(final Item rolloutItem) {
         final StringBuilder swModuleNames = new StringBuilder();
         final StringBuilder swModuleVendors = new StringBuilder();
+        @SuppressWarnings("unchecked")
         final Set<SoftwareModule> swModules = (Set<SoftwareModule>) rolloutItem.getItemProperty(SW_MODULES).getValue();
         swModules.forEach(swModule -> {
             swModuleNames.append(swModule.getName());
@@ -535,6 +622,31 @@ public class RolloutListGrid extends AbstractGrid {
         static {
             EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(RUN_OPTION, RolloutStatus.READY);
             EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(PAUSE_OPTION, RolloutStatus.RUNNING);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(UPDATE_OPTION, RolloutStatus.READY);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(UPDATE_OPTION, RolloutStatus.RUNNING);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(UPDATE_OPTION, RolloutStatus.PAUSED);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(UPDATE_OPTION, RolloutStatus.CREATING);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(UPDATE_OPTION, RolloutStatus.STARTING);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(UPDATE_OPTION, RolloutStatus.STOPPED);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(UPDATE_OPTION, RolloutStatus.ERROR_CREATING);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(UPDATE_OPTION, RolloutStatus.ERROR_STARTING);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(DELETE_OPTION, RolloutStatus.READY);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(DELETE_OPTION, RolloutStatus.RUNNING);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(DELETE_OPTION, RolloutStatus.PAUSED);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(DELETE_OPTION, RolloutStatus.CREATING);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(DELETE_OPTION, RolloutStatus.STARTING);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(DELETE_OPTION, RolloutStatus.STOPPED);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(DELETE_OPTION, RolloutStatus.ERROR_CREATING);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(DELETE_OPTION, RolloutStatus.ERROR_STARTING);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(COPY_OPTION, RolloutStatus.READY);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(COPY_OPTION, RolloutStatus.RUNNING);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(COPY_OPTION, RolloutStatus.PAUSED);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(COPY_OPTION, RolloutStatus.CREATING);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(COPY_OPTION, RolloutStatus.STARTING);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(COPY_OPTION, RolloutStatus.STOPPED);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(COPY_OPTION, RolloutStatus.FINISHED);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(COPY_OPTION, RolloutStatus.ERROR_CREATING);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(COPY_OPTION, RolloutStatus.ERROR_STARTING);
         }
 
         /**
@@ -561,22 +673,29 @@ public class RolloutListGrid extends AbstractGrid {
             if (expectedRolloutStatus == null) {
                 return null;
             }
-
-            if (RUN_OPTION.equals(cellReference.getPropertyId())) {
-                return getStatus(cellReference, RolloutStatus.READY, RolloutStatus.PAUSED);
+            String status = null;
+            if (RUN_OPTION.equals(propertyId)) {
+                status = getStatus(cellReference, Arrays.asList(RolloutStatus.READY, RolloutStatus.PAUSED));
+            } else if (PAUSE_OPTION.equals(propertyId)) {
+                status = getStatus(cellReference, Arrays.asList(RolloutStatus.RUNNING));
+            } else if (UPDATE_OPTION.equals(propertyId) || DELETE_OPTION.equals(propertyId)) {
+                status = getStatus(cellReference,
+                        Arrays.asList(RolloutStatus.CREATING, RolloutStatus.ERROR_CREATING,
+                                RolloutStatus.ERROR_STARTING, RolloutStatus.PAUSED, RolloutStatus.READY,
+                                RolloutStatus.RUNNING, RolloutStatus.STARTING, RolloutStatus.STOPPED));
+            } else if (COPY_OPTION.equals(propertyId)) {
+                status = getStatus(cellReference, Arrays.asList(RolloutStatus.CREATING, RolloutStatus.ERROR_CREATING,
+                        RolloutStatus.ERROR_STARTING, RolloutStatus.PAUSED, RolloutStatus.READY, RolloutStatus.RUNNING,
+                        RolloutStatus.STARTING, RolloutStatus.STOPPED, RolloutStatus.FINISHED));
             }
 
-            if (PAUSE_OPTION.equals(cellReference.getPropertyId())) {
-                return getStatus(cellReference, RolloutStatus.RUNNING);
-            }
-
-            return null;
+            return status;
         }
 
-        private String getStatus(final CellReference cellReference, final RolloutStatus... expectedRolloutStatus) {
+        private String getStatus(final CellReference cellReference, final List<RolloutStatus> expectedRolloutStatus) {
             final RolloutStatus currentRolloutStatus = getRolloutStatus(cellReference.getItemId());
 
-            if (Arrays.asList(expectedRolloutStatus).contains(currentRolloutStatus)) {
+            if (expectedRolloutStatus.contains(currentRolloutStatus)) {
                 return null;
             }
 
@@ -621,7 +740,10 @@ public class RolloutListGrid extends AbstractGrid {
         }
 
         private String convertRolloutStatusToString(final RolloutStatus value) {
-            final StatusFontIcon statusFontIcon = statusIconMap.get(value);
+            StatusFontIcon statusFontIcon = statusIconMap.get(value);
+            if (statusFontIcon == null) {
+                statusFontIcon = new StatusFontIcon(FontAwesome.QUESTION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_BLUE);
+            }
             final String codePoint = HawkbitCommonUtil.getCodePoint(statusFontIcon);
             return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(),
                     UIComponentIdProvider.ROLLOUT_STATUS_LABEL_ID);

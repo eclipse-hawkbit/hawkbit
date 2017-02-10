@@ -31,6 +31,8 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.collect.Lists;
+
 @SpringApplicationConfiguration(classes = {
         org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration.class })
 public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest {
@@ -81,6 +83,9 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     protected RolloutGroupRepository rolloutGroupRepository;
 
     @Autowired
+    protected RolloutTargetGroupRepository rolloutTargetGroupRepository;
+
+    @Autowired
     protected RolloutRepository rolloutRepository;
 
     @Autowired
@@ -91,7 +96,7 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
 
     @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     protected List<Action> findActionsByRolloutAndStatus(final Rollout rollout, final Action.Status actionStatus) {
-        return actionRepository.findByRolloutIdAndStatus(rollout.getId(), actionStatus);
+        return Lists.newArrayList(actionRepository.findByRolloutIdAndStatus(pageReq, rollout.getId(), actionStatus));
     }
 
     protected TargetTagAssignmentResult toggleTagAssignment(final Collection<Target> targets, final TargetTag tag) {

@@ -36,7 +36,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedE
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
@@ -61,7 +60,7 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     private static final long serialVersionUID = 1L;
 
     @ManyToOne
-    @JoinColumn(name = "module_type", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_module_type"))
+    @JoinColumn(name = "module_type", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_module_type"))
     @NotNull
     private JpaSoftwareModuleType type;
 
@@ -77,13 +76,12 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
 
     @CascadeOnDelete
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "softwareModule", cascade = {
-            CascadeType.ALL }, targetEntity = JpaArtifact.class)
-    private List<Artifact> artifacts;
+            CascadeType.PERSIST }, targetEntity = JpaArtifact.class, orphanRemoval = true)
+    private List<JpaArtifact> artifacts;
 
     @CascadeOnDelete
-    @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, targetEntity = JpaSoftwareModuleMetadata.class)
-    @JoinColumn(name = "sw_id", insertable = false, updatable = false)
-    private List<SoftwareModuleMetadata> metadata;
+    @OneToMany(mappedBy = "softwareModule", fetch = FetchType.LAZY, targetEntity = JpaSoftwareModuleMetadata.class)
+    private List<JpaSoftwareModuleMetadata> metadata;
 
     /**
      * Default constructor.
@@ -116,12 +114,12 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     public void addArtifact(final Artifact artifact) {
         if (null == artifacts) {
             artifacts = new ArrayList<>(4);
-            artifacts.add(artifact);
+            artifacts.add((JpaArtifact) artifact);
             return;
         }
 
         if (!artifacts.contains(artifact)) {
-            artifacts.add(artifact);
+            artifacts.add((JpaArtifact) artifact);
         }
     }
 

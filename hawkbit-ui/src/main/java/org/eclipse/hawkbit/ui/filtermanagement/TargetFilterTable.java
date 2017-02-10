@@ -162,7 +162,7 @@ public class TargetFilterTable extends Table {
         final Item row = getItem(itemId);
         final String tfName = (String) row.getItemProperty(SPUILabelDefinitions.NAME).getValue();
         final Button deleteIcon = SPUIComponentProvider.getButton(getDeleteIconId(tfName), "",
-                SPUILabelDefinitions.DELETE_CUSTOM_FILTER, ValoTheme.BUTTON_TINY + " " + "redicon", true,
+                SPUILabelDefinitions.DELETE_CUSTOM_FILTER, ValoTheme.BUTTON_TINY + " " + "blueicon", true,
                 FontAwesome.TRASH_O, SPUIButtonStyleSmallNoBorder.class);
         deleteIcon.setData(itemId);
         deleteIcon.addClickListener(this::onDelete);

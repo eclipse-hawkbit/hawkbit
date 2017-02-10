@@ -232,7 +232,7 @@ public class SpSenderService extends SenderService {
         headers.put(MessageHeaderKey.TENANT, tenant);
         headers.put(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
         headers.put(MessageHeaderKey.CONTENT_TYPE, MessageProperties.CONTENT_TYPE_JSON);
-        actionUpdateStatus.getMessage().addAll(updateResultMessages);
+        actionUpdateStatus.addMessage(updateResultMessages);
 
         actionUpdateStatus.setActionId(actionId);
         return convertMessage(actionUpdateStatus, messageProperties);

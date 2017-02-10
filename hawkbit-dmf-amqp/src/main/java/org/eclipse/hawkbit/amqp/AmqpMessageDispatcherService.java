@@ -33,6 +33,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignment
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.util.IpUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -49,6 +51,8 @@ import org.springframework.context.event.EventListener;
  *
  */
 public class AmqpMessageDispatcherService extends BaseAmqpService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AmqpMessageDispatcherService.class);
 
     private final ArtifactUrlHandler artifactUrlHandler;
     private final AmqpSenderService amqpSenderService;
@@ -101,6 +105,9 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         if (isFromSelf(assignedEvent)) {
             return;
         }
+
+        LOG.debug("targetAssignDistributionSet retrieved for controller {}. I will forward it to DMF broker.",
+                assignedEvent.getControllerId());
 
         sendUpdateMessageToTarget(assignedEvent.getTenant(),
                 targetManagement.findTargetByControllerID(assignedEvent.getControllerId()), assignedEvent.getActionId(),

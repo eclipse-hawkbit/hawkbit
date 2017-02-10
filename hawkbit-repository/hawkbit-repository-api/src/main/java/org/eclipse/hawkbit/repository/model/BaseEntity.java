@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.model;
 
 import java.io.Serializable;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.hateoas.Identifiable;
@@ -18,6 +19,10 @@ import org.springframework.hateoas.Identifiable;
  *
  */
 public interface BaseEntity extends Serializable, Identifiable<Long> {
+
+    static Long getIdOrNull(final BaseEntity entity) {
+        return Optional.ofNullable(entity).map(BaseEntity::getId).orElse(null);
+    }
 
     /**
      * @return time in {@link TimeUnit#MILLISECONDS} when the {@link BaseEntity}

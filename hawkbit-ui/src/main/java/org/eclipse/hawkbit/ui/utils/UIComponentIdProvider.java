@@ -803,6 +803,11 @@ public final class UIComponentIdProvider {
     public static final String ROLLOUT_COPY_BUTTON_ID = ROLLOUT_ACTION_ID + ".12";
 
     /**
+     * Rollout delete button id.
+     */
+    public static final String ROLLOUT_DELETE_BUTTON_ID = ROLLOUT_ACTION_ID + ".13";
+
+    /**
      * Rollout status label id.
      */
     public static final String ROLLOUT_STATUS_LABEL_ID = "rollout.status.id";

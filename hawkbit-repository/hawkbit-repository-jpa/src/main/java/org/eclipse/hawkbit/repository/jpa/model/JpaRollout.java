@@ -28,6 +28,7 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -35,6 +36,10 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
+import org.eclipse.persistence.annotations.CascadeOnDelete;
+import org.eclipse.persistence.annotations.ConversionValue;
+import org.eclipse.persistence.annotations.Convert;
+import org.eclipse.persistence.annotations.ObjectTypeConverter;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -49,25 +54,39 @@ import org.hibernate.validator.constraints.NotEmpty;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
+@ObjectTypeConverter(name = "rolloutstatus", objectType = Rollout.RolloutStatus.class, dataType = Integer.class, conversionValues = {
+        @ConversionValue(objectValue = "CREATING", dataValue = "0"),
+        @ConversionValue(objectValue = "READY", dataValue = "1"),
+        @ConversionValue(objectValue = "PAUSED", dataValue = "2"),
+        @ConversionValue(objectValue = "STARTING", dataValue = "3"),
+        @ConversionValue(objectValue = "STOPPED", dataValue = "4"),
+        @ConversionValue(objectValue = "RUNNING", dataValue = "5"),
+        @ConversionValue(objectValue = "FINISHED", dataValue = "6"),
+        @ConversionValue(objectValue = "ERROR_CREATING", dataValue = "7"),
+        @ConversionValue(objectValue = "ERROR_STARTING", dataValue = "8"),
+        @ConversionValue(objectValue = "DELETING", dataValue = "9"),
+        @ConversionValue(objectValue = "DELETED", dataValue = "10") })
 public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, EventAwareEntity {
 
     private static final long serialVersionUID = 1L;
 
-    @OneToMany(targetEntity = JpaRolloutGroup.class)
-    @JoinColumn(name = "rollout", insertable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollout_rolloutgroup"))
-    private List<RolloutGroup> rolloutGroups;
+    @CascadeOnDelete
+    @OneToMany(targetEntity = JpaRolloutGroup.class, fetch = FetchType.LAZY, mappedBy = "rollout")
+    private List<JpaRolloutGroup> rolloutGroups;
 
     @Column(name = "target_filter", length = 1024, nullable = false)
     @Size(max = 1024)
     @NotEmpty
     private String targetFilterQuery;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "distribution_set", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rolltout_ds"))
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "distribution_set", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rolltout_ds"))
     @NotNull
     private JpaDistributionSet distributionSet;
 
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
+    @Convert("rolloutstatus")
+    @NotNull
     private RolloutStatus status = RolloutStatus.CREATING;
 
     @Column(name = "last_check")
@@ -86,6 +105,9 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
 
     @Column(name = "rollout_groups_created")
     private int rolloutGroupsCreated;
+
+    @Column(name = "deleted")
+    private boolean deleted;
 
     @Column(name = "start_at")
     private Long startAt;
@@ -142,7 +164,7 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
         return startAt;
     }
 
-    public void setStartAt(Long startAt) {
+    public void setStartAt(final Long startAt) {
         this.startAt = startAt;
     }
 
@@ -196,9 +218,8 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
 
     @Override
     public String toString() {
-        return "Rollout [rolloutGroups=" + rolloutGroups + ", targetFilterQuery=" + targetFilterQuery
-                + ", distributionSet=" + distributionSet + ", status=" + status + ", lastCheck=" + lastCheck
-                + ", getName()=" + getName() + ", getId()=" + getId() + "]";
+        return "Rollout [ targetFilterQuery=" + targetFilterQuery + ", distributionSet=" + distributionSet + ", status="
+                + status + ", lastCheck=" + lastCheck + ", getName()=" + getName() + ", getId()=" + getId() + "]";
     }
 
     @Override
@@ -210,12 +231,20 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher()
                 .publishEvent(new RolloutUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
-
     }
 
     @Override
     public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
-        // there is no rollout deletion event
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new RolloutDeletedEvent(getTenant(),
+                getId(), getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(final boolean deleted) {
+        this.deleted = deleted;
     }
 
 }

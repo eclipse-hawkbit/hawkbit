@@ -454,15 +454,15 @@ public final class HawkbitCommonUtil {
                     .getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).getValue();
             pinBtn.removeStyleName("statusIconRed statusIconBlue statusIconGreen statusIconYellow statusIconLightBlue");
             if (updateStatus == TargetUpdateStatus.ERROR) {
-                pinBtn.addStyleName("statusIconRed");
+                pinBtn.addStyleName(SPUIStyleDefinitions.STATUS_ICON_RED);
             } else if (updateStatus == TargetUpdateStatus.UNKNOWN) {
-                pinBtn.addStyleName("statusIconBlue");
+                pinBtn.addStyleName(SPUIStyleDefinitions.STATUS_ICON_BLUE);
             } else if (updateStatus == TargetUpdateStatus.IN_SYNC) {
-                pinBtn.addStyleName("statusIconGreen");
+                pinBtn.addStyleName(SPUIStyleDefinitions.STATUS_ICON_GREEN);
             } else if (updateStatus == TargetUpdateStatus.PENDING) {
-                pinBtn.addStyleName("statusIconYellow");
+                pinBtn.addStyleName(SPUIStyleDefinitions.STATUS_ICON_YELLOW);
             } else if (updateStatus == TargetUpdateStatus.REGISTERED) {
-                pinBtn.addStyleName("statusIconLightBlue");
+                pinBtn.addStyleName(SPUIStyleDefinitions.STATUS_ICON_LIGHT_BLUE);
             }
         }
     }

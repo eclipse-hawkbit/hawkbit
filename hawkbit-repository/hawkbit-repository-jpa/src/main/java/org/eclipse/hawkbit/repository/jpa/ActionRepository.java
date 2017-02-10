@@ -266,6 +266,44 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     Long countByRolloutIdAndRolloutGroupIdAndStatus(Long rolloutId, Long rolloutGroupId, Action.Status status);
 
     /**
+     * Counts all actions referring to a given rollout and status.
+     * 
+     * @param rolloutId
+     *            the ID of the rollout the actions belong to
+     * @param status
+     *            the status the actions should have
+     * @return the count of actions referring to a rollout and are in a given
+     *         status
+     */
+    Long countByRolloutIdAndStatus(Long rolloutId, Action.Status status);
+
+    /**
+     * Returns {@code true} if actions for the given rollout exists, otherwise
+     * {@code false}
+     * 
+     * @param rolloutId
+     *            the ID of the rollout the actions belong to
+     * @return {@code true} if actions for the given rollout exists, otherwise
+     *         {@code false}
+     */
+    @Query("SELECT CASE WHEN COUNT(a)>0 THEN 'true' ELSE 'false' END FROM JpaAction a WHERE a.rollout.id=:rolloutId")
+    boolean existsByRolloutId(@Param("rolloutId") Long rolloutId);
+
+    /**
+     * Returns {@code true} if actions for the given rollout exists, otherwise
+     * {@code false}
+     * 
+     * @param rolloutId
+     *            the ID of the rollout the actions belong to
+     * @param status
+     *            the action is not to be in
+     * @return {@code true} if actions for the given rollout exists, otherwise
+     *         {@code false}
+     */
+    @Query("SELECT CASE WHEN COUNT(a)>0 THEN 'true' ELSE 'false' END FROM JpaAction a WHERE a.rollout.id=:rolloutId AND a.status != :status")
+    boolean existsByRolloutIdAndStatusNotIn(@Param("rolloutId") Long rolloutId, @Param("status") Status status);
+
+    /**
      * Retrieving all actions referring to a given rollout with a specific
      * action as parent reference and a specific status.
      *
@@ -302,14 +340,16 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
 
     /**
      * Retrieves all actions for a specific rollout and in a specific status.
-     *
+     * 
+     * @param pageable
+     *            page parameters
      * @param rolloutId
      *            the rollout the actions beglong to
      * @param actionStatus
      *            the status of the actions
      * @return the actions referring a specific rollout an in a specific status
      */
-    List<Action> findByRolloutIdAndStatus(Long rolloutId, Status actionStatus);
+    Page<JpaAction> findByRolloutIdAndStatus(Pageable pageable, Long rolloutId, Status actionStatus);
 
     /**
      * Get list of objects which has details of status and count of targets in
@@ -355,4 +395,15 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     @Query("SELECT NEW org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus(a.rolloutGroup.id, a.status , COUNT(a.target)) FROM JpaAction a WHERE a.rolloutGroup.id IN ?1 GROUP BY a.rolloutGroup.id, a.status")
     List<TotalTargetCountActionStatus> getStatusCountByRolloutGroupId(List<Long> rolloutGroupId);
 
+    /**
+     * Deletes all actions with the given IDs.
+     * 
+     * @param actionIDs
+     *            the IDs of the actions to be deleted.
+     */
+    @Modifying
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
+    @Query("DELETE FROM JpaAction a WHERE a.id IN ?1")
+    void deleteByIdIn(final Collection<Long> actionIDs);
 }

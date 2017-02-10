@@ -32,8 +32,8 @@ public class JpaSoftwareModuleMetadata extends JpaMetaData implements SoftwareMo
     private static final long serialVersionUID = 1L;
 
     @Id
-    @ManyToOne(targetEntity = JpaSoftwareModule.class, fetch = FetchType.LAZY)
-    @JoinColumn(name = "sw_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_metadata_sw"))
+    @ManyToOne(optional = false, targetEntity = JpaSoftwareModule.class, fetch = FetchType.LAZY)
+    @JoinColumn(name = "sw_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_metadata_sw"))
     private SoftwareModule softwareModule;
 
     public JpaSoftwareModuleMetadata() {

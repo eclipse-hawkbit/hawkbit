@@ -106,6 +106,18 @@ public interface MgmtRolloutRestApi {
     ResponseEntity<Void> pause(@PathVariable("rolloutId") final Long rolloutId);
 
     /**
+     * Handles the DELETE request for deleting a rollout.
+     *
+     * @param rolloutId
+     *            the ID of the rollout to be deleted.
+     * @return OK response (200) if rollout could be deleted. In case of any
+     *         exception the corresponding errors occur.
+     */
+    @RequestMapping(method = RequestMethod.DELETE, value = "/{rolloutId}", produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<Void> delete(@PathVariable("rolloutId") final Long rolloutId);
+
+    /**
      * Handles the POST request for resuming a rollout.
      *
      * @param rolloutId

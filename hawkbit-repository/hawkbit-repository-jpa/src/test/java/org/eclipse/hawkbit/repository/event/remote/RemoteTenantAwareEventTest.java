@@ -13,6 +13,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.Test;
@@ -46,6 +47,7 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
         final Target target = testdataFactory.createTarget("Test");
         generateAction.setTarget(target);
         generateAction.setDistributionSet(dsA);
+        generateAction.setStatus(Status.RUNNING);
         final Action action = actionRepository.save(generateAction);
 
         final TargetAssignDistributionSetEvent assignmentEvent = new TargetAssignDistributionSetEvent(action,

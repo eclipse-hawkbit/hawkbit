@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.grid.AbstractGridLayout;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.rollout.RolloutListView;
 import org.eclipse.hawkbit.ui.rollout.rolloutgroup.RolloutGroupsListView;
@@ -27,6 +28,7 @@ import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
@@ -124,27 +126,42 @@ public class RolloutView extends VerticalLayout implements View {
     }
 
     private void showRolloutGroupTargetsListView() {
-        rolloutGroupTargetsListView.setVisible(true);
-        if (rolloutListView.isVisible()) {
-            rolloutListView.setVisible(false);
+        if (!isRolloutDeleted(rolloutGroupTargetsListView)) {
+            rolloutGroupTargetsListView.setVisible(true);
+            if (rolloutListView.isVisible()) {
+                rolloutListView.setVisible(false);
+            }
+            if (rolloutGroupsListView.isVisible()) {
+                rolloutGroupsListView.setVisible(false);
+            }
+            addComponent(rolloutGroupTargetsListView);
+            setExpandRatio(rolloutGroupTargetsListView, 1.0F);
         }
-        if (rolloutGroupsListView.isVisible()) {
-            rolloutGroupsListView.setVisible(false);
-        }
-        addComponent(rolloutGroupTargetsListView);
-        setExpandRatio(rolloutGroupTargetsListView, 1.0f);
     }
 
     private void showRolloutGroupListView() {
-        rolloutGroupsListView.setVisible(true);
-        if (rolloutListView.isVisible()) {
-            rolloutListView.setVisible(false);
+        if (!isRolloutDeleted(rolloutGroupsListView)) {
+            rolloutGroupsListView.setVisible(true);
+            if (rolloutListView.isVisible()) {
+                rolloutListView.setVisible(false);
+            }
+            if (rolloutGroupTargetsListView.isVisible()) {
+                rolloutGroupTargetsListView.setVisible(false);
+            }
+            addComponent(rolloutGroupsListView);
+            setExpandRatio(rolloutGroupsListView, 1.0F);
         }
-        if (rolloutGroupTargetsListView.isVisible()) {
-            rolloutGroupTargetsListView.setVisible(false);
+    }
+
+    private boolean isRolloutDeleted(final AbstractGridLayout rolloutGroupsListView) {
+        final LazyQueryContainer container = (LazyQueryContainer) rolloutGroupsListView.getGrid()
+                .getContainerDataSource();
+        container.refresh();
+        if (container.size() == 0) {
+            showRolloutListView();
+            return true;
         }
-        addComponent(rolloutGroupsListView);
-        setExpandRatio(rolloutGroupsListView, 1.0f);
+        return false;
     }
 
     private void showRolloutListView() {
@@ -156,7 +173,7 @@ public class RolloutView extends VerticalLayout implements View {
             rolloutGroupTargetsListView.setVisible(false);
         }
         addComponent(rolloutListView);
-        setExpandRatio(rolloutListView, 1.0f);
+        setExpandRatio(rolloutListView, 1.0F);
     }
 
     @Override
