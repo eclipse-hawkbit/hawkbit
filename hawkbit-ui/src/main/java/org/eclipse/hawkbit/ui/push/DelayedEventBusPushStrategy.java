@@ -34,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
@@ -74,7 +73,6 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
     private final EventBus.UIEventBus eventBus;
     private final UIEventProvider eventProvider;
     private final long delay;
-    private final String appContextId;
 
     private ScheduledFuture<?> jobHandle;
     private UI vaadinUI;
@@ -88,18 +86,15 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
      *            the ui event bus
      * @param eventProvider
      *            the event provider
-     * @param appContextId
-     *            the id of the application context
      * @param delay
      *            the delay for the event forwarding. Every delay millisecond
      *            the events are forwarded by this strategy
      */
     public DelayedEventBusPushStrategy(final ScheduledExecutorService executorService, final UIEventBus eventBus,
-            final UIEventProvider eventProvider, final String appContextId, final long delay) {
+            final UIEventProvider eventProvider, final long delay) {
         this.executorService = executorService;
         this.eventBus = eventBus;
         this.eventProvider = eventProvider;
-        this.appContextId = appContextId;
         this.delay = delay;
     }
 
@@ -252,7 +247,6 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
      *            the entity event which has been published from the repository
      */
     @Override
-    @Async
     public void onApplicationEvent(final ApplicationEvent applicationEvent) {
         if (!(applicationEvent instanceof org.eclipse.hawkbit.repository.event.TenantAwareEvent)) {
             return;

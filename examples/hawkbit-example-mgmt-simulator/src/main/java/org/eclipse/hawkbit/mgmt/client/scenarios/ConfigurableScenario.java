@@ -217,8 +217,9 @@ public class ConfigurableScenario {
         LOGGER.info("Run semi automatic rollout for set {}", set.getDsId());
         // create a Rollout
         final MgmtRolloutResponseBody rolloutResponseBody = rolloutResource.create(new RolloutBuilder()
-                .name("Rollout" + set.getName() + set.getVersion()).semiAutomaticGroups(createRolloutGroups(scenario))
-                .targetFilterQuery("name==*").distributionSetId(set.getDsId())
+                .name("SemiAutomaticRollout" + set.getName() + set.getVersion())
+                .semiAutomaticGroups(createRolloutGroups(scenario)).targetFilterQuery("name==*")
+                .distributionSetId(set.getDsId())
                 .successThreshold(String.valueOf(scenario.getRolloutSuccessThreshold())).errorThreshold("5").build())
                 .getBody();
 

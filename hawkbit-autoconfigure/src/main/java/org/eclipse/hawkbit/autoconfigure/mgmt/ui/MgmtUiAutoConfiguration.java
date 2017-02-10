@@ -85,7 +85,7 @@ public class MgmtUiAutoConfiguration {
             final ScheduledExecutorService executorService, final UIEventBus eventBus,
             final UIEventProvider eventProvider, final UiProperties uiProperties) {
         final DelayedEventBusPushStrategy delayedEventBusPushStrategy = new DelayedEventBusPushStrategy(executorService,
-                eventBus, eventProvider, applicationContext.getId(), uiProperties.getEvent().getPush().getDelay());
+                eventBus, eventProvider, uiProperties.getEvent().getPush().getDelay());
         applicationContext.addApplicationListener(delayedEventBusPushStrategy);
         return delayedEventBusPushStrategy;
     }
