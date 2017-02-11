@@ -36,7 +36,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
-import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -92,19 +91,6 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(securityTokenAsSystemCode).isNotNull();
 
         assertThat(securityTokenWithoutPermission).isNull();
-    }
-
-    @Test
-    @Description("Ensures that targets cannot be created e.g. in plug'n play scenarios when tenant does not exists.")
-    @WithUser(tenantId = "tenantWhichDoesNotExists", allSpPermissions = true, autoCreateTenant = false)
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
-    public void createTargetForTenantWhichDoesNotExistThrowsTenantNotExistException() {
-        try {
-            targetManagement.createTarget(entityFactory.target().create().controllerId("targetId123"));
-            fail("should not be possible as the tenant does not exist");
-        } catch (final TenantNotExistException e) {
-            // ok
-        }
     }
 
     @Test

@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -98,12 +97,12 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     /**
      * Max amount of targets that are handled in one transaction.
      */
-    private static final int TRANSACTION_TARGETS = 1_000;
+    private static final int TRANSACTION_TARGETS = 5_000;
 
     /**
      * Maximum amount of actions that are deleted in one transaction.
      */
-    private static final int TRANSACTION_ACTIONS = 1_000;
+    private static final int TRANSACTION_ACTIONS = 5_000;
 
     @Autowired
     private RolloutRepository rolloutRepository;
@@ -865,22 +864,19 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     public Long countRolloutsAll() {
-        final Specification<JpaRollout> spec = RolloutSpecification.isDeleted(Boolean.FALSE);
-        return rolloutRepository.count(SpecificationsBuilder.combineWithAnd(Lists.newArrayList(spec)));
+        return rolloutRepository.count(RolloutSpecification.isDeleted(false));
     }
 
     @Override
     public Long countRolloutsAllByFilters(final String searchText) {
-        return rolloutRepository.count(JpaRolloutHelper.likeNameOrDescription(searchText));
+        return rolloutRepository.count(JpaRolloutHelper.likeNameOrDescription(searchText, false));
     }
 
     @Override
     public Slice<Rollout> findRolloutWithDetailedStatusByFilters(final Pageable pageable, final String searchText,
             final boolean deleted) {
-        final List<Specification<JpaRollout>> specList = new ArrayList<>(2);
-        specList.add(JpaRolloutHelper.likeNameOrDescription(searchText));
-        specList.add(RolloutSpecification.isDeleted(deleted));
-        final Slice<JpaRollout> findAll = findByCriteriaAPI(pageable, specList);
+        final Slice<JpaRollout> findAll = findByCriteriaAPI(pageable,
+                Lists.newArrayList(JpaRolloutHelper.likeNameOrDescription(searchText, deleted)));
         setRolloutStatusDetails(findAll);
         return JpaRolloutHelper.convertPage(findAll, pageable);
     }

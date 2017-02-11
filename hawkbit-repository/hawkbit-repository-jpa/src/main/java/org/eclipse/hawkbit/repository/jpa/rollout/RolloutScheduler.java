@@ -29,6 +29,7 @@ import com.google.common.base.Throwables;
  * {#PROP_SCHEDULER_DELAY_PLACEHOLDER}.
  */
 public class RolloutScheduler {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RolloutScheduler.class);
 
     private static final String PROP_SCHEDULER_DELAY_PLACEHOLDER = "${hawkbit.rollout.scheduler.fixedDelay:2000}";
@@ -97,13 +98,12 @@ public class RolloutScheduler {
             return tenants.size();
         });
 
-        waitUntilHandlersAreComplete(completionService, tasks);
+        waitUntilHandlersAreComplete(tasks);
     }
 
-    private void waitUntilHandlersAreComplete(final ExecutorCompletionService<Void> completionService,
-            final int tenants) {
+    private void waitUntilHandlersAreComplete(final int tasks) {
         try {
-            for (int i = 0; i < tenants; i++) {
+            for (int i = 0; i < tasks; i++) {
                 completionService.take().get();
             }
         } catch (InterruptedException | ExecutionException e) {

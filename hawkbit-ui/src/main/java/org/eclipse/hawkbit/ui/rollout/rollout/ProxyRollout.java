@@ -24,8 +24,6 @@ import com.vaadin.server.FontAwesome;
  */
 public class ProxyRollout {
 
-    private static final long serialVersionUID = 4539849939617681918L;
-
     private String distributionSetNameVersion;
 
     private String createdDate;
