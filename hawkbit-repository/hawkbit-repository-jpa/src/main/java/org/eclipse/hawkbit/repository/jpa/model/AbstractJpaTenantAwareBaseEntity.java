@@ -10,10 +10,12 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.PostPersist;
+import javax.persistence.PrePersist;
 
+import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
+import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.eclipse.persistence.annotations.Multitenant;
 import org.eclipse.persistence.annotations.MultitenantType;
 import org.eclipse.persistence.annotations.TenantDiscriminatorColumn;
@@ -38,12 +40,22 @@ public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEn
         // Default constructor needed for JPA entities.
     }
 
-    @PostPersist
-    void postPersist() {
-        // Mapped column definition not filled by entity manager after persist
-        if (tenant == null) {
-            tenant = TenantAwareHolder.getInstance().getTenantAware().getCurrentTenant().toUpperCase();
+    /**
+     * PrePersist listener method for all {@link TenantAwareBaseEntity}
+     * entities.
+     */
+    @PrePersist
+    public void prePersist() {
+        // before persisting the entity check the current ID of the tenant by
+        // using the TenantAware
+        // service
+        final String currentTenant = SystemManagementHolder.getInstance().currentTenant();
+        if (currentTenant == null) {
+            throw new TenantNotExistException("Tenant "
+                    + TenantAwareHolder.getInstance().getTenantAware().getCurrentTenant()
+                    + " does not exists, cannot create entity " + this.getClass() + " with id " + super.getId());
         }
+        setTenant(currentTenant.toUpperCase());
     }
 
     @Override
