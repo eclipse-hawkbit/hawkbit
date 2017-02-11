@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.common.detailslayout;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -148,15 +149,15 @@ public class DistributionSetMetadatadetailslayout extends Table {
     }
 
     private void showMetadataDetails(final Long selectedDistSetId, final String metadataKey) {
-        final DistributionSet distSet = distributionSetManagement.findDistributionSetById(selectedDistSetId).get();
-        if (distSet == null) {
+        final Optional<DistributionSet> distSet = distributionSetManagement.findDistributionSetById(selectedDistSetId);
+        if (!distSet.isPresent()) {
             notification.displayWarning(i18n.get("distributionset.not.exists"));
             return;
         }
 
         /* display the window */
         UI.getCurrent()
-                .addWindow(dsMetadataPopupLayout.getWindow(distSet, entityFactory.generateMetadata(metadataKey, "")));
+                .addWindow(dsMetadataPopupLayout.getWindow(distSet.get(), entityFactory.generateMetadata(metadataKey, "")));
     }
 
 }

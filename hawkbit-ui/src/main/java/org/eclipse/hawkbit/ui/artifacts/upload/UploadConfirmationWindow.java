@@ -198,7 +198,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
         if (HawkbitCommonUtil.trimAndNullIfEmpty(fileName) != null) {
             final Long baseSwId = (Long) item.getItemProperty(BASE_SOFTWARE_ID).getValue();
             final Optional<Artifact> artifact = artifactManagement.findByFilenameAndSoftwareModule(fileName, baseSwId);
-            if (!artifact.isPresent()) {
+            if (artifact.isPresent()) {
                 warningIconLabel.setVisible(true);
                 if (isErrorIcon(warningIconLabel)) {
                     warningIconLabel.removeStyleName(SPUIStyleDefinitions.ERROR_LABEL);
