@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ddi.rest.resource;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.startsWith;
@@ -74,11 +74,11 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$.deployment.download", equalTo("forced")))
                 .andExpect(jsonPath("$.deployment.update", equalTo("forced")))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==jvm)].version",
-                        contains(ds.findFirstModuleByType(runtimeType).getVersion())))
+                        contains(ds.findFirstModuleByType(runtimeType).get().getVersion())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].version",
-                        contains(ds.findFirstModuleByType(osType).getVersion())))
+                        contains(ds.findFirstModuleByType(osType).get().getVersion())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].version",
-                        contains(ds.findFirstModuleByType(appType).getVersion())));
+                        contains(ds.findFirstModuleByType(appType).get().getVersion())));
 
         // and finish it
         mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/deploymentBase/"

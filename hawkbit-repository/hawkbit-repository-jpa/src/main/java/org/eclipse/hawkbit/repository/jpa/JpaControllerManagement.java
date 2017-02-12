@@ -132,7 +132,7 @@ public class JpaControllerManagement implements ControllerManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public Target updateLastTargetQuery(final String controllerId, final URI address) {
         final Target target = targetRepository.findByControllerId(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException("Target with given ID " + controllerId + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         return updateTargetStatus(target.getTargetInfo(), null, System.currentTimeMillis(), address).getTarget();
     }
@@ -235,7 +235,7 @@ public class JpaControllerManagement implements ControllerManagement {
     public Action addCancelActionStatus(final ActionStatusCreate c) {
         final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
 
-        final JpaAction action = (JpaAction) getActionAndThrowExceptionIfNotFound(create.getActionId());
+        final JpaAction action = getActionAndThrowExceptionIfNotFound(create.getActionId());
 
         if (!action.isCancelingOrCanceled()) {
             throw new CancelActionNotAllowedException("The action is not in canceling state.");
@@ -279,7 +279,7 @@ public class JpaControllerManagement implements ControllerManagement {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Action addUpdateActionStatus(final ActionStatusCreate c) {
         final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
-        final JpaAction action = (JpaAction) getActionAndThrowExceptionIfNotFound(create.getActionId());
+        final JpaAction action = getActionAndThrowExceptionIfNotFound(create.getActionId());
         final JpaActionStatus actionStatus = create.build();
 
         // if action is already closed we accept further status updates if
@@ -385,7 +385,7 @@ public class JpaControllerManagement implements ControllerManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public Target updateControllerAttributes(final String controllerId, final Map<String, String> data) {
         final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException(controllerId));
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         final JpaTargetInfo targetInfo = (JpaTargetInfo) target.getTargetInfo();
         targetInfo.getControllerAttributes().putAll(data);
@@ -428,8 +428,7 @@ public class JpaControllerManagement implements ControllerManagement {
      *         {@link Status#RETRIEVED}
      */
     private Action handleRegisterRetrieved(final Long actionId, final String message) {
-        final JpaAction action = actionRepository.findById(actionId).orElseThrow(
-                () -> new EntityNotFoundException("Actionw ith given ID " + actionId + " doesn not exist."));
+        final JpaAction action = getActionAndThrowExceptionIfNotFound(actionId);
         // do a manual query with CriteriaBuilder to avoid unnecessary field
         // queries and an extra
         // count query made by spring-data when using pageable requests, we
@@ -475,7 +474,7 @@ public class JpaControllerManagement implements ControllerManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public ActionStatus addInformationalActionStatus(final ActionStatusCreate c) {
         final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
-        final JpaAction action = (JpaAction) getActionAndThrowExceptionIfNotFound(create.getActionId());
+        final JpaAction action = getActionAndThrowExceptionIfNotFound(create.getActionId());
         final JpaActionStatus statusMessage = create.build();
         statusMessage.setAction(action);
 
@@ -484,9 +483,9 @@ public class JpaControllerManagement implements ControllerManagement {
         return actionStatusRepository.save(statusMessage);
     }
 
-    private Action getActionAndThrowExceptionIfNotFound(final Long actionId) {
+    private JpaAction getActionAndThrowExceptionIfNotFound(final Long actionId) {
         return actionRepository.findById(actionId)
-                .orElseThrow(() -> new EntityNotFoundException("Action with ID " + actionId + " not found!"));
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
     }
 
     @Override

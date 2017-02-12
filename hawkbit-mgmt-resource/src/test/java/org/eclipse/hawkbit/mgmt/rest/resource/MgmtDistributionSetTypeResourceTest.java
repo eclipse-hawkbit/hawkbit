@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.contains;
@@ -138,7 +138,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes POST requests.")
-    public void createDistributionSetTypes() throws JSONException, Exception {
+    public void createDistributionSetTypes() throws  Exception {
 
         final List<DistributionSetType> types = createTestDistributionSetTestTypes();
 
@@ -231,7 +231,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/mandatorymoduletypes POST requests.")
-    public void addMandatoryModuleToDistributionSetType() throws JSONException, Exception {
+    public void addMandatoryModuleToDistributionSetType() throws  Exception {
         DistributionSetType testType = distributionSetManagement
                 .createDistributionSetType(entityFactory.distributionSetType().create().key("test123")
                         .name("TestName123").description("Desc123").colour("col12"));
@@ -251,7 +251,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/optionalmoduletypes POST requests.")
-    public void addOptionalModuleToDistributionSetType() throws JSONException, Exception {
+    public void addOptionalModuleToDistributionSetType() throws  Exception {
         DistributionSetType testType = distributionSetManagement
                 .createDistributionSetType(entityFactory.distributionSetType().create().key("test123")
                         .name("TestName123").description("Desc123").colour("col12"));
@@ -272,7 +272,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/mandatorymoduletypes GET requests.")
-    public void getMandatoryModulesOfDistributionSetType() throws JSONException, Exception {
+    public void getMandatoryModulesOfDistributionSetType() throws  Exception {
         final DistributionSetType testType = generateTestType();
 
         mvc.perform(get("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes", testType.getId())
@@ -286,7 +286,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/optionalmoduletypes GET requests.")
-    public void getOptionalModulesOfDistributionSetType() throws JSONException, Exception {
+    public void getOptionalModulesOfDistributionSetType() throws  Exception {
         final DistributionSetType testType = generateTestType();
 
         mvc.perform(get("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes", testType.getId())
@@ -301,7 +301,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/mandatorymoduletypes/{ID} GET requests.")
-    public void getMandatoryModuleOfDistributionSetType() throws JSONException, Exception {
+    public void getMandatoryModuleOfDistributionSetType() throws  Exception {
         final DistributionSetType testType = generateTestType();
 
         mvc.perform(get("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes/{smtId}", testType.getId(),
@@ -328,7 +328,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/optionalmoduletypes/{ID} GET requests.")
-    public void getOptionalModuleOfDistributionSetType() throws JSONException, Exception {
+    public void getOptionalModuleOfDistributionSetType() throws  Exception {
         final DistributionSetType testType = generateTestType();
 
         mvc.perform(get("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes/{smtId}", testType.getId(),
@@ -345,7 +345,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/mandatorymoduletypes/{ID} DELETE requests.")
-    public void removeMandatoryModuleToDistributionSetType() throws JSONException, Exception {
+    public void removeMandatoryModuleToDistributionSetType() throws  Exception {
         DistributionSetType testType = generateTestType();
 
         mvc.perform(delete("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes/{smtId}", testType.getId(),
@@ -362,7 +362,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/optionalmoduletypes/{ID} DELETE requests.")
-    public void removeOptionalModuleToDistributionSetType() throws JSONException, Exception {
+    public void removeOptionalModuleToDistributionSetType() throws  Exception {
         DistributionSetType testType = generateTestType();
 
         mvc.perform(delete("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes/{smtId}", testType.getId(),

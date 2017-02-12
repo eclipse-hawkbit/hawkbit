@@ -95,8 +95,8 @@ public class JpaTagManagement implements TagManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteTargetTag(final String targetTagName) {
-        final TargetTag tag = targetTagRepository.findByNameEquals(targetTagName).orElseThrow(
-                () -> new EntityNotFoundException("Tag with given name " + targetTagName + " does not exist!"));
+        final TargetTag tag = targetTagRepository.findByNameEquals(targetTagName)
+                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagName));
 
         targetRepository.findByTag(tag.getId()).forEach(set -> {
             set.removeTag(tag);
@@ -136,7 +136,7 @@ public class JpaTagManagement implements TagManagement {
         final GenericTagUpdate update = (GenericTagUpdate) u;
 
         final JpaTargetTag tag = targetTagRepository.findById(update.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Target tag with ID " + update.getId() + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, update.getId()));
 
         update.getName().ifPresent(tag::setName);
         update.getDescription().ifPresent(tag::setDescription);
@@ -151,8 +151,8 @@ public class JpaTagManagement implements TagManagement {
     public DistributionSetTag updateDistributionSetTag(final TagUpdate u) {
         final GenericTagUpdate update = (GenericTagUpdate) u;
 
-        final JpaDistributionSetTag tag = distributionSetTagRepository.findById(update.getId()).orElseThrow(
-                () -> new EntityNotFoundException("Distribution set tag with ID " + update.getId() + " not found"));
+        final JpaDistributionSetTag tag = distributionSetTagRepository.findById(update.getId())
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, update.getId()));
 
         update.getName().ifPresent(tag::setName);
         update.getDescription().ifPresent(tag::setDescription);
@@ -199,7 +199,7 @@ public class JpaTagManagement implements TagManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteDistributionSetTag(final String tagName) {
         final DistributionSetTag tag = distributionSetTagRepository.findByNameEquals(tagName)
-                .orElseThrow(() -> new EntityNotFoundException("Tag with given name " + tagName + " does not exist!"));
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, tagName));
 
         distributionSetRepository.findByTag(tag).forEach(set -> {
             set.removeTag(tag);

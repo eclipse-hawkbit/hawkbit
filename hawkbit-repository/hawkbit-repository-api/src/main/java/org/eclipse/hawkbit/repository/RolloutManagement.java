@@ -311,8 +311,6 @@ public interface RolloutManagement {
      *            rollout id
      * @return rollout details of targets count for different statuses
      * 
-     * @throws EntityNotFoundException
-     *             if rollout with given ID does not exist
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)

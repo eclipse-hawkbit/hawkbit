@@ -48,8 +48,7 @@ public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreat
 
     private DistributionSetType findDistributionSetTypeWithExceptionIfNotFound(final String distributionSetTypekey) {
         return distributionSetManagement.findDistributionSetTypeByKey(distributionSetTypekey)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "DistributionSetType with key {" + distributionSetTypekey + "} does not exist"));
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, distributionSetTypekey));
     }
 
     private Collection<SoftwareModule> findSoftwareModuleWithExceptionIfNotFound(
@@ -60,8 +59,7 @@ public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreat
 
         final Collection<SoftwareModule> module = softwareManagement.findSoftwareModulesById(softwareModuleId);
         if (module.size() < softwareModuleId.size()) {
-            throw new EntityNotFoundException(
-                    "Some SoftwareModules out of the range {" + softwareModuleId + "} due not exist");
+            throw new EntityNotFoundException(SoftwareModule.class, softwareModuleId);
         }
 
         return module;

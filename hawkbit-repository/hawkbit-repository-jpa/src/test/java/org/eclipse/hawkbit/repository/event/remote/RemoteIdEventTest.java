@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 import java.lang.reflect.Constructor;

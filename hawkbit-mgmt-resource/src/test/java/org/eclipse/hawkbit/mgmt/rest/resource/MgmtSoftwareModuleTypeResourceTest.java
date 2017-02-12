@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.contains;
@@ -140,7 +140,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes POST requests when max assignment is smaller than 1")
-    public void createSoftwareModuleTypesInvalidAssignmentBadRequest() throws JSONException, Exception {
+    public void createSoftwareModuleTypesInvalidAssignmentBadRequest() throws  Exception {
 
         final List<SoftwareModuleType> types = new ArrayList<>();
         types.add(entityFactory.softwareModuleType().create().key("test-1").name("TestName-1").maxAssignments(-1)
@@ -161,7 +161,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes POST requests.")
-    public void createSoftwareModuleTypes() throws JSONException, Exception {
+    public void createSoftwareModuleTypes() throws  Exception {
 
         final List<SoftwareModuleType> types = Lists.newArrayList(
                 entityFactory.softwareModuleType().create().key("test1").name("TestName1").description("Desc1")

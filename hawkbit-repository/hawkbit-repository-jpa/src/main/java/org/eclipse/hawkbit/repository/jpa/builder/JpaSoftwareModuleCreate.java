@@ -40,6 +40,6 @@ public class JpaSoftwareModuleCreate extends AbstractSoftwareModuleUpdateCreate<
         }
 
         return softwareManagement.findSoftwareModuleTypeByKey(type.trim())
-                .orElseThrow(() -> new EntityNotFoundException(type.trim()));
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, type.trim()));
     }
 }

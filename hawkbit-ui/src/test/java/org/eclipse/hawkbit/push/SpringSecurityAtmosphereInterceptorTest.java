@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.push;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import javax.servlet.http.HttpSession;

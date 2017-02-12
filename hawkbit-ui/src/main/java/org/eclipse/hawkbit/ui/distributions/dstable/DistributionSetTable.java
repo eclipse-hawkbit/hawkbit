@@ -121,7 +121,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     private void handleSelectedAndUpdatedDs(final List<DistributionSetUpdateEvent> events) {
         manageDistUIState.getLastSelectedDistribution()
                 .ifPresent(lastSelectedDsIdName -> events.stream()
-                        .filter(event -> event.getEntityId().equals(lastSelectedDsIdName)).findFirst()
+                        .filter(event -> event.getEntityId().equals(lastSelectedDsIdName)).findAny()
                         .ifPresent(event -> eventBus.publish(this,
                                 new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, event.getEntity()))));
     }

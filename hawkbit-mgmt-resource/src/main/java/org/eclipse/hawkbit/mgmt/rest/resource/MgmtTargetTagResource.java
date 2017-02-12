@@ -173,8 +173,8 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     private TargetTag findTargetTagById(final Long targetTagId) {
-        return tagManagement.findTargetTagById(targetTagId).orElseThrow(
-                () -> new EntityNotFoundException("Target Tag with Id {" + targetTagId + "} does not exist"));
+        return tagManagement.findTargetTagById(targetTagId)
+                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagId));
     }
 
     private List<String> findTargetControllerIds(

@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.assertj.core.api.Condition;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
@@ -39,7 +40,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
-import org.fest.assertions.core.Condition;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -272,7 +272,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         // not allowed as it is assigned now
         try {
             ds = distributionSetManagement.unassignSoftwareModule(ds.getId(),
-                    ds.findFirstModuleByType(appType).getId());
+                    ds.findFirstModuleByType(appType).get().getId());
             fail("Expected EntityReadOnlyException");
         } catch (final EntityReadOnlyException e) {
 
@@ -312,12 +312,12 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         // legal update of module addition
         distributionSetManagement.assignSoftwareModules(ds.getId(), Sets.newHashSet(os.getId()));
         ds = distributionSetManagement.findDistributionSetByIdWithDetails(ds.getId()).get();
-        assertThat(ds.findFirstModuleByType(osType)).isEqualTo(os);
+        assertThat(ds.findFirstModuleByType(osType).get()).isEqualTo(os);
 
         // legal update of module removal
-        distributionSetManagement.unassignSoftwareModule(ds.getId(), ds.findFirstModuleByType(appType).getId());
+        distributionSetManagement.unassignSoftwareModule(ds.getId(), ds.findFirstModuleByType(appType).get().getId());
         ds = distributionSetManagement.findDistributionSetByIdWithDetails(ds.getId()).get();
-        assertThat(ds.findFirstModuleByType(appType)).isNull();
+        assertThat(ds.findFirstModuleByType(appType).isPresent()).isFalse();
 
         // Update description
         distributionSetManagement

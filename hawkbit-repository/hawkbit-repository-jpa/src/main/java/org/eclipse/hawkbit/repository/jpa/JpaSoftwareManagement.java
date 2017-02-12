@@ -123,8 +123,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
         final GenericSoftwareModuleUpdate update = (GenericSoftwareModuleUpdate) u;
 
         final JpaSoftwareModule module = softwareModuleRepository.findById(update.getId())
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Software module cannot be updated as it does not exixt" + update.getId()));
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, update.getId()));
 
         update.getDescription().ifPresent(module::setDescription);
         update.getVendor().ifPresent(module::setVendor);
@@ -139,8 +138,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
         final GenericSoftwareModuleTypeUpdate update = (GenericSoftwareModuleTypeUpdate) u;
 
         final JpaSoftwareModuleType type = (JpaSoftwareModuleType) findSoftwareModuleTypeById(update.getId())
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "SoftwareModuleType with given ID " + update.getId() + " does not exist!"));
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, update.getId()));
 
         update.getDescription().ifPresent(type::setDescription);
         update.getColour().ifPresent(type::setColour);
@@ -485,8 +483,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteSoftwareModuleType(final Long typeId) {
-        final JpaSoftwareModuleType toDelete = softwareModuleTypeRepository.findById(typeId).orElseThrow(
-                () -> new EntityNotFoundException("Software Module Type with giben ID " + typeId + " does not exist."));
+        final JpaSoftwareModuleType toDelete = softwareModuleTypeRepository.findById(typeId)
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, typeId));
 
         if (softwareModuleRepository.countByType(toDelete) > 0
                 || distributionSetTypeRepository.countByElementsSmType(toDelete) > 0) {
@@ -541,7 +539,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
         // check if exists otherwise throw entity not found exception
         final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) findSoftwareModuleMetadata(moduleId,
-                md.getKey()).orElseThrow(() -> new EntityNotFoundException("MetaData with given ID does not exist!"));
+                md.getKey()).orElseThrow(
+                        () -> new EntityNotFoundException(SoftwareModuleMetadata.class, moduleId, md.getKey()));
         metadata.setValue(md.getValue());
 
         touch(moduleId);

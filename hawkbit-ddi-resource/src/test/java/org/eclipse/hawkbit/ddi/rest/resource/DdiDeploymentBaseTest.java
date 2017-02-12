@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ddi.rest.resource;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.RandomUtils;
+import org.assertj.core.api.Condition;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
@@ -47,7 +48,6 @@ import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
-import org.fest.assertions.core.Condition;
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
@@ -88,7 +88,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         assignDistributionSet(distributionSet.getId(), target.getName());
 
-        final Long softwareModuleId = distributionSet.getModules().stream().findFirst().get().getId();
+        final Long softwareModuleId = distributionSet.getModules().stream().findAny().get().getId();
         mvc.perform(get("/{tenant}/controller/v1/{targetNotExist}/softwaremodules/{softwareModuleId}/artifacts",
                 tenantAware.getCurrentTenant(), target.getName(), softwareModuleId)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
@@ -166,31 +166,28 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$.deployment.download", equalTo("forced")))
                 .andExpect(jsonPath("$.deployment.update", equalTo("forced")))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==jvm)].name",
-                        contains(ds.findFirstModuleByType(runtimeType).getName())))
+                        contains(ds.findFirstModuleByType(runtimeType).get().getName())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==jvm)].version",
-                        contains(ds.findFirstModuleByType(runtimeType).getVersion())))
+                        contains(ds.findFirstModuleByType(runtimeType).get().getVersion())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].name",
-                        contains(ds.findFirstModuleByType(osType).getName())))
+                        contains(ds.findFirstModuleByType(osType).get().getName())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].version",
-                        contains(ds.findFirstModuleByType(osType).getVersion())))
+                        contains(ds.findFirstModuleByType(osType).get().getVersion())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].size", contains(5 * 1024)))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].filename", contains("test1")))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].hashes.md5",
                         contains(artifact.getMd5Hash())))
-                .andExpect(
-                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].hashes.sha1",
-                                contains(artifact.getSha1Hash())))
-                .andExpect(
-                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.download.href",
-                                contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
-                                        + "/controller/v1/4712/softwaremodules/"
-                                        + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].hashes.sha1",
+                        contains(artifact.getSha1Hash())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.download.href",
+                        contains(
+                                HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
+                                        + findDistributionSetByAction.findFirstModuleByType(osType).get().getId()
                                         + "/artifacts/test1")))
-                .andExpect(
-                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.md5sum.href",
-                                contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
-                                        + "/controller/v1/4712/softwaremodules/"
-                                        + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.md5sum.href",
+                        contains(
+                                HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
+                                        + findDistributionSetByAction.findFirstModuleByType(osType).get().getId()
                                         + "/artifacts/test1.MD5SUM")))
 
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].size", contains(5 * 1024)))
@@ -205,18 +202,17 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                         jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.download.href",
                                 contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
                                         + "/controller/v1/4712/softwaremodules/"
-                                        + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                                        + findDistributionSetByAction.findFirstModuleByType(osType).get().getId()
                                         + "/artifacts/test1.signature")))
-                .andExpect(
-                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.md5sum.href",
-                                contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
-                                        + "/controller/v1/4712/softwaremodules/"
-                                        + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.md5sum.href",
+                        contains(
+                                HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
+                                        + findDistributionSetByAction.findFirstModuleByType(osType).get().getId()
                                         + "/artifacts/test1.signature.MD5SUM")))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].version",
-                        contains(ds.findFirstModuleByType(appType).getVersion())))
+                        contains(ds.findFirstModuleByType(appType).get().getVersion())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].name",
-                        contains(ds.findFirstModuleByType(appType).getName())));
+                        contains(ds.findFirstModuleByType(appType).get().getName())));
         assertThat(targetManagement.findTargetByControllerID("4712").get().getTargetInfo().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
 
@@ -332,13 +328,13 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$.deployment.download", equalTo("attempt")))
                 .andExpect(jsonPath("$.deployment.update", equalTo("attempt")))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==jvm)].name",
-                        contains(ds.findFirstModuleByType(runtimeType).getName())))
+                        contains(ds.findFirstModuleByType(runtimeType).get().getName())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==jvm)].version",
-                        contains(ds.findFirstModuleByType(runtimeType).getVersion())))
+                        contains(ds.findFirstModuleByType(runtimeType).get().getVersion())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].name",
-                        contains(ds.findFirstModuleByType(osType).getName())))
+                        contains(ds.findFirstModuleByType(osType).get().getName())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].version",
-                        contains(ds.findFirstModuleByType(osType).getVersion())))
+                        contains(ds.findFirstModuleByType(osType).get().getVersion())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].size", contains(5 * 1024)))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].filename", contains("test1")))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].hashes.md5",
@@ -372,9 +368,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                                 + "/controller/v1/4712/softwaremodules/" + getOsModule(findDistributionSetByAction)
                                 + "/artifacts/test1.signature.MD5SUM")))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].version",
-                        contains(ds.findFirstModuleByType(appType).getVersion())))
+                        contains(ds.findFirstModuleByType(appType).get().getVersion())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].name",
-                        contains(ds.findFirstModuleByType(appType).getName())));
+                        contains(ds.findFirstModuleByType(appType).get().getName())));
         assertThat(targetManagement.findTargetByControllerID("4712").get().getTargetInfo().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
 
@@ -446,31 +442,28 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$.deployment.download", equalTo("forced")))
                 .andExpect(jsonPath("$.deployment.update", equalTo("forced")))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==jvm)].name",
-                        contains(ds.findFirstModuleByType(runtimeType).getName())))
+                        contains(ds.findFirstModuleByType(runtimeType).get().getName())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==jvm)].version",
-                        contains(ds.findFirstModuleByType(runtimeType).getVersion())))
+                        contains(ds.findFirstModuleByType(runtimeType).get().getVersion())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].name",
-                        contains(ds.findFirstModuleByType(osType).getName())))
+                        contains(ds.findFirstModuleByType(osType).get().getName())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].version",
-                        contains(ds.findFirstModuleByType(osType).getVersion())))
+                        contains(ds.findFirstModuleByType(osType).get().getVersion())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].size", contains(5 * 1024)))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].filename", contains("test1")))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].hashes.md5",
                         contains(artifact.getMd5Hash())))
-                .andExpect(
-                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].hashes.sha1",
-                                contains(artifact.getSha1Hash())))
-                .andExpect(
-                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.download.href",
-                                contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
-                                        + "/controller/v1/4712/softwaremodules/"
-                                        + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].hashes.sha1",
+                        contains(artifact.getSha1Hash())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.download.href",
+                        contains(
+                                HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
+                                        + findDistributionSetByAction.findFirstModuleByType(osType).get().getId()
                                         + "/artifacts/test1")))
-                .andExpect(
-                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.md5sum.href",
-                                contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
-                                        + "/controller/v1/4712/softwaremodules/"
-                                        + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.md5sum.href",
+                        contains(
+                                HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
+                                        + findDistributionSetByAction.findFirstModuleByType(osType).get().getId()
                                         + "/artifacts/test1.MD5SUM")))
 
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].size", contains(5 * 1024)))
@@ -478,26 +471,23 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                         contains("test1.signature")))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].hashes.md5",
                         contains(artifactSignature.getMd5Hash())))
-                .andExpect(
-                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].hashes.sha1",
-                                contains(artifactSignature.getSha1Hash())))
-                .andExpect(
-                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.download.href",
-                                contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
-                                        + "/controller/v1/4712/softwaremodules/"
-                                        + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].hashes.sha1",
+                        contains(artifactSignature.getSha1Hash())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.download.href",
+                        contains(
+                                HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
+                                        + findDistributionSetByAction.findFirstModuleByType(osType).get().getId()
                                         + "/artifacts/test1.signature")))
-                .andExpect(
-                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.md5sum.href",
-                                contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
-                                        + "/controller/v1/4712/softwaremodules/"
-                                        + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.md5sum.href",
+                        contains(
+                                HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
+                                        + findDistributionSetByAction.findFirstModuleByType(osType).get().getId()
                                         + "/artifacts/test1.signature.MD5SUM")))
 
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].version",
-                        contains(ds.findFirstModuleByType(appType).getVersion())))
+                        contains(ds.findFirstModuleByType(appType).get().getVersion())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].name",
-                        contains(ds.findFirstModuleByType(appType).getName())));
+                        contains(ds.findFirstModuleByType(appType).get().getName())));
         assertThat(targetManagement.findTargetByControllerID("4712").get().getTargetInfo().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
 

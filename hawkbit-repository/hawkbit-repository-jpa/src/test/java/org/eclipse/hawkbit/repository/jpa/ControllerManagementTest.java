@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
@@ -326,9 +326,9 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         // create two artifacts with identical SHA1 hash
         final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random),
-                ds.findFirstModuleByType(osType).getId(), "file1", false);
+                ds.findFirstModuleByType(osType).get().getId(), "file1", false);
         final Artifact artifact2 = artifactManagement.createArtifact(new ByteArrayInputStream(random),
-                ds2.findFirstModuleByType(osType).getId(), "file1", false);
+                ds2.findFirstModuleByType(osType).get().getId(), "file1", false);
         assertThat(artifact.getSha1Hash()).isEqualTo(artifact2.getSha1Hash());
 
         assertThat(

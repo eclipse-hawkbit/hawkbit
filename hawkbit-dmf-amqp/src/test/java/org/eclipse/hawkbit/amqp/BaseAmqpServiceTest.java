@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.amqp;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -61,7 +61,7 @@ public class BaseAmqpServiceTest {
                 ActionUpdateStatus.class);
 
         assertThat(convertedActionUpdateStatus).as("Converted Action Status is wrong")
-                .isEqualsToByComparingFields(actionUpdateStatus);
+                .isEqualToComparingFieldByField(actionUpdateStatus);
 
         convertedActionUpdateStatus = baseAmqpService.convertMessage(null, ActionUpdateStatus.class);
         assertThat(convertedActionUpdateStatus).as("Converted Object should be null when message is null").isNull();

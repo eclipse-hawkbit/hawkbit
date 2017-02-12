@@ -235,7 +235,7 @@ public final class RSQLUtility {
 
         private Optional<Join<Object, Object>> findCurrentJoinOfType(final Class<?> type) {
             return getCurrentJoins().stream()
-                    .filter(j -> type.equals(j.getJavaType())).findFirst();
+                    .filter(j -> type.equals(j.getJavaType())).findAny();
         }
 
         private void addCurrentJoin(Join<Object, Object> join) {

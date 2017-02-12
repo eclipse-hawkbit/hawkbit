@@ -161,8 +161,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public Slice<Target> findTargetsByTargetFilterQuery(final Long targetFilterQueryId, final Pageable pageable) {
         final TargetFilterQuery targetFilterQuery = targetFilterQueryRepository.findById(targetFilterQueryId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "TargetFilterQuery with given ID" + targetFilterQueryId + " not found"));
+                .orElseThrow(EntityNotFoundException::new);
 
         return findTargetsBySpec(
                 RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class, virtualPropertyReplacer), pageable);
@@ -192,8 +191,8 @@ public class JpaTargetManagement implements TargetManagement {
     public Target updateTarget(final TargetUpdate u) {
         final JpaTargetUpdate update = (JpaTargetUpdate) u;
 
-        final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(update.getControllerId()).orElseThrow(
-                () -> new EntityNotFoundException("Target with ID " + update.getControllerId() + " not found."));
+        final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(update.getControllerId())
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, update.getControllerId()));
 
         target.setNew(false);
 
@@ -219,8 +218,8 @@ public class JpaTargetManagement implements TargetManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteTarget(final String controllerID) {
-        final Target target = targetRepository.findByControllerId(controllerID).orElseThrow(
-                () -> new EntityNotFoundException("Target with given ID " + controllerID + " does not exist."));
+        final Target target = targetRepository.findByControllerId(controllerID)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerID));
 
         targetRepository.delete(target.getId());
     }
@@ -350,7 +349,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public TargetTagAssignmentResult toggleTagAssignment(final Collection<String> targetIds, final String tagName) {
         final TargetTag tag = targetTagRepository.findByNameEquals(tagName)
-                .orElseThrow(() -> new EntityNotFoundException("Tag with given name " + tagName + " does not exist!"));
+                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, tagName));
         final List<JpaTarget> alreadyAssignedTargets = targetRepository.findByTagNameAndControllerIdIn(tagName,
                 targetIds);
         final List<JpaTarget> allTargets = targetRepository
@@ -387,7 +386,7 @@ public class JpaTargetManagement implements TargetManagement {
                 .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(controllerIds));
 
         final JpaTargetTag tag = targetTagRepository.findById(tagId)
-                .orElseThrow(() -> new EntityNotFoundException("Tag with given ID " + tagId + "does not exist"));
+                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, tagId));
 
         allTargets.forEach(target -> target.addTag(tag));
         return Collections
@@ -409,8 +408,8 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public List<Target> unAssignAllTargetsByTag(final Long targetTagId) {
 
-        final TargetTag tag = targetTagRepository.findById(targetTagId).orElseThrow(
-                () -> new EntityNotFoundException("TargetTag with given ID " + targetTagId + " does not exist."));
+        final TargetTag tag = targetTagRepository.findById(targetTagId)
+                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagId));
 
         if (tag.getAssignedToTargets().isEmpty()) {
             return Collections.emptyList();
@@ -426,8 +425,8 @@ public class JpaTargetManagement implements TargetManagement {
         final List<Target> allTargets = Collections.unmodifiableList(targetRepository
                 .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(Arrays.asList(controllerID))));
 
-        final TargetTag tag = targetTagRepository.findById(targetTagId).orElseThrow(
-                () -> new EntityNotFoundException("TargetTag with given ID " + targetTagId + " does not exist."));
+        final TargetTag tag = targetTagRepository.findById(targetTagId)
+                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagId));
 
         final List<Target> unAssignTag = unAssignTag(allTargets, tag);
         return unAssignTag.isEmpty() ? null : unAssignTag.get(0);
@@ -601,8 +600,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public Long countTargetByTargetFilterQuery(final Long targetFilterQueryId) {
         final TargetFilterQuery targetFilterQuery = targetFilterQueryRepository.findById(targetFilterQueryId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "TargetFilterQuery with given ID" + targetFilterQueryId + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));
 
         final Specification<JpaTarget> specs = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class,
                 virtualPropertyReplacer);

@@ -17,7 +17,7 @@
       <artifactId>hawkbit-extensions-parent</artifactId>
    </parent>
    <artifactId>hawkbit-extension-artifact-repository-mongo</artifactId>
-   <name>hawkBit :: Artifact Repository Mongo</name>
+   <name>hawkBit :: Extensions :: Artifact Repository Mongo</name>
 
 
    <dependencies>
@@ -50,16 +50,6 @@
          <scope>test</scope>
       </dependency>
       <dependency>
-         <groupId>org.springframework</groupId>
-         <artifactId>spring-test</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.easytesting</groupId>
-         <artifactId>fest-assert-core</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
          <groupId>ru.yandex.qatools.allure</groupId>
          <artifactId>allure-junit-adaptor</artifactId>
          <scope>test</scope>
@@ -68,12 +58,6 @@
       <dependency>
          <groupId>de.flapdoodle.embed</groupId>
          <artifactId>de.flapdoodle.embed.mongo</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <!-- Mockito -->
-      <dependency>
-         <groupId>org.mockito</groupId>
-         <artifactId>mockito-core</artifactId>
          <scope>test</scope>
       </dependency>
    </dependencies>

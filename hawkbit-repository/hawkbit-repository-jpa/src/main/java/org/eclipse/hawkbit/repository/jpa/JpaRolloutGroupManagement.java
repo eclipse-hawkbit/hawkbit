@@ -175,8 +175,8 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
     @Override
     public Page<Target> findRolloutGroupTargets(final Long rolloutGroupId, final Pageable page) {
-        final JpaRolloutGroup rolloutGroup = rolloutGroupRepository.findById(rolloutGroupId).orElseThrow(
-                () -> new EntityNotFoundException("Rollout Group with given ID " + rolloutGroupId + " not found."));
+        final JpaRolloutGroup rolloutGroup = rolloutGroupRepository.findById(rolloutGroupId)
+                .orElseThrow(() -> new EntityNotFoundException(RolloutGroup.class, rolloutGroupId));
 
         if (isRolloutStatusReady(rolloutGroup)) {
             // in case of status ready the action has not been created yet and

@@ -104,9 +104,9 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public boolean clearArtifactBinary(final Long existing) {
-        return clearArtifactBinary(localArtifactRepository.findById(existing)
-                .orElseThrow(() -> new EntityNotFoundException("Artifact with given ID" + existing + " not found.")));
+    public boolean clearArtifactBinary(final Long artifactId) {
+        return clearArtifactBinary(localArtifactRepository.findById(artifactId)
+                .orElseThrow(() -> new EntityNotFoundException(Artifact.class, artifactId)));
     }
 
     private boolean clearArtifactBinary(final JpaArtifact existing) {
@@ -207,7 +207,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
         if (softwareModule == null) {
             LOG.debug("no software module with ID {} exists", moduleId);
-            throw new EntityNotFoundException("Software Module: " + moduleId);
+            throw new EntityNotFoundException(SoftwareModule.class, +moduleId);
         }
         return softwareModule;
     }

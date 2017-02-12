@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.contains;
@@ -571,9 +571,9 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
 
         // test
 
-        final SoftwareModule os = ds.findFirstModuleByType(osType);
-        final SoftwareModule jvm = ds.findFirstModuleByType(runtimeType);
-        final SoftwareModule bApp = ds.findFirstModuleByType(appType);
+        final SoftwareModule os = ds.findFirstModuleByType(osType).get();
+        final SoftwareModule jvm = ds.findFirstModuleByType(runtimeType).get();
+        final SoftwareModule bApp = ds.findFirstModuleByType(appType).get();
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId + "/assignedDS"))
                 .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
                 .andExpect(jsonPath(JSON_PATH_ID, equalTo(ds.getId().intValue())))

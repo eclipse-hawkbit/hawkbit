@@ -130,8 +130,6 @@
 
       <!-- Misc libraries versions - START -->
       <validation-api.version>1.1.0.Final</validation-api.version>
-      <fest-assert.version>1.4</fest-assert.version>
-      <org.easytesting.version>2.0M10</org.easytesting.version>
       <allure.version>1.4.22</allure.version>
       <eclipselink.version>2.6.4</eclipselink.version>
       <org.powermock.version>1.6.5</org.powermock.version>
@@ -683,18 +681,6 @@
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>${json.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>org.easytesting</groupId>
-            <artifactId>fest-assert</artifactId>
-            <version>${fest-assert.version}</version>
-            <scope>test</scope>
-         </dependency>
-         <dependency>
-            <groupId>org.easytesting</groupId>
-            <artifactId>fest-assert-core</artifactId>
-            <version>${org.easytesting.version}</version>
-            <scope>test</scope>
          </dependency>
          <dependency>
             <groupId>ru.yandex.qatools.allure</groupId>

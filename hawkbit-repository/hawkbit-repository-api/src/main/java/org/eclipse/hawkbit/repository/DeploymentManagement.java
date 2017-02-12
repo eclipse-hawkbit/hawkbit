@@ -292,9 +292,6 @@ public interface DeploymentManagement {
      * @param actionId
      *            to be id of the action
      * @return the corresponding {@link Action}
-     * 
-     * @throws EntityNotFoundException
-     *             of action with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Optional<Action> findActionWithDetails(@NotNull Long actionId);

@@ -174,8 +174,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final Collection<TargetWithActionType> targets, final String actionMessage) {
         final JpaDistributionSet set = distributoinSetRepository.findOne(dsID);
         if (set == null) {
-            throw new EntityNotFoundException(
-                    String.format("no %s with id %d found", DistributionSet.class.getSimpleName(), dsID));
+            throw new EntityNotFoundException(DistributionSet.class, dsID);
         }
 
         return assignDistributionSetToTargets(set, targets, null, null, actionMessage);
@@ -366,7 +365,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         LOG.debug("cancelAction({})", actionId);
 
         final JpaAction action = actionRepository.findById(actionId)
-                .orElseThrow(() -> new EntityNotFoundException("Action with given ID " + actionId + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
         if (action.isCancelingOrCanceled()) {
             throw new CancelActionNotAllowedException("Actions in canceling or canceled state cannot be canceled");
@@ -413,7 +412,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Action forceQuitAction(final Long actionId) {
         final JpaAction action = actionRepository.findById(actionId)
-                .orElseThrow(() -> new EntityNotFoundException("Action with given ID " + actionId + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
         if (!action.isCancelingOrCanceled()) {
             throw new ForceQuitActionNotAllowedException(
@@ -623,7 +622,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public Action forceTargetAction(final Long actionId) {
         final JpaAction action = actionRepository.findById(actionId)
-                .orElseThrow(() -> new EntityNotFoundException("Action with Id {" + actionId + "} does not exist"));
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
         if (!action.isForced()) {
             action.setActionType(ActionType.FORCED);

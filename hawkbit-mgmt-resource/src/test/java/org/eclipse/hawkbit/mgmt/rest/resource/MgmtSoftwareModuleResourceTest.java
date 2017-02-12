@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.contains;
@@ -659,7 +659,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Verfies that the create request actually results in the creation of the modules in the repository.")
-    public void createSoftwareModules() throws JSONException, Exception {
+    public void createSoftwareModules() throws  Exception {
         final SoftwareModule os = entityFactory.softwareModule().create().name("name1").type(osType).version("version1")
                 .vendor("vendor1").description("description1").build();
         final SoftwareModule ah = entityFactory.softwareModule().create().name("name3").type(appType)
@@ -747,17 +747,17 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
-        artifactManagement.createArtifact(new ByteArrayInputStream(random), ds1.findFirstModuleByType(appType).getId(),
-                "file1", false);
+        artifactManagement.createArtifact(new ByteArrayInputStream(random),
+                ds1.findFirstModuleByType(appType).get().getId(), "file1", false);
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(3);
         assertThat(artifactManagement.countArtifactsAll()).isEqualTo(1);
 
-        mvc.perform(delete("/rest/v1/softwaremodules/{smId}", ds1.findFirstModuleByType(appType).getId()))
+        mvc.perform(delete("/rest/v1/softwaremodules/{smId}", ds1.findFirstModuleByType(appType).get().getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
-        mvc.perform(delete("/rest/v1/softwaremodules/{smId}", ds1.findFirstModuleByType(runtimeType).getId()))
+        mvc.perform(delete("/rest/v1/softwaremodules/{smId}", ds1.findFirstModuleByType(runtimeType).get().getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
-        mvc.perform(delete("/rest/v1/softwaremodules/{smId}", ds1.findFirstModuleByType(osType).getId()))
+        mvc.perform(delete("/rest/v1/softwaremodules/{smId}", ds1.findFirstModuleByType(osType).get().getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         // all 3 are now marked as deleted

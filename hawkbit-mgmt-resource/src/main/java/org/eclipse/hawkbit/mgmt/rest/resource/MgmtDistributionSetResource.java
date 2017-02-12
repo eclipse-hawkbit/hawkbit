@@ -289,8 +289,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         // check if distribution set exists otherwise throw exception
         // immediately
         final DistributionSetMetadata findOne = distributionSetManagement
-                .findDistributionSetMetadata(distributionSetId, metadataKey).orElseThrow(
-                        () -> new EntityNotFoundException("Metadata with key '" + metadataKey + "' does not exist"));
+                .findDistributionSetMetadata(distributionSetId, metadataKey)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSetMetadata.class, distributionSetId,
+                        metadataKey));
         return ResponseEntity.ok(MgmtDistributionSetMapper.toResponseDsMetadata(findOne));
     }
 
@@ -363,7 +364,6 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     private DistributionSet findDistributionSetWithExceptionIfNotFound(final Long distributionSetId) {
         return distributionSetManagement.findDistributionSetById(distributionSetId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "DistributionSet with given ID " + distributionSetId + " does not exist"));
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, distributionSetId));
     }
 }

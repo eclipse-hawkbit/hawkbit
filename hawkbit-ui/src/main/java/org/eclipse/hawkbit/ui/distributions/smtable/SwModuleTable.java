@@ -148,7 +148,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     private void handleSelectedAndUpdatedSoftwareModules(final List<SoftwareModuleUpdatedEvent> events) {
         manageDistUIState.getSelectedBaseSwModuleId()
                 .ifPresent(lastSelectedModuleId -> events.stream()
-                        .filter(event -> lastSelectedModuleId.equals(event.getEntityId())).findFirst()
+                        .filter(event -> lastSelectedModuleId.equals(event.getEntityId())).findAny()
                         .ifPresent(lastEvent -> eventBus.publish(this,
                                 new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, lastEvent.getEntity()))));
     }

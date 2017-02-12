@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.repository.exception;
 
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
+import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.eclipse.hawkbit.repository.model.MetaData;
 
 /**
  * the {@link EntityNotFoundException} is thrown when a entity is tried find but
@@ -60,5 +62,32 @@ public class EntityNotFoundException extends AbstractServerRtException {
      */
     public EntityNotFoundException(final String message) {
         super(message, THIS_ERROR);
+    }
+
+    /**
+     * Parameterized constructor for {@link BaseEntity} not found.
+     * 
+     * @param type
+     *            of the entity that was not found
+     * 
+     * @param enityId
+     *            of the {@link BaseEntity}
+     */
+    public EntityNotFoundException(final Class<? extends BaseEntity> type, final Object enityId) {
+        this(type.getName() + " with given identifier {" + enityId + "} does not exist.");
+    }
+
+    /**
+     * Parameterized constructor for {@link MetaData} not found.
+     * 
+     * @param type
+     *            of the entity that was not found
+     * @param enityId
+     *            of the {@link BaseEntity} the {@link MetaData} was for
+     * @param key
+     *            for the {@link MetaData} entry
+     */
+    public EntityNotFoundException(final Class<? extends MetaData> type, final Long enityId, final String key) {
+        this(type.getName() + " for given entity {" + enityId + "} and with key {" + key + "} does not exist.");
     }
 }

@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.amqp;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -205,7 +205,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
             module.getArtifacts().forEach(dbArtifact -> {
                 final Optional<org.eclipse.hawkbit.dmf.json.model.Artifact> found = softwareModule.getArtifacts()
                         .stream().filter(dmfartifact -> dmfartifact.getFilename().equals(dbArtifact.getFilename()))
-                        .findFirst();
+                        .findAny();
 
                 assertTrue("The artifact should exist in message", found.isPresent());
                 assertThat(found.get().getSize()).isEqualTo(dbArtifact.getSize());

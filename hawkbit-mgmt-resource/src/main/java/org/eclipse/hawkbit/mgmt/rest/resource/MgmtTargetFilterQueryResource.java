@@ -145,8 +145,8 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     }
 
     private TargetFilterQuery findFilterWithExceptionIfNotFound(final Long filterId) {
-        return filterManagement.findTargetFilterQueryById(filterId).orElseThrow(
-                () -> new EntityNotFoundException("TargetFilterQuery with Id {" + filterId + "} does not exist"));
+        return filterManagement.findTargetFilterQueryById(filterId)
+                .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, filterId));
     }
 
 }

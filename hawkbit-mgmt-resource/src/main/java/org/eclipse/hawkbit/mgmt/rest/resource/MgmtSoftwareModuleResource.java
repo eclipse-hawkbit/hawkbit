@@ -229,8 +229,8 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             @PathVariable("metadataKey") final String metadataKey) {
 
         final SoftwareModuleMetadata findOne = softwareManagement
-                .findSoftwareModuleMetadata(softwareModuleId, metadataKey)
-                .orElseThrow(() -> new EntityNotFoundException("Metdadata with given IDs not found!"));
+                .findSoftwareModuleMetadata(softwareModuleId, metadataKey).orElseThrow(
+                        () -> new EntityNotFoundException(SoftwareModuleMetadata.class, softwareModuleId, metadataKey));
 
         return ResponseEntity.ok(toResponseSwMetadata(findOne));
     }
@@ -267,11 +267,10 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             final Long artifactId) {
 
         final SoftwareModule module = softwareManagement.findSoftwareModuleById(softwareModuleId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Sofwtare module with given ID " + softwareModuleId + " does not exist."));
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
 
         if (artifactId != null && !module.getArtifact(artifactId).isPresent()) {
-            throw new EntityNotFoundException("Artifact with Id {" + artifactId + "} does not exist");
+            throw new EntityNotFoundException(Artifact.class, artifactId);
         }
 
         return module;

@@ -116,8 +116,7 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
 
     private SoftwareModuleType findSoftwareModuleTypeWithExceptionIfNotFound(final Long softwareModuleTypeId) {
         return softwareManagement.findSoftwareModuleTypeById(softwareModuleTypeId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "SoftwareModuleType with Id {" + softwareModuleTypeId + "} does not exist"));
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, softwareModuleTypeId));
     }
 
 }

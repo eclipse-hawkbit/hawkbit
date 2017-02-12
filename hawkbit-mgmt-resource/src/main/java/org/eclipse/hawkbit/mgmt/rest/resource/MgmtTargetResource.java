@@ -185,7 +185,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             @PathVariable("actionId") final Long actionId) {
 
         final Action action = deploymentManagement.findAction(actionId)
-                .orElseThrow(() -> new EntityNotFoundException("Action with Id {" + actionId + "} does not exist"));
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
         if (!action.getTarget().getControllerId().equals(controllerId)) {
             LOG.warn("given action ({}) is not assigned to given target ({}).", action.getId(), controllerId);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -215,7 +215,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             @PathVariable("actionId") final Long actionId,
             @RequestParam(value = "force", required = false, defaultValue = "false") final boolean force) {
         final Action action = deploymentManagement.findAction(actionId)
-                .orElseThrow(() -> new EntityNotFoundException("Action with Id {" + actionId + "} does not exist"));
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
         ;
 
         if (!action.getTarget().getControllerId().equals(controllerId)) {
@@ -244,7 +244,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final Target target = findTargetWithExceptionIfNotFound(controllerId);
 
         final Action action = deploymentManagement.findAction(actionId)
-                .orElseThrow(() -> new EntityNotFoundException("Action with Id {" + actionId + "} does not exist"));
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
         if (!action.getTarget().getId().equals(target.getId())) {
             LOG.warn("given action ({}) is not assigned to given target ({}).", action.getId(), target.getId());
@@ -317,7 +317,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     private Target findTargetWithExceptionIfNotFound(final String controllerId) {
         return targetManagement.findTargetByControllerID(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException("Target with Id {" + controllerId + "} does not exist"));
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
     }
 
 }

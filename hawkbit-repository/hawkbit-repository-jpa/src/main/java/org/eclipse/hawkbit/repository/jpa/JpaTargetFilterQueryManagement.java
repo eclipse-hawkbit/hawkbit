@@ -201,13 +201,13 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     private JpaDistributionSet findDistributionSetAndThrowExceptionIfNotFound(final Long setId) {
-        return (JpaDistributionSet) distributionSetManagement.findDistributionSetByIdWithDetails(setId).orElseThrow(
-                () -> new EntityNotFoundException("Distribution set cannot be updated as it does not exixt" + setId));
+        return (JpaDistributionSet) distributionSetManagement.findDistributionSetByIdWithDetails(setId)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, setId));
     }
 
     private JpaTargetFilterQuery findTargetFilterQueryOrThrowExceptionIfNotFound(final Long queryId) {
-        return targetFilterQueryRepository.findById(queryId).orElseThrow(
-                () -> new EntityNotFoundException("TargetFilterQuery with given ID " + queryId + " not found!"));
+        return targetFilterQueryRepository.findById(queryId)
+                .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, queryId));
     }
 
     @Override

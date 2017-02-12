@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;

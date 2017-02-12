@@ -195,8 +195,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
 
     private DistributionSetTag findDistributionTagById(final Long distributionsetTagId) {
         return tagManagement.findDistributionSetTagById(distributionsetTagId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Distribution Tag with Id {" + distributionsetTagId + "} does not exist"));
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, distributionsetTagId));
     }
 
     private static List<Long> findDistributionSetIds(

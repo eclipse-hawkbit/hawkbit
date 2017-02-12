@@ -254,7 +254,7 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     }
 
     protected Long getOsModule(final DistributionSet ds) {
-        return ds.findFirstModuleByType(osType).getId();
+        return ds.findFirstModuleByType(osType).get().getId();
     }
 
     protected Action prepareFinishedUpdate() {

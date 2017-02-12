@@ -137,7 +137,7 @@ public class EventType {
      */
     public static EventType from(final Class<?> clazz) {
         final Optional<Integer> foundEventType = TYPES.entrySet().stream()
-                .filter(entry -> entry.getValue().equals(clazz)).map(entry -> entry.getKey()).findFirst();
+                .filter(entry -> entry.getValue().equals(clazz)).map(entry -> entry.getKey()).findAny();
         if (!foundEventType.isPresent()) {
             return null;
         }

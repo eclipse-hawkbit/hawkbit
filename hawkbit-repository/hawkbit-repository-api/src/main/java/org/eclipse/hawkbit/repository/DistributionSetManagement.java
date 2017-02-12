@@ -296,9 +296,6 @@ public interface DistributionSetManagement {
      * @param distid
      *            to look for.
      * @return {@link DistributionSet}
-     * 
-     * @throws EntityNotFoundException
-     *             if set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Optional<DistributionSet> findDistributionSetByIdWithDetails(@NotNull Long distid);
@@ -517,8 +514,6 @@ public interface DistributionSetManagement {
      * @param key
      *            of the meta data element
      * @return the found DistributionSetMetadata or {@code null} if not exits
-     * @throws EntityNotFoundException
-     *             in case the meta data does not exists for the given key
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Optional<DistributionSetMetadata> findDistributionSetMetadata(@NotNull Long setId, @NotEmpty String key);

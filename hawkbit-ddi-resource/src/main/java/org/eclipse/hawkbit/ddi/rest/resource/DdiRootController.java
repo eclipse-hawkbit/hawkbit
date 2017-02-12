@@ -113,8 +113,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
                 .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
 
         final SoftwareModule softwareModule = softwareManagement.findSoftwareModuleById(softwareModuleId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Sofwtare module with given ID " + softwareModuleId + " does not exist."));
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
 
         return new ResponseEntity<>(
                 DataConversionHelper.createArtifacts(target, softwareModule, artifactUrlHandler, systemManagement,
@@ -144,8 +143,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         final Target target = controllerManagement.updateLastTargetQuery(controllerId, IpUtil
                 .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
         final SoftwareModule module = softwareManagement.findSoftwareModuleById(softwareModuleId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Sofwtare module with given ID " + softwareModuleId + " does not exist."));
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
 
         if (checkModule(fileName, module)) {
             LOG.warn("Softare module with id {} could not be found.", softwareModuleId);
@@ -208,8 +206,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
                 .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
 
         final SoftwareModule module = softwareManagement.findSoftwareModuleById(softwareModuleId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Sofwtare module with given ID " + softwareModuleId + " does not exist."));
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
 
         if (checkModule(fileName, module)) {
             LOG.warn("Software module with id {} could not be found.", softwareModuleId);
@@ -484,7 +481,6 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     private Action findActionWithExceptionIfNotFound(final Long actionId) {
         return controllerManagement.findActionWithDetails(actionId)
-                .orElseThrow(() -> new EntityNotFoundException("Action with Id {" + actionId + "} does not exist"));
-
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
     }
 }

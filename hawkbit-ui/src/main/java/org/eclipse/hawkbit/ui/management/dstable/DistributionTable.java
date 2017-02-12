@@ -119,7 +119,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         }
         final Long lastSelectedDsIdName = managementUIState.getLastSelectedDsIdName();
         eventContainer.getEvents().stream().filter(event -> event.getEntityId().equals(lastSelectedDsIdName))
-                .findFirst().ifPresent(event -> eventBus.publish(this,
+                .findAny().ifPresent(event -> eventBus.publish(this,
                         new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, event.getEntity())));
 
     }

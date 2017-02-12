@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
@@ -448,9 +448,9 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("$.content.[0].lastModifiedAt", equalTo(set.getLastModifiedAt())))
                 .andExpect(jsonPath("$.content.[0].version", equalTo(set.getVersion())))
                 .andExpect(jsonPath("$.content.[0].modules.[?(@.type==" + runtimeType.getKey() + ")].id",
-                        contains(set.findFirstModuleByType(runtimeType).getId().intValue())))
+                        contains(set.findFirstModuleByType(runtimeType).get().getId().intValue())))
                 .andExpect(jsonPath("$.content.[0].modules.[?(@.type==" + appType.getKey() + ")].id",
-                        contains(set.findFirstModuleByType(appType).getId().intValue())))
+                        contains(set.findFirstModuleByType(appType).get().getId().intValue())))
                 .andExpect(jsonPath("$.content.[0].modules.[?(@.type==" + osType.getKey() + ")].id",
                         contains(getOsModule(set).intValue())));
     }
@@ -479,9 +479,9 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("$.lastModifiedAt", equalTo(set.getLastModifiedAt())))
                 .andExpect(jsonPath("$.version", equalTo(set.getVersion())))
                 .andExpect(jsonPath("$.modules.[?(@.type==" + runtimeType.getKey() + ")].id",
-                        contains(set.findFirstModuleByType(runtimeType).getId().intValue())))
+                        contains(set.findFirstModuleByType(runtimeType).get().getId().intValue())))
                 .andExpect(jsonPath("$.modules.[?(@.type==" + appType.getKey() + ")].id",
-                        contains(set.findFirstModuleByType(appType).getId().intValue())))
+                        contains(set.findFirstModuleByType(appType).get().getId().intValue())))
                 .andExpect(jsonPath("$.modules.[?(@.type==" + osType.getKey() + ")].id",
                         contains(getOsModule(set).intValue())));
 
@@ -490,7 +490,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Ensures that multipe DS posted to API are created in the repository.")
-    public void createDistributionSets() throws JSONException, Exception {
+    public void createDistributionSets() throws  Exception {
         assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
                 .hasSize(0);
 
@@ -522,11 +522,11 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("[0]complete", equalTo(Boolean.TRUE)))
                 .andExpect(jsonPath("[0]requiredMigrationStep", equalTo(one.isRequiredMigrationStep())))
                 .andExpect(jsonPath("[0].modules.[?(@.type==" + runtimeType.getKey() + ")].id",
-                        contains(one.findFirstModuleByType(runtimeType).getId().intValue())))
+                        contains(one.findFirstModuleByType(runtimeType).get().getId().intValue())))
                 .andExpect(jsonPath("[0].modules.[?(@.type==" + appType.getKey() + ")].id",
-                        contains(one.findFirstModuleByType(appType).getId().intValue())))
+                        contains(one.findFirstModuleByType(appType).get().getId().intValue())))
                 .andExpect(jsonPath("[0].modules.[?(@.type==" + osType.getKey() + ")].id",
-                        contains(one.findFirstModuleByType(osType).getId().intValue())))
+                        contains(one.findFirstModuleByType(osType).get().getId().intValue())))
                 .andExpect(jsonPath("[1]name", equalTo(two.getName())))
                 .andExpect(jsonPath("[1]description", equalTo(two.getDescription())))
                 .andExpect(jsonPath("[1]complete", equalTo(Boolean.TRUE)))
@@ -534,11 +534,11 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("[1]createdBy", equalTo("uploadTester")))
                 .andExpect(jsonPath("[1]version", equalTo(two.getVersion())))
                 .andExpect(jsonPath("[1].modules.[?(@.type==" + runtimeType.getKey() + ")].id",
-                        contains(two.findFirstModuleByType(runtimeType).getId().intValue())))
+                        contains(two.findFirstModuleByType(runtimeType).get().getId().intValue())))
                 .andExpect(jsonPath("[1].modules.[?(@.type==" + appType.getKey() + ")].id",
-                        contains(two.findFirstModuleByType(appType).getId().intValue())))
+                        contains(two.findFirstModuleByType(appType).get().getId().intValue())))
                 .andExpect(jsonPath("[1].modules.[?(@.type==" + osType.getKey() + ")].id",
-                        contains(two.findFirstModuleByType(osType).getId().intValue())))
+                        contains(two.findFirstModuleByType(osType).get().getId().intValue())))
                 .andExpect(jsonPath("[1]requiredMigrationStep", equalTo(two.isRequiredMigrationStep())))
                 .andExpect(jsonPath("[2]name", equalTo(three.getName())))
                 .andExpect(jsonPath("[2]description", equalTo(three.getDescription())))
@@ -547,11 +547,11 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("[2]createdBy", equalTo("uploadTester")))
                 .andExpect(jsonPath("[2]version", equalTo(three.getVersion())))
                 .andExpect(jsonPath("[2].modules.[?(@.type==" + runtimeType.getKey() + ")].id",
-                        contains(three.findFirstModuleByType(runtimeType).getId().intValue())))
+                        contains(three.findFirstModuleByType(runtimeType).get().getId().intValue())))
                 .andExpect(jsonPath("[2].modules.[?(@.type==" + appType.getKey() + ")].id",
-                        contains(three.findFirstModuleByType(appType).getId().intValue())))
+                        contains(three.findFirstModuleByType(appType).get().getId().intValue())))
                 .andExpect(jsonPath("[2].modules.[?(@.type==" + osType.getKey() + ")].id",
-                        contains(three.findFirstModuleByType(osType).getId().intValue())))
+                        contains(three.findFirstModuleByType(osType).get().getId().intValue())))
                 .andExpect(jsonPath("[2]requiredMigrationStep", equalTo(three.isRequiredMigrationStep()))).andReturn();
 
         one = distributionSetManagement.findDistributionSetByIdWithDetails(distributionSetManagement

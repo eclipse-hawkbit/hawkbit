@@ -458,9 +458,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     private void onRowClick(final SelectionEvent event) {
         final Set<Object> itemsSelected = event.getSelected();
         if (!itemsSelected.isEmpty()) {
-            final Object itemSelected = itemsSelected.stream().findFirst().isPresent()
-                    ? itemsSelected.stream().findFirst().get() : null;
-            popualateKeyValue(itemSelected);
+            popualateKeyValue(itemsSelected.iterator().next());
             addIcon.setEnabled(true);
         } else {
             keyTextField.clear();

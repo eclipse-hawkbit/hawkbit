@@ -82,10 +82,9 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
     private SoftwareModule findSoftwareModuleWithExceptionIfNotFound(final Long softwareModuleId,
             final Long artifactId) {
         final SoftwareModule module = softwareManagement.findSoftwareModuleById(softwareModuleId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Sofwtare module with given ID " + softwareModuleId + " does not exist."));
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
         if (artifactId != null && !module.getArtifact(artifactId).isPresent()) {
-            throw new EntityNotFoundException("Artifact with Id {" + artifactId + "} does not exist");
+            throw new EntityNotFoundException(Artifact.class, artifactId);
         }
         return module;
     }
