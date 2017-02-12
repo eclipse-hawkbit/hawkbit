@@ -15,6 +15,7 @@ import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
@@ -70,13 +71,13 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
 
     @Override
     protected void updateEntity(final DistributionSetTag entity) {
-        updateExistingTag(findEntityByName());
-
+        updateExistingTag(findEntityByName()
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, tagName.getValue())));
     }
 
     @Override
-    protected DistributionSetTag findEntityByName() {
-        return tagManagement.findDistributionSetTag(tagName.getValue()).get();
+    protected Optional<DistributionSetTag> findEntityByName() {
+        return tagManagement.findDistributionSetTag(tagName.getValue());
     }
 
     /**

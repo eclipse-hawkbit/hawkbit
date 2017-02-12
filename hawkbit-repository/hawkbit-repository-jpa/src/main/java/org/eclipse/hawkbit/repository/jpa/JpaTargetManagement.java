@@ -618,8 +618,8 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Target findTargetById(final Long id) {
-        return targetRepository.findOne(id);
+    public Optional<Target> findTargetById(final Long id) {
+        return Optional.ofNullable(targetRepository.findOne(id));
     }
 
     @Override

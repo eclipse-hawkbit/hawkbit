@@ -179,7 +179,7 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
     void deleteTargets(@NotEmpty Collection<Long> targetIDs);
-    
+
     /**
      * Deletes target with the given IDs.
      *
@@ -604,10 +604,10 @@ public interface TargetManagement {
      * 
      * @param id
      *            to look for
-     * @return {@link Target} or <code>null</code> if it does not exist
+     * @return {@link Target}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Target findTargetById(Long id);
+    Optional<Target> findTargetById(Long id);
 
     /**
      * Retrieves all targets without details, i.e. NO {@link Target#getTags()}

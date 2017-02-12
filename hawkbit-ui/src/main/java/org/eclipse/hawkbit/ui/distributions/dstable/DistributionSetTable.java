@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -184,8 +185,8 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     @Override
-    protected DistributionSet findEntityByTableValue(final Long entityTableId) {
-        return distributionSetManagement.findDistributionSetByIdWithDetails(entityTableId).get();
+    protected Optional<DistributionSet> findEntityByTableValue(final Long entityTableId) {
+        return distributionSetManagement.findDistributionSetByIdWithDetails(entityTableId);
     }
 
     @Override
@@ -242,14 +243,15 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     private void handleDropEvent(final Table source, final Set<Long> softwareModulesIdList, final Object distId) {
-        final DistributionSet distributionSet = distributionSetManagement.findDistributionSetById((Long) distId).get();
+        final Optional<DistributionSet> distributionSet = distributionSetManagement
+                .findDistributionSetById((Long) distId);
 
-        if (distributionSet == null) {
+        if (!distributionSet.isPresent()) {
             notification.displayWarning(i18n.get("distributionset.not.exists"));
             return;
         }
 
-        final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distributionSet);
+        final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distributionSet.get());
 
         final HashMap<Long, HashSet<SoftwareModuleIdName>> map;
         if (manageDistUIState.getConsolidatedDistSoftwarewList().containsKey(distributionSetIdName)) {

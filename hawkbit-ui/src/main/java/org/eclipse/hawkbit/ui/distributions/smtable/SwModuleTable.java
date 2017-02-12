@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.distributions.smtable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
@@ -257,8 +258,8 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     }
 
     @Override
-    protected SoftwareModule findEntityByTableValue(final Long lastSelectedId) {
-        return softwareManagement.findSoftwareModuleById(lastSelectedId).get();
+    protected Optional<SoftwareModule> findEntityByTableValue(final Long lastSelectedId) {
+        return softwareManagement.findSoftwareModuleById(lastSelectedId);
     }
 
     @Override

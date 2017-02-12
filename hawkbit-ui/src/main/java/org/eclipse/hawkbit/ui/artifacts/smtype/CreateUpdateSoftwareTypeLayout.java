@@ -236,13 +236,13 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
     }
 
     @Override
-    protected SoftwareModuleType findEntityByKey() {
-        return swTypeManagementService.findSoftwareModuleTypeByKey(typeKey.getValue()).get();
+    protected Optional<SoftwareModuleType> findEntityByKey() {
+        return swTypeManagementService.findSoftwareModuleTypeByKey(typeKey.getValue());
     }
 
     @Override
-    protected SoftwareModuleType findEntityByName() {
-        return swTypeManagementService.findSoftwareModuleTypeByName(tagName.getValue()).get();
+    protected Optional<SoftwareModuleType> findEntityByName() {
+        return swTypeManagementService.findSoftwareModuleTypeByName(tagName.getValue());
     }
 
     @Override

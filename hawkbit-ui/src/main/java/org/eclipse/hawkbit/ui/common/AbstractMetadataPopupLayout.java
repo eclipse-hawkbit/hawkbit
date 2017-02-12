@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -162,7 +161,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         this.selectedEntity = selectedEntity;
     }
 
-    protected abstract void checkForDuplicate(E entity, String value);
+    protected abstract boolean checkForDuplicate(E entity, String value);
 
     protected abstract M createMetadata(E entity, String key, String value);
 
@@ -422,12 +421,10 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     }
 
     private boolean duplicateCheck(final E entity) {
-        try {
-            checkForDuplicate(entity, keyTextField.getValue());
-            // we do not want to log the exception here, does not make sense
-        } catch (@SuppressWarnings("squid:S1166") final EntityNotFoundException exception) {
+        if (!checkForDuplicate(entity, keyTextField.getValue())) {
             return false;
         }
+
         uiNotification.displayValidationError(i18n.get("message.metadata.duplicate.check", keyTextField.getValue()));
         return true;
     }

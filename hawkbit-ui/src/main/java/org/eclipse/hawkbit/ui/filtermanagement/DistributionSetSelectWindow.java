@@ -12,6 +12,7 @@ import java.io.Serializable;
 
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
@@ -104,10 +105,8 @@ public class DistributionSetSelectWindow
      */
     public void showForTargetFilter(final Long tfqId) {
         this.tfqId = tfqId;
-        final TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryById(tfqId).get();
-        if (tfq == null) {
-            throw new IllegalStateException("TargetFilterQuery does not exist for the given id");
-        }
+        final TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryById(tfqId)
+                .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, tfqId));
 
         initLocal();
 
@@ -165,7 +164,8 @@ public class DistributionSetSelectWindow
     }
 
     private void updateTargetFilterQueryDS(final Long targetFilterQueryId, final Long dsId) {
-        final TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryById(targetFilterQueryId).get();
+        final TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryById(targetFilterQueryId)
+                .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));
 
         if (dsId != null) {
             confirmWithConsequencesDialog(tfq, dsId);

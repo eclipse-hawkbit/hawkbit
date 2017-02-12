@@ -149,7 +149,7 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
         @Override
         public void saveOrUpdate() {
             if (isUpdateAction()) {
-                updateEntity(findEntityByName());
+                updateEntity(findEntityByName().orElse(null));
                 return;
             }
 
@@ -607,14 +607,11 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     }
 
     private boolean isDuplicateByName() {
-        final E existingType = findEntityByName();
-        if (existingType != null) {
-            uiNotification.displayValidationError(
-                    i18n.get("message.tag.duplicate.check", new Object[] { existingType.getName() }));
-            return true;
-        }
+        final Optional<E> existingType = findEntityByName();
+        existingType.ifPresent(type -> uiNotification
+                .displayValidationError(i18n.get("message.tag.duplicate.check", new Object[] { type.getName() })));
 
-        return false;
+        return existingType.isPresent();
     }
 
     protected boolean isDuplicate() {
@@ -661,7 +658,7 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     public void removeColorChangeListener(final ColorChangeListener listener) {
     }
 
-    protected abstract E findEntityByName();
+    protected abstract Optional<E> findEntityByName();
 
     protected abstract String getWindowCaption();
 

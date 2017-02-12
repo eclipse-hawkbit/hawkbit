@@ -296,7 +296,7 @@ public class TargetTable extends AbstractTable<Target, Long> {
     }
 
     @Override
-    protected Target findEntityByTableValue(final Long lastSelectedId) {
+    protected Optional<Target> findEntityByTableValue(final Long lastSelectedId) {
         return targetManagement.findTargetById(lastSelectedId);
     }
 
@@ -595,12 +595,12 @@ public class TargetTable extends AbstractTable<Target, Long> {
             return;
         }
         final Long targetId = (Long) targetItemId;
-        final Target target = targetManagement.findTargetById(targetId);
-        if (target == null) {
+        final Optional<Target> target = targetManagement.findTargetById(targetId);
+        if (!target.isPresent()) {
             getNotification().displayWarning(i18n.get("target.not.exists", new Object[] { "" }));
             return;
         }
-        final TargetIdName createTargetIdName = new TargetIdName(target);
+        final TargetIdName createTargetIdName = new TargetIdName(target.get());
 
         final List<DistributionSet> findDistributionSetAllById = distributionSetManagement
                 .findDistributionSetAllById(ids);

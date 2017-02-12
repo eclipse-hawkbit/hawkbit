@@ -581,13 +581,13 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
     }
 
     @Override
-    protected DistributionSetType findEntityByKey() {
-        return distributionSetManagement.findDistributionSetTypeByKey(typeKey.getValue()).get();
+    protected Optional<DistributionSetType> findEntityByKey() {
+        return distributionSetManagement.findDistributionSetTypeByKey(typeKey.getValue());
     }
 
     @Override
-    protected DistributionSetType findEntityByName() {
-        return distributionSetManagement.findDistributionSetTypeByName(tagName.getValue()).get();
+    protected Optional<DistributionSetType> findEntityByName() {
+        return distributionSetManagement.findDistributionSetTypeByName(tagName.getValue());
     }
 
     @Override

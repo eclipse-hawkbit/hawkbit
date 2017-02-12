@@ -109,8 +109,8 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
     }
 
     @Override
-    protected TargetTag findEntityByName() {
-        return tagManagement.findTargetTag(tagName.getValue()).get();
+    protected Optional<TargetTag> findEntityByName() {
+        return tagManagement.findTargetTag(tagName.getValue());
     }
 
     /**

@@ -118,8 +118,8 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             updateVisableTableEntries(eventContainer.getEvents(), visibleItemIds);
         }
         final Long lastSelectedDsIdName = managementUIState.getLastSelectedDsIdName();
-        eventContainer.getEvents().stream().filter(event -> event.getEntityId().equals(lastSelectedDsIdName))
-                .findAny().ifPresent(event -> eventBus.publish(this,
+        eventContainer.getEvents().stream().filter(event -> event.getEntityId().equals(lastSelectedDsIdName)).findAny()
+                .ifPresent(event -> eventBus.publish(this,
                         new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, event.getEntity())));
 
     }
@@ -304,8 +304,8 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     @Override
-    protected DistributionSet findEntityByTableValue(final Long lastSelectedId) {
-        return distributionSetManagement.findDistributionSetByIdWithDetails(lastSelectedId).get();
+    protected Optional<DistributionSet> findEntityByTableValue(final Long lastSelectedId) {
+        return distributionSetManagement.findDistributionSetByIdWithDetails(lastSelectedId);
     }
 
     @Override
