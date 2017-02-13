@@ -634,9 +634,32 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public void deleteDistributionSetMetadata(final Long distributionSet, final String key) {
-        touch(distributionSet);
-        distributionSetMetadataRepository.delete(new DsMetadataCompositeKey(distributionSet, key));
+    public void deleteDistributionSetMetadata(final Long distributionSetId, final String key) {
+        final JpaDistributionSetMetadata metadata = (JpaDistributionSetMetadata) findDistributionSetMetadata(
+                distributionSetId, key).orElseThrow(
+                        () -> new EntityNotFoundException(DistributionSetMetadata.class, distributionSetId, key));
+
+        touch(metadata.getDistributionSet());
+        distributionSetMetadataRepository.delete(metadata.getId());
+    }
+
+    /**
+     * Method to get the latest distribution set based on DS ID after the
+     * metadata changes for that distribution set.
+     *
+     * @param ds
+     *            is the DS to touch
+     */
+    private JpaDistributionSet touch(final DistributionSet ds) {
+
+        // merge base distribution set so optLockRevision gets updated and audit
+        // log written because
+        // modifying metadata is modifying the base distribution set itself for
+        // auditing purposes.
+        final JpaDistributionSet result = entityManager.merge((JpaDistributionSet) ds);
+        result.setLastModifiedAt(0L);
+
+        return result;
     }
 
     /**
@@ -644,19 +667,11 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
      * metadata changes for that distribution set.
      *
      * @param distId
-     *            Distribution set
+     *            of the DS to touch
      */
     private JpaDistributionSet touch(final Long distId) {
-        final DistributionSet latestDistributionSet = findDistributionSetAndThrowExceptionIfNotFound(distId);
-
-        // merge base distribution set so optLockRevision gets updated and audit
-        // log written because
-        // modifying metadata is modifying the base distribution set itself for
-        // auditing purposes.
-        final JpaDistributionSet result = entityManager.merge((JpaDistributionSet) latestDistributionSet);
-        result.setLastModifiedAt(0L);
-
-        return result;
+        return touch(findDistributionSetById(distId)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, distId)));
     }
 
     @Override

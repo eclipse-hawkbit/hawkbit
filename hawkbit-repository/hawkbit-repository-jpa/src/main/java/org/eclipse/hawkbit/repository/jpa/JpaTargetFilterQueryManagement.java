@@ -86,6 +86,9 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteTargetFilterQuery(final Long targetFilterQueryId) {
+        findTargetFilterQueryById(targetFilterQueryId)
+                .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));
+
         targetFilterQueryRepository.delete(targetFilterQueryId);
     }
 

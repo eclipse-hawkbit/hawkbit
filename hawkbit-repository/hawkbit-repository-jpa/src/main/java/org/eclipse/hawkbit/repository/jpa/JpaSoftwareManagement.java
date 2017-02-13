@@ -543,7 +543,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
                         () -> new EntityNotFoundException(SoftwareModuleMetadata.class, moduleId, md.getKey()));
         metadata.setValue(md.getValue());
 
-        touch(moduleId);
+        touch(metadata.getSoftwareModule());
         return softwareModuleMetadataRepository.save(metadata);
     }
 
@@ -551,28 +551,41 @@ public class JpaSoftwareManagement implements SoftwareManagement {
      * Method to get the latest module based on ID after the metadata changes
      * for that module.
      *
-     * @param distributionSet
-     *            Distribution set
+     * @param latestModule
+     *            module to touch
      */
-    private JpaSoftwareModule touch(final Long moduleId) {
-        final JpaSoftwareModule latestModule = softwareModuleRepository.findOne(moduleId);
-
+    private JpaSoftwareModule touch(final SoftwareModule latestModule) {
         // merge base distribution set so optLockRevision gets updated and audit
         // log written because
         // modifying metadata is modifying the base distribution set itself for
         // auditing purposes.
-        final JpaSoftwareModule result = entityManager.merge(latestModule);
+        final JpaSoftwareModule result = entityManager.merge((JpaSoftwareModule) latestModule);
         result.setLastModifiedAt(0L);
 
         return result;
+    }
+
+    /**
+     * Method to get the latest module based on ID after the metadata changes
+     * for that module.
+     *
+     * @param moduleId
+     *            of the module to touch
+     */
+    private JpaSoftwareModule touch(final Long moduleId) {
+        return touch(findSoftwareModuleById(moduleId)
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, moduleId)));
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void deleteSoftwareModuleMetadata(final Long moduleId, final String key) {
-        touch(moduleId);
-        softwareModuleMetadataRepository.delete(new SwMetadataCompositeKey(moduleId, key));
+        final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) findSoftwareModuleMetadata(moduleId, key)
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleMetadata.class, moduleId, key));
+
+        touch(metadata.getSoftwareModule());
+        softwareModuleMetadataRepository.delete(metadata.getId());
     }
 
     @Override

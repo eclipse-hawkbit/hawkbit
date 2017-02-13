@@ -131,11 +131,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteArtifact(final Long id) {
-        final JpaArtifact existing = localArtifactRepository.findOne(id);
-
-        if (null == existing) {
-            return;
-        }
+        final JpaArtifact existing = (JpaArtifact) findArtifact(id)
+                .orElseThrow(() -> new EntityNotFoundException(Artifact.class, id));
 
         clearArtifactBinary(existing);
 

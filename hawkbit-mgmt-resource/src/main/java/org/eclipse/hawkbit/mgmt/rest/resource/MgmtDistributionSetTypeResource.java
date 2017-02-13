@@ -100,7 +100,6 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     @Override
     public ResponseEntity<Void> deleteDistributionSetType(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId) {
-
         distributionSetManagement.deleteDistributionSetType(distributionSetTypeId);
 
         return ResponseEntity.ok().build();

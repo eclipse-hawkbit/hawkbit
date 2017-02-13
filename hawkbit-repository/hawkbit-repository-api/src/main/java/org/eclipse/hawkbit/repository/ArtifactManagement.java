@@ -15,11 +15,11 @@ import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -119,7 +119,8 @@ public interface ArtifactManagement {
      *            of the {@link Artifact} that has to be deleted.
      * @throws ArtifactDeleteFailedException
      *             if deletion failed (MongoDB is not available)
-     *
+     * @throws EntityNotFoundException
+     *             if artifact with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     void deleteArtifact(@NotNull Long id);

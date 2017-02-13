@@ -111,7 +111,6 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
 
     @Override
     public ResponseEntity<Void> deleteFilter(@PathVariable("filterId") final Long filterId) {
-        findFilterWithExceptionIfNotFound(filterId);
         filterManagement.deleteTargetFilterQuery(filterId);
         LOG.debug("{} target filter query deleted, return status {}", filterId, HttpStatus.OK);
         return new ResponseEntity<>(HttpStatus.OK);

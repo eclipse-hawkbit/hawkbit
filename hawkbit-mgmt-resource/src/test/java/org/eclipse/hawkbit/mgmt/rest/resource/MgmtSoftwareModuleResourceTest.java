@@ -46,7 +46,6 @@ import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -659,7 +658,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Verfies that the create request actually results in the creation of the modules in the repository.")
-    public void createSoftwareModules() throws  Exception {
+    public void createSoftwareModules() throws Exception {
         final SoftwareModule os = entityFactory.softwareModule().create().name("name1").type(osType).version("version1")
                 .vendor("vendor1").description("description1").build();
         final SoftwareModule ah = entityFactory.softwareModule().create().name("name3").type(appType)
@@ -870,6 +869,33 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         assertThat(softwareManagement.findSoftwareModuleMetadata(sm.getId(), knownKey).isPresent()).isFalse();
+    }
+
+    @Test
+    @Description("Ensures that module metadta deletion request to API on an entity that does not exist results in NOT_FOUND.")
+    public void deleteModuleMetadataThatDoesNotExistLeadsToNotFound() throws Exception {
+        // prepare and create metadata for deletion
+        final String knownKey = "knownKey";
+        final String knownValue = "knownValue";
+
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
+        softwareManagement.createSoftwareModuleMetadata(sm.getId(),
+                entityFactory.generateMetadata(knownKey, knownValue));
+
+        mvc.perform(delete("/rest/v1/softwaremodules/{swId}/metadata/XXX", sm.getId(), knownKey))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+
+        mvc.perform(delete("/rest/v1/softwaremodules/1234/metadata/{key}", knownKey))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+
+        assertThat(softwareManagement.findSoftwareModuleMetadata(sm.getId(), knownKey).isPresent()).isTrue();
+    }
+
+    @Test
+    @Description("Ensures that module deletion request to API on an entity that does not exist results in NOT_FOUND.")
+    public void deleteSoftwareModuleThatDoesNotExistLeadsToNotFound() throws Exception {
+        mvc.perform(delete("/rest/v1/softwaremodules/1234")).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
     }
 
     @Test

@@ -160,6 +160,9 @@ public interface SoftwareManagement {
      *            where meta data has to be deleted
      * @param key
      *            of the metda data element
+     * 
+     * @throws EntityNotFoundException
+     *             of module or metadata entry does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     void deleteSoftwareModuleMetadata(@NotNull Long moduleId, @NotEmpty String key);

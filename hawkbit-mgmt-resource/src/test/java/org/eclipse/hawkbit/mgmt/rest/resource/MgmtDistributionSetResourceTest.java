@@ -40,7 +40,6 @@ import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.springframework.context.annotation.Description;
@@ -490,7 +489,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Ensures that multipe DS posted to API are created in the repository.")
-    public void createDistributionSets() throws  Exception {
+    public void createDistributionSets() throws Exception {
         assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
                 .hasSize(0);
 
@@ -621,6 +620,13 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
                 .isEmpty();
         assertThat(distributionSetManagement.countDistributionSetsAll()).isEqualTo(0);
+    }
+
+    @Test
+    @Description("Ensures that DS deletion request to API on an entity that does not exist results in NOT_FOUND.")
+    public void deleteDistributionSetThatDoesNotExistLeadsToNotFound() throws Exception {
+        mvc.perform(delete("/rest/v1/distributionsets/1234")).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -823,6 +829,26 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         assertThat(distributionSetManagement.findDistributionSetMetadata(testDS.getId(), knownKey).isPresent())
                 .isFalse();
+    }
+
+    @Test
+    @Description("Ensures that DS metadata deletion request to API on an entity that does not exist results in NOT_FOUND.")
+    public void deleteMetadataThatDoesNotExistLeadsToNotFound() throws Exception {
+        // prepare and create metadata for deletion
+        final String knownKey = "knownKey";
+        final String knownValue = "knownValue";
+
+        final DistributionSet testDS = testdataFactory.createDistributionSet("one");
+        createDistributionSetMetadata(testDS.getId(), entityFactory.generateMetadata(knownKey, knownValue));
+
+        mvc.perform(delete("/rest/v1/distributionsets/{dsId}/metadata/XXX", testDS.getId(), knownKey))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+
+        mvc.perform(delete("/rest/v1/distributionsets/1234/metadata/{key}", knownKey))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+
+        assertThat(distributionSetManagement.findDistributionSetMetadata(testDS.getId(), knownKey).isPresent())
+                .isTrue();
     }
 
     @Test

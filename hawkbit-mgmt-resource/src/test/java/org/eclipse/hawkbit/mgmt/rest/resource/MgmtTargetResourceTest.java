@@ -306,7 +306,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
 
     @Test
     @Description("Ensures that deletion is refused with not found if target does not exist.")
-    public void deleteTargetWhichDoesNotExistsLeadsToEntityNotFound() throws Exception {
+    public void deleteTargetWhichDoesNotExistsLeadsToNotFound() throws Exception {
         final String knownControllerId = "knownControllerIdDelete";
 
         mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId))
@@ -315,7 +315,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
 
     @Test
     @Description("Ensures that update is refused with not found if target does not exist.")
-    public void updateTargetWhichDoesNotExistsLeadsToEntityNotFound() throws Exception {
+    public void updateTargetWhichDoesNotExistsLeadsToNotFound() throws Exception {
         final String knownControllerId = "knownControllerIdUpdate";
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content("{}")
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
