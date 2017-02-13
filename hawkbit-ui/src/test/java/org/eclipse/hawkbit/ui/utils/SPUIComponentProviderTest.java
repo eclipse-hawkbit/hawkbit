@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
 import org.junit.Test;
 
 import com.vaadin.ui.Button;
@@ -38,7 +38,7 @@ public class SPUIComponentProviderTest {
         // Checking Dyanmic Factory
         Button placeHolderButton;
         placeHolderButton = SPUIComponentProvider.getButton("", "Test", "Test", SPUIDefinitions.SP_BUTTON_STATUS_STYLE,
-                true, null, SPUIButtonStyleSmallNoBorder.class);
+                true, null, SPUIButtonStyleSmall.class);
         assertThat(placeHolderButton).isInstanceOf(SPUIButton.class);
         assertThat(placeHolderButton.getCaption()).isEqualTo("Test");
         assertThat(placeHolderButton.getStyleName()).isEqualTo(SPUIDefinitions.SP_BUTTON_STATUS_STYLE);
