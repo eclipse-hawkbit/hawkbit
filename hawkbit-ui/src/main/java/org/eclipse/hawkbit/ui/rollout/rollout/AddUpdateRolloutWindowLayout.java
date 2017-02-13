@@ -883,6 +883,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             addComponent(targetFilterQuery, 1, 2);
             targetFilterQuery.addValidator(nullValidator);
 
+            removeComponent(defineGroupsLayout);
+            removeComponent(groupsDefinitionTabs);
+
+            window.updateAllComponents(this);
             window.setOrginaleValues();
 
             updateGroupsChart(rollout.getRolloutGroups(), rollout.getTotalTargets());
