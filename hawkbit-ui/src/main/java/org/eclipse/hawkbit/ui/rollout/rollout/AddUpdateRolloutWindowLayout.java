@@ -244,6 +244,13 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         noOfGroups.setVisible(true);
         removeComponent(1, 2);
         addComponent(targetFilterQueryCombo, 1, 2);
+        if (getComponent(3, 0) == null) {
+            addComponent(groupsLegendLayout, 3, 0, 3, 3);
+        }
+        if (getComponent(0, 6) == null) {
+            addComponent(groupsDefinitionTabs, 0, 6, 3, 6);
+        }
+
         actionTypeOptionGroupLayout.selectDefaultOption();
         autoStartOptionGroupLayout.selectDefaultOption();
         totalTargetsCount = 0L;
@@ -883,6 +890,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             addComponent(targetFilterQuery, 1, 2);
             targetFilterQuery.addValidator(nullValidator);
 
+            removeComponent(defineGroupsLayout);
+            removeComponent(groupsDefinitionTabs);
+
+            window.updateAllComponents(this);
             window.setOrginaleValues();
 
             updateGroupsChart(rollout.getRolloutGroups(), rollout.getTotalTargets());

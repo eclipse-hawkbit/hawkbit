@@ -95,7 +95,7 @@ public class CommonDialogWindow extends Window {
 
     private final transient Map<Component, Object> orginalValues;
 
-    private final List<AbstractField<?>> allComponents;
+    private List<AbstractField<?>> allComponents;
 
     private final I18N i18n;
 
@@ -208,7 +208,7 @@ public class CommonDialogWindow extends Window {
             addStyleName("marginTop");
         }
 
-        if (null != content) {
+        if (content != null) {
             mainLayout.addComponent(content);
             mainLayout.setExpandRatio(content, 1.0F);
         }
@@ -569,6 +569,17 @@ public class CommonDialogWindow extends Window {
          * 
          */
         void saveOrUpdate();
+    }
+
+    /**
+     * Updates the field allComponents. All components existing on the given
+     * layout are added to the list of allComponents
+     * 
+     * @param layout
+     *            AbstractLayout
+     */
+    public void updateAllComponents(final AbstractLayout layout) {
+        allComponents = getAllComponents(layout);
     }
 
 }
