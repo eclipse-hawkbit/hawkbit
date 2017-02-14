@@ -95,48 +95,46 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
     @Override
     protected List<ProxyRollout> loadBeans(final int startIndex, final int count) {
         final Slice<Rollout> rolloutBeans;
+        final PageRequest pageRequest = new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE,
+                SPUIDefinitions.PAGE_SIZE, sort);
         if (Strings.isNullOrEmpty(searchText)) {
-            rolloutBeans = getRolloutManagement().findAllRolloutsWithDetailedStatus(
-                    new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort), false);
+            rolloutBeans = getRolloutManagement().findAllRolloutsWithDetailedStatus(pageRequest, false);
         } else {
-            rolloutBeans = getRolloutManagement().findRolloutWithDetailedStatusByFilters(
-                    new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
-                    searchText, false);
+            rolloutBeans = getRolloutManagement().findRolloutWithDetailedStatusByFilters(pageRequest, searchText,
+                    false);
         }
         return getProxyRolloutList(rolloutBeans);
     }
 
     private static List<ProxyRollout> getProxyRolloutList(final Slice<Rollout> rolloutBeans) {
         final List<ProxyRollout> proxyRolloutList = new ArrayList<>();
-        if (rolloutBeans != null) {
-            for (final Rollout rollout : rolloutBeans) {
-                final ProxyRollout proxyRollout = new ProxyRollout();
-                proxyRollout.setName(rollout.getName());
-                proxyRollout.setDescription(rollout.getDescription());
-                final DistributionSet distributionSet = rollout.getDistributionSet();
-                proxyRollout.setDistributionSetNameVersion(HawkbitCommonUtil
-                        .getFormattedNameVersion(distributionSet.getName(), distributionSet.getVersion()));
-                proxyRollout.setDistributionSet(distributionSet);
-                proxyRollout.setNumberOfGroups(Long.valueOf(rollout.getRolloutGroups().size()));
-                proxyRollout.setCreatedDate(SPDateTimeUtil.getFormattedDate(rollout.getCreatedAt()));
-                proxyRollout.setModifiedDate(SPDateTimeUtil.getFormattedDate(rollout.getLastModifiedAt()));
-                proxyRollout.setCreatedBy(UserDetailsFormatter.loadAndFormatCreatedBy(rollout));
-                proxyRollout.setLastModifiedBy(UserDetailsFormatter.loadAndFormatLastModifiedBy(rollout));
-                proxyRollout.setForcedTime(rollout.getForcedTime());
-                proxyRollout.setId(rollout.getId());
-                proxyRollout.setStatus(rollout.getStatus());
-                proxyRollout.setRolloutRendererData(
-                        new RolloutRendererData(rollout.getName(), rollout.getStatus().toString()));
+        for (final Rollout rollout : rolloutBeans) {
+            final ProxyRollout proxyRollout = new ProxyRollout();
+            proxyRollout.setName(rollout.getName());
+            proxyRollout.setDescription(rollout.getDescription());
+            final DistributionSet distributionSet = rollout.getDistributionSet();
+            proxyRollout.setDistributionSetNameVersion(
+                    HawkbitCommonUtil.getFormattedNameVersion(distributionSet.getName(), distributionSet.getVersion()));
+            proxyRollout.setDistributionSet(distributionSet);
+            proxyRollout.setNumberOfGroups(Long.valueOf(rollout.getRolloutGroups().size()));
+            proxyRollout.setCreatedDate(SPDateTimeUtil.getFormattedDate(rollout.getCreatedAt()));
+            proxyRollout.setModifiedDate(SPDateTimeUtil.getFormattedDate(rollout.getLastModifiedAt()));
+            proxyRollout.setCreatedBy(UserDetailsFormatter.loadAndFormatCreatedBy(rollout));
+            proxyRollout.setLastModifiedBy(UserDetailsFormatter.loadAndFormatLastModifiedBy(rollout));
+            proxyRollout.setForcedTime(rollout.getForcedTime());
+            proxyRollout.setId(rollout.getId());
+            proxyRollout.setStatus(rollout.getStatus());
+            proxyRollout
+                    .setRolloutRendererData(new RolloutRendererData(rollout.getName(), rollout.getStatus().toString()));
 
-                final TotalTargetCountStatus totalTargetCountActionStatus = rollout.getTotalTargetCountStatus();
-                proxyRollout.setTotalTargetCountStatus(totalTargetCountActionStatus);
-                proxyRollout.setTotalTargetsCount(String.valueOf(rollout.getTotalTargets()));
-                proxyRollout.setType(distributionSet.getType().getName());
-                proxyRollout.setIsRequiredMigrationStep(distributionSet.isRequiredMigrationStep());
-                proxyRollout.setSwModules(distributionSet.getModules());
+            final TotalTargetCountStatus totalTargetCountActionStatus = rollout.getTotalTargetCountStatus();
+            proxyRollout.setTotalTargetCountStatus(totalTargetCountActionStatus);
+            proxyRollout.setTotalTargetsCount(String.valueOf(rollout.getTotalTargets()));
+            proxyRollout.setType(distributionSet.getType().getName());
+            proxyRollout.setIsRequiredMigrationStep(distributionSet.isRequiredMigrationStep());
+            proxyRollout.setSwModules(distributionSet.getModules());
 
-                proxyRolloutList.add(proxyRollout);
-            }
+            proxyRolloutList.add(proxyRollout);
         }
         return proxyRolloutList;
     }

@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
-import org.eclipse.hawkbit.ui.common.grid.AbstractGridLayout;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.rollout.RolloutListView;
 import org.eclipse.hawkbit.ui.rollout.rolloutgroup.RolloutGroupsListView;
@@ -28,7 +27,6 @@ import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
@@ -61,6 +59,8 @@ public class RolloutView extends VerticalLayout implements View {
 
     private final RolloutUIState rolloutUIState;
 
+    private final transient RolloutManagement rolloutManagement;
+
     private final transient EventBus.UIEventBus eventBus;
 
     @Autowired
@@ -70,6 +70,7 @@ public class RolloutView extends VerticalLayout implements View {
             final UINotification uiNotification, final UiProperties uiProperties, final EntityFactory entityFactory,
             final I18N i18n, final TargetFilterQueryManagement targetFilterQueryManagement) {
         this.permChecker = permissionChecker;
+        this.rolloutManagement = rolloutManagement;
         this.rolloutListView = new RolloutListView(permissionChecker, rolloutUIState, eventBus, rolloutManagement,
                 targetManagement, uiNotification, uiProperties, entityFactory, i18n, targetFilterQueryManagement);
         this.rolloutGroupsListView = new RolloutGroupsListView(i18n, eventBus, rolloutGroupManagement, rolloutUIState,
@@ -126,42 +127,44 @@ public class RolloutView extends VerticalLayout implements View {
     }
 
     private void showRolloutGroupTargetsListView() {
-        if (!isRolloutDeleted(rolloutGroupTargetsListView)) {
-            rolloutGroupTargetsListView.setVisible(true);
-            if (rolloutListView.isVisible()) {
-                rolloutListView.setVisible(false);
-            }
-            if (rolloutGroupsListView.isVisible()) {
-                rolloutGroupsListView.setVisible(false);
-            }
-            addComponent(rolloutGroupTargetsListView);
-            setExpandRatio(rolloutGroupTargetsListView, 1.0F);
+        if (isRolloutDeleted()) {
+            showRolloutListView();
+            return;
         }
+
+        rolloutGroupTargetsListView.setVisible(true);
+        if (rolloutListView.isVisible()) {
+            rolloutListView.setVisible(false);
+        }
+        if (rolloutGroupsListView.isVisible()) {
+            rolloutGroupsListView.setVisible(false);
+        }
+        addComponent(rolloutGroupTargetsListView);
+        setExpandRatio(rolloutGroupTargetsListView, 1.0F);
     }
 
     private void showRolloutGroupListView() {
-        if (!isRolloutDeleted(rolloutGroupsListView)) {
-            rolloutGroupsListView.setVisible(true);
-            if (rolloutListView.isVisible()) {
-                rolloutListView.setVisible(false);
-            }
-            if (rolloutGroupTargetsListView.isVisible()) {
-                rolloutGroupTargetsListView.setVisible(false);
-            }
-            addComponent(rolloutGroupsListView);
-            setExpandRatio(rolloutGroupsListView, 1.0F);
+        if (isRolloutDeleted()) {
+            showRolloutListView();
+            return;
         }
+
+        rolloutGroupsListView.setVisible(true);
+        if (rolloutListView.isVisible()) {
+            rolloutListView.setVisible(false);
+        }
+        if (rolloutGroupTargetsListView.isVisible()) {
+            rolloutGroupTargetsListView.setVisible(false);
+        }
+        addComponent(rolloutGroupsListView);
+        setExpandRatio(rolloutGroupsListView, 1.0F);
     }
 
-    private boolean isRolloutDeleted(final AbstractGridLayout rolloutGroupsListView) {
-        final LazyQueryContainer container = (LazyQueryContainer) rolloutGroupsListView.getGrid()
-                .getContainerDataSource();
-        container.refresh();
-        if (container.size() == 0) {
-            showRolloutListView();
+    private boolean isRolloutDeleted() {
+        if (!rolloutUIState.getRolloutId().isPresent()) {
             return true;
         }
-        return false;
+        return rolloutManagement.findRolloutById(rolloutUIState.getRolloutId().get()).isDeleted();
     }
 
     private void showRolloutListView() {

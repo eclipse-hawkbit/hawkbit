@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
@@ -26,6 +27,8 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -41,6 +44,8 @@ import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
 public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> {
 
     private static final long serialVersionUID = 5342450502894318589L;
+
+    private static final Logger LOG = LoggerFactory.getLogger(RolloutGroupBeanQuery.class);
 
     private Sort sort = new Sort(Direction.ASC, "id");
 
@@ -95,12 +100,14 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
     @Override
     protected List<ProxyRolloutGroup> loadBeans(final int startIndex, final int count) {
         List<RolloutGroup> proxyRolloutGroupsList = new ArrayList<>();
-        if (startIndex == 0 && firstPageRolloutGroupSets != null) {
-            proxyRolloutGroupsList = firstPageRolloutGroupSets.getContent();
-        } else if (rolloutId != null) {
-            proxyRolloutGroupsList = getRolloutGroupManagement()
-                    .findAllRolloutGroupsWithDetailedStatus(rolloutId, new PageRequest(startIndex / count, count))
-                    .getContent();
+        if (rolloutId != null) {
+            if (startIndex == 0 && firstPageRolloutGroupSets != null) {
+                proxyRolloutGroupsList = firstPageRolloutGroupSets.getContent();
+            } else {
+                proxyRolloutGroupsList = getRolloutGroupManagement()
+                        .findAllRolloutGroupsWithDetailedStatus(rolloutId, new PageRequest(startIndex / count, count))
+                        .getContent();
+            }
         }
         return getProxyRolloutGroupList(proxyRolloutGroupsList);
     }
@@ -152,9 +159,16 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
     public int size() {
         long size = 0;
         if (rolloutId != null) {
-            firstPageRolloutGroupSets = getRolloutGroupManagement().findAllRolloutGroupsWithDetailedStatus(rolloutId,
-                    new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
-            size = firstPageRolloutGroupSets.getTotalElements();
+            try {
+                firstPageRolloutGroupSets = getRolloutGroupManagement().findAllRolloutGroupsWithDetailedStatus(
+                        rolloutId, new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
+                size = firstPageRolloutGroupSets.getTotalElements();
+            } catch (final EntityNotFoundException e) {
+                LOG.error("Rollout does not exists. Redirect to Rollouts overview", e);
+                rolloutUIState.setShowRolloutGroups(false);
+                rolloutUIState.setShowRollOuts(true);
+                return 0;
+            }
         }
         if (size > Integer.MAX_VALUE) {
             return Integer.MAX_VALUE;

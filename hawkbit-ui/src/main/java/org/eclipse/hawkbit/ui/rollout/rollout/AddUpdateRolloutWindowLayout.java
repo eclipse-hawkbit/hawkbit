@@ -56,8 +56,11 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -88,6 +91,8 @@ import com.vaadin.ui.themes.ValoTheme;
 public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private static final long serialVersionUID = 2999293468801479916L;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AddUpdateRolloutWindowLayout.class);
 
     private static final String MESSAGE_ROLLOUT_FIELD_VALUE_RANGE = "message.rollout.field.value.range";
 
@@ -244,12 +249,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         noOfGroups.setVisible(true);
         removeComponent(1, 2);
         addComponent(targetFilterQueryCombo, 1, 2);
-        if (getComponent(3, 0) == null) {
-            addComponent(groupsLegendLayout, 3, 0, 3, 3);
-        }
-        if (getComponent(0, 6) == null) {
-            addComponent(groupsDefinitionTabs, 0, 6, 3, 6);
-        }
+        addGroupsLegendLayout();
+        addGroupsDefinitionTabs();
 
         actionTypeOptionGroupLayout.selectDefaultOption();
         autoStartOptionGroupLayout.selectDefaultOption();
@@ -257,6 +258,18 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         rollout = null;
         groupsDefinitionTabs.setVisible(true);
         groupsDefinitionTabs.setSelectedTab(0);
+    }
+
+    private void addGroupsDefinitionTabs() {
+        if (getComponent(0, 6) == null) {
+            addComponent(groupsDefinitionTabs, 0, 6, 3, 6);
+        }
+    }
+
+    private void addGroupsLegendLayout() {
+        if (getComponent(3, 0) == null) {
+            addComponent(groupsLegendLayout, 3, 0, 3, 3);
+        }
     }
 
     private void resetFields() {
@@ -619,7 +632,16 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             rolloutUpdate.startAt(getScheduledStartTime());
         }
 
-        final Rollout updatedRollout = rolloutManagement.updateRollout(rolloutUpdate);
+        Rollout updatedRollout;
+        try {
+            updatedRollout = rolloutManagement.updateRollout(rolloutUpdate);
+        } catch (final JpaObjectRetrievalFailureException e) {
+            LOGGER.warn("Rollout was deleted. Redirect to Rollouts overview.", e);
+            uiNotification.displayWarning(
+                    "Rollout with name " + rolloutName.getValue() + " was deleted. Update is not poosible");
+            eventBus.publish(this, RolloutEvent.SHOW_ROLLOUTS);
+            return;
+        }
 
         uiNotification.displaySuccess(i18n.get("message.update.success", updatedRollout.getName()));
         eventBus.publish(this, RolloutEvent.UPDATE_ROLLOUT);

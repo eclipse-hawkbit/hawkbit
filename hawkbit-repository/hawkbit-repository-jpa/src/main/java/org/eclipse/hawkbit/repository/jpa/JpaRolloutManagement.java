@@ -63,7 +63,6 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -825,16 +824,10 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         rollout.setStatus(RolloutStatus.DELETED);
         rollout.setDeleted(true);
         rolloutRepository.save(rollout);
-
-        rollout.fireDeleteEvent(new DescriptorEvent(rollout));
     }
 
     private void hardDeleteRollout(final JpaRollout rollout) {
-        try {
-            rolloutRepository.delete(rollout);
-        } catch (final RuntimeException e) {
-            LOGGER.error("Exception during deletion of rollout-groups of rollout {}", rollout, e);
-        }
+        rolloutRepository.delete(rollout);
     }
 
     private void deleteScheduledActions(final JpaRollout rollout, final Slice<JpaAction> scheduledActions) {

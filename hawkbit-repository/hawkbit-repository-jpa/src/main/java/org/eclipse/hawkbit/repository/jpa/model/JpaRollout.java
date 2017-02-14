@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
@@ -41,6 +42,9 @@ import org.eclipse.persistence.annotations.ConversionValue;
 import org.eclipse.persistence.annotations.Convert;
 import org.eclipse.persistence.annotations.ObjectTypeConverter;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
+import org.eclipse.persistence.queries.UpdateObjectQuery;
+import org.eclipse.persistence.sessions.changesets.DirectToFieldChangeRecord;
+import org.eclipse.persistence.sessions.changesets.ObjectChangeSet;
 import org.hibernate.validator.constraints.NotEmpty;
 
 /**
@@ -69,6 +73,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, EventAwareEntity {
 
     private static final long serialVersionUID = 1L;
+
+    private static final String DELETED_PROPERTY = "deleted";
 
     @CascadeOnDelete
     @OneToMany(targetEntity = JpaRolloutGroup.class, fetch = FetchType.LAZY, mappedBy = "rollout")
@@ -231,6 +237,21 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher()
                 .publishEvent(new RolloutUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+
+        if (isSoftDeleted(descriptorEvent)) {
+            EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new RolloutDeletedEvent(getTenant(),
+                    getId(), getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
+        }
+    }
+
+    private static boolean isSoftDeleted(final DescriptorEvent event) {
+        final ObjectChangeSet changeSet = ((UpdateObjectQuery) event.getQuery()).getObjectChangeSet();
+        final List<DirectToFieldChangeRecord> changes = changeSet.getChanges().stream()
+                .filter(record -> record instanceof DirectToFieldChangeRecord)
+                .map(record -> (DirectToFieldChangeRecord) record).collect(Collectors.toList());
+
+        return changes.stream().filter(record -> DELETED_PROPERTY.equals(record.getAttribute())
+                && Boolean.parseBoolean(record.getNewValue().toString())).count() > 0;
     }
 
     @Override

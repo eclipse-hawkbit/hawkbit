@@ -36,7 +36,6 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Container;
-import com.vaadin.data.Container.Indexed;
 import com.vaadin.data.util.converter.Converter;
 import com.vaadin.server.FontAwesome;
 
@@ -72,11 +71,20 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
                 new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_RED));
     }
 
+    /**
+     * Constructor for RolloutGroupTargetsListGrid
+     * 
+     * @param i18n
+     *            I18N
+     * @param eventBus
+     *            UIEventBus
+     * @param rolloutUIState
+     *            RolloutUIState
+     */
     public RolloutGroupTargetsListGrid(final I18N i18n, final UIEventBus eventBus,
             final RolloutUIState rolloutUIState) {
         super(i18n, eventBus, null);
         this.rolloutUIState = rolloutUIState;
-        handleNoData(rolloutUIState);
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -276,15 +284,4 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
         return "unknown";
     }
 
-    @Override
-    protected void handleNoData(final RolloutUIState rolloutUIState) {
-        int size = 0;
-        final Indexed container = getContainerDataSource();
-        if (container != null) {
-            size = container.size();
-        }
-        if (size == 0 && rolloutUIState.isShowRolloutGroupTargets()) {
-            eventBus.publish(this, RolloutEvent.SHOW_ROLLOUTS);
-        }
-    }
 }

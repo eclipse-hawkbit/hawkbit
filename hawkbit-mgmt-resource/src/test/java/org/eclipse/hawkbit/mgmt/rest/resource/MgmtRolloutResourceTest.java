@@ -956,11 +956,8 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         return rolloutManagement.findRolloutById(rollout.getId());
     }
 
-      protected boolean success(final Rollout result) {
-        if (result != null && result.getStatus() == RolloutStatus.RUNNING) {
-            return true;
-        }
-        return false;
+    protected boolean success(final Rollout result) {
+        return result != null && result.getStatus() == RolloutStatus.RUNNING;
     }
 
     public Rollout getRollout(final Long rolloutId) throws Exception {
