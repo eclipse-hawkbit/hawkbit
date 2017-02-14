@@ -110,19 +110,17 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
 
     private String extractMessageFrom(final Throwable ex) {
 
-        String errorMessage = ex.getClass().getSimpleName();
-
-        if (ConstraintViolationException.class.isAssignableFrom(ex.getClass())) {
-
-            final Set<ConstraintViolation<?>> violations = ((ConstraintViolationException) ex)
-                    .getConstraintViolations();
-
-            if (violations != null) {
-                errorMessage = violations.stream().map(v -> v.getPropertyPath() + " " + v.getMessage())
-                        .collect(joining(lineSeparator()));
-            }
+        if (!(ex instanceof ConstraintViolation)) {
+            return ex.getClass().getSimpleName();
         }
 
-        return errorMessage;
+        final Set<ConstraintViolation<?>> violations = ((ConstraintViolationException) ex).getConstraintViolations();
+
+        if (violations == null) {
+            return ex.getClass().getSimpleName();
+        }
+
+        return violations.stream().map(violation -> violation.getPropertyPath() + " " + violation.getMessage())
+                .collect(joining(lineSeparator()));
     }
 }
