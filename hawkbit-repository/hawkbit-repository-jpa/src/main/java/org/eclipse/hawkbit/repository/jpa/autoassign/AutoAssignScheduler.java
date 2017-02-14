@@ -87,20 +87,16 @@ public class AutoAssignScheduler {
         for (final String tenant : tenants) {
 
             final Lock lock = lockRegistry.obtain(tenant + "-autoassign");
-            boolean acquired = false;
+            if (!lock.tryLock()) {
+                return null;
+            }
             try {
-                acquired = lock.tryLock();
-                if (acquired) {
-
-                    tenantAware.runAsTenant(tenant, () -> {
-                        autoAssignChecker.check();
-                        return null;
-                    });
-                }
+                tenantAware.runAsTenant(tenant, () -> {
+                    autoAssignChecker.check();
+                    return null;
+                });
             } finally {
-                if (acquired) {
-                    lock.unlock();
-                }
+                lock.unlock();
             }
         }
         return null;

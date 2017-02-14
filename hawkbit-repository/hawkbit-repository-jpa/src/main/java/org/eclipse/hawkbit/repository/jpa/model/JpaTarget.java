@@ -110,7 +110,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
      * with this security token.
      */
     @Column(name = "sec_token", updatable = true, nullable = false, length = 128)
-    @Size(max = 64)
+    @Size(max = 128)
     @NotEmpty
     private String securityToken;
 

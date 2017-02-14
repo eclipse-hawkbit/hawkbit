@@ -721,17 +721,14 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
         final String handlerId = tenant + "-rollout-" + rolloutId;
         final Lock lock = lockRegistry.obtain(handlerId);
-        boolean acquired = false;
-        try {
-            acquired = lock.tryLock();
-            if (acquired) {
-                runInNewTransaction(handlerId, status -> executeFittingHandler(rolloutId));
-            }
+        if (!lock.tryLock()) {
+            return;
+        }
 
+        try {
+            runInNewTransaction(handlerId, status -> executeFittingHandler(rolloutId));
         } finally {
-            if (acquired) {
-                lock.unlock();
-            }
+            lock.unlock();
         }
     }
 
