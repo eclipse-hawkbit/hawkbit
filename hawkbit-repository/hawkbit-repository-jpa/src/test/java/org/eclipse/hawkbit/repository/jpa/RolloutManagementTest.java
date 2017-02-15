@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
@@ -1315,6 +1316,50 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Verify Exception when a Rollout groups are queried for rollout that does not exist.")
+    public void findRolloutGroupsForRolloutThatDoesNotExist() throws Exception {
+        try {
+            rolloutGroupManagement.findAllRolloutGroupsWithDetailedStatus(1234L, pageReq);
+            fail("Was able to get Rollout group for rollout that does not exist.");
+        } catch (final EntityNotFoundException e) {
+            // OK
+        }
+    }
+
+    @Test
+    @Description("Verify Exception when targets are queried for rollout group that does not exist.")
+    public void findRolloutGroupTargetsForGroupThatDoesNotExist() throws Exception {
+        try {
+            rolloutGroupManagement.findRolloutGroupTargets(1234L, pageReq);
+            fail("Was able to get Rollout group targets for rollout group that does not exist.");
+        } catch (final EntityNotFoundException e) {
+            // OK
+        }
+    }
+
+    @Test
+    @Description("Verify Exception when targets are queried for rollout group that does not exist.")
+    public void findRolloutGroupTargetWithActionsForGroupThatDoesNotExist() throws Exception {
+        try {
+            rolloutGroupManagement.findAllTargetsWithActionStatus(pageReq, 1234L);
+            fail("Was able to get Rollout group targets for rollout group that does not exist.");
+        } catch (final EntityNotFoundException e) {
+            // OK
+        }
+    }
+
+    @Test
+    @Description("Verify Exception when targets are counted for rollout group that does not exist.")
+    public void countRolloutGroupTargetWithActionsForGroupThatDoesNotExist() throws Exception {
+        try {
+            rolloutGroupManagement.countTargetsOfRolloutsGroup(1234L);
+            fail("Was able to count Rollout group targets for rollout group that does not exist.");
+        } catch (final EntityNotFoundException e) {
+            // OK
+        }
+    }
+
+    @Test
     @Description("Verify the start of a Rollout does not work during creation phase.")
     public void createAndStartRolloutDuringCreationFails() throws Exception {
         final int amountTargetsForRollout = 3;
@@ -1411,6 +1456,11 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final JpaRollout deletedRollout = rolloutRepository.findOne(createdRollout.getId());
         assertThat(deletedRollout).isNotNull();
         assertThat(deletedRollout.getStatus()).isEqualTo(RolloutStatus.DELETED);
+        assertThat(rolloutManagement.findAll(pageReq, true).getContent()).hasSize(1);
+        assertThat(rolloutManagement.findAll(pageReq, false).getContent()).hasSize(0);
+        assertThat(rolloutGroupManagement.findAllRolloutGroupsWithDetailedStatus(createdRollout.getId(), pageReq)
+                .getContent()).hasSize(amountGroups);
+
         // verify that all scheduled actions are deleted
         assertThat(actionRepository.findByRolloutIdAndStatus(pageReq, deletedRollout.getId(), Status.SCHEDULED)
                 .getNumberOfElements()).isEqualTo(0);

@@ -536,7 +536,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     public void pauseRollout(final Long rolloutId) {
         final JpaRollout rollout = Optional.ofNullable(rolloutRepository.findOne(rolloutId))
                 .orElseThrow(() -> new EntityNotFoundException(String.format(ROLLOUT_NOT_FOUND, rolloutId)));
-        if (rollout.getStatus() != RolloutStatus.RUNNING) {
+        if (!RolloutStatus.RUNNING.equals(rollout.getStatus())) {
             throw new RolloutIllegalStateException("Rollout can only be paused in state running but current state is "
                     + rollout.getStatus().name().toLowerCase());
         }
@@ -919,7 +919,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Override
     public Rollout findRolloutWithDetailedStatus(final Long rolloutId, final boolean deleted) {
         final Rollout rollout = findRolloutById(rolloutId);
-        if (rollout == null || (!deleted && rollout.getStatus().equals(RolloutStatus.DELETED))) {
+        if (rollout == null) {
             return null;
         }
         final List<TotalTargetCountActionStatus> rolloutStatusCountItems = actionRepository

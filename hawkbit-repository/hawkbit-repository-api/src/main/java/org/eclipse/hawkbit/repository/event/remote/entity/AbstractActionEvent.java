@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.repository.model.Action;
  * Defines the remote event of creating a new {@link Action}.
  */
 public abstract class AbstractActionEvent extends RemoteEntityEvent<Action> {
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 1L;
 
     private Long rolloutId;
     private Long rolloutGroupId;
