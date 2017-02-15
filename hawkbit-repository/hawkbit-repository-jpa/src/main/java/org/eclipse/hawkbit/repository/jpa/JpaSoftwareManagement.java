@@ -165,9 +165,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     public Slice<SoftwareModule> findSoftwareModulesByType(final Pageable pageable, final Long typeId) {
-        if (!softwareModuleTypeRepository.exists(typeId)) {
-            throw new EntityNotFoundException(SoftwareModuleType.class, typeId);
-        }
+        throwExceptionIfSoftwareModuleTypeDoesNotExist(typeId);
 
         final List<Specification<JpaSoftwareModule>> specList = Lists.newArrayListWithExpectedSize(2);
 
@@ -175,6 +173,12 @@ public class JpaSoftwareManagement implements SoftwareManagement {
         specList.add(SoftwareModuleSpecification.isDeletedFalse());
 
         return convertSmPage(findSwModuleByCriteriaAPI(pageable, specList), pageable);
+    }
+
+    private void throwExceptionIfSoftwareModuleTypeDoesNotExist(final Long typeId) {
+        if (!softwareModuleTypeRepository.exists(typeId)) {
+            throw new EntityNotFoundException(SoftwareModuleType.class, typeId);
+        }
     }
 
     private static Slice<SoftwareModule> convertSmPage(final Slice<JpaSoftwareModule> findAll,
@@ -200,9 +204,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     public Optional<SoftwareModule> findSoftwareModuleByNameAndVersion(final String name, final String version,
             final Long typeId) {
 
-        if (!softwareModuleTypeRepository.exists(typeId)) {
-            throw new EntityNotFoundException(SoftwareModuleType.class, typeId);
-        }
+        throwExceptionIfSoftwareModuleTypeDoesNotExist(typeId);
 
         return softwareModuleRepository.findOneByNameAndVersionAndTypeId(name, version, typeId);
     }
@@ -328,9 +330,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
         }
 
         if (null != typeId) {
-            if (!softwareModuleTypeRepository.exists(typeId)) {
-                throw new EntityNotFoundException(SoftwareModuleType.class, typeId);
-            }
+            throwExceptionIfSoftwareModuleTypeDoesNotExist(typeId);
 
             spec = SoftwareModuleSpecification.equalType(typeId);
             specList.add(spec);
@@ -396,8 +396,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
         Predicate[] unassignedSpec;
         if (!assignedSoftwareModules.isEmpty()) {
             unassignedSpec = specificationsToPredicate(buildSpecificationList(searchText, typeId), unassignedRoot,
-                    unassignedQuery, cb, cb.not(unassignedRoot.get(JpaSoftwareModule_.id)
-                            .in(assignedSoftwareModules.stream().map(sw -> sw.getId()).collect(Collectors.toList()))));
+                    unassignedQuery, cb, cb.not(unassignedRoot.get(JpaSoftwareModule_.id).in(
+                            assignedSoftwareModules.stream().map(SoftwareModule::getId).collect(Collectors.toList()))));
         } else {
             unassignedSpec = specificationsToPredicate(buildSpecificationList(searchText, typeId), unassignedRoot,
                     unassignedQuery, cb);
@@ -421,9 +421,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
             specList.add(SoftwareModuleSpecification.likeNameOrVersion(searchText));
         }
         if (typeId != null) {
-            if (!softwareModuleTypeRepository.exists(typeId)) {
-                throw new EntityNotFoundException(SoftwareModuleType.class, typeId);
-            }
+            throwExceptionIfSoftwareModuleTypeDoesNotExist(typeId);
 
             specList.add(SoftwareModuleSpecification.equalType(typeId));
         }
@@ -453,9 +451,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
         }
 
         if (null != typeId) {
-            if (!softwareModuleTypeRepository.exists(typeId)) {
-                throw new EntityNotFoundException(SoftwareModuleType.class, typeId);
-            }
+            throwExceptionIfSoftwareModuleTypeDoesNotExist(typeId);
 
             spec = SoftwareModuleSpecification.equalType(typeId);
             specList.add(spec);
@@ -614,20 +610,22 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     @Override
     public Page<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(final Long swId,
             final Pageable pageable) {
+        throwExceptionIfSoftwareModuleDoesNotExist(swId);
+
+        return softwareModuleMetadataRepository.findBySoftwareModuleId(swId, pageable);
+    }
+
+    private void throwExceptionIfSoftwareModuleDoesNotExist(final Long swId) {
         if (!softwareModuleRepository.exists(swId)) {
             throw new EntityNotFoundException(SoftwareModule.class, swId);
         }
-
-        return softwareModuleMetadataRepository.findBySoftwareModuleId(swId, pageable);
     }
 
     @Override
     public Page<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(final Long softwareModuleId,
             final String rsqlParam, final Pageable pageable) {
 
-        if (!softwareModuleRepository.exists(softwareModuleId)) {
-            throw new EntityNotFoundException(SoftwareModule.class, softwareModuleId);
-        }
+        throwExceptionIfSoftwareModuleDoesNotExist(softwareModuleId);
 
         final Specification<JpaSoftwareModuleMetadata> spec = RSQLUtility.parse(rsqlParam,
                 SoftwareModuleMetadataFields.class, virtualPropertyReplacer);
@@ -644,9 +642,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     public List<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(final Long softwareModuleId) {
-        if (!softwareModuleRepository.exists(softwareModuleId)) {
-            throw new EntityNotFoundException(SoftwareModule.class, softwareModuleId);
-        }
+        throwExceptionIfSoftwareModuleDoesNotExist(softwareModuleId);
 
         return Collections.unmodifiableList(softwareModuleMetadataRepository
                 .findAll((Specification<JpaSoftwareModuleMetadata>) (root, query, cb) -> cb

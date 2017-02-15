@@ -138,14 +138,14 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
             return rolloutGroup;
         }
 
-        final JpaRolloutGroup jpsRolloutGroup = (JpaRolloutGroup) rolloutGroup.get();
+        final JpaRolloutGroup jpaRolloutGroup = (JpaRolloutGroup) rolloutGroup.get();
 
         final List<TotalTargetCountActionStatus> rolloutStatusCountItems = actionRepository
                 .getStatusCountByRolloutGroupId(rolloutGroupId);
 
         final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(rolloutStatusCountItems,
-                Long.valueOf(jpsRolloutGroup.getTotalTargets()));
-        jpsRolloutGroup.setTotalTargetCountStatus(totalTargetCountStatus);
+                Long.valueOf(jpaRolloutGroup.getTotalTargets()));
+        jpaRolloutGroup.setTotalTargetCountStatus(totalTargetCountStatus);
         return rolloutGroup;
 
     }

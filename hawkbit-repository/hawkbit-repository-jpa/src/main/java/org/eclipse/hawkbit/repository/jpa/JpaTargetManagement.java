@@ -328,9 +328,7 @@ public class JpaTargetManagement implements TargetManagement {
             specList.add(TargetSpecifications.isOverdue(TimestampCalculator.calculateOverdueTimestamp()));
         }
         if (filterParams.getFilterByDistributionId() != null) {
-            if (!distributionSetRepository.exists(filterParams.getFilterByDistributionId())) {
-                throw new EntityNotFoundException(DistributionSet.class, filterParams.getFilterByDistributionId());
-            }
+            throwEntityNotFoundIfDsDoesNotExist(filterParams.getFilterByDistributionId());
 
             specList.add(TargetSpecifications
                     .hasInstalledOrAssignedDistributionSet(filterParams.getFilterByDistributionId()));
