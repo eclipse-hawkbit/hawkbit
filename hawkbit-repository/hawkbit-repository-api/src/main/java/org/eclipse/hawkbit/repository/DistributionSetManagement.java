@@ -458,7 +458,7 @@ public interface DistributionSetManagement {
     /**
      * @param id
      *            as {@link DistributionSetType#getId()}
-     * @return {@link DistributionSetType} if found or <code>null</code> if not
+     * @return {@link DistributionSetType}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Optional<DistributionSetType> findDistributionSetTypeById(@NotNull Long id);
@@ -466,7 +466,7 @@ public interface DistributionSetManagement {
     /**
      * @param key
      *            as {@link DistributionSetType#getKey()}
-     * @return {@link DistributionSetType} if found or <code>null</code> if not
+     * @return {@link DistributionSetType}
      */
 
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
@@ -475,7 +475,7 @@ public interface DistributionSetManagement {
     /**
      * @param name
      *            as {@link DistributionSetType#getName()}
-     * @return {@link DistributionSetType} if found or <code>null</code> if not
+     * @return {@link DistributionSetType}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Optional<DistributionSetType> findDistributionSetTypeByName(@NotEmpty String name);

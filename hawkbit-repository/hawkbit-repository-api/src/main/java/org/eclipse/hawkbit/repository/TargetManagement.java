@@ -345,7 +345,7 @@ public interface TargetManagement {
      *
      * @param controllerId
      *            to look for.
-     * @return {@link Target} or <code>null</code> if it does not exist
+     * @return {@link Target}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Optional<Target> findTargetByControllerID(@NotEmpty String controllerId);
@@ -360,7 +360,7 @@ public interface TargetManagement {
      *
      * @param controllerId
      *            to look for.
-     * @return {@link Target} or <code>null</code> if it does not exist
+     * @return {@link Target}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Optional<Target> findTargetByControllerIDWithDetails(@NotEmpty String controllerId);

@@ -124,12 +124,11 @@ public interface DeploymentManagement {
      * @param actionId
      *            to be canceled
      *
-     * @return generated {@link Action} or <code>null</code> if not active on
-     *         given {@link Target}.
+     * @return canceled {@link Action}
+     * 
      * @throws CancelActionNotAllowedException
      *             in case the given action is not active or is already a cancel
      *             action
-     * 
      * @throws EntityNotFoundException
      *             if action with given ID does not exist
      */
@@ -334,8 +333,8 @@ public interface DeploymentManagement {
      * @param actionId
      *            to be canceled
      *
-     * @return generated {@link Action} or <code>null</code> if not active on
-     *         {@link Target}.
+     * @return quite {@link Action}
+     * 
      * @throws CancelActionNotAllowedException
      *             in case the given action is not active
      * 

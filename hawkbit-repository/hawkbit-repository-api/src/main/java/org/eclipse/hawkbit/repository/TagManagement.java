@@ -191,7 +191,7 @@ public interface TagManagement {
      *
      * @param name
      *            to look for.
-     * @return {@link DistributionSet} or <code>null</code> if it does not exist
+     * @return {@link DistributionSet}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Optional<DistributionSetTag> findDistributionSetTag(@NotEmpty String name);
@@ -221,7 +221,7 @@ public interface TagManagement {
      *
      * @param id
      *            to search for
-     * @return the found {@link TargetTag}s or <code>null</code> if not found.
+     * @return the found {@link TargetTag}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Optional<TargetTag> findTargetTagById(@NotNull Long id);
