@@ -109,6 +109,9 @@ public interface DistributionSetManagement {
      *            to look for
      *
      * @return number of {@link DistributionSet}s
+     * 
+     * @throws EntityNotFoundException
+     *             if type with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Long countDistributionSetsByType(@NotNull Long typeId);
@@ -270,6 +273,8 @@ public interface DistributionSetManagement {
      *            the action associated with the distribution set
      * @return the distribution set which is associated with the action
      * 
+     * @throws EntityNotFoundException
+     *             if action with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Optional<DistributionSet> findDistributionSetByAction(@NotNull Long actionId);
@@ -322,20 +327,13 @@ public interface DistributionSetManagement {
      *            the page request to page the result
      * @return a paged result of all meta data entries for a given distribution
      *         set id
+     * 
+     * @throws EntityNotFoundException
+     *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(@NotNull Long distributionSetId,
             @NotNull Pageable pageable);
-
-    /**
-     * Finds all meta data by the given distribution set id.
-     * 
-     * @param distributionSetId
-     *            the distribution set id to retrieve the meta data from
-     * @return list of distributionSetMetadata for a given distribution set Id.
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    List<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(@NotNull Long distributionSetId);
 
     /**
      * finds all meta data by the given distribution set id.
@@ -354,6 +352,9 @@ public interface DistributionSetManagement {
      *             given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException
      *             if the RSQL syntax is wrong
+     * 
+     * @throws EntityNotFoundException
+     *             of distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(@NotNull Long distributionSetId,

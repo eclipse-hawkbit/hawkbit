@@ -216,7 +216,6 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             @RequestParam(value = "force", required = false, defaultValue = "false") final boolean force) {
         final Action action = deploymentManagement.findAction(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
-        ;
 
         if (!action.getTarget().getControllerId().equals(controllerId)) {
             LOG.warn("given action ({}) is not assigned to given target ({}).", actionId, controllerId);

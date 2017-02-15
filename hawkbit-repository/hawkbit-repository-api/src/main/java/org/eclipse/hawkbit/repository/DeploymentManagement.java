@@ -244,6 +244,7 @@ public interface DeploymentManagement {
      * @param pageable
      *            the pageable request to limit, sort the actions
      * @return a slice of actions found for a specific target
+     * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Slice<Action> findActionsByTarget(@NotEmpty String controllerId, @NotNull Pageable pageable);
@@ -257,6 +258,9 @@ public interface DeploymentManagement {
      * @param actionId
      *            to be filtered on
      * @return the corresponding {@link Page} of {@link ActionStatus}
+     * 
+     * @throws EntityNotFoundException
+     *             if action with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<ActionStatus> findActionStatusByAction(@NotNull Pageable pageReq, @NotNull Long actionId);
@@ -270,6 +274,9 @@ public interface DeploymentManagement {
      * @param actionId
      *            the {@link Action} to retrieve the {@link ActionStatus} from
      * @return a page of {@link ActionStatus} by a speciifc {@link Action}
+     * 
+     * @throws EntityNotFoundException
+     *             if action with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<ActionStatus> findActionStatusByActionWithMessages(@NotNull Pageable pageable, @NotNull Long actionId);

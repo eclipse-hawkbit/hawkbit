@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.AbstractMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.springframework.data.domain.PageRequest;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.google.common.collect.Lists;
@@ -48,9 +49,6 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
         return distributionSetManagement.findDistributionSetMetadata(entity.getId(), value).isPresent();
     }
 
-    /**
-     * Create metadata for DistributionSet.
-     */
     @Override
     protected DistributionSetMetadata createMetadata(final DistributionSet entity, final String key,
             final String value) {
@@ -60,9 +58,6 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
         return dsMetaData;
     }
 
-    /**
-     * Update metadata for DistributionSet.
-     */
     @Override
     protected DistributionSetMetadata updateMetadata(final DistributionSet entity, final String key,
             final String value) {
@@ -74,13 +69,10 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
 
     @Override
     protected List<MetaData> getMetadataList() {
-        return Collections.unmodifiableList(
-                distributionSetManagement.findDistributionSetMetadataByDistributionSetId(getSelectedEntity().getId()));
+        return Collections.unmodifiableList(distributionSetManagement
+                .findDistributionSetMetadataByDistributionSetId(getSelectedEntity().getId(), new PageRequest(0, 500))
+                .getContent());
     }
-
-    /**
-     * Update metadata for DistributionSet.
-     */
 
     @Override
     protected void deleteMetadata(final DistributionSet entity, final String key, final String value) {

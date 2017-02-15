@@ -162,10 +162,6 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
 
-        // check if distribution set exists otherwise throw exception
-        // immediately
-        findDistributionSetWithExceptionIfNotFound(distributionSetId);
-
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeTargetSortParam(sortParam);
@@ -256,10 +252,6 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
 
-        // check if distribution set exists otherwise throw exception
-        // immediately
-        findDistributionSetWithExceptionIfNotFound(distributionSetId);
-
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeDistributionSetMetadataSortParam(sortParam);
@@ -349,9 +341,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam) {
-        // check if distribution set exists otherwise throw exception
-        // immediately
-        findDistributionSetWithExceptionIfNotFound(distributionSetId);
+
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeSoftwareModuleSortParam(sortParam);

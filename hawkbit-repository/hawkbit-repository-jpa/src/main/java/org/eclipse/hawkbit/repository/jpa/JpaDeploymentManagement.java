@@ -633,11 +633,19 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final Long actionId) {
+        if (!actionRepository.exists(actionId)) {
+            throw new EntityNotFoundException(Action.class, actionId);
+        }
+
         return actionStatusRepository.findByActionId(pageReq, actionId);
     }
 
     @Override
     public Page<ActionStatus> findActionStatusByActionWithMessages(final Pageable pageReq, final Long actionId) {
+        if (!actionRepository.exists(actionId)) {
+            throw new EntityNotFoundException(Action.class, actionId);
+        }
+
         return actionStatusRepository.getByActionId(pageReq, actionId);
     }
 

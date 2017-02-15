@@ -51,6 +51,9 @@ public interface SoftwareManagement {
      * @param typeId
      *            to filter the result by type
      * @return number of found {@link SoftwareModule}s
+     * 
+     * @throws EntityNotFoundException
+     *             if software module type with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Long countSoftwareModuleByFilters(String searchText, Long typeId);
@@ -78,6 +81,9 @@ public interface SoftwareManagement {
      * @return SoftwareModule
      * @throws EntityAlreadyExistsException
      *             if a given entity already exists
+     * 
+     * @throws EntityNotFoundException
+     *             of given software module type does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     List<SoftwareModule> createSoftwareModule(@NotNull Collection<SoftwareModuleCreate> creates);
@@ -89,6 +95,9 @@ public interface SoftwareManagement {
      * @return SoftwareModule
      * @throws EntityAlreadyExistsException
      *             if a given entity already exists
+     * 
+     * @throws EntityNotFoundException
+     *             of given software module type does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     SoftwareModule createSoftwareModule(@NotNull SoftwareModuleCreate create);
@@ -104,6 +113,8 @@ public interface SoftwareManagement {
      * @throws EntityAlreadyExistsException
      *             in case one of the meta data entry already exists for the
      *             specific key
+     * @throws EntityNotFoundException
+     *             if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     List<SoftwareModuleMetadata> createSoftwareModuleMetadata(@NotNull Long moduleId,
@@ -120,6 +131,8 @@ public interface SoftwareManagement {
      * @throws EntityAlreadyExistsException
      *             in case the meta data entry already exists for the specific
      *             key
+     * @throws EntityNotFoundException
+     *             if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     SoftwareModuleMetadata createSoftwareModuleMetadata(@NotNull Long moduleId, @NotNull MetaData metadata);
@@ -183,7 +196,7 @@ public interface SoftwareManagement {
      *            to delete
      * 
      * @throws EntityNotFoundException
-     *             not found is type with giben ID does not exist
+     *             not found is type with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     void deleteSoftwareModuleType(@NotNull Long typeId);
@@ -195,6 +208,9 @@ public interface SoftwareManagement {
      *            to search for
      * @return all {@link SoftwareModule}s that are assigned to given
      *         {@link DistributionSet}.
+     * 
+     * @throws EntityNotFoundException
+     *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<SoftwareModule> findSoftwareModuleByAssignedTo(@NotNull Pageable pageable, @NotNull Long setId);
@@ -211,6 +227,9 @@ public interface SoftwareManagement {
      * @param typeId
      *            to be filtered as "like" on {@link SoftwareModule#getType()}
      * @return the page of found {@link SoftwareModule}
+     * 
+     * @throws EntityNotFoundException
+     *             if given software module type does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Slice<SoftwareModule> findSoftwareModuleByFilters(@NotNull Pageable pageable, String searchText, Long typeId);
@@ -248,6 +267,9 @@ public interface SoftwareManagement {
      * @param typeId
      *            of the {@link SoftwareModule}
      * @return the found {@link SoftwareModule}
+     * 
+     * @throws EntityNotFoundException
+     *             if software module type with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Optional<SoftwareModule> findSoftwareModuleByNameAndVersion(@NotEmpty String name, @NotEmpty String version,
@@ -274,6 +296,9 @@ public interface SoftwareManagement {
      *            the page request to page the result
      * @return a paged result of all meta data entries for a given software
      *         module id
+     * 
+     * @throws EntityNotFoundException
+     *             if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(@NotNull Long swId,
@@ -296,6 +321,8 @@ public interface SoftwareManagement {
      *             given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException
      *             if the RSQL syntax is wrong
+     * @throws EntityNotFoundException
+     *             if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(@NotNull Long moduleId,
@@ -320,6 +347,9 @@ public interface SoftwareManagement {
      * @param typeId
      *            filtered as "equal" on {@link SoftwareModule#getType()}
      * @return the page of found {@link SoftwareModule}
+     * 
+     * @throws EntityNotFoundException
+     *             if given software module type does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Slice<AssignedSoftwareModule> findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(
@@ -373,6 +403,9 @@ public interface SoftwareManagement {
      * @param typeId
      *            to be filtered on
      * @return the found {@link SoftwareModule}s
+     * 
+     * @throws EntityNotFoundException
+     *             if software module type with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Slice<SoftwareModule> findSoftwareModulesByType(@NotNull Pageable pageable, @NotNull Long typeId);
@@ -383,7 +416,6 @@ public interface SoftwareManagement {
      *            to search for
      * @return {@link SoftwareModuleType} in the repository with given
      *         {@link SoftwareModuleType#getId()}
-     * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Optional<SoftwareModuleType> findSoftwareModuleTypeById(@NotNull Long id);
@@ -461,8 +493,8 @@ public interface SoftwareManagement {
      * @param metadata
      *            the meta data entry to be updated
      * 
-     * 
      * @return the updated meta data entry
+     * 
      * @throws EntityNotFoundException
      *             in case the meta data entry does not exists and cannot be
      *             updated
@@ -498,6 +530,9 @@ public interface SoftwareManagement {
      * @throws RSQLParameterSyntaxException
      *             if the RSQL syntax is wrong
      * @return result of all meta data entries for a given software module id.
+     * 
+     * @throws EntityNotFoundException
+     *             of software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     List<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(@NotNull Long moduleId);
