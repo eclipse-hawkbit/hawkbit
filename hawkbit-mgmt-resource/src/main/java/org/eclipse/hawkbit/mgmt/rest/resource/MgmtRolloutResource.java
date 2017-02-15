@@ -174,10 +174,17 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     @Override
     public ResponseEntity<MgmtRolloutGroupResponseBody> getRolloutGroup(@PathVariable("rolloutId") final Long rolloutId,
             @PathVariable("groupId") final Long groupId) {
-        rolloutManagement.findRolloutWithDetailedStatus(rolloutId);
+        findRolloutOrThrowException(rolloutId);
+
         final RolloutGroup rolloutGroup = rolloutGroupManagement.findRolloutGroupWithDetailedStatus(groupId)
                 .orElseThrow(() -> new EntityNotFoundException(RolloutGroup.class, rolloutId));
         return ResponseEntity.ok(MgmtRolloutMapper.toResponseRolloutGroup(rolloutGroup, true));
+    }
+
+    private void findRolloutOrThrowException(final Long rolloutId) {
+        if (!rolloutManagement.exists(rolloutId)) {
+            throw new EntityNotFoundException(Rollout.class, rolloutId);
+        }
     }
 
     @Override
@@ -187,7 +194,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
-        rolloutManagement.findRolloutWithDetailedStatus(rolloutId);
+        findRolloutOrThrowException(rolloutId);
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeTargetSortParam(sortParam);

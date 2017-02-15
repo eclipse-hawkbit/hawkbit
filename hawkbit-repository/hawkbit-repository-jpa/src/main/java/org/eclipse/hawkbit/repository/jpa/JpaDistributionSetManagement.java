@@ -58,6 +58,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,8 +141,13 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public DistributionSetTagAssignmentResult toggleTagAssignment(final Collection<Long> dsIds, final String tagName) {
-
         final List<JpaDistributionSet> sets = findDistributionSetListWithDetails(dsIds);
+
+        if (sets.size() < dsIds.size()) {
+            throw new EntityNotFoundException(DistributionSet.class, dsIds,
+                    sets.stream().map(DistributionSet::getId).collect(Collectors.toList()));
+        }
+
         final DistributionSetTag myTag = tagManagement.findDistributionSetTag(tagName)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, tagName));
 
@@ -234,6 +240,13 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteDistributionSet(final Collection<Long> distributionSetIDs) {
+        final List<DistributionSet> setsFound = findDistributionSetAllById(distributionSetIDs);
+
+        if (setsFound.size() < distributionSetIDs.size()) {
+            throw new EntityNotFoundException(DistributionSet.class, distributionSetIDs,
+                    setsFound.stream().map(DistributionSet::getId).collect(Collectors.toList()));
+        }
+
         final List<Long> assigned = distributionSetRepository
                 .findAssignedToTargetDistributionSetsById(distributionSetIDs);
         assigned.addAll(distributionSetRepository.findAssignedToRolloutDistributionSetsById(distributionSetIDs));
@@ -294,7 +307,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         final Collection<JpaSoftwareModule> modules = softwareModuleRepository.findByIdIn(moduleIds);
 
         if (modules.size() < moduleIds.size()) {
-            throw new EntityNotFoundException("Not all given software modules where found.");
+            throw new EntityNotFoundException(SoftwareModule.class, moduleIds,
+                    modules.stream().map(SoftwareModule::getId).collect(Collectors.toList()));
         }
 
         checkDistributionSetIsAssignedToTargets(setId);
@@ -355,7 +369,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                 .findByIdIn(softwareModulesTypeIds);
 
         if (modules.size() < softwareModulesTypeIds.size()) {
-            throw new EntityNotFoundException("Not all given software module types where found.");
+            throw new EntityNotFoundException(SoftwareModuleType.class, softwareModulesTypeIds,
+                    modules.stream().map(SoftwareModuleType::getId).collect(Collectors.toList()));
         }
 
         final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(dsTypeId);
@@ -376,7 +391,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                 .findByIdIn(softwareModulesTypeIds);
 
         if (modules.size() < softwareModulesTypeIds.size()) {
-            throw new EntityNotFoundException("Not all given software module types where found.");
+            throw new EntityNotFoundException(SoftwareModuleType.class, softwareModulesTypeIds,
+                    modules.stream().map(SoftwareModuleType::getId).collect(Collectors.toList()));
         }
 
         final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(dsTypeId);
@@ -822,6 +838,11 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public List<DistributionSet> assignTag(final Collection<Long> dsIds, final Long dsTagId) {
         final List<JpaDistributionSet> allDs = findDistributionSetListWithDetails(dsIds);
+
+        if (allDs.size() < dsIds.size()) {
+            throw new EntityNotFoundException(DistributionSet.class, dsIds,
+                    allDs.stream().map(DistributionSet::getId).collect(Collectors.toList()));
+        }
 
         final DistributionSetTag distributionSetTag = tagManagement.findDistributionSetTagById(dsTagId)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, dsTagId));

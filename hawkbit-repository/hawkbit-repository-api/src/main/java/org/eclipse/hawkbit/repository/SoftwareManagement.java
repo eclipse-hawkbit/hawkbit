@@ -185,6 +185,9 @@ public interface SoftwareManagement {
      *
      * @param moduleIds
      *            of the Software Modules to be deleted
+     * 
+     * @throws EntityNotFoundException
+     *             if (at least one) module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     void deleteSoftwareModules(@NotNull Collection<Long> moduleIds);

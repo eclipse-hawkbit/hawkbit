@@ -37,6 +37,7 @@ import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.SoftwareModuleNotAssignedToTargetException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -175,7 +176,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     private ActionStatus checkAndLogDownload(final HttpServletRequest request, final Target target, final Long module) {
         final Action action = controllerManagement
                 .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), module)
-                .orElseThrow(() -> new EntityNotFoundException("Action does not exist or has been canceled!"));
+                .orElseThrow(() -> new SoftwareModuleNotAssignedToTargetException(module, target.getControllerId()));
         final String range = request.getHeader("Range");
 
         String message;

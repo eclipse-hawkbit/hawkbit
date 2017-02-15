@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.SoftwareModuleTypeNotInDistributionSetTypeException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -147,8 +148,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
         final SoftwareModuleType foundSmType = findSoftwareModuleTypeWithExceptionIfNotFound(softwareModuleTypeId);
 
         if (!foundType.containsMandatoryModuleType(foundSmType)) {
-            throw new EntityNotFoundException(
-                    "Software module with given ID is not part of this distribution set type!");
+            throw new SoftwareModuleTypeNotInDistributionSetTypeException(softwareModuleTypeId, distributionSetTypeId);
         }
 
         return ResponseEntity.ok(toResponse(foundSmType));
@@ -163,8 +163,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
         final SoftwareModuleType foundSmType = findSoftwareModuleTypeWithExceptionIfNotFound(softwareModuleTypeId);
 
         if (!foundType.containsOptionalModuleType(foundSmType)) {
-            throw new EntityNotFoundException(
-                    "Software module with given ID is not part of this distribution set type!");
+            throw new SoftwareModuleTypeNotInDistributionSetTypeException(softwareModuleTypeId, distributionSetTypeId);
         }
 
         return ResponseEntity.ok(toResponse(foundSmType));

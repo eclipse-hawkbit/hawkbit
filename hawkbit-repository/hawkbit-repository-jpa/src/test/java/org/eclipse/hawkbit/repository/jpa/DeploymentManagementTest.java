@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -122,15 +123,34 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Ensures that distribution sets can assigned and unassigned to a  distribution set tag. Not exists  distribution set will be ignored for the assignment.")
-    public void assignAndUnassignDistributionSetToTag() {
-        final List<Long> assignDS = new ArrayList<>();
+    @Description("Ensures that tag to distribution set assignment that does not exist will cause EntityNotFoundException.")
+    public void assignDistributionSetToTagThatDoesNotExistThrowsException() {
+        final List<Long> assignDS = Lists.newArrayListWithExpectedSize(5);
         for (int i = 0; i < 4; i++) {
-            assignDS.add(testdataFactory.createDistributionSet("DS" + i, "1.0", new ArrayList<DistributionSetTag>())
-                    .getId());
+            assignDS.add(testdataFactory.createDistributionSet("DS" + i, "1.0", Collections.emptyList()).getId());
         }
         // not exists
         assignDS.add(Long.valueOf(100));
+
+        final DistributionSetTag tag = tagManagement
+                .createDistributionSetTag(entityFactory.tag().create().name("Tag1"));
+
+        try {
+            distributionSetManagement.assignTag(assignDS, tag.getId());
+            fail("It should not be possible to assign a DS that does not exist");
+        } catch (final EntityNotFoundException e) {
+            // Ok
+        }
+    }
+
+    @Test
+    @Description("Ensures that distribution sets can assigned and unassigned to a  distribution set tag.")
+    public void assignAndUnassignDistributionSetToTag() {
+        final List<Long> assignDS = Lists.newArrayListWithExpectedSize(4);
+        for (int i = 0; i < 4; i++) {
+            assignDS.add(testdataFactory.createDistributionSet("DS" + i, "1.0", Collections.emptyList()).getId());
+        }
+
         final DistributionSetTag tag = tagManagement
                 .createDistributionSetTag(entityFactory.tag().create().name("Tag1"));
 

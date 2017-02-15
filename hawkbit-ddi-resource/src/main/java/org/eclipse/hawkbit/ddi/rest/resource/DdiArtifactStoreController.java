@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.SoftwareModuleNotAssignedToTargetException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -140,8 +140,8 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
         final Action action = controllerManagement
                 .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(),
                         artifact.getSoftwareModule().getId())
-                .orElseThrow(() -> new EntityNotFoundException("No assigment found for module "
-                        + artifact.getSoftwareModule().getId() + " to target " + target.getControllerId()));
+                .orElseThrow(() -> new SoftwareModuleNotAssignedToTargetException(artifact.getSoftwareModule().getId(),
+                        target.getControllerId()));
         final String range = request.getHeader("Range");
 
         String message;
@@ -155,5 +155,4 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
         return controllerManagement.addInformationalActionStatus(
                 entityFactory.actionStatus().create(action.getId()).status(Status.DOWNLOAD).message(message));
     }
-
 }

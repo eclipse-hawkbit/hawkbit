@@ -17,7 +17,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityNotFoundException;
 import javax.validation.ConstraintDeclarationException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -34,6 +33,7 @@ import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -902,8 +902,8 @@ public class JpaRolloutManagement implements RolloutManagement {
         update.getForcedTime().ifPresent(rollout::setForcedTime);
         update.getStartAt().ifPresent(rollout::setStartAt);
         update.getSet().ifPresent(setId -> {
-            final DistributionSet set = distributionSetManagement.findDistributionSetById(setId).orElseThrow(
-                    () -> new EntityNotFoundException("Distribution set cannot be set as it does not exists" + setId));
+            final DistributionSet set = distributionSetManagement.findDistributionSetById(setId)
+                    .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, setId));
 
             rollout.setDistributionSet(set);
         });
@@ -913,7 +913,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     private JpaRollout getRolloutAndThrowExceptionIfNotFound(final Long rolloutId) {
         return rolloutRepository.findById(rolloutId)
-                .orElseThrow(() -> new EntityNotFoundException("Rollout with id " + rolloutId + " not found."));
+                .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
     }
 
     @Override
@@ -958,18 +958,24 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     public float getFinishedPercentForRunningGroup(final Long rolloutId, final Long rolloutGroupId) {
-        final RolloutGroup rolloutGroup = rolloutGroupRepository.findById(rolloutGroupId).orElseThrow(
-                () -> new EntityNotFoundException("Rollout group with given ID " + rolloutGroupId + " not found."));
+        final RolloutGroup rolloutGroup = rolloutGroupRepository.findById(rolloutGroupId)
+                .orElseThrow(() -> new EntityNotFoundException(RolloutGroup.class, rolloutGroupId));
 
         final long totalGroup = rolloutGroup.getTotalTargets();
-        final Long finished = actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rolloutId,
-                rolloutGroup.getId(), Action.Status.FINISHED);
         if (totalGroup == 0) {
             // in case e.g. targets has been deleted we don't have any actions
             // left for this group, so the group is finished
             return 100;
         }
+
+        final Long finished = actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rolloutId,
+                rolloutGroup.getId(), Action.Status.FINISHED);
         // calculate threshold
         return ((float) finished / (float) totalGroup) * 100;
+    }
+
+    @Override
+    public boolean exists(final Long rolloutId) {
+        return rolloutRepository.exists(rolloutId);
     }
 }

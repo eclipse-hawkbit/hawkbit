@@ -185,6 +185,9 @@ public interface TargetManagement {
      *
      * @param targetIDs
      *            the IDs of the targets to be deleted
+     * 
+     * @throws EntityNotFoundException
+     *             if (at least one) of the given target IDs does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
     void deleteTargets(@NotEmpty Collection<Long> targetIDs);

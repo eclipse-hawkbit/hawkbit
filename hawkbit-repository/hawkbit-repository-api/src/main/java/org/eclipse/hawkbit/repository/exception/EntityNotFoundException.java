@@ -8,17 +8,17 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.MetaData;
 
 /**
- * the {@link EntityNotFoundException} is thrown when a entity is tried find but
- * not found.
- * 
- *
- *
+ * the {@link EntityNotFoundException} is thrown when a entity queried but not
+ * found.
  */
 public class EntityNotFoundException extends AbstractServerRtException {
 
@@ -60,7 +60,7 @@ public class EntityNotFoundException extends AbstractServerRtException {
      * @param message
      *            of the exception
      */
-    public EntityNotFoundException(final String message) {
+    protected EntityNotFoundException(final String message) {
         super(message, THIS_ERROR);
     }
 
@@ -89,5 +89,22 @@ public class EntityNotFoundException extends AbstractServerRtException {
      */
     public EntityNotFoundException(final Class<? extends MetaData> type, final Long enityId, final String key) {
         this(type.getSimpleName() + " for given entity {" + enityId + "} and with key {" + key + "} does not exist.");
+    }
+
+    /**
+     * Parameterized constructor for a list of {@link BaseEntity}s not found.
+     * 
+     * @param type
+     *            of the entity that was not found
+     * 
+     * @param expected
+     *            collection of the {@link BaseEntity#getId()}s
+     * @param found
+     *            collection of the {@link BaseEntity#getId()}s
+     */
+    public EntityNotFoundException(final Class<? extends BaseEntity> type, final Collection<Long> expected,
+            final Collection<Long> found) {
+        this(type.getSimpleName() + "s with given identifiers {" + expected.stream().filter(id -> !found.contains(id))
+                .map(String::valueOf).collect(Collectors.joining(",")) + "} do not exist.");
     }
 }

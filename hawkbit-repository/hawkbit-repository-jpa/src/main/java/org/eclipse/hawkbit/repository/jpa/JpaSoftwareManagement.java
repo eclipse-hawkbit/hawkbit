@@ -234,6 +234,12 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteSoftwareModules(final Collection<Long> ids) {
         final List<JpaSoftwareModule> swModulesToDelete = softwareModuleRepository.findByIdIn(ids);
+
+        if (swModulesToDelete.size() < ids.size()) {
+            throw new EntityNotFoundException(SoftwareModule.class, ids,
+                    swModulesToDelete.stream().map(SoftwareModule::getId).collect(Collectors.toList()));
+        }
+
         final Set<Long> assignedModuleIds = new HashSet<>();
         swModulesToDelete.forEach(swModule -> {
 

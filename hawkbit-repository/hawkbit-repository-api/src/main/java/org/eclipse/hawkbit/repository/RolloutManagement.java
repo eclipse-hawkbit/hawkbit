@@ -302,7 +302,7 @@ public interface RolloutManagement {
      *         does not exists
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Optional<Rollout> findRolloutByName(@NotNull String rolloutName);
+    Optional<Rollout> findRolloutByName(@NotEmpty String rolloutName);
 
     /**
      * Get count of targets in different status in rollout.
@@ -315,6 +315,16 @@ public interface RolloutManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     Optional<Rollout> findRolloutWithDetailedStatus(@NotNull Long rolloutId);
+
+    /**
+     * Checks if rollout with given ID exists.
+     *
+     * @param rolloutId
+     *            rollout id
+     * 
+     * @return <code>true</code> if rollout exists
+     */
+    boolean exists(@NotNull Long rolloutId);
 
     /***
      * Get finished percentage details for a specified group which is in running

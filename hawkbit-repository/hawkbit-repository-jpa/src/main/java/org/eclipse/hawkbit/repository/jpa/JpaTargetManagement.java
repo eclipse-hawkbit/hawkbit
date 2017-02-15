@@ -126,18 +126,21 @@ public class JpaTargetManagement implements TargetManagement {
     public Optional<Target> findTargetByControllerIDWithDetails(final String controllerId) {
         final Optional<Target> result = targetRepository.findByControllerId(controllerId);
         // load lazy relations
-        if (result.isPresent()) {
-            result.get().getTargetInfo().getControllerAttributes().size();
-            if (result.get().getTargetInfo() != null
-                    && result.get().getTargetInfo().getInstalledDistributionSet() != null) {
-                result.get().getTargetInfo().getInstalledDistributionSet().getName();
-                result.get().getTargetInfo().getInstalledDistributionSet().getModules().size();
-            }
-            if (result.get().getAssignedDistributionSet() != null) {
-                result.get().getAssignedDistributionSet().getName();
-                result.get().getAssignedDistributionSet().getModules().size();
-            }
+        if (!result.isPresent()) {
+            return result;
         }
+
+        result.get().getTargetInfo().getControllerAttributes().size();
+        if (result.get().getTargetInfo() != null
+                && result.get().getTargetInfo().getInstalledDistributionSet() != null) {
+            result.get().getTargetInfo().getInstalledDistributionSet().getName();
+            result.get().getTargetInfo().getInstalledDistributionSet().getModules().size();
+        }
+        if (result.get().getAssignedDistributionSet() != null) {
+            result.get().getAssignedDistributionSet().getName();
+            result.get().getAssignedDistributionSet().getModules().size();
+        }
+
         return result;
     }
 
@@ -216,6 +219,13 @@ public class JpaTargetManagement implements TargetManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteTargets(final Collection<Long> targetIDs) {
+        final List<JpaTarget> targets = targetRepository.findAll(targetIDs);
+
+        if (targets.size() < targetIDs.size()) {
+            throw new EntityNotFoundException(Target.class, targetIDs,
+                    targets.stream().map(Target::getId).collect(Collectors.toList()));
+        }
+
         targetRepository.deleteByIdIn(targetIDs);
 
         targetIDs.forEach(targetId -> eventPublisher.publishEvent(new TargetDeletedEvent(tenantAware.getCurrentTenant(),

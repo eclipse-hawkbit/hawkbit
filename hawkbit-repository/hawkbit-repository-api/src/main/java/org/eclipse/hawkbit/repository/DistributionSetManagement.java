@@ -61,7 +61,7 @@ public interface DistributionSetManagement {
      * @return the updated {@link DistributionSet}.
      * 
      * @throws EntityNotFoundException
-     *             if given module does not exist
+     *             if (at least one) given module does not exist
      * 
      * @throws EntityReadOnlyException
      *             if use tries to change the {@link DistributionSet} s while
@@ -87,7 +87,8 @@ public interface DistributionSetManagement {
      * @return list of assigned ds
      * 
      * @throws EntityNotFoundException
-     *             if tag with given ID does not exist
+     *             if tag with given ID does not exist or (at least one) of the
+     *             distribution sets.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     List<DistributionSet> assignTag(@NotEmpty Collection<Long> dsIds, @NotNull Long tagId);
@@ -236,6 +237,9 @@ public interface DistributionSetManagement {
      *
      * @param dsIds
      *            to be deleted
+     * 
+     * @throws EntityNotFoundException
+     *             if (at least one) given distribution set does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     void deleteDistributionSet(@NotEmpty Collection<Long> dsIds);
@@ -545,7 +549,7 @@ public interface DistributionSetManagement {
      *         the assignment outcome.
      * 
      * @throws EntityNotFoundException
-     *             if given tag does not exist
+     *             if given tag does not exist or (at least one) module
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     DistributionSetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<Long> dsIds, @NotNull String tagName);
@@ -725,6 +729,6 @@ public interface DistributionSetManagement {
      * @return the found {@link DistributionSet}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    List<DistributionSet> findDistributionSetAllById(@NotNull Collection<Long> ids);
+    List<DistributionSet> findDistributionSetAllById(@NotEmpty Collection<Long> ids);
 
 }
