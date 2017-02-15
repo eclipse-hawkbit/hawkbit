@@ -204,7 +204,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
         if (softwareModule == null) {
             LOG.debug("no software module with ID {} exists", moduleId);
-            throw new EntityNotFoundException(SoftwareModule.class, +moduleId);
+            throw new EntityNotFoundException(SoftwareModule.class, moduleId);
         }
         return softwareModule;
     }

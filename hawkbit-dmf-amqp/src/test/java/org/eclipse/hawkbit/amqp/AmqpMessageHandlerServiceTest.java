@@ -166,7 +166,7 @@ public class AmqpMessageHandlerServiceTest {
         final ArgumentCaptor<URI> uriCaptor = ArgumentCaptor.forClass(URI.class);
         when(controllerManagementMock.findOrRegisterTargetIfItDoesNotexist(targetIdCaptor.capture(),
                 uriCaptor.capture())).thenReturn(targetMock);
-        when(controllerManagementMock.findOldestActiveActionByTarget(Matchers.any())).thenReturn(Optional.empty());
+        when(controllerManagementMock.findOldestActiveActionByTarget(any())).thenReturn(Optional.empty());
 
         amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
 
@@ -400,15 +400,15 @@ public class AmqpMessageHandlerServiceTest {
 
         // Mock
         final Action action = createActionWithTarget(22L, Status.FINISHED);
-        when(controllerManagementMock.findActionWithDetails(Matchers.any())).thenReturn(Optional.of(action));
-        when(controllerManagementMock.addUpdateActionStatus(Matchers.any())).thenReturn(action);
+        when(controllerManagementMock.findActionWithDetails(any())).thenReturn(Optional.of(action));
+        when(controllerManagementMock.addUpdateActionStatus(any())).thenReturn(action);
         final ActionStatusBuilder builder = mock(ActionStatusBuilder.class);
         final ActionStatusCreate create = mock(ActionStatusCreate.class);
         when(builder.create(22L)).thenReturn(create);
-        when(create.status(Matchers.any())).thenReturn(create);
+        when(create.status(any())).thenReturn(create);
         when(entityFactoryMock.actionStatus()).thenReturn(builder);
         // for the test the same action can be used
-        when(controllerManagementMock.findOldestActiveActionByTarget(Matchers.any())).thenReturn(Optional.of(action));
+        when(controllerManagementMock.findOldestActiveActionByTarget(any())).thenReturn(Optional.of(action));
 
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
@@ -420,14 +420,14 @@ public class AmqpMessageHandlerServiceTest {
         amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
 
         // verify
-        verify(controllerManagementMock).updateLastTargetQuery(Matchers.any(String.class), Matchers.isNull(URI.class));
+        verify(controllerManagementMock).updateLastTargetQuery(any(String.class), Matchers.isNull(URI.class));
 
         final ArgumentCaptor<String> tenantCaptor = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<Target> targetCaptor = ArgumentCaptor.forClass(Target.class);
         final ArgumentCaptor<Long> actionIdCaptor = ArgumentCaptor.forClass(Long.class);
 
         verify(amqpMessageDispatcherServiceMock, times(1)).sendUpdateMessageToTarget(tenantCaptor.capture(),
-                targetCaptor.capture(), actionIdCaptor.capture(), Matchers.any(Collection.class));
+                targetCaptor.capture(), actionIdCaptor.capture(), any(Collection.class));
         final String tenant = tenantCaptor.getValue();
         final String controllerId = targetCaptor.getValue().getControllerId();
         final Long actionId = actionIdCaptor.getValue();
