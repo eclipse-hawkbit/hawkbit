@@ -75,7 +75,6 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.converter.Converter;
@@ -607,44 +606,22 @@ public class RolloutListGrid extends AbstractGrid {
 
     private static class RollouStatusCellStyleGenerator implements CellStyleGenerator {
 
-        private static final long serialVersionUID = 1L;
-        /**
-         * Contains all expected rollout status per column to enable or disable
-         * the button.
-         */
-        private static final Map<String, RolloutStatus> EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON = Maps
-                .newHashMapWithExpectedSize(27);
-        private final Container.Indexed containerDataSource;
+        private static final List<RolloutStatus> DELETE_COPY_BUTTON_ENABLED = Arrays.asList(RolloutStatus.CREATING,
+                RolloutStatus.ERROR_CREATING, RolloutStatus.ERROR_STARTING, RolloutStatus.PAUSED, RolloutStatus.READY,
+                RolloutStatus.RUNNING, RolloutStatus.STARTING, RolloutStatus.STOPPED, RolloutStatus.FINISHED);
 
-        static {
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(RUN_OPTION, RolloutStatus.READY);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(PAUSE_OPTION, RolloutStatus.RUNNING);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(UPDATE_OPTION, RolloutStatus.READY);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(UPDATE_OPTION, RolloutStatus.RUNNING);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(UPDATE_OPTION, RolloutStatus.PAUSED);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(UPDATE_OPTION, RolloutStatus.CREATING);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(UPDATE_OPTION, RolloutStatus.STARTING);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(UPDATE_OPTION, RolloutStatus.STOPPED);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(UPDATE_OPTION, RolloutStatus.ERROR_CREATING);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(UPDATE_OPTION, RolloutStatus.ERROR_STARTING);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(DELETE_OPTION, RolloutStatus.READY);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(DELETE_OPTION, RolloutStatus.RUNNING);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(DELETE_OPTION, RolloutStatus.PAUSED);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(DELETE_OPTION, RolloutStatus.CREATING);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(DELETE_OPTION, RolloutStatus.STARTING);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(DELETE_OPTION, RolloutStatus.STOPPED);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(DELETE_OPTION, RolloutStatus.ERROR_CREATING);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(DELETE_OPTION, RolloutStatus.ERROR_STARTING);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(COPY_OPTION, RolloutStatus.READY);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(COPY_OPTION, RolloutStatus.RUNNING);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(COPY_OPTION, RolloutStatus.PAUSED);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(COPY_OPTION, RolloutStatus.CREATING);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(COPY_OPTION, RolloutStatus.STARTING);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(COPY_OPTION, RolloutStatus.STOPPED);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(COPY_OPTION, RolloutStatus.FINISHED);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(COPY_OPTION, RolloutStatus.ERROR_CREATING);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(COPY_OPTION, RolloutStatus.ERROR_STARTING);
-        }
+        private static final List<RolloutStatus> UPDATE_BUTTON_ENABLED = Arrays.asList(RolloutStatus.CREATING,
+                RolloutStatus.ERROR_CREATING, RolloutStatus.ERROR_STARTING, RolloutStatus.PAUSED, RolloutStatus.READY,
+                RolloutStatus.RUNNING, RolloutStatus.STARTING, RolloutStatus.STOPPED);
+
+        private static final List<RolloutStatus> PAUSE_BUTTON_ENABLED = Arrays.asList(RolloutStatus.RUNNING);
+
+        private static final List<RolloutStatus> RUN_BUTTON_ENABLED = Arrays.asList(RolloutStatus.READY,
+                RolloutStatus.PAUSED);
+
+        private static final long serialVersionUID = 1L;
+
+        private final Container.Indexed containerDataSource;
 
         /**
          * Constructor
@@ -665,31 +642,22 @@ public class RolloutListGrid extends AbstractGrid {
         }
 
         private String convertRolloutStatusToString(final CellReference cellReference) {
-            final Object propertyId = cellReference.getPropertyId();
-            final RolloutStatus expectedRolloutStatus = EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.get(propertyId);
-            if (expectedRolloutStatus == null) {
-                return null;
-            }
+            final String propertyId = (String) cellReference.getPropertyId();
 
             if (RUN_OPTION.equals(propertyId)) {
-                return getStatus(cellReference, Arrays.asList(RolloutStatus.READY, RolloutStatus.PAUSED));
+                return getStatus(cellReference, RUN_BUTTON_ENABLED);
             }
 
             if (PAUSE_OPTION.equals(propertyId)) {
-                return getStatus(cellReference, Arrays.asList(RolloutStatus.RUNNING));
+                return getStatus(cellReference, PAUSE_BUTTON_ENABLED);
             }
 
-            if (UPDATE_OPTION.equals(propertyId) || DELETE_OPTION.equals(propertyId)) {
-                return getStatus(cellReference,
-                        Arrays.asList(RolloutStatus.CREATING, RolloutStatus.ERROR_CREATING,
-                                RolloutStatus.ERROR_STARTING, RolloutStatus.PAUSED, RolloutStatus.READY,
-                                RolloutStatus.RUNNING, RolloutStatus.STARTING, RolloutStatus.STOPPED));
+            if (UPDATE_OPTION.equals(propertyId)) {
+                return getStatus(cellReference, UPDATE_BUTTON_ENABLED);
             }
 
-            if (COPY_OPTION.equals(propertyId)) {
-                return getStatus(cellReference, Arrays.asList(RolloutStatus.CREATING, RolloutStatus.ERROR_CREATING,
-                        RolloutStatus.ERROR_STARTING, RolloutStatus.PAUSED, RolloutStatus.READY, RolloutStatus.RUNNING,
-                        RolloutStatus.STARTING, RolloutStatus.STOPPED, RolloutStatus.FINISHED));
+            if (DELETE_OPTION.equals(propertyId) || COPY_OPTION.equals(propertyId)) {
+                return getStatus(cellReference, DELETE_COPY_BUTTON_ENABLED);
             }
 
             return null;

@@ -106,13 +106,14 @@ public final class ViewComponentClientCriterion extends VAcceptCriterion {
     // Exception squid:S1166 - Hide origin exception
     // Exception squid:S2221 - This code is trans-coded to JavaScript, hence
     // Exception semantics changes
-    @SuppressWarnings({ "squid:S1166", "squid:S2221" })
+    // Exception squid:S2629 - not supported by GWT
+    @SuppressWarnings({ "squid:S1166", "squid:S2221", "squid:S2629" })
     void showDropTargetHints(final UIDL configuration) {
         final int dropAreaCount = configuration.getIntAttribute(DROP_AREA_COUNT);
         for (int dropAreaIndex = 0; dropAreaIndex < dropAreaCount; dropAreaIndex++) {
             try {
                 final String dropArea = configuration.getStringAttribute(DROP_AREA + dropAreaIndex);
-                LOGGER.log(Level.FINE, "Hint Area: {}", dropArea);
+                LOGGER.log(Level.FINE, "Hint Area: " + dropArea);
 
                 final Element showHintFor = Document.get().getElementById(dropArea);
                 if (showHintFor != null) {
@@ -140,7 +141,8 @@ public final class ViewComponentClientCriterion extends VAcceptCriterion {
     // Exception squid:S1166 - Hide origin exception
     // Exception squid:S2221 - This code is trans-coded to JavaScript, hence
     // Exception semantics changes
-    @SuppressWarnings({ "squid:S1166", "squid:S2221" })
+    // Exception squid:S2629 - not supported by GWT
+    @SuppressWarnings({ "squid:S1166", "squid:S2221", "squid:S2629" })
     boolean isValidDropTarget(final UIDL configuration) {
         try {
             final String dropTarget = VDragAndDropManager.get().getCurrentDropHandler().getConnector().getWidget()
@@ -148,7 +150,7 @@ public final class ViewComponentClientCriterion extends VAcceptCriterion {
             final int dropTargetCount = configuration.getIntAttribute(DROP_TARGET_COUNT);
             for (int dropTargetIndex = 0; dropTargetIndex < dropTargetCount; dropTargetIndex++) {
                 final String dropTargetPrefix = configuration.getStringAttribute(DROP_TARGET + dropTargetIndex);
-                LOGGER.log(Level.FINE, "Drop Target: {}", dropTargetPrefix);
+                LOGGER.log(Level.FINE, "Drop Target: " + dropTargetPrefix);
                 if (dropTarget.startsWith(dropTargetPrefix)) {
                     return true;
                 }

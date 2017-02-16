@@ -470,7 +470,9 @@ public class TargetTable extends AbstractTable<Target, Long> {
     private void resetPinStyle(final Button pinBtn) {
         pinBtn.removeStyleName(TARGET_PINNED);
         pinBtn.addStyleName(SPUIStyleDefinitions.TARGET_STATUS_PIN_TOGGLE);
-        HawkbitCommonUtil.applyStatusLblStyle(this, pinBtn, pinBtn.getData());
+        final TargetIdName targetIdname = (TargetIdName) pinBtn.getData();
+
+        HawkbitCommonUtil.applyStatusLblStyle(this, pinBtn, targetIdname.getTargetId());
     }
 
     /**
