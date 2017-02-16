@@ -16,7 +16,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-
 import javax.validation.ConstraintDeclarationException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -59,6 +58,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondit
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
+import org.eclipse.hawkbit.repository.model.RolloutGroupsValidation;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
@@ -78,11 +78,14 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.integration.support.locks.LockRegistry;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.collect.Lists;
@@ -391,7 +394,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     private void createAssignmentOfTargetsToGroup(final Page<Target> targets, final RolloutGroup group) {
         targets.forEach(target -> rolloutTargetGroupRepository.save(new RolloutTargetGroup(group, target)));
     }
-    
+
     @Override
     @Async
     public ListenableFuture<RolloutGroupsValidation> validateTargetsInGroups(final List<RolloutGroupCreate> groups,
@@ -413,7 +416,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     public Rollout startRollout(final Long rolloutId) {
         LOGGER.debug("startRollout called for rollout {}", rolloutId);
 
-         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
+        final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
         RolloutHelper.checkIfRolloutCanStarted(rollout, rollout);
         rollout.setStatus(RolloutStatus.STARTING);
         rollout.setLastCheck(0);
@@ -491,7 +494,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private Integer createActionsForTargetsInNewTransaction(final long rolloutId, final long groupId, final int limit) {
-        return runInNewCountingTransaction("createActionsForTargets", status -> {
+        return runInNewTransaction("createActionsForTargets", status -> {
             final PageRequest pageRequest = new PageRequest(0, limit);
             final Rollout rollout = rolloutRepository.findOne(rolloutId);
             final RolloutGroup group = rolloutGroupRepository.findOne(groupId);
@@ -542,7 +545,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void pauseRollout(final Long rolloutId) {
-       final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
+        final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
         if (!RolloutStatus.RUNNING.equals(rollout.getStatus())) {
             throw new RolloutIllegalStateException("Rollout can only be paused in state running but current state is "
                     + rollout.getStatus().name().toLowerCase());
@@ -835,6 +838,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     private void hardDeleteRollout(final JpaRollout rollout) {
         rolloutRepository.delete(rollout);
     }
+
     private void deleteScheduledActions(final JpaRollout rollout, final Slice<JpaAction> scheduledActions) {
         final boolean hasScheduledActions = scheduledActions.getNumberOfElements() > 0;
 
@@ -918,13 +922,13 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-     public Optional<Rollout> findRolloutWithDetailedStatus(final Long rolloutId) {
+    public Optional<Rollout> findRolloutWithDetailedStatus(final Long rolloutId) {
         final Optional<Rollout> rollout = findRolloutById(rolloutId);
 
         if (!rollout.isPresent()) {
             return rollout;
         }
-        
+
         final List<TotalTargetCountActionStatus> rolloutStatusCountItems = actionRepository
                 .getStatusCountByRolloutId(rolloutId);
         final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(rolloutStatusCountItems,

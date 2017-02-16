@@ -59,6 +59,8 @@ public interface RolloutGroupManagement {
      * @param rolloutGroupId
      *            rollout group
      * @return {@link TargetWithActionStatus} target with action status
+     * @throws EntityNotFoundException
+     *             if rollout group with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
     Page<TargetWithActionStatus> findAllTargetsWithActionStatus(@NotNull Pageable pageable,

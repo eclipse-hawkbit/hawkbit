@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 import java.lang.reflect.Constructor;
@@ -94,12 +94,8 @@ public class ActionEventTest extends AbstractRemoteEntityEventTest<Action> {
         final Target target = testdataFactory.createTarget("Test");
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
         generateAction.setTarget(target);
-<<<<<<< HEAD
         generateAction.setDistributionSet(distributionSet);
         generateAction.setStatus(Status.RUNNING);
-=======
-        generateAction.setDistributionSet(testdataFactory.createDistributionSet());
->>>>>>> refs/heads/master
         return actionRepository.save(generateAction);
     }
 

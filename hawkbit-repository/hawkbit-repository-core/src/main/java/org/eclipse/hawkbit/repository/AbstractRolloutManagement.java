@@ -119,7 +119,9 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
                     .round(group.getTargetPercentage() / 100 * (double) realTargetsInGroup);
             groupTargetCounts.add(reducedTargetsInGroup);
             unusedTargetsCount += realTargetsInGroup - reducedTargetsInGroup;
+
         }
+
         return new RolloutGroupsValidation(totalTargets, groupTargetCounts);
     }
 

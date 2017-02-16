@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.rollout;
 
+import java.util.Optional;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
@@ -16,6 +18,7 @@ import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
@@ -164,7 +167,9 @@ public class RolloutView extends VerticalLayout implements View {
         if (!rolloutUIState.getRolloutId().isPresent()) {
             return true;
         }
-        return rolloutManagement.findRolloutById(rolloutUIState.getRolloutId().get()).isDeleted();
+
+        final Optional<Rollout> rollout = rolloutManagement.findRolloutById(rolloutUIState.getRolloutId().get());
+        return !rollout.isPresent() || rollout.get().isDeleted();
     }
 
     private void showRolloutListView() {

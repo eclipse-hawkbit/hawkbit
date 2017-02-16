@@ -33,6 +33,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -194,34 +195,31 @@ public class RolloutListGrid extends AbstractGrid {
         if (!rolloutUIState.isShowRollOuts() || rolloutChangeEvent.getRolloutId() == null) {
             return;
         }
-        final Rollout rollout = rolloutManagement.findRolloutWithDetailedStatus(rolloutChangeEvent.getRolloutId(),
-                false).get();
+        final Optional<Rollout> rollout = rolloutManagement
+                .findRolloutWithDetailedStatus(rolloutChangeEvent.getRolloutId());
 
-        if (rolloutIsDeleted(rollout)) {
+        if (!rollout.isPresent() || rollout.get().isDeleted()) {
             return;
         }
-        final TotalTargetCountStatus totalTargetCountStatus = rollout.getTotalTargetCountStatus();
+
         final LazyQueryContainer rolloutContainer = (LazyQueryContainer) getContainerDataSource();
         final Item item = rolloutContainer.getItem(rolloutChangeEvent.getRolloutId());
         if (item == null) {
             refreshContainer();
             return;
         }
-        item.getItemProperty(VAR_STATUS).setValue(rollout.getStatus());
+        final TotalTargetCountStatus totalTargetCountStatus = rollout.get().getTotalTargetCountStatus();
+        item.getItemProperty(VAR_STATUS).setValue(rollout.get().getStatus());
         item.getItemProperty(VAR_TOTAL_TARGETS_COUNT_STATUS).setValue(totalTargetCountStatus);
         final Long groupCount = (Long) item.getItemProperty(VAR_NUMBER_OF_GROUPS).getValue();
-        final int groupsCreated = rollout.getRolloutGroupsCreated();
+        final int groupsCreated = rollout.get().getRolloutGroupsCreated();
         if (groupsCreated != 0) {
             item.getItemProperty(VAR_NUMBER_OF_GROUPS).setValue(Long.valueOf(groupsCreated));
-        } else if (rollout.getRolloutGroups() != null && groupCount != rollout.getRolloutGroups().size()) {
-            item.getItemProperty(VAR_NUMBER_OF_GROUPS).setValue(Long.valueOf(rollout.getRolloutGroups().size()));
+        } else if (rollout.get().getRolloutGroups() != null && groupCount != rollout.get().getRolloutGroups().size()) {
+            item.getItemProperty(VAR_NUMBER_OF_GROUPS).setValue(Long.valueOf(rollout.get().getRolloutGroups().size()));
         }
         item.getItemProperty(ROLLOUT_RENDERER_DATA)
-                .setValue(new RolloutRendererData(rollout.getName(), rollout.getStatus().toString()));
-    }
-
-    private static boolean rolloutIsDeleted(final Rollout rollout) {
-        return rollout == null;
+                .setValue(new RolloutRendererData(rollout.get().getName(), rollout.get().getStatus().toString()));
     }
 
     @Override
@@ -509,7 +507,13 @@ public class RolloutListGrid extends AbstractGrid {
     }
 
     private void deleteRollout(final Long rolloutId) {
-        final String formattedConfirmationQuestion = getConfirmationQuestion(rolloutId);
+        final Optional<Rollout> rollout = rolloutManagement.findRolloutWithDetailedStatus(rolloutId);
+
+        if (!rollout.isPresent()) {
+            return;
+        }
+
+        final String formattedConfirmationQuestion = getConfirmationQuestion(rollout.get());
         final ConfirmationDialog confirmationDialog = new ConfirmationDialog(i18n.get("caption.confirm.delete.rollout"),
                 formattedConfirmationQuestion, i18n.get("button.ok"), i18n.get("button.cancel"), ok -> {
                     if (!ok) {
@@ -524,9 +528,9 @@ public class RolloutListGrid extends AbstractGrid {
         confirmationDialog.getWindow().bringToFront();
     }
 
-    private String getConfirmationQuestion(final Long rolloutId) {
-        final Rollout rolloutData = rolloutManagement.findRolloutWithDetailedStatus(rolloutId, false);
-        final Map<Status, Long> statusTotalCount = rolloutData.getTotalTargetCountStatus().getStatusTotalCountMap();
+    private String getConfirmationQuestion(final Rollout rollout) {
+
+        final Map<Status, Long> statusTotalCount = rollout.getTotalTargetCountStatus().getStatusTotalCountMap();
         Long scheduledActions = statusTotalCount.get(Status.SCHEDULED);
         if (scheduledActions == null) {
             scheduledActions = 0L;
@@ -537,7 +541,7 @@ public class RolloutListGrid extends AbstractGrid {
             rolloutDetailsMessage = i18n.get("message.delete.rollout.details", runningActions, scheduledActions);
         }
 
-        return i18n.get("message.delete.rollout", rolloutData.getName(), rolloutDetailsMessage);
+        return i18n.get("message.delete.rollout", rollout.getName(), rolloutDetailsMessage);
     }
 
     private String getDescription(final CellReference cell) {

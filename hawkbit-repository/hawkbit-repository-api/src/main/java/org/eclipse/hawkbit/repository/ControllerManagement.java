@@ -120,6 +120,9 @@ public interface ControllerManagement {
      * @param controllerId
      *            identifies the target to retrieve the actions from
      * @return a list of actions assigned to given target which are active
+     * 
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     Optional<Action> findOldestActiveActionByTarget(@NotNull String controllerId);
@@ -157,6 +160,9 @@ public interface ControllerManagement {
      *            of the the {@link SoftwareModule} that should be assigned to
      *            the target
      * @return last {@link Action} for given combination
+     * 
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
      *
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)

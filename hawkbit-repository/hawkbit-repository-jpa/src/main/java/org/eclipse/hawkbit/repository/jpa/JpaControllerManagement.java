@@ -140,6 +140,8 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     public Optional<Action> getActionForDownloadByTargetAndSoftwareModule(final String controllerId,
             final Long moduleId) {
+        throwExceptionIfTargetFoesNotExist(controllerId);
+
         final List<Action> action = actionRepository.findActionByTargetAndSoftwareModule(controllerId, moduleId);
 
         if (action.isEmpty() || action.get(0).isCancelingOrCanceled()) {
@@ -149,14 +151,18 @@ public class JpaControllerManagement implements ControllerManagement {
         return Optional.ofNullable(action.get(0));
     }
 
+    private void throwExceptionIfTargetFoesNotExist(final String controllerId) {
+        if (!targetRepository.existsByControllerId(controllerId)) {
+            throw new EntityNotFoundException(Target.class, controllerId);
+        }
+    }
+
     @Override
     public boolean hasTargetArtifactAssigned(final String controllerId, final String sha1Hash) {
-        
-        finalboolean targetExists = targetRepository.existsByControllerId(controllerId);
-        if (!target.isPresent()) {
+        if (!targetRepository.existsByControllerId(controllerId)) {
             return false;
         }
-        return actionRepository.count(ActionSpecifications.hasTargetAssignedArtifact(target.get(), sha1Hash)) > 0;
+        return actionRepository.count(ActionSpecifications.hasTargetAssignedArtifact(controllerId, sha1Hash)) > 0;
     }
 
     @Override
@@ -166,6 +172,8 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Override
     public Optional<Action> findOldestActiveActionByTarget(final String controllerId) {
+        throwExceptionIfTargetFoesNotExist(controllerId);
+
         // used in favorite to findFirstByTargetAndActiveOrderByIdAsc due to
         // DATAJPA-841 issue.
         return actionRepository.findFirstByTargetControllerIdAndActive(new Sort(Direction.ASC, "id"), controllerId,

@@ -104,14 +104,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-<<<<<<< HEAD
     public boolean clearArtifactBinary(final String sha1Hash, final Long moduleId) {
-=======
-    public boolean clearArtifactBinary(final Long artifactId) {
-        return clearArtifactBinary(localArtifactRepository.findById(artifactId)
-                .orElseThrow(() -> new EntityNotFoundException(Artifact.class, artifactId)));
-    }
->>>>>>> refs/heads/master
 
         if (localArtifactRepository.existsWithSha1HashAndSoftwareModuleIdIsNot(sha1Hash, moduleId)) {
             // there are still other artifacts that need the binary

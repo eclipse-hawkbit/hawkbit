@@ -1496,7 +1496,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
     private void validateRolloutActionStatus(final Long rolloutId,
             final Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus) {
-        final Rollout rolloutWithDetail = rolloutManagement.findRolloutWithDetailedStatus(rolloutId, false).get();
+        final Rollout rolloutWithDetail = rolloutManagement.findRolloutWithDetailedStatus(rolloutId).get();
         validateStatus(rolloutWithDetail.getTotalTargetCountStatus(), expectedTargetCountStatus);
     }
 

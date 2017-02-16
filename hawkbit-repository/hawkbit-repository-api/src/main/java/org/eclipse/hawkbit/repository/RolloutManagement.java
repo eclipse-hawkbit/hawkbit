@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository;
 
 import java.util.List;
-
 import java.util.Optional;
 
 import javax.validation.constraints.NotNull;
@@ -274,7 +273,7 @@ public interface RolloutManagement {
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Optional<Rollout> findRolloutWithDetailedStatus(@NotNull Long rolloutId, boolean deleted);
+    Optional<Rollout> findRolloutWithDetailedStatus(@NotNull Long rolloutId);
 
     /**
      * Checks if rollout with given ID exists.
@@ -285,8 +284,6 @@ public interface RolloutManagement {
      * @return <code>true</code> if rollout exists
      */
     boolean exists(@NotNull Long rolloutId);
-
-
 
     /***
      * Get finished percentage details for a specified group which is in running

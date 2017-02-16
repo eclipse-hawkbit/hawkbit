@@ -283,7 +283,6 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     public ResponseEntity<Void> postAssignedDistributionSet(@PathVariable("controllerId") final String controllerId,
             @RequestBody final MgmtDistributionSetAssigment dsId) {
 
-        findTargetWithExceptionIfNotFound(controllerId);
         final ActionType type = (dsId.getType() != null) ? MgmtRestModelMapper.convertActionType(dsId.getType())
                 : ActionType.FORCED;
         final Iterator<Target> changed = this.deploymentManagement
