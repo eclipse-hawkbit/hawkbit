@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -60,7 +61,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -635,7 +635,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         Rollout updatedRollout;
         try {
             updatedRollout = rolloutManagement.updateRollout(rolloutUpdate);
-        } catch (final JpaObjectRetrievalFailureException e) {
+        } catch (final EntityNotFoundException e) {
             LOGGER.warn("Rollout was deleted. Redirect to Rollouts overview.", e);
             uiNotification.displayWarning(
                     "Rollout with name " + rolloutName.getValue() + " was deleted. Update is not poosible");

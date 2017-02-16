@@ -16,8 +16,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import javax.persistence.EntityNotFoundException;
-
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.AbstractRolloutManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -35,6 +33,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEve
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
