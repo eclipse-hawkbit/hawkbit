@@ -217,8 +217,11 @@ public class DeviceSimulatorUpdater {
 
         private static UpdateStatus downloadUrl(final String url, final String targetToken, final String sha1Hash,
                 final long size) {
-            LOGGER.debug("Downloading {} with token {}, expected sha1 hash {} and size {}", url,
-                    hideTokenDetails(targetToken), sha1Hash, size);
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Downloading {} with token {}, expected sha1 hash {} and size {}", url,
+                        hideTokenDetails(targetToken), sha1Hash, size);
+            }
 
             try {
                 return readAndCheckDownloadUrl(url, targetToken, sha1Hash, size);

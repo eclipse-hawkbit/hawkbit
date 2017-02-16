@@ -13,7 +13,6 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
@@ -101,16 +100,16 @@ public final class DataConversionHelper {
 
     }
 
-    static DdiControllerBase fromTarget(final Target target, final Optional<Action> action,
+    static DdiControllerBase fromTarget(final Target target, final Action action,
             final String defaultControllerPollTime, final TenantAware tenantAware) {
         final DdiControllerBase result = new DdiControllerBase(
                 new DdiConfig(new DdiPolling(defaultControllerPollTime)));
 
-        if (action.isPresent()) {
-            if (action.get().isCancelingOrCanceled()) {
+        if (action != null) {
+            if (action.isCancelingOrCanceled()) {
                 result.add(linkTo(
                         methodOn(DdiRootController.class, tenantAware.getCurrentTenant()).getControllerCancelAction(
-                                tenantAware.getCurrentTenant(), target.getControllerId(), action.get().getId()))
+                                tenantAware.getCurrentTenant(), target.getControllerId(), action.getId()))
                                         .withRel(DdiRestConstants.CANCEL_ACTION));
             } else {
                 // we need to add the hashcode here of the actionWithStatus
@@ -120,7 +119,7 @@ public final class DataConversionHelper {
                 // response because of eTags.
                 result.add(linkTo(methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
                         .getControllerBasedeploymentAction(tenantAware.getCurrentTenant(), target.getControllerId(),
-                                action.get().getId(), calculateEtag(action.get())))
+                                action.getId(), calculateEtag(action)))
                                         .withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION));
             }
         }

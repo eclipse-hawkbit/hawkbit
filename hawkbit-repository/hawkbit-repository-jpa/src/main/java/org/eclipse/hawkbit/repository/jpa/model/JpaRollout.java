@@ -260,6 +260,7 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
                 getId(), getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
     }
 
+    @Override
     public boolean isDeleted() {
         return deleted;
     }

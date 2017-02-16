@@ -208,18 +208,22 @@ public class RolloutListGrid extends AbstractGrid {
             refreshContainer();
             return;
         }
-        final TotalTargetCountStatus totalTargetCountStatus = rollout.get().getTotalTargetCountStatus();
-        item.getItemProperty(VAR_STATUS).setValue(rollout.get().getStatus());
+        updateItem(rollout.get(), item);
+    }
+
+    private void updateItem(final Rollout rollout, final Item item) {
+        final TotalTargetCountStatus totalTargetCountStatus = rollout.getTotalTargetCountStatus();
+        item.getItemProperty(VAR_STATUS).setValue(rollout.getStatus());
         item.getItemProperty(VAR_TOTAL_TARGETS_COUNT_STATUS).setValue(totalTargetCountStatus);
-        final Long groupCount = (Long) item.getItemProperty(VAR_NUMBER_OF_GROUPS).getValue();
-        final int groupsCreated = rollout.get().getRolloutGroupsCreated();
+        final Integer groupCount = (Integer) item.getItemProperty(VAR_NUMBER_OF_GROUPS).getValue();
+        final int groupsCreated = rollout.getRolloutGroupsCreated();
         if (groupsCreated != 0) {
             item.getItemProperty(VAR_NUMBER_OF_GROUPS).setValue(Long.valueOf(groupsCreated));
-        } else if (rollout.get().getRolloutGroups() != null && groupCount != rollout.get().getRolloutGroups().size()) {
-            item.getItemProperty(VAR_NUMBER_OF_GROUPS).setValue(Long.valueOf(rollout.get().getRolloutGroups().size()));
+        } else if (rollout.getRolloutGroups() != null && !groupCount.equals(rollout.getRolloutGroups().size())) {
+            item.getItemProperty(VAR_NUMBER_OF_GROUPS).setValue(Integer.valueOf(rollout.getRolloutGroups().size()));
         }
         item.getItemProperty(ROLLOUT_RENDERER_DATA)
-                .setValue(new RolloutRendererData(rollout.get().getName(), rollout.get().getStatus().toString()));
+                .setValue(new RolloutRendererData(rollout.getName(), rollout.getStatus().toString()));
     }
 
     @Override
@@ -244,7 +248,7 @@ public class RolloutListGrid extends AbstractGrid {
         rolloutGridContainer.addContainerProperty(VAR_MODIFIED_DATE, String.class, null, false, false);
         rolloutGridContainer.addContainerProperty(VAR_CREATED_USER, String.class, null, false, false);
         rolloutGridContainer.addContainerProperty(VAR_MODIFIED_BY, String.class, null, false, false);
-        rolloutGridContainer.addContainerProperty(VAR_NUMBER_OF_GROUPS, Long.class, 0L, false, false);
+        rolloutGridContainer.addContainerProperty(VAR_NUMBER_OF_GROUPS, Integer.class, 0L, false, false);
         rolloutGridContainer.addContainerProperty(VAR_TOTAL_TARGETS, String.class, "0", false, false);
         rolloutGridContainer.addContainerProperty(VAR_TOTAL_TARGETS_COUNT_STATUS, TotalTargetCountStatus.class, null,
                 false, false);
@@ -778,17 +782,18 @@ public class RolloutListGrid extends AbstractGrid {
      * Converter to convert 0 to empty, if total target groups is zero.
      *
      */
-    class TotalTargetGroupsConverter implements Converter<String, Long> {
+    class TotalTargetGroupsConverter implements Converter<String, Integer> {
 
         private static final long serialVersionUID = 6589305227035220369L;
 
         @Override
-        public Long convertToModel(final String value, final Class<? extends Long> targetType, final Locale locale) {
+        public Integer convertToModel(final String value, final Class<? extends Integer> targetType,
+                final Locale locale) {
             return null;
         }
 
         @Override
-        public String convertToPresentation(final Long value, final Class<? extends String> targetType,
+        public String convertToPresentation(final Integer value, final Class<? extends String> targetType,
                 final Locale locale) {
             if (value == 0) {
                 return "";
@@ -797,8 +802,8 @@ public class RolloutListGrid extends AbstractGrid {
         }
 
         @Override
-        public Class<Long> getModelType() {
-            return Long.class;
+        public Class<Integer> getModelType() {
+            return Integer.class;
         }
 
         @Override

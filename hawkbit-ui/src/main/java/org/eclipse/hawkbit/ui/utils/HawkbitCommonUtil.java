@@ -23,7 +23,6 @@ import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
-import org.vaadin.alump.distributionbar.DistributionBar;
 
 import com.google.common.base.Strings;
 import com.vaadin.data.Container;
@@ -467,13 +466,6 @@ public final class HawkbitCommonUtil {
         }
     }
 
-    private static void setBarPartSize(final DistributionBar bar, final String statusName, final int count,
-            final int index) {
-        bar.setPartSize(index, count);
-        bar.setPartTooltip(index, statusName);
-        bar.setPartStyleName(index, "status-bar-part-" + statusName);
-    }
-
     /**
      * Formats the finished percentage of a rollout group into a string with one
      * digit after comma.
@@ -502,10 +494,6 @@ public final class HawkbitCommonUtil {
             break;
         }
         return String.format("%.1f", tmpFinishedPercentage);
-    }
-
-    private static Long getStatusCount(final String propertName, final Item item) {
-        return (Long) item.getItemProperty(propertName).getValue();
     }
 
     /**

@@ -130,7 +130,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist(controllerId, IpUtil
                 .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
         return new ResponseEntity<>(DataConversionHelper.fromTarget(target,
-                controllerManagement.findOldestActiveActionByTarget(controllerId),
+                controllerManagement.findOldestActiveActionByTarget(controllerId).orElse(null),
                 controllerManagement.getPollingTime(), tenantAware), HttpStatus.OK);
     }
 

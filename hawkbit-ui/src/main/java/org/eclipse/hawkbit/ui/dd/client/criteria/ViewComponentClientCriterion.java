@@ -51,7 +51,7 @@ public final class ViewComponentClientCriterion extends VAcceptCriterion {
     public static final String HINT_AREA_STYLE = "show-drop-hint";
 
     @Override
-    protected boolean accept(VDragEvent drag, UIDL configuration) {
+    protected boolean accept(final VDragEvent drag, final UIDL configuration) {
         // 1. check if this component is responsible for the drag source:
         if (!isValidDragSource(drag, configuration)) {
             return false;
@@ -81,14 +81,14 @@ public final class ViewComponentClientCriterion extends VAcceptCriterion {
     // Exception squid:S2221 - This code is trans-coded to JavaScript, hence
     // Exception semantics changes
     @SuppressWarnings({ "squid:S1166", "squid:S2221" })
-    boolean isValidDragSource(VDragEvent drag, UIDL configuration) {
+    boolean isValidDragSource(final VDragEvent drag, final UIDL configuration) {
         try {
-            String dragSource = drag.getTransferable().getDragSource().getWidget().getElement().getId();
-            String dragSourcePrefix = configuration.getStringAttribute(DRAG_SOURCE);
+            final String dragSource = drag.getTransferable().getDragSource().getWidget().getElement().getId();
+            final String dragSourcePrefix = configuration.getStringAttribute(DRAG_SOURCE);
             if (dragSource.startsWith(dragSourcePrefix)) {
                 return true;
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // log and continue
             LOGGER.log(Level.SEVERE, "Error verifying drag source: " + e.getLocalizedMessage());
         }
@@ -107,18 +107,18 @@ public final class ViewComponentClientCriterion extends VAcceptCriterion {
     // Exception squid:S2221 - This code is trans-coded to JavaScript, hence
     // Exception semantics changes
     @SuppressWarnings({ "squid:S1166", "squid:S2221" })
-    void showDropTargetHints(UIDL configuration) {
-        int dropAreaCount = configuration.getIntAttribute(DROP_AREA_COUNT);
+    void showDropTargetHints(final UIDL configuration) {
+        final int dropAreaCount = configuration.getIntAttribute(DROP_AREA_COUNT);
         for (int dropAreaIndex = 0; dropAreaIndex < dropAreaCount; dropAreaIndex++) {
             try {
-                String dropArea = configuration.getStringAttribute(DROP_AREA + dropAreaIndex);
-                LOGGER.log(Level.FINE, "Hint Area: " + dropArea);
+                final String dropArea = configuration.getStringAttribute(DROP_AREA + dropAreaIndex);
+                LOGGER.log(Level.FINE, "Hint Area: {}", dropArea);
 
-                Element showHintFor = Document.get().getElementById(dropArea);
+                final Element showHintFor = Document.get().getElementById(dropArea);
                 if (showHintFor != null) {
                     showHintFor.addClassName(HINT_AREA_STYLE);
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 // log and continue
                 LOGGER.log(Level.SEVERE, "Error highlighting drop targets: " + e.getLocalizedMessage());
             }
@@ -141,19 +141,19 @@ public final class ViewComponentClientCriterion extends VAcceptCriterion {
     // Exception squid:S2221 - This code is trans-coded to JavaScript, hence
     // Exception semantics changes
     @SuppressWarnings({ "squid:S1166", "squid:S2221" })
-    boolean isValidDropTarget(UIDL configuration) {
+    boolean isValidDropTarget(final UIDL configuration) {
         try {
-            String dropTarget = VDragAndDropManager.get().getCurrentDropHandler().getConnector().getWidget()
+            final String dropTarget = VDragAndDropManager.get().getCurrentDropHandler().getConnector().getWidget()
                     .getElement().getId();
-            int dropTargetCount = configuration.getIntAttribute(DROP_TARGET_COUNT);
+            final int dropTargetCount = configuration.getIntAttribute(DROP_TARGET_COUNT);
             for (int dropTargetIndex = 0; dropTargetIndex < dropTargetCount; dropTargetIndex++) {
-                String dropTargetPrefix = configuration.getStringAttribute(DROP_TARGET + dropTargetIndex);
-                LOGGER.log(Level.FINE, "Drop Target: " + dropTargetPrefix);
+                final String dropTargetPrefix = configuration.getStringAttribute(DROP_TARGET + dropTargetIndex);
+                LOGGER.log(Level.FINE, "Drop Target: {}", dropTargetPrefix);
                 if (dropTarget.startsWith(dropTargetPrefix)) {
                     return true;
                 }
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // log and continue
             LOGGER.log(Level.SEVERE, "Error verifying drop target: " + e.getLocalizedMessage());
         }
@@ -161,7 +161,7 @@ public final class ViewComponentClientCriterion extends VAcceptCriterion {
     }
 
     @Override
-    public boolean needsServerSideCheck(VDragEvent drag, UIDL criterioUIDL) {
+    public boolean needsServerSideCheck(final VDragEvent drag, final UIDL criterioUIDL) {
         // client-side only
         return false;
     }
