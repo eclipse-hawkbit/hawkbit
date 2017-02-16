@@ -15,7 +15,6 @@ import java.util.Map;
 
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.components.ProxyDistribution;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -253,12 +252,12 @@ public class TargetFilterTable extends Table {
 
     private void onClickOfDetailButton(final ClickEvent event) {
         final String targetFilterName = (String) ((Button) event.getComponent()).getData();
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .findTargetFilterQueryByName(targetFilterName).get();
-        filterManagementUIState.setFilterQueryValue(targetFilterQuery.getQuery());
-        filterManagementUIState.setTfQuery(targetFilterQuery);
-        filterManagementUIState.setEditViewDisplayed(true);
-        eventBus.publish(this, CustomFilterUIEvent.TARGET_FILTER_DETAIL_VIEW);
+        targetFilterQueryManagement.findTargetFilterQueryByName(targetFilterName).ifPresent(targetFilterQuery -> {
+            filterManagementUIState.setFilterQueryValue(targetFilterQuery.getQuery());
+            filterManagementUIState.setTfQuery(targetFilterQuery);
+            filterManagementUIState.setEditViewDisplayed(true);
+            eventBus.publish(this, CustomFilterUIEvent.TARGET_FILTER_DETAIL_VIEW);
+        });
     }
 
     private void populateTableData() {

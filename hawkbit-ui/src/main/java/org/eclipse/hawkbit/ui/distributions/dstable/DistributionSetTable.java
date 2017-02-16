@@ -266,13 +266,14 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             final String name = (String) softwareItem.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
             final String swVersion = (String) softwareItem.getItemProperty(SPUILabelDefinitions.VAR_VERSION).getValue();
 
-            final SoftwareModule softwareModule = softwareManagement.findSoftwareModuleById(softwareModuleId).get();
-            if (validSoftwareModule((Long) distId, softwareModule)) {
+            final Optional<SoftwareModule> softwareModule = softwareManagement.findSoftwareModuleById(softwareModuleId);
+
+            if (softwareModule.isPresent() && validSoftwareModule((Long) distId, softwareModule.get())) {
                 final SoftwareModuleIdName softwareModuleIdName = new SoftwareModuleIdName(softwareModuleId,
                         name.concat(":" + swVersion));
-                publishAssignEvent((Long) distId, softwareModule);
-                handleSoftwareCase(map, softwareModule, softwareModuleIdName);
-                handleFirmwareCase(map, softwareModule, softwareModuleIdName);
+                publishAssignEvent((Long) distId, softwareModule.get());
+                handleSoftwareCase(map, softwareModule.get(), softwareModuleIdName);
+                handleFirmwareCase(map, softwareModule.get(), softwareModuleIdName);
             } else {
                 return;
             }
@@ -328,14 +329,14 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         if (!isSoftwareModuleDragged(distId, sm)) {
             return false;
         }
-        final DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(distId).get();
-        if (!validateSoftwareModule(sm, ds)) {
+        final Optional<DistributionSet> ds = distributionSetManagement.findDistributionSetByIdWithDetails(distId);
+        if (!ds.isPresent() || !validateSoftwareModule(sm, ds.get())) {
             return false;
         }
 
-        if (distributionSetManagement.isDistributionSetInUse(ds.getId())) {
-            notification.displayValidationError(
-                    i18n.get("message.error.notification.ds.target.assigned", ds.getName(), ds.getVersion()));
+        if (distributionSetManagement.isDistributionSetInUse(ds.get().getId())) {
+            notification.displayValidationError(i18n.get("message.error.notification.ds.target.assigned",
+                    ds.get().getName(), ds.get().getVersion()));
             return false;
         }
         return true;
@@ -492,8 +493,8 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     private void showMetadataDetails(final Long itemId) {
-        final DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(itemId).get();
-        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null));
+        distributionSetManagement.findDistributionSetByIdWithDetails(itemId)
+                .ifPresent(ds -> UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null)));
     }
 
     private String getNameAndVerion(final Object itemId) {

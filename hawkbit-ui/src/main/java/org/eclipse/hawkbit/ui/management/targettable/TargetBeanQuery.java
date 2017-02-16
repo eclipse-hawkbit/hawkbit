@@ -23,7 +23,6 @@ import java.util.Map;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -150,12 +149,10 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
                 prxyTarget.setInstalledDistributionSet(null);
                 prxyTarget.setAssignedDistributionSet(null);
             } else {
-                final Target target = getTargetManagement().findTargetByControllerIDWithDetails(targ.getControllerId())
-                        .get();
-                final DistributionSet installedDistributionSet = target.getTargetInfo().getInstalledDistributionSet();
-                prxyTarget.setInstalledDistributionSet(installedDistributionSet);
-                final DistributionSet assignedDistributionSet = target.getAssignedDistributionSet();
-                prxyTarget.setAssignedDistributionSet(assignedDistributionSet);
+                getTargetManagement().findTargetByControllerIDWithDetails(targ.getControllerId()).ifPresent(target -> {
+                    prxyTarget.setInstalledDistributionSet(target.getTargetInfo().getInstalledDistributionSet());
+                    prxyTarget.setAssignedDistributionSet(target.getAssignedDistributionSet());
+                });
             }
 
             prxyTarget.setUpdateStatus(targ.getTargetInfo().getUpdateStatus());
