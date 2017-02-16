@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.constraints.NotNull;
 
@@ -102,6 +103,9 @@ public interface TagManagement {
      *
      * @param tagName
      *            to be deleted
+     * 
+     * @throws EntityNotFoundException
+     *             if tag with given name does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     void deleteDistributionSetTag(@NotEmpty String tagName);
@@ -111,6 +115,9 @@ public interface TagManagement {
      * 
      * @param targetTagName
      *            tag name of the {@link TargetTag} to be deleted
+     * 
+     * @throws EntityNotFoundException
+     *             if tag with given name does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
     void deleteTargetTag(@NotEmpty String targetTagName);
@@ -151,12 +158,6 @@ public interface TagManagement {
     Page<DistributionSetTag> findAllDistributionSetTags(@NotNull String rsqlParam, @NotNull Pageable pageable);
 
     /**
-     * @return all {@link TargetTag}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<TargetTag> findAllTargetTags();
-
-    /**
      * returns all {@link TargetTag}s.
      * 
      * @param pageable
@@ -190,41 +191,40 @@ public interface TagManagement {
      *
      * @param name
      *            to look for.
-     * @return {@link DistributionSet} or <code>null</code> if it does not exist
+     * @return {@link DistributionSet}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    DistributionSetTag findDistributionSetTag(@NotEmpty String name);
+    Optional<DistributionSetTag> findDistributionSetTag(@NotEmpty String name);
 
     /**
      * Finds {@link DistributionSetTag} by given id.
      *
      * @param id
      *            to search for
-     * @return the found {@link DistributionSetTag}s or <code>null</code> if not
-     *         found.
+     * @return the found {@link DistributionSetTag}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    DistributionSetTag findDistributionSetTagById(@NotNull Long id);
+    Optional<DistributionSetTag> findDistributionSetTagById(@NotNull Long id);
 
     /**
      * Find {@link TargetTag} based on given Name.
      *
      * @param name
      *            to look for.
-     * @return {@link TargetTag} or <code>null</code> if it does not exist
+     * @return {@link TargetTag}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    TargetTag findTargetTag(@NotEmpty String name);
+    Optional<TargetTag> findTargetTag(@NotEmpty String name);
 
     /**
      * Finds {@link TargetTag} by given id.
      *
      * @param id
      *            to search for
-     * @return the found {@link TargetTag}s or <code>null</code> if not found.
+     * @return the found {@link TargetTag}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    TargetTag findTargetTagById(@NotNull Long id);
+    Optional<TargetTag> findTargetTagById(@NotNull Long id);
 
     /**
      * Updates an existing {@link DistributionSetTag}.

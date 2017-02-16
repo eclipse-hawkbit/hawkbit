@@ -162,10 +162,6 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
 
-        // check if distribution set exists otherwise throw exception
-        // immediately
-        findDistributionSetWithExceptionIfNotFound(distributionSetId);
-
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeTargetSortParam(sortParam);
@@ -256,10 +252,6 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
 
-        // check if distribution set exists otherwise throw exception
-        // immediately
-        findDistributionSetWithExceptionIfNotFound(distributionSetId);
-
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeDistributionSetMetadataSortParam(sortParam);
@@ -288,9 +280,11 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @PathVariable("metadataKey") final String metadataKey) {
         // check if distribution set exists otherwise throw exception
         // immediately
-        final DistributionSetMetadata findOne = distributionSetManagement.findDistributionSetMetadata(distributionSetId,
-                metadataKey);
-        return ResponseEntity.<MgmtMetadata> ok(MgmtDistributionSetMapper.toResponseDsMetadata(findOne));
+        final DistributionSetMetadata findOne = distributionSetManagement
+                .findDistributionSetMetadata(distributionSetId, metadataKey)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSetMetadata.class, distributionSetId,
+                        metadataKey));
+        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponseDsMetadata(findOne));
     }
 
     @Override
@@ -347,9 +341,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam) {
-        // check if distribution set exists otherwise throw exception
-        // immediately
-        findDistributionSetWithExceptionIfNotFound(distributionSetId);
+
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeSoftwareModuleSortParam(sortParam);
@@ -361,11 +353,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     private DistributionSet findDistributionSetWithExceptionIfNotFound(final Long distributionSetId) {
-        final DistributionSet set = distributionSetManagement.findDistributionSetById(distributionSetId);
-        if (set == null) {
-            throw new EntityNotFoundException("DistributionSet with Id {" + distributionSetId + "} does not exist");
-        }
-
-        return set;
+        return distributionSetManagement.findDistributionSetById(distributionSetId)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, distributionSetId));
     }
 }

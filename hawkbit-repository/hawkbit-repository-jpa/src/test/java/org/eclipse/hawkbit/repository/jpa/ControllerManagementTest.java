@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
@@ -241,8 +241,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long dsId = testdataFactory.createDistributionSet().getId();
         testdataFactory.createTarget();
         assignDistributionSet(dsId, TestdataFactory.DEFAULT_CONTROLLER_ID);
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).getTargetInfo()
-                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
+        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
+                .getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
 
         return deploymentManagement.findActiveActionsByTarget(TestdataFactory.DEFAULT_CONTROLLER_ID).get(0).getId();
     }
@@ -296,10 +296,10 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     private void assertActionStatus(final Long actionId, final String controllerId,
             final TargetUpdateStatus expectedTargetUpdateStatus, final Action.Status expectedActionActionStatus,
             final Action.Status expectedActionStatus, final boolean actionActive) {
-        final TargetUpdateStatus targetStatus = targetManagement.findTargetByControllerID(controllerId).getTargetInfo()
-                .getUpdateStatus();
+        final TargetUpdateStatus targetStatus = targetManagement.findTargetByControllerID(controllerId).get()
+                .getTargetInfo().getUpdateStatus();
         assertThat(targetStatus).isEqualTo(expectedTargetUpdateStatus);
-        final Action action = deploymentManagement.findAction(actionId);
+        final Action action = deploymentManagement.findAction(actionId).get();
         assertThat(action.getStatus()).isEqualTo(expectedActionActionStatus);
         assertThat(action.isActive()).isEqualTo(actionActive);
         final List<ActionStatus> actionStatusList = deploymentManagement.findActionStatusByAction(pageReq, actionId)
@@ -326,9 +326,9 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         // create two artifacts with identical SHA1 hash
         final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random),
-                ds.findFirstModuleByType(osType).getId(), "file1", false);
+                ds.findFirstModuleByType(osType).get().getId(), "file1", false);
         final Artifact artifact2 = artifactManagement.createArtifact(new ByteArrayInputStream(random),
-                ds2.findFirstModuleByType(osType).getId(), "file1", false);
+                ds2.findFirstModuleByType(osType).get().getId(), "file1", false);
         assertThat(artifact.getSha1Hash()).isEqualTo(artifact2.getSha1Hash());
 
         assertThat(
@@ -462,8 +462,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 entityFactory.actionStatus().create(action.getId()).status(Action.Status.RUNNING));
 
         // nothing changed as "feedback after close" is disabled
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).getTargetInfo()
-                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
+        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
+                .getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         assertThat(actionStatusRepository.count()).isEqualTo(3);
         assertThat(deploymentManagement.findActionStatusByAction(pageReq, action.getId()).getNumberOfElements())
@@ -487,8 +487,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 entityFactory.actionStatus().create(action.getId()).status(Action.Status.RUNNING));
 
         // nothing changed as "feedback after close" is disabled
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).getTargetInfo()
-                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
+        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
+                .getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         // however, additional action status has been stored
         assertThat(actionStatusRepository.findAll(pageReq).getNumberOfElements()).isEqualTo(4);
@@ -514,7 +514,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         testData.put("test1", "testdata1");
         controllerManagament.updateControllerAttributes(controllerId, testData);
 
-        final Target target = targetManagement.findTargetByControllerIDWithDetails(controllerId);
+        final Target target = targetManagement.findTargetByControllerIDWithDetails(controllerId).get();
         assertThat(target.getTargetInfo().getControllerAttributes()).as("Controller Attributes are wrong")
                 .isEqualTo(testData);
     }
@@ -525,7 +525,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         testData.put("test2", "testdata20");
         controllerManagament.updateControllerAttributes(controllerId, testData);
 
-        final Target target = targetManagement.findTargetByControllerIDWithDetails(controllerId);
+        final Target target = targetManagement.findTargetByControllerIDWithDetails(controllerId).get();
         testData.put("test1", "testdata1");
         assertThat(target.getTargetInfo().getControllerAttributes()).as("Controller Attributes are wrong")
                 .isEqualTo(testData);
@@ -538,7 +538,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         controllerManagament.updateControllerAttributes(controllerId, testData);
 
-        final Target target = targetManagement.findTargetByControllerIDWithDetails(controllerId);
+        final Target target = targetManagement.findTargetByControllerIDWithDetails(controllerId).get();
         testData.put("test2", "testdata20");
         assertThat(target.getTargetInfo().getControllerAttributes()).as("Controller Attributes are wrong")
                 .isEqualTo(testData);

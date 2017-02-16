@@ -44,8 +44,8 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
     }
 
     @Override
-    protected void checkForDuplicate(final SoftwareModule entity, final String value) {
-        softwareManagement.findSoftwareModuleMetadata(entity.getId(), value);
+    protected boolean checkForDuplicate(final SoftwareModule entity, final String value) {
+        return softwareManagement.findSoftwareModuleMetadata(entity.getId(), value).isPresent();
     }
 
     /**

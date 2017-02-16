@@ -174,8 +174,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final Collection<TargetWithActionType> targets, final String actionMessage) {
         final JpaDistributionSet set = distributoinSetRepository.findOne(dsID);
         if (set == null) {
-            throw new EntityNotFoundException(
-                    String.format("no %s with id %d found", DistributionSet.class.getSimpleName(), dsID));
+            throw new EntityNotFoundException(DistributionSet.class, dsID);
         }
 
         return assignDistributionSetToTargets(set, targets, null, null, actionMessage);
@@ -365,8 +364,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     public Action cancelAction(final Long actionId) {
         LOG.debug("cancelAction({})", actionId);
 
-        final JpaAction action = Optional.ofNullable(actionRepository.findOne(actionId))
-                .orElseThrow(() -> new EntityNotFoundException("Action with given ID " + actionId + " not found"));
+        final JpaAction action = actionRepository.findById(actionId)
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
         if (action.isCancelingOrCanceled()) {
             throw new CancelActionNotAllowedException("Actions in canceling or canceled state cannot be canceled");
@@ -412,8 +411,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Action forceQuitAction(final Long actionId) {
-        final JpaAction action = Optional.ofNullable(actionRepository.findOne(actionId))
-                .orElseThrow(() -> new EntityNotFoundException("Action with given ID " + actionId + " not found"));
+        final JpaAction action = actionRepository.findById(actionId)
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
         if (!action.isCancelingOrCanceled()) {
             throw new ForceQuitActionNotAllowedException(
@@ -544,13 +543,13 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    public Action findAction(final Long actionId) {
-        return actionRepository.findOne(actionId);
+    public Optional<Action> findAction(final Long actionId) {
+        return Optional.ofNullable(actionRepository.findOne(actionId));
     }
 
     @Override
-    public Action findActionWithDetails(final Long actionId) {
-        return actionRepository.findById(actionId);
+    public Optional<Action> findActionWithDetails(final Long actionId) {
+        return actionRepository.getById(actionId);
     }
 
     @Override
@@ -624,8 +623,10 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public Action forceTargetAction(final Long actionId) {
-        final JpaAction action = actionRepository.findOne(actionId);
-        if (action != null && !action.isForced()) {
+        final JpaAction action = actionRepository.findById(actionId)
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
+
+        if (!action.isForced()) {
             action.setActionType(ActionType.FORCED);
             return actionRepository.save(action);
         }
@@ -634,11 +635,19 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final Long actionId) {
+        if (!actionRepository.exists(actionId)) {
+            throw new EntityNotFoundException(Action.class, actionId);
+        }
+
         return actionStatusRepository.findByActionId(pageReq, actionId);
     }
 
     @Override
     public Page<ActionStatus> findActionStatusByActionWithMessages(final Pageable pageReq, final Long actionId) {
+        if (!actionRepository.exists(actionId)) {
+            throw new EntityNotFoundException(Action.class, actionId);
+        }
+
         return actionStatusRepository.getByActionId(pageReq, actionId);
     }
 

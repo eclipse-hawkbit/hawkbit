@@ -195,7 +195,7 @@ public class RolloutListGrid extends AbstractGrid {
             return;
         }
         final Rollout rollout = rolloutManagement.findRolloutWithDetailedStatus(rolloutChangeEvent.getRolloutId(),
-                false);
+                false).get();
 
         if (rolloutIsDeleted(rollout)) {
             return;

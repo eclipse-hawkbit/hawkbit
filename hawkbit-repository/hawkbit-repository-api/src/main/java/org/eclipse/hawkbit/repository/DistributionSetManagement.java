@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.constraints.NotNull;
 
@@ -60,7 +61,7 @@ public interface DistributionSetManagement {
      * @return the updated {@link DistributionSet}.
      * 
      * @throws EntityNotFoundException
-     *             if given module does not exist
+     *             if (at least one) given module does not exist
      * 
      * @throws EntityReadOnlyException
      *             if use tries to change the {@link DistributionSet} s while
@@ -86,7 +87,8 @@ public interface DistributionSetManagement {
      * @return list of assigned ds
      * 
      * @throws EntityNotFoundException
-     *             if tag with given ID does not exist
+     *             if tag with given ID does not exist or (at least one) of the
+     *             distribution sets.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     List<DistributionSet> assignTag(@NotEmpty Collection<Long> dsIds, @NotNull Long tagId);
@@ -108,6 +110,9 @@ public interface DistributionSetManagement {
      *            to look for
      *
      * @return number of {@link DistributionSet}s
+     * 
+     * @throws EntityNotFoundException
+     *             if type with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Long countDistributionSetsByType(@NotNull Long typeId);
@@ -214,9 +219,13 @@ public interface DistributionSetManagement {
      * result means that they cannot be assigned anymore to any targets. (define
      * e.g. findByDeletedFalse())
      * </p>
-     *
+     * 
      * @param setId
      *            to delete
+     *
+     * @throws EntityNotFoundException
+     *             if given {@link DistributionSet} does not exist
+     *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     void deleteDistributionSet(@NotNull Long setId);
@@ -228,6 +237,9 @@ public interface DistributionSetManagement {
      *
      * @param dsIds
      *            to be deleted
+     * 
+     * @throws EntityNotFoundException
+     *             if (at least one) given distribution set does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     void deleteDistributionSet(@NotEmpty Collection<Long> dsIds);
@@ -264,9 +276,12 @@ public interface DistributionSetManagement {
      * @param actionId
      *            the action associated with the distribution set
      * @return the distribution set which is associated with the action
+     * 
+     * @throws EntityNotFoundException
+     *             if action with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    DistributionSet findDistributionSetByAction(@NotNull Long actionId);
+    Optional<DistributionSet> findDistributionSetByAction(@NotNull Long actionId);
 
     /**
      * Find {@link DistributionSet} based on given ID without details, e.g.
@@ -274,10 +289,11 @@ public interface DistributionSetManagement {
      *
      * @param distid
      *            to look for.
-     * @return {@link DistributionSet} or <code>null</code> if it does not exist
+     * @return {@link DistributionSet}
+     * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    DistributionSet findDistributionSetById(@NotNull Long distid);
+    Optional<DistributionSet> findDistributionSetById(@NotNull Long distid);
 
     /**
      * Find {@link DistributionSet} based on given ID including (lazy loaded)
@@ -288,10 +304,10 @@ public interface DistributionSetManagement {
      *
      * @param distid
      *            to look for.
-     * @return {@link DistributionSet} or <code>null</code> if it does not exist
+     * @return {@link DistributionSet}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    DistributionSet findDistributionSetByIdWithDetails(@NotNull Long distid);
+    Optional<DistributionSet> findDistributionSetByIdWithDetails(@NotNull Long distid);
 
     /**
      * Find distribution set by name and version.
@@ -303,7 +319,8 @@ public interface DistributionSetManagement {
      * @return the page with the found {@link DistributionSet}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    DistributionSet findDistributionSetByNameAndVersion(@NotEmpty String distributionName, @NotEmpty String version);
+    Optional<DistributionSet> findDistributionSetByNameAndVersion(@NotEmpty String distributionName,
+            @NotEmpty String version);
 
     /**
      * finds all meta data by the given distribution set id.
@@ -314,20 +331,13 @@ public interface DistributionSetManagement {
      *            the page request to page the result
      * @return a paged result of all meta data entries for a given distribution
      *         set id
+     * 
+     * @throws EntityNotFoundException
+     *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(@NotNull Long distributionSetId,
             @NotNull Pageable pageable);
-
-    /**
-     * Finds all meta data by the given distribution set id.
-     * 
-     * @param distributionSetId
-     *            the distribution set id to retrieve the meta data from
-     * @return list of distributionSetMetadata for a given distribution set Id.
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    List<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(@NotNull Long distributionSetId);
 
     /**
      * finds all meta data by the given distribution set id.
@@ -346,6 +356,9 @@ public interface DistributionSetManagement {
      *             given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException
      *             if the RSQL syntax is wrong
+     * 
+     * @throws EntityNotFoundException
+     *             of distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(@NotNull Long distributionSetId,
@@ -449,27 +462,27 @@ public interface DistributionSetManagement {
     /**
      * @param id
      *            as {@link DistributionSetType#getId()}
-     * @return {@link DistributionSetType} if found or <code>null</code> if not
+     * @return {@link DistributionSetType}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    DistributionSetType findDistributionSetTypeById(@NotNull Long id);
+    Optional<DistributionSetType> findDistributionSetTypeById(@NotNull Long id);
 
     /**
      * @param key
      *            as {@link DistributionSetType#getKey()}
-     * @return {@link DistributionSetType} if found or <code>null</code> if not
+     * @return {@link DistributionSetType}
      */
 
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    DistributionSetType findDistributionSetTypeByKey(@NotEmpty String key);
+    Optional<DistributionSetType> findDistributionSetTypeByKey(@NotEmpty String key);
 
     /**
      * @param name
      *            as {@link DistributionSetType#getName()}
-     * @return {@link DistributionSetType} if found or <code>null</code> if not
+     * @return {@link DistributionSetType}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    DistributionSetType findDistributionSetTypeByName(@NotEmpty String name);
+    Optional<DistributionSetType> findDistributionSetTypeByName(@NotEmpty String name);
 
     /**
      * @param pageable
@@ -506,11 +519,9 @@ public interface DistributionSetManagement {
      * @param key
      *            of the meta data element
      * @return the found DistributionSetMetadata or {@code null} if not exits
-     * @throws EntityNotFoundException
-     *             in case the meta data does not exists for the given key
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    DistributionSetMetadata findDistributionSetMetadata(@NotNull Long setId, @NotEmpty String key);
+    Optional<DistributionSetMetadata> findDistributionSetMetadata(@NotNull Long setId, @NotEmpty String key);
 
     /**
      * Checks if a {@link DistributionSet} is currently in use by a target in
@@ -536,6 +547,9 @@ public interface DistributionSetManagement {
      *            to toggle
      * @return {@link DistributionSetTagAssignmentResult} with all meta data of
      *         the assignment outcome.
+     * 
+     * @throws EntityNotFoundException
+     *             if given tag does not exist or (at least one) module
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     DistributionSetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<Long> dsIds, @NotNull String tagName);
@@ -715,6 +729,6 @@ public interface DistributionSetManagement {
      * @return the found {@link DistributionSet}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    List<DistributionSet> findDistributionSetAllById(@NotNull Collection<Long> ids);
+    List<DistributionSet> findDistributionSetAllById(@NotEmpty Collection<Long> ids);
 
 }

@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
@@ -54,7 +54,8 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
 
         final Target targetToBeCreated = testdataFactory.createTarget("targetToBeCreated");
 
-        final Target loadedTarget = targetManagement.findTargetByControllerID(targetToBeCreated.getControllerId());
+        final Target loadedTarget = targetManagement.findTargetByControllerID(targetToBeCreated.getControllerId())
+                .get();
         assertThat(postLoadEntityListener.getEntity()).isNotNull();
         assertThat(postLoadEntityListener.getEntity()).isEqualTo(loadedTarget);
     }

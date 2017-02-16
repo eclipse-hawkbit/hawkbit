@@ -80,8 +80,8 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     private VirtualPropertyReplacer virtualPropertyReplacer;
 
     @Override
-    public RolloutGroup findRolloutGroupById(final Long rolloutGroupId) {
-        return rolloutGroupRepository.findOne(rolloutGroupId);
+    public Optional<RolloutGroup> findRolloutGroupById(final Long rolloutGroupId) {
+        return Optional.ofNullable(rolloutGroupRepository.findOne(rolloutGroupId));
     }
 
     @Override
@@ -143,8 +143,15 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     }
 
     @Override
-    public RolloutGroup findRolloutGroupWithDetailedStatus(final Long rolloutGroupId) {
-        final JpaRolloutGroup rolloutGroup = (JpaRolloutGroup) findRolloutGroupById(rolloutGroupId);
+    public Optional<RolloutGroup> findRolloutGroupWithDetailedStatus(final Long rolloutGroupId) {
+        final Optional<RolloutGroup> rolloutGroup = findRolloutGroupById(rolloutGroupId);
+
+        if (!rolloutGroup.isPresent()) {
+            return rolloutGroup;
+        }
+
+        final JpaRolloutGroup jpaRolloutGroup = (JpaRolloutGroup) rolloutGroup.get();
+
         if (rolloutGroup == null) {
             return null;
         }
@@ -153,8 +160,8 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
                 .getStatusCountByRolloutGroupId(rolloutGroupId);
 
         final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(rolloutStatusCountItems,
-                Long.valueOf(rolloutGroup.getTotalTargets()));
-        rolloutGroup.setTotalTargetCountStatus(totalTargetCountStatus);
+                Long.valueOf(jpaRolloutGroup.getTotalTargets()));
+        jpaRolloutGroup.setTotalTargetCountStatus(totalTargetCountStatus);
         return rolloutGroup;
 
     }
@@ -184,9 +191,8 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
     @Override
     public Page<Target> findRolloutGroupTargets(final Long rolloutGroupId, final Pageable page) {
-        final JpaRolloutGroup rolloutGroup = Optional.ofNullable(rolloutGroupRepository.findOne(rolloutGroupId))
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Rollout Group with given ID " + rolloutGroupId + " not found."));
+        final JpaRolloutGroup rolloutGroup = rolloutGroupRepository.findById(rolloutGroupId)
+                .orElseThrow(() -> new EntityNotFoundException(RolloutGroup.class, rolloutGroupId));
 
         if (isRolloutStatusReady(rolloutGroup)) {
             // in case of status ready the action has not been created yet and

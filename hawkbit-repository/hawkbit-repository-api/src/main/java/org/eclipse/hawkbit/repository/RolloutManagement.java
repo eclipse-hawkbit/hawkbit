@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.List;
 
+import java.util.Optional;
+
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -247,7 +249,7 @@ public interface RolloutManagement {
      *         not exists
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Rollout findRolloutById(@NotNull Long rolloutId);
+    Optional<Rollout> findRolloutById(@NotNull Long rolloutId);
 
     /**
      * Retrieves a specific rollout by its name.
@@ -258,7 +260,7 @@ public interface RolloutManagement {
      *         does not exists
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Rollout findRolloutByName(@NotNull String rolloutName);
+    Optional<Rollout> findRolloutByName(@NotEmpty String rolloutName);
 
     /**
      * Get count of targets in different status in rollout.
@@ -268,10 +270,23 @@ public interface RolloutManagement {
      * @param deleted
      *            flag if deleted rollouts should be included
      * @return rollout details of targets count for different statuses
+     * 
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Rollout findRolloutWithDetailedStatus(@NotNull Long rolloutId, boolean deleted);
+    Optional<Rollout> findRolloutWithDetailedStatus(@NotNull Long rolloutId, boolean deleted);
+
+    /**
+     * Checks if rollout with given ID exists.
+     *
+     * @param rolloutId
+     *            rollout id
+     * 
+     * @return <code>true</code> if rollout exists
+     */
+    boolean exists(@NotNull Long rolloutId);
+
+
 
     /***
      * Get finished percentage details for a specified group which is in running
@@ -335,7 +350,7 @@ public interface RolloutManagement {
      * all actions are created and the first group is started. The rollout
      * itself will be then also in {@link RolloutStatus#RUNNING}.
      *
-     * @param rollout
+     * @param rolloutId
      *            the rollout to be started
      *
      * @return started rollout
@@ -347,7 +362,7 @@ public interface RolloutManagement {
      *             ready rollouts can be started.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    Rollout startRollout(@NotNull Long rollout);
+    Rollout startRollout(@NotNull Long rolloutId);
 
     /**
      * Update rollout details.
@@ -356,6 +371,10 @@ public interface RolloutManagement {
      *            rollout to be updated
      *
      * @return Rollout updated rollout
+     * 
+     * @throws EntityNotFoundException
+     *             if rollout or DS with given IDs do not exist
+     * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     Rollout updateRollout(@NotNull RolloutUpdate update);

@@ -304,7 +304,7 @@ public class BulkUploadHandler extends CustomComponent
             final TargetBulkUpload targetBulkUpload = managementUIState.getTargetTableFilters().getBulkUpload();
             final List<String> targetsList = targetBulkUpload.getTargetsCreated();
             final Long dsSelected = (Long) comboBox.getValue();
-            if (distributionSetManagement.findDistributionSetById(dsSelected) == null) {
+            if (!distributionSetManagement.findDistributionSetById(dsSelected).isPresent()) {
                 return i18n.get("message.bulk.upload.assignment.failed");
             }
             deploymentManagement.assignDistributionSet(targetBulkUpload.getDsNameAndVersion(), actionType,
@@ -316,7 +316,7 @@ public class BulkUploadHandler extends CustomComponent
             final Map<Long, TagData> tokensSelected = targetBulkTokenTags.getTokensAdded();
             final List<String> deletedTags = new ArrayList<>();
             for (final TagData tagData : tokensSelected.values()) {
-                if (tagManagement.findTargetTagById(tagData.getId()) == null) {
+                if (!tagManagement.findTargetTagById(tagData.getId()).isPresent()) {
                     deletedTags.add(tagData.getName());
                 } else {
                     targetManagement.toggleTagAssignment(

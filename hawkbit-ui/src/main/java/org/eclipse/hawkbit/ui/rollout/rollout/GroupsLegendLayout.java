@@ -8,17 +8,18 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import java.util.Collections;
+import java.util.List;
+
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupsValidation;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.utils.I18N;
 
-import java.util.Collections;
-import java.util.List;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.VerticalLayout;
 
 /**
  * Displays a legend for the Groups of a Rollout with the count of targets in
@@ -112,8 +113,8 @@ public class GroupsLegendLayout extends VerticalLayout {
     }
 
     /**
-     * Display an indication that the legend is being calculated.
-     * When the loading process is done one of the populate methods should be called.
+     * Display an indication that the legend is being calculated. When the
+     * loading process is done one of the populate methods should be called.
      */
     public void displayLoading() {
         populateGroupsLegendByTargetCounts(Collections.emptyList());
@@ -178,7 +179,8 @@ public class GroupsLegendLayout extends VerticalLayout {
      * @param groups
      *            List of groups with their name
      */
-    public void populateGroupsLegendByValidation(final RolloutGroupsValidation validation, final List<RolloutGroupCreate> groups) {
+    public void populateGroupsLegendByValidation(final RolloutGroupsValidation validation,
+            final List<RolloutGroupCreate> groups) {
         loadingLabel.setVisible(false);
         if (validation == null) {
             return;

@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ddi.rest.resource;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -90,7 +90,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         // create artifact
         final byte random[] = RandomUtils.nextBytes(5 * 1024);
         final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random),
-                ds.findFirstModuleByType(osType).getId(), "file1", false);
+                ds.findFirstModuleByType(osType).get().getId(), "file1", false);
 
         // no artifact available
         mvc.perform(get("/controller/v1/{targetid}/softwaremodules/{softwareModuleId}/artifacts/123455",
@@ -254,7 +254,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         // create artifact
         final byte random[] = RandomUtils.nextBytes(ARTIFACT_SIZE);
         final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random),
-                ds.findFirstModuleByType(osType).getId(), "file1", false);
+                ds.findFirstModuleByType(osType).get().getId(), "file1", false);
 
         // download fails as artifact is not yet assigned
         mvc.perform(get("/controller/v1/{targetid}/softwaremodules/{softwareModuleId}/artifacts/{filename}",

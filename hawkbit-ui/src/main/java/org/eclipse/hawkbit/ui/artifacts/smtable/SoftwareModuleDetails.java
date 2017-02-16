@@ -201,7 +201,7 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
 
     @Override
     protected void showMetadata(final ClickEvent event) {
-        final SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(getSelectedBaseEntityId());
+        final SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(getSelectedBaseEntityId()).get();
         /* display the window */
         UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null));
     }

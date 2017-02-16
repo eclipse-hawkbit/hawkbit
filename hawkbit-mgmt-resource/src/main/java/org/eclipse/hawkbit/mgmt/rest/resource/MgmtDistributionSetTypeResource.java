@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.SoftwareModuleTypeNotInDistributionSetTypeException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -100,7 +101,6 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     @Override
     public ResponseEntity<Void> deleteDistributionSetType(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId) {
-
         distributionSetManagement.deleteDistributionSetType(distributionSetTypeId);
 
         return ResponseEntity.ok().build();
@@ -127,14 +127,8 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     }
 
     private DistributionSetType findDistributionSetTypeWithExceptionIfNotFound(final Long distributionSetTypeId) {
-
-        final DistributionSetType module = distributionSetManagement.findDistributionSetTypeById(distributionSetTypeId);
-        if (module == null) {
-            throw new EntityNotFoundException(
-                    "DistributionSetType with Id {" + distributionSetTypeId + "} does not exist");
-        }
-
-        return module;
+        return distributionSetManagement.findDistributionSetTypeById(distributionSetTypeId)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, distributionSetTypeId));
     }
 
     @Override
@@ -154,8 +148,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
         final SoftwareModuleType foundSmType = findSoftwareModuleTypeWithExceptionIfNotFound(softwareModuleTypeId);
 
         if (!foundType.containsMandatoryModuleType(foundSmType)) {
-            throw new EntityNotFoundException(
-                    "Software module with given ID is not part of this distribution set type!");
+            throw new SoftwareModuleTypeNotInDistributionSetTypeException(softwareModuleTypeId, distributionSetTypeId);
         }
 
         return ResponseEntity.ok(toResponse(foundSmType));
@@ -170,8 +163,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
         final SoftwareModuleType foundSmType = findSoftwareModuleTypeWithExceptionIfNotFound(softwareModuleTypeId);
 
         if (!foundType.containsOptionalModuleType(foundSmType)) {
-            throw new EntityNotFoundException(
-                    "Software module with given ID is not part of this distribution set type!");
+            throw new SoftwareModuleTypeNotInDistributionSetTypeException(softwareModuleTypeId, distributionSetTypeId);
         }
 
         return ResponseEntity.ok(toResponse(foundSmType));
@@ -224,12 +216,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
 
     private SoftwareModuleType findSoftwareModuleTypeWithExceptionIfNotFound(final Long softwareModuleTypeId) {
 
-        final SoftwareModuleType module = softwareManagement.findSoftwareModuleTypeById(softwareModuleTypeId);
-        if (module == null) {
-            throw new EntityNotFoundException(
-                    "SoftwareModuleType with Id {" + softwareModuleTypeId + "} does not exist");
-        }
-
-        return module;
+        return softwareManagement.findSoftwareModuleTypeById(softwareModuleTypeId)
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, softwareModuleTypeId));
     }
 }

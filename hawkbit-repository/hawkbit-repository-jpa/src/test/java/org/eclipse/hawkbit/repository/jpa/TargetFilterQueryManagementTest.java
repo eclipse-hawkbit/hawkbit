@@ -8,8 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -47,7 +48,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.createTargetFilterQuery(
                 entityFactory.targetFilterQuery().create().name(filterName).query("name==PendingTargets001"));
         assertEquals("Retrieved newly created custom target filter", targetFilterQuery,
-                targetFilterQueryManagement.findTargetFilterQueryByName(filterName));
+                targetFilterQueryManagement.findTargetFilterQueryByName(filterName).get());
     }
 
     @Test
@@ -98,8 +99,8 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.createTargetFilterQuery(
                 entityFactory.targetFilterQuery().create().name(filterName).query("name==PendingTargets001"));
         targetFilterQueryManagement.deleteTargetFilterQuery(targetFilterQuery.getId());
-        assertEquals("Returns null as the target filter is deleted", null,
-                targetFilterQueryManagement.findTargetFilterQueryById(targetFilterQuery.getId()));
+        assertFalse("Returns null as the target filter is deleted",
+                targetFilterQueryManagement.findTargetFilterQueryById(targetFilterQuery.getId()).isPresent());
 
     }
 
@@ -114,7 +115,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         targetFilterQueryManagement.updateTargetFilterQuery(
                 entityFactory.targetFilterQuery().update(targetFilterQuery.getId()).query(newQuery));
         assertEquals("Returns updated target filter query", newQuery,
-                targetFilterQueryManagement.findTargetFilterQueryByName(filterName).getQuery());
+                targetFilterQueryManagement.findTargetFilterQueryByName(filterName).get().getQuery());
 
     }
 
@@ -130,7 +131,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(targetFilterQuery.getId(),
                 distributionSet.getId());
 
-        final TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName);
+        final TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName).get();
 
         assertEquals("Returns correct distribution set", distributionSet, tfq.getAutoAssignDistributionSet());
 
@@ -149,13 +150,13 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
                 distributionSet.getId());
 
         // Check if target filter query is there
-        TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName);
+        TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName).get();
         assertEquals("Returns correct distribution set", distributionSet, tfq.getAutoAssignDistributionSet());
 
         distributionSetManagement.deleteDistributionSet(distributionSet.getId());
 
         // Check if auto assign distribution set is null
-        tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName);
+        tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName).get();
         assertNotNull("Returns target filter query", tfq);
         assertNull("Returns distribution set as null", tfq.getAutoAssignDistributionSet());
 
@@ -178,17 +179,17 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
                 .getId(), distributionSet.getId());
 
         // Check if target filter query is there with the distribution set
-        TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName);
+        TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName).get();
         assertEquals("Returns correct distribution set", distributionSet, tfq.getAutoAssignDistributionSet());
 
         distributionSetManagement.deleteDistributionSet(distributionSet.getId());
 
         // Check if distribution set is still in the database with deleted flag
         assertTrue("Distribution set should be deleted",
-                distributionSetManagement.findDistributionSetById(distributionSet.getId()).isDeleted());
+                distributionSetManagement.findDistributionSetById(distributionSet.getId()).get().isDeleted());
 
         // Check if auto assign distribution set is null
-        tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName);
+        tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName).get();
         assertNotNull("Returns target filter query", tfq);
         assertNull("Returns distribution set as null", tfq.getAutoAssignDistributionSet());
 

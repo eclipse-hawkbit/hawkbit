@@ -150,7 +150,8 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
                 prxyTarget.setInstalledDistributionSet(null);
                 prxyTarget.setAssignedDistributionSet(null);
             } else {
-                final Target target = getTargetManagement().findTargetByControllerIDWithDetails(targ.getControllerId());
+                final Target target = getTargetManagement().findTargetByControllerIDWithDetails(targ.getControllerId())
+                        .get();
                 final DistributionSet installedDistributionSet = target.getTargetInfo().getInstalledDistributionSet();
                 prxyTarget.setInstalledDistributionSet(installedDistributionSet);
                 final DistributionSet assignedDistributionSet = target.getAssignedDistributionSet();

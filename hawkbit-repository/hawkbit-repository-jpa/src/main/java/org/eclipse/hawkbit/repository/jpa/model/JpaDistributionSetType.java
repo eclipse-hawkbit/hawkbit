@@ -170,7 +170,7 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
 
         // check if this was in the list before before
         final Optional<DistributionSetTypeElement> existing = elements.stream()
-                .filter(element -> element.getSmType().getKey().equals(smType.getKey())).findFirst();
+                .filter(element -> element.getSmType().getKey().equals(smType.getKey())).findAny();
 
         if (existing.isPresent()) {
             existing.get().setMandatory(mandatory);
@@ -187,7 +187,7 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
         }
 
         // we search by id (standard equals compares also revison)
-        elements.stream().filter(element -> element.getSmType().getId().equals(smTypeId)).findFirst()
+        elements.stream().filter(element -> element.getSmType().getId().equals(smTypeId)).findAny()
                 .ifPresent(elements::remove);
 
         return this;

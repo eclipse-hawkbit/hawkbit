@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -121,7 +122,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     private void handleSelectedAndUpdatedDs(final List<DistributionSetUpdateEvent> events) {
         manageDistUIState.getLastSelectedDistribution()
                 .ifPresent(lastSelectedDsIdName -> events.stream()
-                        .filter(event -> event.getEntityId().equals(lastSelectedDsIdName)).findFirst()
+                        .filter(event -> event.getEntityId().equals(lastSelectedDsIdName)).findAny()
                         .ifPresent(event -> eventBus.publish(this,
                                 new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, event.getEntity()))));
     }
@@ -184,7 +185,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     @Override
-    protected DistributionSet findEntityByTableValue(final Long entityTableId) {
+    protected Optional<DistributionSet> findEntityByTableValue(final Long entityTableId) {
         return distributionSetManagement.findDistributionSetByIdWithDetails(entityTableId);
     }
 
@@ -242,14 +243,15 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     private void handleDropEvent(final Table source, final Set<Long> softwareModulesIdList, final Object distId) {
-        final DistributionSet distributionSet = distributionSetManagement.findDistributionSetById((Long) distId);
+        final Optional<DistributionSet> distributionSet = distributionSetManagement
+                .findDistributionSetById((Long) distId);
 
-        if (distributionSet == null) {
+        if (!distributionSet.isPresent()) {
             notification.displayWarning(i18n.get("distributionset.not.exists"));
             return;
         }
 
-        final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distributionSet);
+        final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distributionSet.get());
 
         final HashMap<Long, HashSet<SoftwareModuleIdName>> map;
         if (manageDistUIState.getConsolidatedDistSoftwarewList().containsKey(distributionSetIdName)) {
@@ -264,7 +266,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             final String name = (String) softwareItem.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
             final String swVersion = (String) softwareItem.getItemProperty(SPUILabelDefinitions.VAR_VERSION).getValue();
 
-            final SoftwareModule softwareModule = softwareManagement.findSoftwareModuleById(softwareModuleId);
+            final SoftwareModule softwareModule = softwareManagement.findSoftwareModuleById(softwareModuleId).get();
             if (validSoftwareModule((Long) distId, softwareModule)) {
                 final SoftwareModuleIdName softwareModuleIdName = new SoftwareModuleIdName(softwareModuleId,
                         name.concat(":" + swVersion));
@@ -326,7 +328,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         if (!isSoftwareModuleDragged(distId, sm)) {
             return false;
         }
-        final DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(distId);
+        final DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(distId).get();
         if (!validateSoftwareModule(sm, ds)) {
             return false;
         }
@@ -490,7 +492,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     private void showMetadataDetails(final Long itemId) {
-        final DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(itemId);
+        final DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(itemId).get();
         UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null));
     }
 

@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
@@ -55,7 +56,7 @@ public interface SoftwareModuleRepository
      * @return the found {@link SoftwareModule} with the given name AND version
      *         AND type
      */
-    JpaSoftwareModule findOneByNameAndVersionAndTypeId(String name, String version, Long typeId);
+    Optional<SoftwareModule> findOneByNameAndVersionAndTypeId(String name, String version, Long typeId);
 
     /**
      * deletes the {@link SoftwareModule}s with the given IDs.

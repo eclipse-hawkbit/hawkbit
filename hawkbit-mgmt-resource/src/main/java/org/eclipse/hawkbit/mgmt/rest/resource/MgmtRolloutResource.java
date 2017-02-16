@@ -50,9 +50,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class MgmtRolloutResource implements MgmtRolloutRestApi {
-
-    private static final String DOES_NOT_EXIST = "} does not exist";
-
     @Autowired
     private RolloutManagement rolloutManagement;
 
@@ -94,7 +91,9 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
     @Override
     public ResponseEntity<MgmtRolloutResponseBody> getRollout(@PathVariable("rolloutId") final Long rolloutId) {
-        final Rollout findRolloutById = findRolloutOrThrowException(rolloutId);
+        final Rollout findRolloutById = rolloutManagement.findRolloutWithDetailedStatus(rolloutId)
+                .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
+
         return new ResponseEntity<>(MgmtRolloutMapper.toResponseRollout(findRolloutById, true), HttpStatus.OK);
     }
 
@@ -182,8 +181,16 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     public ResponseEntity<MgmtRolloutGroupResponseBody> getRolloutGroup(@PathVariable("rolloutId") final Long rolloutId,
             @PathVariable("groupId") final Long groupId) {
         findRolloutOrThrowException(rolloutId);
-        final RolloutGroup rolloutGroup = findRolloutGroupOrThrowException(groupId);
+
+        final RolloutGroup rolloutGroup = rolloutGroupManagement.findRolloutGroupWithDetailedStatus(groupId)
+                .orElseThrow(() -> new EntityNotFoundException(RolloutGroup.class, rolloutId));
         return ResponseEntity.ok(MgmtRolloutMapper.toResponseRolloutGroup(rolloutGroup, true));
+    }
+
+    private void findRolloutOrThrowException(final Long rolloutId) {
+        if (!rolloutManagement.exists(rolloutId)) {
+            throw new EntityNotFoundException(Rollout.class, rolloutId);
+        }
     }
 
     @Override
@@ -211,30 +218,10 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         return new ResponseEntity<>(new PagedList<>(rest, rolloutGroupTargets.getTotalElements()), HttpStatus.OK);
     }
 
-    private Rollout findRolloutOrThrowException(final Long rolloutId) {
-        final Rollout rollout = this.rolloutManagement.findRolloutWithDetailedStatus(rolloutId, false);
-        if (rollout == null) {
-            throw new EntityNotFoundException("Rollout with Id {" + rolloutId + DOES_NOT_EXIST);
-        }
-        return rollout;
-    }
-
-    private RolloutGroup findRolloutGroupOrThrowException(final Long rolloutGroupId) {
-        final RolloutGroup rolloutGroup = this.rolloutGroupManagement
-                .findRolloutGroupWithDetailedStatus(rolloutGroupId);
-        if (rolloutGroup == null) {
-            throw new EntityNotFoundException("Group with Id {" + rolloutGroupId + DOES_NOT_EXIST);
-        }
-        return rolloutGroup;
-    }
-
     private DistributionSet findDistributionSetOrThrowException(final MgmtRolloutRestRequestBody rolloutRequestBody) {
-        final DistributionSet ds = this.distributionSetManagement
-                .findDistributionSetById(rolloutRequestBody.getDistributionSetId());
-        if (ds == null) {
-            throw new EntityNotFoundException(
-                    "DistributionSet with Id {" + rolloutRequestBody.getDistributionSetId() + DOES_NOT_EXIST);
-        }
-        return ds;
+        return this.distributionSetManagement.findDistributionSetById(rolloutRequestBody.getDistributionSetId())
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class,
+                        rolloutRequestBody.getDistributionSetId()));
+
     }
 }

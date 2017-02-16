@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.management.dstable;
 
+import java.util.Optional;
+
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
@@ -195,12 +197,13 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
     @Override
     protected void showMetadata(final ClickEvent event) {
-        final DistributionSet ds = distributionSetManagement.findDistributionSetById(getSelectedBaseEntityId());
-        if (ds == null) {
+        final Optional<DistributionSet> ds = distributionSetManagement
+                .findDistributionSetById(getSelectedBaseEntityId());
+        if (!ds.isPresent()) {
             notificationMessage.displayWarning(getI18n().get("distributionset.not.exists"));
             return;
         }
-        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null));
+        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds.get(), null));
     }
 
 }

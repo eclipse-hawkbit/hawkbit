@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository;
 
 import java.io.InputStream;
-import java.util.List;
+import java.util.Optional;
 
 import javax.validation.constraints.NotNull;
 
@@ -123,7 +123,8 @@ public interface ArtifactManagement {
      *            of the {@link Artifact} that has to be deleted.
      * @throws ArtifactDeleteFailedException
      *             if deletion failed (MongoDB is not available)
-     *
+     * @throws EntityNotFoundException
+     *             if artifact with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     void deleteArtifact(@NotNull Long id);
@@ -133,12 +134,11 @@ public interface ArtifactManagement {
      *
      * @param id
      *            to search for
-     * @return found {@link Artifact} or <code>null</code> is it could not be
-     *         found.
+     * @return found {@link Artifact}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    Artifact findArtifact(@NotNull Long id);
+    Optional<Artifact> findArtifact(@NotNull Long id);
 
     /**
      * Find by artifact by software module id and filename.
@@ -147,11 +147,11 @@ public interface ArtifactManagement {
      *            file name
      * @param softwareModuleId
      *            software module id.
-     * @return Artifact if artifact present
+     * @return found {@link Artifact}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    List<Artifact> findByFilenameAndSoftwareModule(@NotNull String filename, @NotNull Long softwareModuleId);
+    Optional<Artifact> findByFilenameAndSoftwareModule(@NotNull String filename, @NotNull Long softwareModuleId);
 
     /**
      * Find all local artifact by sha1 and return the first artifact.
@@ -162,7 +162,7 @@ public interface ArtifactManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    Artifact findFirstArtifactBySHA1(@NotNull String sha1);
+    Optional<Artifact> findFirstArtifactBySHA1(@NotNull String sha1);
 
     /**
      * Searches for {@link Artifact} with given file name.
@@ -173,7 +173,7 @@ public interface ArtifactManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    List<Artifact> findArtifactByFilename(@NotNull String filename);
+    Optional<Artifact> findArtifactByFilename(@NotNull String filename);
 
     /**
      * Get local artifact for a base software module.

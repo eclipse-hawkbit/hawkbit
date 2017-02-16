@@ -49,7 +49,7 @@ public class SMTypeFilterButtonClick extends AbstractFilterSingleButtonClick imp
     @Override
     protected void filterClicked(final Button clickedButton) {
         final SoftwareModuleType softwareModuleType = softwareManagement
-                .findSoftwareModuleTypeByName(clickedButton.getData().toString());
+                .findSoftwareModuleTypeByName(clickedButton.getData().toString()).get();
         artifactUploadState.getSoftwareModuleFilters().setSoftwareModuleType(softwareModuleType);
         eventBus.publish(this, SMFilterEvent.FILTER_BY_TYPE);
     }

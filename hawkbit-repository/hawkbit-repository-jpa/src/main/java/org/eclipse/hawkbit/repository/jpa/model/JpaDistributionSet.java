@@ -263,7 +263,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         checkTypeCompatability(softwareModule);
 
         final Optional<SoftwareModule> found = modules.stream()
-                .filter(module -> module.getId().equals(softwareModule.getId())).findFirst();
+                .filter(module -> module.getId().equals(softwareModule.getId())).findAny();
 
         if (found.isPresent()) {
             return false;
@@ -274,7 +274,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
         if (allready >= softwareModule.getType().getMaxAssignments()) {
             modules.stream().filter(module -> module.getType().getKey().equals(softwareModule.getType().getKey()))
-                    .findFirst().map(modules::remove);
+                    .findAny().map(modules::remove);
         }
 
         if (modules.add(softwareModule)) {
@@ -303,7 +303,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         }
 
         final Optional<SoftwareModule> found = modules.stream()
-                .filter(module -> module.getId().equals(softwareModule.getId())).findFirst();
+                .filter(module -> module.getId().equals(softwareModule.getId())).findAny();
 
         if (found.isPresent()) {
             modules.remove(found.get());

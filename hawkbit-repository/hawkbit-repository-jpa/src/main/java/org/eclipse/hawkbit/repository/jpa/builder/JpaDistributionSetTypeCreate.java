@@ -51,8 +51,7 @@ public class JpaDistributionSetTypeCreate extends AbstractDistributionSetTypeUpd
         final Collection<SoftwareModuleType> module = softwareManagement
                 .findSoftwareModuleTypesById(softwareModuleTypeId);
         if (module.size() < softwareModuleTypeId.size()) {
-            throw new EntityNotFoundException(
-                    "SoftwareModules types out of the range {" + softwareModuleTypeId + "} due not exist");
+            throw new EntityNotFoundException(SoftwareModuleType.class, softwareModuleTypeId);
         }
 
         return module;

@@ -649,7 +649,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private boolean duplicateCheckForEdit() {
         final String rolloutNameVal = getRolloutName();
-        if (!rollout.getName().equals(rolloutNameVal) && rolloutManagement.findRolloutByName(rolloutNameVal) != null) {
+        if (!rollout.getName().equals(rolloutNameVal)
+                && rolloutManagement.findRolloutByName(rolloutNameVal).isPresent()) {
             uiNotification.displayValidationError(i18n.get("message.rollout.duplicate.check", rolloutNameVal));
             return false;
         }
@@ -736,7 +737,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private boolean duplicateCheck() {
-        if (rolloutManagement.findRolloutByName(getRolloutName()) != null) {
+        if (rolloutManagement.findRolloutByName(getRolloutName()).isPresent()) {
             uiNotification.displayValidationError(i18n.get("message.rollout.duplicate.check", getRolloutName()));
             return false;
         }
@@ -883,7 +884,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             return;
         }
 
-        rollout = rolloutManagement.findRolloutById(rolloutId);
+        rollout = rolloutManagement.findRolloutById(rolloutId).get();
         description.setValue(rollout.getDescription());
         distributionSet.setValue(rollout.getDistributionSet().getId());
         setActionType(rollout);

@@ -304,7 +304,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
         @Override
         public void click(final RendererClickEvent event) {
             rolloutUIState.setRolloutGroup(
-                    rolloutGroupManagement.findRolloutGroupWithDetailedStatus((Long) event.getItemId()));
+                    rolloutGroupManagement.findRolloutGroupWithDetailedStatus((Long) event.getItemId()).get());
             eventBus.publish(this, RolloutEvent.SHOW_ROLLOUT_GROUP_TARGETS);
         }
     }

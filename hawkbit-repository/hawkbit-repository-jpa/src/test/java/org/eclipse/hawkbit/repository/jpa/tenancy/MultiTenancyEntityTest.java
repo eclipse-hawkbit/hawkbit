@@ -8,10 +8,12 @@
  */
 package org.eclipse.hawkbit.repository.jpa.tenancy;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.util.Collection;
 
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -126,7 +128,13 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         final Target createTargetForTenant = createTargetForTenant(controllerAnotherTenant, anotherTenant);
 
         // ensure target cannot be deleted by 'mytenant'
-        targetManagement.deleteTargets(Lists.newArrayList(createTargetForTenant.getId()));
+        try {
+            targetManagement.deleteTargets(Lists.newArrayList(createTargetForTenant.getId()));
+            fail("mytenant should not have been able to delete target of anotherTenant");
+        } catch (final EntityNotFoundException ex) {
+            // ok
+        }
+
         Slice<Target> targetsForAnotherTenant = findTargetsForTenant(anotherTenant);
         assertThat(targetsForAnotherTenant).hasSize(1);
 

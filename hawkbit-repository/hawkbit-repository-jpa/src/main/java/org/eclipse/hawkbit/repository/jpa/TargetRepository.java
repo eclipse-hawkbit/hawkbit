@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
@@ -44,7 +45,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      * @return found {@link Target} or <code>null</code> if not found.
      */
     @EntityGraph(value = "Target.detail", type = EntityGraphType.LOAD)
-    JpaTarget findByControllerId(String controllerID);
+    Optional<Target> findByControllerId(String controllerID);
 
     /**
      * Checks if target with given id exists.

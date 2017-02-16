@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.distributions.smtable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
@@ -148,7 +149,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     private void handleSelectedAndUpdatedSoftwareModules(final List<SoftwareModuleUpdatedEvent> events) {
         manageDistUIState.getSelectedBaseSwModuleId()
                 .ifPresent(lastSelectedModuleId -> events.stream()
-                        .filter(event -> lastSelectedModuleId.equals(event.getEntityId())).findFirst()
+                        .filter(event -> lastSelectedModuleId.equals(event.getEntityId())).findAny()
                         .ifPresent(lastEvent -> eventBus.publish(this,
                                 new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, lastEvent.getEntity()))));
     }
@@ -257,7 +258,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     }
 
     @Override
-    protected SoftwareModule findEntityByTableValue(final Long lastSelectedId) {
+    protected Optional<SoftwareModule> findEntityByTableValue(final Long lastSelectedId) {
         return softwareManagement.findSoftwareModuleById(lastSelectedId);
     }
 
@@ -420,7 +421,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     }
 
     private void showMetadataDetails(final Long itemId) {
-        final SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(itemId);
+        final SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(itemId).get();
         UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null));
     }
 

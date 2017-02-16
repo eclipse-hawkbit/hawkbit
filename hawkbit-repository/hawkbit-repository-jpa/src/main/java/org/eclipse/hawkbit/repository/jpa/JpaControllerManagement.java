@@ -39,7 +39,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
@@ -47,7 +46,6 @@ import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -133,29 +131,32 @@ public class JpaControllerManagement implements ControllerManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public Target updateLastTargetQuery(final String controllerId, final URI address) {
-        final Target target = Optional.ofNullable(targetRepository.findByControllerId(controllerId))
-                .orElseThrow(() -> new EntityNotFoundException("Target with given ID " + controllerId + " not found"));
+        final Target target = targetRepository.findByControllerId(controllerId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         return updateTargetStatus(target.getTargetInfo(), null, System.currentTimeMillis(), address).getTarget();
     }
 
     @Override
-    public Action getActionForDownloadByTargetAndSoftwareModule(final String controllerId,
-            final SoftwareModule module) {
-        final List<Action> action = actionRepository.findActionByTargetAndSoftwareModule(controllerId,
-                (JpaSoftwareModule) module);
+    public Optional<Action> getActionForDownloadByTargetAndSoftwareModule(final String controllerId,
+            final Long moduleId) {
+        final List<Action> action = actionRepository.findActionByTargetAndSoftwareModule(controllerId, moduleId);
 
         if (action.isEmpty() || action.get(0).isCancelingOrCanceled()) {
-            throw new EntityNotFoundException(
-                    "No assigment found for module " + module.getId() + " to target " + controllerId);
+            return Optional.empty();
         }
 
-        return action.get(0);
+        return Optional.ofNullable(action.get(0));
     }
 
     @Override
     public boolean hasTargetArtifactAssigned(final String controllerId, final String sha1Hash) {
-        return actionRepository.count(ActionSpecifications.hasTargetAssignedArtifact(controllerId, sha1Hash)) > 0;
+        
+        finalboolean targetExists = targetRepository.existsByControllerId(controllerId);
+        if (!target.isPresent()) {
+            return false;
+        }
+        return actionRepository.count(ActionSpecifications.hasTargetAssignedArtifact(target.get(), sha1Hash)) > 0;
     }
 
     @Override
@@ -172,8 +173,8 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public Action findActionWithDetails(final Long actionId) {
-        return getActionAndThrowExceptionIfNotFound(actionId);
+    public Optional<Action> findActionWithDetails(final Long actionId) {
+        return actionRepository.getById(actionId);
     }
 
     @Override
@@ -380,11 +381,8 @@ public class JpaControllerManagement implements ControllerManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public Target updateControllerAttributes(final String controllerId, final Map<String, String> data) {
-        final JpaTarget target = targetRepository.findByControllerId(controllerId);
-
-        if (target == null) {
-            throw new EntityNotFoundException(controllerId);
-        }
+        final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         final JpaTargetInfo targetInfo = (JpaTargetInfo) target.getTargetInfo();
         targetInfo.getControllerAttributes().putAll(data);
@@ -427,8 +425,7 @@ public class JpaControllerManagement implements ControllerManagement {
      *         {@link Status#RETRIEVED}
      */
     private Action handleRegisterRetrieved(final Long actionId, final String message) {
-        final JpaAction action = Optional.ofNullable(actionRepository.findById(actionId)).orElseThrow(
-                () -> new EntityNotFoundException("Actionw ith given ID " + actionId + " doesn not exist."));
+        final JpaAction action = getActionAndThrowExceptionIfNotFound(actionId);
         // do a manual query with CriteriaBuilder to avoid unnecessary field
         // queries and an extra
         // count query made by spring-data when using pageable requests, we
@@ -484,8 +481,8 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     private JpaAction getActionAndThrowExceptionIfNotFound(final Long actionId) {
-        return Optional.ofNullable(actionRepository.findById(actionId))
-                .orElseThrow(() -> new EntityNotFoundException("Action with ID " + actionId + " not found!"));
+        return actionRepository.findById(actionId)
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
     }
 
     @Override
@@ -496,13 +493,13 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public Target findByControllerId(final String controllerId) {
+    public Optional<Target> findByControllerId(final String controllerId) {
         return targetRepository.findByControllerId(controllerId);
     }
 
     @Override
-    public Target findByTargetId(final Long targetId) {
-        return targetRepository.findOne(targetId);
+    public Optional<Target> findByTargetId(final Long targetId) {
+        return Optional.ofNullable(targetRepository.findOne(targetId));
     }
 
 }

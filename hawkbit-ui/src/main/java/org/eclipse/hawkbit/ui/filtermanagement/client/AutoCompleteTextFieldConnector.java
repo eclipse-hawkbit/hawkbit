@@ -140,4 +140,3 @@ public class AutoCompleteTextFieldConnector extends AbstractExtensionConnector {
         rpc.suggest(textFieldWidget.getValue(), textFieldWidget.getCursorPos());
     }
 }
-

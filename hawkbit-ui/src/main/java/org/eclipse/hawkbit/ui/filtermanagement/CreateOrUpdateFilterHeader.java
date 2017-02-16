@@ -400,7 +400,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private boolean doesAlreadyExists() {
-        if (targetFilterQueryManagement.findTargetFilterQueryByName(nameTextField.getValue()) != null) {
+        if (targetFilterQueryManagement.findTargetFilterQueryByName(nameTextField.getValue()).isPresent()) {
             notification.displayValidationError(i18n.get("message.target.filter.duplicate", nameTextField.getValue()));
             return true;
         }
