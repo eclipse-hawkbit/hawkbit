@@ -163,7 +163,7 @@ public class AmqpControllerAuthenticationTest {
         final DbArtifact artifact = new DbArtifact();
         artifact.setSize(ARTIFACT_SIZE);
         artifact.setHashes(new DbArtifactHash(SHA1, "md5 test"));
-        when(artifactManagementMock.loadArtifactBinary(SHA1)).thenReturn(artifact);
+        when(artifactManagementMock.loadArtifactBinary(SHA1)).thenReturn(Optional.of(artifact));
 
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate,
                 mock(AmqpMessageDispatcherService.class), controllerManagementMock, new JpaEntityFactory());

@@ -15,7 +15,6 @@ import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
-import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
@@ -58,7 +57,10 @@ public interface ArtifactManagement {
      *
      * @return uploaded {@link Artifact}
      *
-     * @throw ArtifactUploadFailedException if upload fails
+     * @throws ArtifactUploadFailedException
+     *             if upload fails
+     * @throws EntityNotFoundException
+     *             if given software module does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     Artifact createArtifact(@NotNull InputStream inputStream, @NotNull Long moduleId, final String filename,
@@ -148,6 +150,9 @@ public interface ArtifactManagement {
      * @param softwareModuleId
      *            software module id.
      * @return found {@link Artifact}
+     * 
+     * @throws EntityNotFoundException
+     *             if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
@@ -183,6 +188,9 @@ public interface ArtifactManagement {
      * @param swId
      *            software module id
      * @return Page<Artifact>
+     * 
+     * @throws EntityNotFoundException
+     *             if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<Artifact> findArtifactBySoftwareModule(@NotNull Pageable pageReq, @NotNull Long swId);
@@ -194,11 +202,9 @@ public interface ArtifactManagement {
      *            to search for
      * @return loaded {@link DbArtifact}
      *
-     * @throws ArtifactBinaryNotFoundException
-     *             if file could not be found in store
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DOWNLOAD_ARTIFACT + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.HAS_CONTROLLER_DOWNLOAD)
-    DbArtifact loadArtifactBinary(@NotEmpty String sha1Hash);
+    Optional<DbArtifact> loadArtifactBinary(@NotEmpty String sha1Hash);
 
 }

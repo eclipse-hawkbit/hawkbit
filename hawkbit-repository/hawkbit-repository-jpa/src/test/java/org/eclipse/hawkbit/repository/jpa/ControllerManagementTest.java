@@ -61,7 +61,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     private RepositoryProperties repositoryProperties;
 
     @Test
-    @Description("verfies that controller mangement queries react as specfied on calls for non existing entities.")
+    @Description("Verifies that management queries react as specfied on calls for non existing entities.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 1) })
     public void nonExistingEntityQueries() throws URISyntaxException {

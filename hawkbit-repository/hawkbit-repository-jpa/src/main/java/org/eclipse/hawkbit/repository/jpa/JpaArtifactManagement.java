@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.artifact.repository.HashNotMatchException;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
@@ -141,6 +140,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     @Override
     public Optional<Artifact> findByFilenameAndSoftwareModule(final String filename, final Long softwareModuleId) {
+        throwExceptionIfSoftwareModuleDoesNotExist(softwareModuleId);
+
         return localArtifactRepository.findFirstByFilenameAndSoftwareModuleId(filename, softwareModuleId);
     }
 
@@ -156,13 +157,20 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     @Override
     public Page<Artifact> findArtifactBySoftwareModule(final Pageable pageReq, final Long swId) {
+        throwExceptionIfSoftwareModuleDoesNotExist(swId);
+
         return localArtifactRepository.findBySoftwareModuleId(pageReq, swId);
     }
 
+    private void throwExceptionIfSoftwareModuleDoesNotExist(final Long swId) {
+        if (!softwareModuleRepository.exists(swId)) {
+            throw new EntityNotFoundException(SoftwareModule.class, swId);
+        }
+    }
+
     @Override
-    public DbArtifact loadArtifactBinary(final String sha1Hash) {
-        return Optional.ofNullable(artifactRepository.getArtifactBySha1(sha1Hash))
-                .orElseThrow(() -> new ArtifactBinaryNotFoundException(sha1Hash));
+    public Optional<DbArtifact> loadArtifactBinary(final String sha1Hash) {
+        return Optional.ofNullable(artifactRepository.getArtifactBySha1(sha1Hash));
     }
 
     private Artifact storeArtifactMetadata(final SoftwareModule softwareModule, final String providedFilename,
