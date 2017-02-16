@@ -670,22 +670,29 @@ public class RolloutListGrid extends AbstractGrid {
             if (expectedRolloutStatus == null) {
                 return null;
             }
-            String status = null;
+
             if (RUN_OPTION.equals(propertyId)) {
-                status = getStatus(cellReference, Arrays.asList(RolloutStatus.READY, RolloutStatus.PAUSED));
-            } else if (PAUSE_OPTION.equals(propertyId)) {
-                status = getStatus(cellReference, Arrays.asList(RolloutStatus.RUNNING));
-            } else if (UPDATE_OPTION.equals(propertyId) || DELETE_OPTION.equals(propertyId)) {
-                status = getStatus(cellReference,
+                return getStatus(cellReference, Arrays.asList(RolloutStatus.READY, RolloutStatus.PAUSED));
+            }
+
+            if (PAUSE_OPTION.equals(propertyId)) {
+                return getStatus(cellReference, Arrays.asList(RolloutStatus.RUNNING));
+            }
+
+            if (UPDATE_OPTION.equals(propertyId) || DELETE_OPTION.equals(propertyId)) {
+                return getStatus(cellReference,
                         Arrays.asList(RolloutStatus.CREATING, RolloutStatus.ERROR_CREATING,
                                 RolloutStatus.ERROR_STARTING, RolloutStatus.PAUSED, RolloutStatus.READY,
                                 RolloutStatus.RUNNING, RolloutStatus.STARTING, RolloutStatus.STOPPED));
-            } else if (COPY_OPTION.equals(propertyId)) {
-                status = getStatus(cellReference, Arrays.asList(RolloutStatus.CREATING, RolloutStatus.ERROR_CREATING,
+            }
+
+            if (COPY_OPTION.equals(propertyId)) {
+                return getStatus(cellReference, Arrays.asList(RolloutStatus.CREATING, RolloutStatus.ERROR_CREATING,
                         RolloutStatus.ERROR_STARTING, RolloutStatus.PAUSED, RolloutStatus.READY, RolloutStatus.RUNNING,
                         RolloutStatus.STARTING, RolloutStatus.STOPPED, RolloutStatus.FINISHED));
             }
-            return status;
+
+            return null;
         }
 
         private String getStatus(final CellReference cellReference, final List<RolloutStatus> expectedRolloutStatus) {

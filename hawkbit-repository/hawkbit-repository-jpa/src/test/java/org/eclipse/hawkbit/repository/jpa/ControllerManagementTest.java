@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
@@ -67,96 +68,64 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Target target = testdataFactory.createTarget();
         final SoftwareModule module = testdataFactory.createSoftwareModuleOs();
 
-        try {
-            controllerManagement
-                    .addCancelActionStatus(entityFactory.actionStatus().create(1234L).status(Action.Status.FINISHED));
-            fail("Action that does not exist should have called for EntityNotFoundException");
-        } catch (final EntityNotFoundException e) {
-            assertThat(e.getMessage()).contains("1234").contains("Action");
-        }
+        assertThatThrownBy(() -> controllerManagement
+                .addCancelActionStatus(entityFactory.actionStatus().create(1234L).status(Action.Status.FINISHED)))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("Action");
 
-        try {
-            controllerManagement.addInformationalActionStatus(
-                    entityFactory.actionStatus().create(1234L).status(Action.Status.RUNNING));
-            fail("Action that does not exist should have called for EntityNotFoundException");
-        } catch (final EntityNotFoundException e) {
-            assertThat(e.getMessage()).contains("1234").contains("Action");
-        }
+        assertThatThrownBy(() -> controllerManagement
+                .addInformationalActionStatus(entityFactory.actionStatus().create(1234L).status(Action.Status.RUNNING)))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("Action");
 
-        try {
-            controllerManagement
-                    .addUpdateActionStatus(entityFactory.actionStatus().create(1234L).status(Action.Status.FINISHED));
-            fail("Action that does not exist should have called for EntityNotFoundException");
-        } catch (final EntityNotFoundException e) {
-            assertThat(e.getMessage()).contains("1234").contains("Action");
-        }
+        assertThatThrownBy(() -> controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(1234L).status(Action.Status.FINISHED)))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("Action");
 
         assertThat(controllerManagement.findActionWithDetails(1234L).isPresent()).isFalse();
         assertThat(controllerManagement.findByControllerId("1234").isPresent()).isFalse();
         assertThat(controllerManagement.findByTargetId(1234L).isPresent()).isFalse();
 
-        try {
-            controllerManagement.findOldestActiveActionByTarget("1234");
-            fail("Target that does not exist should have called for EntityNotFoundException");
-        } catch (final EntityNotFoundException e) {
-            assertThat(e.getMessage()).contains("1234").contains("Target");
-        }
+        assertThatThrownBy(() -> controllerManagement.findOldestActiveActionByTarget("1234"))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("Target");
 
-        try {
-            controllerManagement.getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), 1234L);
-            fail("Module that does not exist should have called for EntityNotFoundException");
-        } catch (final EntityNotFoundException e) {
-            assertThat(e.getMessage()).contains("1234").contains("SoftwareModule");
-        }
+        assertThatThrownBy(() -> controllerManagement
+                .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), 1234L))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("SoftwareModule");
 
-        try {
-            controllerManagement.getActionForDownloadByTargetAndSoftwareModule("1234", module.getId());
-            fail("Target that does not exist should have called for EntityNotFoundException");
-        } catch (final EntityNotFoundException e) {
-            assertThat(e.getMessage()).contains("1234").contains("Target");
-        }
+        assertThatThrownBy(
+                () -> controllerManagement.getActionForDownloadByTargetAndSoftwareModule("1234", module.getId()))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("Target");
 
         assertThat(controllerManagement
-                .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), module.getId()).isPresent())
-                        .isFalse();
+                .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), module.getId()).isPresent());
 
-        try {
-            controllerManagement.hasTargetArtifactAssigned(1234L, "XXX");
-            fail("Target that does not exist should have called for EntityNotFoundException");
-        } catch (final EntityNotFoundException e) {
-            assertThat(e.getMessage()).contains("1234").contains("Target");
-        }
+        assertThatThrownBy(() -> controllerManagement.hasTargetArtifactAssigned(1234L, "XXX"))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("Target");
 
-        try {
-            controllerManagement.hasTargetArtifactAssigned("1234", "XXX");
-            fail("Target that does not exist should have called for EntityNotFoundException");
-        } catch (final EntityNotFoundException e) {
-            assertThat(e.getMessage()).contains("1234").contains("Target");
-        }
+        assertThatThrownBy(() -> controllerManagement.hasTargetArtifactAssigned("1234", "XXX"))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("Target");
 
         assertThat(controllerManagement.hasTargetArtifactAssigned(target.getControllerId(), "XXX")).isFalse();
         assertThat(controllerManagement.hasTargetArtifactAssigned(target.getId(), "XXX")).isFalse();
 
-        try {
-            controllerManagement.registerRetrieved(1234L, "test message");
-            fail("Action that does not exist should have called for EntityNotFoundException");
-        } catch (final EntityNotFoundException e) {
-            assertThat(e.getMessage()).contains("1234").contains("Action");
-        }
+        assertThatThrownBy(() -> controllerManagement.registerRetrieved(1234L, "test message"))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("Action");
 
-        try {
-            controllerManagement.updateControllerAttributes("1234", Maps.newHashMap());
-            fail("Target that does not exist should have called for EntityNotFoundException");
-        } catch (final EntityNotFoundException e) {
-            assertThat(e.getMessage()).contains("1234").contains("Target");
-        }
+        assertThatThrownBy(() -> controllerManagement.updateControllerAttributes("1234", Maps.newHashMap()))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("Target");
 
-        try {
-            controllerManagement.updateLastTargetQuery("1234", new URI("http://test.com"));
-            fail("Target that does not exist should have called for EntityNotFoundException");
-        } catch (final EntityNotFoundException e) {
-            assertThat(e.getMessage()).contains("1234").contains("Target");
-        }
+        assertThatThrownBy(() -> controllerManagement.updateLastTargetQuery("1234", new URI("http://test.com")))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("Target");
     }
 
     @Test
