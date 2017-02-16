@@ -159,7 +159,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
             }
 
             for (final SoftwareModuleIdName swIdName : softwareModuleIdNameList) {
-                final SoftwareModule softwareModule = softwareManagement.findSoftwareModuleById(swIdName.getId());
+                final SoftwareModule softwareModule = softwareManagement.findSoftwareModuleById(swIdName.getId()).get();
                 if (assignedSWModule.containsKey(softwareModule.getType().getName())) {
                     assignedSWModule.get(softwareModule.getType().getName()).append("</br>").append("<I>")
                             .append(getUnsavedAssigedSwModule(softwareModule.getName(), softwareModule.getVersion()))
@@ -374,7 +374,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
                 assignedSWModule.clear();
             }
             setSelectedBaseEntity(
-                    distributionSetManagement.findDistributionSetByIdWithDetails(getSelectedBaseEntityId()));
+                    distributionSetManagement.findDistributionSetByIdWithDetails(getSelectedBaseEntityId()).get());
             UI.getCurrent().access(this::populateModule);
         }
     }
@@ -409,7 +409,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     @Override
     protected void showMetadata(final ClickEvent event) {
         final DistributionSet ds = distributionSetManagement
-                .findDistributionSetByIdWithDetails(getSelectedBaseEntityId());
+                .findDistributionSetByIdWithDetails(getSelectedBaseEntityId()).get();
         UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null));
     }
 }

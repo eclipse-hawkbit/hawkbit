@@ -12,10 +12,10 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Tag;
@@ -42,7 +42,7 @@ public interface DistributionSetRepository
      * @return list of found {@link DistributionSet}s
      */
     @Query(value = "Select Distinct ds from JpaDistributionSet ds join ds.tags dst where dst = :tag")
-    List<JpaDistributionSet> findByTag(@Param("tag") final JpaDistributionSetTag tag);
+    List<JpaDistributionSet> findByTag(@Param("tag") final DistributionSetTag tag);
 
     /**
      * deletes the {@link DistributionSet}s with the given IDs.

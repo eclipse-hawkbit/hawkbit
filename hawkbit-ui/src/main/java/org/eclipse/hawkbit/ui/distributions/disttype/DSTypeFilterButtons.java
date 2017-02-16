@@ -38,7 +38,7 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
     private final ManageDistUIState manageDistUIState;
 
     private final DistributionsViewClientCriterion distributionsViewClientCriterion;
-    
+
     DSTypeFilterButtons(final UIEventBus eventBus, final ManageDistUIState manageDistUIState,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final DistributionSetManagement distributionSetManagement) {

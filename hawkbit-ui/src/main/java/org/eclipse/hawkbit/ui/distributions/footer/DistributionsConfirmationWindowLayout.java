@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.AbstractConfirmationWindowLayout;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
@@ -278,7 +277,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         for (final String swModuleTypeName : manageDistUIState.getSelectedDeleteSWModuleTypes()) {
 
             softwareManagement.deleteSoftwareModuleType(
-                    softwareManagement.findSoftwareModuleTypeByName(swModuleTypeName).getId());
+                    softwareManagement.findSoftwareModuleTypeByName(swModuleTypeName).get().getId());
         }
         addToConsolitatedMsg(FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.get("message.sw.module.type.delete", new Object[] { deleteSWModuleTypeCount }));
@@ -460,10 +459,10 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     private void deleteDistSetTypeAll(final ConfirmationTab tab) {
 
         final int deleteDistTypeCount = manageDistUIState.getSelectedDeleteDistSetTypes().size();
-        for (final String deleteDistTypeName : manageDistUIState.getSelectedDeleteDistSetTypes()) {
-            dsManagement
-                    .deleteDistributionSetType(dsManagement.findDistributionSetTypeByName(deleteDistTypeName).getId());
-        }
+        manageDistUIState.getSelectedDeleteDistSetTypes().stream()
+                .map(deleteDistTypeName -> dsManagement.findDistributionSetTypeByName(deleteDistTypeName).get().getId())
+                .forEach(dsManagement::deleteDistributionSetType);
+
         addToConsolitatedMsg(FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.get("message.dist.type.delete", new Object[] { deleteDistTypeCount }));
         manageDistUIState.getSelectedDeleteDistSetTypes().clear();

@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.io.InputStream;
-import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
@@ -105,9 +104,9 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public boolean clearArtifactBinary(final Long existing) {
-        return clearArtifactBinary(Optional.ofNullable(localArtifactRepository.findOne(existing))
-                .orElseThrow(() -> new EntityNotFoundException("Artifact with given ID" + existing + " not found.")));
+    public boolean clearArtifactBinary(final Long artifactId) {
+        return clearArtifactBinary(localArtifactRepository.findById(artifactId)
+                .orElseThrow(() -> new EntityNotFoundException(Artifact.class, artifactId)));
     }
 
     private boolean clearArtifactBinary(final JpaArtifact existing) {
@@ -132,11 +131,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteArtifact(final Long id) {
-        final JpaArtifact existing = localArtifactRepository.findOne(id);
-
-        if (null == existing) {
-            return;
-        }
+        final JpaArtifact existing = (JpaArtifact) findArtifact(id)
+                .orElseThrow(() -> new EntityNotFoundException(Artifact.class, id));
 
         clearArtifactBinary(existing);
 
@@ -146,23 +142,23 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     @Override
-    public Artifact findArtifact(final Long id) {
-        return localArtifactRepository.findOne(id);
+    public Optional<Artifact> findArtifact(final Long id) {
+        return Optional.ofNullable(localArtifactRepository.findOne(id));
     }
 
     @Override
-    public List<Artifact> findByFilenameAndSoftwareModule(final String filename, final Long softwareModuleId) {
-        return localArtifactRepository.findByFilenameAndSoftwareModuleId(filename, softwareModuleId);
+    public Optional<Artifact> findByFilenameAndSoftwareModule(final String filename, final Long softwareModuleId) {
+        return localArtifactRepository.findFirstByFilenameAndSoftwareModuleId(filename, softwareModuleId);
     }
 
     @Override
-    public Artifact findFirstArtifactBySHA1(final String sha1Hash) {
+    public Optional<Artifact> findFirstArtifactBySHA1(final String sha1Hash) {
         return localArtifactRepository.findFirstBySha1Hash(sha1Hash);
     }
 
     @Override
-    public List<Artifact> findArtifactByFilename(final String filename) {
-        return localArtifactRepository.findByFilename(filename);
+    public Optional<Artifact> findArtifactByFilename(final String filename) {
+        return localArtifactRepository.findFirstByFilename(filename);
     }
 
     @Override
@@ -208,7 +204,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
         if (softwareModule == null) {
             LOG.debug("no software module with ID {} exists", moduleId);
-            throw new EntityNotFoundException("Software Module: " + moduleId);
+            throw new EntityNotFoundException(SoftwareModule.class, moduleId);
         }
         return softwareModule;
     }

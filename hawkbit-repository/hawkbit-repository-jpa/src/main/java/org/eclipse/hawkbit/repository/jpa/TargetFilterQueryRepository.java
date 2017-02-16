@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.util.Optional;
+
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.springframework.data.domain.Page;
@@ -32,7 +34,7 @@ public interface TargetFilterQueryRepository
      * @param name
      * @return custom target filter
      */
-    TargetFilterQuery findByName(final String name);
+    Optional<TargetFilterQuery> findByName(final String name);
 
     /**
      * Find list of all custom target filters.

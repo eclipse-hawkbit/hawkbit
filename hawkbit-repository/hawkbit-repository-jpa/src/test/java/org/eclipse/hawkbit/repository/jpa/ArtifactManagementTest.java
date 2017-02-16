@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -60,16 +60,13 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         assertThat(softwareModuleRepository.findAll()).hasSize(0);
         assertThat(artifactRepository.findAll()).hasSize(0);
 
-        JpaSoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
-                "version 1", null, null);
+        JpaSoftwareModule sm = new JpaSoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareModuleRepository.save(sm);
 
-        JpaSoftwareModule sm2 = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 2",
-                "version 2", null, null);
+        JpaSoftwareModule sm2 = new JpaSoftwareModule(osType, "name 2", "version 2", null, null);
         sm2 = softwareModuleRepository.save(sm2);
 
-        JpaSoftwareModule sm3 = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 3",
-                "version 3", null, null);
+        JpaSoftwareModule sm3 = new JpaSoftwareModule(osType, "name 3", "version 3", null, null);
         sm3 = softwareModuleRepository.save(sm3);
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
@@ -91,22 +88,21 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         assertThat(result).isNotEqualTo(result2);
         assertThat(((JpaArtifact) result).getSha1Hash()).isEqualTo(((JpaArtifact) result2).getSha1Hash());
 
-        assertThat(artifactManagement.findArtifactByFilename("file1").get(0).getSha1Hash())
+        assertThat(artifactManagement.findArtifactByFilename("file1").get().getSha1Hash())
                 .isEqualTo(HashGeneratorUtils.generateSHA1(random));
-        assertThat(artifactManagement.findArtifactByFilename("file1").get(0).getMd5Hash())
+        assertThat(artifactManagement.findArtifactByFilename("file1").get().getMd5Hash())
                 .isEqualTo(HashGeneratorUtils.generateMD5(random));
 
         assertThat(artifactRepository.findAll()).hasSize(4);
         assertThat(softwareModuleRepository.findAll()).hasSize(3);
 
-        assertThat(softwareManagement.findSoftwareModuleById(sm.getId()).getArtifacts()).hasSize(3);
+        assertThat(softwareManagement.findSoftwareModuleById(sm.getId()).get().getArtifacts()).hasSize(3);
     }
 
     @Test
     @Description("Tests hard delete directly on repository.")
     public void hardDeleteSoftwareModule() throws NoSuchAlgorithmException, IOException {
-        JpaSoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
-                "version 1", null, null);
+        JpaSoftwareModule sm = new JpaSoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareModuleRepository.save(sm);
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
@@ -129,12 +125,10 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests the deletion of a local artifact including metadata.")
     public void deleteArtifact() throws NoSuchAlgorithmException, IOException {
-        JpaSoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
-                "version 1", null, null);
+        JpaSoftwareModule sm = new JpaSoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareModuleRepository.save(sm);
 
-        JpaSoftwareModule sm2 = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 2",
-                "version 2", null, null);
+        JpaSoftwareModule sm2 = new JpaSoftwareModule(osType, "name 2", "version 2", null, null);
         sm2 = softwareModuleRepository.save(sm2);
 
         assertThat(artifactRepository.findAll()).isEmpty();
@@ -168,12 +162,10 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     @Description("Test the deletion of an artifact metadata where the binary is still linked to another "
             + "metadata element. The expected result is that the metadata is deleted but the binary kept.")
     public void deleteDuplicateArtifacts() throws NoSuchAlgorithmException, IOException {
-        JpaSoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
-                "version 1", null, null);
+        JpaSoftwareModule sm = new JpaSoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareModuleRepository.save(sm);
 
-        JpaSoftwareModule sm2 = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 2",
-                "version 2", null, null);
+        JpaSoftwareModule sm2 = new JpaSoftwareModule(osType, "name 2", "version 2", null, null);
         sm2 = softwareModuleRepository.save(sm2);
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
@@ -202,7 +194,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         final Artifact result = artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024),
                 testdataFactory.createSoftwareModuleOs().getId(), "file1", false);
 
-        assertThat(artifactManagement.findArtifact(result.getId())).isEqualTo(result);
+        assertThat(artifactManagement.findArtifact(result.getId()).get()).isEqualTo(result);
     }
 
     @Test
@@ -250,12 +242,12 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     public void findByFilenameAndSoftwareModule() {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        assertThat(artifactManagement.findByFilenameAndSoftwareModule("file1", sm.getId())).isEmpty();
+        assertThat(artifactManagement.findByFilenameAndSoftwareModule("file1", sm.getId()).isPresent()).isFalse();
 
         artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024), sm.getId(), "file1", false);
         artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024), sm.getId(), "file2", false);
 
-        assertThat(artifactManagement.findByFilenameAndSoftwareModule("file1", sm.getId())).hasSize(1);
+        assertThat(artifactManagement.findByFilenameAndSoftwareModule("file1", sm.getId()).isPresent()).isTrue();
 
     }
 }

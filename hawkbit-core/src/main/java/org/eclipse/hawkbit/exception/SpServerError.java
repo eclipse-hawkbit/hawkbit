@@ -32,7 +32,7 @@ public enum SpServerError {
     /**
     *
     */
-    SP_REPO_ENTITY_NOT_EXISTS("hawkbit.server.error.repo.entitiyNotFound", "The given entity does not exist in database"),
+    SP_REPO_ENTITY_NOT_EXISTS("hawkbit.server.error.repo.entitiyNotFound", "The given entity does not exist in the repository"),
     /**
     *
     */

@@ -181,7 +181,7 @@ public class TargetFilterTable extends Table {
                     if (ok) {
                         final Long rowId = (Long) ((Button) event.getComponent()).getData();
                         final String deletedFilterName = targetFilterQueryManagement.findTargetFilterQueryById(rowId)
-                                .getName();
+                                .get().getName();
                         targetFilterQueryManagement.deleteTargetFilterQuery(rowId);
 
                         /*
@@ -254,7 +254,7 @@ public class TargetFilterTable extends Table {
     private void onClickOfDetailButton(final ClickEvent event) {
         final String targetFilterName = (String) ((Button) event.getComponent()).getData();
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .findTargetFilterQueryByName(targetFilterName);
+                .findTargetFilterQueryByName(targetFilterName).get();
         filterManagementUIState.setFilterQueryValue(targetFilterQuery.getQuery());
         filterManagementUIState.setTfQuery(targetFilterQuery);
         filterManagementUIState.setEditViewDisplayed(true);

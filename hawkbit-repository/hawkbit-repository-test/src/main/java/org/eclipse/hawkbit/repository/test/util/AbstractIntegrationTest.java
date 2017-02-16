@@ -254,7 +254,7 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     }
 
     protected Long getOsModule(final DistributionSet ds) {
-        return ds.findFirstModuleByType(osType).getId();
+        return ds.findFirstModuleByType(osType).get().getId();
     }
 
     protected Action prepareFinishedUpdate() {
@@ -291,7 +291,7 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
         // Run here, because Scheduler is disabled during tests
         rolloutManagement.fillRolloutGroupsWithTargets(rollout.getId());
 
-        return rolloutManagement.findRolloutById(rollout.getId());
+        return rolloutManagement.findRolloutById(rollout.getId()).get();
     }
 
     @Before

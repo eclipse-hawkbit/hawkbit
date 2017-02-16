@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.endsWith;
@@ -937,7 +937,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         // Run here, because Scheduler is disabled during tests
         rolloutManagement.fillRolloutGroupsWithTargets(rollout.getId());
 
-        return rolloutManagement.findRolloutById(rollout.getId());
+        return rolloutManagement.findRolloutById(rollout.getId()).get();
     }
 
     protected boolean success(final Rollout result) {
@@ -948,7 +948,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
     }
 
     public Rollout getRollout(final Long rolloutId) throws Exception {
-        return rolloutManagement.findRolloutById(rolloutId);
+        return rolloutManagement.findRolloutById(rolloutId).get();
     }
 
 }

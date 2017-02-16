@@ -42,8 +42,8 @@ public class MgmtDownloadResourceTest extends AbstractManagementApiIntegrationTe
     public void setupCache() {
 
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("Test");
-        final SoftwareModule softwareModule = distributionSet.getModules().stream().findFirst().get();
-        final Artifact artifact = testdataFactory.createArtifacts(softwareModule.getId()).stream().findFirst().get();
+        final SoftwareModule softwareModule = distributionSet.getModules().stream().findAny().get();
+        final Artifact artifact = testdataFactory.createArtifacts(softwareModule.getId()).stream().findAny().get();
 
         downloadIdCache.put(downloadIdSha1, new DownloadArtifactCache(DownloadType.BY_SHA1, artifact.getSha1Hash()));
     }

@@ -103,8 +103,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         }
 
         sendUpdateMessageToTarget(assignedEvent.getTenant(),
-                targetManagement.findTargetByControllerID(assignedEvent.getControllerId()), assignedEvent.getActionId(),
-                assignedEvent.getModules());
+                targetManagement.findTargetByControllerID(assignedEvent.getControllerId()).get(),
+                assignedEvent.getActionId(), assignedEvent.getModules());
     }
 
     void sendUpdateMessageToTarget(final String tenant, final Target target, final Long actionId,

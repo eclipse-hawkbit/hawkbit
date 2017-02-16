@@ -177,7 +177,8 @@ public class RolloutListGrid extends AbstractGrid {
         if (!rolloutUIState.isShowRollOuts()) {
             return;
         }
-        final Rollout rollout = rolloutManagement.findRolloutWithDetailedStatus(rolloutChangeEvent.getRolloutId());
+        final Rollout rollout = rolloutManagement.findRolloutWithDetailedStatus(rolloutChangeEvent.getRolloutId())
+                .get();
         final TotalTargetCountStatus totalTargetCountStatus = rollout.getTotalTargetCountStatus();
         final LazyQueryContainer rolloutContainer = (LazyQueryContainer) getContainerDataSource();
         final Item item = rolloutContainer.getItem(rolloutChangeEvent.getRolloutId());

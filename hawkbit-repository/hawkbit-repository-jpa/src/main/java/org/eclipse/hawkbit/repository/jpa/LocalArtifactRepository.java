@@ -61,7 +61,7 @@ public interface LocalArtifactRepository extends BaseEntityRepository<JpaArtifac
      *            to search
      * @return {@link Artifact} the first in the result list
      */
-    JpaArtifact findFirstBySha1Hash(String sha1Hash);
+    Optional<Artifact> findFirstBySha1Hash(String sha1Hash);
 
     /**
      * Searches for a {@link Artifact} based user provided filename at upload.
@@ -70,7 +70,7 @@ public interface LocalArtifactRepository extends BaseEntityRepository<JpaArtifac
      *            to search
      * @return list of {@link Artifact}.
      */
-    List<Artifact> findByFilename(String filename);
+    Optional<Artifact> findFirstByFilename(String filename);
 
     /**
      * Searches for local artifact for a base software module.
@@ -94,6 +94,6 @@ public interface LocalArtifactRepository extends BaseEntityRepository<JpaArtifac
      *            selected software module id
      * @return list of {@link Artifact}.
      */
-    List<Artifact> findByFilenameAndSoftwareModuleId(final String filename, final Long softwareModuleId);
+    Optional<Artifact> findFirstByFilenameAndSoftwareModuleId(final String filename, final Long softwareModuleId);
 
 }

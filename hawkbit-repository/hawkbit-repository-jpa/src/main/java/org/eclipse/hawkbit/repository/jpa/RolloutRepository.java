@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -67,5 +68,5 @@ public interface RolloutRepository
      *            the rollout name
      * @return {@link Rollout} for specific name
      */
-    JpaRollout findByName(String name);
+    Optional<Rollout> findByName(String name);
 }

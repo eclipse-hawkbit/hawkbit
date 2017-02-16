@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.vaadin.ui.UI;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RolloutManagement;
@@ -60,6 +59,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 
 /**
  * Define groups for a Rollout
@@ -278,8 +278,8 @@ public class DefineGroupsLayout extends GridLayout {
 
         final UI ui = UI.getCurrent();
 
-        runningValidation = rolloutManagement
-                .validateTargetsInGroups(savedRolloutGroups, targetFilter, System.currentTimeMillis());
+        runningValidation = rolloutManagement.validateTargetsInGroups(savedRolloutGroups, targetFilter,
+                System.currentTimeMillis());
         runningValidation.addCallback(validation -> ui.access(() -> this.setGroupsValidation(validation)),
                 throwable -> ui.access(() -> this.setGroupsValidation(null)));
 
@@ -288,7 +288,7 @@ public class DefineGroupsLayout extends GridLayout {
     private void setGroupsValidation(RolloutGroupsValidation validation) {
         groupsValidation = validation;
 
-        if(validationRequested) {
+        if (validationRequested) {
             validateRemainingTargets();
             return;
         }
@@ -317,9 +317,7 @@ public class DefineGroupsLayout extends GridLayout {
      * Status of the groups validation
      */
     public enum ValidationStatus {
-        VALID,
-        INVALID,
-        LOADING
+        VALID, INVALID, LOADING
     }
 
     /**
@@ -336,7 +334,6 @@ public class DefineGroupsLayout extends GridLayout {
          */
         void validation(ValidationStatus isValid);
     }
-
 
     private class GroupRow {
 

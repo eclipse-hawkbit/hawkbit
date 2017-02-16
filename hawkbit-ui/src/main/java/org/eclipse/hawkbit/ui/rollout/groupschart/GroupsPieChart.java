@@ -8,10 +8,11 @@
  */
 package org.eclipse.hawkbit.ui.rollout.groupschart;
 
-import org.eclipse.hawkbit.ui.rollout.groupschart.client.GroupsPieChartState;
-import com.vaadin.ui.AbstractComponent;
-
 import java.util.List;
+
+import org.eclipse.hawkbit.ui.rollout.groupschart.client.GroupsPieChartState;
+
+import com.vaadin.ui.AbstractComponent;
 
 /**
  * Draws a pie charts for the provided groups.

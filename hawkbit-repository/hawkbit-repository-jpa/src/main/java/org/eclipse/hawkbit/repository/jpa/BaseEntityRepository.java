@@ -9,8 +9,10 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.io.Serializable;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaTenantAwareBaseEntity;
+import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.NoRepositoryBean;
@@ -40,5 +42,14 @@ public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     void deleteByTenantIgnoreCase(String tenant);
+
+    /**
+     * Retrieves an {@link BaseEntity} by its id.
+     * 
+     * @param id
+     *            to search for
+     * @return {@link BaseEntity}
+     */
+    Optional<T> findById(I id);
 
 }

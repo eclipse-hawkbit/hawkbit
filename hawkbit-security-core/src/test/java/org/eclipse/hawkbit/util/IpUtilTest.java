@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.util;
 
 import static com.google.common.net.HttpHeaders.X_FORWARDED_FOR;
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

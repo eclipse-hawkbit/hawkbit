@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
@@ -339,13 +340,13 @@ public class TargetTableHeader extends AbstractTableHeader {
                 return;
             }
             final Long distributionSetId = distributionIdSet.iterator().next();
-            final DistributionSet distributionSet = distributionSetManagement
+            final Optional<DistributionSet> distributionSet = distributionSetManagement
                     .findDistributionSetById(distributionSetId);
-            if (distributionSet == null) {
+            if (!distributionSet.isPresent()) {
                 notification.displayWarning(i18n.get("distributionset.not.exists"));
                 return;
             }
-            final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distributionSet);
+            final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distributionSet.get());
             managementUIState.getTargetTableFilters().setDistributionSet(distributionSetIdName);
             addFilterTextField(distributionSetIdName);
         }

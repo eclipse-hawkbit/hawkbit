@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.layouts;
 
+import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
@@ -147,7 +149,7 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
         @Override
         public void saveOrUpdate() {
             if (isUpdateAction()) {
-                updateEntity(findEntityByName());
+                updateEntity(findEntityByName().orElse(null));
                 return;
             }
 
@@ -295,15 +297,16 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
      * @return the color which should be selected in the color-picker component.
      */
     protected Color getColorForColorPicker() {
-        final TargetTag targetTagSelected = tagManagement.findTargetTag(tagNameComboBox.getValue().toString());
-        if (targetTagSelected == null) {
+        final Optional<TargetTag> targetTagSelected = tagManagement
+                .findTargetTag(tagNameComboBox.getValue().toString());
+        if (!targetTagSelected.isPresent()) {
             final DistributionSetTag distTag = tagManagement
-                    .findDistributionSetTag(tagNameComboBox.getValue().toString());
+                    .findDistributionSetTag(tagNameComboBox.getValue().toString()).get();
             return distTag.getColour() != null ? ColorPickerHelper.rgbToColorConverter(distTag.getColour())
                     : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR);
         }
-        return targetTagSelected.getColour() != null
-                ? ColorPickerHelper.rgbToColorConverter(targetTagSelected.getColour())
+        return targetTagSelected.get().getColour() != null
+                ? ColorPickerHelper.rgbToColorConverter(targetTagSelected.get().getColour())
                 : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR);
     }
 
@@ -604,14 +607,11 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     }
 
     private boolean isDuplicateByName() {
-        final E existingType = findEntityByName();
-        if (existingType != null) {
-            uiNotification.displayValidationError(
-                    i18n.get("message.tag.duplicate.check", new Object[] { existingType.getName() }));
-            return true;
-        }
+        final Optional<E> existingType = findEntityByName();
+        existingType.ifPresent(type -> uiNotification
+                .displayValidationError(i18n.get("message.tag.duplicate.check", new Object[] { type.getName() })));
 
-        return false;
+        return existingType.isPresent();
     }
 
     protected boolean isDuplicate() {
@@ -658,7 +658,7 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     public void removeColorChangeListener(final ColorChangeListener listener) {
     }
 
-    protected abstract E findEntityByName();
+    protected abstract Optional<E> findEntityByName();
 
     protected abstract String getWindowCaption();
 

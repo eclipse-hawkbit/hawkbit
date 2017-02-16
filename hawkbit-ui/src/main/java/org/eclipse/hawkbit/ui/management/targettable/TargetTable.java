@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -295,7 +296,7 @@ public class TargetTable extends AbstractTable<Target, Long> {
     }
 
     @Override
-    protected Target findEntityByTableValue(final Long lastSelectedId) {
+    protected Optional<Target> findEntityByTableValue(final Long lastSelectedId) {
         return targetManagement.findTargetById(lastSelectedId);
     }
 
@@ -540,8 +541,8 @@ public class TargetTable extends AbstractTable<Target, Long> {
                     Lists.newArrayListWithCapacity(0), null);
         }
 
-        final TargetTag tag = tagManagement.findTargetTag(targTagName);
-        if (tag == null) {
+        final Optional<TargetTag> tag = tagManagement.findTargetTag(targTagName);
+        if (!tag.isPresent()) {
             notification.displayWarning(i18n.get("targettag.not.exists", new Object[] { targTagName }));
             return new TargetTagAssignmentResult(0, 0, 0, Lists.newArrayListWithCapacity(0),
                     Lists.newArrayListWithCapacity(0), null);
@@ -594,12 +595,12 @@ public class TargetTable extends AbstractTable<Target, Long> {
             return;
         }
         final Long targetId = (Long) targetItemId;
-        final Target target = targetManagement.findTargetById(targetId);
-        if (target == null) {
+        final Optional<Target> target = targetManagement.findTargetById(targetId);
+        if (!target.isPresent()) {
             getNotification().displayWarning(i18n.get("target.not.exists", new Object[] { "" }));
             return;
         }
-        final TargetIdName createTargetIdName = new TargetIdName(target);
+        final TargetIdName createTargetIdName = new TargetIdName(target.get());
 
         final List<DistributionSet> findDistributionSetAllById = distributionSetManagement
                 .findDistributionSetAllById(ids);

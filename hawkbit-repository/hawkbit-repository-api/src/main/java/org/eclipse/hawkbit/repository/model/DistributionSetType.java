@@ -73,7 +73,7 @@ public interface DistributionSetType extends NamedEntity {
      */
     default boolean containsMandatoryModuleType(final Long softwareModuleTypeId) {
         return getMandatoryModuleTypes().stream().filter(element -> element.getId().equals(softwareModuleTypeId))
-                .findFirst().isPresent();
+                .findAny().isPresent();
     }
 
     /**
@@ -98,7 +98,7 @@ public interface DistributionSetType extends NamedEntity {
      */
     default boolean containsOptionalModuleType(final Long softwareModuleTypeId) {
         return getOptionalModuleTypes().stream().filter(element -> element.getId().equals(softwareModuleTypeId))
-                .findFirst().isPresent();
+                .findAny().isPresent();
     }
 
     /**

@@ -252,7 +252,7 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
     }
 
     protected Long getTagIdByTagName(final Long tagId) {
-        return tagDetails.entrySet().stream().filter(entry -> entry.getValue().getId().equals(tagId)).findFirst()
+        return tagDetails.entrySet().stream().filter(entry -> entry.getValue().getId().equals(tagId)).findAny()
                 .map(entry -> entry.getKey()).orElse(null);
 
     }

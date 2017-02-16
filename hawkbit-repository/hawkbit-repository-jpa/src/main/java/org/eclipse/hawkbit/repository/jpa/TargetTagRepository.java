@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -43,7 +44,7 @@ public interface TargetTagRepository
      *            to filter on
      * @return the {@link TargetTag} if found, otherwise null
      */
-    JpaTargetTag findByNameEquals(String tagName);
+    Optional<TargetTag> findByNameEquals(String tagName);
 
     /**
      * Returns all instances of the type.

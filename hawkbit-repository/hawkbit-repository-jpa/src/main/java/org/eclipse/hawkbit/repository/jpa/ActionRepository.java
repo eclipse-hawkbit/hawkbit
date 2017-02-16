@@ -16,7 +16,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -53,7 +52,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return the found {@link Action}
      */
     @EntityGraph(value = "Action.all", type = EntityGraphType.LOAD)
-    JpaAction findById(Long actionId);
+    Optional<Action> getById(Long actionId);
 
     /**
      * Retrieves all {@link Action}s which are referring the given
@@ -113,14 +112,14 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      *
      * @param targetId
      *            to search for
-     * @param module
+     * @param moduleId
      *            to search for
      * @return action if there is one with assigned target and module is part of
      *         assigned {@link DistributionSet}.
      */
-    @Query("Select a from JpaAction a join a.distributionSet ds join ds.modules modul where a.target.controllerId = :target and modul = :module order by a.id desc")
+    @Query("Select a from JpaAction a join a.distributionSet ds join ds.modules modul where a.target.controllerId = :target and modul.id = :module order by a.id desc")
     List<Action> findActionByTargetAndSoftwareModule(@Param("target") final String targetId,
-            @Param("module") JpaSoftwareModule module);
+            @Param("module") Long moduleId);
 
     /**
      * Retrieves all {@link Action}s which are referring the given

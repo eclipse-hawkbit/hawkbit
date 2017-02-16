@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static org.fest.assertions.Assertions.assertThat;
-import static org.fest.assertions.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

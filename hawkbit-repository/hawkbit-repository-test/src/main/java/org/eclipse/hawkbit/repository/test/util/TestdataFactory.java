@@ -314,7 +314,7 @@ public class TestdataFactory {
 
         tags.forEach(tag -> distributionSetManagement.toggleTagAssignment(Arrays.asList(set.getId()), tag.getName()));
 
-        return distributionSetManagement.findDistributionSetById(set.getId());
+        return distributionSetManagement.findDistributionSetById(set.getId()).get();
 
     }
 
@@ -529,7 +529,7 @@ public class TestdataFactory {
                 entityFactory.softwareModule().update(module.getId()).description("Updated " + DEFAULT_DESCRIPTION)));
 
         // load also lazy stuff
-        return distributionSetManagement.findDistributionSetByIdWithDetails(set.getId());
+        return distributionSetManagement.findDistributionSetByIdWithDetails(set.getId()).get();
     }
 
     /**
@@ -560,15 +560,9 @@ public class TestdataFactory {
      * @return persisted {@link DistributionSetType}
      */
     public DistributionSetType findOrCreateDistributionSetType(final String dsTypeKey, final String dsTypeName) {
-        final DistributionSetType findDistributionSetTypeByname = distributionSetManagement
-                .findDistributionSetTypeByKey(dsTypeKey);
-
-        if (findDistributionSetTypeByname != null) {
-            return findDistributionSetTypeByname;
-        }
-
-        return distributionSetManagement.createDistributionSetType(entityFactory.distributionSetType().create()
-                .key(dsTypeKey).name(dsTypeName).description(LOREM.words(10)).colour("black"));
+        return distributionSetManagement.findDistributionSetTypeByKey(dsTypeKey)
+                .orElseGet(() -> distributionSetManagement.createDistributionSetType(entityFactory.distributionSetType()
+                        .create().key(dsTypeKey).name(dsTypeName).description(LOREM.words(10)).colour("black")));
     }
 
     /**
@@ -588,17 +582,11 @@ public class TestdataFactory {
      */
     public DistributionSetType findOrCreateDistributionSetType(final String dsTypeKey, final String dsTypeName,
             final Collection<SoftwareModuleType> mandatory, final Collection<SoftwareModuleType> optional) {
-        final DistributionSetType findDistributionSetTypeByname = distributionSetManagement
-                .findDistributionSetTypeByKey(dsTypeKey);
-
-        if (findDistributionSetTypeByname != null) {
-            return findDistributionSetTypeByname;
-        }
-
-        return distributionSetManagement.createDistributionSetType(entityFactory.distributionSetType().create()
-                .key(dsTypeKey).name(dsTypeName).description(LOREM.words(10)).colour("black")
-                .optional(optional.stream().map(SoftwareModuleType::getId).collect(Collectors.toList()))
-                .mandatory(mandatory.stream().map(SoftwareModuleType::getId).collect(Collectors.toList())));
+        return distributionSetManagement.findDistributionSetTypeByKey(dsTypeKey)
+                .orElseGet(() -> distributionSetManagement.createDistributionSetType(entityFactory.distributionSetType()
+                        .create().key(dsTypeKey).name(dsTypeName).description(LOREM.words(10)).colour("black")
+                        .optional(optional.stream().map(SoftwareModuleType::getId).collect(Collectors.toList()))
+                        .mandatory(mandatory.stream().map(SoftwareModuleType::getId).collect(Collectors.toList()))));
     }
 
     /**
@@ -627,12 +615,9 @@ public class TestdataFactory {
      * @return persisted {@link SoftwareModuleType}
      */
     public SoftwareModuleType findOrCreateSoftwareModuleType(final String key, final int maxAssignments) {
-        final SoftwareModuleType findSoftwareModuleTypeByKey = softwareManagement.findSoftwareModuleTypeByKey(key);
-        if (findSoftwareModuleTypeByKey != null) {
-            return findSoftwareModuleTypeByKey;
-        }
-        return softwareManagement.createSoftwareModuleType(entityFactory.softwareModuleType().create().key(key)
-                .name(key).description(LOREM.words(10)).maxAssignments(maxAssignments));
+        return softwareManagement.findSoftwareModuleTypeByKey(key)
+                .orElseGet(() -> softwareManagement.createSoftwareModuleType(entityFactory.softwareModuleType().create()
+                        .key(key).name(key).description(LOREM.words(10)).maxAssignments(maxAssignments)));
     }
 
     /**

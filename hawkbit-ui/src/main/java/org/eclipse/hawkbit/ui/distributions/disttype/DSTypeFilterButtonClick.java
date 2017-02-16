@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.distributions.disttype;
 import java.io.Serializable;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterSingleButtonClick;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
@@ -49,9 +48,8 @@ public class DSTypeFilterButtonClick extends AbstractFilterSingleButtonClick imp
 
     @Override
     protected void filterClicked(final Button clickedButton) {
-        final DistributionSetType distSetType = distributionSetManagement
-                .findDistributionSetTypeByName(clickedButton.getData().toString());
-        manageDistUIState.getManageDistFilters().setClickedDistSetType(distSetType);
+        distributionSetManagement.findDistributionSetTypeByName(clickedButton.getData().toString())
+                .ifPresent(manageDistUIState.getManageDistFilters()::setClickedDistSetType);
         eventBus.publish(this, DistributionTableFilterEvent.FILTER_BY_TAG);
 
     }

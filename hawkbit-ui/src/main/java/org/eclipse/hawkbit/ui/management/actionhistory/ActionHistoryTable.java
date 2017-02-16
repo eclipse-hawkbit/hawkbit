@@ -432,7 +432,7 @@ public class ActionHistoryTable extends TreeTable {
                     .getValue();
 
             final org.eclipse.hawkbit.repository.model.Action action = deploymentManagement
-                    .findActionWithDetails(actionId);
+                    .findActionWithDetails(actionId).get();
             final Pageable pageReq = new PageRequest(0, 1000,
                     new Sort(Direction.DESC, ActionStatusFields.ID.getFieldName()));
             final Page<ActionStatus> actionStatusList;

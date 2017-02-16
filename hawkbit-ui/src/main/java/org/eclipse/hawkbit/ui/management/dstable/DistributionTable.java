@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -117,8 +118,8 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             updateVisableTableEntries(eventContainer.getEvents(), visibleItemIds);
         }
         final Long lastSelectedDsIdName = managementUIState.getLastSelectedDsIdName();
-        eventContainer.getEvents().stream().filter(event -> event.getEntityId().equals(lastSelectedDsIdName))
-                .findFirst().ifPresent(event -> eventBus.publish(this,
+        eventContainer.getEvents().stream().filter(event -> event.getEntityId().equals(lastSelectedDsIdName)).findAny()
+                .ifPresent(event -> eventBus.publish(this,
                         new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, event.getEntity())));
 
     }
@@ -303,7 +304,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     @Override
-    protected DistributionSet findEntityByTableValue(final Long lastSelectedId) {
+    protected Optional<DistributionSet> findEntityByTableValue(final Long lastSelectedId) {
         return distributionSetManagement.findDistributionSetByIdWithDetails(lastSelectedId);
     }
 
@@ -425,13 +426,14 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         }
 
         final Long distId = (Long) item.getItemProperty("id").getValue();
-        final DistributionSet findDistributionSetById = distributionSetManagement.findDistributionSetById(distId);
-        if (findDistributionSetById == null) {
+        final Optional<DistributionSet> findDistributionSetById = distributionSetManagement
+                .findDistributionSetById(distId);
+        if (!findDistributionSetById.isPresent()) {
             notification.displayWarning(i18n.get("distributionset.not.exists"));
             return;
         }
 
-        showOrHidePopupAndNotification(validate(targetDetailsList, findDistributionSetById));
+        showOrHidePopupAndNotification(validate(targetDetailsList, findDistributionSetById.get()));
     }
 
     @Override
@@ -526,12 +528,12 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             return;
         }
 
-        final Target targetObj = targetService.findTargetByControllerIDWithDetails(
+        final Optional<Target> targetObj = targetService.findTargetByControllerIDWithDetails(
                 managementUIState.getDistributionTableFilters().getPinnedTarget().get().getControllerId());
 
-        if (targetObj != null) {
-            final DistributionSet assignedDistribution = targetObj.getAssignedDistributionSet();
-            final DistributionSet installedDistribution = targetObj.getTargetInfo().getInstalledDistributionSet();
+        if (targetObj.isPresent()) {
+            final DistributionSet assignedDistribution = targetObj.get().getAssignedDistributionSet();
+            final DistributionSet installedDistribution = targetObj.get().getTargetInfo().getInstalledDistributionSet();
             Long installedDistId = null;
             Long assignedDistId = null;
             if (null != installedDistribution) {
@@ -717,12 +719,12 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     private void showMetadataDetails(final Object itemId) {
-        final DistributionSet ds = distributionSetManagement.findDistributionSetById((Long) itemId);
-        if (ds == null) {
+        final Optional<DistributionSet> ds = distributionSetManagement.findDistributionSetById((Long) itemId);
+        if (!ds.isPresent()) {
             notification.displayWarning(i18n.get("distributionset.not.exists"));
             return;
         }
-        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null));
+        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds.get(), null));
     }
 
 }
