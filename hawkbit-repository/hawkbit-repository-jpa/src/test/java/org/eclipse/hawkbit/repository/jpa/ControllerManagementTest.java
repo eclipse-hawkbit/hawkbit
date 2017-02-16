@@ -102,7 +102,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                         .hasMessageContaining("Target");
 
         assertThat(controllerManagement
-                .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), module.getId()).isPresent());
+                .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), module.getId()).isPresent())
+                        .isFalse();
 
         assertThatThrownBy(() -> controllerManagement.hasTargetArtifactAssigned(1234L, "XXX"))
                 .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")

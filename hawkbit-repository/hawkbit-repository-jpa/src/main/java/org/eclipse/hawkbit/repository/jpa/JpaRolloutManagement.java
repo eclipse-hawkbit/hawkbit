@@ -123,8 +123,6 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
 
-    private static final String ROLLOUT_NOT_FOUND = "Rollout with id %s not found.";
-
     JpaRolloutManagement(final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
             final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,

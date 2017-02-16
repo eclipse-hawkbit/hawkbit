@@ -153,10 +153,6 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
         final JpaRolloutGroup jpaRolloutGroup = (JpaRolloutGroup) rolloutGroup.get();
 
-        if (rolloutGroup == null) {
-            return null;
-        }
-
         final List<TotalTargetCountActionStatus> rolloutStatusCountItems = actionRepository
                 .getStatusCountByRolloutGroupId(rolloutGroupId);
 
