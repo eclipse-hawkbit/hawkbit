@@ -96,7 +96,7 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final Long actionId = assignDistributionSet(installedSet.getId(), assignedC).getActions().get(0);
 
         // set one installed DS also
-        controllerManagament.addUpdateActionStatus(
+        controllerManagement.addUpdateActionStatus(
                 entityFactory.actionStatus().create(actionId).status(Status.FINISHED).message("message"));
         assignDistributionSet(setA.getId(), installedC);
 
@@ -663,7 +663,7 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         List<Target> installedtargets = testdataFactory.createTargets(10, "assigned", "assigned");
 
         // set on installed and assign another one
-        assignDistributionSet(installedSet, installedtargets).getActions().forEach(actionId -> controllerManagament
+        assignDistributionSet(installedSet, installedtargets).getActions().forEach(actionId -> controllerManagement
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED)));
         assignDistributionSet(assignedSet, installedtargets);
 

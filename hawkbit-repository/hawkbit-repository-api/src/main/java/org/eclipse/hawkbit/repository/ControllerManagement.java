@@ -190,6 +190,9 @@ public interface ControllerManagement {
      * @return {@code true} if the given target has currently or had ever a
      *         relation to the given artifact through the action history,
      *         otherwise {@code false}
+     * 
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     boolean hasTargetArtifactAssigned(@NotEmpty String controllerId, @NotEmpty String sha1Hash);
@@ -209,6 +212,9 @@ public interface ControllerManagement {
      * @return {@code true} if the given target has currently or had ever a
      *         relation to the given artifact through the action history,
      *         otherwise {@code false}
+     * 
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     boolean hasTargetArtifactAssigned(@NotNull Long targetId, @NotEmpty String sha1Hash);

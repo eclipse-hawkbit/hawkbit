@@ -89,7 +89,7 @@ import com.vaadin.ui.renderers.HtmlRenderer;
  */
 public class RolloutListGrid extends AbstractGrid {
 
-    private static final long serialVersionUID = 4060904914954370524L;
+    private static final long serialVersionUID = 1L;
 
     private static final String UPDATE_OPTION = "Update";
 
@@ -198,7 +198,7 @@ public class RolloutListGrid extends AbstractGrid {
         final Optional<Rollout> rollout = rolloutManagement
                 .findRolloutWithDetailedStatus(rolloutChangeEvent.getRolloutId());
 
-        if (!rollout.isPresent() || rollout.get().isDeleted()) {
+        if (!rollout.isPresent()) {
             return;
         }
 
@@ -218,7 +218,7 @@ public class RolloutListGrid extends AbstractGrid {
         final Integer groupCount = (Integer) item.getItemProperty(VAR_NUMBER_OF_GROUPS).getValue();
         final int groupsCreated = rollout.getRolloutGroupsCreated();
         if (groupsCreated != 0) {
-            item.getItemProperty(VAR_NUMBER_OF_GROUPS).setValue(Long.valueOf(groupsCreated));
+            item.getItemProperty(VAR_NUMBER_OF_GROUPS).setValue(Integer.valueOf(groupsCreated));
         } else if (rollout.getRolloutGroups() != null && !groupCount.equals(rollout.getRolloutGroups().size())) {
             item.getItemProperty(VAR_NUMBER_OF_GROUPS).setValue(Integer.valueOf(rollout.getRolloutGroups().size()));
         }
@@ -248,7 +248,7 @@ public class RolloutListGrid extends AbstractGrid {
         rolloutGridContainer.addContainerProperty(VAR_MODIFIED_DATE, String.class, null, false, false);
         rolloutGridContainer.addContainerProperty(VAR_CREATED_USER, String.class, null, false, false);
         rolloutGridContainer.addContainerProperty(VAR_MODIFIED_BY, String.class, null, false, false);
-        rolloutGridContainer.addContainerProperty(VAR_NUMBER_OF_GROUPS, Integer.class, 0L, false, false);
+        rolloutGridContainer.addContainerProperty(VAR_NUMBER_OF_GROUPS, Integer.class, 0, false, false);
         rolloutGridContainer.addContainerProperty(VAR_TOTAL_TARGETS, String.class, "0", false, false);
         rolloutGridContainer.addContainerProperty(VAR_TOTAL_TARGETS_COUNT_STATUS, TotalTargetCountStatus.class, null,
                 false, false);
@@ -613,7 +613,7 @@ public class RolloutListGrid extends AbstractGrid {
          * the button.
          */
         private static final Map<String, RolloutStatus> EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON = Maps
-                .newHashMapWithExpectedSize(2);
+                .newHashMapWithExpectedSize(27);
         private final Container.Indexed containerDataSource;
 
         static {
@@ -753,7 +753,7 @@ public class RolloutListGrid extends AbstractGrid {
      */
     class TotalTargetCountStatusConverter implements Converter<String, TotalTargetCountStatus> {
 
-        private static final long serialVersionUID = -5794528427855153924L;
+        private static final long serialVersionUID = 1L;
 
         @Override
         public TotalTargetCountStatus convertToModel(final String value,
@@ -784,7 +784,7 @@ public class RolloutListGrid extends AbstractGrid {
      */
     class TotalTargetGroupsConverter implements Converter<String, Integer> {
 
-        private static final long serialVersionUID = 6589305227035220369L;
+        private static final long serialVersionUID = 1L;
 
         @Override
         public Integer convertToModel(final String value, final Class<? extends Integer> targetType,

@@ -153,7 +153,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         // finish one action should be sufficient due the finish condition is at
         // 50%
         final JpaAction action = (JpaAction) runningActions.get(0);
-        controllerManagament
+        controllerManagement
                 .addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).status(Status.FINISHED));
 
         // check running rollouts again, now the finish condition should be hit
@@ -273,7 +273,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private void finishAction(final Action action) {
-        controllerManagament
+        controllerManagement
                 .addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).status(Status.FINISHED));
     }
 
@@ -294,7 +294,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         // finish actions with error
         for (final Action action : runningActions) {
-            controllerManagament
+            controllerManagement
                     .addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).status(Status.ERROR));
         }
 
@@ -334,7 +334,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final List<Action> runningActions = findActionsByRolloutAndStatus(createdRollout, Status.RUNNING);
         // finish actions with error
         for (final Action action : runningActions) {
-            controllerManagament
+            controllerManagement
                     .addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).status(Status.ERROR));
         }
 
@@ -1536,7 +1536,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     private int changeStatusForAllRunningActions(final Rollout rollout, final Status status) {
         final List<Action> runningActions = findActionsByRolloutAndStatus(rollout, Status.RUNNING);
         for (final Action action : runningActions) {
-            controllerManagament
+            controllerManagement
                     .addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).status(status));
         }
         return runningActions.size();
@@ -1547,7 +1547,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final List<Action> runningActions = findActionsByRolloutAndStatus(rollout, Status.RUNNING);
         assertThat(runningActions.size()).isGreaterThanOrEqualTo(amountOfTargetsToGetChanged);
         for (int i = 0; i < amountOfTargetsToGetChanged; i++) {
-            controllerManagament.addUpdateActionStatus(
+            controllerManagement.addUpdateActionStatus(
                     entityFactory.actionStatus().create(runningActions.get(i).getId()).status(status));
         }
         return runningActions.size();
