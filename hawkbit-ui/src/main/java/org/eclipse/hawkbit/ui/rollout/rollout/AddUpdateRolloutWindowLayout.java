@@ -643,7 +643,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             } else {
                 updateGroupsChart(0);
             }
-
         }
     }
 
@@ -690,7 +689,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             groupsPieChart.setChartState(groups, totalTargetsCount);
             groupsLegendLayout.populateGroupsLegendByTargetCounts(groups);
         }
-
     }
 
     private ComboBox createTargetFilterQueryCombo() {
@@ -729,7 +727,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             final TargetFilterQuery filterQuery = filterQueries.getContent().get(0);
             targetFilterQueryCombo.setValue(filterQuery.getName());
         }
-
     }
 
     private static Container createTargetFilterComboContainer() {
@@ -905,7 +902,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             groupsDefinitionTabs.setSelectedTab(1);
 
             window.clearOriginalValues();
-
         } else {
             editRolloutEnabled = true;
             if (rollout.getStatus() != Rollout.RolloutStatus.READY) {
@@ -995,12 +991,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             value = val;
         }
 
-        /**
-         * @return the value
-         */
-        public String getValue() {
+        private String getValue() {
             return value;
         }
     }
-
 }
