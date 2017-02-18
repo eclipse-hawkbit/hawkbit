@@ -518,7 +518,7 @@ public interface DistributionSetManagement {
      *            of the {@link DistributionSet}
      * @param key
      *            of the meta data element
-     * @return the found DistributionSetMetadata or {@code null} if not exits
+     * @return the found DistributionSetMetadata
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Optional<DistributionSetMetadata> findDistributionSetMetadata(@NotNull Long setId, @NotEmpty String key);

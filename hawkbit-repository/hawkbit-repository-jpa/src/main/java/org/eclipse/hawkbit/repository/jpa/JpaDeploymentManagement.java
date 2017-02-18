@@ -115,7 +115,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private ActionRepository actionRepository;
 
     @Autowired
-    private DistributionSetRepository distributoinSetRepository;
+    private DistributionSetRepository distributionSetRepository;
 
     @Autowired
     private TargetRepository targetRepository;
@@ -172,7 +172,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
             final Collection<TargetWithActionType> targets, final String actionMessage) {
-        final JpaDistributionSet set = distributoinSetRepository.findOne(dsID);
+        final JpaDistributionSet set = distributionSetRepository.findOne(dsID);
         if (set == null) {
             throw new EntityNotFoundException(DistributionSet.class, dsID);
         }
@@ -554,11 +554,14 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     public Slice<Action> findActionsByTarget(final String controllerId, final Pageable pageable) {
+        throwExceptionIfTargetDoesNotExist(controllerId);
         return actionRepository.findByTargetControllerId(pageable, controllerId);
     }
 
     @Override
     public List<ActionWithStatusCount> findActionsWithStatusCountByTargetOrderByIdDesc(final String controllerId) {
+        throwExceptionIfTargetDoesNotExist(controllerId);
+
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<JpaActionWithStatusCount> query = cb.createQuery(JpaActionWithStatusCount.class);
         final Root<JpaAction> actionRoot = query.from(JpaAction.class);
@@ -583,6 +586,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     public Page<Action> findActionsByTarget(final String rsqlParam, final String controllerId,
             final Pageable pageable) {
+        throwExceptionIfTargetDoesNotExist(controllerId);
 
         final Specification<JpaAction> byTargetSpec = createSpecificationFor(controllerId, rsqlParam);
         final Page<JpaAction> actions = actionRepository.findAll(byTargetSpec, pageable);
@@ -601,35 +605,41 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     public List<Action> findActiveActionsByTarget(final String controllerId) {
-        throwExceptionIfTargetFoesNotExist(controllerId);
+        throwExceptionIfTargetDoesNotExist(controllerId);
 
         return actionRepository.findByActiveAndTarget(controllerId, true);
     }
 
     @Override
     public List<Action> findInActiveActionsByTarget(final String controllerId) {
-        throwExceptionIfTargetFoesNotExist(controllerId);
+        throwExceptionIfTargetDoesNotExist(controllerId);
 
         return actionRepository.findByActiveAndTarget(controllerId, false);
     }
 
     @Override
     public Long countActionsByTarget(final String controllerId) {
-        throwExceptionIfTargetFoesNotExist(controllerId);
+        throwExceptionIfTargetDoesNotExist(controllerId);
 
         return actionRepository.countByTargetControllerId(controllerId);
     }
 
     @Override
     public Long countActionsByTarget(final String rsqlParam, final String controllerId) {
-        throwExceptionIfTargetFoesNotExist(controllerId);
+        throwExceptionIfTargetDoesNotExist(controllerId);
 
         return actionRepository.count(createSpecificationFor(controllerId, rsqlParam));
     }
 
-    private void throwExceptionIfTargetFoesNotExist(final String controllerId) {
+    private void throwExceptionIfTargetDoesNotExist(final String controllerId) {
         if (!targetRepository.existsByControllerId(controllerId)) {
             throw new EntityNotFoundException(Target.class, controllerId);
+        }
+    }
+
+    private void throwExceptionIfDistributionSetDoesNotExist(final Long dsId) {
+        if (!distributionSetRepository.exists(dsId)) {
+            throw new EntityNotFoundException(DistributionSet.class, dsId);
         }
     }
 
@@ -686,6 +696,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     public Slice<Action> findActionsByDistributionSet(final Pageable pageable, final Long dsId) {
+        throwExceptionIfDistributionSetDoesNotExist(dsId);
+
         return actionRepository.findByDistributionSetId(pageable, dsId);
     }
 

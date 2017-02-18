@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
@@ -42,6 +44,9 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.model.TargetWithActionType;
+import org.eclipse.hawkbit.repository.test.matcher.Expect;
+import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +87,65 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         cancelEventHandlerStub = new CancelEventHandlerStub();
         applicationContext.addApplicationListener(cancelEventHandlerStub);
+    }
+
+    @Test
+    @Description("Verifies that management queries react as specfied on calls for non existing entities.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
+    public void nonExistingEntityQueries() {
+        final Target target = testdataFactory.createTarget();
+
+        assertThatThrownBy(() -> deploymentManagement.assignDistributionSet(1234L,
+                Lists.newArrayList(new TargetWithActionType(target.getControllerId()))))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("DistributionSet");
+        assertThatThrownBy(() -> deploymentManagement.assignDistributionSet(1234L,
+                Lists.newArrayList(new TargetWithActionType(target.getControllerId())), "xxx"))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("DistributionSet");
+        assertThatThrownBy(() -> deploymentManagement.assignDistributionSet(1234L, ActionType.FORCED,
+                System.currentTimeMillis(), Lists.newArrayList(target.getControllerId())))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("DistributionSet");
+
+        assertThatThrownBy(() -> deploymentManagement.cancelAction(1234L)).isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("1234").hasMessageContaining("Action");
+        assertThatThrownBy(() -> deploymentManagement.countActionsByTarget("1234"))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("Target");
+        assertThatThrownBy(() -> deploymentManagement.countActionsByTarget("xxx", "1234"))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("Target");
+
+        assertThat(deploymentManagement.findAction(1234L).isPresent()).isFalse();
+
+        assertThatThrownBy(() -> deploymentManagement.findActionsByDistributionSet(pageReq, 1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("DistributionSet");
+        assertThatThrownBy(() -> deploymentManagement.findActionsByTarget("1234", pageReq))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("Target");
+        assertThatThrownBy(() -> deploymentManagement.findActionsByTarget("id==*", "1234", pageReq))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("Target");
+        assertThatThrownBy(() -> deploymentManagement.findActionsWithStatusCountByTargetOrderByIdDesc("1234"))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("Target");
+
+        assertThat(deploymentManagement.findActionWithDetails(1234L).isPresent()).isFalse();
+
+        assertThatThrownBy(() -> deploymentManagement.findActiveActionsByTarget("1234"))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("Target");
+        assertThatThrownBy(() -> deploymentManagement.findInActiveActionsByTarget("1234"))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("Target");
+        assertThatThrownBy(() -> deploymentManagement.forceQuitAction(1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("Action");
+        assertThatThrownBy(() -> deploymentManagement.forceTargetAction(1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("Action");
     }
 
     @Test
