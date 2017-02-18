@@ -8,11 +8,14 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
+import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
@@ -26,7 +29,6 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
-import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -115,6 +117,56 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         @Override
         public boolean canWindowSaveOrUpdate() {
             return editSwModule || !isDuplicate();
+        }
+
+        private void addNewBaseSoftware() {
+            final String name = HawkbitCommonUtil.trimAndNullIfEmpty(nameTextField.getValue());
+            final String version = HawkbitCommonUtil.trimAndNullIfEmpty(versionTextField.getValue());
+            final String vendor = HawkbitCommonUtil.trimAndNullIfEmpty(vendorTextField.getValue());
+            final String description = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
+            final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
+
+            final SoftwareModuleCreate softwareModule = entityFactory.softwareModule().create()
+                    .type(softwareManagement.findSoftwareModuleTypeByName(type).get()).name(name).version(version)
+                    .description(description).vendor(vendor);
+
+            final SoftwareModule newSoftwareModule = softwareManagement.createSoftwareModule(softwareModule);
+
+            if (newSoftwareModule != null) {
+                eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.ADD_ENTITY, newSoftwareModule));
+                uiNotifcation.displaySuccess(i18n.get("message.save.success",
+                        new Object[] { newSoftwareModule.getName() + ":" + newSoftwareModule.getVersion() }));
+            }
+        }
+
+        private boolean isDuplicate() {
+            final String name = nameTextField.getValue();
+            final String version = versionTextField.getValue();
+            final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
+
+            final Optional<Long> moduleType = softwareManagement.findSoftwareModuleTypeByName(type)
+                    .map(SoftwareModuleType::getId);
+            if (moduleType.isPresent() && softwareManagement
+                    .findSoftwareModuleByNameAndVersion(name, version, moduleType.get()).isPresent()) {
+                uiNotifcation.displayValidationError(
+                        i18n.get("message.duplicate.softwaremodule", new Object[] { name, version }));
+                return true;
+            }
+            return false;
+        }
+
+        /**
+         * updates a softwareModule
+         */
+        private void updateSwModule() {
+            final SoftwareModule newSWModule = softwareManagement.updateSoftwareModule(entityFactory.softwareModule()
+                    .update(baseSwModuleId).description(descTextArea.getValue()).vendor(vendorTextField.getValue()));
+            if (newSWModule != null) {
+                uiNotifcation.displaySuccess(i18n.get("message.save.success",
+                        new Object[] { newSWModule.getName() + ":" + newSWModule.getVersion() }));
+
+                eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.UPDATED_ENTITY, newSWModule));
+            }
         }
     }
 
@@ -217,56 +269,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         return window;
     }
 
-    private void addNewBaseSoftware() {
-        final String name = HawkbitCommonUtil.trimAndNullIfEmpty(nameTextField.getValue());
-        final String version = HawkbitCommonUtil.trimAndNullIfEmpty(versionTextField.getValue());
-        final String vendor = HawkbitCommonUtil.trimAndNullIfEmpty(vendorTextField.getValue());
-        final String description = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
-        final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
-
-        final SoftwareModuleCreate softwareModule = entityFactory.softwareModule().create()
-                .type(softwareManagement.findSoftwareModuleTypeByName(type).get()).name(name).version(version)
-                .description(description).vendor(vendor);
-
-        final SoftwareModule newSoftwareModule = softwareManagement.createSoftwareModule(softwareModule);
-
-        if (newSoftwareModule != null) {
-            eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.ADD_ENTITY, newSoftwareModule));
-            uiNotifcation.displaySuccess(i18n.get("message.save.success",
-                    new Object[] { newSoftwareModule.getName() + ":" + newSoftwareModule.getVersion() }));
-        }
-    }
-
-    private boolean isDuplicate() {
-        final String name = nameTextField.getValue();
-        final String version = versionTextField.getValue();
-        final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
-
-        final SoftwareManagement swMgmtService = SpringContextHelper.getBean(SoftwareManagement.class);
-
-        if (swMgmtService.findSoftwareModuleByNameAndVersion(name, version,
-                swMgmtService.findSoftwareModuleTypeByName(type).get().getId()).isPresent()) {
-            uiNotifcation.displayValidationError(
-                    i18n.get("message.duplicate.softwaremodule", new Object[] { name, version }));
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * updates a softwareModule
-     */
-    private void updateSwModule() {
-        final SoftwareModule newSWModule = softwareManagement.updateSoftwareModule(entityFactory.softwareModule()
-                .update(baseSwModuleId).description(descTextArea.getValue()).vendor(vendorTextField.getValue()));
-        if (newSWModule != null) {
-            uiNotifcation.displaySuccess(i18n.get("message.save.success",
-                    new Object[] { newSWModule.getName() + ":" + newSWModule.getVersion() }));
-
-            eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.UPDATED_ENTITY, newSWModule));
-        }
-    }
-
     /**
      * fill the data of a softwareModule in the content of the window
      */
@@ -275,16 +277,17 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
             return;
         }
         editSwModule = Boolean.TRUE;
-        final SoftwareModule swModule = softwareManagement.findSoftwareModuleById(baseSwModuleId).get();
-        nameTextField.setValue(swModule.getName());
-        versionTextField.setValue(swModule.getVersion());
-        vendorTextField.setValue(HawkbitCommonUtil.trimAndNullIfEmpty(swModule.getVendor()));
-        descTextArea.setValue(HawkbitCommonUtil.trimAndNullIfEmpty(swModule.getDescription()));
+        softwareManagement.findSoftwareModuleById(baseSwModuleId).ifPresent(swModule -> {
+            nameTextField.setValue(swModule.getName());
+            versionTextField.setValue(swModule.getVersion());
+            vendorTextField.setValue(HawkbitCommonUtil.trimAndNullIfEmpty(swModule.getVendor()));
+            descTextArea.setValue(HawkbitCommonUtil.trimAndNullIfEmpty(swModule.getDescription()));
 
-        if (swModule.getType().isDeleted()) {
-            typeComboBox.addItem(swModule.getType().getName());
-        }
-        typeComboBox.setValue(swModule.getType().getName());
+            if (swModule.getType().isDeleted()) {
+                typeComboBox.addItem(swModule.getType().getName());
+            }
+            typeComboBox.setValue(swModule.getType().getName());
+        });
     }
 
     public FormLayout getFormLayout() {

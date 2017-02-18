@@ -57,6 +57,7 @@ import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
+import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -90,11 +91,11 @@ public class CommonDialogWindow extends Window {
 
     private final ClickListener cancelButtonClickListener;
 
-    private final ClickListener closeClickListener = event -> onCloseEvent(event);
+    private final ClickListener closeClickListener = this::onCloseEvent;
 
     private final transient Map<Component, Object> orginalValues;
 
-    private final List<AbstractField<?>> allComponents;
+    private List<AbstractField<?>> allComponents;
 
     private final I18N i18n;
 
@@ -207,7 +208,7 @@ public class CommonDialogWindow extends Window {
             addStyleName("marginTop");
         }
 
-        if (null != content) {
+        if (content != null) {
             mainLayout.addComponent(content);
             mainLayout.setExpandRatio(content, 1.0F);
         }
@@ -391,6 +392,16 @@ public class CommonDialogWindow extends Window {
             if (c instanceof FlexibleOptionGroupItemComponent) {
                 components.add(((FlexibleOptionGroupItemComponent) c).getOwner());
             }
+
+            if (c instanceof TabSheet) {
+                final TabSheet tabSheet = (TabSheet) c;
+                for (final Iterator<Component> i = tabSheet.iterator(); i.hasNext();) {
+                    final Component component = i.next();
+                    if (component instanceof AbstractLayout) {
+                        components.addAll(getAllComponents((AbstractLayout) component));
+                    }
+                }
+            }
         }
         return components;
     }
@@ -558,6 +569,17 @@ public class CommonDialogWindow extends Window {
          * 
          */
         void saveOrUpdate();
+    }
+
+    /**
+     * Updates the field allComponents. All components existing on the given
+     * layout are added to the list of allComponents
+     * 
+     * @param layout
+     *            AbstractLayout
+     */
+    public void updateAllComponents(final AbstractLayout layout) {
+        allComponents = getAllComponents(layout);
     }
 
 }

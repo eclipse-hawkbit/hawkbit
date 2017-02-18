@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
+import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.exception.SoftwareModuleNotAssignedToTargetException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -88,7 +89,8 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
         if (ifMatch != null && !RestResourceConversionHelper.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
             result = new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
         } else {
-            final DbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash());
+            final DbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash())
+                    .orElseThrow(() -> new ArtifactBinaryNotFoundException(artifact.getSha1Hash()));
 
             // we set a download status only if we are aware of the
             // targetid, i.e. authenticated and not anonymous

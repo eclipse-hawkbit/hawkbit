@@ -128,6 +128,77 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             return !isDuplicate();
         }
 
+        private void updateDistribution() {
+
+            if (isDuplicate()) {
+                return;
+            }
+            final boolean isMigStepReq = reqMigStepCheckbox.getValue();
+            final Long distSetTypeId = (Long) distsetTypeNameComboBox.getValue();
+
+            distributionSetManagement.findDistributionSetTypeById(distSetTypeId).ifPresent(type -> {
+                final DistributionSet currentDS = distributionSetManagement.updateDistributionSet(
+                        entityFactory.distributionSet().update(editDistId).name(distNameTextField.getValue())
+                                .description(descTextArea.getValue()).version(distVersionTextField.getValue())
+                                .requiredMigrationStep(isMigStepReq).type(type));
+                notificationMessage.displaySuccess(i18n.get("message.new.dist.save.success",
+                        new Object[] { currentDS.getName(), currentDS.getVersion() }));
+                // update table row+details layout
+                eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.UPDATED_ENTITY, currentDS));
+            });
+        }
+
+        /**
+         * Add new Distribution set.
+         */
+        private void addNewDistribution() {
+            editDistribution = Boolean.FALSE;
+
+            final String name = HawkbitCommonUtil.trimAndNullIfEmpty(distNameTextField.getValue());
+            final String version = HawkbitCommonUtil.trimAndNullIfEmpty(distVersionTextField.getValue());
+            final Long distSetTypeId = (Long) distsetTypeNameComboBox.getValue();
+            final String desc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
+            final boolean isMigStepReq = reqMigStepCheckbox.getValue();
+
+            final DistributionSet newDist = distributionSetManagement.createDistributionSet(
+                    entityFactory.distributionSet().create().name(name).version(version).description(desc)
+                            .type(distributionSetManagement.findDistributionSetTypeById(distSetTypeId).get())
+                            .requiredMigrationStep(isMigStepReq));
+
+            eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.ADD_ENTITY, newDist));
+
+            notificationMessage.displaySuccess(i18n.get("message.new.dist.save.success",
+                    new Object[] { newDist.getName(), newDist.getVersion() }));
+
+            distributionSetTable.setValue(Sets.newHashSet(newDist.getId()));
+        }
+
+        private boolean isDuplicate() {
+            final String name = distNameTextField.getValue();
+            final String version = distVersionTextField.getValue();
+
+            final Optional<DistributionSet> existingDs = distributionSetManagement
+                    .findDistributionSetByNameAndVersion(name, version);
+            /*
+             * Distribution should not exists with the same name & version.
+             * Display error message, when the "existingDs" is not null and it
+             * is add window (or) when the "existingDs" is not null and it is
+             * edit window and the distribution Id of the edit window is
+             * different then the "existingDs"
+             */
+            if (existingDs.isPresent() && !existingDs.get().getId().equals(editDistId)) {
+                distNameTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_LAYOUT_ERROR_HIGHTLIGHT);
+                distVersionTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_LAYOUT_ERROR_HIGHTLIGHT);
+                notificationMessage.displayValidationError(i18n.get("message.duplicate.dist",
+                        new Object[] { existingDs.get().getName(), existingDs.get().getVersion() }));
+
+                return true;
+            }
+
+            return false;
+
+        }
+
     }
 
     private void buildLayout() {
@@ -197,79 +268,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     private DistributionSetType getDefaultDistributionSetType() {
         final TenantMetaData tenantMetaData = systemManagement.getTenantMetadata();
         return tenantMetaData.getDefaultDsType();
-    }
-
-    /**
-     * Update Distribution.
-     */
-    private void updateDistribution() {
-
-        if (isDuplicate()) {
-            return;
-        }
-        final boolean isMigStepReq = reqMigStepCheckbox.getValue();
-        final Long distSetTypeId = (Long) distsetTypeNameComboBox.getValue();
-
-        final DistributionSet currentDS = distributionSetManagement
-                .updateDistributionSet(entityFactory.distributionSet().update(editDistId)
-                        .name(distNameTextField.getValue()).description(descTextArea.getValue())
-                        .version(distVersionTextField.getValue()).requiredMigrationStep(isMigStepReq)
-                        .type(distributionSetManagement.findDistributionSetTypeById(distSetTypeId).get()));
-        notificationMessage.displaySuccess(i18n.get("message.new.dist.save.success",
-                new Object[] { currentDS.getName(), currentDS.getVersion() }));
-        // update table row+details layout
-        eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.UPDATED_ENTITY, currentDS));
-
-    }
-
-    /**
-     * Add new Distribution set.
-     */
-    private void addNewDistribution() {
-        editDistribution = Boolean.FALSE;
-
-        final String name = HawkbitCommonUtil.trimAndNullIfEmpty(distNameTextField.getValue());
-        final String version = HawkbitCommonUtil.trimAndNullIfEmpty(distVersionTextField.getValue());
-        final Long distSetTypeId = (Long) distsetTypeNameComboBox.getValue();
-        final String desc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
-        final boolean isMigStepReq = reqMigStepCheckbox.getValue();
-
-        final DistributionSet newDist = distributionSetManagement.createDistributionSet(
-                entityFactory.distributionSet().create().name(name).version(version).description(desc)
-                        .type(distributionSetManagement.findDistributionSetTypeById(distSetTypeId).get())
-                        .requiredMigrationStep(isMigStepReq));
-
-        eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.ADD_ENTITY, newDist));
-
-        notificationMessage.displaySuccess(
-                i18n.get("message.new.dist.save.success", new Object[] { newDist.getName(), newDist.getVersion() }));
-
-        distributionSetTable.setValue(Sets.newHashSet(newDist.getId()));
-    }
-
-    private boolean isDuplicate() {
-        final String name = distNameTextField.getValue();
-        final String version = distVersionTextField.getValue();
-
-        final Optional<DistributionSet> existingDs = distributionSetManagement.findDistributionSetByNameAndVersion(name,
-                version);
-        /*
-         * Distribution should not exists with the same name & version. Display
-         * error message, when the "existingDs" is not null and it is add window
-         * (or) when the "existingDs" is not null and it is edit window and the
-         * distribution Id of the edit window is different then the "existingDs"
-         */
-        if (existingDs.isPresent() && !existingDs.get().getId().equals(editDistId)) {
-            distNameTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_LAYOUT_ERROR_HIGHTLIGHT);
-            distVersionTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_LAYOUT_ERROR_HIGHTLIGHT);
-            notificationMessage.displayValidationError(i18n.get("message.duplicate.dist",
-                    new Object[] { existingDs.get().getName(), existingDs.get().getVersion() }));
-
-            return true;
-        }
-
-        return false;
-
     }
 
     /**

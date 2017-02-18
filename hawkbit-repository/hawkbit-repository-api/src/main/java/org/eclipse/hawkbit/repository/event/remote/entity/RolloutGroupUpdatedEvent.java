@@ -13,9 +13,9 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 /**
  * Defines the remote event of updated a {@link RolloutGroup}.
  */
-public class RolloutGroupUpdatedEvent extends RemoteEntityEvent<RolloutGroup> {
+public class RolloutGroupUpdatedEvent extends AbstractRolloutGroupEvent {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     /**
      * Default constructor.
@@ -29,11 +29,13 @@ public class RolloutGroupUpdatedEvent extends RemoteEntityEvent<RolloutGroup> {
      * 
      * @param rolloutGroup
      *            the updated rolloutGroup
+     * @param rolloutId
+     *            of the related rollout
      * @param applicationId
      *            the origin application id
      */
-    public RolloutGroupUpdatedEvent(final RolloutGroup rolloutGroup, final String applicationId) {
-        super(rolloutGroup, applicationId);
+    public RolloutGroupUpdatedEvent(final RolloutGroup rolloutGroup, final Long rolloutId, final String applicationId) {
+        super(rolloutGroup, rolloutId, applicationId);
     }
 
 }

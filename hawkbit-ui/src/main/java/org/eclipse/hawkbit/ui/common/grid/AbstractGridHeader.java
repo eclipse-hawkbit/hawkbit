@@ -155,15 +155,18 @@ public abstract class AbstractGridHeader extends VerticalLayout {
         searchResetIcon.togleIcon(FontAwesome.TIMES);
         searchResetIcon.setData(Boolean.TRUE);
         searchField.removeStyleName(SPUIDefinitions.FILTER_BOX_HIDE);
+        searchField.setVisible(true);
         searchField.focus();
     }
 
     private void closeSearchTextField() {
         searchField.setValue("");
         searchField.addStyleName(SPUIDefinitions.FILTER_BOX_HIDE);
+        searchField.setVisible(false);
         searchResetIcon.removeStyleName(SPUIDefinitions.FILTER_RESET_ICON);
         searchResetIcon.togleIcon(FontAwesome.SEARCH);
         searchResetIcon.setData(Boolean.FALSE);
+
         resetSearchText();
     }
 

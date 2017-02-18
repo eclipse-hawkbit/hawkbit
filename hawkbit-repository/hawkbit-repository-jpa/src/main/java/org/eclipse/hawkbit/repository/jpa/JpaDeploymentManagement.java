@@ -225,7 +225,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         final List<JpaTarget> targets = Lists.partition(controllerIDs, Constants.MAX_ENTRIES_IN_STATEMENT).stream()
                 .map(ids -> targetRepository
                         .findAll(TargetSpecifications.hasControllerIdAndAssignedDistributionSetIdNot(ids, set.getId())))
-                .flatMap(t -> t.stream()).collect(Collectors.toList());
+                .flatMap(List::stream).collect(Collectors.toList());
 
         if (targets.isEmpty()) {
             // detaching as it is not necessary to persist the set itself
@@ -456,6 +456,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final RolloutGroup rolloutGroupParent, final int limit) {
         final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         def.setName("startScheduledActions");
+        def.setReadOnly(false);
+        def.setIsolationLevel(Isolation.READ_UNCOMMITTED.value());
         def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         return new TransactionTemplate(txManager, def).execute(status -> {
             final Page<Action> rolloutGroupActions = findActionsByRolloutAndRolloutGroupParent(rollout,
@@ -599,22 +601,36 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     public List<Action> findActiveActionsByTarget(final String controllerId) {
+        throwExceptionIfTargetFoesNotExist(controllerId);
+
         return actionRepository.findByActiveAndTarget(controllerId, true);
     }
 
     @Override
     public List<Action> findInActiveActionsByTarget(final String controllerId) {
+        throwExceptionIfTargetFoesNotExist(controllerId);
+
         return actionRepository.findByActiveAndTarget(controllerId, false);
     }
 
     @Override
     public Long countActionsByTarget(final String controllerId) {
+        throwExceptionIfTargetFoesNotExist(controllerId);
+
         return actionRepository.countByTargetControllerId(controllerId);
     }
 
     @Override
     public Long countActionsByTarget(final String rsqlParam, final String controllerId) {
+        throwExceptionIfTargetFoesNotExist(controllerId);
+
         return actionRepository.count(createSpecificationFor(controllerId, rsqlParam));
+    }
+
+    private void throwExceptionIfTargetFoesNotExist(final String controllerId) {
+        if (!targetRepository.existsByControllerId(controllerId)) {
+            throw new EntityNotFoundException(Target.class, controllerId);
+        }
     }
 
     @Override

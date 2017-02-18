@@ -373,9 +373,11 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
             if (assignedSWModule != null) {
                 assignedSWModule.clear();
             }
-            setSelectedBaseEntity(
-                    distributionSetManagement.findDistributionSetByIdWithDetails(getSelectedBaseEntityId()).get());
-            UI.getCurrent().access(this::populateModule);
+
+            distributionSetManagement.findDistributionSetByIdWithDetails(getSelectedBaseEntityId()).ifPresent(set -> {
+                setSelectedBaseEntity(set);
+                UI.getCurrent().access(this::populateModule);
+            });
         }
     }
 
@@ -408,8 +410,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
 
     @Override
     protected void showMetadata(final ClickEvent event) {
-        final DistributionSet ds = distributionSetManagement
-                .findDistributionSetByIdWithDetails(getSelectedBaseEntityId()).get();
-        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null));
+        distributionSetManagement.findDistributionSetByIdWithDetails(getSelectedBaseEntityId())
+                .ifPresent(ds -> UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null)));
     }
 }

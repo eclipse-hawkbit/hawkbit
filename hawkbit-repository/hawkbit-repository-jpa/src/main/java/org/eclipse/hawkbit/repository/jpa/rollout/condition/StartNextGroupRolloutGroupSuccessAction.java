@@ -71,7 +71,7 @@ public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActi
             // scheduled. If the group is empty now, we just finish the group if
             // there are not actions available for this group.
             final List<JpaRolloutGroup> findByRolloutGroupParent = rolloutGroupRepository
-                    .findByParentAndStatus((JpaRolloutGroup) rolloutGroup, RolloutGroupStatus.SCHEDULED);
+                    .findByParentIdAndStatus(rolloutGroup.getId(), RolloutGroupStatus.SCHEDULED);
             findByRolloutGroupParent.forEach(nextGroup -> {
                 logger.debug("Rolloutgroup {} is finished, starting next group", nextGroup);
                 nextGroup.setStatus(RolloutGroupStatus.FINISHED);

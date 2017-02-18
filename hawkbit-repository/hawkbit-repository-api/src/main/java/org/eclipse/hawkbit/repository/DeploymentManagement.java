@@ -149,6 +149,8 @@ public interface DeploymentManagement {
      *             given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException
      *             if the RSQL syntax is wrong
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Long countActionsByTarget(@NotNull String rsqlParam, @NotEmpty String controllerId);
@@ -171,6 +173,9 @@ public interface DeploymentManagement {
      * @param controllerId
      *            the target associated to the actions to count
      * @return the count value of found actions associated to the target
+     * 
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Long countActionsByTarget(@NotEmpty String controllerId);
@@ -309,6 +314,9 @@ public interface DeploymentManagement {
      * @param controllerId
      *            the target associated with the actions
      * @return a list of actions associated with the given target
+     * 
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     List<Action> findActiveActionsByTarget(@NotEmpty String controllerId);
@@ -320,6 +328,9 @@ public interface DeploymentManagement {
      * @param controllerId
      *            the target associated with the actions
      * @return a list of actions associated with the given target
+     * 
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     List<Action> findInActiveActionsByTarget(@NotEmpty String controllerId);

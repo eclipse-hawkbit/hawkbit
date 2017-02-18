@@ -373,7 +373,7 @@ public class AmqpMessageHandlerServiceTest {
         when(artifactManagementMock.findFirstArtifactBySHA1(SHA1)).thenReturn(Optional.of(localArtifactMock));
         when(controllerManagementMock.hasTargetArtifactAssigned(securityToken.getControllerId(), SHA1))
                 .thenReturn(true);
-        when(artifactManagementMock.loadArtifactBinary(anyString())).thenReturn(dbArtifactMock);
+        when(artifactManagementMock.loadArtifactBinary(anyString())).thenReturn(Optional.of(dbArtifactMock));
         when(dbArtifactMock.getArtifactId()).thenReturn("artifactId");
         when(dbArtifactMock.getSize()).thenReturn(1L);
         when(dbArtifactMock.getHashes()).thenReturn(new DbArtifactHash(SHA1, "md5"));

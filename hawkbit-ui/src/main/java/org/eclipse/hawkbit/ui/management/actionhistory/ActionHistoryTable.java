@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.management.actionhistory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 import org.eclipse.hawkbit.repository.ActionStatusFields;
@@ -104,10 +105,10 @@ public class ActionHistoryTable extends TreeTable {
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final ManagementUIEvent mgmtUIEvent) {
         if (mgmtUIEvent == ManagementUIEvent.MAX_ACTION_HISTORY) {
-            UI.getCurrent().access(() -> createTableContentForMax());
+            UI.getCurrent().access(this::createTableContentForMax);
         }
         if (mgmtUIEvent == ManagementUIEvent.MIN_ACTION_HISTORY) {
-            UI.getCurrent().access(() -> normalActionHistoryTable());
+            UI.getCurrent().access(this::normalActionHistoryTable);
         }
     }
 
@@ -431,8 +432,12 @@ public class ActionHistoryTable extends TreeTable {
             final Long actionId = (Long) item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTION_ID_HIDDEN)
                     .getValue();
 
-            final org.eclipse.hawkbit.repository.model.Action action = deploymentManagement
-                    .findActionWithDetails(actionId).get();
+            final Optional<Action> action = deploymentManagement.findActionWithDetails(actionId);
+
+            if (!action.isPresent()) {
+                return;
+            }
+
             final Pageable pageReq = new PageRequest(0, 1000,
                     new Sort(Direction.DESC, ActionStatusFields.ID.getFieldName()));
             final Page<ActionStatus> actionStatusList;
@@ -458,8 +463,9 @@ public class ActionHistoryTable extends TreeTable {
                      */
                     childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTIVE_HIDDEN).setValue("");
 
-                    childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST).setValue(
-                            action.getDistributionSet().getName() + ":" + action.getDistributionSet().getVersion());
+                    childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST)
+                            .setValue(action.get().getDistributionSet().getName() + ":"
+                                    + action.get().getDistributionSet().getVersion());
 
                     childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DATETIME)
                             .setValue(SPDateTimeUtil.getFormattedDate(actionStatus.getCreatedAt()));
@@ -517,7 +523,6 @@ public class ActionHistoryTable extends TreeTable {
         label.setDescription(i18n.get(mapping.getDescriptionI18N()));
         label.setStyleName(mapping.getStyleName());
         label.setValue(mapping.getIcon().getHtml());
-
         return label;
 
     }
@@ -568,7 +573,7 @@ public class ActionHistoryTable extends TreeTable {
             label.setStyleName("statusIconActive");
         } else if (SPUIDefinitions.IN_ACTIVE.equals(activeValue)) {
             if (endedWithError) {
-                label.setStyleName("statusIconRed");
+                label.setStyleName(SPUIStyleDefinitions.STATUS_ICON_RED);
             } else {
                 label.setStyleName("statusIconNeutral");
             }

@@ -209,8 +209,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
         return softwareModuleRepository.findOneByNameAndVersionAndTypeId(name, version, typeId);
     }
 
-    private boolean isUnassigned(final JpaSoftwareModule bsmMerged) {
-        return distributionSetRepository.countByModules(bsmMerged) <= 0;
+    private boolean isUnassigned(final Long moduleId) {
+        return distributionSetRepository.countByModulesId(moduleId) <= 0;
     }
 
     private Slice<JpaSoftwareModule> findSwModuleByCriteriaAPI(final Pageable pageable,
@@ -225,7 +225,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     private void deleteGridFsArtifacts(final JpaSoftwareModule swModule) {
         for (final Artifact localArtifact : swModule.getArtifacts()) {
-            artifactManagement.clearArtifactBinary(localArtifact.getId());
+            artifactManagement.clearArtifactBinary(localArtifact.getSha1Hash(), swModule.getId());
         }
     }
 
@@ -246,12 +246,9 @@ public class JpaSoftwareManagement implements SoftwareManagement {
             // delete binary data of artifacts
             deleteGridFsArtifacts(swModule);
 
-            if (isUnassigned(swModule)) {
-
-                softwareModuleRepository.delete(swModule);
-
+            if (isUnassigned(swModule.getId())) {
+                softwareModuleRepository.delete(swModule.getId());
             } else {
-
                 assignedModuleIds.add(swModule.getId());
             }
         });

@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -153,7 +154,8 @@ public class TargetTable extends AbstractTable<Target, Long> {
         if (isFilterEnabled()) {
             refreshTargets();
         } else {
-            eventContainer.getEvents().stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
+            eventContainer.getEvents().stream().filter(event -> visibleItemIds.contains(event.getEntityId())).filter(
+                    event -> !Objects.isNull(event.getEntity()) && !Objects.isNull(event.getEntity().getTargetInfo()))
                     .forEach(event -> updateVisibleItemOnEvent(event.getEntity().getTargetInfo()));
         }
         publishTargetSelectedEntityForRefresh(eventContainer.getEvents().stream());
@@ -468,7 +470,9 @@ public class TargetTable extends AbstractTable<Target, Long> {
     private void resetPinStyle(final Button pinBtn) {
         pinBtn.removeStyleName(TARGET_PINNED);
         pinBtn.addStyleName(SPUIStyleDefinitions.TARGET_STATUS_PIN_TOGGLE);
-        HawkbitCommonUtil.applyStatusLblStyle(this, pinBtn, pinBtn.getData());
+        final TargetIdName targetIdname = (TargetIdName) pinBtn.getData();
+
+        HawkbitCommonUtil.applyStatusLblStyle(this, pinBtn, targetIdname.getTargetId());
     }
 
     /**

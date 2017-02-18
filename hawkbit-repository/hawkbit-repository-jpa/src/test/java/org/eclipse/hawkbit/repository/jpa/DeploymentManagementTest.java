@@ -752,7 +752,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .as("Installed distribution set of action should be null").isNotNull();
 
         final Page<Action> updAct = actionRepository.findByDistributionSetId(pageReq, dsA.getId());
-        controllerManagament.addUpdateActionStatus(
+        controllerManagement.addUpdateActionStatus(
                 entityFactory.actionStatus().create(updAct.getContent().get(0).getId()).status(Status.FINISHED));
 
         targ = targetManagement.findTargetByControllerID(targ.getControllerId()).get();

@@ -248,7 +248,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             newItem.getItemProperty(SIZE).setValue(customFile.getFileSize());
             final Button deleteIcon = SPUIComponentProvider.getButton(
                     UIComponentIdProvider.UPLOAD_DELETE_ICON + "-" + itemId, "", SPUILabelDefinitions.DISCARD,
-                    ValoTheme.BUTTON_TINY + " " + "redicon", true, FontAwesome.TRASH_O,
+                    ValoTheme.BUTTON_TINY + " " + "blueicon", true, FontAwesome.TRASH_O,
                     SPUIButtonStyleSmallNoBorder.class);
             deleteIcon.addClickListener(this);
             deleteIcon.setData(itemId);

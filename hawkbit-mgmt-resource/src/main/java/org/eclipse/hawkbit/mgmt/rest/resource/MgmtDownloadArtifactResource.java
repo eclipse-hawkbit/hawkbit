@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDownloadArtifactRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -67,7 +68,8 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
         }
 
         final Artifact artifact = module.getArtifact(artifactId).get();
-        final DbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash());
+        final DbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash())
+                .orElseThrow(() -> new ArtifactBinaryNotFoundException(artifact.getSha1Hash()));
         final HttpServletRequest request = requestResponseContextHolder.getHttpServletRequest();
         final String ifMatch = request.getHeader("If-Match");
         if (ifMatch != null && !RestResourceConversionHelper.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {

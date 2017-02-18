@@ -43,7 +43,7 @@ import org.eclipse.hawkbit.repository.model.TenantMetaData;
 public class JpaTenantMetaData extends AbstractJpaBaseEntity implements TenantMetaData {
     private static final long serialVersionUID = 1L;
 
-    @Column(name = "tenant", nullable = false, length = 40)
+    @Column(name = "tenant", nullable = false, updatable = false, length = 40)
     @Size(max = 40)
     private String tenant;
 

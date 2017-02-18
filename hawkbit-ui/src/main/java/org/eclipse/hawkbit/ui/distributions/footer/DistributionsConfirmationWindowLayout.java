@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.AbstractConfirmationWindowLayout;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
@@ -276,8 +277,8 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         final int deleteSWModuleTypeCount = manageDistUIState.getSelectedDeleteSWModuleTypes().size();
         for (final String swModuleTypeName : manageDistUIState.getSelectedDeleteSWModuleTypes()) {
 
-            softwareManagement.deleteSoftwareModuleType(
-                    softwareManagement.findSoftwareModuleTypeByName(swModuleTypeName).get().getId());
+            softwareManagement.findSoftwareModuleTypeByName(swModuleTypeName).map(SoftwareModuleType::getId)
+                    .ifPresent(softwareManagement::deleteSoftwareModuleType);
         }
         addToConsolitatedMsg(FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.get("message.sw.module.type.delete", new Object[] { deleteSWModuleTypeCount }));

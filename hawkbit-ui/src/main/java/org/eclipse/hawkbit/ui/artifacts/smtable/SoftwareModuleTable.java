@@ -260,9 +260,8 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     }
 
     private void showMetadataDetails(final Long itemId) {
-        final SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(itemId).get();
-        /* display the window */
-        UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null));
+        softwareManagement.findSoftwareModuleById(itemId)
+                .ifPresent(swmodule -> UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null)));
     }
 
 }

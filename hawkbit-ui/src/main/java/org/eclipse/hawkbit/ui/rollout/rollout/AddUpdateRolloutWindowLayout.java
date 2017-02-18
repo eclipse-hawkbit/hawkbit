@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +24,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -56,6 +58,8 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -88,6 +92,8 @@ import com.vaadin.ui.themes.ValoTheme;
 public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private static final long serialVersionUID = 2999293468801479916L;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AddUpdateRolloutWindowLayout.class);
 
     private static final String MESSAGE_ROLLOUT_FIELD_VALUE_RANGE = "message.rollout.field.value.range";
 
@@ -201,6 +207,131 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             }
             return duplicateCheck();
         }
+
+        private void createRollout() {
+            final Rollout rolloutToCreate = saveRollout();
+            uiNotification.displaySuccess(i18n.get("message.save.success", rolloutToCreate.getName()));
+        }
+
+        private boolean duplicateCheck() {
+            if (rolloutManagement.findRolloutByName(getRolloutName()).isPresent()) {
+                uiNotification.displayValidationError(i18n.get("message.rollout.duplicate.check", getRolloutName()));
+                return false;
+            }
+            return true;
+        }
+
+        private void editRollout() {
+            if (rollout == null) {
+                return;
+            }
+
+            final Long distributionSetId = (Long) distributionSet.getValue();
+
+            final RolloutUpdate rolloutUpdate = entityFactory.rollout().update(rollout.getId())
+                    .name(rolloutName.getValue()).description(description.getValue()).set(distributionSetId)
+                    .actionType(getActionType()).forcedTime(getForcedTimeStamp());
+
+            if (AutoStartOptionGroupLayout.AutoStartOption.AUTO_START.equals(getAutoStartOption())) {
+                rolloutUpdate.startAt(System.currentTimeMillis());
+            }
+            if (AutoStartOptionGroupLayout.AutoStartOption.SCHEDULED.equals(getAutoStartOption())) {
+                rolloutUpdate.startAt(getScheduledStartTime());
+            }
+
+            Rollout updatedRollout;
+            try {
+                updatedRollout = rolloutManagement.updateRollout(rolloutUpdate);
+            } catch (final EntityNotFoundException e) {
+                LOGGER.warn("Rollout was deleted. Redirect to Rollouts overview.", e);
+                uiNotification.displayWarning(
+                        "Rollout with name " + rolloutName.getValue() + " was deleted. Update is not poosible");
+                eventBus.publish(this, RolloutEvent.SHOW_ROLLOUTS);
+                return;
+            }
+
+            uiNotification.displaySuccess(i18n.get("message.update.success", updatedRollout.getName()));
+            eventBus.publish(this, RolloutEvent.UPDATE_ROLLOUT);
+        }
+
+        private boolean duplicateCheckForEdit() {
+            final String rolloutNameVal = getRolloutName();
+            if (!rollout.getName().equals(rolloutNameVal)
+                    && rolloutManagement.findRolloutByName(rolloutNameVal).isPresent()) {
+                uiNotification.displayValidationError(i18n.get("message.rollout.duplicate.check", rolloutNameVal));
+                return false;
+            }
+            return true;
+        }
+
+        private String getRolloutName() {
+            return HawkbitCommonUtil.trimAndNullIfEmpty(rolloutName.getValue());
+        }
+
+        private Rollout saveRollout() {
+
+            final Long distributionId = (Long) distributionSet.getValue();
+
+            final int amountGroup = Integer.parseInt(noOfGroups.getValue());
+            final int errorThresholdPercent = getErrorThresholdPercentage(amountGroup);
+            final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder()
+                    .successAction(RolloutGroupSuccessAction.NEXTGROUP, null)
+                    .successCondition(RolloutGroupSuccessCondition.THRESHOLD, triggerThreshold.getValue())
+                    .errorCondition(RolloutGroupErrorCondition.THRESHOLD, String.valueOf(errorThresholdPercent))
+                    .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
+
+            final RolloutCreate rolloutCreate = entityFactory.rollout().create().name(rolloutName.getValue())
+                    .description(description.getValue()).set(distributionId).targetFilterQuery(getTargetFilterQuery())
+                    .actionType(getActionType()).forcedTime(getForcedTimeStamp());
+
+            if (AutoStartOptionGroupLayout.AutoStartOption.AUTO_START.equals(getAutoStartOption())) {
+                rolloutCreate.startAt(System.currentTimeMillis());
+            }
+            if (AutoStartOptionGroupLayout.AutoStartOption.SCHEDULED.equals(getAutoStartOption())) {
+                rolloutCreate.startAt(getScheduledStartTime());
+            }
+
+            if (isNumberOfGroups()) {
+                return rolloutManagement.createRollout(rolloutCreate, amountGroup, conditions);
+            } else if (isGroupsDefinition()) {
+                final List<RolloutGroupCreate> groups = defineGroupsLayout.getSavedRolloutGroups();
+                return rolloutManagement.createRollout(rolloutCreate, groups, conditions);
+            }
+
+            throw new IllegalStateException("Either of the Tabs must be selected");
+        }
+
+        private long getForcedTimeStamp() {
+            return ActionTypeOption.AUTO_FORCED
+                    .equals(actionTypeOptionGroupLayout.getActionTypeOptionGroup().getValue())
+                            ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
+                            : RepositoryModelConstants.NO_FORCE_TIME;
+        }
+
+        private Long getScheduledStartTime() {
+            return AutoStartOptionGroupLayout.AutoStartOption.SCHEDULED.equals(getAutoStartOption())
+                    ? autoStartOptionGroupLayout.getStartAtDateField().getValue().getTime() : null;
+        }
+
+        private int getErrorThresholdPercentage(final int amountGroup) {
+            int errorThresoldPercent = Integer.parseInt(errorThreshold.getValue());
+            if (errorThresholdOptionGroup.getValue().equals(ERRORTHRESOLDOPTIONS.COUNT.getValue())) {
+                final int groupSize = (int) Math.ceil((double) totalTargetsCount / (double) amountGroup);
+                final int erroThresoldCount = Integer.parseInt(errorThreshold.getValue());
+                errorThresoldPercent = (int) Math.ceil(((float) erroThresoldCount / (float) groupSize) * 100);
+            }
+            return errorThresoldPercent;
+        }
+
+        private ActionType getActionType() {
+            return ((ActionTypeOptionGroupLayout.ActionTypeOption) actionTypeOptionGroupLayout
+                    .getActionTypeOptionGroup().getValue()).getActionType();
+        }
+
+        private AutoStartOptionGroupLayout.AutoStartOption getAutoStartOption() {
+            return (AutoStartOptionGroupLayout.AutoStartOption) autoStartOptionGroupLayout.getAutoStartOptionGroup()
+                    .getValue();
+        }
     }
 
     CommonDialogWindow getWindow(final Long rolloutId, final boolean copy) {
@@ -244,12 +375,27 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         noOfGroups.setVisible(true);
         removeComponent(1, 2);
         addComponent(targetFilterQueryCombo, 1, 2);
+        addGroupsLegendLayout();
+        addGroupsDefinitionTabs();
+
         actionTypeOptionGroupLayout.selectDefaultOption();
         autoStartOptionGroupLayout.selectDefaultOption();
         totalTargetsCount = 0L;
         rollout = null;
         groupsDefinitionTabs.setVisible(true);
         groupsDefinitionTabs.setSelectedTab(0);
+    }
+
+    private void addGroupsDefinitionTabs() {
+        if (getComponent(0, 6) == null) {
+            addComponent(groupsDefinitionTabs, 0, 6, 3, 6);
+        }
+    }
+
+    private void addGroupsLegendLayout() {
+        if (getComponent(3, 0) == null) {
+            addComponent(groupsLegendLayout, 3, 0, 3, 3);
+        }
     }
 
     private void resetFields() {
@@ -497,7 +643,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             } else {
                 updateGroupsChart(0);
             }
-
         }
     }
 
@@ -544,7 +689,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             groupsPieChart.setChartState(groups, totalTargetsCount);
             groupsLegendLayout.populateGroupsLegendByTargetCounts(groups);
         }
-
     }
 
     private ComboBox createTargetFilterQueryCombo() {
@@ -583,7 +727,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             final TargetFilterQuery filterQuery = filterQueries.getContent().get(0);
             targetFilterQueryCombo.setValue(filterQuery.getName());
         }
-
     }
 
     private static Container createTargetFilterComboContainer() {
@@ -594,99 +737,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                 targetFilterQF);
     }
 
-    private void editRollout() {
-        if (rollout == null) {
-            return;
-        }
-
-        final Long distributionSetId = (Long) distributionSet.getValue();
-
-        final RolloutUpdate rolloutUpdate = entityFactory.rollout().update(rollout.getId()).name(rolloutName.getValue())
-                .description(description.getValue()).set(distributionSetId).actionType(getActionType())
-                .forcedTime(getForcedTimeStamp());
-
-        if (AutoStartOptionGroupLayout.AutoStartOption.AUTO_START.equals(getAutoStartOption())) {
-            rolloutUpdate.startAt(System.currentTimeMillis());
-        }
-        if (AutoStartOptionGroupLayout.AutoStartOption.SCHEDULED.equals(getAutoStartOption())) {
-            rolloutUpdate.startAt(getScheduledStartTime());
-        }
-
-        final Rollout updatedRollout = rolloutManagement.updateRollout(rolloutUpdate);
-
-        uiNotification.displaySuccess(i18n.get("message.update.success", updatedRollout.getName()));
-        eventBus.publish(this, RolloutEvent.UPDATE_ROLLOUT);
-    }
-
-    private boolean duplicateCheckForEdit() {
-        final String rolloutNameVal = getRolloutName();
-        if (!rollout.getName().equals(rolloutNameVal)
-                && rolloutManagement.findRolloutByName(rolloutNameVal).isPresent()) {
-            uiNotification.displayValidationError(i18n.get("message.rollout.duplicate.check", rolloutNameVal));
-            return false;
-        }
-        return true;
-    }
-
-    private long getForcedTimeStamp() {
-        return ActionTypeOption.AUTO_FORCED.equals(actionTypeOptionGroupLayout.getActionTypeOptionGroup().getValue())
-                ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
-                : RepositoryModelConstants.NO_FORCE_TIME;
-    }
-
-    private Long getScheduledStartTime() {
-        return AutoStartOptionGroupLayout.AutoStartOption.SCHEDULED.equals(getAutoStartOption())
-                ? autoStartOptionGroupLayout.getStartAtDateField().getValue().getTime() : null;
-    }
-
-    private AutoStartOptionGroupLayout.AutoStartOption getAutoStartOption() {
-        return (AutoStartOptionGroupLayout.AutoStartOption) autoStartOptionGroupLayout.getAutoStartOptionGroup()
-                .getValue();
-    }
-
-    private ActionType getActionType() {
-        return ((ActionTypeOptionGroupLayout.ActionTypeOption) actionTypeOptionGroupLayout.getActionTypeOptionGroup()
-                .getValue()).getActionType();
-    }
-
-    private void createRollout() {
-        final Rollout rolloutToCreate = saveRollout();
-        uiNotification.displaySuccess(i18n.get("message.save.success", rolloutToCreate.getName()));
-    }
-
-    private Rollout saveRollout() {
-
-        final Long distributionId = (Long) distributionSet.getValue();
-
-        final int amountGroup = Integer.parseInt(noOfGroups.getValue());
-        final int errorThresholdPercent = getErrorThresholdPercentage(amountGroup);
-        final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder()
-                .successAction(RolloutGroupSuccessAction.NEXTGROUP, null)
-                .successCondition(RolloutGroupSuccessCondition.THRESHOLD, triggerThreshold.getValue())
-                .errorCondition(RolloutGroupErrorCondition.THRESHOLD, String.valueOf(errorThresholdPercent))
-                .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
-
-        final RolloutCreate rolloutCreate = entityFactory.rollout().create().name(rolloutName.getValue())
-                .description(description.getValue()).set(distributionId).targetFilterQuery(getTargetFilterQuery())
-                .actionType(getActionType()).forcedTime(getForcedTimeStamp());
-
-        if (AutoStartOptionGroupLayout.AutoStartOption.AUTO_START.equals(getAutoStartOption())) {
-            rolloutCreate.startAt(System.currentTimeMillis());
-        }
-        if (AutoStartOptionGroupLayout.AutoStartOption.SCHEDULED.equals(getAutoStartOption())) {
-            rolloutCreate.startAt(getScheduledStartTime());
-        }
-
-        if (isNumberOfGroups()) {
-            return rolloutManagement.createRollout(rolloutCreate, amountGroup, conditions);
-        } else if (isGroupsDefinition()) {
-            final List<RolloutGroupCreate> groups = defineGroupsLayout.getSavedRolloutGroups();
-            return rolloutManagement.createRollout(rolloutCreate, groups, conditions);
-        }
-
-        throw new IllegalStateException("Either of the Tabs must be selected");
-    }
-
     private String getTargetFilterQuery() {
         if (null != targetFilterQueryCombo.getValue()
                 && HawkbitCommonUtil.trimAndNullIfEmpty((String) targetFilterQueryCombo.getValue()) != null) {
@@ -695,24 +745,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             return (String) filterItem.getItemProperty("query").getValue();
         }
         return null;
-    }
-
-    private int getErrorThresholdPercentage(final int amountGroup) {
-        int errorThresoldPercent = Integer.parseInt(errorThreshold.getValue());
-        if (errorThresholdOptionGroup.getValue().equals(ERRORTHRESOLDOPTIONS.COUNT.getValue())) {
-            final int groupSize = (int) Math.ceil((double) totalTargetsCount / (double) amountGroup);
-            final int erroThresoldCount = Integer.parseInt(errorThreshold.getValue());
-            errorThresoldPercent = (int) Math.ceil(((float) erroThresoldCount / (float) groupSize) * 100);
-        }
-        return errorThresoldPercent;
-    }
-
-    private boolean duplicateCheck() {
-        if (rolloutManagement.findRolloutByName(getRolloutName()).isPresent()) {
-            uiNotification.displayValidationError(i18n.get("message.rollout.duplicate.check", getRolloutName()));
-            return false;
-        }
-        return true;
     }
 
     private void setDefaultSaveStartGroupOption() {
@@ -795,10 +827,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         return rolloutNameField;
     }
 
-    private String getRolloutName() {
-        return HawkbitCommonUtil.trimAndNullIfEmpty(rolloutName.getValue());
-    }
-
     class ErrorThresoldOptionValidator implements Validator {
         private static final long serialVersionUID = 9049939751976326550L;
 
@@ -855,7 +883,12 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             return;
         }
 
-        rollout = rolloutManagement.findRolloutById(rolloutId).get();
+        final Optional<Rollout> rolloutFound = rolloutManagement.findRolloutById(rolloutId);
+        if (!rolloutFound.isPresent()) {
+            return;
+        }
+
+        rollout = rolloutFound.get();
         description.setValue(rollout.getDescription());
         distributionSet.setValue(rollout.getDistributionSet().getId());
         setActionType(rollout);
@@ -869,7 +902,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             groupsDefinitionTabs.setSelectedTab(1);
 
             window.clearOriginalValues();
-
         } else {
             editRolloutEnabled = true;
             if (rollout.getStatus() != Rollout.RolloutStatus.READY) {
@@ -884,6 +916,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             addComponent(targetFilterQuery, 1, 2);
             targetFilterQuery.addValidator(nullValidator);
 
+            removeComponent(defineGroupsLayout);
+            removeComponent(groupsDefinitionTabs);
+
+            window.updateAllComponents(this);
             window.setOrginaleValues();
 
             updateGroupsChart(rollout.getRolloutGroups(), rollout.getTotalTargets());
@@ -955,12 +991,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             value = val;
         }
 
-        /**
-         * @return the value
-         */
-        public String getValue() {
+        private String getValue() {
             return value;
         }
     }
-
 }

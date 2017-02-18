@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.RolloutManagement;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
@@ -50,8 +49,6 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
     private Sort sort = new Sort(Direction.ASC, "id");
 
     private transient RolloutManagement rolloutManagement;
-
-    private transient TargetFilterQueryManagement filterQueryManagement;
 
     private transient RolloutUIState rolloutUIState;
 
@@ -95,18 +92,18 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
     @Override
     protected List<ProxyRollout> loadBeans(final int startIndex, final int count) {
         final Slice<Rollout> rolloutBeans;
+        final PageRequest pageRequest = new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE,
+                SPUIDefinitions.PAGE_SIZE, sort);
         if (Strings.isNullOrEmpty(searchText)) {
-            rolloutBeans = getRolloutManagement().findAllRolloutsWithDetailedStatus(
-                    new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
+            rolloutBeans = getRolloutManagement().findAllRolloutsWithDetailedStatus(pageRequest, false);
         } else {
-            rolloutBeans = getRolloutManagement().findRolloutWithDetailedStatusByFilters(
-                    new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
-                    searchText);
+            rolloutBeans = getRolloutManagement().findRolloutWithDetailedStatusByFilters(pageRequest, searchText,
+                    false);
         }
         return getProxyRolloutList(rolloutBeans);
     }
 
-    private List<ProxyRollout> getProxyRolloutList(final Slice<Rollout> rolloutBeans) {
+    private static List<ProxyRollout> getProxyRolloutList(final Slice<Rollout> rolloutBeans) {
         final List<ProxyRollout> proxyRolloutList = new ArrayList<>();
         for (final Rollout rollout : rolloutBeans) {
             final ProxyRollout proxyRollout = new ProxyRollout();
@@ -116,7 +113,7 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
             proxyRollout.setDistributionSetNameVersion(
                     HawkbitCommonUtil.getFormattedNameVersion(distributionSet.getName(), distributionSet.getVersion()));
             proxyRollout.setDistributionSet(distributionSet);
-            proxyRollout.setNumberOfGroups(Long.valueOf(rollout.getRolloutGroups().size()));
+            proxyRollout.setNumberOfGroups(Integer.valueOf(rollout.getRolloutGroups().size()));
             proxyRollout.setCreatedDate(SPDateTimeUtil.getFormattedDate(rollout.getCreatedAt()));
             proxyRollout.setModifiedDate(SPDateTimeUtil.getFormattedDate(rollout.getLastModifiedAt()));
             proxyRollout.setCreatedBy(UserDetailsFormatter.loadAndFormatCreatedBy(rollout));
@@ -139,13 +136,6 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
         return proxyRolloutList;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery#saveBeans(java
-     * .util.List, java.util.List, java.util.List)
-     */
     @Override
     protected void saveBeans(final List<ProxyRollout> arg0, final List<ProxyRollout> arg1,
             final List<ProxyRollout> arg2) {
@@ -163,30 +153,14 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
         return size;
     }
 
-    /**
-     * @return the rolloutManagement
-     */
-    public RolloutManagement getRolloutManagement() {
+    private RolloutManagement getRolloutManagement() {
         if (null == rolloutManagement) {
             rolloutManagement = SpringContextHelper.getBean(RolloutManagement.class);
         }
         return rolloutManagement;
     }
 
-    /**
-     * @return the filterQueryManagement
-     */
-    public TargetFilterQueryManagement getFilterQueryManagement() {
-        if (null == filterQueryManagement) {
-            filterQueryManagement = SpringContextHelper.getBean(TargetFilterQueryManagement.class);
-        }
-        return filterQueryManagement;
-    }
-
-    /**
-     * @return the rolloutUIState
-     */
-    public RolloutUIState getRolloutUIState() {
+    private RolloutUIState getRolloutUIState() {
         if (null == rolloutUIState) {
             rolloutUIState = SpringContextHelper.getBean(RolloutUIState.class);
         }

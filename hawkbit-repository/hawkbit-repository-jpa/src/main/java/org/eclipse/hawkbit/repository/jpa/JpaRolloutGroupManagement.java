@@ -38,6 +38,7 @@ import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -48,7 +49,6 @@ import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Isolation;
@@ -64,6 +64,9 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
     @Autowired
     private RolloutGroupRepository rolloutGroupRepository;
+
+    @Autowired
+    private RolloutRepository rolloutRepository;
 
     @Autowired
     private ActionRepository actionRepository;
@@ -115,9 +118,19 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
     @Override
     public Page<RolloutGroup> findAllRolloutGroupsWithDetailedStatus(final Long rolloutId, final Pageable pageable) {
+        if (!rolloutRepository.exists(rolloutId)) {
+            throw new EntityNotFoundException(Rollout.class, rolloutId);
+        }
+
         final Page<JpaRolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutId(rolloutId, pageable);
-        final List<Long> rolloutGroupIds = rolloutGroups.getContent().stream().map(rollout -> rollout.getId())
+        final List<Long> rolloutGroupIds = rolloutGroups.getContent().stream().map(RolloutGroup::getId)
                 .collect(Collectors.toList());
+
+        if (rolloutGroupIds.isEmpty()) {
+            // groups might already deleted, so return empty list.
+            return new PageImpl<>(Collections.emptyList());
+        }
+
         final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRolloutGroup(
                 rolloutGroupIds);
 
@@ -192,8 +205,9 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     }
 
     @Override
-    public Page<TargetWithActionStatus> findAllTargetsWithActionStatus(final PageRequest pageRequest,
+    public Page<TargetWithActionStatus> findAllTargetsWithActionStatus(final Pageable pageRequest,
             final Long rolloutGroupId) {
+        throwExceptionIfRolloutGroupDoesNotExist(rolloutGroupId);
 
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
@@ -218,17 +232,26 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
                 .setFirstResult(pageRequest.getOffset()).setMaxResults(pageRequest.getPageSize()).getResultList()
                 .stream().map(o -> new TargetWithActionStatus((Target) o[0], (Action.Status) o[1]))
                 .collect(Collectors.toList());
+
         return new PageImpl<>(targetWithActionStatus, pageRequest, totalCount);
     }
 
     @Override
     public Long countTargetsOfRolloutsGroup(@NotNull final Long rolloutGroupId) {
+        throwExceptionIfRolloutGroupDoesNotExist(rolloutGroupId);
+
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         final Root<RolloutTargetGroup> countQueryFrom = countQuery.from(RolloutTargetGroup.class);
         countQuery.select(cb.count(countQueryFrom)).where(cb
                 .equal(countQueryFrom.get(RolloutTargetGroup_.rolloutGroup).get(JpaRolloutGroup_.id), rolloutGroupId));
         return entityManager.createQuery(countQuery).getSingleResult();
+    }
+
+    private void throwExceptionIfRolloutGroupDoesNotExist(final Long rolloutGroupId) {
+        if (!rolloutGroupRepository.exists(rolloutGroupId)) {
+            throw new EntityNotFoundException(RolloutGroup.class, rolloutGroupId);
+        }
     }
 
 }

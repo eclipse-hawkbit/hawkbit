@@ -607,7 +607,7 @@ public class JpaTargetManagement implements TargetManagement {
 
         final JpaTarget target = create.build();
 
-        if (targetRepository.findByControllerId(target.getControllerId()).isPresent()) {
+        if (targetRepository.existsByControllerId(target.getControllerId())) {
             throw new EntityAlreadyExistsException();
         }
 

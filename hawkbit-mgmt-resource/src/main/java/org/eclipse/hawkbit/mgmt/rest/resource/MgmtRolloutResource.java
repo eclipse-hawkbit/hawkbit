@@ -80,9 +80,9 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
         final Page<Rollout> findModulesAll;
         if (rsqlParam != null) {
-            findModulesAll = this.rolloutManagement.findAllByPredicate(rsqlParam, pageable);
+            findModulesAll = this.rolloutManagement.findAllByPredicate(rsqlParam, pageable, false);
         } else {
-            findModulesAll = this.rolloutManagement.findAll(pageable);
+            findModulesAll = this.rolloutManagement.findAll(pageable, false);
         }
 
         final List<MgmtRolloutResponseBody> rest = MgmtRolloutMapper.toResponseRollout(findModulesAll.getContent());
@@ -137,6 +137,12 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     @Override
     public ResponseEntity<Void> pause(@PathVariable("rolloutId") final Long rolloutId) {
         this.rolloutManagement.pauseRollout(rolloutId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> delete(@PathVariable("rolloutId") final Long rolloutId) {
+        this.rolloutManagement.deleteRollout(rolloutId);
         return ResponseEntity.ok().build();
     }
 

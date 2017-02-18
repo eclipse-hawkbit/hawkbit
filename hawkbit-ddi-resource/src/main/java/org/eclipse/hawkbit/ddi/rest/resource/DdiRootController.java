@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
+import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.SoftwareModuleNotAssignedToTargetException;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -130,7 +131,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist(controllerId, IpUtil
                 .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
         return new ResponseEntity<>(DataConversionHelper.fromTarget(target,
-                controllerManagement.findOldestActiveActionByTarget(controllerId),
+                controllerManagement.findOldestActiveActionByTarget(controllerId).orElse(null),
                 controllerManagement.getPollingTime(), tenantAware), HttpStatus.OK);
     }
 
@@ -156,7 +157,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @SuppressWarnings("squid:S3655")
             final Artifact artifact = module.getArtifactByFilename(fileName).get();
 
-            final DbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash());
+            final DbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash())
+                    .orElseThrow(() -> new ArtifactBinaryNotFoundException(artifact.getSha1Hash()));
 
             final String ifMatch = requestResponseContextHolder.getHttpServletRequest().getHeader("If-Match");
             if (ifMatch != null && !RestResourceConversionHelper.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {

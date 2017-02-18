@@ -106,7 +106,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final int limitSize = 2;
         final String knownTargetId = "targetId";
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
-        controllerManagament.addUpdateActionStatus(
+        controllerManagement.addUpdateActionStatus(
                 entityFactory.actionStatus().create(actions.get(0).getId()).status(Status.FINISHED).message("test"));
 
         final PageRequest pageRequest = new PageRequest(0, 1000, Direction.ASC, ActionFields.ID.getFieldName());
@@ -1205,7 +1205,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         knownControllerAttrs.put("a", "1");
         knownControllerAttrs.put("b", "2");
         testdataFactory.createTarget(knownTargetId);
-        controllerManagament.updateControllerAttributes(knownTargetId, knownControllerAttrs);
+        controllerManagement.updateControllerAttributes(knownTargetId, knownControllerAttrs);
 
         // test query target over rest resource
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/attributes"))
@@ -1246,7 +1246,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     private Target createSingleTarget(final String controllerId, final String name) {
         targetManagement.createTarget(entityFactory.target().create().controllerId(controllerId).name(name)
                 .description(TARGET_DESCRIPTION_TEST));
-        return controllerManagament.updateLastTargetQuery(controllerId, null);
+        return controllerManagement.updateLastTargetQuery(controllerId, null);
     }
 
     /**
@@ -1261,7 +1261,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         for (int index = 0; index < amount; index++) {
             final String str = String.valueOf(character);
             targetManagement.createTarget(entityFactory.target().create().controllerId(str).name(str).description(str));
-            controllerManagament.updateLastTargetQuery(str, null);
+            controllerManagement.updateLastTargetQuery(str, null);
             character++;
         }
     }

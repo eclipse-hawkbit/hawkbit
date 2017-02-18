@@ -32,11 +32,9 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * 
  * SoftwareModule Metadata details layout.
  *
  */
-
 @SpringComponent
 @UIScope
 public class SoftwareModuleMetadatadetailslayout extends Table {
@@ -174,10 +172,8 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
     }
 
     private void showMetadataDetails(final Long selectedSWModuleId, final String metadataKey) {
-        final SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(selectedSWModuleId).get();
-        /* display the window */
-        UI.getCurrent()
-                .addWindow(swMetadataPopupLayout.getWindow(swmodule, entityFactory.generateMetadata(metadataKey, "")));
+        softwareManagement.findSoftwareModuleById(selectedSWModuleId).ifPresent(swmodule -> UI.getCurrent()
+                .addWindow(swMetadataPopupLayout.getWindow(swmodule, entityFactory.generateMetadata(metadataKey, ""))));
     }
 
 }

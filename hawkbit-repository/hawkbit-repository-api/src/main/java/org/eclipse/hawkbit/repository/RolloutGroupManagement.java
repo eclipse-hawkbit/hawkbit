@@ -21,7 +21,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionStatus;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -40,6 +39,9 @@ public interface RolloutGroupManagement {
      * @param pageable
      *            the page request to sort and limit the result
      * @return a page of found {@link RolloutGroup}s
+     * 
+     * @throws EntityNotFoundException
+     *             of rollout with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     Page<RolloutGroup> findAllRolloutGroupsWithDetailedStatus(@NotNull Long rolloutId, @NotNull Pageable pageable);
@@ -52,14 +54,16 @@ public interface RolloutGroupManagement {
      * distribution set we do not create an action for it but the target is in
      * the result list of the rollout-group.
      * 
-     * @param pageRequest
+     * @param pageable
      *            the page request to sort and limit the result
      * @param rolloutGroupId
      *            rollout group
      * @return {@link TargetWithActionStatus} target with action status
+     * @throws EntityNotFoundException
+     *             if rollout group with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
-    Page<TargetWithActionStatus> findAllTargetsWithActionStatus(@NotNull PageRequest pageRequest,
+    Page<TargetWithActionStatus> findAllTargetsWithActionStatus(@NotNull Pageable pageable,
             @NotNull Long rolloutGroupId);
 
     /**
@@ -165,6 +169,9 @@ public interface RolloutGroupManagement {
      * @param rolloutGroupId
      *            the rollout group id for the count
      * @return the target rollout group count
+     * 
+     * @throws EntityNotFoundException
+     *             if rollout group with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     Long countTargetsOfRolloutsGroup(@NotNull Long rolloutGroupId);

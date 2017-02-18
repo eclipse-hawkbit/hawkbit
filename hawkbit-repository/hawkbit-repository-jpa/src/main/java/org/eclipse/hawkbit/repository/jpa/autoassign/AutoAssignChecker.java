@@ -97,6 +97,7 @@ public class AutoAssignChecker {
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void check() {
+        LOGGER.debug("Auto assigned check call");
 
         final PageRequest pageRequest = new PageRequest(0, PAGE_SIZE);
 

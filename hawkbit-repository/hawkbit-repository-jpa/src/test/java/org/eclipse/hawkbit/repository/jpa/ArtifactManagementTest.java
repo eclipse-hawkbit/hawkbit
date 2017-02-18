@@ -9,23 +9,29 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.test.matcher.Expect;
+import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.HashGeneratorUtils;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.Test;
@@ -35,24 +41,47 @@ import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
- * Test class for {@link ArtifactManagement} with running MongoDB instance..
- *
- *
- *
- *
+ * Test class for {@link ArtifactManagement}.
  */
 @Features("Component Tests - Repository")
 @Stories("Artifact Management")
 public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
-    /**
-     * Test method for
-     * {@link org.eclipse.hawkbit.repository.ArtifactManagement#createArtifact(java.io.InputStream)}
-     * .
-     * 
-     * @throws IOException
-     * @throws NoSuchAlgorithmException
-     */
+    @Test
+    @Description("Verifies that management queries react as specfied on calls for non existing entities.")
+    @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 1) })
+    public void nonExistingEntityQueries() throws URISyntaxException {
+        final SoftwareModule module = testdataFactory.createSoftwareModuleOs();
+
+        assertThatThrownBy(() -> artifactManagement.createArtifact(IOUtils.toInputStream("test", "UTF-8"), 1234L, "xxx",
+                null, null, false, null)).isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("SoftwareModule");
+
+        assertThatThrownBy(
+                () -> artifactManagement.createArtifact(IOUtils.toInputStream("test", "UTF-8"), 1234L, "xxx", false))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("SoftwareModule");
+
+        assertThatThrownBy(() -> artifactManagement.deleteArtifact(1234L)).isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("1234").hasMessageContaining("Artifact");
+
+        assertThat(artifactManagement.findArtifact(1234L).isPresent()).isFalse();
+        assertThatThrownBy(() -> artifactManagement.findArtifactBySoftwareModule(pageReq, 1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("SoftwareModule");
+        assertThat(artifactManagement.findArtifactByFilename("1234").isPresent()).isFalse();
+
+        assertThatThrownBy(() -> artifactManagement.findByFilenameAndSoftwareModule("xxx", 1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("SoftwareModule");
+
+        assertThat(artifactManagement.findByFilenameAndSoftwareModule("1234", module.getId()).isPresent()).isFalse();
+
+        assertThat(artifactManagement.findFirstArtifactBySHA1("1234").isPresent()).isFalse();
+        assertThat(artifactManagement.loadArtifactBinary("1234").isPresent()).isFalse();
+
+    }
+
     @Test
     @Description("Test if a local artifact can be created by API including metadata.")
     public void createArtifact() throws NoSuchAlgorithmException, IOException {
@@ -205,7 +234,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         final Artifact result = artifactManagement.createArtifact(new ByteArrayInputStream(random),
                 testdataFactory.createSoftwareModuleOs().getId(), "file1", false);
 
-        try (InputStream fileInputStream = artifactManagement.loadArtifactBinary(result.getSha1Hash())
+        try (InputStream fileInputStream = artifactManagement.loadArtifactBinary(result.getSha1Hash()).get()
                 .getFileInputStream()) {
             assertTrue("The stored binary matches the given binary",
                     IOUtils.contentEquals(new ByteArrayInputStream(random), fileInputStream));

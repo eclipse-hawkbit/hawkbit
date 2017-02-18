@@ -24,15 +24,13 @@ import com.vaadin.server.FontAwesome;
  */
 public class ProxyRollout {
 
-    private static final long serialVersionUID = 4539849939617681918L;
-
     private String distributionSetNameVersion;
 
     private String createdDate;
 
     private String modifiedDate;
 
-    private Long numberOfGroups;
+    private Integer numberOfGroups;
 
     private Boolean isActionRecieved = Boolean.FALSE;
 
@@ -151,7 +149,7 @@ public class ProxyRollout {
     /**
      * @return the numberOfGroups
      */
-    public Long getNumberOfGroups() {
+    public Integer getNumberOfGroups() {
         return numberOfGroups;
     }
 
@@ -159,7 +157,7 @@ public class ProxyRollout {
      * @param numberOfGroups
      *            the numberOfGroups to set
      */
-    public void setNumberOfGroups(final Long numberOfGroups) {
+    public void setNumberOfGroups(final Integer numberOfGroups) {
         this.numberOfGroups = numberOfGroups;
     }
 
