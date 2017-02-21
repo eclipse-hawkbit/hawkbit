@@ -24,7 +24,6 @@ import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.ProxyTarget;
@@ -61,7 +60,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
     private transient TargetManagement targetManagement;
     private transient I18N i18N;
     private Long pinnedDistId;
-    private TargetFilterQuery targetFilterQuery;
+    private Long targetFilterQueryId;
     private ManagementUIState managementUIState;
 
     /**
@@ -88,7 +87,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             noTagClicked = (Boolean) queryConfig.get(SPUIDefinitions.FILTER_BY_NO_TAG);
             distributionId = (Long) queryConfig.get(SPUIDefinitions.FILTER_BY_DISTRIBUTION);
             searchText = (String) queryConfig.get(SPUIDefinitions.FILTER_BY_TEXT);
-            targetFilterQuery = (TargetFilterQuery) queryConfig.get(SPUIDefinitions.FILTER_BY_TARGET_FILTER_QUERY);
+            targetFilterQueryId = (Long) queryConfig.get(SPUIDefinitions.FILTER_BY_TARGET_FILTER_QUERY);
             if (!Strings.isNullOrEmpty(searchText)) {
                 searchText = String.format("%%%s%%", searchText);
             }
@@ -118,8 +117,8 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             targetBeans = getTargetManagement().findTargetsAllOrderByLinkedDistributionSet(
                     new OffsetBasedPageRequest(startIndex, SPUIDefinitions.PAGE_SIZE, sort), pinnedDistId,
                     new FilterParams(distributionId, status, overdueState, searchText, noTagClicked, targetTags));
-        } else if (null != targetFilterQuery) {
-            targetBeans = getTargetManagement().findTargetsByTargetFilterQuery(targetFilterQuery.getId(),
+        } else if (null != targetFilterQueryId) {
+            targetBeans = getTargetManagement().findTargetsByTargetFilterQuery(targetFilterQueryId,
                     new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         } else if (!isAnyFilterSelected()) {
             targetBeans = getTargetManagement().findTargetsAll(
@@ -186,8 +185,8 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
     public int size() {
         final long totSize = getTargetManagement().countTargetsAll();
         long size;
-        if (null != targetFilterQuery) {
-            size = getTargetManagement().countTargetByTargetFilterQuery(targetFilterQuery.getId());
+        if (null != targetFilterQueryId) {
+            size = getTargetManagement().countTargetByTargetFilterQuery(targetFilterQueryId);
         } else if (!isAnyFilterSelected()) {
             size = totSize;
         } else {
