@@ -186,8 +186,8 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
 
     private Action assignSet(final JpaTarget target, final JpaDistributionSet ds) {
         assignDistributionSet(ds.getId(), target.getControllerId());
-        assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).get().getTargetInfo()
-                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
+        assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).get().getUpdateStatus())
+                .isEqualTo(TargetUpdateStatus.PENDING);
         assertThat(
                 targetManagement.findTargetByControllerID(target.getControllerId()).get().getAssignedDistributionSet())
                         .isEqualTo(ds);

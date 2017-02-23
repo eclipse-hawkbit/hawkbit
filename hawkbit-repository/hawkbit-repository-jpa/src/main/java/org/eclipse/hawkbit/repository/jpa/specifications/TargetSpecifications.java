@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ListJoin;
 import javax.persistence.criteria.Path;
@@ -27,8 +26,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
@@ -37,7 +34,6 @@ import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup_;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.data.jpa.domain.Specification;
@@ -104,16 +100,7 @@ public final class TargetSpecifications {
     public static Specification<JpaTarget> hasTargetUpdateStatus(final Collection<TargetUpdateStatus> updateStatus,
             final boolean fetch) {
         return (targetRoot, query, cb) -> {
-            if (!query.getResultType().isAssignableFrom(Long.class)) {
-                if (fetch) {
-                    targetRoot.fetch(JpaTarget_.targetInfo);
-                } else {
-                    targetRoot.join(JpaTarget_.targetInfo);
-                }
-                return targetRoot.get(JpaTarget_.targetInfo).get(JpaTargetInfo_.updateStatus).in(updateStatus);
-            }
-            final Join<JpaTarget, JpaTargetInfo> targetInfoJoin = targetRoot.join(JpaTarget_.targetInfo);
-            return targetInfoJoin.get(JpaTargetInfo_.updateStatus).in(updateStatus);
+            return targetRoot.get(JpaTarget_.updateStatus).in(updateStatus);
         };
     }
 
@@ -135,8 +122,7 @@ public final class TargetSpecifications {
      */
     public static Specification<JpaTarget> isOverdue(final long overdueTimestamp) {
         return (targetRoot, query, cb) -> {
-            final Join<JpaTarget, JpaTargetInfo> targetInfoJoin = targetRoot.join(JpaTarget_.targetInfo);
-            return cb.lessThanOrEqualTo(targetInfoJoin.get(JpaTargetInfo_.lastTargetQuery), overdueTimestamp);
+            return cb.lessThanOrEqualTo(targetRoot.get(JpaTarget_.lastTargetQuery), overdueTimestamp);
         };
     }
 
@@ -166,14 +152,11 @@ public final class TargetSpecifications {
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasInstalledOrAssignedDistributionSet(@NotNull final Long distributionId) {
-        return (targetRoot, query, cb) -> {
-            final Join<JpaTarget, JpaTargetInfo> targetInfoJoin = targetRoot.join(JpaTarget_.targetInfo);
-            return cb.or(
-                    cb.equal(targetInfoJoin.get(JpaTargetInfo_.installedDistributionSet).get(JpaDistributionSet_.id),
-                            distributionId),
-                    cb.equal(targetRoot.<JpaDistributionSet> get(JpaTarget_.assignedDistributionSet)
-                            .get(JpaDistributionSet_.id), distributionId));
-        };
+        return (targetRoot, query, cb) -> cb.or(
+                cb.equal(targetRoot.get(JpaTarget_.installedDistributionSet).get(JpaDistributionSet_.id),
+                        distributionId),
+                cb.equal(targetRoot.<JpaDistributionSet> get(JpaTarget_.assignedDistributionSet)
+                        .get(JpaDistributionSet_.id), distributionId));
     }
 
     /**
@@ -310,8 +293,7 @@ public final class TargetSpecifications {
      */
     public static Specification<JpaTarget> hasInstalledDistributionSet(final Long distributionSetId) {
         return (targetRoot, query, cb) -> {
-            final Join<JpaTarget, JpaTargetInfo> targetInfoJoin = targetRoot.join(JpaTarget_.targetInfo);
-            return cb.equal(targetInfoJoin.get(JpaTargetInfo_.installedDistributionSet).get(JpaDistributionSet_.id),
+            return cb.equal(targetRoot.get(JpaTarget_.installedDistributionSet).get(JpaDistributionSet_.id),
                     distributionSetId);
         };
     }

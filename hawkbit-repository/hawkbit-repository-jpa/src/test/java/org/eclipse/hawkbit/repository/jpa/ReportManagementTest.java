@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.ReportManagement;
 import org.eclipse.hawkbit.repository.ReportManagement.DateTypes;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
@@ -504,11 +503,10 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
         for (int index = 0; index < amount; index++) {
             final JpaTarget createTarget = (JpaTarget) testdataFactory.createTarget(prefix + index);
             if (lastTargetQuery != null) {
-                final JpaTargetInfo targetInfo = (JpaTargetInfo) createTarget.getTargetInfo();
-                targetInfo.setNew(false);
-                targetInfo
+                createTarget.setNew(false);
+                createTarget
                         .setLastTargetQuery(lastTargetQuery.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
-                targetInfoRepository.save(targetInfo);
+                targetRepository.save(createTarget);
             }
         }
     }
@@ -516,10 +514,8 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
     private void createTargetsWithStatus(final String prefix, final long amount, final TargetUpdateStatus status) {
         for (int index = 0; index < amount; index++) {
             final JpaTarget target = new JpaTarget(prefix + index);
-            final Target sTarget = targetRepository.save(target);
-            final JpaTargetInfo targetInfo = (JpaTargetInfo) sTarget.getTargetInfo();
-            targetInfo.setUpdateStatus(status);
-            targetInfoRepository.save(targetInfo);
+            target.setUpdateStatus(status);
+            targetRepository.save(target);
         }
     }
 

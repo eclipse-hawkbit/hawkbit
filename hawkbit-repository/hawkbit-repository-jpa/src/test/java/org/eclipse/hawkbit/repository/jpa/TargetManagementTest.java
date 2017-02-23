@@ -286,8 +286,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         controllerManagement.updateControllerAttributes(controllerId, testData);
 
         final Target target = targetManagement.findTargetByControllerIDWithDetails(controllerId).get();
-        assertThat(target.getTargetInfo().getControllerAttributes()).as("Controller Attributes are wrong")
-                .isEqualTo(testData);
+        assertThat(target.getControllerAttributes()).as("Controller Attributes are wrong").isEqualTo(testData);
         return target;
     }
 
@@ -333,11 +332,9 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
                 .isEqualTo(1);
         assertThat(targetManagement.countTargetByInstalledDistributionSet(set2.getId())).as("Target count is wrong")
                 .isEqualTo(0);
-        assertThat(target.getTargetInfo().getLastTargetQuery()).as("Target query is not work")
-                .isGreaterThanOrEqualTo(current);
+        assertThat(target.getLastTargetQuery()).as("Target query is not work").isGreaterThanOrEqualTo(current);
         assertThat(target.getAssignedDistributionSet()).as("Assigned ds size is wrong").isEqualTo(set2);
-        assertThat(target.getTargetInfo().getInstalledDistributionSet().getId()).as("Installed ds is wrong")
-                .isEqualTo(set.getId());
+        assertThat(target.getInstalledDistributionSet().getId()).as("Installed ds is wrong").isEqualTo(set.getId());
     }
 
     @Test
@@ -735,8 +732,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
             final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownTargetControllerId)
                     .get();
             assertThat(findTargetByControllerID).isNotNull();
-            assertThat(findTargetByControllerID.getTargetInfo()).isNotNull();
-            assertThat(findTargetByControllerID.getTargetInfo().getPollStatus()).isNotNull();
+            assertThat(findTargetByControllerID.getPollStatus()).isNotNull();
             return null;
         });
 

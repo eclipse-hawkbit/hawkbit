@@ -316,7 +316,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         testdataFactory.createTarget();
         assignDistributionSet(dsId, TestdataFactory.DEFAULT_CONTROLLER_ID);
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
+                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
 
         return deploymentManagement.findActiveActionsByTarget(TestdataFactory.DEFAULT_CONTROLLER_ID).get(0).getId();
     }
@@ -371,7 +371,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             final TargetUpdateStatus expectedTargetUpdateStatus, final Action.Status expectedActionActionStatus,
             final Action.Status expectedActionStatus, final boolean actionActive) {
         final TargetUpdateStatus targetStatus = targetManagement.findTargetByControllerID(controllerId).get()
-                .getTargetInfo().getUpdateStatus();
+                .getUpdateStatus();
         assertThat(targetStatus).isEqualTo(expectedTargetUpdateStatus);
         final Action action = deploymentManagement.findAction(actionId).get();
         assertThat(action.getStatus()).isEqualTo(expectedActionActionStatus);
@@ -540,7 +540,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         // nothing changed as "feedback after close" is disabled
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
+                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         assertThat(actionStatusRepository.count()).isEqualTo(3);
         assertThat(deploymentManagement.findActionStatusByAction(pageReq, action.getId()).getNumberOfElements())
@@ -565,7 +565,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         // nothing changed as "feedback after close" is disabled
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
+                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         // however, additional action status has been stored
         assertThat(actionStatusRepository.findAll(pageReq).getNumberOfElements()).isEqualTo(4);
@@ -592,8 +592,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         controllerManagement.updateControllerAttributes(controllerId, testData);
 
         final Target target = targetManagement.findTargetByControllerIDWithDetails(controllerId).get();
-        assertThat(target.getTargetInfo().getControllerAttributes()).as("Controller Attributes are wrong")
-                .isEqualTo(testData);
+        assertThat(target.getControllerAttributes()).as("Controller Attributes are wrong").isEqualTo(testData);
     }
 
     @Step
@@ -604,8 +603,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         final Target target = targetManagement.findTargetByControllerIDWithDetails(controllerId).get();
         testData.put("test1", "testdata1");
-        assertThat(target.getTargetInfo().getControllerAttributes()).as("Controller Attributes are wrong")
-                .isEqualTo(testData);
+        assertThat(target.getControllerAttributes()).as("Controller Attributes are wrong").isEqualTo(testData);
     }
 
     @Step
@@ -617,7 +615,6 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         final Target target = targetManagement.findTargetByControllerIDWithDetails(controllerId).get();
         testData.put("test2", "testdata20");
-        assertThat(target.getTargetInfo().getControllerAttributes()).as("Controller Attributes are wrong")
-                .isEqualTo(testData);
+        assertThat(target.getControllerAttributes()).as("Controller Attributes are wrong").isEqualTo(testData);
     }
 }

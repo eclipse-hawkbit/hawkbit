@@ -51,7 +51,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
@@ -125,9 +124,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Autowired
     private TargetManagement targetManagement;
-
-    @Autowired
-    private TargetInfoRepository targetInfoRepository;
 
     @Autowired
     private AuditorAware<String> auditorProvider;
@@ -260,7 +256,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         targetIds.forEach(tIds -> targetRepository.setAssignedDistributionSet(set, System.currentTimeMillis(),
                 currentUser, tIds));
-        targetIds.forEach(tIds -> targetInfoRepository.setTargetUpdateStatus(TargetUpdateStatus.PENDING, tIds));
+        targetIds.forEach(tIds -> targetRepository.setTargetUpdateStatus(TargetUpdateStatus.PENDING, tIds));
         final Map<String, JpaAction> targetIdsToActions = targets.stream().map(
                 t -> actionRepository.save(createTargetAction(targetsWithActionMap, t, set, rollout, rolloutGroup)))
                 .collect(Collectors.toMap(a -> a.getTarget().getControllerId(), Function.identity()));
@@ -312,7 +308,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private void assignDistributionSetEvent(final Action action) {
-        ((JpaTargetInfo) action.getTarget().getTargetInfo()).setUpdateStatus(TargetUpdateStatus.PENDING);
+        ((JpaTarget) action.getTarget()).setUpdateStatus(TargetUpdateStatus.PENDING);
 
         afterCommit.afterCommit(() -> eventPublisher
                 .publishEvent(new TargetUpdatedEvent(action.getTarget(), applicationContext.getId())));
@@ -398,13 +394,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      *            the action id of the assignment
      */
     private void cancelAssignDistributionSetEvent(final Target target, final Long actionId) {
-        loadLazyTargetInfo(target);
         afterCommit.afterCommit(() -> eventPublisher
                 .publishEvent(new CancelTargetAssignmentEvent(target, actionId, applicationContext.getId())));
-    }
-
-    private static void loadLazyTargetInfo(final Target target) {
-        target.getTargetInfo();
     }
 
     @Override
@@ -430,8 +421,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELED, System.currentTimeMillis(),
                 "A force quit has been performed."));
 
-        DeploymentHelper.successCancellation(action, actionRepository, targetRepository, targetInfoRepository,
-                entityManager);
+        DeploymentHelper.successCancellation(action, actionRepository, targetRepository, entityManager);
 
         return actionRepository.save(action);
     }
@@ -507,10 +497,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         final JpaTarget target = (JpaTarget) savedAction.getTarget();
 
         target.setAssignedDistributionSet(savedAction.getDistributionSet());
-        final JpaTargetInfo targetInfo = (JpaTargetInfo) target.getTargetInfo();
-        targetInfo.setUpdateStatus(TargetUpdateStatus.PENDING);
+        target.setUpdateStatus(TargetUpdateStatus.PENDING);
         targetRepository.save(target);
-        targetInfoRepository.save(targetInfo);
 
         // in case we canceled an action before for this target, then don't fire
         // assignment event

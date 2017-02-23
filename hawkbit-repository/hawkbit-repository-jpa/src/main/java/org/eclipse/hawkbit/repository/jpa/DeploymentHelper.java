@@ -16,7 +16,6 @@ import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -49,16 +48,13 @@ public final class DeploymentHelper {
      * @return updated target
      */
     static JpaTarget updateTargetInfo(@NotNull final JpaTarget target, @NotNull final TargetUpdateStatus status,
-            final boolean setInstalledDate, final TargetInfoRepository targetInfoRepository,
-            final EntityManager entityManager) {
-        final JpaTargetInfo ts = (JpaTargetInfo) target.getTargetInfo();
-        ts.setUpdateStatus(status);
+            final boolean setInstalledDate, final EntityManager entityManager) {
+        target.setUpdateStatus(status);
 
         if (setInstalledDate) {
-            ts.setInstallationDate(System.currentTimeMillis());
+            target.setInstallationDate(System.currentTimeMillis());
         }
-        targetInfoRepository.save(ts);
-        return entityManager.merge(target);
+        return target;
     }
 
     /**
@@ -78,8 +74,7 @@ public final class DeploymentHelper {
      *            for the operation
      */
     static void successCancellation(final JpaAction action, final ActionRepository actionRepository,
-            final TargetRepository targetRepository, final TargetInfoRepository targetInfoRepository,
-            final EntityManager entityManager) {
+            final TargetRepository targetRepository, final EntityManager entityManager) {
 
         // set action inactive
         action.setActive(false);
@@ -90,8 +85,8 @@ public final class DeploymentHelper {
                 .filter(a -> !a.getId().equals(action.getId())).collect(Collectors.toList());
 
         if (nextActiveActions.isEmpty()) {
-            target.setAssignedDistributionSet(target.getTargetInfo().getInstalledDistributionSet());
-            updateTargetInfo(target, TargetUpdateStatus.IN_SYNC, false, targetInfoRepository, entityManager);
+            target.setAssignedDistributionSet(target.getInstalledDistributionSet());
+            updateTargetInfo(target, TargetUpdateStatus.IN_SYNC, false, entityManager);
         } else {
             target.setAssignedDistributionSet(nextActiveActions.get(0).getDistributionSet());
         }

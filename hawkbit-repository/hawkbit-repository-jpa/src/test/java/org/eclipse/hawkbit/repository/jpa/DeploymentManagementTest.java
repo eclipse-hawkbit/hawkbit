@@ -213,7 +213,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet dsInstalled = action.getDistributionSet();
 
         // check initial status
-        assertThat(targetManagement.findTargetByControllerID("4712").get().getTargetInfo().getUpdateStatus())
+        assertThat(targetManagement.findTargetByControllerID("4712").get().getUpdateStatus())
                 .as("target has update status").isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         // assign the two sets in a row
@@ -232,8 +232,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionStatusRepository.findAll()).as("wrong size of actions status").hasSize(7);
         assertThat(targetManagement.findTargetByControllerID("4712").get().getAssignedDistributionSet()).as("wrong ds")
                 .isEqualTo(dsFirst);
-        assertThat(targetManagement.findTargetByControllerID("4712").get().getTargetInfo().getUpdateStatus())
-                .as("wrong update status").isEqualTo(TargetUpdateStatus.PENDING);
+        assertThat(targetManagement.findTargetByControllerID("4712").get().getUpdateStatus()).as("wrong update status")
+                .isEqualTo(TargetUpdateStatus.PENDING);
 
         // we cancel first -> back to installed
         deploymentManagement.cancelAction(firstAction.getId());
@@ -244,8 +244,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(9);
         assertThat(targetManagement.findTargetByControllerID("4712").get().getAssignedDistributionSet())
                 .as("wrong assigned ds").isEqualTo(dsInstalled);
-        assertThat(targetManagement.findTargetByControllerID("4712").get().getTargetInfo().getUpdateStatus())
-                .as("wrong update status").isEqualTo(TargetUpdateStatus.IN_SYNC);
+        assertThat(targetManagement.findTargetByControllerID("4712").get().getUpdateStatus()).as("wrong update status")
+                .isEqualTo(TargetUpdateStatus.IN_SYNC);
     }
 
     @Test
@@ -260,8 +260,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet dsInstalled = action.getDistributionSet();
 
         // check initial status
-        assertThat(targetManagement.findTargetByControllerID("4712").get().getTargetInfo().getUpdateStatus())
-                .as("wrong update status").isEqualTo(TargetUpdateStatus.IN_SYNC);
+        assertThat(targetManagement.findTargetByControllerID("4712").get().getUpdateStatus()).as("wrong update status")
+                .isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         // assign the two sets in a row
         JpaAction firstAction = assignSet(target, dsFirst);
@@ -279,7 +279,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(7);
         assertThat(targetManagement.findTargetByControllerID("4712").get().getAssignedDistributionSet())
                 .as("wrong assigned ds").isEqualTo(dsSecond);
-        assertThat(targetManagement.findTargetByControllerID("4712").get().getTargetInfo().getUpdateStatus())
+        assertThat(targetManagement.findTargetByControllerID("4712").get().getUpdateStatus())
                 .as("wrong target update status").isEqualTo(TargetUpdateStatus.PENDING);
 
         // we cancel second -> remain assigned until finished cancellation
@@ -294,7 +294,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // cancelled success -> back to dsInstalled
         assertThat(targetManagement.findTargetByControllerID("4712").get().getAssignedDistributionSet())
                 .as("wrong installed ds").isEqualTo(dsInstalled);
-        assertThat(targetManagement.findTargetByControllerID("4712").get().getTargetInfo().getUpdateStatus())
+        assertThat(targetManagement.findTargetByControllerID("4712").get().getUpdateStatus())
                 .as("wrong target info update status").isEqualTo(TargetUpdateStatus.IN_SYNC);
     }
 
@@ -308,7 +308,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("newDS", true);
 
         // verify initial status
-        assertThat(targetManagement.findTargetByControllerID("4712").get().getTargetInfo().getUpdateStatus())
+        assertThat(targetManagement.findTargetByControllerID("4712").get().getUpdateStatus())
                 .as("wrong target info update status").isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         Action assigningAction = assignSet(target, ds);
@@ -331,7 +331,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(assigningAction.getStatus()).as("wrong size of status").isEqualTo(Status.CANCELED);
         assertThat(targetManagement.findTargetByControllerID("4712").get().getAssignedDistributionSet())
                 .as("wrong assigned ds").isEqualTo(dsInstalled);
-        assertThat(targetManagement.findTargetByControllerID("4712").get().getTargetInfo().getUpdateStatus())
+        assertThat(targetManagement.findTargetByControllerID("4712").get().getUpdateStatus())
                 .as("wrong target update status").isEqualTo(TargetUpdateStatus.IN_SYNC);
     }
 
@@ -344,8 +344,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("newDS", true);
 
         // verify initial status
-        assertThat(targetManagement.findTargetByControllerID("4712").get().getTargetInfo().getUpdateStatus())
-                .as("wrong update status").isEqualTo(TargetUpdateStatus.IN_SYNC);
+        assertThat(targetManagement.findTargetByControllerID("4712").get().getUpdateStatus()).as("wrong update status")
+                .isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         final Action assigningAction = assignSet(target, ds);
 
@@ -363,8 +363,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     private JpaAction assignSet(final Target target, final DistributionSet ds) {
         assignDistributionSet(ds.getId(), target.getControllerId());
-        assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).get().getTargetInfo()
-                .getUpdateStatus()).as("wrong update status").isEqualTo(TargetUpdateStatus.PENDING);
+        assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).get().getUpdateStatus())
+                .as("wrong update status").isEqualTo(TargetUpdateStatus.PENDING);
         assertThat(
                 targetManagement.findTargetByControllerID(target.getControllerId()).get().getAssignedDistributionSet())
                         .as("wrong assigned ds").isEqualTo(ds);
@@ -425,8 +425,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             final List<Action> activeActionsByTarget = deploymentManagement
                     .findActiveActionsByTarget(t.getControllerId());
             assertThat(activeActionsByTarget).as("action should not be empty").isNotEmpty();
-            assertThat(t.getTargetInfo().getUpdateStatus()).as("wrong target update status")
-                    .isEqualTo(TargetUpdateStatus.PENDING);
+            assertThat(t.getUpdateStatus()).as("wrong target update status").isEqualTo(TargetUpdateStatus.PENDING);
             for (final Action ua : activeActionsByTarget) {
                 assertThat(ua.getDistributionSet()).as("action has wrong ds").isEqualTo(ds);
             }
@@ -565,20 +564,23 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // verifying the correctness of the assignments
         for (final Target t : deployResWithDsA.getDeployedTargets()) {
             assertThat(t.getAssignedDistributionSet().getId()).as("assignment is not correct").isEqualTo(dsA.getId());
-            assertThat(targetManagement.findTargetByControllerID(t.getControllerId()).get().getTargetInfo()
-                    .getInstalledDistributionSet()).as("installed ds should be null").isNull();
+            assertThat(
+                    targetManagement.findTargetByControllerID(t.getControllerId()).get().getInstalledDistributionSet())
+                            .as("installed ds should be null").isNull();
         }
         for (final Target t : deployResWithDsB.getDeployedTargets()) {
             assertThat(t.getAssignedDistributionSet().getId()).as("assigned ds is wrong").isEqualTo(dsB.getId());
-            assertThat(targetManagement.findTargetByControllerID(t.getControllerId()).get().getTargetInfo()
-                    .getInstalledDistributionSet()).as("installed ds should be null").isNull();
+            assertThat(
+                    targetManagement.findTargetByControllerID(t.getControllerId()).get().getInstalledDistributionSet())
+                            .as("installed ds should be null").isNull();
         }
         for (final Target t : deployResWithDsC.getDeployedTargets()) {
             assertThat(t.getAssignedDistributionSet().getId()).isEqualTo(dsC.getId());
-            assertThat(targetManagement.findTargetByControllerID(t.getControllerId()).get().getTargetInfo()
-                    .getInstalledDistributionSet()).as("installed ds should not be null").isNull();
-            assertThat(targetManagement.findTargetByControllerID(t.getControllerId()).get().getTargetInfo()
-                    .getUpdateStatus()).as("wrong target info update status").isEqualTo(TargetUpdateStatus.PENDING);
+            assertThat(
+                    targetManagement.findTargetByControllerID(t.getControllerId()).get().getInstalledDistributionSet())
+                            .as("installed ds should not be null").isNull();
+            assertThat(targetManagement.findTargetByControllerID(t.getControllerId()).get().getUpdateStatus())
+                    .as("wrong target info update status").isEqualTo(TargetUpdateStatus.PENDING);
         }
 
         final List<Target> updatedTsDsA = testdataFactory
@@ -591,10 +593,11 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         for (final Target t_ : updatedTsDsA) {
             final Target t = targetManagement.findTargetByControllerID(t_.getControllerId()).get();
             assertThat(t.getAssignedDistributionSet()).as("assigned ds is wrong").isEqualTo(dsA);
-            assertThat(targetManagement.findTargetByControllerID(t.getControllerId()).get().getTargetInfo()
-                    .getInstalledDistributionSet()).as("installed ds is wrong").isEqualTo(dsA);
-            assertThat(targetManagement.findTargetByControllerID(t.getControllerId()).get().getTargetInfo()
-                    .getUpdateStatus()).as("wrong target info update status").isEqualTo(TargetUpdateStatus.IN_SYNC);
+            assertThat(
+                    targetManagement.findTargetByControllerID(t.getControllerId()).get().getInstalledDistributionSet())
+                            .as("installed ds is wrong").isEqualTo(dsA);
+            assertThat(targetManagement.findTargetByControllerID(t.getControllerId()).get().getUpdateStatus())
+                    .as("wrong target info update status").isEqualTo(TargetUpdateStatus.IN_SYNC);
             assertThat(deploymentManagement.findActiveActionsByTarget(t.getControllerId()))
                     .as("no actions should be active").hasSize(0);
         }
@@ -617,10 +620,11 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         for (final Target t_ : deployed2DS) {
             final Target t = targetManagement.findTargetByControllerID(t_.getControllerId()).get();
             assertThat(t.getAssignedDistributionSet()).as("assigned ds is wrong").isEqualTo(dsA);
-            assertThat(targetManagement.findTargetByControllerID(t.getControllerId()).get().getTargetInfo()
-                    .getInstalledDistributionSet()).as("installed ds should be null").isNull();
-            assertThat(targetManagement.findTargetByControllerID(t.getControllerId()).get().getTargetInfo()
-                    .getUpdateStatus()).as("wrong target info update status").isEqualTo(TargetUpdateStatus.PENDING);
+            assertThat(
+                    targetManagement.findTargetByControllerID(t.getControllerId()).get().getInstalledDistributionSet())
+                            .as("installed ds should be null").isNull();
+            assertThat(targetManagement.findTargetByControllerID(t.getControllerId()).get().getUpdateStatus())
+                    .as("wrong target info update status").isEqualTo(TargetUpdateStatus.PENDING);
 
         }
     }
@@ -743,8 +747,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .as("Active target actions are wrong").isEqualTo(1);
         assertThat(deploymentManagement.countActionsByTarget(targ.getControllerId())).as("Target actions are wrong")
                 .isEqualTo(1);
-        assertThat(targ.getTargetInfo().getUpdateStatus()).as("UpdateStatus of target is wrong")
-                .isEqualTo(TargetUpdateStatus.PENDING);
+        assertThat(targ.getUpdateStatus()).as("UpdateStatus of target is wrong").isEqualTo(TargetUpdateStatus.PENDING);
         assertThat(targ.getAssignedDistributionSet()).as("Assigned distribution set of target is wrong").isEqualTo(dsA);
         assertThat(deploymentManagement.findActiveActionsByTarget(targ.getControllerId()).get(0).getDistributionSet())
                 .as("Distribution set of actionn is wrong").isEqualTo(dsA);
@@ -762,10 +765,9 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertEquals("active actions are wrong", 1,
                 deploymentManagement.findInActiveActionsByTarget(targ.getControllerId()).size());
 
-        assertEquals("tagret update status is not correct", TargetUpdateStatus.IN_SYNC,
-                targ.getTargetInfo().getUpdateStatus());
+        assertEquals("tagret update status is not correct", TargetUpdateStatus.IN_SYNC, targ.getUpdateStatus());
         assertEquals("wrong assigned ds", dsA, targ.getAssignedDistributionSet());
-        assertEquals("wrong installed ds", dsA, targ.getTargetInfo().getInstalledDistributionSet());
+        assertEquals("wrong installed ds", dsA, targ.getInstalledDistributionSet());
 
         targs = assignDistributionSet(dsB.getId(), "target-id-A").getAssignedEntity();
 
@@ -773,11 +775,11 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         assertEquals("active actions are wrong", 1,
                 deploymentManagement.findActiveActionsByTarget(targ.getControllerId()).size());
-        assertEquals("target status is wrong", TargetUpdateStatus.PENDING, targetManagement
-                .findTargetByControllerID(targ.getControllerId()).get().getTargetInfo().getUpdateStatus());
+        assertEquals("target status is wrong", TargetUpdateStatus.PENDING,
+                targetManagement.findTargetByControllerID(targ.getControllerId()).get().getUpdateStatus());
         assertEquals("wrong assigned ds", dsB, targ.getAssignedDistributionSet());
         assertEquals("Installed ds is wrong", dsA.getId(),
-                targetManagement.findTargetByControllerIDWithDetails(targ.getControllerId()).get().getTargetInfo()
+                targetManagement.findTargetByControllerIDWithDetails(targ.getControllerId()).get()
                         .getInstalledDistributionSet().getId());
         assertEquals("Active ds is wrong", dsB,
                 deploymentManagement.findActiveActionsByTarget(targ.getControllerId()).get(0).getDistributionSet());

@@ -20,8 +20,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
@@ -41,8 +39,6 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetUpdate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
@@ -100,9 +96,6 @@ public class JpaTargetManagement implements TargetManagement {
     private TargetTagRepository targetTagRepository;
 
     @Autowired
-    private TargetInfoRepository targetInfoRepository;
-
-    @Autowired
     private NoCountPagingRepository criteriaNoCountDao;
 
     @Autowired
@@ -130,11 +123,10 @@ public class JpaTargetManagement implements TargetManagement {
             return result;
         }
 
-        result.get().getTargetInfo().getControllerAttributes().size();
-        if (result.get().getTargetInfo() != null
-                && result.get().getTargetInfo().getInstalledDistributionSet() != null) {
-            result.get().getTargetInfo().getInstalledDistributionSet().getName();
-            result.get().getTargetInfo().getInstalledDistributionSet().getModules().size();
+        result.get().getControllerAttributes().size();
+        if (result.get().getInstalledDistributionSet() != null) {
+            result.get().getInstalledDistributionSet().getName();
+            result.get().getInstalledDistributionSet().getModules().size();
         }
         if (result.get().getAssignedDistributionSet() != null) {
             result.get().getAssignedDistributionSet().getName();
@@ -157,16 +149,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Slice<Target> findTargetsAll(final Pageable pageable) {
-        // workarround - no join fetch allowed that is why we need specification
-        // instead of query for
-        // count() of Pageable
-        final Specification<JpaTarget> spec = (root, query, cb) -> {
-            if (!query.getResultType().isAssignableFrom(Long.class)) {
-                root.fetch(JpaTarget_.targetInfo);
-            }
-            return cb.conjunction();
-        };
-        return convertPage(criteriaNoCountDao.findAll(spec, pageable, JpaTarget.class), pageable);
+        return convertPage(criteriaNoCountDao.findAll(pageable, JpaTarget.class), pageable);
     }
 
     @Override
@@ -209,7 +192,7 @@ public class JpaTargetManagement implements TargetManagement {
 
         update.getName().ifPresent(target::setName);
         update.getDescription().ifPresent(target::setDescription);
-        update.getAddress().ifPresent(address -> ((JpaTargetInfo) target.getTargetInfo()).setAddress(address));
+        update.getAddress().ifPresent(target::setAddress);
         update.getSecurityToken().ifPresent(target::setSecurityToken);
 
         return targetRepository.save(target);
@@ -470,15 +453,11 @@ public class JpaTargetManagement implements TargetManagement {
         final CriteriaQuery<JpaTarget> query = cb.createQuery(JpaTarget.class);
         final Root<JpaTarget> targetRoot = query.from(JpaTarget.class);
 
-        // necessary joins for the select
-        final Join<JpaTarget, JpaTargetInfo> targetInfo = (Join<JpaTarget, JpaTargetInfo>) targetRoot
-                .fetch(JpaTarget_.targetInfo, JoinType.LEFT);
-
         // select case expression to retrieve the case value as a column to be
         // able to order based on
         // this column, installed first,...
         final Expression<Object> selectCase = cb.selectCase()
-                .when(cb.equal(targetInfo.get(JpaTargetInfo_.installedDistributionSet).get(JpaDistributionSet_.id),
+                .when(cb.equal(targetRoot.get(JpaTarget_.installedDistributionSet).get(JpaDistributionSet_.id),
                         orderByDistributionId), 1)
                 .when(cb.equal(targetRoot.get(JpaTarget_.assignedDistributionSet).get(JpaDistributionSet_.id),
                         orderByDistributionId), 2)
@@ -612,13 +591,7 @@ public class JpaTargetManagement implements TargetManagement {
         }
 
         target.setNew(true);
-        final JpaTarget savedTarget = targetRepository.save(target);
-        final JpaTargetInfo targetInfo = (JpaTargetInfo) savedTarget.getTargetInfo();
-
-        targetInfo.setNew(true);
-        final Target targetToReturn = targetInfoRepository.save(targetInfo).getTarget();
-        targetInfo.setNew(false);
-        return targetToReturn;
+        return targetRepository.save(target);
     }
 
     @Override

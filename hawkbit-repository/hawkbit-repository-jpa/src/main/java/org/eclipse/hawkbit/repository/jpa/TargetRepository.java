@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +35,19 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>, JpaSpecificationExecutor<JpaTarget> {
+    /**
+     * Sets new TargetUpdateStatus of given target if is not already on that
+     * value.
+     *
+     * @param status
+     *            to set
+     * @param targets
+     *            to set it for
+     */
+    @Modifying
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Query("update JpaTarget ti set ti.updateStatus = :status where ti.targetId in :targets and ti.updateStatus != :status")
+    void setTargetUpdateStatus(@Param("status") TargetUpdateStatus status, @Param("targets") List<Long> targets);
 
     /**
      * Loads {@link Target} including details {@link EntityGraph} by given ID.
@@ -50,7 +62,8 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     /**
      * Checks if target with given id exists.
      * 
-     * @param controllerId to check 
+     * @param controllerId
+     *            to check
      * @return <code>true</code> if target with given id exists
      */
     @Query("SELECT CASE WHEN COUNT(t)>0 THEN 'true' ELSE 'false' END FROM JpaTarget t WHERE t.controllerId=:controllerId")
