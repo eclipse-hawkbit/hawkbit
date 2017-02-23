@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.amqp;
 
 import java.util.concurrent.TimeUnit;
 
+import javax.validation.ConstraintViolationException;
+
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
@@ -59,11 +61,18 @@ public class DelayedRequeueExceptionStrategy extends ConditionalRejectingErrorHa
     }
 
     private boolean invalidMessage(final Throwable cause) {
-        return doesNotExist(cause) || cause instanceof TooManyStatusEntriesException
-                || cause instanceof InvalidTargetAddressException || cause instanceof ToManyAttributeEntriesException;
+        return doesNotExist(cause) || quotaHit(cause) || invalidContent(cause);
+    }
+
+    private boolean quotaHit(final Throwable cause) {
+        return cause instanceof TooManyStatusEntriesException || cause instanceof ToManyAttributeEntriesException;
     }
 
     private boolean doesNotExist(final Throwable cause) {
         return cause instanceof TenantNotExistException || cause instanceof EntityNotFoundException;
+    }
+
+    private boolean invalidContent(final Throwable cause) {
+        return cause instanceof ConstraintViolationException || cause instanceof InvalidTargetAddressException;
     }
 }
