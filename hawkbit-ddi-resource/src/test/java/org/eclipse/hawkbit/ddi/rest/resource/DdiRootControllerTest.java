@@ -106,7 +106,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
         // make a poll, audit information should not be changed, run as
         // controller principal!
-        securityRule.runAs(WithSpringAuthorityRule.withUser("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+        securityRule.runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
             mvc.perform(get("/{tenant}/controller/v1/" + knownTargetControllerId, tenantAware.getCurrentTenant()))
                     .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
             return null;
@@ -118,7 +118,6 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         assertThat(targetVerify.getCreatedAt()).isEqualTo(findTargetByControllerID.getCreatedAt());
         assertThat(targetVerify.getLastModifiedBy()).isEqualTo(findTargetByControllerID.getLastModifiedBy());
         assertThat(targetVerify.getLastModifiedAt()).isEqualTo(findTargetByControllerID.getLastModifiedAt());
-
     }
 
     @Test
@@ -279,12 +278,23 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     public void rootRsPlugAndPlayIpAddress() throws Exception {
         // test
         final String knownControllerId1 = "0815";
-        mvc.perform(get("/{tenant}/controller/v1/{controllerId}", tenantAware.getCurrentTenant(), knownControllerId1))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+        final long create = System.currentTimeMillis();
+
+        // make a poll, audit information should be set on plug and play
+        securityRule.runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+            mvc.perform(
+                    get("/{tenant}/controller/v1/{controllerId}", tenantAware.getCurrentTenant(), knownControllerId1))
+                    .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+            return null;
+        });
 
         // verify
         final Target target = targetManagement.findTargetByControllerID(knownControllerId1).get();
         assertThat(target.getTargetInfo().getAddress()).isEqualTo(IpUtil.createHttpUri("127.0.0.1"));
+        assertThat(target.getCreatedBy()).isEqualTo("CONTROLLER_PLUG_AND_PLAY");
+        assertThat(target.getCreatedAt()).isGreaterThanOrEqualTo(create);
+        assertThat(target.getLastModifiedBy()).isNull();
+        assertThat(target.getLastModifiedAt()).isNull();
 
     }
 
