@@ -111,7 +111,6 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
 
     @Override
     public ResponseEntity<Void> deleteFilter(@PathVariable("filterId") final Long filterId) {
-        findFilterWithExceptionIfNotFound(filterId);
         filterManagement.deleteTargetFilterQuery(filterId);
         LOG.debug("{} target filter query deleted, return status {}", filterId, HttpStatus.OK);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -145,11 +144,8 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     }
 
     private TargetFilterQuery findFilterWithExceptionIfNotFound(final Long filterId) {
-        final TargetFilterQuery filter = filterManagement.findTargetFilterQueryById(filterId);
-        if (filter == null) {
-            throw new EntityNotFoundException("TargetFilterQuery with Id {" + filterId + "} does not exist");
-        }
-        return filter;
+        return filterManagement.findTargetFilterQueryById(filterId)
+                .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, filterId));
     }
 
 }

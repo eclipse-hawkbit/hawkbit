@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ddi.rest.resource;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -150,9 +150,9 @@ public class DosFilterTest extends AbstractDDiApiIntegrationTest {
         final List<Target> toAssign = Lists.newArrayList(target);
 
         final Iterable<Target> saved = assignDistributionSet(ds, toAssign).getAssignedEntity();
-        assertThat(deploymentManagement.findActiveActionsByTarget(target)).hasSize(1);
+        assertThat(deploymentManagement.findActiveActionsByTarget(target.getControllerId())).hasSize(1);
 
-        final Action uaction = deploymentManagement.findActiveActionsByTarget(target).get(0);
+        final Action uaction = deploymentManagement.findActiveActionsByTarget(target.getControllerId()).get(0);
 
         return uaction.getId();
     }

@@ -122,7 +122,7 @@ public class FilterManagementUIState implements Serializable {
      * @return the tfQuery
      */
     public Optional<TargetFilterQuery> getTfQuery() {
-        return targetFilterQuery == null ? Optional.empty() : Optional.of(targetFilterQuery);
+        return Optional.ofNullable(targetFilterQuery);
     }
 
     /**
@@ -142,7 +142,7 @@ public class FilterManagementUIState implements Serializable {
     }
 
     public Optional<String> getCustomFilterSearchText() {
-        return targetFilterSearchText == null ? Optional.empty() : Optional.of(targetFilterSearchText);
+        return Optional.ofNullable(targetFilterSearchText);
     }
 
     public void setCustomFilterSearchText(final String updateCustomFilterSearchText) {

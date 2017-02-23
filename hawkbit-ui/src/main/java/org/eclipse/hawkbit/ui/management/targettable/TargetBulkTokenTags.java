@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.ui.common.tagdetails.AbstractTargetTagToken;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.springframework.data.domain.PageRequest;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
@@ -25,6 +26,8 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
  */
 public class TargetBulkTokenTags extends AbstractTargetTagToken {
     private static final long serialVersionUID = 4159616629565523717L;
+
+    private static final int MAX_TAGS = 500;
 
     TargetBulkTokenTags(final SpPermissionChecker checker, final I18N i18n, final UINotification uinotification,
             final UIEventBus eventBus, final ManagementUIState managementUIState, final TagManagement tagManagement) {
@@ -65,7 +68,7 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken {
 
     protected void addAlreadySelectedTags() {
         for (final String tagName : managementUIState.getTargetTableFilters().getBulkUpload().getAssignedTagNames()) {
-            addNewToken(tagManagement.findTargetTag(tagName).getId());
+            tagManagement.findTargetTag(tagName).map(TargetTag::getId).ifPresent(this::addNewToken);
         }
     }
 
@@ -73,7 +76,7 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken {
     protected void populateContainer() {
         container.removeAllItems();
         tagDetails.clear();
-        for (final TargetTag tag : tagManagement.findAllTargetTags()) {
+        for (final TargetTag tag : tagManagement.findAllTargetTags(new PageRequest(0, MAX_TAGS))) {
             setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour());
         }
 

@@ -13,10 +13,6 @@ import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
  * Thrown if too many status entries have been inserted.
- *
- *
- *
- *
  */
 public final class ToManyAttributeEntriesException extends AbstractServerRtException {
     /**

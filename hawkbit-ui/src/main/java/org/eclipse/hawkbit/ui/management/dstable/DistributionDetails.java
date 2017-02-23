@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.management.dstable;
 
+import java.util.Optional;
+
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
@@ -51,6 +53,8 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
     private final DistributionSetMetadatadetailslayout dsMetadataTable;
 
+    private final UINotification notificationMessage;
+
     DistributionDetails(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
             final ManagementUIState managementUIState, final DistributionSetManagement distributionSetManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout, final EntityFactory entityFactory,
@@ -64,12 +68,13 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
         this.dsMetadataPopupLayout = new DsMetadataPopupLayout(i18n, notificationMessage, eventBus,
                 distributionSetManagement, entityFactory, permissionChecker);
         this.distributionAddUpdateWindowLayout = distributionAddUpdateWindowLayout;
+        this.notificationMessage = notificationMessage;
 
         softwareModuleTable = new SoftwareModuleDetailsTable(i18n, false, permissionChecker, null, null, null,
                 notificationMessage);
 
         dsMetadataTable = new DistributionSetMetadatadetailslayout(i18n, permissionChecker, distributionSetManagement,
-                dsMetadataPopupLayout, entityFactory);
+                dsMetadataPopupLayout, entityFactory, notificationMessage);
         addTabs(detailsTab);
         restoreState();
     }
@@ -97,7 +102,7 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
     @Override
     protected void onEdit(final ClickEvent event) {
         final Window newDistWindow = distributionAddUpdateWindowLayout.getWindow(getSelectedBaseEntityId());
-        newDistWindow.setCaption(getI18n().get("caption.update.dist"));
+        newDistWindow.setCaption(getI18n().get(UIComponentIdProvider.DIST_UPDATE_CAPTION));
         UI.getCurrent().addWindow(newDistWindow);
         newDistWindow.setVisible(Boolean.TRUE);
     }
@@ -192,8 +197,13 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
     @Override
     protected void showMetadata(final ClickEvent event) {
-        final DistributionSet ds = distributionSetManagement.findDistributionSetById(getSelectedBaseEntityId());
-        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null));
+        final Optional<DistributionSet> ds = distributionSetManagement
+                .findDistributionSetById(getSelectedBaseEntityId());
+        if (!ds.isPresent()) {
+            notificationMessage.displayWarning(getI18n().get("distributionset.not.exists"));
+            return;
+        }
+        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds.get(), null));
     }
 
 }

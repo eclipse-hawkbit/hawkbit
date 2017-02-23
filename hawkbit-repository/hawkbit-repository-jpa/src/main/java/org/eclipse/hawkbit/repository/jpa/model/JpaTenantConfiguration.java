@@ -32,7 +32,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 public class JpaTenantConfiguration extends AbstractJpaTenantAwareBaseEntity implements TenantConfiguration {
     private static final long serialVersionUID = 1L;
 
-    @Column(name = "conf_key", length = 128, nullable = false)
+    @Column(name = "conf_key", length = 128, nullable = false, updatable = false)
     @Size(max = 128)
     @NotEmpty
     private String key;

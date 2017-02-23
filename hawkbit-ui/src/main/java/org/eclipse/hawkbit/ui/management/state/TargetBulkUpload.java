@@ -12,8 +12,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
-
 /**
  * Hold details for target bulk upload window.
  * 
@@ -22,13 +20,13 @@ public class TargetBulkUpload implements Serializable {
 
     private static final long serialVersionUID = -7697723122460382323L;
 
-    private DistributionSetIdName dsNameAndVersion;
+    private Long dsNameAndVersion;
 
     private String description;
 
-    private long sucessfulUploadCount;
+    private int sucessfulUploadCount;
 
-    private long failedUploadCount;
+    private int failedUploadCount;
 
     private float progressBarCurrentValue;
 
@@ -53,7 +51,7 @@ public class TargetBulkUpload implements Serializable {
     /**
      * @return the dsNameAndVersion
      */
-    public DistributionSetIdName getDsNameAndVersion() {
+    public Long getDsNameAndVersion() {
         return dsNameAndVersion;
     }
 
@@ -76,7 +74,7 @@ public class TargetBulkUpload implements Serializable {
      * @param dsNameAndVersion
      *            the dsNameAndVersion to set
      */
-    public void setDsNameAndVersion(final DistributionSetIdName dsNameAndVersion) {
+    public void setDsNameAndVersion(final Long dsNameAndVersion) {
         this.dsNameAndVersion = dsNameAndVersion;
     }
 
@@ -98,7 +96,7 @@ public class TargetBulkUpload implements Serializable {
     /**
      * @return the sucessfulUploadCount
      */
-    public long getSucessfulUploadCount() {
+    public int getSucessfulUploadCount() {
         return sucessfulUploadCount;
     }
 
@@ -106,14 +104,14 @@ public class TargetBulkUpload implements Serializable {
      * @param sucessfulUploadCount
      *            the sucessfulUploadCount to set
      */
-    public void setSucessfulUploadCount(final long sucessfulUploadCount) {
+    public void setSucessfulUploadCount(final int sucessfulUploadCount) {
         this.sucessfulUploadCount = sucessfulUploadCount;
     }
 
     /**
      * @return the failedUploadCount
      */
-    public long getFailedUploadCount() {
+    public int getFailedUploadCount() {
         return failedUploadCount;
     }
 
@@ -121,7 +119,7 @@ public class TargetBulkUpload implements Serializable {
      * @param failedUploadCount
      *            the failedUploadCount to set
      */
-    public void setFailedUploadCount(final long failedUploadCount) {
+    public void setFailedUploadCount(final int failedUploadCount) {
         this.failedUploadCount = failedUploadCount;
     }
 

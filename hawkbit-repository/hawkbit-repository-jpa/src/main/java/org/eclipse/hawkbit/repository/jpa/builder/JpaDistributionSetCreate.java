@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.builder.AbstractDistributionSetUpdateCreate;
@@ -21,6 +20,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Create/build implementation.
@@ -47,14 +47,8 @@ public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreat
     }
 
     private DistributionSetType findDistributionSetTypeWithExceptionIfNotFound(final String distributionSetTypekey) {
-
-        final DistributionSetType module = distributionSetManagement
-                .findDistributionSetTypeByKey(distributionSetTypekey);
-        if (module == null) {
-            throw new EntityNotFoundException(
-                    "DistributionSetType with key {" + distributionSetTypekey + "} does not exist");
-        }
-        return module;
+        return distributionSetManagement.findDistributionSetTypeByKey(distributionSetTypekey)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, distributionSetTypekey));
     }
 
     private Collection<SoftwareModule> findSoftwareModuleWithExceptionIfNotFound(
@@ -65,8 +59,7 @@ public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreat
 
         final Collection<SoftwareModule> module = softwareManagement.findSoftwareModulesById(softwareModuleId);
         if (module.size() < softwareModuleId.size()) {
-            throw new EntityNotFoundException(
-                    "Some SoftwareModules out of the range {" + softwareModuleId + "} due not exist");
+            throw new EntityNotFoundException(SoftwareModule.class, softwareModuleId);
         }
 
         return module;

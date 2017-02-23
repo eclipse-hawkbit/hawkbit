@@ -240,7 +240,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                         .getItemProperty(PROVIDED_FILE_NAME).getValue();
                 final Button deleteIcon = SPUIComponentProvider.getButton(
                         fileName + "-" + UIComponentIdProvider.UPLOAD_FILE_DELETE_ICON, "",
-                        SPUILabelDefinitions.DISCARD, ValoTheme.BUTTON_TINY + " " + "redicon", true,
+                        SPUILabelDefinitions.DISCARD, ValoTheme.BUTTON_TINY + " " + "blueicon", true,
                         FontAwesome.TRASH_O, SPUIButtonStyleSmallNoBorder.class);
                 deleteIcon.setData(itemId);
                 deleteIcon.addClickListener(event -> confirmAndDeleteArtifact((Long) itemId, fileName));
@@ -424,17 +424,9 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     /**
      * Set title of artifact details header layout.
      */
-    public void setTitleOfLayoutHeader() {
+    private void setTitleOfLayoutHeader() {
         titleOfArtifactDetails.setValue(HawkbitCommonUtil.getArtifactoryDetailsLabelId(""));
         titleOfArtifactDetails.setContentMode(ContentMode.HTML);
-    }
-
-    /**
-     * Close artifact details layout.
-     */
-    public void closeArtifactDetails() {
-        removeAllComponents();
-        setVisible(false);
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)

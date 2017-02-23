@@ -88,4 +88,9 @@ public abstract class AbstractGridLayout extends VerticalLayout {
      * @return count message
      */
     protected abstract Label getCountMessageLabel();
+
+    public AbstractGrid getGrid() {
+        return grid;
+    }
+
 }

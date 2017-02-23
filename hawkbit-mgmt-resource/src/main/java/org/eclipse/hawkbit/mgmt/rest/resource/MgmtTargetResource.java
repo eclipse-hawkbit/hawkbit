@@ -130,8 +130,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<Void> deleteTarget(@PathVariable("controllerId") final String controllerId) {
-        final Target target = findTargetWithExceptionIfNotFound(controllerId);
-        this.targetManagement.deleteTargets(target.getId());
+        this.targetManagement.deleteTarget(controllerId);
         LOG.debug("{} target deleted, return status {}", controllerId, HttpStatus.OK);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -158,7 +157,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
 
-        final Target foundTarget = findTargetWithExceptionIfNotFound(controllerId);
+        findTargetWithExceptionIfNotFound(controllerId);
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -168,11 +167,11 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final Slice<Action> activeActions;
         final Long totalActionCount;
         if (rsqlParam != null) {
-            activeActions = this.deploymentManagement.findActionsByTarget(rsqlParam, foundTarget, pageable);
-            totalActionCount = this.deploymentManagement.countActionsByTarget(rsqlParam, foundTarget);
+            activeActions = this.deploymentManagement.findActionsByTarget(rsqlParam, controllerId, pageable);
+            totalActionCount = this.deploymentManagement.countActionsByTarget(rsqlParam, controllerId);
         } else {
-            activeActions = this.deploymentManagement.findActionsByTarget(foundTarget, pageable);
-            totalActionCount = this.deploymentManagement.countActionsByTarget(foundTarget);
+            activeActions = this.deploymentManagement.findActionsByTarget(controllerId, pageable);
+            totalActionCount = this.deploymentManagement.countActionsByTarget(controllerId);
         }
 
         return new ResponseEntity<>(
@@ -184,11 +183,11 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     @Override
     public ResponseEntity<MgmtAction> getAction(@PathVariable("controllerId") final String controllerId,
             @PathVariable("actionId") final Long actionId) {
-        final Target target = findTargetWithExceptionIfNotFound(controllerId);
 
-        final Action action = findActionWithExceptionIfNotFound(actionId);
-        if (!action.getTarget().getId().equals(target.getId())) {
-            LOG.warn("given action ({}) is not assigned to given target ({}).", action.getId(), target.getId());
+        final Action action = deploymentManagement.findAction(actionId)
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
+        if (!action.getTarget().getControllerId().equals(controllerId)) {
+            LOG.warn("given action ({}) is not assigned to given target ({}).", action.getId(), controllerId);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
@@ -215,13 +214,18 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     public ResponseEntity<Void> cancelAction(@PathVariable("controllerId") final String controllerId,
             @PathVariable("actionId") final Long actionId,
             @RequestParam(value = "force", required = false, defaultValue = "false") final boolean force) {
-        final Target target = findTargetWithExceptionIfNotFound(controllerId);
-        final Action action = findActionWithExceptionIfNotFound(actionId);
+        final Action action = deploymentManagement.findAction(actionId)
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
+
+        if (!action.getTarget().getControllerId().equals(controllerId)) {
+            LOG.warn("given action ({}) is not assigned to given target ({}).", actionId, controllerId);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
 
         if (force) {
-            this.deploymentManagement.forceQuitAction(action);
+            this.deploymentManagement.forceQuitAction(actionId);
         } else {
-            this.deploymentManagement.cancelAction(action, target);
+            this.deploymentManagement.cancelAction(actionId);
         }
         // both functions will throw an exception, when action is in wrong
         // state, which is mapped by MgmtResponseExceptionHandler.
@@ -238,7 +242,9 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
         final Target target = findTargetWithExceptionIfNotFound(controllerId);
 
-        final Action action = findActionWithExceptionIfNotFound(actionId);
+        final Action action = deploymentManagement.findAction(actionId)
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
+
         if (!action.getTarget().getId().equals(target.getId())) {
             LOG.warn("given action ({}) is not assigned to given target ({}).", action.getId(), target.getId());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -249,7 +255,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final Sort sorting = PagingUtility.sanitizeActionStatusSortParam(sortParam);
 
         final Page<ActionStatus> statusList = this.deploymentManagement.findActionStatusByActionWithMessages(
-                new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting), action);
+                new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting), action.getId());
 
         return new ResponseEntity<>(
                 new PagedList<>(MgmtTargetMapper.toActionStatusRestResponse(statusList.getContent()),
@@ -309,19 +315,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     private Target findTargetWithExceptionIfNotFound(final String controllerId) {
-        final Target findTarget = this.targetManagement.findTargetByControllerID(controllerId);
-        if (findTarget == null) {
-            throw new EntityNotFoundException("Target with Id {" + controllerId + "} does not exist");
-        }
-        return findTarget;
-    }
-
-    private Action findActionWithExceptionIfNotFound(final Long actionId) {
-        final Action findAction = this.deploymentManagement.findAction(actionId);
-        if (findAction == null) {
-            throw new EntityNotFoundException("Action with Id {" + actionId + "} does not exist");
-        }
-        return findAction;
+        return targetManagement.findTargetByControllerID(controllerId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
     }
 
 }

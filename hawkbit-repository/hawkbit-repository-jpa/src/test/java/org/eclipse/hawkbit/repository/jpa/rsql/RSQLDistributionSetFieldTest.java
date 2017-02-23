@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 import java.util.Arrays;
@@ -52,7 +52,7 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
         tagManagement.createDistributionSetTag(entityFactory.tag().create().name("Tag3"));
         tagManagement.createDistributionSetTag(entityFactory.tag().create().name("Tag4"));
 
-        distributionSetManagement.assignTag(Arrays.asList(ds.getId(), ds2.getId()), targetTag);
+        distributionSetManagement.assignTag(Arrays.asList(ds.getId(), ds2.getId()), targetTag.getId());
     }
 
     @Test

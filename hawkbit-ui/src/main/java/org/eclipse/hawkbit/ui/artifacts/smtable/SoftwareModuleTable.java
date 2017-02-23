@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -148,7 +149,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     }
 
     @Override
-    protected SoftwareModule findEntityByTableValue(final Long entityTableId) {
+    protected Optional<SoftwareModule> findEntityByTableValue(final Long entityTableId) {
         return softwareManagement.findSoftwareModuleById(entityTableId);
     }
 
@@ -259,9 +260,8 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     }
 
     private void showMetadataDetails(final Long itemId) {
-        final SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(itemId);
-        /* display the window */
-        UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null));
+        softwareManagement.findSoftwareModuleById(itemId)
+                .ifPresent(swmodule -> UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null)));
     }
 
 }

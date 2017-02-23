@@ -77,6 +77,20 @@ public class RolloutGroupListGrid extends AbstractGrid {
                 new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_RED));
     }
 
+    /**
+     * Constructor for RolloutGroupListGrid (Header with breadcrumbs)
+     * 
+     * @param i18n
+     *            I18N
+     * @param eventBus
+     *            UIEventBus
+     * @param rolloutGroupManagement
+     *            RolloutGroupManagement
+     * @param rolloutUIState
+     *            RolloutUIState
+     * @param permissionChecker
+     *            SpPermissionChecker
+     */
     public RolloutGroupListGrid(final I18N i18n, final UIEventBus eventBus,
             final RolloutGroupManagement rolloutGroupManagement, final RolloutUIState rolloutUIState,
             final SpPermissionChecker permissionChecker) {
@@ -87,6 +101,11 @@ public class RolloutGroupListGrid extends AbstractGrid {
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final RolloutEvent event) {
+        if (RolloutEvent.SHOW_ROLLOUTS == event) {
+            rolloutUIState.setShowRollOuts(true);
+            rolloutUIState.setShowRolloutGroups(false);
+            rolloutUIState.setShowRolloutGroupTargets(false);
+        }
         if (RolloutEvent.SHOW_ROLLOUT_GROUPS != event) {
             return;
         }
@@ -107,7 +126,6 @@ public class RolloutGroupListGrid extends AbstractGrid {
         if (!rolloutUIState.isShowRolloutGroups()) {
             return;
         }
-
         ((LazyQueryContainer) getContainerDataSource()).refresh();
     }
 
@@ -149,7 +167,6 @@ public class RolloutGroupListGrid extends AbstractGrid {
                 false);
         rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS,
                 TotalTargetCountStatus.class, null, false, false);
-
     }
 
     @Override
@@ -173,8 +190,6 @@ public class RolloutGroupListGrid extends AbstractGrid {
         getColumn(SPUILabelDefinitions.ROLLOUT_GROUP_THRESHOLD).setMaximumWidth(100);
 
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setMinimumWidth(280);
-
-        setFrozenColumnCount(7);
     }
 
     @Override
@@ -288,9 +303,10 @@ public class RolloutGroupListGrid extends AbstractGrid {
 
         @Override
         public void click(final RendererClickEvent event) {
-            rolloutUIState.setRolloutGroup(
-                    rolloutGroupManagement.findRolloutGroupWithDetailedStatus((Long) event.getItemId()));
-            eventBus.publish(this, RolloutEvent.SHOW_ROLLOUT_GROUP_TARGETS);
+            rolloutGroupManagement.findRolloutGroupWithDetailedStatus((Long) event.getItemId()).ifPresent(group -> {
+                rolloutUIState.setRolloutGroup(group);
+                eventBus.publish(this, RolloutEvent.SHOW_ROLLOUT_GROUP_TARGETS);
+            });
         }
     }
 
@@ -361,8 +377,8 @@ public class RolloutGroupListGrid extends AbstractGrid {
             final String codePoint = HawkbitCommonUtil.getCodePoint(statusFontIcon);
             return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(),
                     UIComponentIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
-
         }
 
     }
+
 }

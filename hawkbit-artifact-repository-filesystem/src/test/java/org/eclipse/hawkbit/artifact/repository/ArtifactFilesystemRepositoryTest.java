@@ -8,15 +8,15 @@
  */
 package org.eclipse.hawkbit.artifact.repository;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Random;
 
 import org.apache.commons.io.IOUtils;
+import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
-import org.fest.assertions.api.Assertions;
 import org.junit.Test;
 
 import ru.yandex.qatools.allure.annotations.Description;

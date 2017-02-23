@@ -13,9 +13,6 @@ import com.vaadin.ui.Button;
 
 /**
  * Interface to define method for button decoration.
- * 
- *
- *
  */
 @FunctionalInterface
 public interface SPUIButtonDecorator {

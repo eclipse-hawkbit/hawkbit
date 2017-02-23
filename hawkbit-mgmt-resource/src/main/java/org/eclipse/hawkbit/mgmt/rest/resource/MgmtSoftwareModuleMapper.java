@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifactHash;
@@ -30,6 +31,7 @@ import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
+import org.eclipse.hawkbit.rest.data.ResponseList;
 
 /**
  * A mapper which maps repository model to RESTful model representation and
@@ -41,7 +43,7 @@ public final class MgmtSoftwareModuleMapper {
         // Utility class
     }
 
-    static SoftwareModuleCreate fromRequest(final EntityFactory entityFactory,
+    private static SoftwareModuleCreate fromRequest(final EntityFactory entityFactory,
             final MgmtSoftwareModuleRequestBodyPost smsRest) {
         return entityFactory.softwareModule().create().type(smsRest.getType()).name(smsRest.getName())
                 .version(smsRest.getVersion()).description(smsRest.getDescription()).vendor(smsRest.getVendor());
@@ -67,19 +69,13 @@ public final class MgmtSoftwareModuleMapper {
         return smsRest.stream().map(smRest -> fromRequest(entityFactory, smRest)).collect(Collectors.toList());
     }
 
-    /**
-     * Create response for sw modules.
-     * 
-     * @param softwareModules
-     *            the modules
-     * @return the response
-     */
-    public static List<MgmtSoftwareModule> toResponse(final Collection<SoftwareModule> softwareModules) {
+    static List<MgmtSoftwareModule> toResponse(final Collection<SoftwareModule> softwareModules) {
         if (softwareModules == null) {
             return Collections.emptyList();
         }
 
-        return softwareModules.stream().map(MgmtSoftwareModuleMapper::toResponse).collect(Collectors.toList());
+        return new ResponseList<>(
+                softwareModules.stream().map(MgmtSoftwareModuleMapper::toResponse).collect(Collectors.toList()));
     }
 
     static List<MgmtMetadata> toResponseSwMetadata(final Collection<SoftwareModuleMetadata> metadata) {
@@ -97,14 +93,7 @@ public final class MgmtSoftwareModuleMapper {
         return metadataRest;
     }
 
-    /**
-     * Create response for one sw module.
-     * 
-     * @param baseSofwareModule
-     *            the sw module
-     * @return the response
-     */
-    public static MgmtSoftwareModule toResponse(final SoftwareModule baseSofwareModule) {
+    static MgmtSoftwareModule toResponse(final SoftwareModule baseSofwareModule) {
         if (baseSofwareModule == null) {
             return null;
         }
@@ -119,7 +108,7 @@ public final class MgmtSoftwareModuleMapper {
         response.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getArtifacts(response.getModuleId()))
                 .withRel(MgmtRestConstants.SOFTWAREMODULE_V1_ARTIFACT));
         response.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getSoftwareModule(response.getModuleId()))
-                .withRel("self"));
+                .withSelfRel());
 
         response.add(linkTo(methodOn(MgmtSoftwareModuleTypeRestApi.class)
                 .getSoftwareModuleType(baseSofwareModule.getType().getId()))
@@ -128,7 +117,7 @@ public final class MgmtSoftwareModuleMapper {
         response.add(linkTo(methodOn(MgmtSoftwareModuleResource.class).getMetadata(response.getModuleId(),
                 Integer.parseInt(MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET),
                 Integer.parseInt(MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT), null, null))
-                        .withRel("metadata"));
+                        .withRel("metadata").expand(ArrayUtils.toArray()));
         return response;
     }
 
@@ -147,7 +136,7 @@ public final class MgmtSoftwareModuleMapper {
         MgmtRestModelMapper.mapBaseToBase(artifactRest, artifact);
 
         artifactRest.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class)
-                .getArtifact(artifact.getSoftwareModule().getId(), artifact.getId())).withRel("self"));
+                .getArtifact(artifact.getSoftwareModule().getId(), artifact.getId())).withSelfRel());
 
         artifactRest.add(linkTo(methodOn(MgmtDownloadArtifactResource.class)
                 .downloadArtifact(artifact.getSoftwareModule().getId(), artifact.getId())).withRel("download"));
@@ -160,6 +149,7 @@ public final class MgmtSoftwareModuleMapper {
             return Collections.emptyList();
         }
 
-        return artifacts.stream().map(MgmtSoftwareModuleMapper::toResponse).collect(Collectors.toList());
+        return new ResponseList<>(
+                artifacts.stream().map(MgmtSoftwareModuleMapper::toResponse).collect(Collectors.toList()));
     }
 }

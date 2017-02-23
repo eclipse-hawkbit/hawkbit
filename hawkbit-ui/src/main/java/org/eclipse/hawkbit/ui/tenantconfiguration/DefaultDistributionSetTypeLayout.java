@@ -12,6 +12,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -29,9 +30,9 @@ import com.vaadin.ui.VerticalLayout;
 /**
  * Default DistributionSet Panel.
  */
-public class DefaultDistributionSetTypeLayout extends BaseConfigurationView implements ConfigurationGroup {
+public class DefaultDistributionSetTypeLayout extends BaseConfigurationView {
 
-    private static final long serialVersionUID = 17896542758L;
+    private static final long serialVersionUID = 1L;
 
     private final transient SystemManagement systemManagement;
 
@@ -46,8 +47,15 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView impl
     private final Label changeIcon;
 
     DefaultDistributionSetTypeLayout(final SystemManagement systemManagement,
-            final DistributionSetManagement distributionSetManagement, final I18N i18n) {
+            final DistributionSetManagement distributionSetManagement, final I18N i18n,
+            final SpPermissionChecker permChecker) {
         this.systemManagement = systemManagement;
+        combobox = SPUIComponentProvider.getComboBox(null, "330", null, null, false, "", "label.combobox.tag");
+        changeIcon = new Label();
+
+        if (!permChecker.hasReadDistributionPermission()) {
+            return;
+        }
 
         final Panel rootPanel = new Panel();
         rootPanel.setSizeFull();
@@ -75,7 +83,6 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView impl
         final Iterable<DistributionSetType> distributionSetTypeCollection = distributionSetManagement
                 .findDistributionSetTypesAll(pageReq);
 
-        combobox = SPUIComponentProvider.getComboBox(null, "330", null, null, false, "", "label.combobox.tag");
         combobox.setId(UIComponentIdProvider.SYSTEM_CONFIGURATION_DEFAULTDIS_COMBOBOX);
         combobox.setNullSelectionAllowed(false);
         for (final DistributionSetType distributionSetType : distributionSetTypeCollection) {
@@ -91,7 +98,6 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView impl
         combobox.addValueChangeListener(event -> selectDistributionSetValue());
         hlayout.addComponent(combobox);
 
-        changeIcon = new Label();
         changeIcon.setIcon(FontAwesome.CHECK);
         hlayout.addComponent(changeIcon);
         changeIcon.setVisible(false);
@@ -99,7 +105,6 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView impl
         vlayout.addComponent(hlayout);
         rootPanel.setContent(vlayout);
         setCompositionRoot(rootPanel);
-
     }
 
     private DistributionSetType getCurrentDistributionSetType() {
@@ -126,7 +131,7 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView impl
     /**
      * Method that is called when combobox event is performed.
      */
-    public void selectDistributionSetValue() {
+    private void selectDistributionSetValue() {
         selectedDefaultDisSetType = (Long) combobox.getValue();
         if (!selectedDefaultDisSetType.equals(currentDefaultDisSetType)) {
             changeIcon.setVisible(true);

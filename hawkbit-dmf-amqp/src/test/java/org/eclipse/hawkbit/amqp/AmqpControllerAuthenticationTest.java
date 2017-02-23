@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.amqp;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -17,6 +17,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.net.URL;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.api.HostnameResolver;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
@@ -35,7 +36,6 @@ import org.eclipse.hawkbit.repository.jpa.JpaEntityFactory;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
-import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
@@ -135,8 +135,8 @@ public class AmqpControllerAuthenticationTest {
                 .thenReturn(CONFIG_VALUE_FALSE);
 
         final ControllerManagement controllerManagement = mock(ControllerManagement.class);
-        when(controllerManagement.findByControllerId(anyString())).thenReturn(targteMock);
-        when(controllerManagement.findByTargetId(any(Long.class))).thenReturn(targteMock);
+        when(controllerManagement.findByControllerId(anyString())).thenReturn(Optional.of(targteMock));
+        when(controllerManagement.findByTargetId(any(Long.class))).thenReturn(Optional.of(targteMock));
 
         when(targteMock.getSecurityToken()).thenReturn(CONTROLLER_ID);
         when(targteMock.getControllerId()).thenReturn(CONTROLLER_ID);
@@ -153,16 +153,17 @@ public class AmqpControllerAuthenticationTest {
 
         authenticationManager.postConstruct();
 
-        final Artifact testArtifact = new JpaArtifact("afilename", "afilename", new JpaSoftwareModule(
+        final JpaArtifact testArtifact = new JpaArtifact(SHA1, "afilename", new JpaSoftwareModule(
                 new JpaSoftwareModuleType("a key", "a name", null, 1), "a name", null, null, null));
+        testArtifact.setId(1L);
 
-        when(artifactManagementMock.findArtifact(ARTIFACT_ID)).thenReturn(testArtifact);
-        when(artifactManagementMock.findFirstArtifactBySHA1(SHA1)).thenReturn(testArtifact);
+        when(artifactManagementMock.findArtifact(ARTIFACT_ID)).thenReturn(Optional.of(testArtifact));
+        when(artifactManagementMock.findFirstArtifactBySHA1(SHA1)).thenReturn(Optional.of(testArtifact));
 
         final DbArtifact artifact = new DbArtifact();
         artifact.setSize(ARTIFACT_SIZE);
-        artifact.setHashes(new DbArtifactHash("sha1 test", "md5 test"));
-        when(artifactManagementMock.loadArtifactBinary(testArtifact)).thenReturn(artifact);
+        artifact.setHashes(new DbArtifactHash(SHA1, "md5 test"));
+        when(artifactManagementMock.loadArtifactBinary(SHA1)).thenReturn(Optional.of(artifact));
 
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate,
                 mock(AmqpMessageDispatcherService.class), controllerManagementMock, new JpaEntityFactory());
@@ -173,8 +174,8 @@ public class AmqpControllerAuthenticationTest {
 
         when(hostnameResolverMock.resolveHostname()).thenReturn(new URL("http://localhost"));
 
-        when(controllerManagementMock.hasTargetArtifactAssigned(TARGET_ID, testArtifact)).thenReturn(true);
-        when(controllerManagementMock.hasTargetArtifactAssigned(CONTROLLER_ID, testArtifact)).thenReturn(true);
+        when(controllerManagementMock.hasTargetArtifactAssigned(TARGET_ID, SHA1)).thenReturn(true);
+        when(controllerManagementMock.hasTargetArtifactAssigned(CONTROLLER_ID, SHA1)).thenReturn(true);
     }
 
     @Test

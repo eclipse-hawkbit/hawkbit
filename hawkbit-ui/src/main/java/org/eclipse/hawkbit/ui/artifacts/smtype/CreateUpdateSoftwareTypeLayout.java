@@ -10,7 +10,9 @@ package org.eclipse.hawkbit.ui.artifacts.smtype;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
@@ -60,6 +62,24 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
     private Label multiAssign;
     private OptionGroup assignOptiongroup;
 
+    /**
+     * Constructor for CreateUpdateSoftwareTypeLayout
+     * 
+     * @param i18n
+     *            I18N
+     * @param tagManagement
+     *            TagManagement
+     * @param entityFactory
+     *            EntityFactory
+     * @param eventBus
+     *            UIEventBus
+     * @param permChecker
+     *            SpPermissionChecker
+     * @param uiNotification
+     *            UINotification
+     * @param swTypeManagementService
+     *            SoftwareManagement
+     */
     public CreateUpdateSoftwareTypeLayout(final I18N i18n, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
             final UINotification uiNotification, final SoftwareManagement swTypeManagementService) {
@@ -92,7 +112,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_DESC)
                 .prompt(i18n.get("textfield.description")).immediate(true).id(SPUIDefinitions.NEW_SOFTWARE_TYPE_DESC)
                 .buildTextComponent();
-        tagDesc.setNullRepresentation("");
+        tagDesc.setNullRepresentation(StringUtils.EMPTY);
 
         singleMultiOptionGroup();
     }
@@ -100,10 +120,11 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
     @Override
     protected Color getColorForColorPicker() {
 
-        final SoftwareModuleType typeSelected = swTypeManagementService
+        final Optional<SoftwareModuleType> typeSelected = swTypeManagementService
                 .findSoftwareModuleTypeByName(tagNameComboBox.getValue().toString());
-        if (null != typeSelected) {
-            return typeSelected.getColour() != null ? ColorPickerHelper.rgbToColorConverter(typeSelected.getColour())
+        if (typeSelected.isPresent()) {
+            return typeSelected.get().getColour() != null
+                    ? ColorPickerHelper.rgbToColorConverter(typeSelected.get().getColour())
                     : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR);
         }
         return ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR);
@@ -176,9 +197,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
     @Override
     protected void setTagDetails(final String targetTagSelected) {
         tagName.setValue(targetTagSelected);
-        final SoftwareModuleType selectedTypeTag = swTypeManagementService
-                .findSoftwareModuleTypeByName(targetTagSelected);
-        if (null != selectedTypeTag) {
+        swTypeManagementService.findSoftwareModuleTypeByName(targetTagSelected).ifPresent(selectedTypeTag -> {
             tagDesc.setValue(selectedTypeTag.getDescription());
             typeKey.setValue(selectedTypeTag.getKey());
             if (selectedTypeTag.getMaxAssignments() == 1) {
@@ -187,7 +206,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
                 assignOptiongroup.setValue(multiAssignStr);
             }
             setColorPickerComponentsColor(selectedTypeTag.getColour());
-        }
+        });
     }
 
     private void singleMultiOptionGroup() {
@@ -217,12 +236,12 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
     }
 
     @Override
-    protected SoftwareModuleType findEntityByKey() {
+    protected Optional<SoftwareModuleType> findEntityByKey() {
         return swTypeManagementService.findSoftwareModuleTypeByKey(typeKey.getValue());
     }
 
     @Override
-    protected SoftwareModuleType findEntityByName() {
+    protected Optional<SoftwareModuleType> findEntityByName() {
         return swTypeManagementService.findSoftwareModuleTypeByName(tagName.getValue());
     }
 
@@ -238,13 +257,13 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
         final String typeKeyValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeKey.getValue());
         final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
         final String assignValue = (String) assignOptiongroup.getValue();
-        if (null != assignValue && assignValue.equalsIgnoreCase(singleAssignStr)) {
+        if (assignValue != null && assignValue.equalsIgnoreCase(singleAssignStr)) {
             assignNumber = 1;
-        } else if (null != assignValue && assignValue.equalsIgnoreCase(multiAssignStr)) {
+        } else if (assignValue != null && assignValue.equalsIgnoreCase(multiAssignStr)) {
             assignNumber = Integer.MAX_VALUE;
         }
 
-        if (null != typeNameValue && null != typeKeyValue) {
+        if (typeNameValue != null && typeKeyValue != null) {
             final SoftwareModuleType newSWType = swTypeManagementService.createSoftwareModuleType(
                     entityFactory.softwareModuleType().create().key(typeKeyValue).name(typeNameValue)
                             .description(typeDescValue).colour(colorPicked).maxAssignments(assignNumber));

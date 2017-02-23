@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.layouts;
 
+import java.util.Optional;
+
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
@@ -42,7 +44,7 @@ public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends Abst
 
     protected TextField typeKey;
 
-    public static final String TYPE_NAME_DYNAMIC_STYLE = "new-tag-name";
+    private static final String TYPE_NAME_DYNAMIC_STYLE = "new-tag-name";
     private static final String TYPE_DESC_DYNAMIC_STYLE = "new-tag-desc";
 
     public CreateUpdateTypeLayout(final I18N i18n, final TagManagement tagManagement, final EntityFactory entityFactory,
@@ -94,7 +96,7 @@ public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends Abst
      * @param tagDesc
      * @param taregtTagColor
      */
-    protected void createDynamicStyleForComponents(final TextField tagName, final TextField typeKey,
+    private void createDynamicStyleForComponents(final TextField tagName, final TextField typeKey,
             final TextArea typeDesc, final String typeTagColor) {
 
         tagName.removeStyleName(SPUIDefinitions.TYPE_NAME);
@@ -229,15 +231,11 @@ public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends Abst
     }
 
     private boolean isDuplicateByKey() {
+        final Optional<E> existingType = findEntityByKey();
 
-        final E existingType = findEntityByKey();
+        existingType.ifPresent(type -> uiNotification.displayValidationError(getDuplicateKeyErrorMessage(type)));
 
-        if (existingType != null) {
-            uiNotification.displayValidationError(getDuplicateKeyErrorMessage(existingType));
-            return true;
-        }
-
-        return false;
+        return existingType.isPresent();
     }
 
     @Override
@@ -245,7 +243,7 @@ public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends Abst
         return isDuplicateByKey() || super.isDuplicate();
     }
 
-    protected abstract E findEntityByKey();
+    protected abstract Optional<E> findEntityByKey();
 
     protected abstract String getDuplicateKeyErrorMessage(E existingType);
 

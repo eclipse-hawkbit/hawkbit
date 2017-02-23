@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.distributions.smtype;
 import java.io.Serializable;
 
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterSingleButtonClick;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
@@ -48,10 +47,10 @@ public class DistSMTypeFilterButtonClick extends AbstractFilterSingleButtonClick
 
     @Override
     protected void filterClicked(final Button clickedButton) {
-        final SoftwareModuleType smType = softwareManagement
-                .findSoftwareModuleTypeByName(clickedButton.getData().toString());
-        manageDistUIState.getSoftwareModuleFilters().setSoftwareModuleType(smType);
-        eventBus.publish(this, SMFilterEvent.FILTER_BY_TYPE);
+        softwareManagement.findSoftwareModuleTypeByName(clickedButton.getData().toString()).ifPresent(smType -> {
+            manageDistUIState.getSoftwareModuleFilters().setSoftwareModuleType(smType);
+            eventBus.publish(this, SMFilterEvent.FILTER_BY_TYPE);
+        });
     }
 
 }

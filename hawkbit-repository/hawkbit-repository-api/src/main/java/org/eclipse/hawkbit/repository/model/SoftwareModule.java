@@ -23,11 +23,7 @@ public interface SoftwareModule extends NamedVersionedEntity {
      * @return found {@link Artifact}
      */
     default Optional<Artifact> getArtifact(final Long artifactId) {
-        if (getArtifacts().isEmpty()) {
-            return Optional.empty();
-        }
-
-        return getArtifacts().stream().filter(artifact -> artifact.getId().equals(artifactId)).findFirst();
+        return getArtifacts().stream().filter(artifact -> artifact.getId().equals(artifactId)).findAny();
     }
 
     /**
@@ -36,12 +32,8 @@ public interface SoftwareModule extends NamedVersionedEntity {
      * @return found {@link Artifact}
      */
     default Optional<Artifact> getArtifactByFilename(final String fileName) {
-        if (getArtifacts().isEmpty()) {
-            return Optional.empty();
-        }
-
         return getArtifacts().stream().filter(artifact -> artifact.getFilename().equalsIgnoreCase(fileName.trim()))
-                .findFirst();
+                .findAny();
     }
 
     /**

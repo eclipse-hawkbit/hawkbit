@@ -20,11 +20,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -39,6 +37,7 @@ import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.util.CollectionUtils;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
 
@@ -120,7 +119,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
                     new OffsetBasedPageRequest(startIndex, SPUIDefinitions.PAGE_SIZE, sort), pinnedDistId,
                     new FilterParams(distributionId, status, overdueState, searchText, noTagClicked, targetTags));
         } else if (null != targetFilterQuery) {
-            targetBeans = getTargetManagement().findTargetsAll(targetFilterQuery,
+            targetBeans = getTargetManagement().findTargetsByTargetFilterQuery(targetFilterQuery.getId(),
                     new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         } else if (!isAnyFilterSelected()) {
             targetBeans = getTargetManagement().findTargetsAll(
@@ -132,7 +131,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         }
         for (final Target targ : targetBeans) {
             final ProxyTarget prxyTarget = new ProxyTarget();
-            prxyTarget.setTargetIdName(targ.getTargetIdName());
+            prxyTarget.setId(targ.getId());
             prxyTarget.setName(targ.getName());
             prxyTarget.setDescription(targ.getDescription());
             prxyTarget.setControllerId(targ.getControllerId());
@@ -150,11 +149,10 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
                 prxyTarget.setInstalledDistributionSet(null);
                 prxyTarget.setAssignedDistributionSet(null);
             } else {
-                final Target target = getTargetManagement().findTargetByControllerIDWithDetails(targ.getControllerId());
-                final DistributionSet installedDistributionSet = target.getTargetInfo().getInstalledDistributionSet();
-                prxyTarget.setInstalledDistributionSet(installedDistributionSet);
-                final DistributionSet assignedDistributionSet = target.getAssignedDistributionSet();
-                prxyTarget.setAssignedDistributionSet(assignedDistributionSet);
+                getTargetManagement().findTargetByControllerIDWithDetails(targ.getControllerId()).ifPresent(target -> {
+                    prxyTarget.setInstalledDistributionSet(target.getTargetInfo().getInstalledDistributionSet());
+                    prxyTarget.setAssignedDistributionSet(target.getAssignedDistributionSet());
+                });
             }
 
             prxyTarget.setUpdateStatus(targ.getTargetInfo().getUpdateStatus());
@@ -189,7 +187,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         final long totSize = getTargetManagement().countTargetsAll();
         long size;
         if (null != targetFilterQuery) {
-            size = getTargetManagement().countTargetByTargetFilterQuery(targetFilterQuery);
+            size = getTargetManagement().countTargetByTargetFilterQuery(targetFilterQuery.getId());
         } else if (!isAnyFilterSelected()) {
             size = totSize;
         } else {
@@ -211,7 +209,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
     private boolean isAnyFilterSelected() {
         final boolean isFilterSelected = isTagSelected() || isOverdueFilterEnabled();
-        return isFilterSelected || CollectionUtils.isNotEmpty(status) || distributionId != null
+        return isFilterSelected || !CollectionUtils.isEmpty(status) || distributionId != null
                 || !isNullOrEmpty(searchText);
     }
 

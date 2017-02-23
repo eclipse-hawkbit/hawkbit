@@ -119,8 +119,7 @@ public class TargetFilterQueryButtons extends Table {
     }
 
     private boolean isClickedByDefault(final Long id) {
-        return managementUIState.getTargetTableFilters().getTargetFilterQuery().map(q -> q.getId().equals(id))
-                .orElse(false);
+        return managementUIState.getTargetTableFilters().getTargetFilterQuery().map(q -> q.equals(id)).orElse(false);
     }
 
     private Button createFilterButton(final Long id, final String name, final Object itemId) {

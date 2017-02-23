@@ -12,10 +12,10 @@ import java.io.Serializable;
 
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorderWithIcon;
@@ -90,18 +90,11 @@ public class DistributionSetSelectWindow
         window.setId(UIComponentIdProvider.DIST_SET_SELECT_WINDOW_ID);
     }
 
-    public void setValue(final DistributionSetIdName distSet) {
+    public void setValue(final Long distSet) {
         dsTable.setVisible(distSet != null);
         checkBox.setValue(distSet != null);
         dsTable.setValue(distSet);
         dsTable.setCurrentPageFirstItemId(distSet);
-    }
-
-    public DistributionSetIdName getValue() {
-        if (checkBox.getValue()) {
-            return (DistributionSetIdName) dsTable.getValue();
-        }
-        return null;
     }
 
     /**
@@ -112,16 +105,14 @@ public class DistributionSetSelectWindow
      */
     public void showForTargetFilter(final Long tfqId) {
         this.tfqId = tfqId;
-        final TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryById(tfqId);
-        if (tfq == null) {
-            throw new IllegalStateException("TargetFilterQuery does not exist for the given id");
-        }
+        final TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryById(tfqId)
+                .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, tfqId));
 
         initLocal();
 
         final DistributionSet distributionSet = tfq.getAutoAssignDistributionSet();
         if (distributionSet != null) {
-            setValue(DistributionSetIdName.generate(distributionSet));
+            setValue(distributionSet.getId());
         } else {
             setValue(null);
         }
@@ -163,8 +154,7 @@ public class DistributionSetSelectWindow
     @Override
     public void saveOrUpdate() {
         if (checkBox.getValue() && dsTable.getValue() != null) {
-            final DistributionSetIdName ds = (DistributionSetIdName) dsTable.getValue();
-            updateTargetFilterQueryDS(tfqId, ds.getId());
+            updateTargetFilterQueryDS(tfqId, (Long) dsTable.getValue());
 
         } else if (!checkBox.getValue()) {
             updateTargetFilterQueryDS(tfqId, null);
@@ -174,7 +164,8 @@ public class DistributionSetSelectWindow
     }
 
     private void updateTargetFilterQueryDS(final Long targetFilterQueryId, final Long dsId) {
-        final TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryById(targetFilterQueryId);
+        final TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryById(targetFilterQueryId)
+                .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));
 
         if (dsId != null) {
             confirmWithConsequencesDialog(tfq, dsId);
@@ -242,7 +233,7 @@ public class DistributionSetSelectWindow
             setContent(layout);
 
             final Long targetsCount = targetManagement.countTargetsByTargetFilterQueryAndNonDS(distributionSetId,
-                    targetFilterQuery);
+                    targetFilterQuery.getQuery());
             Label mainTextLabel;
             if (targetsCount == 0) {
                 mainTextLabel = new Label(i18n.get("message.confirm.assign.consequences.none"));

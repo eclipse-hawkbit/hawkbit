@@ -8,25 +8,21 @@
  */
 package org.eclipse.hawkbit.ui.utils;
 
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.model.AssignmentResult;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
-import org.vaadin.alump.distributionbar.DistributionBar;
 
 import com.google.common.base.Strings;
 import com.vaadin.data.Container;
@@ -41,18 +37,7 @@ import com.vaadin.ui.Table;
  */
 public final class HawkbitCommonUtil {
     public static final String SP_STRING_PIPE = " | ";
-    /**
-     * Define spaced string.
-     */
-    public static final String SP_STRING_SPACE = " ";
-    /**
-     * Define empty string.
-     */
-    public static final String SP_STRING_EMPTY = "";
-    /**
-     * Html span.
-     */
-    public static final String SPAN_CLOSE = "</span>";
+
     public static final String HTML_LI_CLOSE_TAG = "</li>";
     public static final String HTML_LI_OPEN_TAG = "<li>";
     public static final String HTML_UL_CLOSE_TAG = "</ul>";
@@ -73,9 +58,6 @@ public final class HawkbitCommonUtil {
     private static final String PREVIEW_BUTTON_COLOR_CREATE_SCRIPT = "tagColorPreview = document.createElement('style'); tagColorPreview.id=\"tag-color-preview\";  document.head.appendChild(tagColorPreview); ";
     private static final String PREVIEW_BUTTON_COLOR_REMOVE_SCRIPT = "var a = document.getElementById('tag-color-preview'); if(a) { document.head.removeChild(a); } ";
     private static final String PREVIEW_BUTTON_COLOR_SET_STYLE_SCRIPT = "document.getElementById('tag-color-preview').innerHTML = tagColorPreviewStyle;";
-
-    private static final String ASSIGN_DIST_SET = "assignedDistributionSet";
-    private static final String INSTALL_DIST_SET = "installedDistributionSet";
 
     private HawkbitCommonUtil() {
 
@@ -102,11 +84,11 @@ public final class HawkbitCommonUtil {
      *         the text is not empty.
      */
     public static String trimAndNullIfEmpty(final String text) {
-        String emptyStr = null;
-        if (null != text && !text.trim().isEmpty()) {
-            emptyStr = text.trim();
+        String resultStr = null;
+        if (text != null && !text.trim().isEmpty()) {
+            resultStr = text.trim();
         }
-        return emptyStr;
+        return resultStr;
     }
 
     /**
@@ -124,7 +106,7 @@ public final class HawkbitCommonUtil {
      *         null.
      */
     public static String concatStrings(final String delimiter, final String... texts) {
-        final String delim = delimiter == null ? SP_STRING_EMPTY : delimiter;
+        final String delim = delimiter == null ? StringUtils.EMPTY : delimiter;
         final StringBuilder conCatStrBldr = new StringBuilder();
         if (null != texts) {
             for (final String text : texts) {
@@ -159,7 +141,8 @@ public final class HawkbitCommonUtil {
      * Get Label for Artifact Details.
      *
      * @param name
-     * @return
+     *            artifact name
+     * @return ArtifactoryDetailsLabelId
      */
     public static String getArtifactoryDetailsLabelId(final String name) {
         return new StringBuilder()
@@ -174,7 +157,7 @@ public final class HawkbitCommonUtil {
      *            as caption of the details
      * @param name
      *            as name
-     * @return
+     * @return SoftwareModuleName
      */
     public static String getSoftwareModuleName(final String caption, final String name) {
         return new StringBuilder()
@@ -186,7 +169,7 @@ public final class HawkbitCommonUtil {
      * Get Label for Action History Details.
      *
      * @param name
-     * @return
+     * @return ActionHistoryLabelId
      */
     public static String getActionHistoryLabelId(final String name) {
         return new StringBuilder()
@@ -199,7 +182,7 @@ public final class HawkbitCommonUtil {
      *
      * @param pollStatus
      * @param i18N
-     * @return
+     * @return PollStatusToolTip
      */
     public static String getPollStatusToolTip(final PollStatus pollStatus, final I18N i18N) {
         if (pollStatus != null && pollStatus.getLastPollDate() != null && pollStatus.isOverdue()) {
@@ -223,14 +206,7 @@ public final class HawkbitCommonUtil {
         return trimAndNullIfEmpty(orgText) == null ? SPUIDefinitions.SPACE : orgText;
     }
 
-    /**
-     * Find required extra width of software module.
-     *
-     * @param newBrowserWidth
-     *            new browser width
-     * @return float width of software module table
-     */
-    public static float findRequiredSwModuleExtraWidth(final float newBrowserWidth) {
+    private static float findRequiredSwModuleExtraWidth(final float newBrowserWidth) {
         return newBrowserWidth > SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_WIDTH
                 ? (newBrowserWidth - SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_WIDTH) : 0;
     }
@@ -312,7 +288,7 @@ public final class HawkbitCommonUtil {
     /**
      * @param distName
      * @param distVersion
-     * @return
+     * @return DistributionNameAndVersion
      */
     public static String getDistributionNameAndVersion(final String distName, final String distVersion) {
         return new StringBuilder(distName).append(':').append(distVersion).toString();
@@ -461,42 +437,6 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     * Add target table container properties.
-     *
-     * @param container
-     *            table container
-     */
-    public static void addTargetTableContainerProperties(final Container container) {
-        final LazyQueryContainer targetTableContainer = (LazyQueryContainer) container;
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CONT_ID, String.class, "", false, false);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_TARGET_STATUS, TargetUpdateStatus.class,
-                TargetUpdateStatus.UNKNOWN, false, false);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_ID, Long.class, null,
-                false, false);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_ID, Long.class, null,
-                false, false);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER, String.class, "",
-                false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_NAME_VER, String.class,
-                "", false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.LAST_QUERY_DATE, Date.class, null, false, false);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_BY, String.class, null, false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, String.class, null, false,
-                true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_DATE, String.class, null, false,
-                true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, String.class, null,
-                false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP, String.class, null,
-                false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, "", false, true);
-
-        targetTableContainer.addContainerProperty(ASSIGN_DIST_SET, DistributionSet.class, null, false, true);
-        targetTableContainer.addContainerProperty(INSTALL_DIST_SET, DistributionSet.class, null, false, true);
-    }
-
-    /**
      * Apply style for status label in target table.
      *
      * @param targetTable
@@ -513,62 +453,16 @@ public final class HawkbitCommonUtil {
                     .getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).getValue();
             pinBtn.removeStyleName("statusIconRed statusIconBlue statusIconGreen statusIconYellow statusIconLightBlue");
             if (updateStatus == TargetUpdateStatus.ERROR) {
-                pinBtn.addStyleName("statusIconRed");
+                pinBtn.addStyleName(SPUIStyleDefinitions.STATUS_ICON_RED);
             } else if (updateStatus == TargetUpdateStatus.UNKNOWN) {
-                pinBtn.addStyleName("statusIconBlue");
+                pinBtn.addStyleName(SPUIStyleDefinitions.STATUS_ICON_BLUE);
             } else if (updateStatus == TargetUpdateStatus.IN_SYNC) {
-                pinBtn.addStyleName("statusIconGreen");
+                pinBtn.addStyleName(SPUIStyleDefinitions.STATUS_ICON_GREEN);
             } else if (updateStatus == TargetUpdateStatus.PENDING) {
-                pinBtn.addStyleName("statusIconYellow");
+                pinBtn.addStyleName(SPUIStyleDefinitions.STATUS_ICON_YELLOW);
             } else if (updateStatus == TargetUpdateStatus.REGISTERED) {
-                pinBtn.addStyleName("statusIconLightBlue");
+                pinBtn.addStyleName(SPUIStyleDefinitions.STATUS_ICON_LIGHT_BLUE);
             }
-        }
-    }
-
-    /**
-     * Set status progress bar value.
-     *
-     * @param bar
-     *            DistributionBar
-     * @param statusName
-     *            status name
-     * @param count
-     *            target counts in a status
-     * @param index
-     *            bar part index
-     */
-    public static void setBarPartSize(final DistributionBar bar, final String statusName, final int count,
-            final int index) {
-        bar.setPartSize(index, count);
-        bar.setPartTooltip(index, statusName);
-        bar.setPartStyleName(index, "status-bar-part-" + statusName);
-    }
-
-    /**
-     * Initialize status progress bar with values and number of parts on load.
-     *
-     * @param bar
-     *            DistributionBar
-     * @param item
-     *            row of a table
-     */
-    public static void initialiseProgressBar(final DistributionBar bar, final Item item) {
-        final Long notStartedTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED, item);
-        final Long runningTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING, item);
-        final Long scheduledTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED, item);
-        final Long errorTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR, item);
-        final Long finishedTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED, item);
-        final Long cancelledTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED, item);
-        if (isNoTargets(errorTargetsCount, notStartedTargetsCount, runningTargetsCount, scheduledTargetsCount,
-                finishedTargetsCount, cancelledTargetsCount)) {
-            HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.SCHEDULED.toString().toLowerCase(), 0,
-                    0);
-            HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.FINISHED.toString().toLowerCase(), 0,
-                    1);
-        } else {
-            bar.setNumberOfParts(6);
-            setProgressBarDetails(bar, item);
         }
     }
 
@@ -600,39 +494,6 @@ public final class HawkbitCommonUtil {
             break;
         }
         return String.format("%.1f", tmpFinishedPercentage);
-    }
-
-    /**
-     * Reset the values of status progress bar on change of values.
-     *
-     * @param bar
-     *            DistributionBar
-     * @param item
-     *            row of the table
-     */
-    private static void setProgressBarDetails(final DistributionBar bar, final Item item) {
-        bar.setNumberOfParts(6);
-        final Long notStartedTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED, item);
-        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.NOTSTARTED.toString().toLowerCase(),
-                notStartedTargetsCount.intValue(), 0);
-        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.SCHEDULED.toString().toLowerCase(),
-                getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED, item).intValue(), 1);
-        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.RUNNING.toString().toLowerCase(),
-                getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING, item).intValue(), 2);
-        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.ERROR.toString().toLowerCase(),
-                getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR, item).intValue(), 3);
-        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.FINISHED.toString().toLowerCase(),
-                getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED, item).intValue(), 4);
-        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.CANCELLED.toString().toLowerCase(),
-                getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED, item).intValue(), 5);
-    }
-
-    private static boolean isNoTargets(final Long... statusCount) {
-        return (Arrays.asList(statusCount).stream().filter(value -> value > 0).toArray().length) == 0;
-    }
-
-    private static Long getStatusCount(final String propertName, final Item item) {
-        return (Long) item.getItemProperty(propertName).getValue();
     }
 
     /**

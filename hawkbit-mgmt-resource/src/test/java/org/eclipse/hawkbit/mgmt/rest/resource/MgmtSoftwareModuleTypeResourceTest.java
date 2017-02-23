@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.contains;
@@ -30,7 +30,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.springframework.http.MediaType;
@@ -140,7 +139,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes POST requests when max assignment is smaller than 1")
-    public void createSoftwareModuleTypesInvalidAssignmentBadRequest() throws JSONException, Exception {
+    public void createSoftwareModuleTypesInvalidAssignmentBadRequest() throws Exception {
 
         final List<SoftwareModuleType> types = new ArrayList<>();
         types.add(entityFactory.softwareModuleType().create().key("test-1").name("TestName-1").maxAssignments(-1)
@@ -161,7 +160,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes POST requests.")
-    public void createSoftwareModuleTypes() throws JSONException, Exception {
+    public void createSoftwareModuleTypes() throws Exception {
 
         final List<SoftwareModuleType> types = Lists.newArrayList(
                 entityFactory.softwareModuleType().create().key("test1").name("TestName1").description("Desc1")
@@ -190,9 +189,9 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
                 .andExpect(jsonPath("[2].createdAt", not(equalTo(0))))
                 .andExpect(jsonPath("[2].maxAssignments", equalTo(3))).andReturn();
 
-        final SoftwareModuleType created1 = softwareManagement.findSoftwareModuleTypeByKey("test1");
-        final SoftwareModuleType created2 = softwareManagement.findSoftwareModuleTypeByKey("test2");
-        final SoftwareModuleType created3 = softwareManagement.findSoftwareModuleTypeByKey("test3");
+        final SoftwareModuleType created1 = softwareManagement.findSoftwareModuleTypeByKey("test1").get();
+        final SoftwareModuleType created2 = softwareManagement.findSoftwareModuleTypeByKey("test2").get();
+        final SoftwareModuleType created3 = softwareManagement.findSoftwareModuleTypeByKey("test3").get();
 
         assertThat(
                 JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
@@ -237,6 +236,13 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
                 .andExpect(status().isOk());
 
         assertThat(softwareManagement.countSoftwareModuleTypesAll()).isEqualTo(3);
+    }
+
+    @Test
+    @Description("Ensures that module type deletion request to API on an entity that does not exist results in NOT_FOUND.")
+    public void deleteSoftwareModuleTypeThatDoesNotExistLeadsToNotFound() throws Exception {
+        mvc.perform(delete("/rest/v1/softwaremoduletypes/1234")).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
     }
 
     @Test

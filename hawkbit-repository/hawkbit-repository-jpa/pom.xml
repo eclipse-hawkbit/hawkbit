@@ -81,10 +81,6 @@
          <groupId>cz.jirutka.rsql</groupId>
          <artifactId>rsql-parser</artifactId>
       </dependency>
-      <dependency>
-      	<groupId>org.apache.commons</groupId>
-      	<artifactId>commons-collections4</artifactId>
-      </dependency>
 
       <!-- Test -->
       <dependency>
@@ -111,16 +107,6 @@
       <dependency>
          <groupId>ru.yandex.qatools.allure</groupId>
          <artifactId>allure-junit-adaptor</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.easytesting</groupId>
-         <artifactId>fest-assert-core</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.easytesting</groupId>
-         <artifactId>fest-assert</artifactId>
          <scope>test</scope>
       </dependency>
       <dependency>

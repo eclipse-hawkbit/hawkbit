@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.distributions.smtable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
@@ -97,8 +98,6 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
         styleTableOnDistSelection();
     }
 
-    /* All event Listeners */
-
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SMFilterEvent filterEvent) {
         UI.getCurrent().access(() -> {
@@ -137,6 +136,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     @EventBusListenerMethod(scope = EventScope.UI)
     void onSoftwareModuleUpdateEvents(final SoftwareModuleUpdatedEventContainer eventContainer) {
 
+        @SuppressWarnings("unchecked")
         final List<Long> visibleItemIds = (List<Long>) getVisibleItemIds();
 
         handleSelectedAndUpdatedSoftwareModules(eventContainer.getEvents());
@@ -149,7 +149,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     private void handleSelectedAndUpdatedSoftwareModules(final List<SoftwareModuleUpdatedEvent> events) {
         manageDistUIState.getSelectedBaseSwModuleId()
                 .ifPresent(lastSelectedModuleId -> events.stream()
-                        .filter(event -> lastSelectedModuleId.equals(event.getEntityId())).findFirst()
+                        .filter(event -> lastSelectedModuleId.equals(event.getEntityId())).findAny()
                         .ifPresent(lastEvent -> eventBus.publish(this,
                                 new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, lastEvent.getEntity()))));
     }
@@ -183,7 +183,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
                 .ifPresent(type -> queryConfig.put(SPUIDefinitions.BY_SOFTWARE_MODULE_TYPE, type));
 
         manageDistUIState.getLastSelectedDistribution()
-                .ifPresent(distIdName -> queryConfig.put(SPUIDefinitions.ORDER_BY_DISTRIBUTION, distIdName.getId()));
+                .ifPresent(id -> queryConfig.put(SPUIDefinitions.ORDER_BY_DISTRIBUTION, id));
 
         return queryConfig;
     }
@@ -258,7 +258,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     }
 
     @Override
-    protected SoftwareModule findEntityByTableValue(final Long lastSelectedId) {
+    protected Optional<SoftwareModule> findEntityByTableValue(final Long lastSelectedId) {
         return softwareManagement.findSoftwareModuleById(lastSelectedId);
     }
 
@@ -308,7 +308,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     }
 
-    private String getTableStyle(final Long typeId, final boolean isAssigned, final String color) {
+    private static String getTableStyle(final Long typeId, final boolean isAssigned, final String color) {
         if (isAssigned) {
             addTypeStyle(typeId, color);
             return "distribution-upload-type-" + typeId;
@@ -316,7 +316,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
         return null;
     }
 
-    private void addTypeStyle(final Long tagId, final String color) {
+    private static void addTypeStyle(final Long tagId, final String color) {
         final JavaScript javaScript = UI.getCurrent().getPage().getJavaScript();
         UI.getCurrent()
                 .access(() -> javaScript.execute(
@@ -421,8 +421,8 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     }
 
     private void showMetadataDetails(final Long itemId) {
-        final SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(itemId);
-        UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null));
+        softwareManagement.findSoftwareModuleById(itemId)
+                .ifPresent(swmodule -> UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null)));
     }
 
 }

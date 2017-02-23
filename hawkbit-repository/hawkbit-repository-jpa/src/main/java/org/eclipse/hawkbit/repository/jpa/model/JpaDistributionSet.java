@@ -16,7 +16,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
@@ -45,9 +44,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
@@ -82,40 +79,38 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @CascadeOnDelete
     @ManyToMany(targetEntity = JpaSoftwareModule.class, fetch = FetchType.LAZY)
     @JoinTable(name = "sp_ds_module", joinColumns = {
-            @JoinColumn(name = "ds_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_ds")) }, inverseJoinColumns = {
-                    @JoinColumn(name = "module_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_module")) })
+            @JoinColumn(name = "ds_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_ds")) }, inverseJoinColumns = {
+                    @JoinColumn(name = "module_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_module")) })
     private Set<SoftwareModule> modules;
 
     @CascadeOnDelete
     @ManyToMany(targetEntity = JpaDistributionSetTag.class)
     @JoinTable(name = "sp_ds_dstag", joinColumns = {
-            @JoinColumn(name = "ds", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_ds")) }, inverseJoinColumns = {
-                    @JoinColumn(name = "TAG", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_tag")) })
+            @JoinColumn(name = "ds", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_ds")) }, inverseJoinColumns = {
+                    @JoinColumn(name = "TAG", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_tag")) })
     private Set<DistributionSetTag> tags;
 
     @Column(name = "deleted")
     private boolean deleted;
 
     @OneToMany(mappedBy = "assignedDistributionSet", targetEntity = JpaTarget.class, fetch = FetchType.LAZY)
-    private List<Target> assignedToTargets;
+    private List<JpaTarget> assignedToTargets;
 
     @OneToMany(mappedBy = "autoAssignDistributionSet", targetEntity = JpaTargetFilterQuery.class, fetch = FetchType.LAZY)
     private List<TargetFilterQuery> autoAssignFilters;
 
     @OneToMany(mappedBy = "installedDistributionSet", targetEntity = JpaTargetInfo.class, fetch = FetchType.LAZY)
-    private List<TargetInfo> installedAtTargets;
+    private List<JpaTargetInfo> installedAtTargets;
 
     @OneToMany(mappedBy = "distributionSet", targetEntity = JpaAction.class, fetch = FetchType.LAZY)
-    private List<Action> actions;
+    private List<JpaAction> actions;
 
     @CascadeOnDelete
-    @OneToMany(fetch = FetchType.LAZY, targetEntity = JpaDistributionSetMetadata.class, cascade = {
-            CascadeType.REMOVE })
-    @JoinColumn(name = "ds_id", insertable = false, updatable = false)
+    @OneToMany(mappedBy = "distributionSet", fetch = FetchType.LAZY, targetEntity = JpaDistributionSetMetadata.class)
     private List<DistributionSetMetadata> metadata;
 
-    @ManyToOne(fetch = FetchType.LAZY, targetEntity = JpaDistributionSetType.class)
-    @JoinColumn(name = "ds_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstype_ds"))
+    @ManyToOne(fetch = FetchType.LAZY, optional = false, targetEntity = JpaDistributionSetType.class)
+    @JoinColumn(name = "ds_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstype_ds"))
     @NotNull
     private DistributionSetType type;
 
@@ -268,7 +263,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         checkTypeCompatability(softwareModule);
 
         final Optional<SoftwareModule> found = modules.stream()
-                .filter(module -> module.getId().equals(softwareModule.getId())).findFirst();
+                .filter(module -> module.getId().equals(softwareModule.getId())).findAny();
 
         if (found.isPresent()) {
             return false;
@@ -279,7 +274,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
         if (allready >= softwareModule.getType().getMaxAssignments()) {
             modules.stream().filter(module -> module.getType().getKey().equals(softwareModule.getType().getKey()))
-                    .findFirst().map(modules::remove);
+                    .findAny().map(modules::remove);
         }
 
         if (modules.add(softwareModule)) {
@@ -308,7 +303,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         }
 
         final Optional<SoftwareModule> found = modules.stream()
-                .filter(module -> module.getId().equals(softwareModule.getId())).findFirst();
+                .filter(module -> module.getId().equals(softwareModule.getId())).findAny();
 
         if (found.isPresent()) {
             modules.remove(found.get());

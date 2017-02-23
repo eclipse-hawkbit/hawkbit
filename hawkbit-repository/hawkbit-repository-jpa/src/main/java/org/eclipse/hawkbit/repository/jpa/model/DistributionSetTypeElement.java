@@ -43,12 +43,12 @@ public class DistributionSetTypeElement implements Serializable {
 
     @MapsId("dsType")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "distribution_set_type", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_type_element_dstype"))
+    @JoinColumn(name = "distribution_set_type", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_type_element_element"))
     private JpaDistributionSetType dsType;
 
     @MapsId("smType")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "software_module_type", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_type_element_smtype"))
+    @JoinColumn(name = "software_module_type", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_type_element_smtype"))
     private JpaSoftwareModuleType smType;
 
     public DistributionSetTypeElement() {
@@ -66,7 +66,7 @@ public class DistributionSetTypeElement implements Serializable {
      *            to <code>true</code> if the {@link SoftwareModuleType} if
      *            mandatory element in the {@link DistributionSet}.
      */
-    public DistributionSetTypeElement(final JpaDistributionSetType dsType, final JpaSoftwareModuleType smType,
+    DistributionSetTypeElement(final JpaDistributionSetType dsType, final JpaSoftwareModuleType smType,
             final boolean mandatory) {
         super();
         key = new DistributionSetTypeElementCompositeKey(dsType, smType);
@@ -75,7 +75,7 @@ public class DistributionSetTypeElement implements Serializable {
         this.mandatory = mandatory;
     }
 
-    public DistributionSetTypeElement setMandatory(final boolean mandatory) {
+    DistributionSetTypeElement setMandatory(final boolean mandatory) {
         this.mandatory = mandatory;
         return this;
     }

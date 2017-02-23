@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -44,7 +45,7 @@ public interface DistributionSetTagRepository
      *            to filter on
      * @return the {@link DistributionSetTag} if found, otherwise null
      */
-    JpaDistributionSetTag findByNameEquals(final String tagName);
+    Optional<DistributionSetTag> findByNameEquals(final String tagName);
 
     /**
      * Returns all instances of the type.

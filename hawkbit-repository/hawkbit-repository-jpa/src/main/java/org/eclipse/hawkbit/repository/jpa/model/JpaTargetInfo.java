@@ -79,8 +79,7 @@ public class JpaTargetInfo implements Persistable<Long>, TargetInfo {
     private boolean entityNew;
 
     @CascadeOnDelete
-    @OneToOne(cascade = { CascadeType.MERGE,
-            CascadeType.REMOVE }, fetch = FetchType.LAZY, targetEntity = JpaTarget.class)
+    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, targetEntity = JpaTarget.class)
     @JoinColumn(name = "target_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_stat_targ"))
     @MapsId
     private JpaTarget target;
@@ -112,7 +111,7 @@ public class JpaTargetInfo implements Persistable<Long>, TargetInfo {
     @Column(name = "attribute_value", length = 128)
     @MapKeyColumn(name = "attribute_key", nullable = false, length = 32)
     @CollectionTable(name = "sp_target_attributes", joinColumns = {
-            @JoinColumn(name = "target_id") }, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_attrib_target"))
+            @JoinColumn(name = "target_id", nullable = false, updatable = false) }, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_attrib_target"))
     private final Map<String, String> controllerAttributes = Collections.synchronizedMap(new HashMap<String, String>());
 
     // set default request controller attributes to true, because we want to

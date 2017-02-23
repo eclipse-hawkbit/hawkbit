@@ -97,7 +97,6 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     @Override
-    @ResponseBody
     public ResponseEntity<List<MgmtArtifact>> getArtifacts(
             @PathVariable("softwareModuleId") final Long softwareModuleId) {
 
@@ -229,8 +228,9 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     public ResponseEntity<MgmtMetadata> getMetadataValue(@PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("metadataKey") final String metadataKey) {
 
-        final SoftwareModuleMetadata findOne = softwareManagement.findSoftwareModuleMetadata(softwareModuleId,
-                metadataKey);
+        final SoftwareModuleMetadata findOne = softwareManagement
+                .findSoftwareModuleMetadata(softwareModuleId, metadataKey).orElseThrow(
+                        () -> new EntityNotFoundException(SoftwareModuleMetadata.class, softwareModuleId, metadataKey));
 
         return ResponseEntity.ok(toResponseSwMetadata(findOne));
     }
@@ -266,12 +266,11 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     private SoftwareModule findSoftwareModuleWithExceptionIfNotFound(final Long softwareModuleId,
             final Long artifactId) {
 
-        final SoftwareModule module = softwareManagement.findSoftwareModuleById(softwareModuleId);
-        if (module == null) {
-            throw new EntityNotFoundException("SoftwareModule with Id {" + softwareModuleId + "} does not exist");
-        }
+        final SoftwareModule module = softwareManagement.findSoftwareModuleById(softwareModuleId)
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
+
         if (artifactId != null && !module.getArtifact(artifactId).isPresent()) {
-            throw new EntityNotFoundException("Artifact with Id {" + artifactId + "} does not exist");
+            throw new EntityNotFoundException(Artifact.class, artifactId);
         }
 
         return module;

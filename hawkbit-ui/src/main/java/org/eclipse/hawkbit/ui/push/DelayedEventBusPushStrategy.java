@@ -34,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
@@ -68,14 +67,14 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
     private static final Logger LOG = LoggerFactory.getLogger(DelayedEventBusPushStrategy.class);
 
     private static final int BLOCK_SIZE = 10_000;
-    private final BlockingDeque<org.eclipse.hawkbit.repository.event.TenantAwareEvent> queue = new LinkedBlockingDeque<>(
-            BLOCK_SIZE);
+    private final BlockingDeque<TenantAwareEvent> queue = new LinkedBlockingDeque<>(BLOCK_SIZE);
 
     private final ScheduledExecutorService executorService;
     private final EventBus.UIEventBus eventBus;
     private final UIEventProvider eventProvider;
-    private ScheduledFuture<?> jobHandle;
     private final long delay;
+
+    private ScheduledFuture<?> jobHandle;
     private UI vaadinUI;
 
     /**
@@ -248,7 +247,6 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
      *            the entity event which has been published from the repository
      */
     @Override
-    @Async
     public void onApplicationEvent(final ApplicationEvent applicationEvent) {
         if (!(applicationEvent instanceof org.eclipse.hawkbit.repository.event.TenantAwareEvent)) {
             return;
@@ -274,7 +272,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
 
     private void offerEvent(final org.eclipse.hawkbit.repository.event.TenantAwareEvent event) {
         if (!queue.offer(event)) {
-            LOG.warn("Deque limit is reached, cannot add more events!!! Dropped event is {}", event);
+            LOG.trace("Deque limit is reached, cannot add more events!!! Dropped event is {}", event);
         }
     }
 
@@ -282,25 +280,23 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
         Long rolloutId = null;
         Long rolloutGroupId = null;
         if (event instanceof ActionCreatedEvent) {
-            rolloutId = getRolloutId(((ActionCreatedEvent) event).getEntity().getRollout());
-            rolloutGroupId = getRolloutGroupId(((ActionCreatedEvent) event).getEntity().getRolloutGroup());
+            rolloutId = ((ActionCreatedEvent) event).getRolloutId();
+            rolloutGroupId = ((ActionCreatedEvent) event).getRolloutGroupId();
         } else if (event instanceof ActionUpdatedEvent) {
-            rolloutId = getRolloutId(((ActionUpdatedEvent) event).getEntity().getRollout());
-            rolloutGroupId = getRolloutGroupId(((ActionUpdatedEvent) event).getEntity().getRolloutGroup());
+            rolloutId = ((ActionUpdatedEvent) event).getRolloutId();
+            rolloutGroupId = ((ActionUpdatedEvent) event).getRolloutGroupId();
         } else if (event instanceof RolloutUpdatedEvent) {
             rolloutId = ((RolloutUpdatedEvent) event).getEntityId();
         } else if (event instanceof RolloutGroupCreatedEvent) {
             rolloutId = ((RolloutGroupCreatedEvent) event).getRolloutId();
             rolloutGroupId = ((RolloutGroupCreatedEvent) event).getEntityId();
         } else if (event instanceof RolloutGroupUpdatedEvent) {
-            final RolloutGroup rolloutGroup = ((RolloutGroupUpdatedEvent) event).getEntity();
-            rolloutId = rolloutGroup.getRollout().getId();
-            rolloutGroupId = rolloutGroup.getId();
-        }
-
-        if (rolloutId == null) {
+            rolloutId = ((RolloutGroupUpdatedEvent) event).getRolloutId();
+            rolloutGroupId = ((RolloutGroupUpdatedEvent) event).getEntityId();
+        } else {
             return;
         }
+
         offerEventIfNotContains(new RolloutChangeEvent(event.getTenant(), rolloutId));
 
         if (rolloutGroupId != null) {

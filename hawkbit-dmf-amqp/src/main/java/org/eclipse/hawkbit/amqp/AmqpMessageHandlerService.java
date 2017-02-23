@@ -21,13 +21,13 @@ import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.ActionUpdateStatus;
+import org.eclipse.hawkbit.dmf.json.model.AttributeUpdate;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -180,7 +180,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private void lookIfUpdateAvailable(final Target target) {
-        final Optional<Action> actionOptional = controllerManagement.findOldestActiveActionByTarget(target);
+        final Optional<Action> actionOptional = controllerManagement
+                .findOldestActiveActionByTarget(target.getControllerId());
         if (!actionOptional.isPresent()) {
             return;
         }
@@ -205,11 +206,26 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      *            the topic of the event.
      */
     private void handleIncomingEvent(final Message message, final EventTopic topic) {
-        if (EventTopic.UPDATE_ACTION_STATUS.equals(topic)) {
+
+        switch (topic) {
+        case UPDATE_ACTION_STATUS:
             updateActionStatus(message);
-            return;
+            break;
+        case UPDATE_ATTRIBUTES:
+            updateAttributes(message);
+            break;
+        default:
+            logAndThrowMessageError(message, "Got event without appropriate topic.");
+            break;
         }
-        logAndThrowMessageError(message, "Got event without appropriate topic.");
+
+    }
+
+    private void updateAttributes(final Message message) {
+        final AttributeUpdate attributeUpdate = convertMessage(message, AttributeUpdate.class);
+        final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, "ThingId is null");
+
+        controllerManagement.updateControllerAttributes(thingId, attributeUpdate.getAttributes());
     }
 
     /**
@@ -277,7 +293,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private Status hanldeCancelRejectedState(final Message message, final Action action) {
         if (action.isCancelingOrCanceled()) {
-            return Status.WARNING;
+            return Status.CANCEL_REJECTED;
         } else {
             logAndThrowMessageError(message,
                     "Cancel recjected message is not allowed, if action is on state: " + action.getStatus());
@@ -286,7 +302,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private void updateLastPollTime(final Target target) {
-        controllerManagement.updateTargetStatus(target.getTargetInfo(), null, System.currentTimeMillis(), null);
+        controllerManagement.updateLastTargetQuery(target.getControllerId(), null);
     }
 
     private static String convertCorrelationId(final Message message) {
@@ -300,6 +316,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         return controllerManagement.addUpdateActionStatus(actionStatus);
     }
 
+    // Exception squid:S3655 - logAndThrowMessageError throws exception, i.e.
+    // get will not be called
+    @SuppressWarnings("squid:S3655")
     private Action checkActionExist(final Message message, final ActionUpdateStatus actionUpdateStatus) {
         final Long actionId = actionUpdateStatus.getActionId();
         LOG.debug("Target notifies intermediate about action {} with status {}.", actionId,
@@ -309,17 +328,12 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             logAndThrowMessageError(message, "Invalid message no action id");
         }
 
-        try {
-            final Action findActionWithDetails = controllerManagement.findActionWithDetails(actionId);
-            if (findActionWithDetails == null) {
-                logAndThrowMessageError(message,
-                        "Got intermediate notification about action " + actionId + " but action does not exist");
-            }
-            return findActionWithDetails;
-        } catch (@SuppressWarnings("squid:S1166") final EntityNotFoundException e) {
+        final Optional<Action> findActionWithDetails = controllerManagement.findActionWithDetails(actionId);
+        if (!findActionWithDetails.isPresent()) {
             logAndThrowMessageError(message,
                     "Got intermediate notification about action " + actionId + " but action does not exist");
         }
-        return null;
+
+        return findActionWithDetails.get();
     }
 }

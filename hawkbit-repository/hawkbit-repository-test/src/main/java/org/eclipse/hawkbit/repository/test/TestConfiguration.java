@@ -55,6 +55,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.data.domain.AuditorAware;
+import org.springframework.integration.support.locks.DefaultLockRegistry;
+import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
@@ -72,6 +74,11 @@ import org.springframework.util.AntPathMatcher;
 @Profile("test")
 @EnableAutoConfiguration
 public class TestConfiguration implements AsyncConfigurer {
+
+    @Bean
+    public LockRegistry lockRegistry() {
+        return new DefaultLockRegistry();
+    }
 
     @Bean
     public SecurityTokenGenerator securityTokenGenerator() {

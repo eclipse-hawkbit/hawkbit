@@ -60,7 +60,7 @@ public class ManageDistFilters implements Serializable {
     }
 
     public Optional<String> getSearchText() {
-        return searchText == null ? Optional.empty() : Optional.of(searchText);
+        return Optional.ofNullable(searchText);
     }
 
     public void setSearchText(final String searchText) {

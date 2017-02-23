@@ -13,15 +13,23 @@ import static org.eclipse.hawkbit.repository.FieldNameProvider.SUB_ATTRIBUTE_SEP
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.MapJoin;
 import javax.persistence.criteria.Path;
+import javax.persistence.criteria.PluralJoin;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -157,7 +165,6 @@ public final class RSQLUtility {
 
         @Override
         public Predicate toPredicate(final Root<T> root, final CriteriaQuery<?> query, final CriteriaBuilder cb) {
-
             final Node rootNode = parseRsql(rsql);
 
             final JpqQueryRSQLVisitor<A, T> jpqQueryRSQLVisitor = new JpqQueryRSQLVisitor<>(root, cb, enumType,
@@ -192,6 +199,9 @@ public final class RSQLUtility {
         private final CriteriaBuilder cb;
         private final Class<A> enumType;
         private final VirtualPropertyReplacer virtualPropertyReplacer;
+        private int level;
+        private boolean isOrLevel;
+        private final Map<Integer, Set<Join<Object, Object>>> joinsInLevel = new HashMap<>(3);
 
         private final SimpleTypeConverter simpleTypeConverter;
 
@@ -204,9 +214,41 @@ public final class RSQLUtility {
             simpleTypeConverter = new SimpleTypeConverter();
         }
 
+        private void beginLevel(boolean isOr) {
+            level++;
+            isOrLevel = isOr;
+            joinsInLevel.put(level, new HashSet<>(2));
+        }
+
+        private void endLevel() {
+            joinsInLevel.remove(level);
+            level--;
+            isOrLevel = false;
+        }
+
+        private Set<Join<Object, Object>> getCurrentJoins() {
+            if(level > 0) {
+                return joinsInLevel.get(level);
+            }
+            return Collections.emptySet();
+        }
+
+        private Optional<Join<Object, Object>> findCurrentJoinOfType(final Class<?> type) {
+            return getCurrentJoins().stream()
+                    .filter(j -> type.equals(j.getJavaType())).findAny();
+        }
+
+        private void addCurrentJoin(Join<Object, Object> join) {
+            if(level > 0) {
+                getCurrentJoins().add(join);
+            }
+        }
+
         @Override
         public List<Predicate> visit(final AndNode node, final String param) {
+            beginLevel(false);
             final List<Predicate> childs = acceptChilds(node);
+            endLevel();
             if (!childs.isEmpty()) {
                 return toSingleList(cb.and(childs.toArray(new Predicate[childs.size()])));
             }
@@ -215,7 +257,9 @@ public final class RSQLUtility {
 
         @Override
         public List<Predicate> visit(final OrNode node, final String param) {
+            beginLevel(true);
             final List<Predicate> childs = acceptChilds(node);
+            endLevel();
             if (!childs.isEmpty()) {
                 return toSingleList(cb.or(childs.toArray(new Predicate[childs.size()])));
             }
@@ -282,12 +326,28 @@ public final class RSQLUtility {
                     new Exception());
         }
 
+        /**
+         * Resolves the Path for a field in the persistence layer and joins the
+         * required models. This operation is part of a tree traversal through
+         * an RSQL expression. It creates for every field that is not part of
+         * the root model a join to the foreign model. This behavior is
+         * optimized when several joins happen directly under an OR node in the
+         * traversed tree. The same foreign model is only joined once.
+         *
+         * Example: tags.name==M;(tags.name==A,tags.name==B,tags.name==C) This
+         * example joins the tags model only twice, because for the OR node in
+         * brackets only one join is used.
+         *
+         * @param enumField
+         *            field from a FieldNameProvider to resolve on the
+         *            persistence layer
+         * @param finalProperty
+         *            dot notated field path
+         * @return the Path for a field
+         */
         private Path<Object> getFieldPath(final A enumField, final String finalProperty) {
             Path<Object> fieldPath = null;
             final String[] split = finalProperty.split("\\" + SUB_ATTRIBUTE_SEPERATOR);
-            if (split.length == 0) {
-                return root.get(split[0]);
-            }
 
             for (int i = 0; i < split.length; i++) {
                 final boolean isMapKeyField = enumField.isMap() && i == (split.length - 1);
@@ -297,6 +357,21 @@ public final class RSQLUtility {
 
                 final String fieldNameSplit = split[i];
                 fieldPath = (fieldPath != null) ? fieldPath.get(fieldNameSplit) : root.get(fieldNameSplit);
+                if (fieldPath instanceof PluralJoin) {
+                    final Join<Object, ?> join = (Join<Object, ?>) fieldPath;
+                    final From<?, Object> joinParent = join.getParent();
+                    Optional<Join<Object, Object>> currentJoinOfType = findCurrentJoinOfType(join.getJavaType());
+                    if(currentJoinOfType.isPresent() && isOrLevel) {
+                        // remove the additional join and use the existing one
+                        joinParent.getJoins().remove(join);
+                        fieldPath = currentJoinOfType.get();
+                    } else {
+                        Join<Object, Object> newJoin = joinParent.join(fieldNameSplit, JoinType.LEFT);
+                        addCurrentJoin(newJoin);
+                        fieldPath = newJoin;
+                    }
+
+                }
             }
             return fieldPath;
         }

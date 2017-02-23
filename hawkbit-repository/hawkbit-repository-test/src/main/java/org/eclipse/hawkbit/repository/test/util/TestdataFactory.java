@@ -8,10 +8,13 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -43,7 +46,9 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 
 import com.google.common.collect.Lists;
 
@@ -307,12 +312,9 @@ public class TestdataFactory {
 
         final DistributionSet set = createDistributionSet(prefix, version, false);
 
-        final List<DistributionSet> sets = new ArrayList<>();
-        sets.add(set);
+        tags.forEach(tag -> distributionSetManagement.toggleTagAssignment(Arrays.asList(set.getId()), tag.getName()));
 
-        tags.forEach(tag -> distributionSetManagement.toggleTagAssignment(sets, tag));
-
-        return distributionSetManagement.findDistributionSetById(set.getId());
+        return distributionSetManagement.findDistributionSetById(set.getId()).get();
 
     }
 
@@ -499,7 +501,9 @@ public class TestdataFactory {
      * @return persisted {@link Target}
      */
     public Target createTarget(final String controllerId) {
-        return targetManagement.createTarget(entityFactory.target().create().controllerId(controllerId));
+        final Target target = targetManagement.createTarget(entityFactory.target().create().controllerId(controllerId));
+        assertThat(target.getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.UNKNOWN);
+        return target;
     }
 
     /**
@@ -525,7 +529,7 @@ public class TestdataFactory {
                 entityFactory.softwareModule().update(module.getId()).description("Updated " + DEFAULT_DESCRIPTION)));
 
         // load also lazy stuff
-        return distributionSetManagement.findDistributionSetByIdWithDetails(set.getId());
+        return distributionSetManagement.findDistributionSetByIdWithDetails(set.getId()).get();
     }
 
     /**
@@ -556,15 +560,9 @@ public class TestdataFactory {
      * @return persisted {@link DistributionSetType}
      */
     public DistributionSetType findOrCreateDistributionSetType(final String dsTypeKey, final String dsTypeName) {
-        final DistributionSetType findDistributionSetTypeByname = distributionSetManagement
-                .findDistributionSetTypeByKey(dsTypeKey);
-
-        if (findDistributionSetTypeByname != null) {
-            return findDistributionSetTypeByname;
-        }
-
-        return distributionSetManagement.createDistributionSetType(entityFactory.distributionSetType().create()
-                .key(dsTypeKey).name(dsTypeName).description(LOREM.words(10)).colour("black"));
+        return distributionSetManagement.findDistributionSetTypeByKey(dsTypeKey)
+                .orElseGet(() -> distributionSetManagement.createDistributionSetType(entityFactory.distributionSetType()
+                        .create().key(dsTypeKey).name(dsTypeName).description(LOREM.words(10)).colour("black")));
     }
 
     /**
@@ -584,17 +582,11 @@ public class TestdataFactory {
      */
     public DistributionSetType findOrCreateDistributionSetType(final String dsTypeKey, final String dsTypeName,
             final Collection<SoftwareModuleType> mandatory, final Collection<SoftwareModuleType> optional) {
-        final DistributionSetType findDistributionSetTypeByname = distributionSetManagement
-                .findDistributionSetTypeByKey(dsTypeKey);
-
-        if (findDistributionSetTypeByname != null) {
-            return findDistributionSetTypeByname;
-        }
-
-        return distributionSetManagement.createDistributionSetType(entityFactory.distributionSetType().create()
-                .key(dsTypeKey).name(dsTypeName).description(LOREM.words(10)).colour("black")
-                .optional(optional.stream().map(SoftwareModuleType::getId).collect(Collectors.toList()))
-                .mandatory(mandatory.stream().map(SoftwareModuleType::getId).collect(Collectors.toList())));
+        return distributionSetManagement.findDistributionSetTypeByKey(dsTypeKey)
+                .orElseGet(() -> distributionSetManagement.createDistributionSetType(entityFactory.distributionSetType()
+                        .create().key(dsTypeKey).name(dsTypeName).description(LOREM.words(10)).colour("black")
+                        .optional(optional.stream().map(SoftwareModuleType::getId).collect(Collectors.toList()))
+                        .mandatory(mandatory.stream().map(SoftwareModuleType::getId).collect(Collectors.toList()))));
     }
 
     /**
@@ -623,12 +615,9 @@ public class TestdataFactory {
      * @return persisted {@link SoftwareModuleType}
      */
     public SoftwareModuleType findOrCreateSoftwareModuleType(final String key, final int maxAssignments) {
-        final SoftwareModuleType findSoftwareModuleTypeByKey = softwareManagement.findSoftwareModuleTypeByKey(key);
-        if (findSoftwareModuleTypeByKey != null) {
-            return findSoftwareModuleTypeByKey;
-        }
-        return softwareManagement.createSoftwareModuleType(entityFactory.softwareModuleType().create().key(key)
-                .name(key).description(LOREM.words(10)).maxAssignments(maxAssignments));
+        return softwareManagement.findSoftwareModuleTypeByKey(key)
+                .orElseGet(() -> softwareManagement.createSoftwareModuleType(entityFactory.softwareModuleType().create()
+                        .key(key).name(key).description(LOREM.words(10)).maxAssignments(maxAssignments)));
     }
 
     /**
@@ -900,7 +889,8 @@ public class TestdataFactory {
             final Collection<String> msgs) {
         final List<Action> result = new ArrayList<>();
         for (final Target target : targets) {
-            final List<Action> findByTarget = deploymentManagement.findActionsByTarget(target);
+            final List<Action> findByTarget = deploymentManagement
+                    .findActionsByTarget(target.getControllerId(), new PageRequest(0, 400)).getContent();
             for (final Action action : findByTarget) {
                 result.add(sendUpdateActionStatusToTarget(status, action, msgs));
             }

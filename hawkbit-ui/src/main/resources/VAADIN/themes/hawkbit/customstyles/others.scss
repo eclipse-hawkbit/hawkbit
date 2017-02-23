@@ -209,6 +209,11 @@
     color: $hawkbit-primary-color;
   }
   
+  
+  .redSpinner{
+	 @include valo-spinner($size: $v-font-size--small,$color: $red-color);
+	 pointer-events: auto !important;
+   } 
 
    .greySpinner{
 	 @include valo-spinner($size: $v-font-size--small,$color: $grey-color);

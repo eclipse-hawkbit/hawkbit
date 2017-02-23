@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.common;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -161,7 +161,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         this.selectedEntity = selectedEntity;
     }
 
-    protected abstract void checkForDuplicate(E entity, String value);
+    protected abstract boolean checkForDuplicate(E entity, String value);
 
     protected abstract M createMetadata(E entity, String key, String value);
 
@@ -233,7 +233,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         final TextField keyField = new TextFieldBuilder().caption(i18n.get("textfield.key")).required(true)
                 .prompt(i18n.get("textfield.key")).immediate(true).id(UIComponentIdProvider.METADATA_KEY_FIELD_ID)
                 .maxLengthAllowed(128).buildTextComponent();
-        keyField.addTextChangeListener(event -> onKeyChange(event));
+        keyField.addTextChangeListener(this::onKeyChange);
         keyField.setTextChangeEventMode(TextChangeEventMode.EAGER);
         keyField.setWidth("100%");
         return keyField;
@@ -243,10 +243,10 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         valueTextArea = new TextAreaBuilder().caption(i18n.get("textfield.value")).required(true)
                 .prompt(i18n.get("textfield.value")).immediate(true).id(UIComponentIdProvider.METADATA_VALUE_ID)
                 .maxLengthAllowed(4000).buildTextComponent();
-        valueTextArea.setNullRepresentation("");
+        valueTextArea.setNullRepresentation(StringUtils.EMPTY);
         valueTextArea.setSizeFull();
         valueTextArea.setHeight(100, Unit.PERCENTAGE);
-        valueTextArea.addTextChangeListener(event -> onValueChange(event));
+        valueTextArea.addTextChangeListener(this::onValueChange);
         valueTextArea.setTextChangeEventMode(TextChangeEventMode.EAGER);
         return valueTextArea;
     }
@@ -264,9 +264,9 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         metadataGrid.getColumn(KEY).setHeaderCaption(i18n.get("header.key"));
         metadataGrid.getColumn(VALUE).setHeaderCaption(i18n.get("header.value"));
         metadataGrid.getColumn(VALUE).setHidden(true);
-        metadataGrid.addSelectionListener(event -> onRowClick(event));
+        metadataGrid.addSelectionListener(this::onRowClick);
         metadataGrid.getColumn(DELETE_BUTTON).setHeaderCaption("");
-        metadataGrid.getColumn(DELETE_BUTTON).setRenderer(new HtmlButtonRenderer(event -> onDelete(event)));
+        metadataGrid.getColumn(DELETE_BUTTON).setRenderer(new HtmlButtonRenderer(this::onDelete));
         metadataGrid.getColumn(DELETE_BUTTON).setWidth(50);
         metadataGrid.getColumn(KEY).setExpandRatio(1);
         return metadataGrid;
@@ -421,12 +421,10 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     }
 
     private boolean duplicateCheck(final E entity) {
-        try {
-            checkForDuplicate(entity, keyTextField.getValue());
-            // we do not want to log the exception here, does not make sense
-        } catch (@SuppressWarnings("squid:S1166") final EntityNotFoundException exception) {
+        if (!checkForDuplicate(entity, keyTextField.getValue())) {
             return false;
         }
+
         uiNotification.displayValidationError(i18n.get("message.metadata.duplicate.check", keyTextField.getValue()));
         return true;
     }
@@ -457,9 +455,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     private void onRowClick(final SelectionEvent event) {
         final Set<Object> itemsSelected = event.getSelected();
         if (!itemsSelected.isEmpty()) {
-            final Object itemSelected = itemsSelected.stream().findFirst().isPresent()
-                    ? itemsSelected.stream().findFirst().get() : null;
-            popualateKeyValue(itemSelected);
+            popualateKeyValue(itemsSelected.iterator().next());
             addIcon.setEnabled(true);
         } else {
             keyTextField.clear();

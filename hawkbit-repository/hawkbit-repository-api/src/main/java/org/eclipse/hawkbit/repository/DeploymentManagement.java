@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.constraints.NotNull;
 
@@ -115,56 +116,31 @@ public interface DeploymentManagement {
             @NotEmpty Collection<TargetWithActionType> targets, String actionMessage);
 
     /**
-     * method assigns the {@link DistributionSet} to all {@link Target}s by
-     * their IDs with a specific {@link ActionType} and {@code forcetime}.
-     *
-     * @param dsID
-     *            the ID of the distribution set to assign
-     * @param targets
-     *            a list of all targets and their action type
-     * @param rollout
-     *            the rollout for this assignment
-     * @param rolloutGroup
-     *            the rollout group for this assignment
-     * @return the assignment result
-     *
-     * @throw IncompleteDistributionSetException if mandatory
-     *        {@link SoftwareModuleType} are not assigned as define by the
-     *        {@link DistributionSetType}.
-     * 
-     * @throw {@link EntityNotFoundException} if either provided
-     *        {@link DistributionSet} or {@link Target}s do not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    DistributionSetAssignmentResult assignDistributionSet(@NotNull Long dsID,
-            @NotEmpty Collection<TargetWithActionType> targets, Rollout rollout, RolloutGroup rolloutGroup);
-
-    /**
      * Cancels given {@link Action} for given {@link Target}. The method will
      * immediately add a {@link Status#CANCELED} status to the action. However,
      * it might be possible that the controller will continue to work on the
      * cancellation.
      *
-     * @param action
+     * @param actionId
      *            to be canceled
-     * @param target
-     *            for which the action needs cancellation
      *
-     * @return generated {@link Action} or <code>null</code> if not active on
-     *         given {@link Target}.
+     * @return canceled {@link Action}
+     * 
      * @throws CancelActionNotAllowedException
      *             in case the given action is not active or is already a cancel
      *             action
+     * @throws EntityNotFoundException
+     *             if action with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    Action cancelAction(@NotNull Action action, @NotNull Target target);
+    Action cancelAction(@NotNull Long actionId);
 
     /**
      * counts all actions associated to a specific target.
      *
      * @param rsqlParam
      *            rsql query string
-     * @param target
+     * @param controllerId
      *            the target associated to the actions to count
      * @return the count value of found actions associated to the target
      * 
@@ -173,9 +149,11 @@ public interface DeploymentManagement {
      *             given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException
      *             if the RSQL syntax is wrong
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Long countActionsByTarget(@NotNull String rsqlParam, @NotNull Target target);
+    Long countActionsByTarget(@NotNull String rsqlParam, @NotEmpty String controllerId);
 
     /**
      * @return the total amount of stored action status
@@ -192,35 +170,15 @@ public interface DeploymentManagement {
     /**
      * counts all actions associated to a specific target.
      *
-     * @param target
+     * @param controllerId
      *            the target associated to the actions to count
      * @return the count value of found actions associated to the target
+     * 
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Long countActionsByTarget(@NotNull Target target);
-
-    /**
-     * Creates an action entry into the action repository. In case of existing
-     * scheduled actions the scheduled actions gets canceled. A scheduled action
-     * is created in-active.
-     *
-     * @param targets
-     *            the targets to create scheduled actions for
-     * @param distributionSet
-     *            the distribution set for the actions
-     * @param actionType
-     *            the action type for the action
-     * @param forcedTime
-     *            the forcedTime of the action
-     * @param rollout
-     *            the roll out for this action
-     * @param rolloutGroup
-     *            the roll out group for this action
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    void createScheduledAction(@NotEmpty Collection<Target> targets, @NotNull DistributionSet distributionSet,
-            @NotNull ActionType actionType, Long forcedTime, @NotNull Rollout rollout,
-            @NotNull RolloutGroup rolloutGroup);
+    Long countActionsByTarget(@NotEmpty String controllerId);
 
     /**
      * Get the {@link Action} entity for given actionId.
@@ -228,33 +186,10 @@ public interface DeploymentManagement {
      * @param actionId
      *            to be id of the action
      * @return the corresponding {@link Action}
+     * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Action findAction(@NotNull Long actionId);
-
-    /**
-     * Retrieves all actions for a specific rollout and in a specific status.
-     *
-     * @param rollout
-     *            the rollout the actions beglong to
-     * @param actionStatus
-     *            the status of the actions
-     * @return the actions referring a specific rollout an in a specific status
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<Action> findActionsByRolloutAndStatus(@NotNull Rollout rollout, @NotNull Action.Status actionStatus);
-    
-    /**
-     * Retrieves all {@link Action}s of a specific target.
-     *
-     * @param pageable
-     *            pagination parameter
-     * @param target
-     *            of which the actions have to be searched
-     * @return a paged list of actions associated with the given target
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<Action> findActionsByTarget(@NotNull Pageable pageable, @NotNull Target target);
+    Optional<Action> findAction(@NotNull Long actionId);
 
     /**
      * Retrieves all {@link Action}s from repository.
@@ -272,14 +207,14 @@ public interface DeploymentManagement {
      * 
      * @param pageable
      *            the page request parameter for paging and sorting the result
-     * @param distributionSet
+     * @param distributionSetId
      *            the distribution set which should be assigned to the actions
      *            in the result
      * @return a list of {@link Action} which are assigned to a specific
      *         {@link DistributionSet}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<Action> findActionsByDistributionSet(@NotNull Pageable pageable, @NotNull DistributionSet distributionSet);
+    Slice<Action> findActionsByDistributionSet(@NotNull Pageable pageable, @NotNull Long distributionSetId);
 
     /**
      * Retrieves all {@link Action}s assigned to a specific {@link Target} and a
@@ -287,7 +222,7 @@ public interface DeploymentManagement {
      *
      * @param rsqlParam
      *            rsql query string
-     * @param target
+     * @param controllerId
      *            the target which must be assigned to the actions
      * @param pageable
      *            the page request
@@ -301,31 +236,22 @@ public interface DeploymentManagement {
      *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<Action> findActionsByTarget(@NotNull String rsqlParam, @NotNull Target target, @NotNull Pageable pageable);
-
-    /**
-     * Retrieves all {@link Action}s of a specific target ordered by action ID.
-     *
-     * @param target
-     *            the target associated with the actions
-     * @return a list of actions associated with the given target ordered by
-     *         action ID
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<Action> findActionsByTarget(@NotNull Target target);
+    Slice<Action> findActionsByTarget(@NotNull String rsqlParam, @NotEmpty String controllerId,
+            @NotNull Pageable pageable);
 
     /**
      * Retrieves all {@link Action}s which are referring the given
      * {@link Target}.
      *
-     * @param foundTarget
+     * @param controllerId
      *            the target to find actions for
      * @param pageable
      *            the pageable request to limit, sort the actions
      * @return a slice of actions found for a specific target
+     * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<Action> findActionsByTarget(@NotNull Target foundTarget, @NotNull Pageable pageable);
+    Slice<Action> findActionsByTarget(@NotEmpty String controllerId, @NotNull Pageable pageable);
 
     /**
      * Retrieves all the {@link ActionStatus} entries of the given
@@ -333,12 +259,15 @@ public interface DeploymentManagement {
      *
      * @param pageReq
      *            pagination parameter
-     * @param action
+     * @param actionId
      *            to be filtered on
      * @return the corresponding {@link Page} of {@link ActionStatus}
+     * 
+     * @throws EntityNotFoundException
+     *             if action with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<ActionStatus> findActionStatusByAction(@NotNull Pageable pageReq, @NotNull Action action);
+    Page<ActionStatus> findActionStatusByAction(@NotNull Pageable pageReq, @NotNull Long actionId);
 
     /**
      * Retrieves all {@link ActionStatus} inclusive their messages by a specific
@@ -346,23 +275,26 @@ public interface DeploymentManagement {
      * 
      * @param pageable
      *            the page request parameter for paging and sorting the result
-     * @param action
+     * @param actionId
      *            the {@link Action} to retrieve the {@link ActionStatus} from
      * @return a page of {@link ActionStatus} by a speciifc {@link Action}
+     * 
+     * @throws EntityNotFoundException
+     *             if action with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<ActionStatus> findActionStatusByActionWithMessages(@NotNull Pageable pageable, @NotNull Action action);
+    Page<ActionStatus> findActionStatusByActionWithMessages(@NotNull Pageable pageable, @NotNull Long actionId);
 
     /**
      * Retrieves all {@link Action}s of a specific target ordered by action ID.
      *
-     * @param target
+     * @param controllerId
      *            the target associated with the actions
      * @return a list of actions associated with the given target ordered by
      *         action ID
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<ActionWithStatusCount> findActionsWithStatusCountByTargetOrderByIdDesc(@NotNull Target target);
+    List<ActionWithStatusCount> findActionsWithStatusCountByTargetOrderByIdDesc(@NotNull String controllerId);
 
     /**
      * Get the {@link Action} entity for given actionId with all lazy attributes
@@ -373,29 +305,35 @@ public interface DeploymentManagement {
      * @return the corresponding {@link Action}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Action findActionWithDetails(@NotNull Long actionId);
+    Optional<Action> findActionWithDetails(@NotNull Long actionId);
 
     /**
      * Retrieves all active {@link Action}s of a specific target ordered by
      * action ID.
      *
-     * @param target
+     * @param controllerId
      *            the target associated with the actions
      * @return a list of actions associated with the given target
+     * 
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<Action> findActiveActionsByTarget(@NotNull Target target);
+    List<Action> findActiveActionsByTarget(@NotEmpty String controllerId);
 
     /**
      * Retrieves all inactive {@link Action}s of a specific target ordered by
      * action ID.
      *
-     * @param target
+     * @param controllerId
      *            the target associated with the actions
      * @return a list of actions associated with the given target
+     * 
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<Action> findInActiveActionsByTarget(@NotNull Target target);
+    List<Action> findInActiveActionsByTarget(@NotEmpty String controllerId);
 
     /**
      * Force cancels given {@link Action} for given {@link Target}. Force
@@ -403,16 +341,19 @@ public interface DeploymentManagement {
      * and a cancel request is sent to the target. But however it's not tracked,
      * if the targets handles the cancel request or not.
      *
-     * @param action
+     * @param actionId
      *            to be canceled
      *
-     * @return generated {@link Action} or <code>null</code> if not active on
-     *         {@link Target}.
+     * @return quite {@link Action}
+     * 
      * @throws CancelActionNotAllowedException
      *             in case the given action is not active
+     * 
+     * @throws EntityNotFoundException
+     *             if action with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    Action forceQuitAction(@NotNull Action action);
+    Action forceQuitAction(@NotNull Long actionId);
 
     /**
      * Updates a {@link Action} and forces the {@link Action} if it's not
@@ -421,20 +362,12 @@ public interface DeploymentManagement {
      * @param actionId
      *            the ID of the action
      * @return the updated or the found {@link Action}
+     * 
+     * @throws EntityNotFoundException
+     *             if action with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     Action forceTargetAction(@NotNull Long actionId);
-
-    /**
-     * Starting an action which is scheduled, e.g. in case of roll out a
-     * scheduled action must be started now.
-     *
-     * @param actionId
-     *            the the ID of the action to start now.
-     * @return the action which has been started
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Action startScheduledAction(@NotNull Long actionId);
 
     /**
      * Starts all scheduled actions of an RolloutGroup parent.

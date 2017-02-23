@@ -14,12 +14,6 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Style for button: Small NoBorder.
- * 
- *
- *
- *
- *
- *
  */
 public class SPUIButtonStyleSmallNoBorder implements SPUIButtonDecorator {
 

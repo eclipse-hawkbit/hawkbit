@@ -8,9 +8,12 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.util.Optional;
+
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -18,7 +21,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionStatus;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -37,6 +39,9 @@ public interface RolloutGroupManagement {
      * @param pageable
      *            the page request to sort and limit the result
      * @return a page of found {@link RolloutGroup}s
+     * 
+     * @throws EntityNotFoundException
+     *             of rollout with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     Page<RolloutGroup> findAllRolloutGroupsWithDetailedStatus(@NotNull Long rolloutId, @NotNull Pageable pageable);
@@ -49,15 +54,17 @@ public interface RolloutGroupManagement {
      * distribution set we do not create an action for it but the target is in
      * the result list of the rollout-group.
      * 
-     * @param pageRequest
+     * @param pageable
      *            the page request to sort and limit the result
-     * @param rolloutGroup
+     * @param rolloutGroupId
      *            rollout group
      * @return {@link TargetWithActionStatus} target with action status
+     * @throws EntityNotFoundException
+     *             if rollout group with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
-    Page<TargetWithActionStatus> findAllTargetsWithActionStatus(@NotNull PageRequest pageRequest,
-            @NotNull RolloutGroup rolloutGroup);
+    Page<TargetWithActionStatus> findAllTargetsWithActionStatus(@NotNull Pageable pageable,
+            @NotNull Long rolloutGroupId);
 
     /**
      * Retrieves a single {@link RolloutGroup} by its ID.
@@ -66,9 +73,10 @@ public interface RolloutGroupManagement {
      *            the ID of the rollout group to find
      * @return the found {@link RolloutGroup} by its ID or {@code null} if it
      *         does not exists
+     * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    RolloutGroup findRolloutGroupById(@NotNull Long rolloutGroupId);
+    Optional<RolloutGroup> findRolloutGroupById(@NotNull Long rolloutGroupId);
 
     /**
      * Retrieves a page of {@link RolloutGroup}s filtered by a given
@@ -109,20 +117,23 @@ public interface RolloutGroupManagement {
     /**
      * Get targets of specified rollout group.
      * 
-     * @param rolloutGroup
+     * @param rolloutGroupId
      *            rollout group
      * @param page
      *            the page request to sort and limit the result
      * 
      * @return Page<Target> list of targets of a rollout group
+     * 
+     * @throws EntityNotFoundException
+     *             if group with ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
-    Page<Target> findRolloutGroupTargets(@NotNull RolloutGroup rolloutGroup, @NotNull Pageable page);
+    Page<Target> findRolloutGroupTargets(@NotNull Long rolloutGroupId, @NotNull Pageable page);
 
     /**
      * Get targets of specified rollout group.
      * 
-     * @param rolloutGroup
+     * @param rolloutGroupId
      *            rollout group
      * @param rsqlParam
      *            the specification for filtering the targets of a rollout group
@@ -138,7 +149,7 @@ public interface RolloutGroupManagement {
      *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
-    Page<Target> findRolloutGroupTargets(@NotNull RolloutGroup rolloutGroup, @NotNull String rsqlParam,
+    Page<Target> findRolloutGroupTargets(@NotNull Long rolloutGroupId, @NotNull String rsqlParam,
             @NotNull Pageable pageable);
 
     /**
@@ -147,9 +158,10 @@ public interface RolloutGroupManagement {
      * @param rolloutGroupId
      *            rollout group id
      * @return rolloutGroup with details of targets count for different statuses
+     * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    RolloutGroup findRolloutGroupWithDetailedStatus(@NotNull Long rolloutGroupId);
+    Optional<RolloutGroup> findRolloutGroupWithDetailedStatus(@NotNull Long rolloutGroupId);
 
     /**
      * Count targets of rollout group.
@@ -157,6 +169,9 @@ public interface RolloutGroupManagement {
      * @param rolloutGroupId
      *            the rollout group id for the count
      * @return the target rollout group count
+     * 
+     * @throws EntityNotFoundException
+     *             if rollout group with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     Long countTargetsOfRolloutsGroup(@NotNull Long rolloutGroupId);

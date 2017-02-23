@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.io.InputStream;
-import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.artifact.repository.ArtifactStoreException;
@@ -21,7 +21,6 @@ import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.GridFSDBFileNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
@@ -104,19 +103,16 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public boolean clearArtifactBinary(final Artifact existing) {
+    public boolean clearArtifactBinary(final String sha1Hash, final Long moduleId) {
 
-        for (final Artifact lArtifact : localArtifactRepository
-                .findByGridFsFileName(((JpaArtifact) existing).getGridFsFileName())) {
-            if (!lArtifact.getSoftwareModule().isDeleted()
-                    && Long.compare(lArtifact.getSoftwareModule().getId(), existing.getSoftwareModule().getId()) != 0) {
-                return false;
-            }
+        if (localArtifactRepository.existsWithSha1HashAndSoftwareModuleIdIsNot(sha1Hash, moduleId)) {
+            // there are still other artifacts that need the binary
+            return false;
         }
 
         try {
-            LOG.debug("deleting artifact from repository {}", ((JpaArtifact) existing).getGridFsFileName());
-            artifactRepository.deleteBySha1(((JpaArtifact) existing).getGridFsFileName());
+            LOG.debug("deleting artifact from repository {}", sha1Hash);
+            artifactRepository.deleteBySha1(sha1Hash);
             return true;
         } catch (final ArtifactStoreException e) {
             throw new ArtifactDeleteFailedException(e);
@@ -127,13 +123,10 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteArtifact(final Long id) {
-        final JpaArtifact existing = localArtifactRepository.findOne(id);
+        final JpaArtifact existing = (JpaArtifact) findArtifact(id)
+                .orElseThrow(() -> new EntityNotFoundException(Artifact.class, id));
 
-        if (null == existing) {
-            return;
-        }
-
-        clearArtifactBinary(existing);
+        clearArtifactBinary(existing.getSha1Hash(), existing.getSoftwareModule().getId());
 
         ((JpaSoftwareModule) existing.getSoftwareModule()).removeArtifact(existing);
         softwareModuleRepository.save((JpaSoftwareModule) existing.getSoftwareModule());
@@ -141,38 +134,43 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     @Override
-    public Artifact findArtifact(final Long id) {
-        return localArtifactRepository.findOne(id);
+    public Optional<Artifact> findArtifact(final Long id) {
+        return Optional.ofNullable(localArtifactRepository.findOne(id));
     }
 
     @Override
-    public List<Artifact> findByFilenameAndSoftwareModule(final String filename, final Long softwareModuleId) {
-        return localArtifactRepository.findByFilenameAndSoftwareModuleId(filename, softwareModuleId);
+    public Optional<Artifact> findByFilenameAndSoftwareModule(final String filename, final Long softwareModuleId) {
+        throwExceptionIfSoftwareModuleDoesNotExist(softwareModuleId);
+
+        return localArtifactRepository.findFirstByFilenameAndSoftwareModuleId(filename, softwareModuleId);
     }
 
     @Override
-    public Artifact findFirstArtifactBySHA1(final String sha1) {
-        return localArtifactRepository.findFirstByGridFsFileName(sha1);
+    public Optional<Artifact> findFirstArtifactBySHA1(final String sha1Hash) {
+        return localArtifactRepository.findFirstBySha1Hash(sha1Hash);
     }
 
     @Override
-    public List<Artifact> findArtifactByFilename(final String filename) {
-        return localArtifactRepository.findByFilename(filename);
+    public Optional<Artifact> findArtifactByFilename(final String filename) {
+        return localArtifactRepository.findFirstByFilename(filename);
     }
 
     @Override
     public Page<Artifact> findArtifactBySoftwareModule(final Pageable pageReq, final Long swId) {
+        throwExceptionIfSoftwareModuleDoesNotExist(swId);
+
         return localArtifactRepository.findBySoftwareModuleId(pageReq, swId);
     }
 
-    @Override
-    public DbArtifact loadArtifactBinary(final Artifact artifact) {
-        final DbArtifact result = artifactRepository.getArtifactBySha1(((JpaArtifact) artifact).getGridFsFileName());
-        if (result == null) {
-            throw new GridFSDBFileNotFoundException(((JpaArtifact) artifact).getGridFsFileName());
+    private void throwExceptionIfSoftwareModuleDoesNotExist(final Long swId) {
+        if (!softwareModuleRepository.exists(swId)) {
+            throw new EntityNotFoundException(SoftwareModule.class, swId);
         }
+    }
 
-        return result;
+    @Override
+    public Optional<DbArtifact> loadArtifactBinary(final String sha1Hash) {
+        return Optional.ofNullable(artifactRepository.getArtifactBySha1(sha1Hash));
     }
 
     private Artifact storeArtifactMetadata(final SoftwareModule softwareModule, final String providedFilename,
@@ -207,7 +205,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
         if (softwareModule == null) {
             LOG.debug("no software module with ID {} exists", moduleId);
-            throw new EntityNotFoundException("Software Module: " + moduleId);
+            throw new EntityNotFoundException(SoftwareModule.class, moduleId);
         }
         return softwareModule;
     }

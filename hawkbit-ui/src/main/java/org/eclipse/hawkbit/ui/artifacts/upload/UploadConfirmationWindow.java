@@ -17,6 +17,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
@@ -196,8 +197,8 @@ public class UploadConfirmationWindow implements Button.ClickListener {
         final Item item = uploadDetailsTable.getItem(itemId);
         if (HawkbitCommonUtil.trimAndNullIfEmpty(fileName) != null) {
             final Long baseSwId = (Long) item.getItemProperty(BASE_SOFTWARE_ID).getValue();
-            final List<Artifact> artifactList = artifactManagement.findByFilenameAndSoftwareModule(fileName, baseSwId);
-            if (!artifactList.isEmpty()) {
+            final Optional<Artifact> artifact = artifactManagement.findByFilenameAndSoftwareModule(fileName, baseSwId);
+            if (artifact.isPresent()) {
                 warningIconLabel.setVisible(true);
                 if (isErrorIcon(warningIconLabel)) {
                     warningIconLabel.removeStyleName(SPUIStyleDefinitions.ERROR_LABEL);
@@ -247,7 +248,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             newItem.getItemProperty(SIZE).setValue(customFile.getFileSize());
             final Button deleteIcon = SPUIComponentProvider.getButton(
                     UIComponentIdProvider.UPLOAD_DELETE_ICON + "-" + itemId, "", SPUILabelDefinitions.DISCARD,
-                    ValoTheme.BUTTON_TINY + " " + "redicon", true, FontAwesome.TRASH_O,
+                    ValoTheme.BUTTON_TINY + " " + "blueicon", true, FontAwesome.TRASH_O,
                     SPUIButtonStyleSmallNoBorder.class);
             deleteIcon.addClickListener(this);
             deleteIcon.setData(itemId);
@@ -438,11 +439,11 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             final Label errorLabel, final String oldFileName, final Long currentSwId) {
         if (warningLabel == null && (errorLabelCount > 1 || (duplicateCount == 1 && errorLabelCount == 1))) {
 
-            final List<Artifact> artifactList = artifactManagement.findByFilenameAndSoftwareModule(oldFileName,
+            final Optional<Artifact> artifactList = artifactManagement.findByFilenameAndSoftwareModule(oldFileName,
                     currentSwId);
             errorLabel.removeStyleName(SPUIStyleDefinitions.ERROR_LABEL);
             errorLabel.setDescription(i18n.get(ALREADY_EXISTS_MSG));
-            if (artifactList.isEmpty()) {
+            if (!artifactList.isPresent()) {
                 errorLabel.setVisible(false);
             }
             redErrorLabelCount--;

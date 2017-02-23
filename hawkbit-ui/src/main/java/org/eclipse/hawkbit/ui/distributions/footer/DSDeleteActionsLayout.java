@@ -9,16 +9,19 @@
 package org.eclipse.hawkbit.ui.distributions.footer;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.entity.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
@@ -50,11 +53,12 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
     private static final long serialVersionUID = 3494052985006132714L;
 
     private final transient SystemManagement systemManagement;
+    private final transient DistributionSetManagement distributionSetManagement;
 
     private final ManageDistUIState manageDistUIState;
 
     private final DistributionsConfirmationWindowLayout distConfirmationWindowLayout;
-  
+
     private final DistributionsViewClientCriterion distributionsViewClientCriterion;
 
     public DSDeleteActionsLayout(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
@@ -68,7 +72,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
         this.distConfirmationWindowLayout = new DistributionsConfirmationWindowLayout(i18n, eventBus, dsManagement,
                 softwareManagement, manageDistUIState);
         this.distributionsViewClientCriterion = distributionsViewClientCriterion;
-
+        this.distributionSetManagement = dsManagement;
         init();
     }
 
@@ -179,32 +183,25 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
     }
 
     private void addInDeleteDistributionList(final Table sourceTable, final TableTransferable transferable) {
-        @SuppressWarnings("unchecked")
-        final AbstractTable<?, DistributionSetIdName> table = (AbstractTable<?, DistributionSetIdName>) sourceTable;
-        final Set<DistributionSetIdName> distributionIdNameSet = table.getDeletedEntityByTransferable(transferable);
-        /*
-         * Flags to identify whether all dropped distributions are already in
-         * the deleted list (or) some distributions are already in the deleted
-         * distribution list.
-         */
+        final AbstractTable<?, Long> table = (AbstractTable<?, Long>) sourceTable;
+        final Set<Long> ids = table.getDeletedEntityByTransferable(transferable);
+        final List<DistributionSet> findDistributionSetAllById = distributionSetManagement
+                .findDistributionSetAllById(ids);
+
+        if (findDistributionSetAllById.isEmpty()) {
+            notification.displayWarning(i18n.get("distributionsets.not.exists"));
+            return;
+        }
+
+        final Set<DistributionSetIdName> distributionIdNameSet = findDistributionSetAllById.stream()
+                .map(distributionSet -> new DistributionSetIdName(distributionSet)).collect(Collectors.toSet());
+
         final int existingDeletedDistributionsSize = manageDistUIState.getDeletedDistributionList().size();
         manageDistUIState.getDeletedDistributionList().addAll(distributionIdNameSet);
         final int newDeletedDistributionsSize = manageDistUIState.getDeletedDistributionList().size();
         if (newDeletedDistributionsSize == existingDeletedDistributionsSize) {
-            /*
-             * No new distributions are added, all distributions dropped now are
-             * already available in the delete list. Hence display warning
-             * message accordingly.
-             */
-
             notification.displayValidationError(i18n.get("message.targets.already.deleted"));
         } else if (newDeletedDistributionsSize - existingDeletedDistributionsSize != distributionIdNameSet.size()) {
-            /*
-             * Not the all distributions dropped now are added to the delete
-             * list. There are some distributions are already there in the
-             * delete list. Hence display warning message accordingly.
-             */
-
             notification.displayValidationError(i18n.get("message.dist.deleted.pending"));
         }
 

@@ -128,8 +128,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     @Override
     public ResponseEntity<List<MgmtTarget>> getAssignedTargets(@PathVariable("targetTagId") final Long targetTagId) {
         final TargetTag targetTag = findTargetTagById(targetTagId);
-        return new ResponseEntity<>(MgmtTargetMapper.toResponseWithLinksAndPollStatus(targetTag.getAssignedToTargets()),
-                HttpStatus.OK);
+        return new ResponseEntity<>(MgmtTargetMapper.toResponse(targetTag.getAssignedToTargets()), HttpStatus.OK);
     }
 
     @Override
@@ -152,21 +151,16 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     public ResponseEntity<List<MgmtTarget>> assignTargets(@PathVariable("targetTagId") final Long targetTagId,
             @RequestBody final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
         LOG.debug("Assign Targets {} for target tag {}", assignedTargetRequestBodies.size(), targetTagId);
-        final TargetTag targetTag = findTargetTagById(targetTagId);
         final List<Target> assignedTarget = this.targetManagement
-                .assignTag(findTargetControllerIds(assignedTargetRequestBodies), targetTag);
-        return new ResponseEntity<>(MgmtTargetMapper.toResponseWithLinksAndPollStatus(assignedTarget), HttpStatus.OK);
+                .assignTag(findTargetControllerIds(assignedTargetRequestBodies), targetTagId);
+        return new ResponseEntity<>(MgmtTargetMapper.toResponse(assignedTarget), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> unassignTargets(@PathVariable("targetTagId") final Long targetTagId) {
         LOG.debug("Unassign all Targets for target tag {}", targetTagId);
-        final TargetTag targetTag = findTargetTagById(targetTagId);
-        if (targetTag.getAssignedToTargets() == null) {
-            LOG.debug("No assigned targets found");
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
-        this.targetManagement.unAssignAllTargetsByTag(targetTag);
+
+        this.targetManagement.unAssignAllTargetsByTag(targetTagId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -174,22 +168,18 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     public ResponseEntity<Void> unassignTarget(@PathVariable("targetTagId") final Long targetTagId,
             @PathVariable("controllerId") final String controllerId) {
         LOG.debug("Unassign target {} for target tag {}", controllerId, targetTagId);
-        final TargetTag targetTag = findTargetTagById(targetTagId);
-        this.targetManagement.unAssignTag(controllerId, targetTag);
+        this.targetManagement.unAssignTag(controllerId, targetTagId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private TargetTag findTargetTagById(final Long targetTagId) {
-        final TargetTag tag = this.tagManagement.findTargetTagById(targetTagId);
-        if (tag == null) {
-            throw new EntityNotFoundException("Target Tag with Id {" + targetTagId + "} does not exist");
-        }
-        return tag;
+        return tagManagement.findTargetTagById(targetTagId)
+                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagId));
     }
 
     private List<String> findTargetControllerIds(
             final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
-        return assignedTargetRequestBodies.stream().map(request -> request.getControllerId())
+        return assignedTargetRequestBodies.stream().map(MgmtAssignedTargetRequestBody::getControllerId)
                 .collect(Collectors.toList());
     }
 

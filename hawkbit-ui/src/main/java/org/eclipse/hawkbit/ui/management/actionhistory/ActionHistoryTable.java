@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.management.actionhistory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 import org.eclipse.hawkbit.repository.ActionStatusFields;
@@ -33,6 +34,7 @@ import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.slf4j.Logger;
@@ -72,7 +74,6 @@ public class ActionHistoryTable extends TreeTable {
     private static final Logger LOG = LoggerFactory.getLogger(ActionHistoryTable.class);
     private static final String BUTTON_CANCEL = "button.cancel";
     private static final String BUTTON_OK = "button.ok";
-    private static final String STATUS_ICON_GREEN = "statusIconGreen";
 
     private final I18N i18n;
     private final transient DeploymentManagement deploymentManagement;
@@ -104,10 +105,10 @@ public class ActionHistoryTable extends TreeTable {
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final ManagementUIEvent mgmtUIEvent) {
         if (mgmtUIEvent == ManagementUIEvent.MAX_ACTION_HISTORY) {
-            UI.getCurrent().access(() -> createTableContentForMax());
+            UI.getCurrent().access(this::createTableContentForMax);
         }
         if (mgmtUIEvent == ManagementUIEvent.MIN_ACTION_HISTORY) {
-            UI.getCurrent().access(() -> normalActionHistoryTable());
+            UI.getCurrent().access(this::normalActionHistoryTable);
         }
     }
 
@@ -220,7 +221,7 @@ public class ActionHistoryTable extends TreeTable {
         if (target != null) {
             /* service method to create action history for target */
             final List<ActionWithStatusCount> actionHistory = deploymentManagement
-                    .findActionsWithStatusCountByTargetOrderByIdDesc(target);
+                    .findActionsWithStatusCountByTargetOrderByIdDesc(target.getControllerId());
 
             addDetailsToContainer(actionHistory);
         }
@@ -431,15 +432,19 @@ public class ActionHistoryTable extends TreeTable {
             final Long actionId = (Long) item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTION_ID_HIDDEN)
                     .getValue();
 
-            final org.eclipse.hawkbit.repository.model.Action action = deploymentManagement
-                    .findActionWithDetails(actionId);
+            final Optional<Action> action = deploymentManagement.findActionWithDetails(actionId);
+
+            if (!action.isPresent()) {
+                return;
+            }
+
             final Pageable pageReq = new PageRequest(0, 1000,
                     new Sort(Direction.DESC, ActionStatusFields.ID.getFieldName()));
             final Page<ActionStatus> actionStatusList;
             if (managementUIState.isActionHistoryMaximized()) {
-                actionStatusList = deploymentManagement.findActionStatusByActionWithMessages(pageReq, action);
+                actionStatusList = deploymentManagement.findActionStatusByActionWithMessages(pageReq, actionId);
             } else {
-                actionStatusList = deploymentManagement.findActionStatusByAction(pageReq, action);
+                actionStatusList = deploymentManagement.findActionStatusByAction(pageReq, actionId);
             }
             final List<ActionStatus> content = actionStatusList.getContent();
             /*
@@ -458,8 +463,9 @@ public class ActionHistoryTable extends TreeTable {
                      */
                     childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTIVE_HIDDEN).setValue("");
 
-                    childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST).setValue(
-                            action.getDistributionSet().getName() + ":" + action.getDistributionSet().getVersion());
+                    childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST)
+                            .setValue(action.get().getDistributionSet().getName() + ":"
+                                    + action.get().getDistributionSet().getVersion());
 
                     childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DATETIME)
                             .setValue(SPDateTimeUtil.getFormattedDate(actionStatus.getCreatedAt()));
@@ -504,50 +510,19 @@ public class ActionHistoryTable extends TreeTable {
      */
     private Label getStatusIcon(final Action.Status status) {
         final Label label = new LabelBuilder().name("").buildLabel();
-        final String statusIconPending = "statusIconPending";
         label.setContentMode(ContentMode.HTML);
-        if (Action.Status.FINISHED == status) {
-            label.setDescription(i18n.get("label.finished"));
-            label.setStyleName(STATUS_ICON_GREEN);
-            label.setValue(FontAwesome.CHECK_CIRCLE.getHtml());
-        } else if (Action.Status.ERROR == status) {
-            label.setDescription(i18n.get("label.error"));
-            label.setStyleName("statusIconRed");
-            label.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
-        } else if (Action.Status.WARNING == status) {
-            label.setStyleName("statusIconOrange");
-            label.setDescription(i18n.get("label.warning"));
-            label.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
-        } else if (Action.Status.RUNNING == status) {
-            // dynamic spinner
-            label.setStyleName(statusIconPending);
-            label.setDescription(i18n.get("label.running"));
-            label.setValue(FontAwesome.ADJUST.getHtml());
-        } else if (Action.Status.CANCELING == status) {
-            label.setStyleName(statusIconPending);
-            label.setDescription(i18n.get("label.cancelling"));
-            label.setValue(FontAwesome.TIMES_CIRCLE.getHtml());
-        } else if (Action.Status.CANCELED == status) {
-            label.setStyleName(statusIconPending);
-            label.setDescription(i18n.get("label.cancelled"));
-            label.setStyleName(STATUS_ICON_GREEN);
-            label.setValue(FontAwesome.TIMES_CIRCLE.getHtml());
-        } else if (Action.Status.RETRIEVED == status) {
-            label.setStyleName(statusIconPending);
-            label.setDescription(i18n.get("label.retrieved"));
-            label.setValue(FontAwesome.CIRCLE_O.getHtml());
-        } else if (Action.Status.DOWNLOAD == status) {
-            label.setStyleName(statusIconPending);
-            label.setDescription(i18n.get("label.download"));
-            label.setValue(FontAwesome.CLOUD_DOWNLOAD.getHtml());
-        } else if (Action.Status.SCHEDULED == status) {
-            label.setStyleName(statusIconPending);
-            label.setDescription(i18n.get("label.scheduled"));
-            label.setValue(FontAwesome.HOURGLASS_1.getHtml());
-        } else {
+
+        final ActionStatusIconMapper mapping = ActionStatusIconMapper.MAPPINGS.get(status);
+
+        if (mapping == null) {
             label.setDescription("");
             label.setValue("");
+            return label;
         }
+
+        label.setDescription(i18n.get(mapping.getDescriptionI18N()));
+        label.setStyleName(mapping.getStyleName());
+        label.setValue(mapping.getIcon().getHtml());
         return label;
 
     }
@@ -568,7 +543,7 @@ public class ActionHistoryTable extends TreeTable {
 
         if (actionWithActiveStatus.isHitAutoForceTime(currentTimeMillis)) {
             autoForceLabel.setDescription("autoforced");
-            autoForceLabel.setStyleName(STATUS_ICON_GREEN);
+            autoForceLabel.setStyleName(SPUIStyleDefinitions.STATUS_ICON_GREEN);
             autoForceLabel.setDescription("auto forced since " + SPDateTimeUtil
                     .getDurationFormattedString(actionWithActiveStatus.getForcedTime(), currentTimeMillis, i18n));
         } else {
@@ -598,7 +573,7 @@ public class ActionHistoryTable extends TreeTable {
             label.setStyleName("statusIconActive");
         } else if (SPUIDefinitions.IN_ACTIVE.equals(activeValue)) {
             if (endedWithError) {
-                label.setStyleName("statusIconRed");
+                label.setStyleName(SPUIStyleDefinitions.STATUS_ICON_RED);
             } else {
                 label.setStyleName("statusIconNeutral");
             }
@@ -793,9 +768,8 @@ public class ActionHistoryTable extends TreeTable {
     // service call to cancel the active action
     private boolean cancelActiveAction(final Long actionId) {
         if (actionId != null) {
-            final Action activeAction = deploymentManagement.findAction(actionId);
             try {
-                deploymentManagement.cancelAction(activeAction, target);
+                deploymentManagement.cancelAction(actionId);
                 return true;
             } catch (final CancelActionNotAllowedException e) {
                 LOG.info("Cancel action not allowed exception :{}", e);
@@ -808,9 +782,8 @@ public class ActionHistoryTable extends TreeTable {
     // service call to cancel the active action
     private boolean forceQuitActiveAction(final Long actionId) {
         if (actionId != null) {
-            final Action activeAction = deploymentManagement.findAction(actionId);
             try {
-                deploymentManagement.forceQuitAction(activeAction);
+                deploymentManagement.forceQuitAction(actionId);
                 return true;
             } catch (final CancelActionNotAllowedException e) {
                 LOG.info("Force Cancel action not allowed exception :{}", e);
@@ -831,14 +804,13 @@ public class ActionHistoryTable extends TreeTable {
      */
     private void updateDistributionTableStyle() {
 
-        if (managementUIState.getDistributionTableFilters().getPinnedTargetId().isPresent()
-                && null != managementUIState.getDistributionTableFilters().getPinnedTargetId().get()) {
-            final String alreadyPinnedControllerId = managementUIState.getDistributionTableFilters().getPinnedTargetId()
-                    .get();
-            // if the current target is pinned publish a pin event again
-            if (null != alreadyPinnedControllerId && alreadyPinnedControllerId.equals(target.getControllerId())) {
-                eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
-            }
+        if (!managementUIState.getDistributionTableFilters().getPinnedTarget().isPresent()) {
+            return;
+        }
+        final Long alreadyPinnedControllerId = managementUIState.getDistributionTableFilters().getPinnedTarget().get()
+                .getTargetId();
+        if (alreadyPinnedControllerId.equals(target.getId())) {
+            eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
         }
     }
 

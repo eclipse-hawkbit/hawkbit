@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ddi.rest.resource;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -48,7 +48,8 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         final Target savedTarget = testdataFactory.createTarget("4712");
 
         final long current = System.currentTimeMillis();
-        mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
+        mvc.perform(
+                get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()).accept(APPLICATION_JSON_HAL_UTF))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
@@ -57,21 +58,22 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         Thread.sleep(1); // is required: otherwise processing the next line is
                          // often too fast and
                          // the following assert will fail
-        assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getLastTargetQuery())
+        assertThat(targetManagement.findTargetByControllerID("4712").get().getTargetInfo().getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getLastTargetQuery())
+        assertThat(targetManagement.findTargetByControllerID("4712").get().getTargetInfo().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
 
         savedTarget.getTargetInfo().getControllerAttributes().put("dsafsdf", "sdsds");
 
-        final Target updateControllerAttributes = controllerManagament.updateControllerAttributes(
+        final Target updateControllerAttributes = controllerManagement.updateControllerAttributes(
                 savedTarget.getControllerId(), savedTarget.getTargetInfo().getControllerAttributes());
         // request controller attributes need to be false because we don't want
         // to request the
         // controller attributes again
         assertThat(updateControllerAttributes.getTargetInfo().isRequestControllerAttributes()).isFalse();
 
-        mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
+        mvc.perform(
+                get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()).accept(APPLICATION_JSON_HAL_UTF))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
@@ -95,13 +97,12 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         Thread.sleep(1); // is required: otherwise processing the next line is
                          // often too fast and
                          // the following assert will fail
-        assertThat(targetManagement.findTargetByControllerID("4717").getTargetInfo().getLastTargetQuery())
+        assertThat(targetManagement.findTargetByControllerID("4717").get().getTargetInfo().getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(targetManagement.findTargetByControllerID("4717").getTargetInfo().getLastTargetQuery())
+        assertThat(targetManagement.findTargetByControllerID("4717").get().getTargetInfo().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
-        assertThat(
-                targetManagement.findTargetByControllerIDWithDetails("4717").getTargetInfo().getControllerAttributes())
-                        .isEqualTo(attributes);
+        assertThat(targetManagement.findTargetByControllerIDWithDetails("4717").get().getTargetInfo()
+                .getControllerAttributes()).isEqualTo(attributes);
 
         // update
         attributes.put("sdsds", "123412");
@@ -112,13 +113,12 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         Thread.sleep(1); // is required: otherwise processing the next line is
                          // often too fast and
                          // the following assert will fail
-        assertThat(targetManagement.findTargetByControllerID("4717").getTargetInfo().getLastTargetQuery())
+        assertThat(targetManagement.findTargetByControllerID("4717").get().getTargetInfo().getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(targetManagement.findTargetByControllerID("4717").getTargetInfo().getLastTargetQuery())
+        assertThat(targetManagement.findTargetByControllerID("4717").get().getTargetInfo().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
-        assertThat(
-                targetManagement.findTargetByControllerIDWithDetails("4717").getTargetInfo().getControllerAttributes())
-                        .isEqualTo(attributes);
+        assertThat(targetManagement.findTargetByControllerIDWithDetails("4717").get().getTargetInfo()
+                .getControllerAttributes()).isEqualTo(attributes);
     }
 
     @Test

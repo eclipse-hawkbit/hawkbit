@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.autoassign;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -73,7 +73,7 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         verifyThatTargetsHaveDistributionSetAssignment(setB, targets.subList(10, 20), targetsCount);
 
         // Count the number of targets that will be assigned with setA
-        assertThat(targetManagement.countTargetsByTargetFilterQueryAndNonDS(setA.getId(), targetFilterQuery))
+        assertThat(targetManagement.countTargetsByTargetFilterQueryAndNonDS(setA.getId(), targetFilterQuery.getQuery()))
                 .isEqualTo(90);
 
         // Run the check

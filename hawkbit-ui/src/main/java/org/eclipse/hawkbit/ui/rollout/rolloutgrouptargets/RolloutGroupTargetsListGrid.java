@@ -71,6 +71,16 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
                 new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_RED));
     }
 
+    /**
+     * Constructor for RolloutGroupTargetsListGrid
+     * 
+     * @param i18n
+     *            I18N
+     * @param eventBus
+     *            UIEventBus
+     * @param rolloutUIState
+     *            RolloutUIState
+     */
     public RolloutGroupTargetsListGrid(final I18N i18n, final UIEventBus eventBus,
             final RolloutUIState rolloutUIState) {
         super(i18n, eventBus, null);
@@ -133,9 +143,6 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
 
         getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).setMaximumWidth(180);
         getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).setMinimumWidth(50);
-
-        setFrozenColumnCount(getColumns().size());
-
     }
 
     @Override
@@ -276,4 +283,5 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
         }
         return "unknown";
     }
+
 }

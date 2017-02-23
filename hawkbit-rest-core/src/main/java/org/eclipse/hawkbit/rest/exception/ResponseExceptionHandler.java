@@ -71,6 +71,7 @@ public class ResponseExceptionHandler {
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_INVALID_TARGET_ADDRESS, HttpStatus.BAD_REQUEST);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_CONSTRAINT_VIOLATION, HttpStatus.BAD_REQUEST);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_OPERATION_NOT_SUPPORTED, HttpStatus.GONE);
+        ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_CONCURRENT_MODIFICATION, HttpStatus.CONFLICT);
 
     }
 

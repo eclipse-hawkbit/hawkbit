@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo_;
@@ -135,14 +136,13 @@ public final class TargetSpecifications {
     public static Specification<JpaTarget> isOverdue(final long overdueTimestamp) {
         return (targetRoot, query, cb) -> {
             final Join<JpaTarget, JpaTargetInfo> targetInfoJoin = targetRoot.join(JpaTarget_.targetInfo);
-            return cb.lessThanOrEqualTo(
-                    targetInfoJoin.get(JpaTargetInfo_.lastTargetQuery), overdueTimestamp);
+            return cb.lessThanOrEqualTo(targetInfoJoin.get(JpaTargetInfo_.lastTargetQuery), overdueTimestamp);
         };
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by
-     * "like controllerId or like name or like description".
+     * {@link Specification} for retrieving {@link Target}s by "like
+     * controllerId or like name or like description".
      *
      * @param searchText
      *            to be filtered on
@@ -158,8 +158,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by
-     * "like controllerId".
+     * {@link Specification} for retrieving {@link Target}s by "like
+     * controllerId".
      *
      * @param distributionId
      *            to be filtered on
@@ -195,8 +195,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by
-     * "has no tag names"or "has at least on of the given tag names".
+     * {@link Specification} for retrieving {@link Target}s by "has no tag
+     * names"or "has at least on of the given tag names".
      *
      * @param tagNames
      *            to be filtered on
@@ -242,8 +242,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s that don't have the given
-     * distribution set in their action history
+     * {@link Specification} for retrieving {@link Target}s that don't have the
+     * given distribution set in their action history
      *
      * @param distributionSetId
      *            the ID of the distribution set which must not be assigned
@@ -267,11 +267,12 @@ public final class TargetSpecifications {
      *            the {@link RolloutGroup}s
      * @return the {@link Target} {@link Specification}
      */
-    public static Specification<JpaTarget> isNotInRolloutGroups(final List<RolloutGroup> groups) {
+    public static Specification<JpaTarget> isNotInRolloutGroups(final Collection<Long> groups) {
         return (targetRoot, query, cb) -> {
-            ListJoin<JpaTarget, RolloutTargetGroup> rolloutTargetJoin = targetRoot.join(JpaTarget_.rolloutTargetGroup,
-                    JoinType.LEFT);
-            Predicate inRolloutGroups = rolloutTargetJoin.get(RolloutTargetGroup_.rolloutGroup).in(groups);
+            final ListJoin<JpaTarget, RolloutTargetGroup> rolloutTargetJoin = targetRoot
+                    .join(JpaTarget_.rolloutTargetGroup, JoinType.LEFT);
+            final Predicate inRolloutGroups = rolloutTargetJoin.get(RolloutTargetGroup_.rolloutGroup)
+                    .get(JpaRolloutGroup_.id).in(groups);
             rolloutTargetJoin.on(inRolloutGroups);
             return cb.isNull(rolloutTargetJoin.get(RolloutTargetGroup_.target));
         };
@@ -285,14 +286,15 @@ public final class TargetSpecifications {
      *            the {@link RolloutGroup}
      * @return the {@link Target} {@link Specification}
      */
-    public static Specification<JpaTarget> hasNoActionInRolloutGroup(final RolloutGroup group) {
+    public static Specification<JpaTarget> hasNoActionInRolloutGroup(final Long group) {
         return (targetRoot, query, cb) -> {
-            ListJoin<JpaTarget, RolloutTargetGroup> rolloutTargetJoin = targetRoot.join(JpaTarget_.rolloutTargetGroup,
-                    JoinType.INNER);
-            rolloutTargetJoin.on(cb.equal(rolloutTargetJoin.get(RolloutTargetGroup_.rolloutGroup), group));
+            final ListJoin<JpaTarget, RolloutTargetGroup> rolloutTargetJoin = targetRoot
+                    .join(JpaTarget_.rolloutTargetGroup, JoinType.INNER);
+            rolloutTargetJoin.on(
+                    cb.equal(rolloutTargetJoin.get(RolloutTargetGroup_.rolloutGroup).get(JpaRolloutGroup_.id), group));
 
             final ListJoin<JpaTarget, JpaAction> actionsJoin = targetRoot.join(JpaTarget_.actions, JoinType.LEFT);
-            actionsJoin.on(cb.equal(actionsJoin.get(JpaAction_.rolloutGroup), group));
+            actionsJoin.on(cb.equal(actionsJoin.get(JpaAction_.rolloutGroup).get(JpaRolloutGroup_.id), group));
 
             return cb.isNull(actionsJoin.get(JpaAction_.id));
         };

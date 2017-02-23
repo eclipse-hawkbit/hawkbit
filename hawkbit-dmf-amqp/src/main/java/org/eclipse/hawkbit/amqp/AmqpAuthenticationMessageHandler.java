@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.amqp;
 
 import java.net.URISyntaxException;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.eclipse.hawkbit.api.HostnameResolver;
@@ -116,63 +117,65 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
      * 
      * @param secruityToken
      *            the security token which holds the target ID to check on
-     * @param artifact
-     *            the artifact to verify if the given target is allowed to
+     * @param sha1Hash
+     *            of the artifact to verify if the given target is allowed to
      *            download it
      */
-    private void checkIfArtifactIsAssignedToTarget(final TenantSecurityToken secruityToken,
-            final org.eclipse.hawkbit.repository.model.Artifact artifact) {
+    private void checkIfArtifactIsAssignedToTarget(final TenantSecurityToken secruityToken, final String sha1Hash) {
 
         if (secruityToken.getControllerId() != null) {
-            checkByControllerId(artifact, secruityToken.getControllerId());
+            checkByControllerId(sha1Hash, secruityToken.getControllerId());
         } else if (secruityToken.getTargetId() != null) {
-            checkByTargetId(artifact, secruityToken.getTargetId());
+            checkByTargetId(sha1Hash, secruityToken.getTargetId());
         } else {
-            LOG.info("anonymous download no authentication check for artifact {}", artifact);
+            LOG.info("anonymous download no authentication check for artifact {}", sha1Hash);
             return;
         }
 
     }
 
-    private void checkByTargetId(final org.eclipse.hawkbit.repository.model.Artifact localArtifact,
-            final Long targetId) {
+    private void checkByTargetId(final String sha1Hash, final Long targetId) {
         LOG.debug("no anonymous download request, doing authentication check for target {} and artifact {}", targetId,
-                localArtifact);
-        if (!controllerManagement.hasTargetArtifactAssigned(targetId, localArtifact)) {
-            LOG.info("target {} tried to download artifact {} which is not assigned to the target", targetId,
-                    localArtifact);
+                sha1Hash);
+        if (!controllerManagement.hasTargetArtifactAssigned(targetId, sha1Hash)) {
+            LOG.info("target {} tried to download artifact {} which is not assigned to the target", targetId, sha1Hash);
             throw new EntityNotFoundException();
         }
-        LOG.info("download security check for target {} and artifact {} granted", targetId, localArtifact);
+        LOG.info("download security check for target {} and artifact {} granted", targetId, sha1Hash);
     }
 
-    private void checkByControllerId(final org.eclipse.hawkbit.repository.model.Artifact localArtifact,
-            final String controllerId) {
+    private void checkByControllerId(final String sha1Hash, final String controllerId) {
         LOG.debug("no anonymous download request, doing authentication check for target {} and artifact {}",
-                controllerId, localArtifact);
-        if (!controllerManagement.hasTargetArtifactAssigned(controllerId, localArtifact)) {
+                controllerId, sha1Hash);
+        if (!controllerManagement.hasTargetArtifactAssigned(controllerId, sha1Hash)) {
             LOG.info("target {} tried to download artifact {} which is not assigned to the target", controllerId,
-                    localArtifact);
+                    sha1Hash);
             throw new EntityNotFoundException();
         }
-        LOG.info("download security check for target {} and artifact {} granted", controllerId, localArtifact);
+        LOG.info("download security check for target {} and artifact {} granted", controllerId, sha1Hash);
     }
 
-    private org.eclipse.hawkbit.repository.model.Artifact findArtifactByFileResource(final FileResource fileResource) {
+    private Optional<org.eclipse.hawkbit.repository.model.Artifact> findArtifactByFileResource(
+            final FileResource fileResource) {
         if (fileResource.getSha1() != null) {
             return artifactManagement.findFirstArtifactBySHA1(fileResource.getSha1());
-        } else if (fileResource.getFilename() != null) {
-            return artifactManagement.findArtifactByFilename(fileResource.getFilename()).stream().findFirst()
-                    .orElse(null);
-        } else if (fileResource.getArtifactId() != null) {
-            return artifactManagement.findArtifact(fileResource.getArtifactId());
-        } else if (fileResource.getSoftwareModuleFilenameResource() != null) {
-            return artifactManagement
-                    .findByFilenameAndSoftwareModule(fileResource.getSoftwareModuleFilenameResource().getFilename(),
-                            fileResource.getSoftwareModuleFilenameResource().getSoftwareModuleId())
-                    .stream().findFirst().orElse(null);
         }
-        return null;
+
+        if (fileResource.getFilename() != null) {
+            return artifactManagement.findArtifactByFilename(fileResource.getFilename());
+        }
+
+        if (fileResource.getArtifactId() != null) {
+            return artifactManagement.findArtifact(fileResource.getArtifactId());
+        }
+
+        if (fileResource.getSoftwareModuleFilenameResource() != null) {
+            return artifactManagement.findByFilenameAndSoftwareModule(
+                    fileResource.getSoftwareModuleFilenameResource().getFilename(),
+                    fileResource.getSoftwareModuleFilenameResource().getSoftwareModuleId());
+        }
+
+        return Optional.empty();
     }
 
     private static Artifact convertDbArtifact(final DbArtifact dbArtifact) {
@@ -192,26 +195,19 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
         try {
             SecurityContextHolder.getContext().setAuthentication(authenticationManager.doAuthenticate(secruityToken));
 
-            final org.eclipse.hawkbit.repository.model.Artifact localArtifact = findArtifactByFileResource(
-                    fileResource);
+            final String sha1Hash = findArtifactByFileResource(fileResource)
+                    .map(org.eclipse.hawkbit.repository.model.Artifact::getSha1Hash)
+                    .orElseThrow(() -> new EntityNotFoundException());
 
-            if (localArtifact == null) {
-                LOG.info("target {} requested file resource {} which does not exists to download",
-                        secruityToken.getControllerId(), fileResource);
-                throw new EntityNotFoundException();
-            }
+            checkIfArtifactIsAssignedToTarget(secruityToken, sha1Hash);
 
-            checkIfArtifactIsAssignedToTarget(secruityToken, localArtifact);
+            final Artifact artifact = convertDbArtifact(artifactManagement.loadArtifactBinary(sha1Hash).orElseThrow(
+                    () -> new EntityNotFoundException(org.eclipse.hawkbit.repository.model.Artifact.class, sha1Hash)));
 
-            final Artifact artifact = convertDbArtifact(artifactManagement.loadArtifactBinary(localArtifact));
-            if (artifact == null) {
-                throw new EntityNotFoundException();
-            }
             authentificationResponse.setArtifact(artifact);
             final String downloadId = UUID.randomUUID().toString();
             // SHA1 key is set, download by SHA1
-            final DownloadArtifactCache downloadCache = new DownloadArtifactCache(DownloadType.BY_SHA1,
-                    localArtifact.getSha1Hash());
+            final DownloadArtifactCache downloadCache = new DownloadArtifactCache(DownloadType.BY_SHA1, sha1Hash);
             cache.put(downloadId, downloadCache);
             authentificationResponse
                     .setDownloadUrl(UriComponentsBuilder.fromUri(hostnameResolver.resolveHostname().toURI())

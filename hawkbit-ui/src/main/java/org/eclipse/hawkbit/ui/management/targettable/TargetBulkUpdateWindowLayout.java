@@ -8,16 +8,17 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -26,7 +27,6 @@ import org.eclipse.hawkbit.ui.management.dstable.DistributionBeanQuery;
 import org.eclipse.hawkbit.ui.management.event.BulkUploadPopupEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.state.TargetBulkUpload;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -65,6 +65,12 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     private final I18N i18n;
 
     private final transient TargetManagement targetManagement;
+    private final transient DistributionSetManagement distributionSetManagement;
+    private final transient TagManagement tagManagement;
+
+    private final transient EntityFactory entityFactory;
+
+    private final transient Executor uiExecutor;
 
     private final transient EventBus.UIEventBus eventBus;
 
@@ -93,7 +99,8 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     TargetBulkUpdateWindowLayout(final I18N i18n, final TargetManagement targetManagement, final UIEventBus eventBus,
             final ManagementUIState managementUIState, final DeploymentManagement deploymentManagement,
             final UiProperties uiproperties, final SpPermissionChecker checker, final UINotification uinotification,
-            final TagManagement tagManagement) {
+            final TagManagement tagManagement, final DistributionSetManagement distributionSetManagement,
+            final EntityFactory entityFactory, final Executor uiExecutor) {
         this.i18n = i18n;
         this.targetManagement = targetManagement;
         this.eventBus = eventBus;
@@ -102,6 +109,10 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         this.managementUIState = managementUIState;
         this.deploymentManagement = deploymentManagement;
         this.uiproperties = uiproperties;
+        this.tagManagement = tagManagement;
+        this.distributionSetManagement = distributionSetManagement;
+        this.entityFactory = entityFactory;
+        this.uiExecutor = uiExecutor;
 
         createRequiredComponents();
         buildLayout();
@@ -111,11 +122,11 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
 
     protected void onStartOfUpload() {
         final TargetBulkUpload targetBulkUpload = managementUIState.getTargetTableFilters().getBulkUpload();
-        targetBulkUpload.setDsNameAndVersion((DistributionSetIdName) dsNamecomboBox.getValue());
+        targetBulkUpload.setDsNameAndVersion((Long) dsNamecomboBox.getValue());
         targetBulkUpload.setDescription(descTextArea.getValue());
         targetBulkUpload.setProgressBarCurrentValue(0F);
-        targetBulkUpload.setFailedUploadCount(0L);
-        targetBulkUpload.setSucessfulUploadCount(0L);
+        targetBulkUpload.setFailedUploadCount(0);
+        targetBulkUpload.setSucessfulUploadCount(0);
         closeButton.setEnabled(false);
         minimizeButton.setEnabled(true);
     }
@@ -139,7 +150,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         closeButton = getCloseButton();
     }
 
-    private ProgressBar creatreProgressBar() {
+    private static ProgressBar creatreProgressBar() {
         final ProgressBar progressBarIndicator = new ProgressBar(0F);
         progressBarIndicator.addStyleName("bulk-upload-label");
         progressBarIndicator.setSizeFull();
@@ -164,14 +175,15 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     }
 
     private BulkUploadHandler getBulkUploadHandler() {
-        final BulkUploadHandler bulkUploadHandler = new BulkUploadHandler(this, targetManagement, managementUIState,
-                deploymentManagement, i18n, UI.getCurrent());
+        final BulkUploadHandler bulkUploadHandler = new BulkUploadHandler(this, targetManagement, tagManagement,
+                entityFactory, distributionSetManagement, managementUIState, deploymentManagement, i18n,
+                UI.getCurrent(), uiExecutor);
         bulkUploadHandler.buildLayout();
         bulkUploadHandler.addStyleName(SPUIStyleDefinitions.BULK_UPLOAD_BUTTON);
         return bulkUploadHandler;
     }
 
-    private Label getStatusCountLabel() {
+    private static Label getStatusCountLabel() {
         final Label countLabel = new Label();
         countLabel.setImmediate(true);
         countLabel.addStyleName("bulk-upload-label");
@@ -185,7 +197,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         final TextArea description = new TextAreaBuilder().caption(i18n.get("textfield.description"))
                 .style("text-area-style").prompt(i18n.get("textfield.description")).immediate(true)
                 .id(UIComponentIdProvider.BULK_UPLOAD_DESC).buildTextComponent();
-        description.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
+        description.setNullRepresentation(StringUtils.EMPTY);
         description.setWidth("100%");
         return description;
     }
@@ -232,24 +244,17 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
 
         final Map<String, Object> queryConfiguration = Maps.newHashMapWithExpectedSize(2);
 
-        final List<String> list = new ArrayList<>();
         queryConfiguration.put(SPUIDefinitions.FILTER_BY_NO_TAG,
                 managementUIState.getDistributionTableFilters().isNoTagSelected());
 
-        if (!managementUIState.getDistributionTableFilters().getDistSetTags().isEmpty()) {
-            list.addAll(managementUIState.getDistributionTableFilters().getDistSetTags());
-        }
-        queryConfiguration.put(SPUIDefinitions.FILTER_BY_TAG, list);
+        queryConfiguration.put(SPUIDefinitions.FILTER_BY_TAG,
+                managementUIState.getDistributionTableFilters().getDistSetTags());
 
         final BeanQueryFactory<DistributionBeanQuery> distributionQF = new BeanQueryFactory<>(
                 DistributionBeanQuery.class);
         distributionQF.setQueryConfiguration(queryConfiguration);
-        final LazyQueryContainer distributionContainer = new LazyQueryContainer(
-                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_DIST_ID_NAME),
-                distributionQF);
-
-        return distributionContainer;
-
+        return new LazyQueryContainer(
+                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID), distributionQF);
     }
 
     private void buildLayout() {
@@ -292,8 +297,8 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         final TargetBulkUpload targetBulkUpload = managementUIState.getTargetTableFilters().getBulkUpload();
         targetBulkUpload.setDescription(null);
         targetBulkUpload.setDsNameAndVersion(null);
-        targetBulkUpload.setFailedUploadCount(0L);
-        targetBulkUpload.setSucessfulUploadCount(0L);
+        targetBulkUpload.setFailedUploadCount(0);
+        targetBulkUpload.setSucessfulUploadCount(0);
         targetBulkUpload.getAssignedTagNames().clear();
         targetBulkUpload.getTargetsCreated().clear();
     }
@@ -308,13 +313,11 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         dsNamecomboBox.setValue(targetBulkUpload.getDsNameAndVersion());
         descTextArea.setValue(targetBulkUpload.getDescription());
         targetBulkTokenTags.addAlreadySelectedTags();
-        if (targetBulkUpload.getSucessfulUploadCount() > 0 || targetBulkUpload.getFailedUploadCount() > 0) {
+
+        if (targetBulkUpload.getProgressBarCurrentValue() >= 1) {
             targetsCountLabel.setVisible(true);
             targetsCountLabel.setCaption(getFormattedCountLabelValue(targetBulkUpload.getSucessfulUploadCount(),
                     targetBulkUpload.getFailedUploadCount()));
-        }
-        if (targetBulkUpload.getProgressBarCurrentValue() < 1) {
-            bulkUploader.getUpload().setEnabled(false);
         }
     }
 
@@ -329,13 +332,11 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         getTargetsCountLabel().setVisible(true);
         getTargetsCountLabel().setCaption(targetCountLabel);
 
-        getBulkUploader().getUpload().setEnabled(true);
-
         closeButton.setEnabled(true);
         minimizeButton.setEnabled(false);
     }
 
-    private static String getFormattedCountLabelValue(final long succussfulUploadCount, final long failedUploadCount) {
+    private static String getFormattedCountLabelValue(final int succussfulUploadCount, final int failedUploadCount) {
         return new StringBuilder().append("Successful :").append(succussfulUploadCount)
                 .append("<font color=RED> Failed :").append(failedUploadCount).append("</font>").toString();
     }
@@ -352,16 +353,12 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
                 .buildWindow();
         bulkUploadWindow.addStyleName("bulk-upload-window");
         bulkUploadWindow.setImmediate(true);
-        if (isNoBulkUploadInProgress()) {
+        if (managementUIState.getTargetTableFilters().getBulkUpload().getProgressBarCurrentValue() <= 0) {
             bulkUploader.getUpload().setEnabled(true);
+        } else {
+            bulkUploader.getUpload().setEnabled(false);
         }
         return bulkUploadWindow;
-    }
-
-    private boolean isNoBulkUploadInProgress() {
-        final float progressBarCurrentValue = managementUIState.getTargetTableFilters().getBulkUpload()
-                .getProgressBarCurrentValue();
-        return Math.abs(progressBarCurrentValue - 0) < 0.00001 || Math.abs(progressBarCurrentValue - 1) < 0.00001;
     }
 
     private void minimizeWindow() {

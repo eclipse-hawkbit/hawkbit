@@ -34,16 +34,6 @@
       </dependency>
       <!-- Test -->
       <dependency>
-         <groupId>org.easytesting</groupId>
-         <artifactId>fest-assert-core</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.easytesting</groupId>
-         <artifactId>fest-assert</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
          <groupId>org.springframework.boot</groupId>
          <artifactId>spring-boot-starter-test</artifactId>
          <scope>test</scope>
@@ -51,16 +41,6 @@
       <dependency>
          <groupId>ru.yandex.qatools.allure</groupId>
          <artifactId>allure-junit-adaptor</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.easytesting</groupId>
-         <artifactId>fest-assert-core</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.easytesting</groupId>
-         <artifactId>fest-assert</artifactId>
          <scope>test</scope>
       </dependency>
       <dependency>

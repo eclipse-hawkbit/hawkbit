@@ -13,7 +13,6 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
@@ -34,8 +33,10 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.rest.data.ResponseList;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.hateoas.Link;
+import org.springframework.http.HttpRequest;
 
 import com.google.common.base.Charsets;
 
@@ -49,10 +50,12 @@ public final class DataConversionHelper {
     }
 
     static List<DdiChunk> createChunks(final Target target, final Action uAction,
-            final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement) {
+            final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement,
+            final HttpRequest request) {
         return uAction.getDistributionSet().getModules().stream()
                 .map(module -> new DdiChunk(mapChunkLegacyKeys(module.getType().getKey()), module.getVersion(),
-                        module.getName(), createArtifacts(target, module, artifactUrlHandler, systemManagement)))
+                        module.getName(),
+                        createArtifacts(target, module, artifactUrlHandler, systemManagement, request)))
                 .collect(Collectors.toList());
 
     }
@@ -68,30 +71,18 @@ public final class DataConversionHelper {
         return key;
     }
 
-    /**
-     * Creates all (rest) artifacts for a given software module.
-     *
-     * @param target
-     *            for create URLs for
-     * @param module
-     *            the software module
-     * @param artifactUrlHandler
-     *            for creating download URLs
-     * @param systemManagement
-     *            for access to tenant meta data
-     * @return a list of artifacts or a empty list. Cannot be <null>.
-     */
-    public static List<DdiArtifact> createArtifacts(final Target target,
+    static List<DdiArtifact> createArtifacts(final Target target,
             final org.eclipse.hawkbit.repository.model.SoftwareModule module,
-            final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement) {
+            final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement,
+            final HttpRequest request) {
 
-        return module.getArtifacts().stream()
-                .map(artifact -> createArtifact(target, artifactUrlHandler, artifact, systemManagement))
-                .collect(Collectors.toList());
+        return new ResponseList<>(module.getArtifacts().stream()
+                .map(artifact -> createArtifact(target, artifactUrlHandler, artifact, systemManagement, request))
+                .collect(Collectors.toList()));
     }
 
     private static DdiArtifact createArtifact(final Target target, final ArtifactUrlHandler artifactUrlHandler,
-            final Artifact artifact, final SystemManagement systemManagement) {
+            final Artifact artifact, final SystemManagement systemManagement, final HttpRequest request) {
         final DdiArtifact file = new DdiArtifact();
         file.setHashes(new DdiArtifactHash(artifact.getSha1Hash(), artifact.getMd5Hash()));
         file.setFilename(artifact.getFilename());
@@ -102,23 +93,23 @@ public final class DataConversionHelper {
                         systemManagement.getTenantMetadata().getId(), target.getControllerId(), target.getId(),
                         new SoftwareData(artifact.getSoftwareModule().getId(), artifact.getFilename(), artifact.getId(),
                                 artifact.getSha1Hash())),
-                        ApiType.DDI)
+                        ApiType.DDI, request.getURI())
                 .forEach(entry -> file.add(new Link(entry.getRef()).withRel(entry.getRel())));
 
         return file;
 
     }
 
-    static DdiControllerBase fromTarget(final Target target, final Optional<Action> action,
+    static DdiControllerBase fromTarget(final Target target, final Action action,
             final String defaultControllerPollTime, final TenantAware tenantAware) {
         final DdiControllerBase result = new DdiControllerBase(
                 new DdiConfig(new DdiPolling(defaultControllerPollTime)));
 
-        if (action.isPresent()) {
-            if (action.get().isCancelingOrCanceled()) {
+        if (action != null) {
+            if (action.isCancelingOrCanceled()) {
                 result.add(linkTo(
                         methodOn(DdiRootController.class, tenantAware.getCurrentTenant()).getControllerCancelAction(
-                                tenantAware.getCurrentTenant(), target.getControllerId(), action.get().getId()))
+                                tenantAware.getCurrentTenant(), target.getControllerId(), action.getId()))
                                         .withRel(DdiRestConstants.CANCEL_ACTION));
             } else {
                 // we need to add the hashcode here of the actionWithStatus
@@ -128,7 +119,7 @@ public final class DataConversionHelper {
                 // response because of eTags.
                 result.add(linkTo(methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
                         .getControllerBasedeploymentAction(tenantAware.getCurrentTenant(), target.getControllerId(),
-                                action.get().getId(), calculateEtag(action.get())))
+                                action.getId(), calculateEtag(action)))
                                         .withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION));
             }
         }

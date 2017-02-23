@@ -49,14 +49,12 @@ public final class DistributionsViewClientCriterion extends ServerViewClientCrit
         criteria[0] = ServerViewComponentClientCriterion.createBuilder()
                 .dragSourceIdPrefix(UIComponentIdProvider.DIST_TABLE_ID)
                 .dropTargetIdPrefixes(UIComponentIdProvider.DELETE_BUTTON_WRAPPER_ID)
-                .dropAreaIds(UIComponentIdProvider.DELETE_BUTTON_WRAPPER_ID)
-                .build();
+                .dropAreaIds(UIComponentIdProvider.DELETE_BUTTON_WRAPPER_ID).build();
         // Distribution set type acceptable components.
         criteria[1] = ServerViewComponentClientCriterion.createBuilder()
                 .dragSourceIdPrefix(SPUIDefinitions.DISTRIBUTION_SET_TYPE_ID_PREFIXS)
                 .dropTargetIdPrefixes(UIComponentIdProvider.DELETE_BUTTON_WRAPPER_ID)
-                .dropAreaIds(UIComponentIdProvider.DELETE_BUTTON_WRAPPER_ID)
-                .build();
+                .dropAreaIds(UIComponentIdProvider.DELETE_BUTTON_WRAPPER_ID).build();
         // Upload software module table acceptable components.
         criteria[2] = ServerViewComponentClientCriterion.createBuilder()
                 .dragSourceIdPrefix(UIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE)
@@ -68,8 +66,7 @@ public final class DistributionsViewClientCriterion extends ServerViewClientCrit
         criteria[3] = ServerViewComponentClientCriterion.createBuilder()
                 .dragSourceIdPrefix(SPUIDefinitions.SOFTWARE_MODULE_TAG_ID_PREFIXS)
                 .dropTargetIdPrefixes(UIComponentIdProvider.DELETE_BUTTON_WRAPPER_ID)
-                .dropAreaIds(UIComponentIdProvider.DELETE_BUTTON_WRAPPER_ID)
-                .build();
+                .dropAreaIds(UIComponentIdProvider.DELETE_BUTTON_WRAPPER_ID).build();
 
         return criteria;
     }

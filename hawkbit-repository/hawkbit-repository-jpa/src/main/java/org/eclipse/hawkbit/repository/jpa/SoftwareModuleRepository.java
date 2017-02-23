@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
@@ -50,12 +51,12 @@ public interface SoftwareModuleRepository
      *            to be filtered on
      * @param version
      *            to be filtered on
-     * @param type
+     * @param typeId
      *            to be filtered on
      * @return the found {@link SoftwareModule} with the given name AND version
      *         AND type
      */
-    JpaSoftwareModule findOneByNameAndVersionAndType(String name, String version, JpaSoftwareModuleType type);
+    Optional<SoftwareModule> findOneByNameAndVersionAndTypeId(String name, String version, Long typeId);
 
     /**
      * deletes the {@link SoftwareModule}s with the given IDs.
@@ -77,12 +78,12 @@ public interface SoftwareModuleRepository
     /**
      * @param pageable
      *            the page request to page the result set
-     * @param set
+     * @param setId
      *            to search for
      * @return all {@link SoftwareModule}s that are assigned to given
      *         {@link DistributionSet}.
      */
-    Page<SoftwareModule> findByAssignedTo(Pageable pageable, JpaDistributionSet set);
+    Page<SoftwareModule> findByAssignedToId(Pageable pageable, Long setId);
 
     /**
      * @param pageable

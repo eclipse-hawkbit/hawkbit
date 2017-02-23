@@ -8,7 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
+import java.util.concurrent.Executor;
+
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -43,13 +46,14 @@ public class TargetTableLayout extends AbstractTableLayout<TargetTable> {
             final ManagementViewClientCriterion managementViewClientCriterion,
             final DeploymentManagement deploymentManagement, final UiProperties uiproperties,
             final SpPermissionChecker permissionChecker, final UINotification uinotification,
-            final TagManagement tagManagement) {
+            final TagManagement tagManagement, final DistributionSetManagement distributionSetManagement,
+            final Executor uiExecutor) {
         this.eventBus = eventBus;
         this.targetDetails = new TargetDetails(i18n, eventbus, permissionChecker, managementUIState, uinotification,
                 tagManagement, targetManagement, entityFactory);
         this.targetTableHeader = new TargetTableHeader(i18n, permissionChecker, eventBus, notification,
                 managementUIState, managementViewClientCriterion, targetManagement, deploymentManagement, uiproperties,
-                eventbus, entityFactory, uinotification, tagManagement);
+                eventbus, entityFactory, uinotification, tagManagement, distributionSetManagement, uiExecutor);
 
         super.init(targetTableHeader, targetTable, targetDetails);
     }

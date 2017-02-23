@@ -15,6 +15,7 @@ import java.util.Optional;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
+import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
@@ -91,12 +92,13 @@ public class EventType {
 
         // download
         TYPES.put(20, DownloadProgressEvent.class);
-        
+
         TYPES.put(21, SoftwareModuleCreatedEvent.class);
         TYPES.put(22, SoftwareModuleDeletedEvent.class);
         TYPES.put(23, SoftwareModuleUpdatedEvent.class);
 
         TYPES.put(24, TargetPollEvent.class);
+        TYPES.put(25, RolloutDeletedEvent.class);
     }
 
     private int value;
@@ -137,7 +139,7 @@ public class EventType {
      */
     public static EventType from(final Class<?> clazz) {
         final Optional<Integer> foundEventType = TYPES.entrySet().stream()
-                .filter(entry -> entry.getValue().equals(clazz)).map(entry -> entry.getKey()).findFirst();
+                .filter(entry -> entry.getValue().equals(clazz)).map(entry -> entry.getKey()).findAny();
         if (!foundEventType.isPresent()) {
             return null;
         }

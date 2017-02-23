@@ -143,10 +143,8 @@ public class UploadStatusInfoWindow extends Window {
         case RECEIVE_UPLOAD:
             uploadRecevied(uploadStatus.getFileName(), uploadStatus.getSoftwareModule());
             break;
-        case UPLOAD_FINISHED:
-        case ABORT_UPLOAD:
-        case UPLOAD_FAILED:
         default:
+            break;
         }
     }
 

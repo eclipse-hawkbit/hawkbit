@@ -8,6 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.layouts;
 
+import java.util.Objects;
+import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.builder.TagUpdate;
@@ -110,6 +114,22 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     protected String tagNameValue;
     protected String tagDescValue;
 
+    /**
+     * Constructor for AbstractCreateUpdateTagLayout
+     * 
+     * @param i18n
+     *            I18N
+     * @param tagManagement
+     *            TagManagement
+     * @param entityFactory
+     *            EntityFactory
+     * @param eventBus
+     *            UIEventBus
+     * @param permChecker
+     *            SpPermissionChecker
+     * @param uiNotification
+     *            UINotification
+     */
     public AbstractCreateUpdateTagLayout(final I18N i18n, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
             final UINotification uiNotification) {
@@ -130,7 +150,7 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
         @Override
         public void saveOrUpdate() {
             if (isUpdateAction()) {
-                updateEntity(findEntityByName());
+                updateEntity(findEntityByName().orElse(null));
                 return;
             }
 
@@ -192,7 +212,7 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
                 .prompt(i18n.get("textfield.description")).immediate(true).id(SPUIDefinitions.NEW_TARGET_TAG_DESC)
                 .buildTextComponent();
 
-        tagDesc.setNullRepresentation("");
+        tagDesc.setNullRepresentation(StringUtils.EMPTY);
 
         tagNameComboBox = SPUIComponentProvider.getComboBox(null, "", null, null, false, "",
                 i18n.get("label.combobox.tag"));
@@ -278,16 +298,17 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
      * @return the color which should be selected in the color-picker component.
      */
     protected Color getColorForColorPicker() {
-        final TargetTag targetTagSelected = tagManagement.findTargetTag(tagNameComboBox.getValue().toString());
-        if (targetTagSelected == null) {
-            final DistributionSetTag distTag = tagManagement
-                    .findDistributionSetTag(tagNameComboBox.getValue().toString());
-            return distTag.getColour() != null ? ColorPickerHelper.rgbToColorConverter(distTag.getColour())
-                    : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR);
+        final Optional<TargetTag> targetTagSelected = tagManagement
+                .findTargetTag(tagNameComboBox.getValue().toString());
+        if (targetTagSelected.isPresent()) {
+            return ColorPickerHelper.rgbToColorConverter(targetTagSelected.map(TargetTag::getColour)
+                    .filter(Objects::nonNull).orElse(ColorPickerConstants.DEFAULT_COLOR));
         }
-        return targetTagSelected.getColour() != null
-                ? ColorPickerHelper.rgbToColorConverter(targetTagSelected.getColour())
-                : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR);
+
+        return ColorPickerHelper.rgbToColorConverter(tagManagement
+                .findDistributionSetTag(tagNameComboBox.getValue().toString()).map(DistributionSetTag::getColour)
+                .filter(Objects::nonNull).orElse(ColorPickerConstants.DEFAULT_COLOR));
+
     }
 
     private void tagNameChosen(final ValueChangeEvent event) {
@@ -587,14 +608,11 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     }
 
     private boolean isDuplicateByName() {
-        final E existingType = findEntityByName();
-        if (existingType != null) {
-            uiNotification.displayValidationError(
-                    i18n.get("message.tag.duplicate.check", new Object[] { existingType.getName() }));
-            return true;
-        }
+        final Optional<E> existingType = findEntityByName();
+        existingType.ifPresent(type -> uiNotification
+                .displayValidationError(i18n.get("message.tag.duplicate.check", new Object[] { type.getName() })));
 
-        return false;
+        return existingType.isPresent();
     }
 
     protected boolean isDuplicate() {
@@ -641,7 +659,7 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     public void removeColorChangeListener(final ColorChangeListener listener) {
     }
 
-    protected abstract E findEntityByName();
+    protected abstract Optional<E> findEntityByName();
 
     protected abstract String getWindowCaption();
 

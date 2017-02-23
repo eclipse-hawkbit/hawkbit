@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -99,7 +101,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
         if (values == null) {
             values = Collections.emptySet();
         }
-        return values.stream().filter(item -> item != null).collect(Collectors.toSet());
+        return values.stream().filter(Objects::nonNull).collect(Collectors.toSet());
     }
 
     private void onValueChange() {
@@ -107,14 +109,15 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
 
         final Set<I> values = getTableValue(this);
 
-        E entity = null;
         I lastId = null;
         if (!values.isEmpty()) {
             lastId = Iterables.getLast(values);
-            entity = findEntityByTableValue(lastId);
         }
         setManagementEntitiyStateValues(values, lastId);
-        publishEntityAfterValueChange(entity);
+
+        if (lastId != null) {
+            findEntityByTableValue(lastId).ifPresent(this::publishEntityAfterValueChange);
+        }
     }
 
     protected void setManagementEntitiyStateValues(final Set<I> values, final I lastId) {
@@ -183,7 +186,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
         }
     }
 
-    protected void applyMaxTableSettings() {
+    private void applyMaxTableSettings() {
         setColumnProperties();
         setValue(null);
         setSelectable(false);
@@ -192,7 +195,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
         setColumnCollapsingAllowed(true);
     }
 
-    protected void applyMinTableSettings() {
+    private void applyMinTableSettings() {
         setDefault();
         setColumnProperties();
         selectRow();
@@ -255,7 +258,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
         return ids;
     }
 
-    protected abstract E findEntityByTableValue(I lastSelectedId);
+    protected abstract Optional<E> findEntityByTableValue(I lastSelectedId);
 
     protected abstract void publishEntityAfterValueChange(E selectedLastEntity);
 
@@ -439,6 +442,10 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
             return;
         }
         ((LazyQueryContainer) getContainerDataSource()).refresh();
+    }
+
+    protected UINotification getNotification() {
+        return notification;
     }
 
     protected abstract boolean hasDropPermission();

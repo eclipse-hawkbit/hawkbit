@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionStatus;
@@ -26,6 +27,8 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -40,6 +43,8 @@ import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
 public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
     private static final long serialVersionUID = -8841076207255485907L;
+
+    private static final Logger LOG = LoggerFactory.getLogger(RolloutGroupTargetsBeanQuery.class);
 
     private static final Sort sort = new Sort(Direction.ASC, "id");
 
@@ -84,8 +89,8 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
         }
 
         return rolloutGroup.map(group -> getProxyRolloutGroupTargetsList(getRolloutGroupManagement()
-                .findAllTargetsWithActionStatus(new PageRequest(startIndex / count, count), group).getContent()))
-                .orElse(Collections.emptyList());
+                .findAllTargetsWithActionStatus(new PageRequest(startIndex / count, count), group.getId())
+                .getContent())).orElse(Collections.emptyList());
     }
 
     private static List<ProxyTarget> getProxyRolloutGroupTargetsList(
@@ -98,7 +103,6 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
     private static ProxyTarget mapTargetToProxy(final TargetWithActionStatus targetWithActionStatus) {
         final Target targ = targetWithActionStatus.getTarget();
         final ProxyTarget prxyTarget = new ProxyTarget();
-        prxyTarget.setTargetIdName(targ.getTargetIdName());
         prxyTarget.setName(targ.getName());
         prxyTarget.setDescription(targ.getDescription());
         prxyTarget.setControllerId(targ.getControllerId());
@@ -135,9 +139,16 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
         long size = 0;
 
         if (rolloutGroup.isPresent()) {
-            firstPageTargetSets = getRolloutGroupManagement().findAllTargetsWithActionStatus(
-                    new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), rolloutGroup.get());
-            size = firstPageTargetSets.getTotalElements();
+            try {
+                firstPageTargetSets = getRolloutGroupManagement().findAllTargetsWithActionStatus(
+                        new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), rolloutGroup.get().getId());
+                size = firstPageTargetSets.getTotalElements();
+            } catch (final EntityNotFoundException e) {
+                LOG.error("Rollout does not exists. Redirect to Rollouts overview", e);
+                rolloutUIState.setShowRolloutGroupTargets(false);
+                rolloutUIState.setShowRollOuts(true);
+                return 0;
+            }
         }
         getRolloutUIState().setRolloutGroupTargetsTotalCount(size);
         if (size > SPUIDefinitions.MAX_TABLE_ENTRIES) {

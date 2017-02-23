@@ -77,8 +77,9 @@ public class AutoAssignChecker {
      * @param transactionManager
      *            to run transactions
      */
-    public AutoAssignChecker(TargetFilterQueryManagement targetFilterQueryManagement, TargetManagement targetManagement,
-            DeploymentManagement deploymentManagement, PlatformTransactionManager transactionManager) {
+    public AutoAssignChecker(final TargetFilterQueryManagement targetFilterQueryManagement,
+            final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
+            final PlatformTransactionManager transactionManager) {
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
@@ -96,13 +97,14 @@ public class AutoAssignChecker {
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void check() {
+        LOGGER.debug("Auto assigned check call");
 
-        PageRequest pageRequest = new PageRequest(0, PAGE_SIZE);
+        final PageRequest pageRequest = new PageRequest(0, PAGE_SIZE);
 
-        Page<TargetFilterQuery> filterQueries = targetFilterQueryManagement
+        final Page<TargetFilterQuery> filterQueries = targetFilterQueryManagement
                 .findTargetFilterQueryWithAutoAssignDS(pageRequest);
 
-        for (TargetFilterQuery filterQuery : filterQueries) {
+        for (final TargetFilterQuery filterQuery : filterQueries) {
             checkByTargetFilterQueryAndAssignDS(filterQuery);
         }
 
@@ -116,9 +118,9 @@ public class AutoAssignChecker {
      * @param targetFilterQuery
      *            the target filter query
      */
-    private void checkByTargetFilterQueryAndAssignDS(TargetFilterQuery targetFilterQuery) {
+    private void checkByTargetFilterQueryAndAssignDS(final TargetFilterQuery targetFilterQuery) {
         try {
-            DistributionSet distributionSet = targetFilterQuery.getAutoAssignDistributionSet();
+            final DistributionSet distributionSet = targetFilterQuery.getAutoAssignDistributionSet();
 
             int count;
             do {
@@ -142,11 +144,12 @@ public class AutoAssignChecker {
      *            distribution set id to assign
      * @return count of targets
      */
-    private int runTransactionalAssignment(TargetFilterQuery targetFilterQuery, Long dsId) {
+    private int runTransactionalAssignment(final TargetFilterQuery targetFilterQuery, final Long dsId) {
         final String actionMessage = String.format(ACTION_MESSAGE, targetFilterQuery.getName());
         return transactionTemplate.execute(status -> {
-            List<TargetWithActionType> targets = getTargetsWithActionType(targetFilterQuery, dsId, PAGE_SIZE);
-            int count = targets.size();
+            final List<TargetWithActionType> targets = getTargetsWithActionType(targetFilterQuery.getQuery(), dsId,
+                    PAGE_SIZE);
+            final int count = targets.size();
             if (count > 0) {
                 deploymentManagement.assignDistributionSet(dsId, targets, actionMessage);
             }
@@ -167,10 +170,10 @@ public class AutoAssignChecker {
      *            maximum amount of targets to retrieve
      * @return list of targets with action type
      */
-    private List<TargetWithActionType> getTargetsWithActionType(TargetFilterQuery targetFilterQuery, Long dsId,
-            int count) {
-        Page<Target> targets = targetManagement.findAllTargetsByTargetFilterQueryAndNonDS(new PageRequest(0, count),
-                dsId, targetFilterQuery);
+    private List<TargetWithActionType> getTargetsWithActionType(final String targetFilterQuery, final Long dsId,
+            final int count) {
+        final Page<Target> targets = targetManagement
+                .findAllTargetsByTargetFilterQueryAndNonDS(new PageRequest(0, count), dsId, targetFilterQuery);
 
         return targets.getContent().stream().map(t -> new TargetWithActionType(t.getControllerId(),
                 Action.ActionType.FORCED, RepositoryModelConstants.NO_FORCE_TIME)).collect(Collectors.toList());

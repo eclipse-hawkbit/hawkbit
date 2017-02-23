@@ -19,7 +19,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -33,7 +32,6 @@ import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroupItemComponent;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.vaadin.data.Container.ItemSetChangeEvent;
 import com.vaadin.data.Container.ItemSetChangeListener;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -59,6 +57,7 @@ import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
+import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -92,11 +91,11 @@ public class CommonDialogWindow extends Window {
 
     private final ClickListener cancelButtonClickListener;
 
-    private final ClickListener closeClickListener = event -> onCloseEvent(event);
+    private final ClickListener closeClickListener = this::onCloseEvent;
 
     private final transient Map<Component, Object> orginalValues;
 
-    private final List<AbstractField<?>> allComponents;
+    private List<AbstractField<?>> allComponents;
 
     private final I18N i18n;
 
@@ -209,7 +208,7 @@ public class CommonDialogWindow extends Window {
             addStyleName("marginTop");
         }
 
-        if (null != content) {
+        if (content != null) {
             mainLayout.addComponent(content);
             mainLayout.setExpandRatio(content, 1.0F);
         }
@@ -240,11 +239,18 @@ public class CommonDialogWindow extends Window {
             Object value = field.getValue();
 
             if (field instanceof Table) {
-                value = Sets.newHashSet(((Table) field).getContainerDataSource().getItemIds());
+                value = ((Table) field).getContainerDataSource().getItemIds();
             }
             orginalValues.put(field, value);
         }
         saveButton.setEnabled(isSaveButtonEnabledAfterValueChange(null, null));
+    }
+
+    /**
+     * Clears the original values in case no value changed check is wished
+     */
+    public final void clearOriginalValues() {
+        orginalValues.clear();
     }
 
     protected void addCloseListenerForSaveButton() {
@@ -256,6 +262,9 @@ public class CommonDialogWindow extends Window {
     }
 
     protected void addComponentListeners() {
+        // avoid duplicate registration
+        removeListeners();
+
         for (final AbstractField<?> field : allComponents) {
             if (field instanceof TextChangeNotifier) {
                 ((TextChangeNotifier) field).addTextChangeListener(new ChangeListener(field));
@@ -283,26 +292,11 @@ public class CommonDialogWindow extends Window {
             }
             final Object currentValue = getCurrentVaue(currentChangedComponent, newValue, field);
 
-            if (!isValueEquals(field, originalValue, currentValue)) {
+            if (!Objects.equals(originalValue, currentValue)) {
                 return true;
             }
         }
         return false;
-    }
-
-    private static boolean isValueEquals(final AbstractField<?> field, final Object orginalValue,
-            final Object currentValue) {
-        if (Set.class.equals(field.getType())) {
-            return CollectionUtils.isEqualCollection(CollectionUtils.emptyIfNull((Collection<?>) orginalValue),
-                    CollectionUtils.emptyIfNull((Collection<?>) currentValue));
-        }
-
-        if (String.class.equals(field.getType())) {
-            return Objects.equals(Strings.emptyToNull((String) orginalValue),
-                    Strings.emptyToNull((String) currentValue));
-        }
-
-        return Objects.equals(orginalValue, currentValue);
     }
 
     private static Object getCurrentVaue(final Component currentChangedComponent, final Object newValue,
@@ -397,6 +391,16 @@ public class CommonDialogWindow extends Window {
 
             if (c instanceof FlexibleOptionGroupItemComponent) {
                 components.add(((FlexibleOptionGroupItemComponent) c).getOwner());
+            }
+
+            if (c instanceof TabSheet) {
+                final TabSheet tabSheet = (TabSheet) c;
+                for (final Iterator<Component> i = tabSheet.iterator(); i.hasNext();) {
+                    final Component component = i.next();
+                    if (component instanceof AbstractLayout) {
+                        components.addAll(getAllComponents((AbstractLayout) component));
+                    }
+                }
             }
         }
         return components;
@@ -565,6 +569,17 @@ public class CommonDialogWindow extends Window {
          * 
          */
         void saveOrUpdate();
+    }
+
+    /**
+     * Updates the field allComponents. All components existing on the given
+     * layout are added to the list of allComponents
+     * 
+     * @param layout
+     *            AbstractLayout
+     */
+    public void updateAllComponents(final AbstractLayout layout) {
+        allComponents = getAllComponents(layout);
     }
 
 }

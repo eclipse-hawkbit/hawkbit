@@ -47,7 +47,7 @@ final class MgmtDistributionSetTypeMapper {
         return smTypesRest.stream().map(smRest -> fromRequest(entityFactory, smRest)).collect(Collectors.toList());
     }
 
-    static DistributionSetTypeCreate fromRequest(final EntityFactory entityFactory,
+    private static DistributionSetTypeCreate fromRequest(final EntityFactory entityFactory,
             final MgmtDistributionSetTypeRequestBodyPost smsRest) {
         return entityFactory.distributionSetType().create().key(smsRest.getKey()).name(smsRest.getName())
                 .description(smsRest.getDescription()).colour(smsRest.getColour())
@@ -90,7 +90,7 @@ final class MgmtDistributionSetTypeMapper {
         result.setModuleId(type.getId());
 
         result.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class).getDistributionSetType(result.getModuleId()))
-                .withRel("self"));
+                .withSelfRel());
 
         result.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class).getMandatoryModules(result.getModuleId()))
                 .withRel(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULES));

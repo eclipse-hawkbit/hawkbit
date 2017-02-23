@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.management;
 
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 import javax.annotation.PostConstruct;
 
@@ -55,6 +56,7 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -113,7 +115,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
             final ManagementViewClientCriterion managementViewClientCriterion, final TagManagement tagManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement,
             final NotificationUnreadButton notificationUnreadButton,
-            final DeploymentViewMenuItem deploymentViewMenuItem) {
+            final DeploymentViewMenuItem deploymentViewMenuItem, @Qualifier("uiExecutor") final Executor uiExecutor) {
         super(eventBus, notificationUnreadButton);
         this.permChecker = permChecker;
         this.i18n = i18n;
@@ -124,14 +126,15 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
         final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout = new CreateUpdateTargetTagLayoutWindow(
                 i18n, tagManagement, entityFactory, eventBus, permChecker, uiNotification);
         this.targetTagFilterLayout = new TargetTagFilterLayout(i18n, createUpdateTargetTagLayout, managementUIState,
-                managementViewClientCriterion, permChecker, eventBus, uiNotification, entityFactory, targetManagement,
+                managementViewClientCriterion, permChecker, eventBus, uiNotification, entityFactory,
                 targetFilterQueryManagement);
         final TargetTable targetTable = new TargetTable(eventBus, i18n, uiNotification, targetManagement,
-                managementUIState, permChecker, managementViewClientCriterion);
+                managementUIState, permChecker, managementViewClientCriterion, distributionSetManagement,
+                tagManagement);
 
         this.targetTableLayout = new TargetTableLayout(eventbus, targetTable, targetManagement, entityFactory, i18n,
                 eventBus, uiNotification, managementUIState, managementViewClientCriterion, deploymentManagement,
-                uiproperties, permChecker, uiNotification, tagManagement);
+                uiproperties, permChecker, uiNotification, tagManagement, distributionSetManagement, uiExecutor);
 
         this.distributionTagLayout = new DistributionTagLayout(eventbus, managementUIState, i18n, permChecker, eventBus,
                 tagManagement, entityFactory, uiNotification, distFilterParameters, distributionSetManagement,

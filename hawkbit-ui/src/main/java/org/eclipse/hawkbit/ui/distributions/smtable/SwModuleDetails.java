@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.distributions.smtable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.MetaData;
@@ -144,8 +145,8 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
     }
 
     private void populateDetails() {
-        String maxAssign = HawkbitCommonUtil.SP_STRING_EMPTY;
         if (getSelectedBaseEntity() != null) {
+            String maxAssign;
             if (getSelectedBaseEntity().getType().getMaxAssignments() == 1) {
                 maxAssign = getI18n().get("label.singleAssign.type");
             } else {
@@ -154,8 +155,7 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
             updateSwModuleDetailsLayout(getSelectedBaseEntity().getType().getName(),
                     getSelectedBaseEntity().getVendor(), maxAssign);
         } else {
-            updateSwModuleDetailsLayout(HawkbitCommonUtil.SP_STRING_EMPTY, HawkbitCommonUtil.SP_STRING_EMPTY,
-                    maxAssign);
+            updateSwModuleDetailsLayout(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY);
         }
     }
 
@@ -215,7 +215,7 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
 
     @Override
     protected void showMetadata(final ClickEvent event) {
-        final SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(getSelectedBaseEntityId());
-        UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null));
+        softwareManagement.findSoftwareModuleById(getSelectedBaseEntityId())
+                .ifPresent(swmodule -> UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null)));
     }
 }

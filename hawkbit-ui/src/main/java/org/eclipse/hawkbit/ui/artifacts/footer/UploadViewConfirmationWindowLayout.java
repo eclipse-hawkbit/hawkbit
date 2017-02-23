@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.state.CustomFile;
@@ -238,9 +239,8 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
     private void deleteSMtypeAll(final ConfirmationTab tab) {
         final int deleteSWModuleTypeCount = artifactUploadState.getSelectedDeleteSWModuleTypes().size();
         for (final String swModuleTypeName : artifactUploadState.getSelectedDeleteSWModuleTypes()) {
-
-            softwareManagement
-                    .deleteSoftwareModuleType(softwareManagement.findSoftwareModuleTypeByName(swModuleTypeName));
+            softwareManagement.findSoftwareModuleTypeByName(swModuleTypeName).map(SoftwareModuleType::getId)
+                    .ifPresent(softwareManagement::deleteSoftwareModuleType);
         }
         addToConsolitatedMsg(FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.get("message.sw.module.type.delete", new Object[] { deleteSWModuleTypeCount }));

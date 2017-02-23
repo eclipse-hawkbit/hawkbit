@@ -11,9 +11,11 @@ package org.eclipse.hawkbit.ui.management.dstag;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
@@ -22,6 +24,7 @@ import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -68,12 +71,12 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
 
     @Override
     protected void updateEntity(final DistributionSetTag entity) {
-        updateExistingTag(findEntityByName());
-
+        updateExistingTag(findEntityByName()
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, tagName.getValue())));
     }
 
     @Override
-    protected DistributionSetTag findEntityByName() {
+    protected Optional<DistributionSetTag> findEntityByName() {
         return tagManagement.findDistributionSetTag(tagName.getValue());
     }
 
@@ -83,15 +86,17 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     @Override
     protected void createNewTag() {
         super.createNewTag();
-        if (isNotEmpty(getTagNameValue())) {
+        final String tagNameValueTrimmed = HawkbitCommonUtil.trimAndNullIfEmpty(tagNameValue);
+        final String tagDescriptionTrimmed = HawkbitCommonUtil.trimAndNullIfEmpty(tagDescValue);
+        if (isNotEmpty(tagNameValueTrimmed)) {
 
             String colour = ColorPickerConstants.START_COLOR.getCSS();
             if (isNotEmpty(getColorPicked())) {
                 colour = getColorPicked();
             }
 
-            final DistributionSetTag newDistTag = tagManagement.createDistributionSetTag(
-                    entityFactory.tag().create().name(tagNameValue).description(tagDescValue).colour(colour));
+            final DistributionSetTag newDistTag = tagManagement.createDistributionSetTag(entityFactory.tag().create()
+                    .name(tagNameValueTrimmed).description(tagDescriptionTrimmed).colour(colour));
             eventBus.publish(this, new DistributionSetTagTableEvent(BaseEntityEventType.ADD_ENTITY, newDistTag));
             displaySuccess(newDistTag.getName());
             resetDistTagValues();
@@ -133,14 +138,14 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     @Override
     public void setTagDetails(final String distTagSelected) {
         tagName.setValue(distTagSelected);
-        final DistributionSetTag selectedDistTag = tagManagement.findDistributionSetTag(distTagSelected);
-        if (null != selectedDistTag) {
-            tagDesc.setValue(selectedDistTag.getDescription());
-            if (null == selectedDistTag.getColour()) {
+        final Optional<DistributionSetTag> selectedDistTag = tagManagement.findDistributionSetTag(distTagSelected);
+        if (selectedDistTag.isPresent()) {
+            tagDesc.setValue(selectedDistTag.get().getDescription());
+            if (null == selectedDistTag.get().getColour()) {
                 setTagColor(getColorPickerLayout().getDefaultColor(), ColorPickerConstants.DEFAULT_COLOR);
             } else {
-                setTagColor(ColorPickerHelper.rgbToColorConverter(selectedDistTag.getColour()),
-                        selectedDistTag.getColour());
+                setTagColor(ColorPickerHelper.rgbToColorConverter(selectedDistTag.get().getColour()),
+                        selectedDistTag.get().getColour());
             }
         }
     }

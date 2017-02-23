@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository;
 
 import java.io.InputStream;
-import java.util.List;
+import java.util.Optional;
 
 import javax.validation.constraints.NotNull;
 
@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.GridFSDBFileNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -58,7 +57,10 @@ public interface ArtifactManagement {
      *
      * @return uploaded {@link Artifact}
      *
-     * @throw ArtifactUploadFailedException if upload fails
+     * @throws ArtifactUploadFailedException
+     *             if upload fails
+     * @throws EntityNotFoundException
+     *             if given software module does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     Artifact createArtifact(@NotNull InputStream inputStream, @NotNull Long moduleId, final String filename,
@@ -101,16 +103,20 @@ public interface ArtifactManagement {
             String providedMd5Sum, String providedSha1Sum, boolean overrideExisting, String contentType);
 
     /**
-     * Garbage collects local artifact binary file if only referenced by given
-     * {@link Artifact} metadata object.
+     * Garbage collects artifact binaries if only referenced by given
+     * {@link SoftwareModule#getId()} or {@link SoftwareModules} that are marged
+     * as deleted.
+     * 
      *
-     * @param onlyByThisReferenced
-     *            the related local artifact
+     * @param artifactSha1Hash
+     *            no longer needed
+     * @param moduleId
+     *            the garbage colelction call is made for
      * 
      * @return <code>true</code> if an binary was actually garbage collected
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
-    boolean clearArtifactBinary(@NotNull Artifact onlyByThisReferenced);
+    boolean clearArtifactBinary(@NotEmpty String artifactSha1Hash, @NotNull Long moduleId);
 
     /**
      * Deletes {@link Artifact} based on given id.
@@ -119,7 +125,8 @@ public interface ArtifactManagement {
      *            of the {@link Artifact} that has to be deleted.
      * @throws ArtifactDeleteFailedException
      *             if deletion failed (MongoDB is not available)
-     *
+     * @throws EntityNotFoundException
+     *             if artifact with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     void deleteArtifact(@NotNull Long id);
@@ -129,12 +136,11 @@ public interface ArtifactManagement {
      *
      * @param id
      *            to search for
-     * @return found {@link Artifact} or <code>null</code> is it could not be
-     *         found.
+     * @return found {@link Artifact}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    Artifact findArtifact(@NotNull Long id);
+    Optional<Artifact> findArtifact(@NotNull Long id);
 
     /**
      * Find by artifact by software module id and filename.
@@ -143,11 +149,14 @@ public interface ArtifactManagement {
      *            file name
      * @param softwareModuleId
      *            software module id.
-     * @return Artifact if artifact present
+     * @return found {@link Artifact}
+     * 
+     * @throws EntityNotFoundException
+     *             if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    List<Artifact> findByFilenameAndSoftwareModule(@NotNull String filename, @NotNull Long softwareModuleId);
+    Optional<Artifact> findByFilenameAndSoftwareModule(@NotNull String filename, @NotNull Long softwareModuleId);
 
     /**
      * Find all local artifact by sha1 and return the first artifact.
@@ -158,7 +167,7 @@ public interface ArtifactManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    Artifact findFirstArtifactBySHA1(@NotNull String sha1);
+    Optional<Artifact> findFirstArtifactBySHA1(@NotNull String sha1);
 
     /**
      * Searches for {@link Artifact} with given file name.
@@ -169,7 +178,7 @@ public interface ArtifactManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    List<Artifact> findArtifactByFilename(@NotNull String filename);
+    Optional<Artifact> findArtifactByFilename(@NotNull String filename);
 
     /**
      * Get local artifact for a base software module.
@@ -179,6 +188,9 @@ public interface ArtifactManagement {
      * @param swId
      *            software module id
      * @return Page<Artifact>
+     * 
+     * @throws EntityNotFoundException
+     *             if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<Artifact> findArtifactBySoftwareModule(@NotNull Pageable pageReq, @NotNull Long swId);
@@ -186,15 +198,13 @@ public interface ArtifactManagement {
     /**
      * Loads {@link DbArtifact} from store for given {@link Artifact}.
      *
-     * @param artifact
+     * @param sha1Hash
      *            to search for
      * @return loaded {@link DbArtifact}
      *
-     * @throws GridFSDBFileNotFoundException
-     *             if file could not be found in store
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DOWNLOAD_ARTIFACT + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.HAS_CONTROLLER_DOWNLOAD)
-    DbArtifact loadArtifactBinary(@NotNull Artifact artifact);
+    Optional<DbArtifact> loadArtifactBinary(@NotEmpty String sha1Hash);
 
 }

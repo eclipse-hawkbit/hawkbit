@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.model;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -57,10 +58,10 @@ public interface DistributionSet extends NamedVersionedEntity {
      *
      * @param type
      *            to search for
-     * @return SoftwareModule of given type or <code>null</code> if not found.
+     * @return SoftwareModule of given type
      */
-    default SoftwareModule findFirstModuleByType(final SoftwareModuleType type) {
-        return getModules().stream().filter(module -> module.getType().equals(type)).findFirst().orElse(null);
+    default Optional<SoftwareModule> findFirstModuleByType(final SoftwareModuleType type) {
+        return getModules().stream().filter(module -> module.getType().equals(type)).findAny();
     }
 
     /**

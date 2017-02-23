@@ -8,13 +8,17 @@
  */
 package org.eclipse.hawkbit.ui.rollout;
 
+import java.util.Optional;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
@@ -58,6 +62,8 @@ public class RolloutView extends VerticalLayout implements View {
 
     private final RolloutUIState rolloutUIState;
 
+    private final transient RolloutManagement rolloutManagement;
+
     private final transient EventBus.UIEventBus eventBus;
 
     @Autowired
@@ -65,10 +71,11 @@ public class RolloutView extends VerticalLayout implements View {
             final UIEventBus eventBus, final RolloutManagement rolloutManagement,
             final RolloutGroupManagement rolloutGroupManagement, final TargetManagement targetManagement,
             final UINotification uiNotification, final UiProperties uiProperties, final EntityFactory entityFactory,
-            final I18N i18n) {
+            final I18N i18n, final TargetFilterQueryManagement targetFilterQueryManagement) {
         this.permChecker = permissionChecker;
+        this.rolloutManagement = rolloutManagement;
         this.rolloutListView = new RolloutListView(permissionChecker, rolloutUIState, eventBus, rolloutManagement,
-                targetManagement, uiNotification, uiProperties, entityFactory, i18n);
+                targetManagement, uiNotification, uiProperties, entityFactory, i18n, targetFilterQueryManagement);
         this.rolloutGroupsListView = new RolloutGroupsListView(i18n, eventBus, rolloutGroupManagement, rolloutUIState,
                 permissionChecker);
         this.rolloutGroupTargetsListView = new RolloutGroupTargetsListView(eventBus, i18n, rolloutUIState);
@@ -123,6 +130,11 @@ public class RolloutView extends VerticalLayout implements View {
     }
 
     private void showRolloutGroupTargetsListView() {
+        if (isRolloutDeleted()) {
+            showRolloutListView();
+            return;
+        }
+
         rolloutGroupTargetsListView.setVisible(true);
         if (rolloutListView.isVisible()) {
             rolloutListView.setVisible(false);
@@ -131,10 +143,15 @@ public class RolloutView extends VerticalLayout implements View {
             rolloutGroupsListView.setVisible(false);
         }
         addComponent(rolloutGroupTargetsListView);
-        setExpandRatio(rolloutGroupTargetsListView, 1.0f);
+        setExpandRatio(rolloutGroupTargetsListView, 1.0F);
     }
 
     private void showRolloutGroupListView() {
+        if (isRolloutDeleted()) {
+            showRolloutListView();
+            return;
+        }
+
         rolloutGroupsListView.setVisible(true);
         if (rolloutListView.isVisible()) {
             rolloutListView.setVisible(false);
@@ -143,7 +160,16 @@ public class RolloutView extends VerticalLayout implements View {
             rolloutGroupTargetsListView.setVisible(false);
         }
         addComponent(rolloutGroupsListView);
-        setExpandRatio(rolloutGroupsListView, 1.0f);
+        setExpandRatio(rolloutGroupsListView, 1.0F);
+    }
+
+    private boolean isRolloutDeleted() {
+        if (!rolloutUIState.getRolloutId().isPresent()) {
+            return true;
+        }
+
+        final Optional<Rollout> rollout = rolloutManagement.findRolloutById(rolloutUIState.getRolloutId().get());
+        return !rollout.isPresent() || rollout.get().isDeleted();
     }
 
     private void showRolloutListView() {
@@ -155,7 +181,7 @@ public class RolloutView extends VerticalLayout implements View {
             rolloutGroupTargetsListView.setVisible(false);
         }
         addComponent(rolloutListView);
-        setExpandRatio(rolloutListView, 1.0f);
+        setExpandRatio(rolloutListView, 1.0F);
     }
 
     @Override

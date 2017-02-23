@@ -10,11 +10,10 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -46,7 +45,16 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      * @return found {@link Target} or <code>null</code> if not found.
      */
     @EntityGraph(value = "Target.detail", type = EntityGraphType.LOAD)
-    JpaTarget findByControllerId(String controllerID);
+    Optional<Target> findByControllerId(String controllerID);
+
+    /**
+     * Checks if target with given id exists.
+     * 
+     * @param controllerId to check 
+     * @return <code>true</code> if target with given id exists
+     */
+    @Query("SELECT CASE WHEN COUNT(t)>0 THEN 'true' ELSE 'false' END FROM JpaTarget t WHERE t.controllerId=:controllerId")
+    boolean existsByControllerId(@Param("controllerId") String controllerId);
 
     /**
      * Deletes the {@link Target}s with the given target IDs.
@@ -63,12 +71,12 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     /**
      * Finds {@link Target}s by assigned {@link Tag}.
      *
-     * @param tag
+     * @param tagId
      *            to be found
      * @return list of found targets
      */
-    @Query(value = "SELECT DISTINCT t FROM JpaTarget t JOIN t.tags tt WHERE tt = :tag")
-    List<JpaTarget> findByTag(@Param("tag") final JpaTargetTag tag);
+    @Query(value = "SELECT DISTINCT t FROM JpaTarget t JOIN t.tags tt WHERE tt.id = :tag")
+    List<JpaTarget> findByTag(@Param("tag") final Long tagId);
 
     /**
      * Finds all {@link Target}s based on given {@link Target#getControllerId()}
@@ -190,11 +198,11 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      * Finds all targets related to a target rollout group stored for a specific
      * rollout.
      * 
-     * @param rolloutGroup
+     * @param rolloutGroupId
      *            the rollout group the targets should belong to
      * @param page
      *            the page request parameter
      * @return a page of all targets related to a rollout group
      */
-    Page<Target> findByActionsRolloutGroup(JpaRolloutGroup rolloutGroup, Pageable page);
+    Page<Target> findByActionsRolloutGroupId(Long rolloutGroupId, Pageable page);
 }

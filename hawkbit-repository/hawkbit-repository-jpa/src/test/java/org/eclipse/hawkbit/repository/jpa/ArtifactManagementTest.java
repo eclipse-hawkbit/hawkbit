@@ -8,24 +8,30 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.test.matcher.Expect;
+import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.HashGeneratorUtils;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.Test;
@@ -35,24 +41,47 @@ import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
- * Test class for {@link ArtifactManagement} with running MongoDB instance..
- *
- *
- *
- *
+ * Test class for {@link ArtifactManagement}.
  */
 @Features("Component Tests - Repository")
 @Stories("Artifact Management")
 public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
-    /**
-     * Test method for
-     * {@link org.eclipse.hawkbit.repository.ArtifactManagement#createArtifact(java.io.InputStream)}
-     * .
-     * 
-     * @throws IOException
-     * @throws NoSuchAlgorithmException
-     */
+    @Test
+    @Description("Verifies that management queries react as specfied on calls for non existing entities.")
+    @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 1) })
+    public void nonExistingEntityQueries() throws URISyntaxException {
+        final SoftwareModule module = testdataFactory.createSoftwareModuleOs();
+
+        assertThatThrownBy(() -> artifactManagement.createArtifact(IOUtils.toInputStream("test", "UTF-8"), 1234L, "xxx",
+                null, null, false, null)).isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("SoftwareModule");
+
+        assertThatThrownBy(
+                () -> artifactManagement.createArtifact(IOUtils.toInputStream("test", "UTF-8"), 1234L, "xxx", false))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("SoftwareModule");
+
+        assertThatThrownBy(() -> artifactManagement.deleteArtifact(1234L)).isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("1234").hasMessageContaining("Artifact");
+
+        assertThat(artifactManagement.findArtifact(1234L).isPresent()).isFalse();
+        assertThatThrownBy(() -> artifactManagement.findArtifactBySoftwareModule(pageReq, 1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("SoftwareModule");
+        assertThat(artifactManagement.findArtifactByFilename("1234").isPresent()).isFalse();
+
+        assertThatThrownBy(() -> artifactManagement.findByFilenameAndSoftwareModule("xxx", 1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("SoftwareModule");
+
+        assertThat(artifactManagement.findByFilenameAndSoftwareModule("1234", module.getId()).isPresent()).isFalse();
+
+        assertThat(artifactManagement.findFirstArtifactBySHA1("1234").isPresent()).isFalse();
+        assertThat(artifactManagement.loadArtifactBinary("1234").isPresent()).isFalse();
+
+    }
+
     @Test
     @Description("Test if a local artifact can be created by API including metadata.")
     public void createArtifact() throws NoSuchAlgorithmException, IOException {
@@ -60,16 +89,13 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         assertThat(softwareModuleRepository.findAll()).hasSize(0);
         assertThat(artifactRepository.findAll()).hasSize(0);
 
-        JpaSoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
-                "version 1", null, null);
+        JpaSoftwareModule sm = new JpaSoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareModuleRepository.save(sm);
 
-        JpaSoftwareModule sm2 = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 2",
-                "version 2", null, null);
+        JpaSoftwareModule sm2 = new JpaSoftwareModule(osType, "name 2", "version 2", null, null);
         sm2 = softwareModuleRepository.save(sm2);
 
-        JpaSoftwareModule sm3 = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 3",
-                "version 3", null, null);
+        JpaSoftwareModule sm3 = new JpaSoftwareModule(osType, "name 3", "version 3", null, null);
         sm3 = softwareModuleRepository.save(sm3);
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
@@ -87,26 +113,25 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         assertThat(result.getSoftwareModule().getId()).isEqualTo(sm.getId());
         assertThat(result2.getSoftwareModule().getId()).isEqualTo(sm2.getId());
         assertThat(((JpaArtifact) result).getFilename()).isEqualTo("file1");
-        assertThat(((JpaArtifact) result).getGridFsFileName()).isNotNull();
+        assertThat(((JpaArtifact) result).getSha1Hash()).isNotNull();
         assertThat(result).isNotEqualTo(result2);
-        assertThat(((JpaArtifact) result).getGridFsFileName()).isEqualTo(((JpaArtifact) result2).getGridFsFileName());
+        assertThat(((JpaArtifact) result).getSha1Hash()).isEqualTo(((JpaArtifact) result2).getSha1Hash());
 
-        assertThat(artifactManagement.findArtifactByFilename("file1").get(0).getSha1Hash())
+        assertThat(artifactManagement.findArtifactByFilename("file1").get().getSha1Hash())
                 .isEqualTo(HashGeneratorUtils.generateSHA1(random));
-        assertThat(artifactManagement.findArtifactByFilename("file1").get(0).getMd5Hash())
+        assertThat(artifactManagement.findArtifactByFilename("file1").get().getMd5Hash())
                 .isEqualTo(HashGeneratorUtils.generateMD5(random));
 
         assertThat(artifactRepository.findAll()).hasSize(4);
         assertThat(softwareModuleRepository.findAll()).hasSize(3);
 
-        assertThat(softwareManagement.findSoftwareModuleById(sm.getId()).getArtifacts()).hasSize(3);
+        assertThat(softwareManagement.findSoftwareModuleById(sm.getId()).get().getArtifacts()).hasSize(3);
     }
 
     @Test
     @Description("Tests hard delete directly on repository.")
     public void hardDeleteSoftwareModule() throws NoSuchAlgorithmException, IOException {
-        JpaSoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
-                "version 1", null, null);
+        JpaSoftwareModule sm = new JpaSoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareModuleRepository.save(sm);
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
@@ -129,12 +154,10 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests the deletion of a local artifact including metadata.")
     public void deleteArtifact() throws NoSuchAlgorithmException, IOException {
-        JpaSoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
-                "version 1", null, null);
+        JpaSoftwareModule sm = new JpaSoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareModuleRepository.save(sm);
 
-        JpaSoftwareModule sm2 = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 2",
-                "version 2", null, null);
+        JpaSoftwareModule sm2 = new JpaSoftwareModule(osType, "name 2", "version 2", null, null);
         sm2 = softwareModuleRepository.save(sm2);
 
         assertThat(artifactRepository.findAll()).isEmpty();
@@ -148,19 +171,18 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(result.getId()).isNotNull();
         assertThat(result2.getId()).isNotNull();
-        assertThat(((JpaArtifact) result).getGridFsFileName())
-                .isNotEqualTo(((JpaArtifact) result2).getGridFsFileName());
+        assertThat(((JpaArtifact) result).getSha1Hash()).isNotEqualTo(((JpaArtifact) result2).getSha1Hash());
 
-        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getGridFsFileName())).isNotNull();
-        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result2).getGridFsFileName())).isNotNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getSha1Hash())).isNotNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result2).getSha1Hash())).isNotNull();
 
         artifactManagement.deleteArtifact(result.getId());
 
-        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getGridFsFileName())).isNull();
-        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result2).getGridFsFileName())).isNotNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getSha1Hash())).isNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result2).getSha1Hash())).isNotNull();
 
         artifactManagement.deleteArtifact(result2.getId());
-        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result2).getGridFsFileName())).isNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result2).getSha1Hash())).isNull();
 
         assertThat(artifactRepository.findAll()).hasSize(0);
     }
@@ -169,12 +191,10 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     @Description("Test the deletion of an artifact metadata where the binary is still linked to another "
             + "metadata element. The expected result is that the metadata is deleted but the binary kept.")
     public void deleteDuplicateArtifacts() throws NoSuchAlgorithmException, IOException {
-        JpaSoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
-                "version 1", null, null);
+        JpaSoftwareModule sm = new JpaSoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareModuleRepository.save(sm);
 
-        JpaSoftwareModule sm2 = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 2",
-                "version 2", null, null);
+        JpaSoftwareModule sm2 = new JpaSoftwareModule(osType, "name 2", "version 2", null, null);
         sm2 = softwareModuleRepository.save(sm2);
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
@@ -187,14 +207,14 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         assertThat(artifactRepository.findAll()).hasSize(2);
         assertThat(result.getId()).isNotNull();
         assertThat(result2.getId()).isNotNull();
-        assertThat(((JpaArtifact) result).getGridFsFileName()).isEqualTo(((JpaArtifact) result2).getGridFsFileName());
+        assertThat(((JpaArtifact) result).getSha1Hash()).isEqualTo(((JpaArtifact) result2).getSha1Hash());
 
-        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getGridFsFileName())).isNotNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getSha1Hash())).isNotNull();
         artifactManagement.deleteArtifact(result.getId());
-        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getGridFsFileName())).isNotNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getSha1Hash())).isNotNull();
 
         artifactManagement.deleteArtifact(result2.getId());
-        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getGridFsFileName())).isNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getSha1Hash())).isNull();
     }
 
     @Test
@@ -203,7 +223,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         final Artifact result = artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024),
                 testdataFactory.createSoftwareModuleOs().getId(), "file1", false);
 
-        assertThat(artifactManagement.findArtifact(result.getId())).isEqualTo(result);
+        assertThat(artifactManagement.findArtifact(result.getId()).get()).isEqualTo(result);
     }
 
     @Test
@@ -214,7 +234,8 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         final Artifact result = artifactManagement.createArtifact(new ByteArrayInputStream(random),
                 testdataFactory.createSoftwareModuleOs().getId(), "file1", false);
 
-        try (InputStream fileInputStream = artifactManagement.loadArtifactBinary(result).getFileInputStream()) {
+        try (InputStream fileInputStream = artifactManagement.loadArtifactBinary(result.getSha1Hash()).get()
+                .getFileInputStream()) {
             assertTrue("The stored binary matches the given binary",
                     IOUtils.contentEquals(new ByteArrayInputStream(random), fileInputStream));
         }
@@ -225,7 +246,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     @Description("Trys and fails to load an artifact without required permission. Checks if expected InsufficientPermissionException is thrown.")
     public void loadArtifactBinaryWithoutDownloadArtifactThrowsPermissionDenied() {
         try {
-            artifactManagement.loadArtifactBinary(new JpaArtifact());
+            artifactManagement.loadArtifactBinary("123");
             fail("Should not have worked with missing permission.");
         } catch (final InsufficientPermissionException e) {
 
@@ -250,12 +271,12 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     public void findByFilenameAndSoftwareModule() {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        assertThat(artifactManagement.findByFilenameAndSoftwareModule("file1", sm.getId())).isEmpty();
+        assertThat(artifactManagement.findByFilenameAndSoftwareModule("file1", sm.getId()).isPresent()).isFalse();
 
         artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024), sm.getId(), "file1", false);
         artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024), sm.getId(), "file2", false);
 
-        assertThat(artifactManagement.findByFilenameAndSoftwareModule("file1", sm.getId())).hasSize(1);
+        assertThat(artifactManagement.findByFilenameAndSoftwareModule("file1", sm.getId()).isPresent()).isTrue();
 
     }
 }

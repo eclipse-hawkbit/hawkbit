@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -68,22 +68,22 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSetTag tagX = tagManagement.createDistributionSetTag(entityFactory.tag().create().name("X"));
         final DistributionSetTag tagY = tagManagement.createDistributionSetTag(entityFactory.tag().create().name("Y"));
 
-        distributionSetManagement.toggleTagAssignment(dsAs, tagA);
-        distributionSetManagement.toggleTagAssignment(dsBs, tagB);
-        distributionSetManagement.toggleTagAssignment(dsCs, tagC);
+        toggleTagAssignment(dsAs, tagA);
+        toggleTagAssignment(dsBs, tagB);
+        toggleTagAssignment(dsCs, tagC);
 
-        distributionSetManagement.toggleTagAssignment(dsABs, tagManagement.findDistributionSetTag(tagA.getName()));
-        distributionSetManagement.toggleTagAssignment(dsABs, tagManagement.findDistributionSetTag(tagB.getName()));
+        toggleTagAssignment(dsABs, tagManagement.findDistributionSetTag(tagA.getName()).get());
+        toggleTagAssignment(dsABs, tagManagement.findDistributionSetTag(tagB.getName()).get());
 
-        distributionSetManagement.toggleTagAssignment(dsACs, tagManagement.findDistributionSetTag(tagA.getName()));
-        distributionSetManagement.toggleTagAssignment(dsACs, tagManagement.findDistributionSetTag(tagC.getName()));
+        toggleTagAssignment(dsACs, tagManagement.findDistributionSetTag(tagA.getName()).get());
+        toggleTagAssignment(dsACs, tagManagement.findDistributionSetTag(tagC.getName()).get());
 
-        distributionSetManagement.toggleTagAssignment(dsBCs, tagManagement.findDistributionSetTag(tagB.getName()));
-        distributionSetManagement.toggleTagAssignment(dsBCs, tagManagement.findDistributionSetTag(tagC.getName()));
+        toggleTagAssignment(dsBCs, tagManagement.findDistributionSetTag(tagB.getName()).get());
+        toggleTagAssignment(dsBCs, tagManagement.findDistributionSetTag(tagC.getName()).get());
 
-        distributionSetManagement.toggleTagAssignment(dsABCs, tagManagement.findDistributionSetTag(tagA.getName()));
-        distributionSetManagement.toggleTagAssignment(dsABCs, tagManagement.findDistributionSetTag(tagB.getName()));
-        distributionSetManagement.toggleTagAssignment(dsABCs, tagManagement.findDistributionSetTag(tagC.getName()));
+        toggleTagAssignment(dsABCs, tagManagement.findDistributionSetTag(tagA.getName()).get());
+        toggleTagAssignment(dsABCs, tagManagement.findDistributionSetTag(tagB.getName()).get());
+        toggleTagAssignment(dsABCs, tagManagement.findDistributionSetTag(tagC.getName()).get());
 
         DistributionSetFilterBuilder distributionSetFilterBuilder;
 
@@ -164,7 +164,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
                 .createDistributionSetTag(entityFactory.tag().create().name("tag1").description("tagdesc1"));
 
         // toggle A only -> A is now assigned
-        DistributionSetTagAssignmentResult result = distributionSetManagement.toggleTagAssignment(groupA, tag);
+        DistributionSetTagAssignmentResult result = toggleTagAssignment(groupA, tag);
         assertThat(result.getAlreadyAssigned()).isEqualTo(0);
         assertThat(result.getAssigned()).isEqualTo(20);
         assertThat(result.getAssignedEntity()).containsAll(distributionSetManagement
@@ -174,7 +174,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         assertThat(result.getDistributionSetTag()).isEqualTo(tag);
 
         // toggle A+B -> A is still assigned and B is assigned as well
-        result = distributionSetManagement.toggleTagAssignment(concat(groupA, groupB), tag);
+        result = toggleTagAssignment(concat(groupA, groupB), tag);
         assertThat(result.getAlreadyAssigned()).isEqualTo(20);
         assertThat(result.getAssigned()).isEqualTo(20);
         assertThat(result.getAssignedEntity()).containsAll(distributionSetManagement
@@ -184,7 +184,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         assertThat(result.getDistributionSetTag()).isEqualTo(tag);
 
         // toggle A+B -> both unassigned
-        result = distributionSetManagement.toggleTagAssignment(concat(groupA, groupB), tag);
+        result = toggleTagAssignment(concat(groupA, groupB), tag);
         assertThat(result.getAlreadyAssigned()).isEqualTo(0);
         assertThat(result.getAssigned()).isEqualTo(0);
         assertThat(result.getAssignedEntity()).isEmpty();
@@ -206,7 +206,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
                 .createTargetTag(entityFactory.tag().create().name("tag1").description("tagdesc1"));
 
         // toggle A only -> A is now assigned
-        TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(groupA, tag);
+        TargetTagAssignmentResult result = toggleTagAssignment(groupA, tag);
         assertThat(result.getAlreadyAssigned()).isEqualTo(0);
         assertThat(result.getAssigned()).isEqualTo(20);
         assertThat(result.getAssignedEntity()).containsAll(targetManagement.findTargetsByControllerIDsWithTags(
@@ -216,7 +216,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         assertThat(result.getTargetTag()).isEqualTo(tag);
 
         // toggle A+B -> A is still assigned and B is assigned as well
-        result = targetManagement.toggleTagAssignment(concat(groupA, groupB), tag);
+        result = toggleTagAssignment(concat(groupA, groupB), tag);
         assertThat(result.getAlreadyAssigned()).isEqualTo(20);
         assertThat(result.getAssigned()).isEqualTo(20);
         assertThat(result.getAssignedEntity()).containsAll(targetManagement.findTargetsByControllerIDsWithTags(
@@ -226,7 +226,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         assertThat(result.getTargetTag()).isEqualTo(tag);
 
         // toggle A+B -> both unassigned
-        result = targetManagement.toggleTagAssignment(concat(groupA, groupB), tag);
+        result = toggleTagAssignment(concat(groupA, groupB), tag);
         assertThat(result.getAlreadyAssigned()).isEqualTo(0);
         assertThat(result.getAssigned()).isEqualTo(0);
         assertThat(result.getAssignedEntity()).isEmpty();
@@ -259,9 +259,11 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         final Tag tag = tagManagement
                 .createTargetTag(entityFactory.tag().create().name("kai1").description("kai2").colour("colour"));
 
-        assertThat(targetTagRepository.findByNameEquals("kai1").getDescription()).as("wrong tag ed").isEqualTo("kai2");
-        assertThat(tagManagement.findTargetTag("kai1").getColour()).as("wrong tag found").isEqualTo("colour");
-        assertThat(tagManagement.findTargetTagById(tag.getId()).getColour()).as("wrong tag found").isEqualTo("colour");
+        assertThat(targetTagRepository.findByNameEquals("kai1").get().getDescription()).as("wrong tag ed")
+                .isEqualTo("kai2");
+        assertThat(tagManagement.findTargetTag("kai1").get().getColour()).as("wrong tag found").isEqualTo("colour");
+        assertThat(tagManagement.findTargetTagById(tag.getId()).get().getColour()).as("wrong tag found")
+                .isEqualTo("colour");
     }
 
     @Test
@@ -273,7 +275,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         final TargetTag toDelete = tags.iterator().next();
 
         for (final Target target : targetRepository.findAll()) {
-            assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).getTags())
+            assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).get().getTags())
                     .contains(toDelete);
         }
 
@@ -282,7 +284,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
 
         // check
         for (final Target target : targetRepository.findAll()) {
-            assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).getTags())
+            assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).get().getTags())
                     .doesNotContain(toDelete);
         }
         assertThat(targetTagRepository.findOne(toDelete.getId())).as("No tag should be found").isNull();
@@ -314,10 +316,11 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         final Tag tag = tagManagement.createDistributionSetTag(
                 entityFactory.tag().create().name("kai1").description("kai2").colour("colour"));
 
-        assertThat(distributionSetTagRepository.findByNameEquals("kai1").getDescription()).as("wrong tag found")
+        assertThat(distributionSetTagRepository.findByNameEquals("kai1").get().getDescription()).as("wrong tag found")
                 .isEqualTo("kai2");
-        assertThat(tagManagement.findDistributionSetTag("kai1").getColour()).as("wrong tag found").isEqualTo("colour");
-        assertThat(tagManagement.findDistributionSetTagById(tag.getId()).getColour()).as("wrong tag found")
+        assertThat(tagManagement.findDistributionSetTag("kai1").get().getColour()).as("wrong tag found")
+                .isEqualTo("colour");
+        assertThat(tagManagement.findDistributionSetTagById(tag.getId()).get().getColour()).as("wrong tag found")
                 .isEqualTo("colour");
     }
 
@@ -337,7 +340,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSetTag toDelete = tags.iterator().next();
 
         for (final DistributionSet set : distributionSetRepository.findAll()) {
-            assertThat(distributionSetManagement.findDistributionSetByIdWithDetails(set.getId()).getTags())
+            assertThat(distributionSetManagement.findDistributionSetByIdWithDetails(set.getId()).get().getTags())
                     .as("Wrong tag found").contains(toDelete);
         }
 
@@ -348,7 +351,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         assertThat(distributionSetTagRepository.findOne(toDelete.getId())).as("Deleted tag should be null").isNull();
         assertThat(tagManagement.findAllDistributionSetTags()).as("Wrong size of tags after deletion").hasSize(19);
         for (final DistributionSet set : distributionSetRepository.findAll()) {
-            assertThat(distributionSetManagement.findDistributionSetByIdWithDetails(set.getId()).getTags())
+            assertThat(distributionSetManagement.findDistributionSetByIdWithDetails(set.getId()).get().getTags())
                     .as("Wrong found tags").doesNotContain(toDelete);
         }
     }
@@ -439,7 +442,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         final List<Target> targets = testdataFactory.createTargets(20);
         final Iterable<TargetTag> tags = testdataFactory.createTargetTags(20, "");
 
-        tags.forEach(tag -> targetManagement.toggleTagAssignment(targets, tag));
+        tags.forEach(tag -> toggleTagAssignment(targets, tag));
 
         return targetTagRepository.findAll();
     }
@@ -449,7 +452,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         final Collection<DistributionSet> sets = testdataFactory.createDistributionSets(20);
         final Iterable<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(20);
 
-        tags.forEach(tag -> distributionSetManagement.toggleTagAssignment(sets, tag));
+        tags.forEach(tag -> toggleTagAssignment(sets, tag));
 
         return tagManagement.findAllDistributionSetTags();
     }

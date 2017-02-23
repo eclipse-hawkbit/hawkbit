@@ -59,4 +59,5 @@
          <scope>test</scope>
       </dependency>
    </dependencies>
+   <name>hawkBit :: Extensions :: UAA Integration</name>
 </project>

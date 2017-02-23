@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.model;
 import java.util.Collections;
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
@@ -34,6 +33,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -58,12 +58,13 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
 public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Action, EventAwareEntity {
     private static final long serialVersionUID = 1L;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "distribution_set", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_ds"))
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "distribution_set", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_ds"))
+    @NotNull
     private JpaDistributionSet distributionSet;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "target", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_target"))
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "target", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_target"))
     @NotNull
     private JpaTarget target;
 
@@ -78,20 +79,20 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @Column(name = "forced_time")
     private long forcedTime;
 
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
+    @NotNull
     private Status status;
 
     @CascadeOnDelete
-    @OneToMany(mappedBy = "action", targetEntity = JpaActionStatus.class, fetch = FetchType.LAZY, cascade = {
-            CascadeType.REMOVE })
-    private List<ActionStatus> actionStatus;
+    @OneToMany(mappedBy = "action", targetEntity = JpaActionStatus.class, fetch = FetchType.LAZY)
+    private List<JpaActionStatus> actionStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rolloutgroup", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rolloutgroup"))
+    @JoinColumn(name = "rolloutgroup", updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rolloutgroup"))
     private JpaRolloutGroup rolloutGroup;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rollout", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rollout"))
+    @JoinColumn(name = "rollout", updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rollout"))
     private JpaRollout rollout;
 
     @Override
@@ -184,13 +185,15 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @Override
     public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new ActionCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+                .publishEvent(new ActionCreatedEvent(this, BaseEntity.getIdOrNull(rollout),
+                        BaseEntity.getIdOrNull(rolloutGroup), EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new ActionUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+                .publishEvent(new ActionUpdatedEvent(this, BaseEntity.getIdOrNull(rollout),
+                        BaseEntity.getIdOrNull(rolloutGroup), EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override

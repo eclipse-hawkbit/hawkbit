@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.util.Optional;
+
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -16,7 +18,6 @@ import org.eclipse.hawkbit.repository.builder.TargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -43,6 +44,9 @@ public interface TargetFilterQueryManagement {
      *
      * @param targetFilterQueryId
      *            IDs of target filter query to be deleted
+     * 
+     * @throws EntityNotFoundException
+     *             if filter with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
     void deleteTargetFilterQuery(@NotNull Long targetFilterQueryId);
@@ -62,7 +66,7 @@ public interface TargetFilterQueryManagement {
      *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    boolean verifyTargetFilterQuerySyntax(String query);
+    boolean verifyTargetFilterQuerySyntax(@NotNull String query);
 
     /**
      *
@@ -94,7 +98,7 @@ public interface TargetFilterQueryManagement {
      * @return the page with the found {@link TargetFilterQuery}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetFilterQuery> findTargetFilterQueryByName(@NotNull Pageable pageable, String name);
+    Page<TargetFilterQuery> findTargetFilterQueryByName(@NotNull Pageable pageable, @NotNull String name);
 
     /**
      * Retrieves all target filter query which {@link TargetFilterQuery}.
@@ -107,21 +111,19 @@ public interface TargetFilterQueryManagement {
      * @return the page with the found {@link TargetFilterQuery}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetFilterQuery> findTargetFilterQueryByFilter(@NotNull Pageable pageable, String rsqlFilter);
+    Page<TargetFilterQuery> findTargetFilterQueryByFilter(@NotNull Pageable pageable, @NotNull String rsqlFilter);
 
     /**
-     * Retrieves all target filter query which {@link TargetFilterQuery}.
-     *
+     * Retrieves all target filter query which have exactly the provided query.
      *
      * @param pageable
      *            pagination parameter
-     * @param distributionSet
-     *            the auto assign distribution set
+     * @param query
+     *            the query saved in the target filter query
      * @return the page with the found {@link TargetFilterQuery}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetFilterQuery> findTargetFilterQueryByAutoAssignDS(@NotNull Pageable pageable,
-            DistributionSet distributionSet);
+    Page<TargetFilterQuery> findTargetFilterQueryByQuery(@NotNull Pageable pageable, @NotNull String query);
 
     /**
      * Retrieves all target filter query which {@link TargetFilterQuery}.
@@ -129,15 +131,18 @@ public interface TargetFilterQueryManagement {
      *
      * @param pageable
      *            pagination parameter
-     * @param distributionSet
+     * @param setId
      *            the auto assign distribution set
      * @param rsqlParam
      *            RSQL filter
      * @return the page with the found {@link TargetFilterQuery}
+     * 
+     * @throws EntityNotFoundException
+     *             if DS with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetFilterQuery> findTargetFilterQueryByAutoAssignDS(@NotNull Pageable pageable,
-            DistributionSet distributionSet, String rsqlParam);
+    Page<TargetFilterQuery> findTargetFilterQueryByAutoAssignDS(@NotNull Pageable pageable, @NotNull Long setId,
+            String rsqlParam);
 
     /**
      * Retrieves all target filter query with auto assign DS which
@@ -159,7 +164,7 @@ public interface TargetFilterQueryManagement {
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    TargetFilterQuery findTargetFilterQueryById(@NotNull Long targetFilterQueryId);
+    Optional<TargetFilterQuery> findTargetFilterQueryById(@NotNull Long targetFilterQueryId);
 
     /**
      * Find target filter query by name.
@@ -170,7 +175,7 @@ public interface TargetFilterQueryManagement {
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    TargetFilterQuery findTargetFilterQueryByName(@NotNull String targetFilterQueryName);
+    Optional<TargetFilterQuery> findTargetFilterQueryByName(@NotNull String targetFilterQueryName);
 
     /**
      * updates the {@link TargetFilterQuery}.
@@ -185,7 +190,7 @@ public interface TargetFilterQueryManagement {
      *             provided but not found
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    TargetFilterQuery updateTargetFilterQuery(TargetFilterQueryUpdate update);
+    TargetFilterQuery updateTargetFilterQuery(@NotNull TargetFilterQueryUpdate update);
 
     /**
      * updates the {@link TargetFilterQuery#getAutoAssignDistributionSet()}.
@@ -193,7 +198,7 @@ public interface TargetFilterQueryManagement {
      * @param queryId
      *            to be updated
      * @param dsId
-     *            to be updated or <code>null</code>
+     *            to be updated or <code>null</code> in order to remove it
      * @return the updated {@link TargetFilterQuery}
      * 
      * @throws EntityNotFoundException
@@ -201,6 +206,6 @@ public interface TargetFilterQueryManagement {
      *             provided but not found
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    TargetFilterQuery updateTargetFilterQueryAutoAssignDS(Long queryId, Long dsId);
+    TargetFilterQuery updateTargetFilterQueryAutoAssignDS(@NotNull Long queryId, Long dsId);
 
 }

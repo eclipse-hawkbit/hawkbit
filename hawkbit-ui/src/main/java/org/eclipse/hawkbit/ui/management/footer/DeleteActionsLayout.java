@@ -9,15 +9,21 @@
 package org.eclipse.hawkbit.ui.management.footer;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.model.TargetIdName;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.entity.TargetIdName;
 import org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
@@ -67,6 +73,10 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private final CountMessageLabel countMessageLabel;
 
+    private final transient TargetManagement targetManagement;
+
+    private final transient DistributionSetManagement distributionSetManagement;
+
     public DeleteActionsLayout(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final UINotification notification, final TagManagement tagManagementService,
             final ManagementViewClientCriterion managementViewClientCriterion,
@@ -81,7 +91,8 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
                 managementUIState, targetManagement, deploymentManagement, distributionSetManagement);
         this.countMessageLabel = new CountMessageLabel(eventBus, targetManagement, i18n, managementUIState,
                 targetTable);
-
+        this.targetManagement = targetManagement;
+        this.distributionSetManagement = distributionSetManagement;
         init();
     }
 
@@ -264,18 +275,29 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private void addInDeleteDistributionList(final Table sourceTable, final TableTransferable transferable) {
         @SuppressWarnings("unchecked")
-        final AbstractTable<?, DistributionSetIdName> distTable = (AbstractTable<?, DistributionSetIdName>) sourceTable;
-        final Set<DistributionSetIdName> distributionIdNameSet = distTable.getDeletedEntityByTransferable(transferable);
+        final AbstractTable<?, Long> distTable = (AbstractTable<?, Long>) sourceTable;
+        final Set<Long> ids = distTable.getDeletedEntityByTransferable(transferable);
 
-        final DistributionSetIdName dsInBulkUpload = managementUIState.getTargetTableFilters().getBulkUpload()
-                .getDsNameAndVersion();
-        if (isDsInUseInBulkUpload(distributionIdNameSet, dsInBulkUpload)) {
-            distributionIdNameSet.remove(dsInBulkUpload);
+        final Long dsInBulkUpload = managementUIState.getTargetTableFilters().getBulkUpload().getDsNameAndVersion();
+        if (isDsInUseInBulkUpload(ids, dsInBulkUpload)) {
+            ids.remove(dsInBulkUpload);
         }
 
-        if (distributionIdNameSet.isEmpty()) {
+        if (ids.isEmpty()) {
             return;
         }
+
+        final List<DistributionSet> findDistributionSetAllById = distributionSetManagement
+                .findDistributionSetAllById(ids);
+
+        if (findDistributionSetAllById.isEmpty()) {
+            notification.displayWarning(i18n.get("distributionsets.not.exists"));
+            return;
+        }
+
+        final Set<DistributionSetIdName> distributionIdNameSet = findDistributionSetAllById.stream()
+                .map(distributionSet -> new DistributionSetIdName(distributionSet)).collect(Collectors.toSet());
+
         checkDeletedDistributionSets(distributionIdNameSet);
     }
 
@@ -307,11 +329,16 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         notification.displayValidationError(i18n.get(messageKey));
     }
 
-    private boolean isDsInUseInBulkUpload(final Set<DistributionSetIdName> distributionIdNameSet,
-            final DistributionSetIdName dsInBulkUpload) {
+    private boolean isDsInUseInBulkUpload(final Set<Long> distributionIdNameSet, final Long dsInBulkUpload) {
         if (distributionIdNameSet.contains(dsInBulkUpload)) {
-            notification.displayValidationError(i18n.get("message.tag.use.bulk.upload",
-                    HawkbitCommonUtil.getFormattedNameVersion(dsInBulkUpload.getName(), dsInBulkUpload.getVersion())));
+            final Optional<DistributionSet> distributionSet = distributionSetManagement
+                    .findDistributionSetById(dsInBulkUpload);
+            if (!distributionSet.isPresent()) {
+                notification.displayWarning(i18n.get("distributionset.not.exists"));
+                return true;
+            }
+            notification.displayValidationError(i18n.get("message.tag.use.bulk.upload", HawkbitCommonUtil
+                    .getFormattedNameVersion(distributionSet.get().getName(), distributionSet.get().getVersion())));
             return true;
         }
         return false;
@@ -319,21 +346,28 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private void addInDeleteTargetList(final Table sourceTable, final TableTransferable transferable) {
         @SuppressWarnings("unchecked")
-        final AbstractTable<?, TargetIdName> targetTable = (AbstractTable<?, TargetIdName>) sourceTable;
-        final Set<TargetIdName> targetIdNameSet = targetTable.getDeletedEntityByTransferable(transferable);
+        final TargetTable targetTable = (TargetTable) sourceTable;
+        final Set<Long> targetIdSet = targetTable.getDeletedEntityByTransferable(transferable);
+        final Collection<Target> findTargetAllById = targetManagement.findTargetAllById(targetIdSet);
+        if (findTargetAllById.isEmpty()) {
+            notification.displayWarning(i18n.get("targets.not.exists"));
+            return;
+        }
 
-        checkDeletedTargets(targetIdNameSet);
+        final Set<TargetIdName> targetIdNames = findTargetAllById.stream().map(target -> new TargetIdName(target))
+                .collect(Collectors.toSet());
+        checkDeletedTargets(targetIdNames);
     }
 
-    private void checkDeletedTargets(final Set<TargetIdName> targetIdNameSet) {
+    private void checkDeletedTargets(final Set<TargetIdName> targetIdSet) {
         final int existingDeletedTargetsSize = managementUIState.getDeletedTargetList().size();
-        managementUIState.getDeletedTargetList().addAll(targetIdNameSet);
+        managementUIState.getDeletedTargetList().addAll(targetIdSet);
         final int newDeletedTargetsSize = managementUIState.getDeletedTargetList().size();
 
         showAlreadyDeletedDistributionSetNotfication(existingDeletedTargetsSize, newDeletedTargetsSize,
                 "message.targets.already.deleted");
 
-        showPendingDeletedNotifaction(targetIdNameSet, existingDeletedTargetsSize, newDeletedTargetsSize,
+        showPendingDeletedNotifaction(targetIdSet, existingDeletedTargetsSize, newDeletedTargetsSize,
                 "message.target.deleted.pending");
     }
 
@@ -371,8 +405,8 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected void restoreBulkUploadStatusCount() {
-        final Long failedCount = managementUIState.getTargetTableFilters().getBulkUpload().getFailedUploadCount();
-        final Long successCount = managementUIState.getTargetTableFilters().getBulkUpload().getSucessfulUploadCount();
+        final int failedCount = managementUIState.getTargetTableFilters().getBulkUpload().getFailedUploadCount();
+        final int successCount = managementUIState.getTargetTableFilters().getBulkUpload().getSucessfulUploadCount();
         if (failedCount != 0 || successCount != 0) {
             setUploadStatusButtonCaption(failedCount + successCount);
             enableBulkUploadStatusButton();
