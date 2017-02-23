@@ -65,7 +65,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         assertThatThrownBy(() -> artifactManagement.deleteArtifact(1234L)).isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("1234").hasMessageContaining("Artifact");
 
-        assertThat(artifactManagement.findArtifact(1234L).isPresent()).isFalse();
+        assertThat(artifactManagement.findArtifact(1234L)).isNotPresent();
         assertThatThrownBy(() -> artifactManagement.findArtifactBySoftwareModule(pageReq, 1234L))
                 .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
                 .hasMessageContaining("SoftwareModule");
@@ -77,8 +77,8 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(artifactManagement.findByFilenameAndSoftwareModule("1234", module.getId()).isPresent()).isFalse();
 
-        assertThat(artifactManagement.findFirstArtifactBySHA1("1234").isPresent()).isFalse();
-        assertThat(artifactManagement.loadArtifactBinary("1234").isPresent()).isFalse();
+        assertThat(artifactManagement.findFirstArtifactBySHA1("1234")).isNotPresent();
+        assertThat(artifactManagement.loadArtifactBinary("1234")).isNotPresent();
 
     }
 

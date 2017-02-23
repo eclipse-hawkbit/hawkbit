@@ -117,7 +117,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
                 .hasMessageContaining("Target");
 
-        assertThat(deploymentManagement.findAction(1234L).isPresent()).isFalse();
+        assertThat(deploymentManagement.findAction(1234L)).isNotPresent();
 
         assertThatThrownBy(() -> deploymentManagement.findActionsByDistributionSet(pageReq, 1234L))
                 .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
@@ -132,7 +132,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
                 .hasMessageContaining("Target");
 
-        assertThat(deploymentManagement.findActionWithDetails(1234L).isPresent()).isFalse();
+        assertThat(deploymentManagement.findActionWithDetails(1234L)).isNotPresent();
 
         assertThatThrownBy(() -> deploymentManagement.findActiveActionsByTarget("1234"))
                 .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")

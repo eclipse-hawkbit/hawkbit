@@ -301,14 +301,14 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         int readyGroups = 0;
         int totalTargets = 0;
         for (final RolloutGroup group : rolloutGroups) {
-            if (group.getStatus() != RolloutGroupStatus.CREATING) {
+            if (RolloutGroupStatus.READY.equals(group.getStatus())) {
                 readyGroups++;
                 totalTargets += group.getTotalTargets();
                 continue;
             }
 
             final RolloutGroup filledGroup = fillRolloutGroupWithTargets(rollout, group);
-            if (filledGroup.getStatus() == RolloutGroupStatus.READY) {
+            if (RolloutGroupStatus.READY.equals(filledGroup.getStatus())) {
                 readyGroups++;
                 totalTargets += filledGroup.getTotalTargets();
             }

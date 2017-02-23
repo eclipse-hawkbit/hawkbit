@@ -22,6 +22,7 @@ import org.assertj.core.api.Condition;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -63,24 +64,88 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that management queries react as specfied on calls for non existing entities.")
     @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+            @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 4) })
     public void nonExistingEntityQueries() {
         final DistributionSet set = testdataFactory.createDistributionSet();
-        // distributionSetManagement.assignMandatorySoftwareModuleTypes(dsTypeId,
-        // softwareModuleTypes)
-        // distributionSetManagement.assignOptionalSoftwareModuleTypes(dsTypeId,
-        // softwareModuleTypeIds)
-        // distributionSetManagement.assignSoftwareModules(setId, moduleIds)
-        // distributionSetManagement.assignTag(dsIds, tagId)
+        final DistributionSetTag dsTag = testdataFactory.createDistributionSetTags(1).get(0);
+        final SoftwareModule module = testdataFactory.createSoftwareModuleApp();
+
+        assertThatThrownBy(() -> distributionSetManagement.assignMandatorySoftwareModuleTypes(1234L,
+                Lists.newArrayList(osType.getId()))).isInstanceOf(EntityNotFoundException.class)
+                        .hasMessageContaining("1234").hasMessageContaining("DistributionSetType");
+        assertThatThrownBy(() -> distributionSetManagement.assignMandatorySoftwareModuleTypes(
+                testdataFactory.findOrCreateDistributionSetType("xxx", "xxx").getId(), Lists.newArrayList(1234L)))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("SoftwareModuleType");
+
+        assertThatThrownBy(() -> distributionSetManagement.assignOptionalSoftwareModuleTypes(1234L,
+                Lists.newArrayList(osType.getId()))).isInstanceOf(EntityNotFoundException.class)
+                        .hasMessageContaining("1234").hasMessageContaining("DistributionSetType");
+        assertThatThrownBy(() -> distributionSetManagement.assignOptionalSoftwareModuleTypes(
+                testdataFactory.findOrCreateDistributionSetType("xxx", "xxx").getId(), Lists.newArrayList(1234L)))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("SoftwareModuleType");
+
+        assertThatThrownBy(
+                () -> distributionSetManagement.assignSoftwareModules(1234L, Lists.newArrayList(module.getId())))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("DistributionSet");
+        assertThatThrownBy(
+                () -> distributionSetManagement.assignSoftwareModules(set.getId(), Lists.newArrayList(1234L)))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("SoftwareModule");
+
+        assertThatThrownBy(() -> distributionSetManagement.unassignSoftwareModule(1234L, module.getId()))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("DistributionSet");
+        assertThatThrownBy(() -> distributionSetManagement.unassignSoftwareModule(set.getId(), 1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("SoftwareModule");
+
+        assertThatThrownBy(() -> distributionSetManagement.assignTag(Lists.newArrayList(set.getId()), 1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("DistributionSetTag");
+
+        assertThatThrownBy(() -> distributionSetManagement.assignTag(Lists.newArrayList(1234L), dsTag.getId()))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("DistributionSet");
+
+        assertThatThrownBy(
+                () -> distributionSetManagement.toggleTagAssignment(Lists.newArrayList(1234L), dsTag.getName()))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("DistributionSet");
+        assertThatThrownBy(
+                () -> distributionSetManagement.toggleTagAssignment(Lists.newArrayList(set.getId()), "1234L"))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("DistributionSetTag");
+
+        assertThatThrownBy(() -> distributionSetManagement.unAssignAllDistributionSetsByTag(1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("DistributionSetTag");
+
+        assertThatThrownBy(() -> distributionSetManagement.unAssignTag(set.getId(), 1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("DistributionSetTag");
+
+        assertThatThrownBy(() -> distributionSetManagement.unAssignTag(1234L, dsTag.getId()))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("DistributionSet");
+
         assertThatThrownBy(() -> distributionSetManagement.countDistributionSetsByType(1234L))
                 .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
                 .hasMessageContaining("DistributionSet");
-        // distributionSetManagement.createDistributionSet(create)
+
+        assertThatThrownBy(() -> distributionSetManagement
+                .createDistributionSet(entityFactory.distributionSet().create().name("xxx").type("1234")))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("DistributionSetType");
+
         assertThatThrownBy(() -> distributionSetManagement.createDistributionSetMetadata(1234L,
                 Lists.newArrayList(entityFactory.generateMetadata("123", "123"))))
                         .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
                         .hasMessageContaining("DistributionSet");
-        // distributionSetManagement.createDistributionSets(creates)
+
         assertThatThrownBy(() -> distributionSetManagement.deleteDistributionSet(Lists.newArrayList(1234L)))
                 .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
                 .hasMessageContaining("DistributionSet");
@@ -101,28 +166,45 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThatThrownBy(() -> distributionSetManagement.findDistributionSetByAction(1234L))
                 .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
                 .hasMessageContaining("Action");
-        assertThat(distributionSetManagement.findDistributionSetById(1234L).isPresent()).isFalse();
-        assertThat(distributionSetManagement.findDistributionSetByIdWithDetails(1234L).isPresent()).isFalse();
-        assertThat(distributionSetManagement.findDistributionSetByNameAndVersion("1234", "1234").isPresent()).isFalse();
-        assertThat(distributionSetManagement.findDistributionSetMetadata(1234L, "1234").isPresent()).isFalse();
+        assertThat(distributionSetManagement.findDistributionSetById(1234L)).isNotPresent();
+        assertThat(distributionSetManagement.findDistributionSetByIdWithDetails(1234L)).isNotPresent();
+        assertThat(distributionSetManagement.findDistributionSetByNameAndVersion("1234", "1234")).isNotPresent();
+        assertThat(distributionSetManagement.findDistributionSetMetadata(1234L, "1234")).isNotPresent();
 
-        // distributionSetManagement.findDistributionSetMetadataByDistributionSetId(distributionSetId,
-        // pageable)
-        // distributionSetManagement.findDistributionSetMetadataByDistributionSetId(distributionSetId,
-        // rsqlParam, pageable)
+        assertThatThrownBy(
+                () -> distributionSetManagement.findDistributionSetMetadataByDistributionSetId(1234L, pageReq))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("DistributionSet");
 
-        assertThat(distributionSetManagement.findDistributionSetTypeById(1234L).isPresent()).isFalse();
-        assertThat(distributionSetManagement.findDistributionSetTypeByKey("1234").isPresent()).isFalse();
-        assertThat(distributionSetManagement.findDistributionSetTypeByName("1234").isPresent()).isFalse();
+        assertThatThrownBy(() -> distributionSetManagement.findDistributionSetMetadataByDistributionSetId(1234L,
+                "name==*", pageReq)).isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("DistributionSet");
 
-        // distributionSetManagement.isDistributionSetInUse(setId)
-        // distributionSetManagement.toggleTagAssignment(dsIds, tagName)
-        // distributionSetManagement.unAssignAllDistributionSetsByTag(tagId)
-        // distributionSetManagement.unassignSoftwareModule(setId, moduleId)
-        // distributionSetManagement.unAssignTag(dsId, tagId)
-        // distributionSetManagement.updateDistributionSet(update)
-        // distributionSetManagement.updateDistributionSetMetadata(dsId, md)
-        // distributionSetManagement.updateDistributionSetType(update)
+        assertThat(distributionSetManagement.findDistributionSetTypeById(1234L)).isNotPresent();
+        assertThat(distributionSetManagement.findDistributionSetTypeByKey("1234")).isNotPresent();
+        assertThat(distributionSetManagement.findDistributionSetTypeByName("1234")).isNotPresent();
+
+        assertThatThrownBy(() -> distributionSetManagement.isDistributionSetInUse(1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("DistributionSet");
+
+        assertThatThrownBy(
+                () -> distributionSetManagement.updateDistributionSet(entityFactory.distributionSet().update(1234L)))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("DistributionSet");
+
+        assertThatThrownBy(() -> distributionSetManagement.updateDistributionSetMetadata(1234L,
+                entityFactory.generateMetadata("xxx", "xxx"))).isInstanceOf(EntityNotFoundException.class)
+                        .hasMessageContaining("1234").hasMessageContaining("DistributionSetMetadata");
+
+        assertThatThrownBy(() -> distributionSetManagement.updateDistributionSetMetadata(set.getId(),
+                entityFactory.generateMetadata("1234", "xxx"))).isInstanceOf(EntityNotFoundException.class)
+                        .hasMessageContaining("1234").hasMessageContaining("DistributionSetMetadata");
+
+        assertThatThrownBy(() -> distributionSetManagement
+                .updateDistributionSetType(entityFactory.distributionSetType().update(1234L)))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("DistributionSet");
     }
 
     @Test

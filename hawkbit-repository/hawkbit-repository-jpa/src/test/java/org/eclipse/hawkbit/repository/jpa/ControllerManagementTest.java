@@ -83,9 +83,9 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                         .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
                         .hasMessageContaining("Action");
 
-        assertThat(controllerManagement.findActionWithDetails(1234L).isPresent()).isFalse();
-        assertThat(controllerManagement.findByControllerId("1234").isPresent()).isFalse();
-        assertThat(controllerManagement.findByTargetId(1234L).isPresent()).isFalse();
+        assertThat(controllerManagement.findActionWithDetails(1234L)).isNotPresent();
+        assertThat(controllerManagement.findByControllerId("1234")).isNotPresent();
+        assertThat(controllerManagement.findByTargetId(1234L)).isNotPresent();
 
         assertThatThrownBy(() -> controllerManagement.findOldestActiveActionByTarget("1234"))
                 .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
@@ -101,9 +101,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                         .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
                         .hasMessageContaining("Target");
 
-        assertThat(controllerManagement
-                .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), module.getId()).isPresent())
-                        .isFalse();
+        assertThat(controllerManagement.getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(),
+                module.getId())).isNotPresent();
 
         assertThatThrownBy(() -> controllerManagement.hasTargetArtifactAssigned(1234L, "XXX"))
                 .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
