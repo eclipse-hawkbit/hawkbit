@@ -96,7 +96,7 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
      *            the amqp message
      * @return the rpc message back to supplier.
      */
-    @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.authenticationReceiverQueue}", containerFactory = "listenerContainerFactory")
+    @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.authenticationReceiverQueue:authentication_receiver}", containerFactory = "listenerContainerFactory")
     public Message onAuthenticationRequest(final Message message) {
         checkContentTypeJson(message);
         final SecurityContext oldContext = SecurityContextHolder.getContext();

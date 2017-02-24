@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
@@ -18,11 +20,17 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.hawkbit.amqp.AmqpProperties;
 import org.eclipse.hawkbit.amqp.AmqpSenderService;
 import org.eclipse.hawkbit.amqp.DefaultAmqpSenderService;
+import org.eclipse.hawkbit.api.HostnameResolver;
+import org.eclipse.hawkbit.integration.listener.DeadletterListener;
+import org.eclipse.hawkbit.integration.listener.ReplyToListener;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.FanoutExchange;
+import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.amqp.rabbit.test.RabbitListenerTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -33,6 +41,7 @@ import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 
+import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 /**
@@ -40,7 +49,12 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
  */
 @Configuration
 @EnableConfigurationProperties({ AmqpProperties.class })
+@RabbitListenerTest
 public class AmqpTestConfiguration {
+
+    public static final String REPLY_TO_EXCHANGE = "reply.queue";
+    public static final String REPLY_TO_QUEUE = "reply_queue";
+
     /**
      * @return the {@link SystemSecurityContext} singleton bean which make it
      *         accessible in beans which cannot access the service directly,
@@ -49,16 +63,6 @@ public class AmqpTestConfiguration {
     @Bean
     public SystemSecurityContextHolder systemSecurityContextHolder() {
         return SystemSecurityContextHolder.getInstance();
-    }
-
-    /**
-     * Method to set the Jackson2JsonMessageConverter.
-     *
-     * @return the Jackson2JsonMessageConverter
-     */
-    @Bean
-    public MessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
     }
 
     /**
@@ -123,4 +127,41 @@ public class AmqpTestConfiguration {
     public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
         return new ThreadPoolTaskScheduler();
     }
+
+    @Bean
+    public HostnameResolver hostnameResolver(final HawkbitServerProperties serverProperties) {
+        return () -> {
+            try {
+                return new URL(serverProperties.getUrl());
+            } catch (final MalformedURLException e) {
+                throw Throwables.propagate(e);
+            }
+        };
+    }
+
+    @Bean
+    public Queue replyToQueue() {
+        return new Queue(REPLY_TO_QUEUE, false, false, true);
+    }
+
+    @Bean
+    public FanoutExchange replyToExchange() {
+        return new FanoutExchange(REPLY_TO_EXCHANGE, false, true);
+    }
+
+    @Bean
+    public Binding bindReplyToQueueToReplyTorExchange() {
+        return BindingBuilder.bind(replyToQueue()).to(replyToExchange());
+    }
+
+    @Bean
+    public DeadletterListener deadletterListener() {
+        return new DeadletterListener();
+    }
+
+    @Bean
+    public ReplyToListener replyToListener() {
+        return new ReplyToListener();
+    }
+
 }

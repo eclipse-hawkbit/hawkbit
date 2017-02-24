@@ -19,6 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler;
 import org.springframework.amqp.rabbit.listener.FatalExceptionStrategy;
+import org.springframework.amqp.support.converter.MessageConversionException;
+import org.springframework.messaging.MessageHandlingException;
 
 /**
  * Custom {@link FatalExceptionStrategy} that markes defined hawkBit internal
@@ -60,7 +62,16 @@ public class DelayedRequeueExceptionStrategy extends ConditionalRejectingErrorHa
 
     private boolean invalidMessage(final Throwable cause) {
         return doesNotExist(cause) || cause instanceof TooManyStatusEntriesException
-                || cause instanceof InvalidTargetAddressException || cause instanceof ToManyAttributeEntriesException;
+                || cause instanceof InvalidTargetAddressException || cause instanceof ToManyAttributeEntriesException
+                || cause instanceof MessageHandlingException || cause instanceof MessageConversionException
+                || test(cause);
+    }
+
+    private boolean test(final Throwable cause) {
+        if (cause instanceof javax.validation.ConstraintViolationException) {
+            System.out.println("hier");
+        }
+        return cause instanceof javax.validation.ConstraintViolationException;
     }
 
     private boolean doesNotExist(final Throwable cause) {

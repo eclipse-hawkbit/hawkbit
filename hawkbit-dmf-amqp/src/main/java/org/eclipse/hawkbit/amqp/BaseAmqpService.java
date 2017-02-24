@@ -8,10 +8,9 @@
  */
 package org.eclipse.hawkbit.amqp;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
+
+import javax.validation.constraints.NotNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +19,7 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
+import org.springframework.amqp.support.converter.MessageConversionException;
 import org.springframework.amqp.support.converter.MessageConverter;
 
 /**
@@ -58,43 +58,21 @@ public class BaseAmqpService {
      * @return the converted object
      */
     @SuppressWarnings("unchecked")
-    public <T> T convertMessage(final Message message, final Class<T> clazz) {
-        if (isMessageBodyEmpty(message)) {
-            return null;
-        }
+    public <T> T convertMessage(@NotNull final Message message, final Class<T> clazz) {
+        checkMessageBody(message);
         message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME,
                 clazz.getName());
         return (T) rabbitTemplate.getMessageConverter().fromMessage(message);
     }
 
-    private static boolean isMessageBodyEmpty(final Message message) {
-        return message == null || message.getBody() == null || message.getBody().length == 0;
-    }
-
-    /**
-     * Is needed to convert a incoming message to is originally list object
-     * type.
-     *
-     * @param message
-     *            the message to convert.
-     * @param clazz
-     *            the class of the list content.
-     * @return the list of converted objects
-     */
-    @SuppressWarnings("unchecked")
-    public <T> List<T> convertMessageList(final Message message, final Class<T> clazz) {
-        if (isMessageBodyEmpty(message)) {
-            return Collections.emptyList();
-        }
-        message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME,
-                ArrayList.class.getName());
-        message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CONTENT_CLASSID_FIELD_NAME,
-                clazz.getName());
-        return (List<T>) rabbitTemplate.getMessageConverter().fromMessage(message);
-    }
-
     public MessageConverter getMessageConverter() {
         return rabbitTemplate.getMessageConverter();
+    }
+
+    protected void checkMessageBody(@NotNull final Message message) {
+        if (message.getBody() == null) {
+            throw new MessageConversionException("Message body cannot be null");
+        }
     }
 
     protected String getStringHeaderKey(final Message message, final String key, final String errorMessageIfNull) {
