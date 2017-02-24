@@ -14,19 +14,19 @@ SET t.install_date = i.install_date, t.address = i.address,t.last_target_query =
 ALTER TABLE sp_target_info DROP INDEX sp_idx_target_info_02;
 CREATE INDEX sp_idx_target_05 ON sp_target (tenant,address);
 
-ALTER TABLE sp_target_attributes DROP FOREIGN KEY fk_targ_attrib_target;
+ALTER TABLE sp_target_attributes DROP CONSTRAINT fk_targ_attrib_target;
 ALTER TABLE sp_target_attributes 
         ADD CONSTRAINT fk_targ_attrib_target 
         FOREIGN KEY (target_id) 
         REFERENCES sp_target (id)
         ON DELETE cascade;
 
-ALTER TABLE sp_target_info DROP FOREIGN KEY fk_target_inst_ds;     
+ALTER TABLE sp_target_info DROP CONSTRAINT fk_target_inst_ds;     
 ALTER TABLE sp_target 
         ADD CONSTRAINT fk_target_inst_ds 
         FOREIGN KEY (installed_distribution_set) 
         REFERENCES sp_distribution_set (id);
 
-ALTER TABLE sp_target_info DROP FOREIGN KEY fk_targ_stat_targ;
+ALTER TABLE sp_target_info DROP CONSTRAINT fk_targ_stat_targ;
 
 DROP TABLE sp_target_info;

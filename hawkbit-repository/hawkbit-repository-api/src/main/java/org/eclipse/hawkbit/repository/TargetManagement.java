@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -108,7 +107,7 @@ public interface TargetManagement {
 
     /**
      * Counts number of targets with given
-     * {@link TargetInfo#getInstalledDistributionSet()}.
+     * {@link Target#getInstalledDistributionSet()}.
      *
      * @param distId
      *            to search for
@@ -523,8 +522,7 @@ public interface TargetManagement {
      * order:
      * <p>
      * 1) {@link Target}s which have the given {@link DistributionSet} as
-     * {@link Target#getTargetInfo()}
-     * {@link TargetInfo#getInstalledDistributionSet()}
+     * {@link Target#getTarget()} {@link Target#getInstalledDistributionSet()}
      * <p>
      * 2) {@link Target}s which have the given {@link DistributionSet} as
      * {@link Target#getAssignedDistributionSet()}

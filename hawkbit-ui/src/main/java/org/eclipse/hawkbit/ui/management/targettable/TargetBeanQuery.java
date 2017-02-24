@@ -135,10 +135,10 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             prxyTarget.setName(targ.getName());
             prxyTarget.setDescription(targ.getDescription());
             prxyTarget.setControllerId(targ.getControllerId());
-            prxyTarget.setInstallationDate(targ.getTargetInfo().getInstallationDate());
-            prxyTarget.setAddress(targ.getTargetInfo().getAddress());
-            prxyTarget.setLastTargetQuery(targ.getTargetInfo().getLastTargetQuery());
-            prxyTarget.setUpdateStatus(targ.getTargetInfo().getUpdateStatus());
+            prxyTarget.setInstallationDate(targ.getInstallationDate());
+            prxyTarget.setAddress(targ.getAddress());
+            prxyTarget.setLastTargetQuery(targ.getLastTargetQuery());
+            prxyTarget.setUpdateStatus(targ.getUpdateStatus());
             prxyTarget.setLastModifiedDate(SPDateTimeUtil.getFormattedDate(targ.getLastModifiedAt()));
             prxyTarget.setCreatedDate(SPDateTimeUtil.getFormattedDate(targ.getCreatedAt()));
             prxyTarget.setCreatedAt(targ.getCreatedAt());
@@ -150,16 +150,15 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
                 prxyTarget.setAssignedDistributionSet(null);
             } else {
                 getTargetManagement().findTargetByControllerIDWithDetails(targ.getControllerId()).ifPresent(target -> {
-                    prxyTarget.setInstalledDistributionSet(target.getTargetInfo().getInstalledDistributionSet());
+                    prxyTarget.setInstalledDistributionSet(target.getInstalledDistributionSet());
                     prxyTarget.setAssignedDistributionSet(target.getAssignedDistributionSet());
                 });
             }
 
-            prxyTarget.setUpdateStatus(targ.getTargetInfo().getUpdateStatus());
-            prxyTarget.setLastTargetQuery(targ.getTargetInfo().getLastTargetQuery());
-            prxyTarget.setTargetInfo(targ.getTargetInfo());
-            prxyTarget.setPollStatusToolTip(
-                    HawkbitCommonUtil.getPollStatusToolTip(prxyTarget.getTargetInfo().getPollStatus(), getI18N()));
+            prxyTarget.setUpdateStatus(targ.getUpdateStatus());
+            prxyTarget.setLastTargetQuery(targ.getLastTargetQuery());
+            prxyTarget.setPollStatus(targ.getPollStatus());
+            prxyTarget.setPollStatusToolTip(HawkbitCommonUtil.getPollStatusToolTip(targ.getPollStatus(), getI18N()));
             proxyTargetBeans.add(prxyTarget);
         }
         return proxyTargetBeans;

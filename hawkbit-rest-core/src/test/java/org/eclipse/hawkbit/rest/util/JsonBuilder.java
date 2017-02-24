@@ -417,8 +417,7 @@ public abstract class JsonBuilder {
         int i = 0;
         for (final Target target : targets) {
             try {
-                final String address = target.getTargetInfo().getAddress() != null
-                        ? target.getTargetInfo().getAddress().toString() : null;
+                final String address = target.getAddress() != null ? target.getAddress().toString() : null;
 
                 final String token = withToken ? target.getSecurityToken() : null;
 

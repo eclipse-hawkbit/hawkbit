@@ -13,8 +13,8 @@ import java.net.URI;
 
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 
 /**
@@ -58,7 +58,15 @@ public class ProxyTarget implements Serializable {
 
     private Long createdAt;
 
-    private TargetInfo targetInfo;
+    private PollStatus pollStatus;
+
+    public PollStatus getPollStatus() {
+        return pollStatus;
+    }
+
+    public void setPollStatus(final PollStatus pollStatus) {
+        this.pollStatus = pollStatus;
+    }
 
     public Long getId() {
         return id;
@@ -90,14 +98,6 @@ public class ProxyTarget implements Serializable {
 
     public void setCreatedAt(final Long createdAt) {
         this.createdAt = createdAt;
-    }
-
-    public TargetInfo getTargetInfo() {
-        return targetInfo;
-    }
-
-    public void setTargetInfo(final TargetInfo targetInfo) {
-        this.targetInfo = targetInfo;
     }
 
     public String getCreatedByUser() {

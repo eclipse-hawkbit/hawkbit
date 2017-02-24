@@ -81,10 +81,12 @@ import org.springframework.data.domain.Persistable;
         @Index(name = "sp_idx_target_02", columnList = "tenant,name"),
         @Index(name = "sp_idx_target_03", columnList = "tenant,controller_id,assigned_distribution_set"),
         @Index(name = "sp_idx_target_04", columnList = "tenant,created_at"),
+        @Index(name = "sp_idx_target_05", columnList = "tenant,address"),
         @Index(name = "sp_idx_target_prim", columnList = "tenant,id") }, uniqueConstraints = @UniqueConstraint(columnNames = {
                 "controller_id", "tenant" }, name = "uk_tenant_controller_id"))
 @NamedEntityGraph(name = "Target.detail", attributeNodes = { @NamedAttributeNode("tags"),
-        @NamedAttributeNode(value = "assignedDistributionSet"), @NamedAttributeNode(value = "targetInfo") })
+        @NamedAttributeNode(value = "assignedDistributionSet"),
+        @NamedAttributeNode(value = "installedDistributionSet") })
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
@@ -372,7 +374,8 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
 
     @Override
     public String toString() {
-        return "Target [controllerId=" + controllerId + ", getId()=" + getId() + "]";
+        return "JpaTarget [controllerId=" + controllerId + ", revision=" + getOptLockRevision() + ", id=" + getId()
+                + "]";
     }
 
     public void setAddress(final String address) {

@@ -1425,7 +1425,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = RolloutGroupUpdatedEvent.class, count = 16),
             @Expect(type = RolloutUpdatedEvent.class, count = 6),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = TargetCreatedEvent.class, count = 25), @Expect(type = TargetUpdatedEvent.class, count = 4),
+            @Expect(type = TargetCreatedEvent.class, count = 25), @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 5),
             @Expect(type = ActionCreatedEvent.class, count = 10), @Expect(type = ActionUpdatedEvent.class, count = 2),

@@ -265,7 +265,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public Page<Target> findTargetByInstalledDistributionSet(final Long distributionSetID, final Pageable pageReq) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetID);
-        return targetRepository.findByTargetInfoInstalledDistributionSetId(pageReq, distributionSetID);
+        return targetRepository.findByInstalledDistributionSetId(pageReq, distributionSetID);
     }
 
     @Override
@@ -286,7 +286,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Page<Target> findTargetByUpdateStatus(final Pageable pageable, final TargetUpdateStatus status) {
-        return targetRepository.findByTargetInfoUpdateStatus(pageable, status);
+        return targetRepository.findByUpdateStatus(pageable, status);
     }
 
     @Override
@@ -511,7 +511,7 @@ public class JpaTargetManagement implements TargetManagement {
     public Long countTargetByInstalledDistributionSet(final Long distId) {
         throwEntityNotFoundIfDsDoesNotExist(distId);
 
-        return targetRepository.countByTargetInfoInstalledDistributionSetId(distId);
+        return targetRepository.countByInstalledDistributionSetId(distId);
     }
 
     @Override

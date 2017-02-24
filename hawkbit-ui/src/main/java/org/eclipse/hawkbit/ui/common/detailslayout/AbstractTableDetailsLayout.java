@@ -247,10 +247,9 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
      */
 
     protected void updateAttributesLayout(final Target target) {
-        if (null != target && null != target.getTargetInfo()
-                && null != target.getTargetInfo().getControllerAttributes()) {
+        if (null != target && null != target.getControllerAttributes()) {
             attributesLayout.removeAllComponents();
-            for (final Map.Entry<String, String> entry : target.getTargetInfo().getControllerAttributes().entrySet()) {
+            for (final Map.Entry<String, String> entry : target.getControllerAttributes().entrySet()) {
                 final Label conAttributeLabel = SPUIComponentProvider.createNameValueLabel(
                         entry.getKey().concat("  :  "),
                         HawkbitCommonUtil.trimAndNullIfEmpty(entry.getValue()) == null ? "" : entry.getValue());

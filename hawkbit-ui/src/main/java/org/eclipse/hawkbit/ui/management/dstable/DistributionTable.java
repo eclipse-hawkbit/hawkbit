@@ -533,7 +533,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
         if (targetObj.isPresent()) {
             final DistributionSet assignedDistribution = targetObj.get().getAssignedDistributionSet();
-            final DistributionSet installedDistribution = targetObj.get().getTargetInfo().getInstalledDistributionSet();
+            final DistributionSet installedDistribution = targetObj.get().getInstalledDistributionSet();
             Long installedDistId = null;
             Long assignedDistId = null;
             if (null != installedDistribution) {

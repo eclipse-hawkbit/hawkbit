@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.repository.builder;
 
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -52,7 +51,7 @@ public interface TargetCreate {
 
     /**
      * @param address
-     *            for {@link TargetInfo#getAddress()}
+     *            for {@link Target#getAddress()}
      *
      * @throws IllegalArgumentException
      *             If the given string violates RFC&nbsp;2396
@@ -63,14 +62,14 @@ public interface TargetCreate {
 
     /**
      * @param lastTargetQuery
-     *            for {@link TargetInfo#getLastTargetQuery()}
+     *            for {@link Target#getLastTargetQuery()}
      * @return updated builder instance
      */
     TargetCreate lastTargetQuery(Long lastTargetQuery);
 
     /**
      * @param status
-     *            for {@link TargetInfo#getUpdateStatus()}
+     *            for {@link Target#getUpdateStatus()}
      * @return updated builder instance
      */
     TargetCreate status(TargetUpdateStatus status);

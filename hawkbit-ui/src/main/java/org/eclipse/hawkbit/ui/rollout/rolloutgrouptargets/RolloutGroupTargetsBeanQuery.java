@@ -106,9 +106,9 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
         prxyTarget.setName(targ.getName());
         prxyTarget.setDescription(targ.getDescription());
         prxyTarget.setControllerId(targ.getControllerId());
-        prxyTarget.setInstallationDate(targ.getTargetInfo().getInstallationDate());
-        prxyTarget.setAddress(targ.getTargetInfo().getAddress());
-        prxyTarget.setLastTargetQuery(targ.getTargetInfo().getLastTargetQuery());
+        prxyTarget.setInstallationDate(targ.getInstallationDate());
+        prxyTarget.setAddress(targ.getAddress());
+        prxyTarget.setLastTargetQuery(targ.getLastTargetQuery());
         prxyTarget.setLastModifiedDate(SPDateTimeUtil.getFormattedDate(targ.getLastModifiedAt()));
         prxyTarget.setCreatedDate(SPDateTimeUtil.getFormattedDate(targ.getCreatedAt()));
         prxyTarget.setCreatedAt(targ.getCreatedAt());
@@ -117,8 +117,7 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
         if (targetWithActionStatus.getStatus() != null) {
             prxyTarget.setStatus(targetWithActionStatus.getStatus());
         }
-        prxyTarget.setLastTargetQuery(targ.getTargetInfo().getLastTargetQuery());
-        prxyTarget.setTargetInfo(targ.getTargetInfo());
+        prxyTarget.setLastTargetQuery(targ.getLastTargetQuery());
         prxyTarget.setId(targ.getId());
         if (targ.getAssignedDistributionSet() != null) {
             prxyTarget.setAssignedDistNameVersion(HawkbitCommonUtil.getFormattedNameVersion(

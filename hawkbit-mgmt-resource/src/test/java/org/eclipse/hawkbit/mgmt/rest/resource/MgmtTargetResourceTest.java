@@ -236,7 +236,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         // remains assigned until
         // confirmation
         assertThat(queryTarget.getAssignedDistributionSet()).isNotNull();
-        assertThat(queryTarget.getTargetInfo().getInstalledDistributionSet()).isNull();
+        assertThat(queryTarget.getInstalledDistributionSet()).isNull();
     }
 
     @Test
@@ -387,7 +387,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath("$.name", equalTo(knownNameNotModiy)));
 
         final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownControllerId).get();
-        assertThat(findTargetByControllerID.getTargetInfo().getAddress().toString()).isEqualTo(knownNewAddress);
+        assertThat(findTargetByControllerID.getAddress().toString()).isEqualTo(knownNewAddress);
         assertThat(findTargetByControllerID.getName()).isEqualTo(knownNameNotModiy);
     }
 
@@ -518,7 +518,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath(JSON_PATH_NAME, equalTo(knownName)))
                 .andExpect(jsonPath(JSON_PATH_CONTROLLERID, equalTo(knownControllerId)))
                 .andExpect(jsonPath(JSON_PATH_DESCRIPTION, equalTo(TARGET_DESCRIPTION_TEST)))
-                .andExpect(jsonPath(JSON_PATH_LAST_REQUEST_AT, equalTo(target.getTargetInfo().getLastTargetQuery())))
+                .andExpect(jsonPath(JSON_PATH_LAST_REQUEST_AT, equalTo(target.getLastTargetQuery())))
                 .andExpect(jsonPath("$.pollStatus", hasKey("lastRequestAt")))
                 .andExpect(jsonPath("$.pollStatus", hasKey("nextExpectedRequestAt")))
                 .andExpect(jsonPath("$.pollStatus.overdue", equalTo(false)))
@@ -749,7 +749,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         assertThat(targetManagement.findTargetByControllerID("id1").get().getName()).isEqualTo("testname1");
         assertThat(targetManagement.findTargetByControllerID("id1").get().getDescription()).isEqualTo("testid1");
         assertThat(targetManagement.findTargetByControllerID("id1").get().getSecurityToken()).isEqualTo("token");
-        assertThat(targetManagement.findTargetByControllerID("id1").get().getTargetInfo().getAddress().toString())
+        assertThat(targetManagement.findTargetByControllerID("id1").get().getAddress().toString())
                 .isEqualTo("amqp://test123/foobar");
         assertThat(targetManagement.findTargetByControllerID("id2")).isNotNull();
         assertThat(targetManagement.findTargetByControllerID("id2").get().getName()).isEqualTo("testname2");

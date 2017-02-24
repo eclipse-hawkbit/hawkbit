@@ -137,10 +137,10 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(get("/default-tenant/controller/v1/4711")).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")));
-        assertThat(targetManagement.findTargetByControllerID("4711").get().getTargetInfo().getLastTargetQuery())
+        assertThat(targetManagement.findTargetByControllerID("4711").get().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
 
-        assertThat(targetManagement.findTargetByControllerID("4711").get().getTargetInfo().getUpdateStatus())
+        assertThat(targetManagement.findTargetByControllerID("4711").get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.REGISTERED);
 
         // not allowed methods
@@ -253,7 +253,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     public void rootRsPrecommissioned() throws Exception {
         final Target target = testdataFactory.createTarget("4711");
 
-        assertThat(targetManagement.findTargetByControllerID("4711").get().getTargetInfo().getUpdateStatus())
+        assertThat(targetManagement.findTargetByControllerID("4711").get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.UNKNOWN);
 
         final long current = System.currentTimeMillis();
@@ -262,12 +262,12 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")));
 
-        assertThat(targetManagement.findTargetByControllerID("4711").get().getTargetInfo().getLastTargetQuery())
+        assertThat(targetManagement.findTargetByControllerID("4711").get().getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(targetManagement.findTargetByControllerID("4711").get().getTargetInfo().getLastTargetQuery())
+        assertThat(targetManagement.findTargetByControllerID("4711").get().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
 
-        assertThat(targetManagement.findTargetByControllerID("4711").get().getTargetInfo().getUpdateStatus())
+        assertThat(targetManagement.findTargetByControllerID("4711").get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.REGISTERED);
     }
 
@@ -290,7 +290,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
         // verify
         final Target target = targetManagement.findTargetByControllerID(knownControllerId1).get();
-        assertThat(target.getTargetInfo().getAddress()).isEqualTo(IpUtil.createHttpUri("127.0.0.1"));
+        assertThat(target.getAddress()).isEqualTo(IpUtil.createHttpUri("127.0.0.1"));
         assertThat(target.getCreatedBy()).isEqualTo("CONTROLLER_PLUG_AND_PLAY");
         assertThat(target.getCreatedAt()).isGreaterThanOrEqualTo(create);
         assertThat(target.getLastModifiedBy()).isNull();
@@ -312,7 +312,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
         // verify
         final Target target = targetManagement.findTargetByControllerID(knownControllerId1).get();
-        assertThat(target.getTargetInfo().getAddress()).isEqualTo(IpUtil.createHttpUri("***"));
+        assertThat(target.getAddress()).isEqualTo(IpUtil.createHttpUri("***"));
 
         securityProperties.getClients().setTrackRemoteIp(true);
     }

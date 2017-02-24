@@ -127,7 +127,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     private Message getCaptureAdressEvent(final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
         final Target target = targetManagement
                 .findTargetByControllerID(targetAssignDistributionSetEvent.getControllerId()).get();
-        final Message sendMessage = createArgumentCapture(target.getTargetInfo().getAddress());
+        final Message sendMessage = createArgumentCapture(target.getAddress());
         return sendMessage;
     }
 
@@ -223,7 +223,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         amqpMessageDispatcherService
                 .targetCancelAssignmentToDistributionSet(cancelTargetAssignmentDistributionSetEvent);
         final Message sendMessage = createArgumentCapture(
-                cancelTargetAssignmentDistributionSetEvent.getEntity().getTargetInfo().getAddress());
+                cancelTargetAssignmentDistributionSetEvent.getEntity().getAddress());
         assertCancelMessage(sendMessage);
 
     }

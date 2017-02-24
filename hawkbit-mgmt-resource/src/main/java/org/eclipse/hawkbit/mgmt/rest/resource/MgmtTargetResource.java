@@ -138,7 +138,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     @Override
     public ResponseEntity<MgmtTargetAttributes> getAttributes(@PathVariable("controllerId") final String controllerId) {
         final Target foundTarget = findTargetWithExceptionIfNotFound(controllerId);
-        final Map<String, String> controllerAttributes = foundTarget.getTargetInfo().getControllerAttributes();
+        final Map<String, String> controllerAttributes = foundTarget.getControllerAttributes();
         if (controllerAttributes.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -304,7 +304,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             @PathVariable("controllerId") final String controllerId) {
         final Target findTarget = findTargetWithExceptionIfNotFound(controllerId);
         final MgmtDistributionSet distributionSetRest = MgmtDistributionSetMapper
-                .toResponse(findTarget.getTargetInfo().getInstalledDistributionSet());
+                .toResponse(findTarget.getInstalledDistributionSet());
         final HttpStatus retStatus;
         if (distributionSetRest == null) {
             retStatus = HttpStatus.NO_CONTENT;

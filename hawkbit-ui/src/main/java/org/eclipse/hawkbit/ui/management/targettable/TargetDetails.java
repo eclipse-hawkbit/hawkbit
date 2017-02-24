@@ -141,11 +141,10 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
     @Override
     protected void populateDetailsWidget() {
         if (getSelectedBaseEntity() != null) {
-            updateDetailsLayout(getSelectedBaseEntity().getControllerId(),
-                    getSelectedBaseEntity().getTargetInfo().getAddress(), getSelectedBaseEntity().getSecurityToken(),
-                    SPDateTimeUtil.getFormattedDate(getSelectedBaseEntity().getTargetInfo().getLastTargetQuery()));
-            populateDistributionDtls(installedDistLayout,
-                    getSelectedBaseEntity().getTargetInfo().getInstalledDistributionSet());
+            updateDetailsLayout(getSelectedBaseEntity().getControllerId(), getSelectedBaseEntity().getAddress(),
+                    getSelectedBaseEntity().getSecurityToken(),
+                    SPDateTimeUtil.getFormattedDate(getSelectedBaseEntity().getLastTargetQuery()));
+            populateDistributionDtls(installedDistLayout, getSelectedBaseEntity().getInstalledDistributionSet());
             populateDistributionDtls(assignedDistLayout, getSelectedBaseEntity().getAssignedDistributionSet());
         } else {
             updateDetailsLayout(null, null, null, null);

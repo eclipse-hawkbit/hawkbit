@@ -91,9 +91,9 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
                 .getAssignedDistributionSet().getId()).isEqualTo(ds.getId());
         assertThat(targetManagement.findTargetByControllerIDWithDetails(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getTargetInfo().getInstalledDistributionSet().getId()).isEqualTo(ds.getId());
+                .getInstalledDistributionSet().getId()).isEqualTo(ds.getId());
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getTargetInfo().getInstallationDate()).isGreaterThanOrEqualTo(current);
+                .getInstallationDate()).isGreaterThanOrEqualTo(current);
 
     }
 
@@ -119,9 +119,9 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         // often too fast and
         // the following assert will fail
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getTargetInfo().getLastTargetQuery()).isLessThanOrEqualTo(System.currentTimeMillis());
+                .getLastTargetQuery()).isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getTargetInfo().getLastTargetQuery()).isGreaterThanOrEqualTo(current);
+                .getLastTargetQuery()).isGreaterThanOrEqualTo(current);
 
         // Retrieved is reported
 
@@ -151,13 +151,13 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         // often too fast and
         // the following assert will fail
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getTargetInfo().getLastTargetQuery()).isLessThanOrEqualTo(System.currentTimeMillis());
+                .getLastTargetQuery()).isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getTargetInfo().getLastTargetQuery()).isGreaterThanOrEqualTo(current);
+                .getLastTargetQuery()).isGreaterThanOrEqualTo(current);
 
         current = System.currentTimeMillis();
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getTargetInfo().getLastTargetQuery()).isLessThanOrEqualTo(System.currentTimeMillis());
+                .getLastTargetQuery()).isLessThanOrEqualTo(System.currentTimeMillis());
         mvc.perform(get("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
                 + cancelAction.getId(), tenantAware.getCurrentTenant()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -165,9 +165,9 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$.id", equalTo(String.valueOf(cancelAction.getId()))))
                 .andExpect(jsonPath("$.cancelAction.stopId", equalTo(String.valueOf(updateAction.getId()))));
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getTargetInfo().getLastTargetQuery()).isLessThanOrEqualTo(System.currentTimeMillis());
+                .getLastTargetQuery()).isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getTargetInfo().getLastTargetQuery()).isGreaterThanOrEqualTo(current);
+                .getLastTargetQuery()).isGreaterThanOrEqualTo(current);
 
         // controller confirmed cancelled action, should not be active anymore
         mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
@@ -251,7 +251,7 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getTargetInfo().getLastTargetQuery()).isGreaterThanOrEqualTo(current);
+                .getLastTargetQuery()).isGreaterThanOrEqualTo(current);
 
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId())).hasSize(1);
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(3);
@@ -263,7 +263,7 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getTargetInfo().getLastTargetQuery()).isGreaterThanOrEqualTo(current);
+                .getLastTargetQuery()).isGreaterThanOrEqualTo(current);
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId())).hasSize(1);
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(4);
 
@@ -274,7 +274,7 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getTargetInfo().getLastTargetQuery()).isGreaterThanOrEqualTo(current);
+                .getLastTargetQuery()).isGreaterThanOrEqualTo(current);
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(5);
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId())).hasSize(1);
 
@@ -287,7 +287,7 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getTargetInfo().getLastTargetQuery()).isGreaterThanOrEqualTo(current);
+                .getLastTargetQuery()).isGreaterThanOrEqualTo(current);
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(6);
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId())).hasSize(1);
 
@@ -303,7 +303,7 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getTargetInfo().getLastTargetQuery()).isGreaterThanOrEqualTo(current);
+                .getLastTargetQuery()).isGreaterThanOrEqualTo(current);
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(7);
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId())).hasSize(1);
 
@@ -315,7 +315,7 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getTargetInfo().getLastTargetQuery()).isGreaterThanOrEqualTo(current);
+                .getLastTargetQuery()).isGreaterThanOrEqualTo(current);
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(8);
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId())).hasSize(0);
     }

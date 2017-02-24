@@ -254,9 +254,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             currentUser = null;
         }
 
-        targetIds.forEach(tIds -> targetRepository.setAssignedDistributionSet(set, System.currentTimeMillis(),
-                currentUser, tIds));
-        targetIds.forEach(tIds -> targetRepository.setTargetUpdateStatus(TargetUpdateStatus.PENDING, tIds));
+        targetIds.forEach(tIds -> targetRepository.setAssignedDistributionSetAndUpdateStatus(TargetUpdateStatus.PENDING,
+                set, System.currentTimeMillis(), currentUser, tIds));
         final Map<String, JpaAction> targetIdsToActions = targets.stream().map(
                 t -> actionRepository.save(createTargetAction(targetsWithActionMap, t, set, rollout, rolloutGroup)))
                 .collect(Collectors.toMap(a -> a.getTarget().getControllerId(), Function.identity()));
@@ -308,7 +307,12 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private void assignDistributionSetEvent(final Action action) {
-        ((JpaTarget) action.getTarget()).setUpdateStatus(TargetUpdateStatus.PENDING);
+
+        // Update is not available in the object as the update was executed
+        // through JQL
+        final JpaTarget target = (JpaTarget) action.getTarget();
+        target.setUpdateStatus(TargetUpdateStatus.PENDING);
+        entityManager.detach(target);
 
         afterCommit.afterCommit(() -> eventPublisher
                 .publishEvent(new TargetUpdatedEvent(action.getTarget(), applicationContext.getId())));
