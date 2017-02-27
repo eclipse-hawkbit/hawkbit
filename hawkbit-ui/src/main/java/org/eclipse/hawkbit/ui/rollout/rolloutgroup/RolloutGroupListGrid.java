@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -303,10 +304,14 @@ public class RolloutGroupListGrid extends AbstractGrid {
 
         @Override
         public void click(final RendererClickEvent event) {
-            rolloutGroupManagement.findRolloutGroupWithDetailedStatus((Long) event.getItemId()).ifPresent(group -> {
-                rolloutUIState.setRolloutGroup(group);
-                eventBus.publish(this, RolloutEvent.SHOW_ROLLOUT_GROUP_TARGETS);
-            });
+            final Optional<RolloutGroup> group = rolloutGroupManagement
+                    .findRolloutGroupWithDetailedStatus((Long) event.getItemId());
+            if (!group.isPresent()) {
+                eventBus.publish(this, RolloutEvent.SHOW_ROLLOUTS);
+                return;
+            }
+            rolloutUIState.setRolloutGroup(group.get());
+            eventBus.publish(this, RolloutEvent.SHOW_ROLLOUT_GROUP_TARGETS);
         }
     }
 
