@@ -526,7 +526,7 @@ public class RolloutListGrid extends AbstractGrid {
                     final String rolloutName = (String) row.getItemProperty(VAR_NAME).getValue();
                     rolloutManagement.deleteRollout(rolloutId);
                     uiNotification.displaySuccess(i18n.get("message.rollout.deleted", rolloutName));
-                });
+                }, UIComponentIdProvider.ROLLOUT_DELETE_CONFIRMATION_DIALOG);
         UI.getCurrent().addWindow(confirmationDialog.getWindow());
         confirmationDialog.getWindow().bringToFront();
     }

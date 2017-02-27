@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.common;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleTiny;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -53,7 +54,28 @@ public class ConfirmationDialog implements Button.ClickListener {
      */
     public ConfirmationDialog(final String caption, final String question, final String okLabel,
             final String cancelLabel, final ConfirmationDialogCallback callback) {
-        this(caption, question, okLabel, cancelLabel, callback, null);
+        this(caption, question, okLabel, cancelLabel, callback, null, null);
+    }
+
+    /**
+     * Constructor for configuring confirmation dialog.
+     * 
+     * @param caption
+     *            the dialog caption.
+     * @param question
+     *            the question.
+     * @param okLabel
+     *            the Ok button label.
+     * @param cancelLabel
+     *            the cancel button label.
+     * @param callback
+     *            the callback.
+     * @param id
+     *            the id of the confirmation dialog
+     */
+    public ConfirmationDialog(final String caption, final String question, final String okLabel,
+            final String cancelLabel, final ConfirmationDialogCallback callback, final String id) {
+        this(caption, question, okLabel, cancelLabel, callback, null, id);
     }
 
     /**
@@ -74,7 +96,33 @@ public class ConfirmationDialog implements Button.ClickListener {
      */
     public ConfirmationDialog(final String caption, final String question, final String okLabel,
             final String cancelLabel, final ConfirmationDialogCallback callback, final Resource icon) {
+        this(caption, question, okLabel, cancelLabel, callback, icon, null);
+    }
+
+    /**
+     * Constructor for configuring confirmation dialog.
+     * 
+     * @param caption
+     *            the dialog caption.
+     * @param question
+     *            the question.
+     * @param okLabel
+     *            the Ok button label.
+     * @param cancelLabel
+     *            the cancel button label.
+     * @param callback
+     *            the callback.
+     * @param icon
+     *            the icon of the dialog
+     * @param id
+     *            the id of the confirmation dialog
+     */
+    public ConfirmationDialog(final String caption, final String question, final String okLabel,
+            final String cancelLabel, final ConfirmationDialogCallback callback, final Resource icon, final String id) {
         window = new Window(caption);
+        if (StringUtils.isNotBlank(id)) {
+            window.setId(id);
+        }
         window.addStyleName(SPUIStyleDefinitions.CONFIRMATION_WINDOW_CAPTION);
 
         if (icon != null) {

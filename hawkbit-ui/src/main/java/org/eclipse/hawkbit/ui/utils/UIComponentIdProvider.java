@@ -967,12 +967,25 @@ public final class UIComponentIdProvider {
     public static final String DIST_SET_SELECT_CONS_WINDOW_ID = "distribution.set.select.consequences.window";
 
     public static final String DIST_SET_SELECT_ENABLE_ID = "distribution.set.select.enable";
-
+    /**
+     * Id of the unread notification button
+     */
     public static final String NOTIFICATION_UNREAD_ID = "notification.unread";
 
+    /**
+     * Id of the unread notification popup
+     */
     public static final String NOTIFICATION_UNREAD_POPUP_id = "notification.unread.popup";
 
+    /**
+     * Id of the unread notification icon in the menu
+     */
     public static final String NOTIFICATION_MENU_ID = "notification.menu.";
+
+    /**
+     * Id of the rollout deletion confirmation window
+     */
+    public static final String ROLLOUT_DELETE_CONFIRMATION_DIALOG = "rollout.delete.confirmation.window";
 
     /**
      * /* Private Constructor.
