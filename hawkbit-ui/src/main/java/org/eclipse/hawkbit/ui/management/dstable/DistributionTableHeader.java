@@ -9,27 +9,26 @@
 package org.eclipse.hawkbit.ui.management.dstable;
 
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
+import org.eclipse.hawkbit.ui.common.table.AbstractDistributionSetTableHeader;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.event.dd.DropHandler;
 import com.vaadin.ui.Button.ClickEvent;
 
 /**
  * Distribution table header.
  *
  */
-public class DistributionTableHeader extends AbstractTableHeader {
-    private static final long serialVersionUID = 7597766804650170127L;
+public class DistributionTableHeader extends AbstractDistributionSetTableHeader {
+
+    private static final long serialVersionUID = 1L;
 
     DistributionTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
             final ManagementUIState managementUIState) {
@@ -46,56 +45,11 @@ public class DistributionTableHeader extends AbstractTableHeader {
     }
 
     @Override
-    protected String getHeaderCaption() {
-        return i18n.get("header.dist.table");
-    }
-
-    @Override
-    protected String getSearchBoxId() {
-        return UIComponentIdProvider.DIST_SEARCH_TEXTFIELD;
-    }
-
-    @Override
-    protected String getSearchRestIconId() {
-        return UIComponentIdProvider.DIST_SEARCH_ICON;
-    }
-
-    @Override
-    protected String getAddIconId() {
-        return UIComponentIdProvider.DIST_ADD_ICON;
-    }
-
-    @Override
     protected String onLoadSearchBoxValue() {
         if (managementUIState.getDistributionTableFilters().getSearchText().isPresent()) {
             return managementUIState.getDistributionTableFilters().getSearchText().get();
         }
         return null;
-    }
-
-    @Override
-    protected String getDropFilterId() {
-        return null;
-    }
-
-    @Override
-    protected boolean hasCreatePermission() {
-        return permChecker.hasCreateDistributionPermission();
-    }
-
-    @Override
-    protected boolean isDropHintRequired() {
-        return true;
-    }
-
-    @Override
-    protected boolean isDropFilterRequired() {
-        return false;
-    }
-
-    @Override
-    protected String getShowFilterButtonLayoutId() {
-        return UIComponentIdProvider.SHOW_DIST_TAG_ICON;
     }
 
     @Override
@@ -110,11 +64,6 @@ public class DistributionTableHeader extends AbstractTableHeader {
             managementUIState.getDistributionTableFilters().setSearchText(null);
             eventbus.publish(this, DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT);
         }
-    }
-
-    @Override
-    protected String getMaxMinIconId() {
-        return UIComponentIdProvider.DS_MAX_MIN_TABLE_ICON;
     }
 
     @Override
@@ -155,38 +104,4 @@ public class DistributionTableHeader extends AbstractTableHeader {
         return Boolean.FALSE;
     }
 
-    @Override
-    protected String getFilterIconStyle() {
-        return null;
-    }
-
-    @Override
-    protected String getDropFilterWrapperId() {
-        return null;
-    }
-
-    @Override
-    protected DropHandler getDropFilterHandler() {
-        return null;
-    }
-
-    @Override
-    protected String getBulkUploadIconId() {
-        return null;
-    }
-
-    @Override
-    protected void bulkUpload(final ClickEvent event) {
-        // No implementation as no bulk upload is supported.
-    }
-
-    @Override
-    protected Boolean isBulkUploadAllowed() {
-        return Boolean.FALSE;
-    }
-
-    @Override
-    protected boolean isBulkUploadInProgress() {
-        return false;
-    }
 }

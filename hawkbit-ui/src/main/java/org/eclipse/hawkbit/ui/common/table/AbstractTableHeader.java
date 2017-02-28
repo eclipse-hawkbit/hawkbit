@@ -28,6 +28,7 @@ import com.vaadin.event.dd.DropHandler;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -361,6 +362,84 @@ public abstract class AbstractTableHeader extends VerticalLayout {
     }
 
     /**
+     * Get the Id value of the drop filter in the table header.
+     * 
+     * @return Id of the drop filter if filter is displayed, otherwise returns
+     *         null.
+     */
+    protected abstract String getDropFilterId();
+
+    /**
+     * Get style of the filter Icon.
+     * 
+     * @return style of the filter Icon
+     */
+    protected abstract String getFilterIconStyle();
+
+    /**
+     * Get the Id value of the drop filter wrapper in the table header.
+     * 
+     * @return Id of the drop filter if filter is displayed, otherwise returns
+     *         null.
+     */
+    protected abstract String getDropFilterWrapperId();
+
+    protected abstract DropHandler getDropFilterHandler();
+
+    /**
+     * Check if drop hits required to display and user has permissions for that.
+     * 
+     * @return true if drop hits should be displayed and user has permission,
+     *         otherwise false.
+     */
+    protected abstract boolean isDropHintRequired();
+
+    /**
+     * Check if drop filter is required.
+     * 
+     * @return true if drop filter is required to display, otherwise return
+     *         false.
+     */
+    protected abstract boolean isDropFilterRequired();
+
+    /**
+     * Checks if the creation of a new item is allowed. Default is true.
+     * 
+     * @return true if the creation of a new item is allowed, otherwise returns
+     *         false.
+     */
+    protected abstract Boolean isAddNewItemAllowed();
+
+    /**
+     * Get Id of bulk upload Icon.
+     * 
+     * @return String of bulk upload Icon.
+     */
+    protected abstract String getBulkUploadIconId();
+
+    /**
+     * Gets the flag if bulk upload is allowed. Default is false
+     * 
+     * @return true if bulk upload is allowed, otherwise returns false.
+     */
+    protected abstract Boolean isBulkUploadAllowed();
+
+    /**
+     * Checks if bulk upload is in progress. Default is false.
+     * 
+     * @return true if bulk upload is in progress, otherwise returns false.
+     */
+    protected abstract boolean isBulkUploadInProgress();
+
+    /**
+     * Performs the bulk upload
+     * 
+     * @param event
+     *            Event of type ClickEvent
+     */
+    protected abstract void bulkUpload(final ClickEvent event);
+
+    /**
      * Get the title of the table.
      * 
      * @return title as String.
@@ -389,13 +468,6 @@ public abstract class AbstractTableHeader extends VerticalLayout {
     protected abstract String getAddIconId();
 
     /**
-     * Get Id of bulk upload Icon.
-     * 
-     * @return String of bulk upload Icon.
-     */
-    protected abstract String getBulkUploadIconId();
-
-    /**
      * Get search box on load text value.
      * 
      * @return value of search box.
@@ -403,50 +475,11 @@ public abstract class AbstractTableHeader extends VerticalLayout {
     protected abstract String onLoadSearchBoxValue();
 
     /**
-     * Get the Id value of the drop filter in the table header.
-     * 
-     * @return Id of the drop filter if filter is displayed, otherwise returns
-     *         null.
-     */
-    protected abstract String getDropFilterId();
-
-    /**
-     * Get style of the filter Icon.
-     * 
-     * @return style of the filter Icon
-     */
-    protected abstract String getFilterIconStyle();
-
-    /**
-     * Get the Id value of the drop filter wrapper in the table header.
-     * 
-     * @return Id of the drop filter if filter is displayed, otherwise returns
-     *         null.
-     */
-    protected abstract String getDropFilterWrapperId();
-
-    /**
      * Check if logged in user has create permission..
      * 
      * @return true of user has create permission, otherwise return false.
      */
     protected abstract boolean hasCreatePermission();
-
-    /**
-     * Check if drop hits required to display and user has permissions for that.
-     * 
-     * @return true if drop hits should be displayed and user has permission,
-     *         otherwise false.
-     */
-    protected abstract boolean isDropHintRequired();
-
-    /**
-     * Check if drop filter is required.
-     * 
-     * @return true if drop filter is required to display, otherwise return
-     *         false.
-     */
-    protected abstract boolean isDropFilterRequired();
 
     /**
      * Get Id of the show filter buttons layout.
@@ -491,8 +524,6 @@ public abstract class AbstractTableHeader extends VerticalLayout {
      */
     public abstract Boolean onLoadIsTableMaximized();
 
-    protected abstract DropHandler getDropFilterHandler();
-
     /**
      * On load show filter button is displayed.
      * 
@@ -500,16 +531,8 @@ public abstract class AbstractTableHeader extends VerticalLayout {
      */
     public abstract Boolean onLoadIsShowFilterButtonDisplayed();
 
-    protected abstract boolean isBulkUploadInProgress();
-
     protected abstract void searchBy(String newSearchText);
 
     protected abstract void addNewItem(final Button.ClickEvent event);
-
-    protected abstract void bulkUpload(final Button.ClickEvent event);
-
-    protected abstract Boolean isAddNewItemAllowed();
-
-    protected abstract Boolean isBulkUploadAllowed();
 
 }

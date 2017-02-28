@@ -13,33 +13,24 @@ import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
-import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
+import org.eclipse.hawkbit.ui.common.table.AbstractSoftwareModuleTableHeader;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.event.dd.DropHandler;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
-
 /**
  * Header of Software module table.
  */
-public class SoftwareModuleTableHeader extends AbstractTableHeader {
+public class SoftwareModuleTableHeader extends AbstractSoftwareModuleTableHeader {
 
-    private static final long serialVersionUID = 242961845006626297L;
-
-    private final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow;
+    private static final long serialVersionUID = 1L;
 
     SoftwareModuleTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
             final ArtifactUploadState artifactUploadState,
             final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow) {
-        super(i18n, permChecker, eventbus, null, null, artifactUploadState);
-        this.softwareModuleAddUpdateWindow = softwareModuleAddUpdateWindow;
+        super(i18n, permChecker, eventbus, null, null, artifactUploadState, softwareModuleAddUpdateWindow);
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -50,56 +41,8 @@ public class SoftwareModuleTableHeader extends AbstractTableHeader {
     }
 
     @Override
-    protected String getHeaderCaption() {
-        return i18n.get("upload.swModuleTable.header");
-    }
-
-    @Override
-    protected String getSearchBoxId() {
-        return UIComponentIdProvider.SW_MODULE_SEARCH_TEXT_FIELD;
-    }
-
-    @Override
-    protected String getSearchRestIconId() {
-        return UIComponentIdProvider.SW_MODULE_SEARCH_RESET_ICON;
-    }
-
-    @Override
-    protected String getAddIconId() {
-        return UIComponentIdProvider.SW_MODULE_ADD_BUTTON;
-    }
-
-    @Override
     protected String onLoadSearchBoxValue() {
         return artifactUploadState.getSoftwareModuleFilters().getSearchText().orElse(null);
-    }
-
-    @Override
-    protected String getDropFilterId() {
-        /* No dropping on software module table header in Upload View */
-        return null;
-    }
-
-    @Override
-    protected boolean hasCreatePermission() {
-        return permChecker.hasCreateDistributionPermission();
-    }
-
-    @Override
-    protected boolean isDropHintRequired() {
-        /* No dropping on software module table header in Upload View */
-        return false;
-    }
-
-    @Override
-    protected boolean isDropFilterRequired() {
-        /* No dropping on software module table header in Upload View */
-        return false;
-    }
-
-    @Override
-    protected String getShowFilterButtonLayoutId() {
-        return "show.type.icon";
     }
 
     @Override
@@ -115,11 +58,6 @@ public class SoftwareModuleTableHeader extends AbstractTableHeader {
             artifactUploadState.getSoftwareModuleFilters().setSearchText(null);
             eventbus.publish(this, SMFilterEvent.REMOVER_FILTER_BY_TEXT);
         }
-    }
-
-    @Override
-    protected String getMaxMinIconId() {
-        return UIComponentIdProvider.SW_MAX_MIN_TABLE_ICON;
     }
 
     @Override
@@ -152,50 +90,8 @@ public class SoftwareModuleTableHeader extends AbstractTableHeader {
     }
 
     @Override
-    protected void addNewItem(final ClickEvent event) {
-        final Window addSoftwareModule = softwareModuleAddUpdateWindow.createAddSoftwareModuleWindow();
-        addSoftwareModule.setCaption(i18n.get("upload.caption.add.new.swmodule"));
-        UI.getCurrent().addWindow(addSoftwareModule);
-        addSoftwareModule.setVisible(Boolean.TRUE);
-    }
-
-    @Override
-    protected Boolean isAddNewItemAllowed() {
-        return Boolean.TRUE;
-    }
-
-    @Override
-    protected String getFilterIconStyle() {
-        return null;
-    }
-
-    @Override
-    protected String getDropFilterWrapperId() {
-        return null;
-    }
-
-    @Override
-    protected DropHandler getDropFilterHandler() {
-        return null;
-    }
-
-    @Override
-    protected String getBulkUploadIconId() {
-        return null;
-    }
-
-    @Override
-    protected void bulkUpload(final ClickEvent event) {
-        // No implementation as no bulk upload is supported.
-    }
-
-    @Override
-    protected Boolean isBulkUploadAllowed() {
-        return Boolean.FALSE;
-    }
-
-    @Override
-    protected boolean isBulkUploadInProgress() {
+    protected boolean isDropHintRequired() {
+        /* No dropping on software module table header in Upload View */
         return false;
     }
 

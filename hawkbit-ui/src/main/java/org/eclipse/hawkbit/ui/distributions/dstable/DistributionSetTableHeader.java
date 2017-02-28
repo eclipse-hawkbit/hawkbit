@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ui.distributions.dstable;
 
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
+import org.eclipse.hawkbit.ui.common.table.AbstractDistributionSetTableHeader;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
@@ -22,7 +22,6 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.event.dd.DropHandler;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
@@ -30,9 +29,9 @@ import com.vaadin.ui.Window;
 /**
  * Distribution table header.
  */
-public class DistributionSetTableHeader extends AbstractTableHeader {
+public class DistributionSetTableHeader extends AbstractDistributionSetTableHeader {
 
-    private static final long serialVersionUID = -3483238438474530748L;
+    private static final long serialVersionUID = 1L;
 
     private final DistributionAddUpdateWindowLayout addUpdateWindowLayout;
 
@@ -50,56 +49,11 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
     }
 
     @Override
-    protected String getHeaderCaption() {
-        return i18n.get("header.dist.table");
-    }
-
-    @Override
-    protected String getSearchBoxId() {
-        return UIComponentIdProvider.DIST_SEARCH_TEXTFIELD;
-    }
-
-    @Override
-    protected String getSearchRestIconId() {
-        return UIComponentIdProvider.DIST_SEARCH_ICON;
-    }
-
-    @Override
-    protected String getAddIconId() {
-        return UIComponentIdProvider.DIST_ADD_ICON;
-    }
-
-    @Override
     protected String onLoadSearchBoxValue() {
         if (manageDistUIstate.getManageDistFilters().getSearchText().isPresent()) {
             return manageDistUIstate.getManageDistFilters().getSearchText().get();
         }
         return null;
-    }
-
-    @Override
-    protected String getDropFilterId() {
-        return null;
-    }
-
-    @Override
-    protected boolean hasCreatePermission() {
-        return permChecker.hasCreateDistributionPermission();
-    }
-
-    @Override
-    protected boolean isDropHintRequired() {
-        return true;
-    }
-
-    @Override
-    protected boolean isDropFilterRequired() {
-        return false;
-    }
-
-    @Override
-    protected String getShowFilterButtonLayoutId() {
-        return UIComponentIdProvider.SHOW_DIST_TAG_ICON;
     }
 
     @Override
@@ -114,11 +68,6 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
             manageDistUIstate.getManageDistFilters().setSearchText(null);
             eventbus.publish(this, DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT);
         }
-    }
-
-    @Override
-    protected String getMaxMinIconId() {
-        return UIComponentIdProvider.DS_MAX_MIN_TABLE_ICON;
     }
 
     @Override
@@ -162,38 +111,4 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
         return Boolean.TRUE;
     }
 
-    @Override
-    protected String getFilterIconStyle() {
-        return null;
-    }
-
-    @Override
-    protected String getDropFilterWrapperId() {
-        return null;
-    }
-
-    @Override
-    protected DropHandler getDropFilterHandler() {
-        return null;
-    }
-
-    @Override
-    protected String getBulkUploadIconId() {
-        return null;
-    }
-
-    @Override
-    protected void bulkUpload(final ClickEvent event) {
-        // No implementation as no bulk upload is supported.
-    }
-
-    @Override
-    protected Boolean isBulkUploadAllowed() {
-        return Boolean.FALSE;
-    }
-
-    @Override
-    protected boolean isBulkUploadInProgress() {
-        return false;
-    }
 }
