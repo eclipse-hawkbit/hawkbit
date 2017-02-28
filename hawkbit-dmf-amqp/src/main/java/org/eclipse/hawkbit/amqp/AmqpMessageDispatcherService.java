@@ -109,16 +109,14 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         LOG.debug("targetAssignDistributionSet retrieved for controller {}. I will forward it to DMF broker.",
                 assignedEvent.getControllerId());
 
-        sendUpdateMessageToTarget(assignedEvent.getTenant(),
-                targetManagement.findTargetByControllerID(assignedEvent.getControllerId()).get(),
-                assignedEvent.getActionId(), assignedEvent.getModules());
+        targetManagement.findTargetByControllerID(assignedEvent.getControllerId()).ifPresent(target -> sendUpdateMessageToTarget(assignedEvent.getTenant(),
+                target,
+                assignedEvent.getActionId(), assignedEvent.getModules()));
+        
     }
 
     void sendUpdateMessageToTarget(final String tenant, final Target target, final Long actionId,
             final Collection<org.eclipse.hawkbit.repository.model.SoftwareModule> modules) {
-        if (target == null) {
-            return;
-        }
 
         final URI targetAdress = target.getTargetInfo().getAddress();
         if (!IpUtil.isAmqpUri(targetAdress)) {
