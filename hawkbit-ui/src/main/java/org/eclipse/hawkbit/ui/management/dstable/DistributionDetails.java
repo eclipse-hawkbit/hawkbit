@@ -13,7 +13,6 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractDistributionSetDetails;
-import org.eclipse.hawkbit.ui.common.tagdetails.DistributionTagToken;
 import org.eclipse.hawkbit.ui.distributions.dstable.DsMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -29,20 +28,14 @@ public class DistributionDetails extends AbstractDistributionSetDetails {
 
     private static final long serialVersionUID = 1L;
 
-    private final DistributionTagToken distributionTagToken;
-
     DistributionDetails(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
             final ManagementUIState managementUIState, final DistributionSetManagement distributionSetManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout, final EntityFactory entityFactory,
             final UINotification uiNotification, final TagManagement tagManagement,
             final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout) {
         super(i18n, eventBus, permissionChecker, managementUIState, distributionAddUpdateWindowLayout,
-                distributionSetManagement, dsMetadataPopupLayout, entityFactory, uiNotification);
+                distributionSetManagement, dsMetadataPopupLayout, entityFactory, uiNotification, tagManagement);
 
-        this.distributionTagToken = new DistributionTagToken(permissionChecker, i18n, uiNotification, eventBus,
-                managementUIState, tagManagement, distributionSetManagement);
-
-        addTabs(detailsTab);
         restoreState();
     }
 

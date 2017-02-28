@@ -144,7 +144,7 @@ public class SoftwareModuleDetailsTable extends Table {
      */
     public void populateModule(final DistributionSet distributionSet) {
         removeAllItems();
-        if (null != distributionSet) {
+        if (distributionSet != null) {
             if (isUnassignSoftModAllowed && permissionChecker.hasUpdateDistributionPermission()) {
                 try {
                     isTargetAssigned = false;
@@ -157,10 +157,10 @@ public class SoftwareModuleDetailsTable extends Table {
             final Set<SoftwareModuleType> swModuleMandatoryTypes = distributionSet.getType().getMandatoryModuleTypes();
             final Set<SoftwareModuleType> swModuleOptionalTypes = distributionSet.getType().getOptionalModuleTypes();
 
-            if (null != swModuleMandatoryTypes && !swModuleMandatoryTypes.isEmpty()) {
+            if (swModuleMandatoryTypes != null && !swModuleMandatoryTypes.isEmpty()) {
                 swModuleMandatoryTypes.forEach(swModule -> setSwModuleProperties(swModule, true, distributionSet));
             }
-            if (null != swModuleOptionalTypes && !swModuleOptionalTypes.isEmpty()) {
+            if (swModuleOptionalTypes != null && !swModuleOptionalTypes.isEmpty()) {
                 swModuleOptionalTypes.forEach(swModule -> setSwModuleProperties(swModule, false, distributionSet));
             }
         }

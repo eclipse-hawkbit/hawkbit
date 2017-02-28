@@ -12,8 +12,10 @@ import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.tagdetails.DistributionTagToken;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.distributions.dstable.DsMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionAddUpdateWindowLayout;
@@ -48,30 +50,36 @@ public abstract class AbstractDistributionSetDetails
 
     private final UINotification uiNotification;
 
-    private final transient DistributionSetManagement distributionSetManagement;
+    protected final transient DistributionSetManagement distributionSetManagement;
 
     private final DsMetadataPopupLayout dsMetadataPopupLayout;
 
-    private final SoftwareModuleDetailsTable softwareModuleTable;
+    protected final SoftwareModuleDetailsTable softwareModuleTable;
 
     protected VerticalLayout tagsLayout;
+
+    protected final DistributionTagToken distributionTagToken;
 
     protected AbstractDistributionSetDetails(final I18N i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState,
             final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout,
             final DistributionSetManagement distributionSetManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout, final EntityFactory entityFactory,
-            final UINotification uiNotification) {
+            final UINotification uiNotification, final TagManagement tagManagement) {
         super(i18n, eventBus, permissionChecker, managementUIState);
         this.distributionAddUpdateWindowLayout = distributionAddUpdateWindowLayout;
         this.uiNotification = uiNotification;
         this.distributionSetManagement = distributionSetManagement;
         this.dsMetadataPopupLayout = dsMetadataPopupLayout;
+        this.distributionTagToken = new DistributionTagToken(permissionChecker, i18n, uiNotification, eventBus,
+                managementUIState, tagManagement, distributionSetManagement);
 
         dsMetadataTable = new DistributionSetMetadatadetailslayout(i18n, permissionChecker, distributionSetManagement,
                 dsMetadataPopupLayout, entityFactory, uiNotification);
         softwareModuleTable = new SoftwareModuleDetailsTable(i18n, false, permissionChecker, null, null, null,
                 uiNotification);
+
+        addTabs(detailsTab);
     }
 
     @Override

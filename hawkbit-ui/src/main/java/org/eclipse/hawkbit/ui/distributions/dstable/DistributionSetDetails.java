@@ -24,11 +24,9 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractDistributionSetDetails;
-import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsTable;
 import org.eclipse.hawkbit.ui.common.detailslayout.TargetFilterQueryDetailsTable;
 import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.entity.SoftwareModuleIdName;
-import org.eclipse.hawkbit.ui.common.tagdetails.DistributionTagToken;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
@@ -62,15 +60,9 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
 
     private final ManageDistUIState manageDistUIState;
 
-    private final DistributionTagToken distributionTagToken;
-
     private final transient SoftwareManagement softwareManagement;
 
-    private final transient DistributionSetManagement distributionSetManagement;
-
     private final transient TargetManagement targetManagement;
-
-    private final SoftwareModuleDetailsTable softwareModuleTable;
 
     private final TargetFilterQueryDetailsTable tfqDetailsTable;
 
@@ -84,16 +76,11 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
             final UINotification uinotification, final TagManagement tagManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout, final UINotification uiNotification) {
         super(i18n, eventBus, permissionChecker, managementUIState, distributionAddUpdateWindowLayout,
-                distributionSetManagement, dsMetadataPopupLayout, entityFactory, uiNotification);
+                distributionSetManagement, dsMetadataPopupLayout, entityFactory, uiNotification, tagManagement);
         this.manageDistUIState = manageDistUIState;
-        this.distributionTagToken = new DistributionTagToken(permissionChecker, i18n, uinotification, eventBus,
-                managementUIState, tagManagement, distributionSetManagement);
         this.softwareManagement = softwareManagement;
-        this.distributionSetManagement = distributionSetManagement;
         this.targetManagement = targetManagement;
 
-        softwareModuleTable = new SoftwareModuleDetailsTable(i18n, true, permissionChecker, distributionSetManagement,
-                eventBus, manageDistUIState, uiNotification);
         tfqDetailsTable = new TargetFilterQueryDetailsTable(i18n);
 
         addTabs(detailsTab);
