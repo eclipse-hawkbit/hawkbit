@@ -73,8 +73,8 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
             final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout,
             final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
             final TargetManagement targetManagement, final EntityFactory entityFactory,
-            final UINotification uinotification, final TagManagement tagManagement,
-            final DsMetadataPopupLayout dsMetadataPopupLayout, final UINotification uiNotification) {
+            final UINotification uiNotification, final TagManagement tagManagement,
+            final DsMetadataPopupLayout dsMetadataPopupLayout) {
         super(i18n, eventBus, permissionChecker, managementUIState, distributionAddUpdateWindowLayout,
                 distributionSetManagement, dsMetadataPopupLayout, entityFactory, uiNotification, tagManagement);
         this.manageDistUIState = manageDistUIState;
