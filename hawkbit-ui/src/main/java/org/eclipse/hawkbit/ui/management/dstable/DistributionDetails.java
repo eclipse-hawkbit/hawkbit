@@ -13,6 +13,7 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractDistributionSetDetails;
+import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsTable;
 import org.eclipse.hawkbit.ui.distributions.dstable.DsMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -36,6 +37,10 @@ public class DistributionDetails extends AbstractDistributionSetDetails {
         super(i18n, eventBus, permissionChecker, managementUIState, distributionAddUpdateWindowLayout,
                 distributionSetManagement, dsMetadataPopupLayout, entityFactory, uiNotification, tagManagement);
 
+        softwareModuleTable = new SoftwareModuleDetailsTable(i18n, false, permissionChecker, null, null, null,
+                uiNotification);
+
+        addTabs(detailsTab);
         restoreState();
     }
 

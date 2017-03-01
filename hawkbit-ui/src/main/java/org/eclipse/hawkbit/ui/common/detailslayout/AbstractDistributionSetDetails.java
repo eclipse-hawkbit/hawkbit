@@ -54,11 +54,11 @@ public abstract class AbstractDistributionSetDetails
 
     private final DsMetadataPopupLayout dsMetadataPopupLayout;
 
-    protected final SoftwareModuleDetailsTable softwareModuleTable;
-
     protected VerticalLayout tagsLayout;
 
     protected final DistributionTagToken distributionTagToken;
+
+    protected SoftwareModuleDetailsTable softwareModuleTable;
 
     protected AbstractDistributionSetDetails(final I18N i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState,
@@ -76,10 +76,6 @@ public abstract class AbstractDistributionSetDetails
 
         dsMetadataTable = new DistributionSetMetadatadetailslayout(i18n, permissionChecker, distributionSetManagement,
                 dsMetadataPopupLayout, entityFactory, uiNotification);
-        softwareModuleTable = new SoftwareModuleDetailsTable(i18n, false, permissionChecker, null, null, null,
-                uiNotification);
-
-        addTabs(detailsTab);
     }
 
     @Override

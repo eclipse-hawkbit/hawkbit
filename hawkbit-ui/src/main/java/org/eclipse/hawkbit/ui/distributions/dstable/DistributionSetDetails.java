@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractDistributionSetDetails;
+import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsTable;
 import org.eclipse.hawkbit.ui.common.detailslayout.TargetFilterQueryDetailsTable;
 import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.entity.SoftwareModuleIdName;
@@ -83,6 +84,10 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
 
         tfqDetailsTable = new TargetFilterQueryDetailsTable(i18n);
 
+        softwareModuleTable = new SoftwareModuleDetailsTable(i18n, true, permissionChecker, distributionSetManagement,
+                eventBus, manageDistUIState, uiNotification);
+
+        addTabs(detailsTab);
         restoreState();
     }
 
