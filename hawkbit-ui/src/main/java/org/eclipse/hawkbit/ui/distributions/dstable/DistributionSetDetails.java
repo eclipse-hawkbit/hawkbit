@@ -83,7 +83,6 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
 
         tfqDetailsTable = new TargetFilterQueryDetailsTable(i18n);
 
-        addTabs(detailsTab);
         restoreState();
     }
 
