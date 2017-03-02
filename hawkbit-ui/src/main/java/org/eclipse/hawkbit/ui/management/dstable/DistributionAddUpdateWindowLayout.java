@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
@@ -160,10 +161,12 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             final String desc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
             final boolean isMigStepReq = reqMigStepCheckbox.getValue();
 
-            final DistributionSet newDist = distributionSetManagement.createDistributionSet(
-                    entityFactory.distributionSet().create().name(name).version(version).description(desc)
-                            .type(distributionSetManagement.findDistributionSetTypeById(distSetTypeId).get())
-                            .requiredMigrationStep(isMigStepReq));
+            final DistributionSetType distributionSetType = distributionSetManagement
+                    .findDistributionSetTypeById(distSetTypeId)
+                    .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, distSetTypeId));
+            final DistributionSet newDist = distributionSetManagement
+                    .createDistributionSet(entityFactory.distributionSet().create().name(name).version(version)
+                            .description(desc).type(distributionSetType).requiredMigrationStep(isMigStepReq));
 
             eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.ADD_ENTITY, newDist));
 
@@ -252,7 +255,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
      *
      * @return
      */
-    private LazyQueryContainer getDistSetTypeLazyQueryContainer() {
+    private static LazyQueryContainer getDistSetTypeLazyQueryContainer() {
         final BeanQueryFactory<DistributionSetTypeBeanQuery> dtQF = new BeanQueryFactory<>(
                 DistributionSetTypeBeanQuery.class);
         dtQF.setQueryConfiguration(Collections.emptyMap());

@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -126,9 +127,10 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
             final String description = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
             final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
 
+            final SoftwareModuleType softwareModuleTypeByName = softwareManagement.findSoftwareModuleTypeByName(type)
+                    .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, type));
             final SoftwareModuleCreate softwareModule = entityFactory.softwareModule().create()
-                    .type(softwareManagement.findSoftwareModuleTypeByName(type).get()).name(name).version(version)
-                    .description(description).vendor(vendor);
+                    .type(softwareModuleTypeByName).name(name).version(version).description(description).vendor(vendor);
 
             final SoftwareModule newSoftwareModule = softwareManagement.createSoftwareModule(softwareModule);
 
