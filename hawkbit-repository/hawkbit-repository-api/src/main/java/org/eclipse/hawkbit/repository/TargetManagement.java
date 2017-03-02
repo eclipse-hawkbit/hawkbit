@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.validation.constraints.NotNull;
@@ -341,9 +342,7 @@ public interface TargetManagement {
     List<Target> findTargetByControllerID(@NotEmpty Collection<String> controllerIDs);
 
     /**
-     * Find a {@link Target} based a given ID. The returned target will not
-     * contain details (e.g {@link Target#getTags()} and
-     * {@link Target#getActions()})
+     * Find a {@link Target} based a given ID.
      *
      * @param controllerId
      *            to look for.
@@ -351,21 +350,6 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Optional<Target> findTargetByControllerID(@NotEmpty String controllerId);
-
-    /**
-     * Find {@link Target} based on given ID returns found Target with details,
-     * i.e. {@link Target#getTags()} and {@link Target#getActions()} are
-     * possible.
-     *
-     * Note: try to use {@link #findTargetByControllerID(String)} as much as
-     * possible.
-     *
-     * @param controllerId
-     *            to look for.
-     * @return {@link Target}
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Optional<Target> findTargetByControllerIDWithDetails(@NotEmpty String controllerId);
 
     /**
      * Filter {@link Target}s for all the given parameters. If all parameters
@@ -548,20 +532,6 @@ public interface TargetManagement {
             @NotNull Long orderByDistributionId, FilterParams filterParams);
 
     /**
-     * retrieves a list of {@link Target}s by their controller ID with details,
-     * i.e. {@link Target#getTags()} are possible.
-     *
-     * Note: try to use {@link #findTargetByControllerID(String)} as much as
-     * possible.
-     *
-     * @param controllerIDs
-     *            {@link Target}s Names parameter
-     * @return the found {@link Target}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<Target> findTargetsByControllerIDsWithTags(@NotNull List<String> controllerIDs);
-
-    /**
      * Find targets by tag name.
      *
      * @param tagName
@@ -654,4 +624,16 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     List<Target> findTargetAllById(@NotNull Collection<Long> ids);
+
+    /**
+     * Get controller attributes of given {@link Target}.
+     * 
+     * @param controllerId
+     *            of the target
+     * @return controller attributes as key/value pairs
+     * 
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
+     */
+    Map<String, String> getControllerAttributes(@NotEmpty String controllerId);
 }

@@ -207,7 +207,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
                         .stream().filter(dmfartifact -> dmfartifact.getFilename().equals(dbArtifact.getFilename()))
                         .findAny();
 
-                assertTrue("The artifact should exist in message", found.isPresent());
+                assertThat(found).as("The artifact should exist in message").isPresent();
                 assertThat(found.get().getSize()).isEqualTo(dbArtifact.getSize());
                 assertThat(found.get().getHashes().getMd5()).isEqualTo(dbArtifact.getMd5Hash());
                 assertThat(found.get().getHashes().getSha1()).isEqualTo(dbArtifact.getSha1Hash());

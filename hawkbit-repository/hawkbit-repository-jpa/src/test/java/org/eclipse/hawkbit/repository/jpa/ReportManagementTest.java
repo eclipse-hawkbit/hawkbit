@@ -503,7 +503,6 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
         for (int index = 0; index < amount; index++) {
             final JpaTarget createTarget = (JpaTarget) testdataFactory.createTarget(prefix + index);
             if (lastTargetQuery != null) {
-                createTarget.setNew(false);
                 createTarget
                         .setLastTargetQuery(lastTargetQuery.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
                 targetRepository.save(createTarget);

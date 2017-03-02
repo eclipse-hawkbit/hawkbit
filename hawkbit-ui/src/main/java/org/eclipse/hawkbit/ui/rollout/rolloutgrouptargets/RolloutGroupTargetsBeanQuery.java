@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.repository.model.TargetWithActionStatus;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.ProxyTarget;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
@@ -119,10 +118,6 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
         }
         prxyTarget.setLastTargetQuery(targ.getLastTargetQuery());
         prxyTarget.setId(targ.getId());
-        if (targ.getAssignedDistributionSet() != null) {
-            prxyTarget.setAssignedDistNameVersion(HawkbitCommonUtil.getFormattedNameVersion(
-                    targ.getAssignedDistributionSet().getName(), targ.getAssignedDistributionSet().getVersion()));
-        }
         return prxyTarget;
     }
 

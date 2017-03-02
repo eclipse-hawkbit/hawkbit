@@ -62,8 +62,6 @@ import org.eclipse.hawkbit.repository.model.ActionWithStatusCount;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -433,29 +431,29 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public long startScheduledActionsByRolloutGroupParent(@NotNull final Rollout rollout,
-            final RolloutGroup rolloutGroupParent) {
+    public long startScheduledActionsByRolloutGroupParent(@NotNull final Long rolloutId,
+            final Long rolloutGroupParentId) {
         long totalActionsCount = 0L;
         long lastStartedActionsCount;
         do {
-            lastStartedActionsCount = startScheduledActionsByRolloutGroupParentInNewTransaction(rollout,
-                    rolloutGroupParent, ACTION_PAGE_LIMIT);
+            lastStartedActionsCount = startScheduledActionsByRolloutGroupParentInNewTransaction(rolloutId,
+                    rolloutGroupParentId, ACTION_PAGE_LIMIT);
             totalActionsCount += lastStartedActionsCount;
         } while (lastStartedActionsCount > 0);
 
         return totalActionsCount;
     }
 
-    private long startScheduledActionsByRolloutGroupParentInNewTransaction(final Rollout rollout,
-            final RolloutGroup rolloutGroupParent, final int limit) {
+    private long startScheduledActionsByRolloutGroupParentInNewTransaction(final Long rolloutId,
+            final Long rolloutGroupParentId, final int limit) {
         final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         def.setName("startScheduledActions");
         def.setReadOnly(false);
         def.setIsolationLevel(Isolation.READ_UNCOMMITTED.value());
         def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         return new TransactionTemplate(txManager, def).execute(status -> {
-            final Page<Action> rolloutGroupActions = findActionsByRolloutAndRolloutGroupParent(rollout,
-                    rolloutGroupParent, limit);
+            final Page<Action> rolloutGroupActions = findActionsByRolloutAndRolloutGroupParent(rolloutId,
+                    rolloutGroupParentId, limit);
 
             rolloutGroupActions.map(action -> (JpaAction) action).forEach(this::startScheduledAction);
 
@@ -463,33 +461,33 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         });
     }
 
-    private Page<Action> findActionsByRolloutAndRolloutGroupParent(final Rollout rollout,
-            final RolloutGroup rolloutGroupParent, final int limit) {
-        final JpaRollout jpaRollout = (JpaRollout) rollout;
-        final JpaRolloutGroup jpaRolloutGroup = (JpaRolloutGroup) rolloutGroupParent;
+    private Page<Action> findActionsByRolloutAndRolloutGroupParent(final Long rolloutId,
+            final Long rolloutGroupParentId, final int limit) {
+
         final PageRequest pageRequest = new PageRequest(0, limit);
-        if (rolloutGroupParent == null) {
-            return actionRepository.findByRolloutAndRolloutGroupParentIsNullAndStatus(pageRequest, jpaRollout,
+        if (rolloutGroupParentId == null) {
+            return actionRepository.findByRolloutIdAndRolloutGroupParentIsNullAndStatus(pageRequest, rolloutId,
                     Action.Status.SCHEDULED);
         } else {
-            return actionRepository.findByRolloutAndRolloutGroupParentAndStatus(pageRequest, jpaRollout,
-                    jpaRolloutGroup, Action.Status.SCHEDULED);
+            return actionRepository.findByRolloutIdAndRolloutGroupParentIdAndStatus(pageRequest, rolloutId,
+                    rolloutGroupParentId, Action.Status.SCHEDULED);
         }
     }
 
-    private Action startScheduledAction(final JpaAction action) {
+    private void startScheduledAction(final JpaAction action) {
         // check if we need to override running update actions
         final Set<Long> overrideObsoleteUpdateActions = overrideObsoleteUpdateActions(
                 Collections.singletonList(action.getTarget().getId()));
 
-        if (action.getTarget().getAssignedDistributionSet() != null && action.getDistributionSet().getId()
-                .equals(action.getTarget().getAssignedDistributionSet().getId())) {
+        if (((JpaTarget) action.getTarget()).getAssignedDistributionSet() != null && action.getDistributionSet().getId()
+                .equals(((JpaTarget) action.getTarget()).getAssignedDistributionSet().getId())) {
             // the target has already the distribution set assigned, we don't
             // need to start the scheduled action, just finish it.
             action.setStatus(Status.FINISHED);
             action.setActive(false);
             setSkipActionStatus(action);
-            return actionRepository.save(action);
+            actionRepository.save(action);
+            return;
         }
 
         action.setActive(true);
@@ -498,7 +496,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         setRunningActionStatus(savedAction, null);
 
-        final JpaTarget target = (JpaTarget) savedAction.getTarget();
+        final JpaTarget target = (JpaTarget) entityManager.merge(savedAction.getTarget());
 
         target.setAssignedDistributionSet(savedAction.getDistributionSet());
         target.setUpdateStatus(TargetUpdateStatus.PENDING);
@@ -507,9 +505,9 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         // in case we canceled an action before for this target, then don't fire
         // assignment event
         if (!overrideObsoleteUpdateActions.contains(savedAction.getId())) {
-            assignDistributionSetEvent(savedAction);
+            afterCommit.afterCommit(() -> eventPublisher
+                    .publishEvent(new TargetAssignDistributionSetEvent(savedAction, applicationContext.getId())));
         }
-        return savedAction;
     }
 
     private void setRunningActionStatus(final JpaAction action, final String actionMessage) {
@@ -684,5 +682,19 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     public Slice<Action> findActionsAll(final Pageable pageable) {
         return convertAcPage(actionRepository.findAll(pageable), pageable);
+    }
+
+    @Override
+    public Optional<DistributionSet> getAssignedDistributionSet(final String controllerId) {
+        throwExceptionIfTargetFoesNotExist(controllerId);
+
+        return distributoinSetRepository.findAssignedToTarget(controllerId);
+    }
+
+    @Override
+    public Optional<DistributionSet> getInstalledDistributionSet(final String controllerId) {
+        throwExceptionIfTargetFoesNotExist(controllerId);
+
+        return distributoinSetRepository.findInstalledAtTarget(controllerId);
     }
 }

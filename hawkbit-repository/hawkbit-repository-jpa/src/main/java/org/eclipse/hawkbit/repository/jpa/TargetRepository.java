@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -20,8 +21,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -37,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>, JpaSpecificationExecutor<JpaTarget> {
 
     /**
-     * Sets {@link Target#getAssignedDistributionSet()}.
+     * Sets {@link JpaTarget#getAssignedDistributionSet()}.
      *
      * @param set
      *            to use
@@ -58,14 +57,16 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
             @Param("lastModifiedBy") String modifiedBy, @Param("targets") Collection<Long> targets);
 
     /**
-     * Loads {@link Target} including details {@link EntityGraph} by given ID.
+     * Loads {@link Target} by given ID.
      *
      * @param controllerID
      *            to search for
      * @return found {@link Target} or <code>null</code> if not found.
      */
-    @EntityGraph(value = "Target.detail", type = EntityGraphType.LOAD)
     Optional<Target> findByControllerId(String controllerID);
+
+    @Query("SELECT t.controllerAttributes FROM JpaTarget t WHERE t.controllerId=:controllerId")
+    Map<String, String> getControllerAttributes(@Param("controllerId") String controllerId);
 
     /**
      * Checks if target with given id exists.

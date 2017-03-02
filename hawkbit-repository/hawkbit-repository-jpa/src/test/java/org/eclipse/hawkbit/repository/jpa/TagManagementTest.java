@@ -209,7 +209,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         TargetTagAssignmentResult result = toggleTagAssignment(groupA, tag);
         assertThat(result.getAlreadyAssigned()).isEqualTo(0);
         assertThat(result.getAssigned()).isEqualTo(20);
-        assertThat(result.getAssignedEntity()).containsAll(targetManagement.findTargetsByControllerIDsWithTags(
+        assertThat(result.getAssignedEntity()).containsAll(targetManagement.findTargetByControllerID(
                 groupA.stream().map(target -> target.getControllerId()).collect(Collectors.toList())));
         assertThat(result.getUnassigned()).isEqualTo(0);
         assertThat(result.getUnassignedEntity()).isEmpty();
@@ -219,7 +219,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         result = toggleTagAssignment(concat(groupA, groupB), tag);
         assertThat(result.getAlreadyAssigned()).isEqualTo(20);
         assertThat(result.getAssigned()).isEqualTo(20);
-        assertThat(result.getAssignedEntity()).containsAll(targetManagement.findTargetsByControllerIDsWithTags(
+        assertThat(result.getAssignedEntity()).containsAll(targetManagement.findTargetByControllerID(
                 groupB.stream().map(target -> target.getControllerId()).collect(Collectors.toList())));
         assertThat(result.getUnassigned()).isEqualTo(0);
         assertThat(result.getUnassignedEntity()).isEmpty();
@@ -231,7 +231,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         assertThat(result.getAssigned()).isEqualTo(0);
         assertThat(result.getAssignedEntity()).isEmpty();
         assertThat(result.getUnassigned()).isEqualTo(40);
-        assertThat(result.getUnassignedEntity()).containsAll(targetManagement.findTargetsByControllerIDsWithTags(
+        assertThat(result.getUnassignedEntity()).containsAll(targetManagement.findTargetByControllerID(
                 concat(groupB, groupA).stream().map(target -> target.getControllerId()).collect(Collectors.toList())));
         assertThat(result.getTargetTag()).isEqualTo(tag);
 
@@ -275,7 +275,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         final TargetTag toDelete = tags.iterator().next();
 
         for (final Target target : targetRepository.findAll()) {
-            assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).get().getTags())
+            assertThat(tagManagement.findAllTargetTags(pageReq, target.getControllerId()).getContent())
                     .contains(toDelete);
         }
 
@@ -284,7 +284,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
 
         // check
         for (final Target target : targetRepository.findAll()) {
-            assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).get().getTags())
+            assertThat(tagManagement.findAllTargetTags(pageReq, target.getControllerId()).getContent())
                     .doesNotContain(toDelete);
         }
         assertThat(targetTagRepository.findOne(toDelete.getId())).as("No tag should be found").isNull();

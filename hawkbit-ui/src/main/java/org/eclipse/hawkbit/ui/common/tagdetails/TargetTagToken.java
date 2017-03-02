@@ -43,12 +43,14 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
     private static final Boolean NOTAGS_SELECTED = Boolean.FALSE;
 
     private final transient TargetManagement targetManagement;
+    private final transient TagManagement tagManagement;
 
     public TargetTagToken(final SpPermissionChecker checker, final I18N i18n, final UINotification uinotification,
             final UIEventBus eventBus, final ManagementUIState managementUIState, final TagManagement tagManagement,
             final TargetManagement targetManagement) {
         super(checker, i18n, uinotification, eventBus, managementUIState, tagManagement);
         this.targetManagement = targetManagement;
+        this.tagManagement = tagManagement;
     }
 
     @Override
@@ -99,7 +101,8 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
     protected void displayAlreadyAssignedTags() {
         removePreviouslyAddedTokens();
         if (selectedEntity != null) {
-            for (final TargetTag tag : selectedEntity.getTags()) {
+            for (final TargetTag tag : tagManagement.findAllTargetTags(new PageRequest(0, MAX_TAGS),
+                    selectedEntity.getControllerId())) {
                 addNewToken(tag.getId());
             }
         }
@@ -129,7 +132,7 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
 
     protected boolean isAssign(final TargetTagAssignmentResult assignmentResult) {
         if (assignmentResult.getAssigned() > 0 && managementUIState.getLastSelectedTargetId() != null) {
-            return assignmentResult.getAssignedEntity().stream().map(t -> t.getId())
+            return assignmentResult.getAssignedEntity().stream().map(Target::getId)
                     .anyMatch(controllerId -> controllerId.equals(managementUIState.getLastSelectedTargetId()));
         }
         return false;

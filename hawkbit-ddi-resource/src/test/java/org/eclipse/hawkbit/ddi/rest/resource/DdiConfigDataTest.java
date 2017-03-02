@@ -29,6 +29,8 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.google.common.collect.Maps;
+
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
@@ -63,10 +65,11 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         assertThat(targetManagement.findTargetByControllerID("4712").get().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
 
-        savedTarget.getControllerAttributes().put("dsafsdf", "sdsds");
+        final Map<String, String> attributes = Maps.newHashMapWithExpectedSize(1);
+        attributes.put("dsafsdf", "sdsds");
 
         final Target updateControllerAttributes = controllerManagement
-                .updateControllerAttributes(savedTarget.getControllerId(), savedTarget.getControllerAttributes());
+                .updateControllerAttributes(savedTarget.getControllerId(), attributes);
         // request controller attributes need to be false because we don't want
         // to request the
         // controller attributes again
@@ -101,8 +104,7 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
                 .isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(targetManagement.findTargetByControllerID("4717").get().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
-        assertThat(targetManagement.findTargetByControllerIDWithDetails("4717").get().getControllerAttributes())
-                .isEqualTo(attributes);
+        assertThat(targetManagement.getControllerAttributes("4717")).isEqualTo(attributes);
 
         // update
         attributes.put("sdsds", "123412");
@@ -117,8 +119,7 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
                 .isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(targetManagement.findTargetByControllerID("4717").get().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
-        assertThat(targetManagement.findTargetByControllerIDWithDetails("4717").get().getControllerAttributes())
-                .isEqualTo(attributes);
+        assertThat(targetManagement.getControllerAttributes("4717")).isEqualTo(attributes);
     }
 
     @Test

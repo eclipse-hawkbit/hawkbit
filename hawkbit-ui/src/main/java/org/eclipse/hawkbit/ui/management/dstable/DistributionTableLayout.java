@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management.dstable;
 
+import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
@@ -34,7 +35,8 @@ public class DistributionTableLayout extends AbstractTableLayout<DistributionTab
             final DistributionSetManagement distributionSetManagement,
             final ManagementViewClientCriterion managementViewClientCriterion, final EntityFactory entityFactory,
             final UINotification notification, final TagManagement tagManagement,
-            final SystemManagement systemManagement, final TargetManagement targetService) {
+            final SystemManagement systemManagement, final TargetManagement targetManagement,
+            final DeploymentManagement deploymentManagement) {
 
         final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout = new DistributionAddUpdateWindowLayout(
                 i18n, notification, eventBus, distributionSetManagement, systemManagement, entityFactory, null);
@@ -43,8 +45,8 @@ public class DistributionTableLayout extends AbstractTableLayout<DistributionTab
                 distributionSetManagement, entityFactory, permissionChecker);
 
         final DistributionTable distributionTable = new DistributionTable(eventBus, i18n, permissionChecker,
-                notification, managementUIState, managementViewClientCriterion, targetService, dsMetadataPopupLayout,
-                distributionSetManagement);
+                notification, managementUIState, managementViewClientCriterion, targetManagement, dsMetadataPopupLayout,
+                distributionSetManagement, deploymentManagement);
 
         super.init(new DistributionTableHeader(i18n, permissionChecker, eventBus, managementUIState), distributionTable,
                 new DistributionDetails(i18n, eventBus, permissionChecker, managementUIState, distributionSetManagement,

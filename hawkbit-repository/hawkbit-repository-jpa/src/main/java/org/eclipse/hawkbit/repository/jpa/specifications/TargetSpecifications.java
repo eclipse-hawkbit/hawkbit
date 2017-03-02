@@ -292,9 +292,7 @@ public final class TargetSpecifications {
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasInstalledDistributionSet(final Long distributionSetId) {
-        return (targetRoot, query, cb) -> {
-            return cb.equal(targetRoot.get(JpaTarget_.installedDistributionSet).get(JpaDistributionSet_.id),
-                    distributionSetId);
-        };
+        return (targetRoot, query, cb) -> cb.equal(
+                targetRoot.get(JpaTarget_.installedDistributionSet).get(JpaDistributionSet_.id), distributionSetId);
     }
 }

@@ -37,11 +37,8 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKeyColumn;
-import javax.persistence.NamedAttributeNode;
-import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -66,10 +63,13 @@ import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
+import org.eclipse.persistence.queries.UpdateObjectQuery;
+import org.eclipse.persistence.sessions.changesets.ObjectChangeSet;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Persistable;
+
+import com.google.common.collect.Lists;
 
 /**
  * JPA implementation of {@link Target}.
@@ -84,26 +84,23 @@ import org.springframework.data.domain.Persistable;
         @Index(name = "sp_idx_target_05", columnList = "tenant,address"),
         @Index(name = "sp_idx_target_prim", columnList = "tenant,id") }, uniqueConstraints = @UniqueConstraint(columnNames = {
                 "controller_id", "tenant" }, name = "uk_tenant_controller_id"))
-@NamedEntityGraph(name = "Target.detail", attributeNodes = { @NamedAttributeNode("tags"),
-        @NamedAttributeNode(value = "assignedDistributionSet"),
-        @NamedAttributeNode(value = "installedDistributionSet") })
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
-public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Long>, Target, EventAwareEntity {
+public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAwareEntity {
 
     private static final long serialVersionUID = 1L;
 
     private static final Logger LOG = LoggerFactory.getLogger(JpaTarget.class);
+
+    private static final List<String> TARGET_UPDATE_EVENT_IGNORE_FIELDS = Lists.newArrayList("lastTargetQuery",
+            "lastTargetQuery", "address", "optLockRevision", "lastModifiedAt", "lastModifiedBy");
 
     @Column(name = "controller_id", length = 64)
     @Size(min = 1, max = 64)
     @NotEmpty
     @Pattern(regexp = "[.\\S]*", message = "has whitespaces which are not allowed")
     private String controllerId;
-
-    @Transient
-    private boolean entityNew;
 
     @CascadeOnDelete
     @ManyToMany(targetEntity = JpaTargetTag.class)
@@ -115,10 +112,6 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
     @CascadeOnDelete
     @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, targetEntity = JpaAction.class)
     private List<JpaAction> actions;
-
-    @ManyToOne(optional = true, fetch = FetchType.LAZY, targetEntity = JpaDistributionSet.class)
-    @JoinColumn(name = "assigned_distribution_set", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_assign_ds"))
-    private JpaDistributionSet assignedDistributionSet;
 
     /**
      * the security token of the target which allows if enabled to authenticate
@@ -152,8 +145,12 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
     @JoinColumn(name = "installed_distribution_set", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_inst_ds"))
     private JpaDistributionSet installedDistributionSet;
 
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_distribution_set", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_assign_ds"))
+    private JpaDistributionSet assignedDistributionSet;
+
     /**
-     * Read only on management API. Are commited by controller.
+     * Read only on management API. Are committed by controller.
      */
     @CascadeOnDelete
     @ElementCollection
@@ -197,7 +194,6 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
         // empty constructor for JPA.
     }
 
-    @Override
     public DistributionSet getAssignedDistributionSet() {
         return assignedDistributionSet;
     }
@@ -207,7 +203,6 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
         return controllerId;
     }
 
-    @Override
     public Set<TargetTag> getTags() {
         if (tags == null) {
             return Collections.emptySet();
@@ -248,7 +243,6 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
         this.controllerId = controllerId;
     }
 
-    @Override
     public List<Action> getActions() {
         if (actions == null) {
             return Collections.emptyList();
@@ -263,20 +257,6 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
         }
 
         return actions.add((JpaAction) action);
-    }
-
-    @Override
-    @Transient
-    public boolean isNew() {
-        return entityNew;
-    }
-
-    /**
-     * @param entityNew
-     *            the isNew to set
-     */
-    public void setNew(final boolean entityNew) {
-        this.entityNew = entityNew;
     }
 
     /**
@@ -357,12 +337,10 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
         return updateStatus;
     }
 
-    @Override
     public JpaDistributionSet getInstalledDistributionSet() {
         return installedDistributionSet;
     }
 
-    @Override
     public Map<String, String> getControllerAttributes() {
         return controllerAttributes;
     }
@@ -410,8 +388,14 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
 
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
-        EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new TargetUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+        final ObjectChangeSet objectChanges = ((UpdateObjectQuery) descriptorEvent.getQuery()).getObjectChangeSet();
+
+        if (objectChanges.getChangedAttributeNames().stream()
+                .filter(field -> !TARGET_UPDATE_EVENT_IGNORE_FIELDS.contains(field)).findAny().isPresent()) {
+
+            EventPublisherHolder.getInstance().getEventPublisher()
+                    .publishEvent(new TargetUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+        }
     }
 
     @Override

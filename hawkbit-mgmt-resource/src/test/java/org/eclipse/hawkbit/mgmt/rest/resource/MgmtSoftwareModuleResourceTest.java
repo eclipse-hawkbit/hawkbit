@@ -237,8 +237,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         assertThat(artifactManagement.countArtifactsAll()).isEqualTo(1);
 
         // hashes
-        assertThat(artifactManagement.findArtifactByFilename("customFilename").isPresent())
-                .as("Local artifact is wrong").isTrue();
+        assertThat(artifactManagement.findArtifactByFilename("customFilename")).as("Local artifact is wrong")
+                .isPresent();
     }
 
     @Test
@@ -868,7 +868,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         mvc.perform(delete("/rest/v1/softwaremodules/{swId}/metadata/{key}", sm.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        assertThat(softwareManagement.findSoftwareModuleMetadata(sm.getId(), knownKey).isPresent()).isFalse();
+        assertThat(softwareManagement.findSoftwareModuleMetadata(sm.getId(), knownKey)).isNotPresent();
     }
 
     @Test
@@ -888,7 +888,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         mvc.perform(delete("/rest/v1/softwaremodules/1234/metadata/{key}", knownKey))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
 
-        assertThat(softwareManagement.findSoftwareModuleMetadata(sm.getId(), knownKey).isPresent()).isTrue();
+        assertThat(softwareManagement.findSoftwareModuleMetadata(sm.getId(), knownKey)).isPresent();
     }
 
     @Test

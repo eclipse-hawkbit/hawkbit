@@ -222,21 +222,24 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final Target tA = createTargetAndStartAction();
 
         // test - cancel the active action
-        mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}",
-                tA.getControllerId(), tA.getActions().get(0).getId())).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isNoContent());
+        mvc.perform(
+                delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}",
+                        tA.getControllerId(), deploymentManagement.findActionsByTarget(tA.getControllerId(), pageReq)
+                                .getContent().get(0).getId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNoContent());
 
-        final Action action = deploymentManagement.findAction(tA.getActions().get(0).getId()).get();
+        final Action action = deploymentManagement.findAction(
+                deploymentManagement.findActionsByTarget(tA.getControllerId(), pageReq).getContent().get(0).getId())
+                .get();
         // still active because in "canceling" state and waiting for controller
         // feedback
         assertThat(action.isActive()).isTrue();
 
-        final Target queryTarget = targetManagement.findTargetByControllerID(tA.getControllerId()).get();
         // action has not been cancelled confirmed from controller, so DS
         // remains assigned until
         // confirmation
-        assertThat(queryTarget.getAssignedDistributionSet()).isNotNull();
-        assertThat(queryTarget.getInstalledDistributionSet()).isNull();
+        assertThat(deploymentManagement.getAssignedDistributionSet(tA.getControllerId())).isPresent();
+        assertThat(deploymentManagement.getInstalledDistributionSet(tA.getControllerId())).isNotPresent();
     }
 
     @Test
@@ -246,11 +249,12 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final Target tA = createTargetAndStartAction();
 
         // cancel the active action
-        deploymentManagement.cancelAction(tA.getActions().get(0).getId());
+        deploymentManagement.cancelAction(
+                deploymentManagement.findActionsByTarget(tA.getControllerId(), pageReq).getContent().get(0).getId());
 
         // find the current active action
         final List<Action> cancelActions = deploymentManagement.findActionsByTarget(tA.getControllerId(), pageReq)
-                .getContent().stream().filter(action -> action.isCancelingOrCanceled()).collect(Collectors.toList());
+                .getContent().stream().filter(Action::isCancelingOrCanceled).collect(Collectors.toList());
         assertThat(cancelActions).hasSize(1);
 
         // test - cancel an cancel action returns forbidden
@@ -266,7 +270,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final Target tA = createTargetAndStartAction();
 
         // cancel the active action
-        deploymentManagement.cancelAction(tA.getActions().get(0).getId());
+        deploymentManagement.cancelAction(
+                deploymentManagement.findActionsByTarget(tA.getControllerId(), pageReq).getContent().get(0).getId());
 
         // find the current active action
         final List<Action> cancelActions = deploymentManagement.findActionsByTarget(tA.getControllerId(), pageReq)
@@ -287,9 +292,11 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final Target tA = createTargetAndStartAction();
 
         // test - cancel an cancel action returns forbidden
-        mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}?force=true",
-                tA.getControllerId(), tA.getActions().get(0).getId())).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isMethodNotAllowed());
+        mvc.perform(
+                delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}?force=true",
+                        tA.getControllerId(), deploymentManagement.findActionsByTarget(tA.getControllerId(), pageReq)
+                                .getContent().get(0).getId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isMethodNotAllowed());
     }
 
     @Test
@@ -301,7 +308,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId))
                 .andExpect(status().isOk());
 
-        assertThat(targetManagement.findTargetByControllerID(knownControllerId).isPresent()).isFalse();
+        assertThat(targetManagement.findTargetByControllerID(knownControllerId)).isNotPresent();
     }
 
     @Test
@@ -1078,8 +1085,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        assertThat(targetManagement.findTargetByControllerID("fsdfsd").get().getAssignedDistributionSet())
-                .isEqualTo(set);
+        assertThat(deploymentManagement.getAssignedDistributionSet("fsdfsd").get()).isEqualTo(set);
     }
 
     @Test
@@ -1101,8 +1107,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         assertThat(findActiveActionsByTarget).hasSize(1);
         assertThat(findActiveActionsByTarget.get(0).getActionType()).isEqualTo(ActionType.TIMEFORCED);
         assertThat(findActiveActionsByTarget.get(0).getForcedTime()).isEqualTo(forceTime);
-        assertThat(targetManagement.findTargetByControllerID("fsdfsd").get().getAssignedDistributionSet())
-                .isEqualTo(set);
+        assertThat(deploymentManagement.getAssignedDistributionSet("fsdfsd").get()).isEqualTo(set);
     }
 
     @Test

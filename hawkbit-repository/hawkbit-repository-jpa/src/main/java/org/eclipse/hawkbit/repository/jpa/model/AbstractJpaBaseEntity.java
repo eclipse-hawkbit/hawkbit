@@ -74,14 +74,14 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     @Override
     @Access(AccessType.PROPERTY)
-    @Column(name = "last_modified_at", insertable = false, updatable = true)
+    @Column(name = "last_modified_at", insertable = true, updatable = true)
     public Long getLastModifiedAt() {
         return lastModifiedAt;
     }
 
     @Override
     @Access(AccessType.PROPERTY)
-    @Column(name = "last_modified_by", insertable = false, updatable = true, length = 40)
+    @Column(name = "last_modified_by", insertable = true, updatable = true, length = 40)
     public String getLastModifiedBy() {
         return lastModifiedBy;
     }
@@ -94,6 +94,21 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
         }
 
         this.createdBy = createdBy;
+    }
+
+    @CreatedDate
+    public void setCreatedAt(final Long createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @LastModifiedDate
+    public void setLastModifiedAt(final Long lastModifiedAt) {
+
+        if (isController()) {
+            return;
+        }
+
+        this.lastModifiedAt = lastModifiedAt;
     }
 
     @LastModifiedBy
@@ -110,20 +125,6 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
                 .getDetails() instanceof TenantAwareAuthenticationDetails
                 && ((TenantAwareAuthenticationDetails) SecurityContextHolder.getContext().getAuthentication()
                         .getDetails()).isController();
-    }
-
-    @CreatedDate
-    public void setCreatedAt(final Long createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    @LastModifiedDate
-    public void setLastModifiedAt(final Long lastModifiedAt) {
-        if (isController()) {
-            return;
-        }
-
-        this.lastModifiedAt = lastModifiedAt;
     }
 
     @Override

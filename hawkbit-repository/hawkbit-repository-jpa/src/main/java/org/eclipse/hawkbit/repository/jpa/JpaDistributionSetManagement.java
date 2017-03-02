@@ -675,7 +675,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         final JpaDistributionSet result = entityManager.merge((JpaDistributionSet) ds);
         result.setLastModifiedAt(0L);
 
-        return result;
+        return distributionSetRepository.save(result);
     }
 
     /**

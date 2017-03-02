@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -36,7 +37,6 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetCreate;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetUpdate;
-import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
@@ -116,27 +116,6 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Optional<Target> findTargetByControllerIDWithDetails(final String controllerId) {
-        final Optional<Target> result = targetRepository.findByControllerId(controllerId);
-        // load lazy relations
-        if (!result.isPresent()) {
-            return result;
-        }
-
-        result.get().getControllerAttributes().size();
-        if (result.get().getInstalledDistributionSet() != null) {
-            result.get().getInstalledDistributionSet().getName();
-            result.get().getInstalledDistributionSet().getModules().size();
-        }
-        if (result.get().getAssignedDistributionSet() != null) {
-            result.get().getAssignedDistributionSet().getName();
-            result.get().getAssignedDistributionSet().getModules().size();
-        }
-
-        return result;
-    }
-
-    @Override
     public List<Target> findTargetByControllerID(final Collection<String> controllerIDs) {
         return Collections.unmodifiableList(targetRepository
                 .findAll(TargetSpecifications.byControllerIdWithStatusAndAssignedInJoin(controllerIDs)));
@@ -172,14 +151,6 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public List<Target> findTargetsByControllerIDsWithTags(final List<String> controllerIDs) {
-        final List<List<String>> partition = Lists.partition(controllerIDs, Constants.MAX_ENTRIES_IN_STATEMENT);
-        return partition.stream()
-                .map(ids -> targetRepository.findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(ids)))
-                .flatMap(t -> t.stream()).collect(Collectors.toList());
-    }
-
-    @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public Target updateTarget(final TargetUpdate u) {
@@ -187,8 +158,6 @@ public class JpaTargetManagement implements TargetManagement {
 
         final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(update.getControllerId())
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, update.getControllerId()));
-
-        target.setNew(false);
 
         update.getName().ifPresent(target::setName);
         update.getDescription().ifPresent(target::setDescription);
@@ -590,7 +559,6 @@ public class JpaTargetManagement implements TargetManagement {
             throw new EntityAlreadyExistsException();
         }
 
-        target.setNew(true);
         return targetRepository.save(target);
     }
 
@@ -639,6 +607,14 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public List<Target> findTargetAllById(final Collection<Long> ids) {
         return Collections.unmodifiableList(targetRepository.findAll(ids));
+    }
+
+    @Override
+    public Map<String, String> getControllerAttributes(final String controllerId) {
+        final JpaTarget target = (JpaTarget) findTargetByControllerID(controllerId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+
+        return target.getControllerAttributes();
     }
 
 }

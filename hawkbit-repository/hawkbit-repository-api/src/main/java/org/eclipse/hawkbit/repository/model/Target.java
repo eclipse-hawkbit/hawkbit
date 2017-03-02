@@ -9,10 +9,6 @@
 package org.eclipse.hawkbit.repository.model;
 
 import java.net.URI;
-import java.text.AttributedCharacterIterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -26,24 +22,9 @@ import java.util.concurrent.TimeUnit;
 public interface Target extends NamedEntity {
 
     /**
-     * @return currently assigned {@link DistributionSet}.
-     */
-    DistributionSet getAssignedDistributionSet();
-
-    /**
      * @return business identifier of the {@link Target}
      */
     String getControllerId();
-
-    /**
-     * @return immutable set of assigned {@link TargetTag}s.
-     */
-    Set<TargetTag> getTags();
-
-    /**
-     * @return immutable {@link Action} history of the {@link Target}.
-     */
-    List<Action> getActions();
 
     /**
      * @return the securityToken
@@ -70,13 +51,6 @@ public interface Target extends NamedEntity {
     Long getLastTargetQuery();
 
     /**
-     * @return {@link AttributedCharacterIterator} that have been provided by
-     *         the {@link Target} itself, e.g. hardware revision, serial number,
-     *         mac address etc.
-     */
-    Map<String, String> getControllerAttributes();
-
-    /**
      * @return time in {@link TimeUnit#MILLISECONDS} GMT when
      *         {@link #getInstalledDistributionSet()} was applied.
      */
@@ -86,11 +60,6 @@ public interface Target extends NamedEntity {
      * @return current status of the {@link Target}.
      */
     TargetUpdateStatus getUpdateStatus();
-
-    /**
-     * @return currently installed {@link DistributionSet}.
-     */
-    DistributionSet getInstalledDistributionSet();
 
     /**
      * @return the poll time which holds the last poll time of the target, the

@@ -27,7 +27,6 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ToManyAttributeEntriesException;
@@ -231,8 +230,6 @@ public class JpaControllerManagement implements ControllerManagement {
 
         if (TargetUpdateStatus.UNKNOWN.equals(toUpdate.getUpdateStatus())) {
             toUpdate.setUpdateStatus(TargetUpdateStatus.REGISTERED);
-            afterCommit.afterCommit(
-                    () -> eventPublisher.publishEvent(new TargetUpdatedEvent(toUpdate, applicationContext.getId())));
         }
 
         if (address != null) {
@@ -350,7 +347,6 @@ public class JpaControllerManagement implements ControllerManagement {
         mergedAction.setStatus(Status.ERROR);
         mergedTarget.setAssignedDistributionSet(null);
 
-        mergedTarget.setNew(false);
         targetRepository.save(mergedTarget);
     }
 
@@ -386,9 +382,6 @@ public class JpaControllerManagement implements ControllerManagement {
 
         targetRepository.save(target);
 
-        afterCommit.afterCommit(
-                () -> eventPublisher.publishEvent(new TargetUpdatedEvent(target, applicationContext.getId())));
-
         entityManager.detach(ds);
     }
 
@@ -411,12 +404,7 @@ public class JpaControllerManagement implements ControllerManagement {
         target.setLastTargetQuery(System.currentTimeMillis());
         target.setRequestControllerAttributes(false);
 
-        final Target result = targetRepository.save(target);
-
-        afterCommit.afterCommit(
-                () -> eventPublisher.publishEvent(new TargetUpdatedEvent(result, applicationContext.getId())));
-
-        return result;
+        return targetRepository.save(target);
     }
 
     @Override

@@ -88,10 +88,10 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         // check database after test
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getAssignedDistributionSet().getId()).isEqualTo(ds.getId());
-        assertThat(targetManagement.findTargetByControllerIDWithDetails(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getInstalledDistributionSet().getId()).isEqualTo(ds.getId());
+        assertThat(deploymentManagement.getAssignedDistributionSet(TestdataFactory.DEFAULT_CONTROLLER_ID).get())
+                .isEqualTo(ds);
+        assertThat(deploymentManagement.getInstalledDistributionSet(TestdataFactory.DEFAULT_CONTROLLER_ID).get())
+                .isEqualTo(ds);
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
                 .getInstallationDate()).isGreaterThanOrEqualTo(current);
 
@@ -403,8 +403,8 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(9);
 
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getAssignedDistributionSet()).isEqualTo(ds3);
+        assertThat(deploymentManagement.getAssignedDistributionSet(TestdataFactory.DEFAULT_CONTROLLER_ID).get())
+                .isEqualTo(ds3);
         mvc.perform(get("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/deploymentBase/"
                 + updateAction3.getId(), tenantAware.getCurrentTenant())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
@@ -418,8 +418,8 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         // action is in cancelling state
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId())).hasSize(1);
         assertThat(deploymentManagement.countActionsByTarget(savedTarget.getControllerId())).isEqualTo(3);
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getAssignedDistributionSet()).isEqualTo(ds3);
+        assertThat(deploymentManagement.getAssignedDistributionSet(TestdataFactory.DEFAULT_CONTROLLER_ID).get())
+                .isEqualTo(ds3);
 
         mvc.perform(get("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
                 + cancelAction3.getId(), tenantAware.getCurrentTenant()).accept(MediaType.APPLICATION_JSON))

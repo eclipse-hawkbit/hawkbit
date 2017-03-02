@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -59,6 +60,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
     private String searchText;
     private Boolean noTagClicked;
     private transient TargetManagement targetManagement;
+    private transient DeploymentManagement deploymentManagement;
     private transient I18N i18N;
     private Long pinnedDistId;
     private TargetFilterQuery targetFilterQuery;
@@ -149,10 +151,10 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
                 prxyTarget.setInstalledDistributionSet(null);
                 prxyTarget.setAssignedDistributionSet(null);
             } else {
-                getTargetManagement().findTargetByControllerIDWithDetails(targ.getControllerId()).ifPresent(target -> {
-                    prxyTarget.setInstalledDistributionSet(target.getInstalledDistributionSet());
-                    prxyTarget.setAssignedDistributionSet(target.getAssignedDistributionSet());
-                });
+                getDeploymentManagement().getAssignedDistributionSet(targ.getControllerId())
+                        .ifPresent(prxyTarget::setAssignedDistributionSet);
+                getDeploymentManagement().getInstalledDistributionSet(targ.getControllerId())
+                        .ifPresent(prxyTarget::setInstalledDistributionSet);
             }
 
             prxyTarget.setUpdateStatus(targ.getUpdateStatus());
@@ -217,6 +219,13 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             targetManagement = SpringContextHelper.getBean(TargetManagement.class);
         }
         return targetManagement;
+    }
+
+    private DeploymentManagement getDeploymentManagement() {
+        if (deploymentManagement == null) {
+            deploymentManagement = SpringContextHelper.getBean(DeploymentManagement.class);
+        }
+        return deploymentManagement;
     }
 
     private ManagementUIState getManagementUIState() {

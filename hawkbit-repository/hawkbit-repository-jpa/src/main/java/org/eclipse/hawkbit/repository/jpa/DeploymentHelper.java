@@ -90,7 +90,6 @@ public final class DeploymentHelper {
         } else {
             target.setAssignedDistributionSet(nextActiveActions.get(0).getDistributionSet());
         }
-        target.setNew(false);
         targetRepository.save(target);
     }
 
