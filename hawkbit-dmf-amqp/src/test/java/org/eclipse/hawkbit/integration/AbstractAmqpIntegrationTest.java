@@ -11,10 +11,11 @@ package org.eclipse.hawkbit.integration;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.concurrent.TimeUnit;
+
 import org.eclipse.hawkbit.AmqpTestConfiguration;
 import org.eclipse.hawkbit.amqp.AmqpProperties;
 import org.eclipse.hawkbit.amqp.DmfApiConfiguration;
-import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.eclipse.hawkbit.integration.listener.DeadletterListener;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
@@ -86,9 +87,12 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
     private RabbitTemplate createDmfClient() {
         final RabbitTemplate template = new RabbitTemplate(rabbitConnectionFactory());
         template.setMessageConverter(new Jackson2JsonMessageConverter());
-        template.setExchange(AmqpSettings.DMF_EXCHANGE);
+        template.setReceiveTimeout(TimeUnit.SECONDS.toMillis(35));
+        template.setExchange(getAmqpSettings());
         return template;
     }
+
+    protected abstract String getAmqpSettings();
 
     protected RabbitTemplate getDmfClient() {
         return dmfClient;
@@ -110,7 +114,7 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
         return Awaitility.await().atMost(2, SECONDS);
     }
 
-    protected void verifyDeadLetterMessages(int expectedMessages) {
+    protected void verifyDeadLetterMessages(final int expectedMessages) {
         createConditionFactory().until(() -> {
             Mockito.verify(getDeadletterListener(), Mockito.times(expectedMessages)).handleMessage(Mockito.any());
         });
