@@ -38,7 +38,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceIntegrationTest {
 
     @Test
-    @Description("Verify that a distribution assignment send an amqp message.")
+    @Description("Verify that a distribution assignment send a download and install message.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1),
@@ -91,7 +91,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
     }
 
     @Test
-    @Description("Verify that a cancel assignment send an amqp message.")
+    @Description("Verify that a cancel assignment send a cancel message.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = CancelTargetAssignmentEvent.class, count = 1),

@@ -324,10 +324,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         LOG.debug("Target notifies intermediate about action {} with status {}.", actionId,
                 actionUpdateStatus.getActionStatus().name());
 
-        if (actionId == null) {
-            logAndThrowMessageError(message, "Invalid message no action id");
-        }
-
         final Optional<Action> findActionWithDetails = controllerManagement.findActionWithDetails(actionId);
         if (!findActionWithDetails.isPresent()) {
             logAndThrowMessageError(message,
