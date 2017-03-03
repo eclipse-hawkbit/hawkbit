@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.validation.ConstraintViolationException;
 
+import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
@@ -62,7 +63,11 @@ public class DelayedRequeueExceptionStrategy extends ConditionalRejectingErrorHa
     }
 
     private boolean invalidMessage(final Throwable cause) {
-        return doesNotExist(cause) || quotaHit(cause) || invalidContent(cause);
+        return doesNotExist(cause) || quotaHit(cause) || invalidContent(cause) || invalidState(cause);
+    }
+
+    private boolean invalidState(final Throwable cause) {
+        return cause instanceof CancelActionNotAllowedException;
     }
 
     private boolean quotaHit(final Throwable cause) {
