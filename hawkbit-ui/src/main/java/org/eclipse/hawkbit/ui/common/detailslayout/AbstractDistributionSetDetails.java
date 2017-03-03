@@ -46,7 +46,7 @@ public abstract class AbstractDistributionSetDetails
 
     private final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout;
 
-    private final DistributionSetMetadatadetailslayout dsMetadataTable;
+    private final DistributionSetMetadatadetailsLayout dsMetadataTable;
 
     private final UINotification uiNotification;
 
@@ -57,6 +57,8 @@ public abstract class AbstractDistributionSetDetails
     private final DistributionTagToken distributionTagToken;
 
     private final SoftwareModuleDetailsTable softwareModuleDetailsTable;
+
+    private VerticalLayout softwareModuleTab;
 
     protected AbstractDistributionSetDetails(final I18N i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState,
@@ -74,8 +76,9 @@ public abstract class AbstractDistributionSetDetails
                 managementUIState, tagManagement, distributionSetManagement);
         this.softwareModuleDetailsTable = softwareModuleDetailsTable;
 
-        dsMetadataTable = new DistributionSetMetadatadetailslayout(i18n, permissionChecker, distributionSetManagement,
+        dsMetadataTable = new DistributionSetMetadatadetailsLayout(i18n, permissionChecker, distributionSetManagement,
                 dsMetadataPopupLayout, entityFactory, uiNotification);
+        createSoftwareModuleTab();
     }
 
     @Override
@@ -141,7 +144,7 @@ public abstract class AbstractDistributionSetDetails
     protected void addTabs(final TabSheet detailsTab) {
         detailsTab.addTab(getDetailsLayout(), getI18n().get("caption.tab.details"), null);
         detailsTab.addTab(getDescriptionLayout(), getI18n().get("caption.tab.description"), null);
-        detailsTab.addTab(createSoftwareModuleTab(), getI18n().get("caption.softwares.distdetail.tab"), null);
+        detailsTab.addTab(softwareModuleTab, getI18n().get("caption.softwares.distdetail.tab"), null);
         detailsTab.addTab(getTagsLayout(), getI18n().get("caption.tags.tab"), null);
         detailsTab.addTab(getLogLayout(), getI18n().get("caption.logs.tab"), null);
         detailsTab.addTab(dsMetadataTable, getI18n().get("caption.metadata"), null);
@@ -160,11 +163,10 @@ public abstract class AbstractDistributionSetDetails
         softwareModuleDetailsTable.populateModule(getSelectedBaseEntity());
     }
 
-    private VerticalLayout createSoftwareModuleTab() {
-        final VerticalLayout softwareLayout = createTabLayout();
-        softwareLayout.setSizeFull();
-        softwareLayout.addComponent(softwareModuleDetailsTable);
-        return softwareLayout;
+    private final void createSoftwareModuleTab() {
+        this.softwareModuleTab = createTabLayout();
+        softwareModuleTab.setSizeFull();
+        softwareModuleTab.addComponent(softwareModuleDetailsTable);
     }
 
     private void updateDistributionSetDetailsLayout(final String type, final Boolean isMigrationRequired) {

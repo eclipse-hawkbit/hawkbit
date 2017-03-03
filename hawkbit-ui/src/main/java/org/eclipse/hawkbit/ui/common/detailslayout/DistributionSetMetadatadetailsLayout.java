@@ -37,7 +37,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * DistributionSet Metadata details layout.
  *
  */
-public class DistributionSetMetadatadetailslayout extends Table {
+public class DistributionSetMetadatadetailsLayout extends Table {
 
     private static final long serialVersionUID = 2913758299611837718L;
 
@@ -59,7 +59,7 @@ public class DistributionSetMetadatadetailslayout extends Table {
 
     private final UINotification notification;
 
-    public DistributionSetMetadatadetailslayout(final I18N i18n, final SpPermissionChecker permissionChecker,
+    public DistributionSetMetadatadetailsLayout(final I18N i18n, final SpPermissionChecker permissionChecker,
             final DistributionSetManagement distributionSetManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout, final EntityFactory entityFactory,
             final UINotification notification) {
