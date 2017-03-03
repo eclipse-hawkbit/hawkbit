@@ -50,15 +50,15 @@ public abstract class AbstractDistributionSetDetails
 
     private final UINotification uiNotification;
 
-    protected final transient DistributionSetManagement distributionSetManagement;
+    private final transient DistributionSetManagement distributionSetManagement;
 
     private final DsMetadataPopupLayout dsMetadataPopupLayout;
 
-    protected VerticalLayout tagsLayout;
+    private VerticalLayout tagsLayout;
 
-    protected final DistributionTagToken distributionTagToken;
+    private final DistributionTagToken distributionTagToken;
 
-    protected SoftwareModuleDetailsTable softwareModuleTable;
+    private SoftwareModuleDetailsTable softwareModuleTable;
 
     protected AbstractDistributionSetDetails(final I18N i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState,
@@ -188,6 +188,46 @@ public abstract class AbstractDistributionSetDetails
                     getI18n().get("checkbox.dist.migration.required"),
                     isMigrationRequired.equals(Boolean.TRUE) ? getI18n().get("label.yes") : getI18n().get("label.no")));
         }
+    }
+
+    public VerticalLayout getTagsLayout() {
+        return tagsLayout;
+    }
+
+    public void setTagsLayout(final VerticalLayout tagsLayout) {
+        this.tagsLayout = tagsLayout;
+    }
+
+    public SoftwareModuleDetailsTable getSoftwareModuleTable() {
+        return softwareModuleTable;
+    }
+
+    public void setSoftwareModuleTable(final SoftwareModuleDetailsTable softwareModuleTable) {
+        this.softwareModuleTable = softwareModuleTable;
+    }
+
+    public DistributionAddUpdateWindowLayout getDistributionAddUpdateWindowLayout() {
+        return distributionAddUpdateWindowLayout;
+    }
+
+    public DistributionSetMetadatadetailslayout getDsMetadataTable() {
+        return dsMetadataTable;
+    }
+
+    public UINotification getUiNotification() {
+        return uiNotification;
+    }
+
+    public DistributionSetManagement getDistributionSetManagement() {
+        return distributionSetManagement;
+    }
+
+    public DsMetadataPopupLayout getDsMetadataPopupLayout() {
+        return dsMetadataPopupLayout;
+    }
+
+    public DistributionTagToken getDistributionTagToken() {
+        return distributionTagToken;
     }
 
 }

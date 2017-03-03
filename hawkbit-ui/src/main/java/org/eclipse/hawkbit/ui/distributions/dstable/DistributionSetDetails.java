@@ -84,8 +84,8 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
 
         tfqDetailsTable = new TargetFilterQueryDetailsTable(i18n);
 
-        softwareModuleTable = new SoftwareModuleDetailsTable(i18n, true, permissionChecker, distributionSetManagement,
-                eventBus, manageDistUIState, uiNotification);
+        setSoftwareModuleTable(new SoftwareModuleDetailsTable(i18n, true, permissionChecker, distributionSetManagement,
+                eventBus, manageDistUIState, uiNotification));
 
         addTabs(detailsTab);
         restoreState();
@@ -143,7 +143,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
 
             }
             for (final Map.Entry<String, StringBuilder> entry : assignedSWModule.entrySet()) {
-                item = softwareModuleTable.getContainerDataSource().getItem(entry.getKey());
+                item = getSoftwareModuleTable().getContainerDataSource().getItem(entry.getKey());
                 if (item != null) {
                     item.getItemProperty(SOFT_MODULE).setValue(createSoftModuleLayout(entry.getValue().toString()));
                 }
@@ -174,7 +174,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
             assignedSWModule = new HashMap<>();
         }
 
-        softwareModuleTable.getContainerDataSource().getItemIds();
+        getSoftwareModuleTable().getContainerDataSource().getItemIds();
         if (assignedSWModule.containsKey(module.getType().getName())) {
             /*
              * If software module type is software, means multiple softwares can
@@ -203,7 +203,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
         }
 
         for (final Map.Entry<String, StringBuilder> entry : assignedSWModule.entrySet()) {
-            final Item item = softwareModuleTable.getContainerDataSource().getItem(entry.getKey());
+            final Item item = getSoftwareModuleTable().getContainerDataSource().getItem(entry.getKey());
             if (item != null) {
                 item.getItemProperty(SOFT_MODULE).setValue(createSoftModuleLayout(entry.getValue().toString()));
             }
@@ -227,11 +227,11 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
     }
 
     private void populateTags() {
-        tagsLayout.removeAllComponents();
+        getTagsLayout().removeAllComponents();
         if (getSelectedBaseEntity() == null) {
             return;
         }
-        tagsLayout.addComponent(distributionTagToken.getTokenField());
+        getTagsLayout().addComponent(getDistributionTagToken().getTokenField());
     }
 
     protected void populateTargetFilterQueries() {
@@ -265,10 +265,11 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
                 assignedSWModule.clear();
             }
 
-            distributionSetManagement.findDistributionSetByIdWithDetails(getSelectedBaseEntityId()).ifPresent(set -> {
-                setSelectedBaseEntity(set);
-                UI.getCurrent().access(this::populateModule);
-            });
+            getDistributionSetManagement().findDistributionSetByIdWithDetails(getSelectedBaseEntityId())
+                    .ifPresent(set -> {
+                        setSelectedBaseEntity(set);
+                        UI.getCurrent().access(this::populateModule);
+                    });
         }
     }
 

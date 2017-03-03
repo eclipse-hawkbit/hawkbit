@@ -37,8 +37,8 @@ public class DistributionDetails extends AbstractDistributionSetDetails {
         super(i18n, eventBus, permissionChecker, managementUIState, distributionAddUpdateWindowLayout,
                 distributionSetManagement, dsMetadataPopupLayout, entityFactory, uiNotification, tagManagement);
 
-        softwareModuleTable = new SoftwareModuleDetailsTable(i18n, false, permissionChecker, null, null, null,
-                uiNotification);
+        setSoftwareModuleTable(
+                new SoftwareModuleDetailsTable(i18n, false, permissionChecker, null, null, null, uiNotification));
 
         addTabs(detailsTab);
         restoreState();
@@ -65,8 +65,8 @@ public class DistributionDetails extends AbstractDistributionSetDetails {
     @Override
     protected VerticalLayout createTagsLayout() {
         super.createTagsLayout();
-        tagsLayout.addComponent(distributionTagToken.getTokenField());
-        return tagsLayout;
+        getTagsLayout().addComponent(getDistributionTagToken().getTokenField());
+        return getTagsLayout();
     }
 
 }
