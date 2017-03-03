@@ -41,6 +41,7 @@ import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 
 import com.google.common.collect.Lists;
 
@@ -123,7 +124,6 @@ public class ConfigurableScenario {
                         .createTargetTags(new TagBuilder().name(group).description("Group " + group).build()).getBody()
                         .get(0).getTagId())
                 .collect(Collectors.toList());
-
     }
 
     private void cleanRepository() {
@@ -136,11 +136,20 @@ public class ConfigurableScenario {
     }
 
     private void deleteRollouts() {
-        // TODO: complete this as soon as rollouts can be deleted
+        LOGGER.info("Delete Rollouts");
 
+        PagedList<MgmtRolloutResponseBody> rollouts;
+
+        while ((rollouts = rolloutResource.getRollouts(0, PAGE_SIZE, null, null).getBody()).getTotal() > 0) {
+            rollouts.getContent().parallelStream().forEach(rollout -> {
+                rolloutResource.delete(rollout.getRolloutId());
+                waitUntilRolloutNoLongerExists(rollout.getRolloutId());
+            });
+        }
     }
 
     private void deleteSoftwareModules() {
+        LOGGER.info("Delete SoftwareModules");
         PagedList<MgmtSoftwareModule> modules;
         do {
             modules = softwareModuleResource.getSoftwareModules(0, PAGE_SIZE, null, null).getBody();
@@ -150,6 +159,8 @@ public class ConfigurableScenario {
     }
 
     private void deleteDistributionSets() {
+        LOGGER.info("Delete DistributionSets");
+
         PagedList<MgmtDistributionSet> distributionSets;
         do {
             distributionSets = distributionSetResource.getDistributionSets(0, PAGE_SIZE, null, null).getBody();
@@ -170,6 +181,8 @@ public class ConfigurableScenario {
     }
 
     private void deleteTargets() {
+        LOGGER.info("Delete Targets");
+
         PagedList<MgmtTarget> targets;
         do {
             targets = targetResource.getTargets(0, PAGE_SIZE, null, null).getBody();
@@ -203,8 +216,9 @@ public class ConfigurableScenario {
         LOGGER.info("Run semi automatic rollout for set {}", set.getDsId());
         // create a Rollout
         final MgmtRolloutResponseBody rolloutResponseBody = rolloutResource.create(new RolloutBuilder()
-                .name("Rollout" + set.getName() + set.getVersion()).semiAutomaticGroups(createRolloutGroups(scenario))
-                .targetFilterQuery("name==*").distributionSetId(set.getDsId())
+                .name("SemiAutomaticRollout" + set.getName() + set.getVersion())
+                .semiAutomaticGroups(createRolloutGroups(scenario)).targetFilterQuery("name==*")
+                .distributionSetId(set.getDsId())
                 .successThreshold(String.valueOf(scenario.getRolloutSuccessThreshold())).errorThreshold("5").build())
                 .getBody();
 
@@ -218,13 +232,15 @@ public class ConfigurableScenario {
     }
 
     private static List<MgmtRolloutGroup> createRolloutGroups(final Scenario scenario) {
-        final List<MgmtRolloutGroup> result = Lists.newArrayListWithCapacity(scenario.getDeviceGroups().size() * 2);
+        final List<MgmtRolloutGroup> result = Lists
+                .newArrayListWithExpectedSize((scenario.getDeviceGroups().size() * 3) + 1);
 
         scenario.getDeviceGroups().forEach(groupname -> {
             result.add(createGroup(1, groupname, 10F));
             result.add(createGroup(2, groupname, 50F));
             result.add(createGroup(3, groupname, 100F));
         });
+        result.add(createFinalGroup());
 
         return result;
     }
@@ -235,6 +251,15 @@ public class ConfigurableScenario {
         one.setDescription("Group of " + groupname);
         one.setTargetFilterQuery("tag==" + groupname);
         one.setTargetPercentage(percent);
+        return one;
+    }
+
+    private static MgmtRolloutGroup createFinalGroup() {
+        final MgmtRolloutGroup one = new MgmtRolloutGroup();
+        one.setName("final");
+        one.setDescription("Group of non tagged devices");
+        one.setTargetFilterQuery("name==*");
+        one.setTargetPercentage(100F);
         return one;
     }
 
@@ -254,6 +279,17 @@ public class ConfigurableScenario {
 
         waitUntilRolloutIsComplete(rolloutResponseBody.getRolloutId());
         LOGGER.info("Run rollout for set {} -> Done", set.getDsId());
+    }
+
+    private void waitUntilRolloutNoLongerExists(final Long id) {
+        do {
+            try {
+                TimeUnit.SECONDS.sleep(5);
+            } catch (final InterruptedException e) {
+                LOGGER.warn("Interrupted!");
+                Thread.currentThread().interrupt();
+            }
+        } while (rolloutResource.getRollout(id).getStatusCode() != HttpStatus.NOT_FOUND);
     }
 
     private void waitUntilRolloutIsComplete(final Long id) {

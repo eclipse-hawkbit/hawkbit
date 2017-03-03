@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.artifact.repository.HashNotMatchException;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
@@ -104,23 +103,16 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public boolean clearArtifactBinary(final Long artifactId) {
-        return clearArtifactBinary(localArtifactRepository.findById(artifactId)
-                .orElseThrow(() -> new EntityNotFoundException(Artifact.class, artifactId)));
-    }
+    public boolean clearArtifactBinary(final String sha1Hash, final Long moduleId) {
 
-    private boolean clearArtifactBinary(final JpaArtifact existing) {
-
-        for (final Artifact lArtifact : localArtifactRepository.findBySha1Hash(existing.getSha1Hash())) {
-            if (!lArtifact.getSoftwareModule().isDeleted()
-                    && Long.compare(lArtifact.getSoftwareModule().getId(), existing.getSoftwareModule().getId()) != 0) {
-                return false;
-            }
+        if (localArtifactRepository.existsWithSha1HashAndSoftwareModuleIdIsNot(sha1Hash, moduleId)) {
+            // there are still other artifacts that need the binary
+            return false;
         }
 
         try {
-            LOG.debug("deleting artifact from repository {}", existing.getSha1Hash());
-            artifactRepository.deleteBySha1(existing.getSha1Hash());
+            LOG.debug("deleting artifact from repository {}", sha1Hash);
+            artifactRepository.deleteBySha1(sha1Hash);
             return true;
         } catch (final ArtifactStoreException e) {
             throw new ArtifactDeleteFailedException(e);
@@ -134,7 +126,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
         final JpaArtifact existing = (JpaArtifact) findArtifact(id)
                 .orElseThrow(() -> new EntityNotFoundException(Artifact.class, id));
 
-        clearArtifactBinary(existing);
+        clearArtifactBinary(existing.getSha1Hash(), existing.getSoftwareModule().getId());
 
         ((JpaSoftwareModule) existing.getSoftwareModule()).removeArtifact(existing);
         softwareModuleRepository.save((JpaSoftwareModule) existing.getSoftwareModule());
@@ -148,6 +140,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     @Override
     public Optional<Artifact> findByFilenameAndSoftwareModule(final String filename, final Long softwareModuleId) {
+        throwExceptionIfSoftwareModuleDoesNotExist(softwareModuleId);
+
         return localArtifactRepository.findFirstByFilenameAndSoftwareModuleId(filename, softwareModuleId);
     }
 
@@ -163,13 +157,20 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     @Override
     public Page<Artifact> findArtifactBySoftwareModule(final Pageable pageReq, final Long swId) {
+        throwExceptionIfSoftwareModuleDoesNotExist(swId);
+
         return localArtifactRepository.findBySoftwareModuleId(pageReq, swId);
     }
 
+    private void throwExceptionIfSoftwareModuleDoesNotExist(final Long swId) {
+        if (!softwareModuleRepository.exists(swId)) {
+            throw new EntityNotFoundException(SoftwareModule.class, swId);
+        }
+    }
+
     @Override
-    public DbArtifact loadArtifactBinary(final String sha1Hash) {
-        return Optional.ofNullable(artifactRepository.getArtifactBySha1(sha1Hash))
-                .orElseThrow(() -> new ArtifactBinaryNotFoundException(sha1Hash));
+    public Optional<DbArtifact> loadArtifactBinary(final String sha1Hash) {
+        return Optional.ofNullable(artifactRepository.getArtifactBySha1(sha1Hash));
     }
 
     private Artifact storeArtifactMetadata(final SoftwareModule softwareModule, final String providedFilename,

@@ -12,8 +12,8 @@
   //Table header - filter text field style
   .filter-box {
     height: 25px !important;
-    transition: width .5s ease-in-out;
     float: right;
+    visibility: visible;
     border-radius: $v-border-radius;
   }
 
@@ -23,9 +23,7 @@
   }
 
   .filter-box-hide {
-    width: 0 !important;
-    padding: 0 !important;
-    border-width: 0 !important;
+    visibility: hidden;
   }
 
   //Search rest icon color

@@ -46,6 +46,7 @@ import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -84,6 +85,9 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Autowired
     private TargetRepository targetRepository;
+
+    @Autowired
+    private SoftwareModuleRepository softwareModuleRepository;
 
     @Autowired
     private TargetManagement targetManagement;
@@ -140,6 +144,9 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     public Optional<Action> getActionForDownloadByTargetAndSoftwareModule(final String controllerId,
             final Long moduleId) {
+        throwExceptionIfTargetDoesNotExist(controllerId);
+        throwExceptionIfSoftwareModuleDoesNotExist(moduleId);
+
         final List<Action> action = actionRepository.findActionByTargetAndSoftwareModule(controllerId, moduleId);
 
         if (action.isEmpty() || action.get(0).isCancelingOrCanceled()) {
@@ -149,26 +156,40 @@ public class JpaControllerManagement implements ControllerManagement {
         return Optional.ofNullable(action.get(0));
     }
 
+    private void throwExceptionIfTargetDoesNotExist(final String controllerId) {
+        if (!targetRepository.existsByControllerId(controllerId)) {
+            throw new EntityNotFoundException(Target.class, controllerId);
+        }
+    }
+
+    private void throwExceptionIfTargetDoesNotExist(final Long targetId) {
+        if (!targetRepository.exists(targetId)) {
+            throw new EntityNotFoundException(Target.class, targetId);
+        }
+    }
+
+    private void throwExceptionIfSoftwareModuleDoesNotExist(final Long moduleId) {
+        if (!softwareModuleRepository.exists(moduleId)) {
+            throw new EntityNotFoundException(SoftwareModule.class, moduleId);
+        }
+    }
+
     @Override
     public boolean hasTargetArtifactAssigned(final String controllerId, final String sha1Hash) {
-        final Optional<Target> target = targetRepository.findByControllerId(controllerId);
-        if (!target.isPresent()) {
-            return false;
-        }
-        return actionRepository.count(ActionSpecifications.hasTargetAssignedArtifact(target.get(), sha1Hash)) > 0;
+        throwExceptionIfTargetDoesNotExist(controllerId);
+        return actionRepository.count(ActionSpecifications.hasTargetAssignedArtifact(controllerId, sha1Hash)) > 0;
     }
 
     @Override
     public boolean hasTargetArtifactAssigned(final Long targetId, final String sha1Hash) {
-        final Target target = targetRepository.findOne(targetId);
-        if (target == null) {
-            return false;
-        }
-        return actionRepository.count(ActionSpecifications.hasTargetAssignedArtifact(target, sha1Hash)) > 0;
+        throwExceptionIfTargetDoesNotExist(targetId);
+        return actionRepository.count(ActionSpecifications.hasTargetAssignedArtifact(targetId, sha1Hash)) > 0;
     }
 
     @Override
     public Optional<Action> findOldestActiveActionByTarget(final String controllerId) {
+        throwExceptionIfTargetDoesNotExist(controllerId);
+
         // used in favorite to findFirstByTargetAndActiveOrderByIdAsc due to
         // DATAJPA-841 issue.
         return actionRepository.findFirstByTargetControllerIdAndActive(new Sort(Direction.ASC, "id"), controllerId,

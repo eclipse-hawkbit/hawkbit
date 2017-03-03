@@ -470,7 +470,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     }
 
     private void assertAction(final Long actionId, Status... expectedActionStates) {
-        final Action action = waitUntilIsPresent(() -> controllerManagament.findActionWithDetails(actionId));
+        final Action action = waitUntilIsPresent(() -> controllerManagement.findActionWithDetails(actionId));
         final List<Status> status = action.getActionStatus().stream().map(actionStatus -> actionStatus.getStatus())
                 .collect(Collectors.toList());
         assertThat(status).containsOnly(expectedActionStates);

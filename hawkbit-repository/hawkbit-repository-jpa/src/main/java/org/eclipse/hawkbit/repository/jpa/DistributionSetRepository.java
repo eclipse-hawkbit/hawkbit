@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
@@ -72,11 +71,11 @@ public interface DistributionSetRepository
      * Finds {@link DistributionSet}s where given {@link SoftwareModule} is
      * assigned.
      *
-     * @param module
+     * @param moduleId
      *            to search for
      * @return {@link List} of found {@link DistributionSet}s
      */
-    Long countByModules(JpaSoftwareModule module);
+    Long countByModulesId(Long moduleId);
 
     /**
      * Finds {@link DistributionSet}s based on given ID that are assigned yet to

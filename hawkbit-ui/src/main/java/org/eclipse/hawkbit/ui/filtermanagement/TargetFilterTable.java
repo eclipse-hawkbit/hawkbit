@@ -15,7 +15,6 @@ import java.util.Map;
 
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.components.ProxyDistribution;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -162,7 +161,7 @@ public class TargetFilterTable extends Table {
         final Item row = getItem(itemId);
         final String tfName = (String) row.getItemProperty(SPUILabelDefinitions.NAME).getValue();
         final Button deleteIcon = SPUIComponentProvider.getButton(getDeleteIconId(tfName), "",
-                SPUILabelDefinitions.DELETE_CUSTOM_FILTER, ValoTheme.BUTTON_TINY + " " + "redicon", true,
+                SPUILabelDefinitions.DELETE_CUSTOM_FILTER, ValoTheme.BUTTON_TINY + " " + "blueicon", true,
                 FontAwesome.TRASH_O, SPUIButtonStyleSmallNoBorder.class);
         deleteIcon.setData(itemId);
         deleteIcon.addClickListener(this::onDelete);
@@ -253,12 +252,12 @@ public class TargetFilterTable extends Table {
 
     private void onClickOfDetailButton(final ClickEvent event) {
         final String targetFilterName = (String) ((Button) event.getComponent()).getData();
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .findTargetFilterQueryByName(targetFilterName).get();
-        filterManagementUIState.setFilterQueryValue(targetFilterQuery.getQuery());
-        filterManagementUIState.setTfQuery(targetFilterQuery);
-        filterManagementUIState.setEditViewDisplayed(true);
-        eventBus.publish(this, CustomFilterUIEvent.TARGET_FILTER_DETAIL_VIEW);
+        targetFilterQueryManagement.findTargetFilterQueryByName(targetFilterName).ifPresent(targetFilterQuery -> {
+            filterManagementUIState.setFilterQueryValue(targetFilterQuery.getQuery());
+            filterManagementUIState.setTfQuery(targetFilterQuery);
+            filterManagementUIState.setEditViewDisplayed(true);
+            eventBus.publish(this, CustomFilterUIEvent.TARGET_FILTER_DETAIL_VIEW);
+        });
     }
 
     private void populateTableData() {

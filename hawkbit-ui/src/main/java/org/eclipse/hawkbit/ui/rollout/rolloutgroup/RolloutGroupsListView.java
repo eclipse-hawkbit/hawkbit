@@ -24,6 +24,20 @@ public class RolloutGroupsListView extends AbstractGridLayout {
 
     private static final long serialVersionUID = 7252345838154270259L;
 
+    /**
+     * Constructor for RolloutGroupsListView
+     * 
+     * @param i18n
+     *            I18N
+     * @param eventBus
+     *            UIEventBus
+     * @param rolloutGroupManagement
+     *            RolloutGroupManagement
+     * @param rolloutUIState
+     *            RolloutUIState
+     * @param permissionChecker
+     *            SpPermissionChecker
+     */
     public RolloutGroupsListView(final I18N i18n, final UIEventBus eventBus,
             final RolloutGroupManagement rolloutGroupManagement, final RolloutUIState rolloutUIState,
             final SpPermissionChecker permissionChecker) {

@@ -248,7 +248,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         testData.put("test1", "testdata1");
 
         targetManagement.createTarget(entityFactory.target().create().controllerId(controllerId));
-        controllerManagament.updateControllerAttributes(controllerId, testData);
+        controllerManagement.updateControllerAttributes(controllerId, testData);
 
         final Target target = targetManagement.findTargetByControllerIDWithDetails(controllerId).get();
         assertThat(target.getTargetInfo().getControllerAttributes()).as("Controller Attributes are wrong")
@@ -279,11 +279,11 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         Target target = createTargetWithAttributes("4711");
 
         final long current = System.currentTimeMillis();
-        controllerManagament.updateLastTargetQuery("4711", null);
+        controllerManagement.updateLastTargetQuery("4711", null);
 
         final DistributionSetAssignmentResult result = assignDistributionSet(set.getId(), "4711");
 
-        controllerManagament.addUpdateActionStatus(
+        controllerManagement.addUpdateActionStatus(
                 entityFactory.actionStatus().create(result.getActions().get(0)).status(Status.FINISHED));
         assignDistributionSet(set2.getId(), "4711");
 
@@ -694,7 +694,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Expect(type = TargetCreatedEvent.class, count = 0)
     public void targetCanBeReadWithOnlyReadTargetPermission() throws Exception {
         final String knownTargetControllerId = "readTarget";
-        controllerManagament.findOrRegisterTargetIfItDoesNotexist(knownTargetControllerId, new URI("http://127.0.0.1"));
+        controllerManagement.findOrRegisterTargetIfItDoesNotexist(knownTargetControllerId, new URI("http://127.0.0.1"));
 
         securityRule.runAs(WithSpringAuthorityRule.withUser("bumlux", "READ_TARGET"), () -> {
             final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownTargetControllerId)

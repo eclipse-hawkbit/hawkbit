@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.RolloutGroupsValidation;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,72 +45,37 @@ import org.springframework.util.concurrent.ListenableFuture;
 public interface RolloutManagement {
 
     /**
-     * Checking running rollouts. Rollouts which are checked updating the
-     * lastCheck to indicate that the current instance is handling the specific
-     * rollout. This code should run as system-code.
-     *
-     * <pre>
-     * {@code
-     *  SystemSecurityContext.runAsSystem(new Callable<Void>() {
-     *     public Void call() throws Exception {
-     *        //run system-code
-     *     }
-     * });
-     *  }
-     * </pre>
-     *
-     * This method is intended to be called by a scheduler. And must be running
-     * in an transaction so it's splitted from the scheduler.
-     *
-     * Rollouts which are currently running are investigated, by means the
-     * error- and finish condition of running groups in this rollout are
-     * evaluated.
-     *
-     * @param delayBetweenChecks
-     *            the time in milliseconds of the delay between the further and
-     *            this check. This check is only applied if the last check is
-     *            less than (lastcheck-delay).
+     * Process rollout based on its current {@link Rollout#getStatus()}.
+     * 
+     * For {@link RolloutStatus#CREATING} that means creating the
+     * {@link RolloutGroup}s with {@link Target}s and when finished switch to
+     * {@link RolloutStatus#READY}.
+     * 
+     * For {@link RolloutStatus#READY} that means switching to
+     * {@link RolloutStatus#STARTING} if the {@link Rollout#getStartAt()} is set
+     * and time of calling this method is beyond this point in time. This auto
+     * start mechanism is optional. Call {@link #startRollout(Long)} otherwise.
+     * 
+     * For {@link RolloutStatus#STARTING} that means starting the first
+     * {@link RolloutGroup}s in line and when finished switch to
+     * {@link RolloutStatus#RUNNING}.
+     * 
+     * For {@link RolloutStatus#RUNNING} that means checking to activate further
+     * groups based on the defined thresholds. Switched to
+     * {@link RolloutStatus#FINISHED} is all groups are finished.
+     * 
+     * For {@link RolloutStatus#DELETING} that means either soft delete in case
+     * rollout was already {@link RolloutStatus#RUNNING} which results in status
+     * change {@link RolloutStatus#DELETED} or hard delete from the persistence
+     * otherwise.
+     * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    void checkRunningRollouts(long delayBetweenChecks);
+    void handleRollouts();
 
     /**
-     * Checking Rollouts that are currently being created with asynchronous
-     * assignment of targets to the Rollout Groups.
-     *
-     * @param delayBetweenChecks
-     *            the time in milliseconds of the delay between the further and
-     *            this check. This check is only applied if the last check is
-     *            less than (lastcheck-delay).
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    void checkCreatingRollouts(long delayBetweenChecks);
-
-    /**
-     * Checking Rollouts that are currently being started with asynchronous
-     * creation of actions to the targets of a group.
-     *
-     * @param delayBetweenChecks
-     *            the time in milliseconds of the delay between the further and
-     *            this check. This check is only applied if the last check is
-     *            less than (lastcheck-delay).
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    void checkStartingRollouts(long delayBetweenChecks);
-
-    /**
-     * Checking Rollouts that are currently ready for an auto start.
-     *
-     * @param delayBetweenChecks
-     *            the time in milliseconds of the delay between the further and
-     *            this check. This check is only applied if the last check is
-     *            less than (lastcheck-delay).
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    void checkReadyRollouts(long delayBetweenChecks);
-
-    /**
-     * Counts all {@link Rollout}s in the repository.
+     * Counts all {@link Rollout}s in the repository that are not marked as
+     * deleted.
      *
      * @return number of roll outs
      */
@@ -213,43 +179,29 @@ public interface RolloutManagement {
             String targetFilter, Long createdAt);
 
     /**
-     * Can be called on a Rollout in {@link RolloutStatus#CREATING} to
-     * automatically fill it with targets.
-     *
-     * Works through all Rollout groups in {@link RolloutGroupStatus#CREATING}
-     * and fills them with remaining targets until the supposed amount of
-     * targets for the group is reached. Targets are added to a group when they
-     * match the overall {@link Rollout#getTargetFilterQuery()} and the
-     * {@link RolloutGroup#getTargetFilterQuery()} and not more than
-     * {@link RolloutGroup#getTargetPercentage()} are assigned to the group.
-     *
-     * @param rollout
-     *            the rollout
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    void fillRolloutGroupsWithTargets(@NotNull Long rollout);
-
-    /**
      * Retrieves all rollouts.
      *
      * @param pageable
      *            the page request to sort and limit the result
+     * @param deleted
+     *            flag if deleted rollouts should be included
      * @return a page of found rollouts
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<Rollout> findAll(@NotNull Pageable pageable);
+    Page<Rollout> findAll(@NotNull Pageable pageable, boolean deleted);
 
     /**
      * Get count of targets in different status in rollout.
      *
      * @param pageable
      *            the page request to sort and limit the result
+     * @param deleted
+     *            flag if deleted rollouts should be included
      * @return a list of rollouts with details of targets count for different
      *         statuses
-     *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<Rollout> findAllRolloutsWithDetailedStatus(@NotNull Pageable pageable);
+    Page<Rollout> findAllRolloutsWithDetailedStatus(@NotNull Pageable pageable, boolean deleted);
 
     /**
      * Retrieves all rollouts found by the given specification.
@@ -258,6 +210,8 @@ public interface RolloutManagement {
      *            the specification to filter rollouts
      * @param pageable
      *            the page request to sort and limit the result
+     * @param deleted
+     *            flag if deleted rollouts should be included
      * @return a page of found rollouts
      * 
      * @throws RSQLParameterUnsupportedFieldException
@@ -267,7 +221,7 @@ public interface RolloutManagement {
      *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<Rollout> findAllByPredicate(@NotNull String rsqlParam, @NotNull Pageable pageable);
+    Page<Rollout> findAllByPredicate(@NotNull String rsqlParam, @NotNull Pageable pageable, boolean deleted);
 
     /**
      * Finds rollouts by given text in name or description.
@@ -276,11 +230,14 @@ public interface RolloutManagement {
      *            the page request to sort and limit the result
      * @param searchText
      *            search text which matches name or description of rollout
+     * @param deleted
+     *            flag if deleted rollouts should be included
      * @return the founded rollout or {@code null} if rollout with given ID does
      *         not exists
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Slice<Rollout> findRolloutWithDetailedStatusByFilters(@NotNull Pageable pageable, @NotEmpty String searchText);
+    Slice<Rollout> findRolloutWithDetailedStatusByFilters(@NotNull Pageable pageable, @NotEmpty String searchText,
+            boolean deleted);
 
     /**
      * Retrieves a specific rollout by its ID.
@@ -309,6 +266,8 @@ public interface RolloutManagement {
      *
      * @param rolloutId
      *            rollout id
+     * @param deleted
+     *            flag if deleted rollouts should be included
      * @return rollout details of targets count for different statuses
      * 
      *
@@ -416,5 +375,16 @@ public interface RolloutManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     Rollout updateRollout(@NotNull RolloutUpdate update);
+
+    /**
+     * Deletes a rollout. A rollout might be deleted asynchronously by
+     * indicating the rollout by {@link RolloutStatus#DELETING}
+     * 
+     * 
+     * @param rolloutId
+     *            the ID of the rollout to be deleted
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
+    void deleteRollout(long rolloutId);
 
 }

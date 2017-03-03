@@ -27,6 +27,12 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
 public interface Rollout extends NamedEntity {
 
     /**
+     * @return <code>true</code> if the rollout is deleted and only kept for
+     *         history purposes.
+     */
+    boolean isDeleted();
+
+    /**
      * @return {@link DistributionSet} that is rolled out
      */
     DistributionSet getDistributionSet();
@@ -60,10 +66,10 @@ public interface Rollout extends NamedEntity {
     long getForcedTime();
 
     /**
-     * @return Timestamp when the rollout should be started automatically. Can be null.
+     * @return Timestamp when the rollout should be started automatically. Can
+     *         be null.
      */
     Long getStartAt();
-
 
     /**
      * @return number of {@link Target}s in this rollout.
@@ -124,8 +130,21 @@ public interface Rollout extends NamedEntity {
         FINISHED,
 
         /**
+         * Rollout is under deletion.
+         */
+        DELETING,
+
+        /**
+         * Rollout has been deleted. This state is only set in case of a
+         * soft-deletion of the rollout which keeps references, in case of an
+         * hard-deletion of a rollout the rollout-entry itself is deleted.
+         */
+        DELETED,
+
+        /**
          * Rollout could not be created due to errors, might be a database
          * problem during asynchronous creating.
+         * 
          * @deprecated legacy status is not used anymore
          */
         @Deprecated
@@ -134,6 +153,7 @@ public interface Rollout extends NamedEntity {
         /**
          * Rollout could not be started due to errors, might be database problem
          * during asynchronous starting.
+         * 
          * @deprecated legacy status is not used anymore
          */
         @Deprecated

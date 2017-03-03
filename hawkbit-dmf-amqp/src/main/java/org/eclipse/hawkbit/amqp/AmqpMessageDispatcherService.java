@@ -33,6 +33,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignment
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.util.IpUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -49,6 +51,8 @@ import org.springframework.context.event.EventListener;
  *
  */
 public class AmqpMessageDispatcherService extends BaseAmqpService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AmqpMessageDispatcherService.class);
 
     private final ArtifactUrlHandler artifactUrlHandler;
     private final AmqpSenderService amqpSenderService;
@@ -102,16 +106,17 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
 
-        sendUpdateMessageToTarget(assignedEvent.getTenant(),
-                targetManagement.findTargetByControllerID(assignedEvent.getControllerId()).get(),
-                assignedEvent.getActionId(), assignedEvent.getModules());
+        LOG.debug("targetAssignDistributionSet retrieved for controller {}. I will forward it to DMF broker.",
+                assignedEvent.getControllerId());
+
+        targetManagement.findTargetByControllerID(assignedEvent.getControllerId()).ifPresent(target -> sendUpdateMessageToTarget(assignedEvent.getTenant(),
+                target,
+                assignedEvent.getActionId(), assignedEvent.getModules()));
+        
     }
 
     void sendUpdateMessageToTarget(final String tenant, final Target target, final Long actionId,
             final Collection<org.eclipse.hawkbit.repository.model.SoftwareModule> modules) {
-        if (target == null) {
-            return;
-        }
 
         final URI targetAdress = target.getTargetInfo().getAddress();
         if (!IpUtil.isAmqpUri(targetAdress)) {

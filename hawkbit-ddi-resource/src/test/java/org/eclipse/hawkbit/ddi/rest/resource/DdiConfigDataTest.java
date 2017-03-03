@@ -65,7 +65,7 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
 
         savedTarget.getTargetInfo().getControllerAttributes().put("dsafsdf", "sdsds");
 
-        final Target updateControllerAttributes = controllerManagament.updateControllerAttributes(
+        final Target updateControllerAttributes = controllerManagement.updateControllerAttributes(
                 savedTarget.getControllerId(), savedTarget.getTargetInfo().getControllerAttributes());
         // request controller attributes need to be false because we don't want
         // to request the

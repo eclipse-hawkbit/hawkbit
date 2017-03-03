@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -36,11 +37,13 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedE
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
+import org.eclipse.persistence.queries.UpdateObjectQuery;
+import org.eclipse.persistence.sessions.changesets.DirectToFieldChangeRecord;
+import org.eclipse.persistence.sessions.changesets.ObjectChangeSet;
 
 /**
  * Base Software Module that is supported by OS level provisioning mechanism on
@@ -60,8 +63,10 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
 public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implements SoftwareModule, EventAwareEntity {
     private static final long serialVersionUID = 1L;
 
+    private static final String DELETED_PROPERTY = "deleted";
+
     @ManyToOne
-    @JoinColumn(name = "module_type", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_module_type"))
+    @JoinColumn(name = "module_type", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_module_type"))
     @NotNull
     private JpaSoftwareModuleType type;
 
@@ -77,13 +82,12 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
 
     @CascadeOnDelete
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "softwareModule", cascade = {
-            CascadeType.ALL }, targetEntity = JpaArtifact.class)
-    private List<Artifact> artifacts;
+            CascadeType.PERSIST }, targetEntity = JpaArtifact.class, orphanRemoval = true)
+    private List<JpaArtifact> artifacts;
 
     @CascadeOnDelete
-    @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, targetEntity = JpaSoftwareModuleMetadata.class)
-    @JoinColumn(name = "sw_id", insertable = false, updatable = false)
-    private List<SoftwareModuleMetadata> metadata;
+    @OneToMany(mappedBy = "softwareModule", fetch = FetchType.LAZY, targetEntity = JpaSoftwareModuleMetadata.class)
+    private List<JpaSoftwareModuleMetadata> metadata;
 
     /**
      * Default constructor.
@@ -116,12 +120,12 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     public void addArtifact(final Artifact artifact) {
         if (null == artifacts) {
             artifacts = new ArrayList<>(4);
-            artifacts.add(artifact);
+            artifacts.add((JpaArtifact) artifact);
             return;
         }
 
         if (!artifacts.contains(artifact)) {
-            artifacts.add(artifact);
+            artifacts.add((JpaArtifact) artifact);
         }
     }
 
@@ -206,6 +210,21 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
                 new SoftwareModuleUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+
+        if (isSoftDeleted(descriptorEvent)) {
+            EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new SoftwareModuleDeletedEvent(
+                    getTenant(), getId(), getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
+        }
+    }
+
+    private static boolean isSoftDeleted(final DescriptorEvent event) {
+        final ObjectChangeSet changeSet = ((UpdateObjectQuery) event.getQuery()).getObjectChangeSet();
+        final List<DirectToFieldChangeRecord> changes = changeSet.getChanges().stream()
+                .filter(record -> record instanceof DirectToFieldChangeRecord)
+                .map(record -> (DirectToFieldChangeRecord) record).collect(Collectors.toList());
+
+        return changes.stream().filter(record -> DELETED_PROPERTY.equals(record.getAttribute())
+                && Boolean.parseBoolean(record.getNewValue().toString())).count() > 0;
     }
 
     @Override

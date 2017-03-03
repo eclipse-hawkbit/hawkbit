@@ -37,7 +37,7 @@ public class RolloutGroupTargetsListHeader extends AbstractGridHeader {
 
     private final transient EventBus.UIEventBus eventBus;
 
-    private Button rolloutsGroupViewLink;
+    private Button rolloutNameLink;
     private Label headerCaption;
 
     public RolloutGroupTargetsListHeader(final UIEventBus eventBus, final I18N i18n,
@@ -57,7 +57,7 @@ public class RolloutGroupTargetsListHeader extends AbstractGridHeader {
 
     private void setCaptionDetails() {
         rolloutUIState.getRolloutGroup().map(RolloutGroup::getName).ifPresent(headerCaption::setCaption);
-        rolloutsGroupViewLink.setCaption(rolloutUIState.getRolloutGroup().map(RolloutGroup::getName).orElse(""));
+        rolloutNameLink.setCaption(rolloutUIState.getRolloutName().orElse(""));
     }
 
     @Override
@@ -149,18 +149,17 @@ public class RolloutGroupTargetsListHeader extends AbstractGridHeader {
         rolloutsListViewLink.setCaption(i18n.get("message.rollouts"));
         rolloutsListViewLink.addClickListener(value -> showRolloutListView());
 
-        rolloutsGroupViewLink = SPUIComponentProvider.getButton(null, "", "", null, false, null,
+        rolloutNameLink = SPUIComponentProvider.getButton(null, "", "", null, false, null,
                 SPUIButtonStyleSmallNoBorder.class);
-        rolloutsGroupViewLink
-                .setStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link rollout-caption-links");
-        rolloutsGroupViewLink.setDescription("Rollouts Group");
-        rolloutsGroupViewLink.addClickListener(value -> showRolloutGroupListView());
+        rolloutNameLink.setStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link rollout-caption-links");
+        rolloutNameLink.setDescription("Rollout");
+        rolloutNameLink.addClickListener(value -> showRolloutGroupListView());
 
         final HorizontalLayout headerCaptionLayout = new HorizontalLayout();
         headerCaptionLayout.addComponent(rolloutsListViewLink);
         headerCaptionLayout.addComponent(new Label(">"));
-        headerCaptionLayout.addComponent(rolloutsGroupViewLink);
-        headerCaptionLayout.addComponent(new Label(">"));
+        headerCaptionLayout.addComponent(rolloutNameLink);
+        headerCaptionLayout.addComponent(new Label("> "));
         headerCaptionLayout.addComponent(headerCaption);
 
         return headerCaptionLayout;

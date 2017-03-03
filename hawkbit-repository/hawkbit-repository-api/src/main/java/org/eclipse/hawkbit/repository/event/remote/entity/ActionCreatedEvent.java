@@ -13,8 +13,8 @@ import org.eclipse.hawkbit.repository.model.Action;
 /**
  * Defines the remote event of creating a new {@link Action}.
  */
-public class ActionCreatedEvent extends RemoteEntityEvent<Action> {
-    private static final long serialVersionUID = 1L;
+public class ActionCreatedEvent extends AbstractActionEvent {
+    private static final long serialVersionUID = 2L;
 
     /**
      * Default constructor.
@@ -28,11 +28,16 @@ public class ActionCreatedEvent extends RemoteEntityEvent<Action> {
      * 
      * @param action
      *            the created action
+     * @param rolloutId
+     *            rollout identifier (optional)
+     * @param rolloutGroupId
+     *            rollout group identifier (optional)
      * @param applicationId
      *            the origin application id
      */
-    public ActionCreatedEvent(final Action action, final String applicationId) {
-        super(action, applicationId);
+    public ActionCreatedEvent(final Action action, final Long rolloutId, final Long rolloutGroupId,
+            final String applicationId) {
+        super(action, rolloutId, rolloutGroupId, applicationId);
     }
 
 }

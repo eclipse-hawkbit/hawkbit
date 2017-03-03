@@ -113,8 +113,8 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
      * Add tabs.
      */
     private void addTabs() {
-        this.addTab(getSimpleFilterTab());
-        this.addTab(getComplexFilterTab());
+        this.addTab(getSimpleFilterTab()).setId(UIComponentIdProvider.SIMPLE_FILTER_ACCORDION_TAB);
+        this.addTab(getComplexFilterTab()).setId(UIComponentIdProvider.CUSTOM_FILTER_ACCORDION_TAB);
     }
 
     private Component getSimpleFilterTab() {

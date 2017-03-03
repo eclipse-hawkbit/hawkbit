@@ -215,7 +215,7 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
 
     @Override
     protected void showMetadata(final ClickEvent event) {
-        final SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(getSelectedBaseEntityId()).get();
-        UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null));
+        softwareManagement.findSoftwareModuleById(getSelectedBaseEntityId())
+                .ifPresent(swmodule -> UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null)));
     }
 }

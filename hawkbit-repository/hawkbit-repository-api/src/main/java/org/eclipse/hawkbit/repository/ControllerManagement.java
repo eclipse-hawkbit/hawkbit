@@ -120,6 +120,9 @@ public interface ControllerManagement {
      * @param controllerId
      *            identifies the target to retrieve the actions from
      * @return a list of actions assigned to given target which are active
+     * 
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     Optional<Action> findOldestActiveActionByTarget(@NotNull String controllerId);
@@ -157,6 +160,9 @@ public interface ControllerManagement {
      *            of the the {@link SoftwareModule} that should be assigned to
      *            the target
      * @return last {@link Action} for given combination
+     * 
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
      *
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
@@ -184,6 +190,9 @@ public interface ControllerManagement {
      * @return {@code true} if the given target has currently or had ever a
      *         relation to the given artifact through the action history,
      *         otherwise {@code false}
+     * 
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     boolean hasTargetArtifactAssigned(@NotEmpty String controllerId, @NotEmpty String sha1Hash);
@@ -203,6 +212,9 @@ public interface ControllerManagement {
      * @return {@code true} if the given target has currently or had ever a
      *         relation to the given artifact through the action history,
      *         otherwise {@code false}
+     * 
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     boolean hasTargetArtifactAssigned(@NotNull Long targetId, @NotEmpty String sha1Hash);

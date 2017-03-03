@@ -201,10 +201,9 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
 
             checkIfArtifactIsAssignedToTarget(secruityToken, sha1Hash);
 
-            final Artifact artifact = convertDbArtifact(artifactManagement.loadArtifactBinary(sha1Hash));
-            if (artifact == null) {
-                throw new EntityNotFoundException();
-            }
+            final Artifact artifact = convertDbArtifact(artifactManagement.loadArtifactBinary(sha1Hash).orElseThrow(
+                    () -> new EntityNotFoundException(org.eclipse.hawkbit.repository.model.Artifact.class, sha1Hash)));
+
             authentificationResponse.setArtifact(artifact);
             final String downloadId = UUID.randomUUID().toString();
             // SHA1 key is set, download by SHA1

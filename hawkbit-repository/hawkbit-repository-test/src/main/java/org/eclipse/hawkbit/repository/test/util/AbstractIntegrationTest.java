@@ -153,9 +153,6 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     protected WebApplicationContext context;
 
     @Autowired
-    protected ControllerManagement controllerManagament;
-
-    @Autowired
     protected AuditingHandler auditingHandler;
 
     @Autowired
@@ -269,10 +266,10 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
                 .next();
         Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId()).get(0);
 
-        savedAction = controllerManagament.addUpdateActionStatus(
+        savedAction = controllerManagement.addUpdateActionStatus(
                 entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.RUNNING));
 
-        return controllerManagament.addUpdateActionStatus(
+        return controllerManagement.addUpdateActionStatus(
                 entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.FINISHED));
     }
 
@@ -289,7 +286,7 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
                 conditions);
 
         // Run here, because Scheduler is disabled during tests
-        rolloutManagement.fillRolloutGroupsWithTargets(rollout.getId());
+        rolloutManagement.handleRollouts();
 
         return rolloutManagement.findRolloutById(rollout.getId()).get();
     }

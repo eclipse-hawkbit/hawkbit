@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.layouts;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
@@ -299,15 +300,15 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     protected Color getColorForColorPicker() {
         final Optional<TargetTag> targetTagSelected = tagManagement
                 .findTargetTag(tagNameComboBox.getValue().toString());
-        if (!targetTagSelected.isPresent()) {
-            final DistributionSetTag distTag = tagManagement
-                    .findDistributionSetTag(tagNameComboBox.getValue().toString()).get();
-            return distTag.getColour() != null ? ColorPickerHelper.rgbToColorConverter(distTag.getColour())
-                    : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR);
+        if (targetTagSelected.isPresent()) {
+            return ColorPickerHelper.rgbToColorConverter(targetTagSelected.map(TargetTag::getColour)
+                    .filter(Objects::nonNull).orElse(ColorPickerConstants.DEFAULT_COLOR));
         }
-        return targetTagSelected.get().getColour() != null
-                ? ColorPickerHelper.rgbToColorConverter(targetTagSelected.get().getColour())
-                : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR);
+
+        return ColorPickerHelper.rgbToColorConverter(tagManagement
+                .findDistributionSetTag(tagNameComboBox.getValue().toString()).map(DistributionSetTag::getColour)
+                .filter(Objects::nonNull).orElse(ColorPickerConstants.DEFAULT_COLOR));
+
     }
 
     private void tagNameChosen(final ValueChangeEvent event) {

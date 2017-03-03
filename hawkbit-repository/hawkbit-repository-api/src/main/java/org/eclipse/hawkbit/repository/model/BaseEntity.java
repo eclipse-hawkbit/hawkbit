@@ -19,6 +19,10 @@ import org.springframework.hateoas.Identifiable;
  */
 public interface BaseEntity extends Serializable, Identifiable<Long> {
 
+    static Long getIdOrNull(final BaseEntity entity) {
+        return entity == null ? null : entity.getId();
+    }
+
     /**
      * @return time in {@link TimeUnit#MILLISECONDS} when the {@link BaseEntity}
      *         was created.

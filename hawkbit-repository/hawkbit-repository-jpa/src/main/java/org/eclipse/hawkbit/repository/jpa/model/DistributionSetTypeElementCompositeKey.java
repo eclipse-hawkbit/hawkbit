@@ -20,10 +20,10 @@ import javax.persistence.Embeddable;
 public class DistributionSetTypeElementCompositeKey implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    @Column(name = "distribution_set_type", nullable = false)
+    @Column(name = "distribution_set_type", nullable = false, updatable = false)
     private Long dsType;
 
-    @Column(name = "software_module_type", nullable = false)
+    @Column(name = "software_module_type", nullable = false, updatable = false)
     private Long smType;
 
     /**
