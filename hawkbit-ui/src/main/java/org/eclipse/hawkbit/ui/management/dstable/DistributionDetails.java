@@ -20,8 +20,6 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.ui.VerticalLayout;
-
 /**
  * Distribution set details layout.
  */
@@ -59,14 +57,8 @@ public class DistributionDetails extends AbstractDistributionSetDetails {
     protected void populateDetailsWidget() {
         populateModule();
         populateDetails();
+        populateTags(getDistributionTagToken());
         populateMetadataDetails();
-    }
-
-    @Override
-    protected VerticalLayout createTagsLayout() {
-        super.createTagsLayout();
-        getTagsLayout().addComponent(getDistributionTagToken().getTokenField());
-        return getTagsLayout();
     }
 
 }

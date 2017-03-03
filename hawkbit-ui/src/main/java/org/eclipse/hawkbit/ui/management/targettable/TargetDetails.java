@@ -79,30 +79,24 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
     @Override
     protected void addTabs(final TabSheet detailsTab) {
-        detailsTab.addTab(createDetailsLayout(), getI18n().get("caption.tab.details"), null);
-        detailsTab.addTab(createDescriptionLayout(), getI18n().get("caption.tab.description"), null);
-        detailsTab.addTab(createAttributesLayout(), getI18n().get("caption.attributes.tab"), null);
+        detailsTab.addTab(getDetailsLayout(), getI18n().get("caption.tab.details"), null);
+        detailsTab.addTab(getDescriptionLayout(), getI18n().get("caption.tab.description"), null);
+        detailsTab.addTab(getAttributesLayout(), getI18n().get("caption.attributes.tab"), null);
         detailsTab.addTab(createAssignedDistLayout(), getI18n().get("header.target.assigned"), null);
         detailsTab.addTab(createInstalledDistLayout(), getI18n().get("header.target.installed"), null);
-        detailsTab.addTab(createTagsLayout(), getI18n().get("caption.tags.tab"), null);
-        detailsTab.addTab(createLogLayout(), getI18n().get("caption.logs.tab"), null);
+        detailsTab.addTab(getTagsLayout(), getI18n().get("caption.tags.tab"), null);
+        detailsTab.addTab(getLogLayout(), getI18n().get("caption.logs.tab"), null);
 
     }
 
     private Component createInstalledDistLayout() {
-        installedDistLayout = getTabLayout();
+        installedDistLayout = createTabLayout();
         return installedDistLayout;
     }
 
     private Component createAssignedDistLayout() {
-        assignedDistLayout = getTabLayout();
+        assignedDistLayout = createTabLayout();
         return assignedDistLayout;
-    }
-
-    private VerticalLayout createTagsLayout() {
-        final VerticalLayout tagsLayout = getTabLayout();
-        tagsLayout.addComponent(targetTagToken.getTokenField());
-        return tagsLayout;
     }
 
     @Override
@@ -152,6 +146,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
             populateDistributionDtls(installedDistLayout, null);
             populateDistributionDtls(assignedDistLayout, null);
         }
+        populateTags(targetTagToken);
         updateAttributesLayout(getSelectedBaseEntity());
     }
 

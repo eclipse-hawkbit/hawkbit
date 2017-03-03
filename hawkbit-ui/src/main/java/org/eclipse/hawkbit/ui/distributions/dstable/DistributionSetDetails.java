@@ -95,7 +95,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
     protected void populateDetailsWidget() {
         populateDetails();
         populateModule();
-        populateTags();
+        populateTags(getDistributionTagToken());
         populateMetadataDetails();
         populateTargetFilterQueries();
     }
@@ -224,14 +224,6 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
         horizontalLayout.addComponent(reassignSoftModule);
         verticalLayout.addComponent(horizontalLayout);
         return verticalLayout;
-    }
-
-    private void populateTags() {
-        getTagsLayout().removeAllComponents();
-        if (getSelectedBaseEntity() == null) {
-            return;
-        }
-        getTagsLayout().addComponent(getDistributionTagToken().getTokenField());
     }
 
     protected void populateTargetFilterQueries() {

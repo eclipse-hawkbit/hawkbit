@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
+import org.eclipse.hawkbit.ui.common.tagdetails.AbstractTagToken;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
@@ -67,6 +68,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     private final VerticalLayout attributesLayout;
 
+    private final VerticalLayout tagsLayout;
+
     protected final ManagementUIState managementUIState;
 
     protected AbstractTableDetailsLayout(final I18N i18n, final UIEventBus eventBus,
@@ -74,10 +77,11 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         this.i18n = i18n;
         this.permissionChecker = permissionChecker;
         this.managementUIState = managementUIState;
-        detailsLayout = getTabLayout();
-        descriptionLayout = getTabLayout();
-        logLayout = getTabLayout();
-        attributesLayout = getTabLayout();
+        detailsLayout = createTabLayout();
+        descriptionLayout = createTabLayout();
+        logLayout = createTabLayout();
+        attributesLayout = createTabLayout();
+        tagsLayout = createTabLayout();
         createComponents();
         buildLayout();
         eventBus.subscribe(this);
@@ -173,7 +177,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         return new LabelBuilder().name(getDefaultCaption()).buildCaptionLabel();
     }
 
-    protected VerticalLayout getTabLayout() {
+    protected VerticalLayout createTabLayout() {
         final VerticalLayout tabLayout = SPUIComponentProvider.getDetailTabLayout();
         tabLayout.addStyleName("details-layout");
         return tabLayout;
@@ -209,6 +213,14 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         populateLog();
         populateDescription();
         populateDetailsWidget();
+    }
+
+    protected void populateTags(final AbstractTagToken<?> tagToken) {
+        getTagsLayout().removeAllComponents();
+        if (getSelectedBaseEntity() == null) {
+            return;
+        }
+        getTagsLayout().addComponent(tagToken.getTokenField());
     }
 
     protected void populateLog() {
@@ -262,20 +274,24 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         }
     }
 
-    protected VerticalLayout createLogLayout() {
+    protected VerticalLayout getLogLayout() {
         return logLayout;
     }
 
-    protected VerticalLayout createAttributesLayout() {
+    protected VerticalLayout getAttributesLayout() {
         return attributesLayout;
     }
 
-    protected VerticalLayout createDetailsLayout() {
+    protected VerticalLayout getDescriptionLayout() {
+        return descriptionLayout;
+    }
+
+    protected VerticalLayout getDetailsLayout() {
         return detailsLayout;
     }
 
-    protected VerticalLayout createDescriptionLayout() {
-        return descriptionLayout;
+    protected VerticalLayout getTagsLayout() {
+        return tagsLayout;
     }
 
     /**
@@ -309,10 +325,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     protected abstract String getTabSheetId();
 
     protected abstract Boolean hasEditPermission();
-
-    public VerticalLayout getDetailsLayout() {
-        return detailsLayout;
-    }
 
     private void populateDescription() {
         if (selectedBaseEntity != null) {

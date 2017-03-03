@@ -54,8 +54,6 @@ public abstract class AbstractDistributionSetDetails
 
     private final DsMetadataPopupLayout dsMetadataPopupLayout;
 
-    private VerticalLayout tagsLayout;
-
     private final DistributionTagToken distributionTagToken;
 
     private SoftwareModuleDetailsTable softwareModuleTable;
@@ -139,17 +137,12 @@ public abstract class AbstractDistributionSetDetails
 
     @Override
     protected void addTabs(final TabSheet detailsTab) {
-        detailsTab.addTab(createDetailsLayout(), getI18n().get("caption.tab.details"), null);
-        detailsTab.addTab(createDescriptionLayout(), getI18n().get("caption.tab.description"), null);
+        detailsTab.addTab(getDetailsLayout(), getI18n().get("caption.tab.details"), null);
+        detailsTab.addTab(getDescriptionLayout(), getI18n().get("caption.tab.description"), null);
         detailsTab.addTab(createSoftwareModuleTab(), getI18n().get("caption.softwares.distdetail.tab"), null);
-        detailsTab.addTab(createTagsLayout(), getI18n().get("caption.tags.tab"), null);
-        detailsTab.addTab(createLogLayout(), getI18n().get("caption.logs.tab"), null);
+        detailsTab.addTab(getTagsLayout(), getI18n().get("caption.tags.tab"), null);
+        detailsTab.addTab(getLogLayout(), getI18n().get("caption.logs.tab"), null);
         detailsTab.addTab(dsMetadataTable, getI18n().get("caption.metadata"), null);
-    }
-
-    protected VerticalLayout createTagsLayout() {
-        tagsLayout = getTabLayout();
-        return tagsLayout;
     }
 
     protected void populateDetails() {
@@ -166,7 +159,7 @@ public abstract class AbstractDistributionSetDetails
     }
 
     private VerticalLayout createSoftwareModuleTab() {
-        final VerticalLayout softwareLayout = getTabLayout();
+        final VerticalLayout softwareLayout = createTabLayout();
         softwareLayout.setSizeFull();
         softwareLayout.addComponent(softwareModuleTable);
         return softwareLayout;
@@ -190,43 +183,31 @@ public abstract class AbstractDistributionSetDetails
         }
     }
 
-    public VerticalLayout getTagsLayout() {
-        return tagsLayout;
-    }
-
-    public void setTagsLayout(final VerticalLayout tagsLayout) {
-        this.tagsLayout = tagsLayout;
-    }
-
-    public SoftwareModuleDetailsTable getSoftwareModuleTable() {
+    protected SoftwareModuleDetailsTable getSoftwareModuleTable() {
         return softwareModuleTable;
     }
 
-    public void setSoftwareModuleTable(final SoftwareModuleDetailsTable softwareModuleTable) {
+    protected void setSoftwareModuleTable(final SoftwareModuleDetailsTable softwareModuleTable) {
         this.softwareModuleTable = softwareModuleTable;
     }
 
-    public DistributionAddUpdateWindowLayout getDistributionAddUpdateWindowLayout() {
+    protected DistributionAddUpdateWindowLayout getDistributionAddUpdateWindowLayout() {
         return distributionAddUpdateWindowLayout;
     }
 
-    public DistributionSetMetadatadetailslayout getDsMetadataTable() {
-        return dsMetadataTable;
-    }
-
-    public UINotification getUiNotification() {
+    protected UINotification getUiNotification() {
         return uiNotification;
     }
 
-    public DistributionSetManagement getDistributionSetManagement() {
+    protected DistributionSetManagement getDistributionSetManagement() {
         return distributionSetManagement;
     }
 
-    public DsMetadataPopupLayout getDsMetadataPopupLayout() {
+    protected DsMetadataPopupLayout getDsMetadataPopupLayout() {
         return dsMetadataPopupLayout;
     }
 
-    public DistributionTagToken getDistributionTagToken() {
+    protected DistributionTagToken getDistributionTagToken() {
         return distributionTagToken;
     }
 

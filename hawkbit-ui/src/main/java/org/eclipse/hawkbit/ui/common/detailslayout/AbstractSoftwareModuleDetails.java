@@ -97,9 +97,9 @@ public abstract class AbstractSoftwareModuleDetails
 
     @Override
     protected void addTabs(final TabSheet detailsTab) {
-        detailsTab.addTab(createDetailsLayout(), getI18n().get("caption.tab.details"), null);
-        detailsTab.addTab(createDescriptionLayout(), getI18n().get("caption.tab.description"), null);
-        detailsTab.addTab(createLogLayout(), getI18n().get("caption.logs.tab"), null);
+        detailsTab.addTab(getDetailsLayout(), getI18n().get("caption.tab.details"), null);
+        detailsTab.addTab(getDescriptionLayout(), getI18n().get("caption.tab.description"), null);
+        detailsTab.addTab(getLogLayout(), getI18n().get("caption.logs.tab"), null);
         detailsTab.addTab(swmMetadataTable, getI18n().get("caption.metadata"), null);
     }
 
