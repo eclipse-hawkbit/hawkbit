@@ -26,8 +26,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
-import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.ui.push.event.RolloutChangeEvent;
 import org.eclipse.hawkbit.ui.push.event.RolloutGroupChangeEvent;
 import org.slf4j.Logger;
@@ -277,7 +275,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
     }
 
     private void collectRolloutEvent(final TenantAwareEvent event) {
-        Long rolloutId = null;
+        Long rolloutId;
         Long rolloutGroupId = null;
         if (event instanceof ActionCreatedEvent) {
             rolloutId = ((ActionCreatedEvent) event).getRolloutId();
@@ -303,19 +301,4 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
             offerEventIfNotContains(new RolloutGroupChangeEvent(event.getTenant(), rolloutId, rolloutGroupId));
         }
     }
-
-    private static Long getRolloutGroupId(final RolloutGroup rolloutGroup) {
-        if (rolloutGroup != null) {
-            return rolloutGroup.getId();
-        }
-        return null;
-    }
-
-    private static Long getRolloutId(final Rollout rollout) {
-        if (rollout != null) {
-            return rollout.getId();
-        }
-        return null;
-    }
-
 }
