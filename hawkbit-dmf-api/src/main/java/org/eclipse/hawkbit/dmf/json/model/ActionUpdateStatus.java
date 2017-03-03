@@ -25,8 +25,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ActionUpdateStatus {
 
-    private Long actionId;
-    private ActionStatus actionStatus;
+    private final Long actionId;
+    private final ActionStatus actionStatus;
 
     @JsonProperty
     private Long softwareModuleId;
@@ -40,23 +40,8 @@ public class ActionUpdateStatus {
         this.actionStatus = actionStatus;
     }
 
-    /**
-     * Will be remove in future release. Please use the arg-constructor.
-     */
-    @Deprecated
-    public ActionUpdateStatus() {
-    }
-
     public Long getActionId() {
         return actionId;
-    }
-
-    /**
-     * Will be remove in future release. Please use the arg-constructor.
-     */
-    @Deprecated
-    public void setActionId(final Long actionId) {
-        this.actionId = actionId;
     }
 
     public Long getSoftwareModuleId() {
@@ -69,14 +54,6 @@ public class ActionUpdateStatus {
 
     public ActionStatus getActionStatus() {
         return actionStatus;
-    }
-
-    /**
-     * Will be remove in future release. Please use the arg-constructor.
-     */
-    @Deprecated
-    public void setActionStatus(final ActionStatus actionStatus) {
-        this.actionStatus = actionStatus;
     }
 
     public List<String> getMessage() {

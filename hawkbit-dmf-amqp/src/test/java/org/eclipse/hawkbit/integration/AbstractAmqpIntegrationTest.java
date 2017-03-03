@@ -16,14 +16,12 @@ import org.eclipse.hawkbit.amqp.AmqpProperties;
 import org.eclipse.hawkbit.amqp.DmfApiConfiguration;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.eclipse.hawkbit.integration.listener.DeadletterListener;
-import org.eclipse.hawkbit.integration.listener.TestRabbitListener;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.mockito.Mockito;
-import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -34,7 +32,6 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 
-import com.google.common.base.Preconditions;
 import com.jayway.awaitility.Awaitility;
 import com.jayway.awaitility.core.ConditionFactory;
 
@@ -113,16 +110,10 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
         return Awaitility.await().atMost(2, SECONDS);
     }
 
-    protected Message verifyTestRabbitListener(TestRabbitListener rabbitListener, int expectedMessages) {
-        Preconditions.checkArgument(expectedMessages > 0);
-        createConditionFactory().until(() -> {
-            Mockito.verify(rabbitListener, Mockito.times(expectedMessages)).handleMessage(Mockito.any());
-        });
-        return rabbitListener.getMessage();
-    }
-
     protected void verifyDeadLetterMessages(int expectedMessages) {
-        verifyTestRabbitListener(getDeadletterListener(), expectedMessages);
+        createConditionFactory().until(() -> {
+            Mockito.verify(getDeadletterListener(), Mockito.times(expectedMessages)).handleMessage(Mockito.any());
+        });
     }
 
 }

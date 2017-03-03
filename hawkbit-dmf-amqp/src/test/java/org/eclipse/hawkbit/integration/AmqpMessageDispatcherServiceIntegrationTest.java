@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.integration;
 
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
@@ -21,6 +22,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
@@ -28,11 +30,15 @@ import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.Test;
 
 import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
+@Features("Component Tests - Device Management Federation API")
+@Stories("Amqp Message Dispatcher Service")
 public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceIntegrationTest {
 
     @Test
-    @Description("Tests register target and assign a Distribution Set")
+    @Description("Verify that a distribution assignment send an amqp message.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1),
@@ -40,7 +46,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 2) })
     public void sendDownloadAndInstallStatus() {
-        final DistributionSet distributionSet = registerTargetAndAssignDistributionSet();
+        registerTargetAndAssignDistributionSet();
 
         createAndSendTarget(TENANT_EXIST);
         waitUntil(() -> {
@@ -49,12 +55,43 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
             return findTargetByControllerID.isPresent() && TargetUpdateStatus.PENDING
                     .equals(findTargetByControllerID.get().getTargetInfo().getUpdateStatus());
         });
-        assertDownloadAndInstallMessage(distributionSet);
+        assertDownloadAndInstallMessage(getDistributionSet().getModules());
+    }
+
+    @Test
+    @Description("Verify that a distribution assignment multiple times send cancel and assign events with right softwaremodules")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 3) })
+    public void assignDistributionSetMultipleTimes() {
+        // TODO: Check fachlichkeit
+        // Assign DS
+        // Assign anderes DS,
+        // Was muss in den Cancel und Install Nachrichten drin sein
+        final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet();
+
+        final DistributionSet distributionSet2 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        registerTargetAndAssignDistributionSet(distributionSet2.getId(), TargetUpdateStatus.PENDING,
+                getDistributionSet().getModules());
+        assertCancelActionMessage(assignmentResult.getActions().get(0));
+
+        createAndSendTarget(TENANT_EXIST);
+        waitUntil(() -> {
+            final Optional<Target> findTargetByControllerID = targetManagement
+                    .findTargetByControllerID(REGISTER_TARGET);
+            return findTargetByControllerID.isPresent() && TargetUpdateStatus.PENDING
+                    .equals(findTargetByControllerID.get().getTargetInfo().getUpdateStatus());
+        });
+        assertCancelActionMessage(assignmentResult.getActions().get(0));
 
     }
 
     @Test
-    @Description("Tests register target and cancel a assignment")
+    @Description("Verify that a cancel assignment send an amqp message.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
@@ -63,9 +100,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 2) })
     public void sendCancelStatus() {
-        registerTargetAndAssignDistributionSet();
-        final Long actionId = cancelReplyAction();
-        assertCancelActionMessage(actionId);
+        final Long actionId = registerTargetAndCancelActionId();
 
         createAndSendTarget(TENANT_EXIST);
         waitUntil(() -> {

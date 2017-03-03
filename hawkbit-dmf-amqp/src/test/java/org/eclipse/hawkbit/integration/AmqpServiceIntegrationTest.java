@@ -12,6 +12,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import org.eclipse.hawkbit.AmqpTestConfiguration;
@@ -22,6 +24,7 @@ import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
 import org.eclipse.hawkbit.integration.listener.ReplyToListener;
 import org.eclipse.hawkbit.matcher.SoftwareMouleJsonMatcher;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.util.IpUtil;
@@ -42,6 +45,7 @@ public class AmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
     protected static final String REGISTER_TARGET = "NewDmfTarget";
 
     private ReplyToListener replyToListener;
+    private DistributionSet distributionSet;
 
     @Before
     public void initListener() {
@@ -62,14 +66,24 @@ public class AmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
         }
     }
 
-    protected DistributionSet registerTargetAndAssignDistributionSet() {
-        registerAndAssertTargetWithExistingTenant(REGISTER_TARGET, 1);
-
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
-        assignDistributionSet(distributionSet.getId(), REGISTER_TARGET);
-        assertDownloadAndInstallMessage(distributionSet);
-        Mockito.reset(replyToListener);
+    protected DistributionSet getDistributionSet() {
         return distributionSet;
+    }
+
+    protected DistributionSetAssignmentResult registerTargetAndAssignDistributionSet() {
+        distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        return registerTargetAndAssignDistributionSet(distributionSet.getId(), TargetUpdateStatus.REGISTERED,
+                distributionSet.getModules());
+    }
+
+    protected DistributionSetAssignmentResult registerTargetAndAssignDistributionSet(Long assignDs,
+            TargetUpdateStatus expectedStatus,
+            Set<org.eclipse.hawkbit.repository.model.SoftwareModule> expectedSoftwareModulesInMessage) {
+        registerAndAssertTargetWithExistingTenant(REGISTER_TARGET, 1, expectedStatus);
+
+        final DistributionSetAssignmentResult assignmentResult = assignDistributionSet(assignDs, REGISTER_TARGET);
+        assertDownloadAndInstallMessage(expectedSoftwareModulesInMessage);
+        return assignmentResult;
     }
 
     protected void assertCancelActionMessage(Long actionId) {
@@ -77,11 +91,9 @@ public class AmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
 
         final Long actionUpdateStatus = (Long) getDmfClient().getMessageConverter().fromMessage(replyMessage);
         assertThat(actionUpdateStatus).isEqualTo(actionId);
-
-        Mockito.reset(replyToListener);
     }
 
-    protected void assertDownloadAndInstallMessage(final DistributionSet distributionSet) {
+    protected void assertDownloadAndInstallMessage(Set<org.eclipse.hawkbit.repository.model.SoftwareModule> dsModules) {
         final Message replyMessage = assertReplyMessageHeader(EventTopic.DOWNLOAD_AND_INSTALL);
         assertAllTargetsCount(1);
 
@@ -89,7 +101,7 @@ public class AmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
                 .getMessageConverter().fromMessage(replyMessage);
         assertThat(downloadAndUpdateRequest).isNotNull();
 
-        Assert.assertThat(distributionSet.getModules(),
+        Assert.assertThat(dsModules,
                 SoftwareMouleJsonMatcher.containsExactly(downloadAndUpdateRequest.getSoftwareModules()));
 
         final Target updatedTarget = waitUntilIsPresent(
@@ -103,20 +115,21 @@ public class AmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
         getDmfClient().send(message);
     }
 
-    protected Message verifyReplyToListener(int expectedMessages) {
-        return verifyTestRabbitListener(replyToListener, expectedMessages);
+    protected void verifyReplyToListener() {
+        createConditionFactory().until(() -> {
+            Mockito.verify(replyToListener, Mockito.atLeast(1)).handleMessage(Mockito.any());
+        });
     }
 
-    protected Long cancelReplyAction() {
-        final DownloadAndUpdateRequest downloadAndUpdateRequest = (DownloadAndUpdateRequest) getDmfClient()
-                .getMessageConverter().fromMessage(replyToListener.getMessage());
-        final Long actionId = downloadAndUpdateRequest.getActionId();
+    private Long cancelAction(Long actionId) {
         deploymentManagement.cancelAction(actionId);
+        assertCancelActionMessage(actionId);
         return actionId;
     }
 
-    protected ReplyToListener getReplyToListener() {
-        return replyToListener;
+    protected Long registerTargetAndCancelActionId() {
+        final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet();
+        return cancelAction(assignmentResult.getActions().get(0));
     }
 
     protected void assertAllTargetsCount(long expectedTargetsCount) {
@@ -124,7 +137,8 @@ public class AmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
     }
 
     private Message assertReplyMessageHeader(EventTopic eventTopic) {
-        final Message replyMessage = verifyReplyToListener(1);
+        verifyReplyToListener();
+        final Message replyMessage = replyToListener.getMessages().get(eventTopic);
         assertAllTargetsCount(1);
         final Map<String, Object> headers = replyMessage.getMessageProperties().getHeaders();
         assertThat(headers.get(MessageHeaderKey.TOPIC)).isEqualTo(eventTopic.toString());
@@ -135,10 +149,15 @@ public class AmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
     }
 
     protected void registerAndAssertTargetWithExistingTenant(String target, int existingTargetsAfterCreation) {
+        registerAndAssertTargetWithExistingTenant(target, existingTargetsAfterCreation, TargetUpdateStatus.REGISTERED);
+    }
+
+    protected void registerAndAssertTargetWithExistingTenant(String target, int existingTargetsAfterCreation,
+            TargetUpdateStatus expectedTargetStatus) {
         createAndSendTarget(target, TENANT_EXIST);
         final Target registerdTarget = waitUntilIsPresent(() -> targetManagement.findTargetByControllerID(target));
         assertAllTargetsCount(existingTargetsAfterCreation);
-        assertTarget(registerdTarget, TargetUpdateStatus.REGISTERED);
+        assertTarget(registerdTarget, expectedTargetStatus);
     }
 
     private void assertTarget(Target target, TargetUpdateStatus updateStatus) {

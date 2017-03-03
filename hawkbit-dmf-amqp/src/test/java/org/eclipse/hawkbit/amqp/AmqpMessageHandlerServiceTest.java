@@ -444,10 +444,8 @@ public class AmqpMessageHandlerServiceTest {
     }
 
     private ActionUpdateStatus createActionUpdateStatus(final ActionStatus status, final Long id) {
-        final ActionUpdateStatus actionUpdateStatus = new ActionUpdateStatus();
-        actionUpdateStatus.setActionId(id);
+        final ActionUpdateStatus actionUpdateStatus = new ActionUpdateStatus(id, status);
         actionUpdateStatus.setSoftwareModuleId(Long.valueOf(2));
-        actionUpdateStatus.setActionStatus(status);
         return actionUpdateStatus;
     }
 

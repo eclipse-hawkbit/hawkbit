@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.ActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.ActionUpdateStatus;
-import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
@@ -30,6 +29,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.Ignore;
@@ -68,7 +68,6 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     @Test
     @Description("Tests register invalid target withy empty controller id")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
-    @Ignore
     public void registerEmptyTarget() {
         // TODO Hier passiert eine
         // javax.validation.ConstraintViolationException und passiert ein
@@ -145,12 +144,21 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void missingThingIdProperty() {
         final Message createTargetMessage = createTargetMessage(null, TENANT_EXIST);
-        getDmfClient().send(createTargetMessage);
-
         createTargetMessage.getMessageProperties().getHeaders().remove(MessageHeaderKey.THING_ID);
         getDmfClient().send(createTargetMessage);
 
-        verifyDeadLetterMessages(2);
+        verifyDeadLetterMessages(1);
+        assertAllTargetsCount(0);
+    }
+
+    @Test
+    @Description("Tests thing id property in message. This message should forwarded to the deadletter queue")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    public void nullThingIdProperty() {
+        final Message createTargetMessage = createTargetMessage(null, TENANT_EXIST);
+        getDmfClient().send(createTargetMessage);
+
+        verifyDeadLetterMessages(1);
         assertAllTargetsCount(0);
     }
 
@@ -277,15 +285,11 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     @Description("Tests invalid topic message header. This message should forwarded to the deadletter queue")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void updateActionStatusWithInvalidActionId() {
-        ActionUpdateStatus actionUpdateStatus = new ActionUpdateStatus();
-        Message eventMessage = createEventMessage(TENANT_EXIST, EventTopic.UPDATE_ACTION_STATUS, actionUpdateStatus);
+        final ActionUpdateStatus actionUpdateStatus = new ActionUpdateStatus(1L, ActionStatus.RUNNING);
+        final Message eventMessage = createEventMessage(TENANT_EXIST, EventTopic.UPDATE_ACTION_STATUS,
+                actionUpdateStatus);
         getDmfClient().send(eventMessage);
         verifyDeadLetterMessages(1);
-
-        actionUpdateStatus = new ActionUpdateStatus(1L, ActionStatus.RUNNING);
-        eventMessage = createEventMessage(TENANT_EXIST, EventTopic.UPDATE_ACTION_STATUS, actionUpdateStatus);
-        getDmfClient().send(eventMessage);
-        verifyDeadLetterMessages(2);
     }
 
     @Test
@@ -370,11 +374,11 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 2), @Expect(type = TargetPollEvent.class, count = 1) })
     public void cancelNotAllowActionStatus() {
+        // TODO: CancelActionNotAllowedException requeuen oder nicht?
         registerTargetAndSendActionStatus(ActionStatus.CANCELED);
         verifyDeadLetterMessages(1);
     }
 
-    @Ignore
     @Test
     @Description("Verfiy update the action status to canceld, if the current status is not a canceling state")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
@@ -382,9 +386,39 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = ActionUpdatedEvent.class, count = 1), @Expect(type = ActionCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 2), @Expect(type = TargetPollEvent.class, count = 1) })
+            @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
     public void cancelActionStatus() {
-        registerTargetAndSendActionStatus(ActionStatus.CANCELED);
+        // TODO: AmqpMessageHandlerService komme nicht in zeile 255 und danach
+        // 189
+        // final DistributionSet distributionSet =
+        // registerTargetAndAssignDistributionSet();
+        // assertDownloadAndInstallMessage(distributionSet);
+        // registerTargetAndAssignDistributionSet(TargetUpdateStatus.PENDING);
+        // final assertCancel
+        // Long actionId = getReplyAction();
+        // actionId = controllerManagament
+        // .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.CANCELING))
+        // .getId();
+        //
+        // assertThat(controllerManagament.findOldestActiveActionByTarget(REGISTER_TARGET).isPresent()).isTrue();
+        // sendActionUpdateStatus(new ActionUpdateStatus(actionId,
+        // ActionStatus.CANCELED));
+        // assertAction(actionId, Status.RUNNING, Status.CANCELING,
+        // Status.CANCELED);
+    }
+
+    @Description("Verfiy update the action status to canceld, if the current status is not a canceling state")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionUpdatedEvent.class, count = 1), @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
+    public void actionNotExists() {
+        final Long actionId = registerTargetAndCancelActionId();
+        final Long actionNotExist = actionId + 1;
+
+        sendActionUpdateStatus(new ActionUpdateStatus(actionNotExist, ActionStatus.CANCELED));
         verifyDeadLetterMessages(1);
     }
 
@@ -411,16 +445,15 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
     public void canceledRejectedActionStatus() {
-        final Long actionId = registerTargetAndGetActionId();
-        deploymentManagement.cancelAction(actionId);
-        assertCancelActionMessage(actionId);
+        final Long actionId = registerTargetAndCancelActionId();
 
         sendActionUpdateStatus(new ActionUpdateStatus(actionId, ActionStatus.CANCEL_REJECTED));
         assertAction(actionId, Status.RUNNING, Status.CANCELING, Status.CANCEL_REJECTED);
     }
 
     private Long registerTargetAndSendActionStatus(ActionStatus sendActionStatus) {
-        final Long actionId = registerTargetAndGetActionId();
+        final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet();
+        final Long actionId = assignmentResult.getActions().get(0);
         sendActionUpdateStatus(new ActionUpdateStatus(actionId, sendActionStatus));
         return actionId;
     }
@@ -428,15 +461,6 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     private void sendActionUpdateStatus(ActionUpdateStatus actionStatus) {
         final Message eventMessage = createEventMessage(TENANT_EXIST, EventTopic.UPDATE_ACTION_STATUS, actionStatus);
         getDmfClient().send(eventMessage);
-    }
-
-    private Long registerTargetAndGetActionId() {
-
-        registerTargetAndAssignDistributionSet();
-        final DownloadAndUpdateRequest downloadAndUpdateRequest = (DownloadAndUpdateRequest) getDmfClient()
-                .getMessageConverter().fromMessage(getReplyToListener().getMessage());
-        final Long actionId = downloadAndUpdateRequest.getActionId();
-        return actionId;
     }
 
     private void registerTargetAndSendAndAssertUpdateActionStatus(ActionStatus sendActionStatus,

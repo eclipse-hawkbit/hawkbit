@@ -8,7 +8,12 @@
  */
 package org.eclipse.hawkbit.integration.listener;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.hawkbit.AmqpTestConfiguration;
+import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
+import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 
@@ -16,10 +21,18 @@ public class ReplyToListener extends AbstractTestRabbitListener {
 
     public static final String LISTENER_ID = "replyto";
 
+    private final Map<EventTopic, Message> messages = new HashMap<>();
+
     @Override
     @RabbitListener(id = LISTENER_ID, queues = AmqpTestConfiguration.REPLY_TO_QUEUE)
     public void handleMessage(Message message) {
         setMessage(message);
+        final EventTopic eventTopic = EventTopic
+                .valueOf(message.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC).toString());
+        messages.put(eventTopic, message);
     }
 
+    public Map<EventTopic, Message> getMessages() {
+        return messages;
+    }
 }
