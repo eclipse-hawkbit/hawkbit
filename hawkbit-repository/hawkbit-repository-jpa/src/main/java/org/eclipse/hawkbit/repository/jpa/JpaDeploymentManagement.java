@@ -423,7 +423,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELED, System.currentTimeMillis(),
                 "A force quit has been performed."));
 
-        DeploymentHelper.successCancellation(action, actionRepository, targetRepository, entityManager);
+        DeploymentHelper.successCancellation(action, actionRepository, targetRepository);
 
         return actionRepository.save(action);
     }

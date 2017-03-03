@@ -154,7 +154,7 @@ public class TargetTable extends AbstractTable<Target, Long> {
             refreshTargets();
         } else {
             eventContainer.getEvents().stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
-                    .filter(event -> !Objects.isNull(event.getEntity()) && !Objects.isNull(event.getEntity()))
+                    .filter(event -> !Objects.isNull(event.getEntity()))
                     .forEach(event -> updateVisibleItemOnEvent(event.getEntity()));
         }
         publishTargetSelectedEntityForRefresh(eventContainer.getEvents().stream());

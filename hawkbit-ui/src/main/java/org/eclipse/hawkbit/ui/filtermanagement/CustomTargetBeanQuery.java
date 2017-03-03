@@ -114,7 +114,6 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             prxyTarget.setCreatedByUser(UserDetailsFormatter.loadAndFormatCreatedBy(targ));
             prxyTarget.setModifiedByUser(UserDetailsFormatter.loadAndFormatLastModifiedBy(targ));
 
-            prxyTarget.setPollStatus(targ.getPollStatus());
             prxyTarget.setUpdateStatus(targ.getUpdateStatus());
             prxyTarget.setLastTargetQuery(targ.getLastTargetQuery());
             prxyTarget.setPollStatusToolTip(HawkbitCommonUtil.getPollStatusToolTip(targ.getPollStatus(), getI18N()));

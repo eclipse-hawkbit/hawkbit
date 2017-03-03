@@ -8,9 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.common.tagdetails;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -28,6 +25,8 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
+import com.google.gwt.thirdparty.guava.common.collect.Lists;
+
 /**
  * Implementation of Target tag token.
  *
@@ -43,14 +42,12 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
     private static final Boolean NOTAGS_SELECTED = Boolean.FALSE;
 
     private final transient TargetManagement targetManagement;
-    private final transient TagManagement tagManagement;
 
     public TargetTagToken(final SpPermissionChecker checker, final I18N i18n, final UINotification uinotification,
             final UIEventBus eventBus, final ManagementUIState managementUIState, final TagManagement tagManagement,
             final TargetManagement targetManagement) {
         super(checker, i18n, uinotification, eventBus, managementUIState, tagManagement);
         this.targetManagement = targetManagement;
-        this.tagManagement = tagManagement;
     }
 
     @Override
@@ -76,9 +73,8 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
     }
 
     private TargetTagAssignmentResult toggleAssignment(final String tagNameSelected) {
-        final Set<String> targetList = new HashSet<>();
-        targetList.add(selectedEntity.getControllerId());
-        final TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(targetList, tagNameSelected);
+        final TargetTagAssignmentResult result = targetManagement
+                .toggleTagAssignment(Lists.newArrayList(selectedEntity.getControllerId()), tagNameSelected);
         processTargetTagAssigmentResult(result);
         uinotification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(tagNameSelected, result, i18n));
         return result;
@@ -117,10 +113,6 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
         }
     }
 
-    /**
-     * 
-     * @param assignmentResult
-     */
     public void processTargetTagAssigmentResult(final TargetTagAssignmentResult assignmentResult) {
         final TargetTag targetTag = assignmentResult.getTargetTag();
         if (isAssign(assignmentResult)) {
@@ -140,7 +132,7 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
 
     protected boolean isUnassign(final TargetTagAssignmentResult assignmentResult) {
         if (assignmentResult.getUnassigned() > 0 && managementUIState.getLastSelectedTargetId() != null) {
-            return assignmentResult.getUnassignedEntity().stream().map(t -> t.getId())
+            return assignmentResult.getUnassignedEntity().stream().map(Target::getId)
                     .anyMatch(controllerId -> controllerId.equals(managementUIState.getLastSelectedTargetId()));
         }
         return false;

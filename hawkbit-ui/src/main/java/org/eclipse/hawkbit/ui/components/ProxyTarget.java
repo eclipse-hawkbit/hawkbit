@@ -58,16 +58,6 @@ public class ProxyTarget implements Serializable {
 
     private Long createdAt;
 
-    private PollStatus pollStatus;
-
-    public PollStatus getPollStatus() {
-        return pollStatus;
-    }
-
-    public void setPollStatus(final PollStatus pollStatus) {
-        this.pollStatus = pollStatus;
-    }
-
     public Long getId() {
         return id;
     }

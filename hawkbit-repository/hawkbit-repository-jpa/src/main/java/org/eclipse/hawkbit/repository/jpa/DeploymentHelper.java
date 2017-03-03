@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityManager;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -40,15 +39,13 @@ public final class DeploymentHelper {
      *            of the target
      * @param setInstalledDate
      *            to set
-     * @param entityManager
-     *            for the operation
      * @param targetInfoRepository
      *            for the operation
      *
      * @return updated target
      */
     static JpaTarget updateTargetInfo(@NotNull final JpaTarget target, @NotNull final TargetUpdateStatus status,
-            final boolean setInstalledDate, final EntityManager entityManager) {
+            final boolean setInstalledDate) {
         target.setUpdateStatus(status);
 
         if (setInstalledDate) {
@@ -68,13 +65,11 @@ public final class DeploymentHelper {
      *            for the operation
      * @param targetRepository
      *            for the operation
-     * @param entityManager
-     *            for the operation
      * @param targetInfoRepository
      *            for the operation
      */
     static void successCancellation(final JpaAction action, final ActionRepository actionRepository,
-            final TargetRepository targetRepository, final EntityManager entityManager) {
+            final TargetRepository targetRepository) {
 
         // set action inactive
         action.setActive(false);
@@ -86,7 +81,7 @@ public final class DeploymentHelper {
 
         if (nextActiveActions.isEmpty()) {
             target.setAssignedDistributionSet(target.getInstalledDistributionSet());
-            updateTargetInfo(target, TargetUpdateStatus.IN_SYNC, false, entityManager);
+            updateTargetInfo(target, TargetUpdateStatus.IN_SYNC, false);
         } else {
             target.setAssignedDistributionSet(nextActiveActions.get(0).getDistributionSet());
         }

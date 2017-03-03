@@ -97,11 +97,8 @@ public final class TargetSpecifications {
      *            join it.
      * @return the {@link Target} {@link Specification}
      */
-    public static Specification<JpaTarget> hasTargetUpdateStatus(final Collection<TargetUpdateStatus> updateStatus,
-            final boolean fetch) {
-        return (targetRoot, query, cb) -> {
-            return targetRoot.get(JpaTarget_.updateStatus).in(updateStatus);
-        };
+    public static Specification<JpaTarget> hasTargetUpdateStatus(final Collection<TargetUpdateStatus> updateStatus) {
+        return (targetRoot, query, cb) -> targetRoot.get(JpaTarget_.updateStatus).in(updateStatus);
     }
 
     /**
@@ -121,9 +118,8 @@ public final class TargetSpecifications {
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> isOverdue(final long overdueTimestamp) {
-        return (targetRoot, query, cb) -> {
-            return cb.lessThanOrEqualTo(targetRoot.get(JpaTarget_.lastTargetQuery), overdueTimestamp);
-        };
+        return (targetRoot, query, cb) -> cb.lessThanOrEqualTo(targetRoot.get(JpaTarget_.lastTargetQuery),
+                overdueTimestamp);
     }
 
     /**

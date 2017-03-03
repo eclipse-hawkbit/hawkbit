@@ -264,8 +264,7 @@ public class JpaTargetManagement implements TargetManagement {
             final Boolean selectTargetWithNoTag, final String... tagNames) {
         final List<Specification<JpaTarget>> specList = buildSpecificationList(
                 new FilterParams(installedOrAssignedDistributionSetId, status, overdueState, searchText,
-                        selectTargetWithNoTag, tagNames),
-                true);
+                        selectTargetWithNoTag, tagNames));
         return findByCriteriaAPI(pageable, specList);
     }
 
@@ -275,16 +274,14 @@ public class JpaTargetManagement implements TargetManagement {
             final Boolean selectTargetWithNoTag, final String... tagNames) {
         final List<Specification<JpaTarget>> specList = buildSpecificationList(
                 new FilterParams(installedOrAssignedDistributionSetId, status, overdueState, searchText,
-                        selectTargetWithNoTag, tagNames),
-                true);
+                        selectTargetWithNoTag, tagNames));
         return countByCriteriaAPI(specList);
     }
 
-    private List<Specification<JpaTarget>> buildSpecificationList(final FilterParams filterParams,
-            final boolean fetch) {
+    private List<Specification<JpaTarget>> buildSpecificationList(final FilterParams filterParams) {
         final List<Specification<JpaTarget>> specList = new ArrayList<>();
         if (filterParams.getFilterByStatus() != null && !filterParams.getFilterByStatus().isEmpty()) {
-            specList.add(TargetSpecifications.hasTargetUpdateStatus(filterParams.getFilterByStatus(), fetch));
+            specList.add(TargetSpecifications.hasTargetUpdateStatus(filterParams.getFilterByStatus()));
         }
         if (filterParams.getOverdueState() != null) {
             specList.add(TargetSpecifications.isOverdue(TimestampCalculator.calculateOverdueTimestamp()));
@@ -435,8 +432,8 @@ public class JpaTargetManagement implements TargetManagement {
         query.distinct(true);
         // build the specifications and then to predicates necessary by the
         // given filters
-        final Predicate[] specificationsForMultiSelect = specificationsToPredicate(
-                buildSpecificationList(filterParams, true), targetRoot, query, cb);
+        final Predicate[] specificationsForMultiSelect = specificationsToPredicate(buildSpecificationList(filterParams),
+                targetRoot, query, cb);
 
         // if we have some predicates then add it to the where clause of the
         // multiselect

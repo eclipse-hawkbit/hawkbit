@@ -282,7 +282,7 @@ public class JpaControllerManagement implements ControllerManagement {
         // the canceled action itself.
         actionStatus.addMessage(
                 RepositoryConstants.SERVER_MESSAGE_PREFIX + "Cancellation completion is finished sucessfully.");
-        DeploymentHelper.successCancellation(action, actionRepository, targetRepository, entityManager);
+        DeploymentHelper.successCancellation(action, actionRepository, targetRepository);
     }
 
     @Override
@@ -322,7 +322,7 @@ public class JpaControllerManagement implements ControllerManagement {
 
         switch (actionStatus.getStatus()) {
         case ERROR:
-            target = DeploymentHelper.updateTargetInfo(target, TargetUpdateStatus.ERROR, false, entityManager);
+            target = DeploymentHelper.updateTargetInfo(target, TargetUpdateStatus.ERROR, false);
             handleErrorOnAction(action, target);
             break;
         case FINISHED:
