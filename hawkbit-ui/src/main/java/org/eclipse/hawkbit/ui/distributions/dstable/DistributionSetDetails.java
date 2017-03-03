@@ -77,18 +77,24 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
             final UINotification uiNotification, final TagManagement tagManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout) {
         super(i18n, eventBus, permissionChecker, managementUIState, distributionAddUpdateWindowLayout,
-                distributionSetManagement, dsMetadataPopupLayout, entityFactory, uiNotification, tagManagement);
+                distributionSetManagement, dsMetadataPopupLayout, entityFactory, uiNotification, tagManagement,
+                createSoftwareModuleDetailsTable(i18n, permissionChecker, distributionSetManagement, eventBus,
+                        manageDistUIState, uiNotification));
         this.manageDistUIState = manageDistUIState;
         this.softwareManagement = softwareManagement;
         this.targetManagement = targetManagement;
 
         tfqDetailsTable = new TargetFilterQueryDetailsTable(i18n);
 
-        setSoftwareModuleTable(new SoftwareModuleDetailsTable(i18n, true, permissionChecker, distributionSetManagement,
-                eventBus, manageDistUIState, uiNotification));
-
         addTabs(detailsTab);
         restoreState();
+    }
+
+    private static final SoftwareModuleDetailsTable createSoftwareModuleDetailsTable(final I18N i18n,
+            final SpPermissionChecker permissionChecker, final DistributionSetManagement distributionSetManagement,
+            final UIEventBus eventBus, final ManageDistUIState manageDistUIState, final UINotification uiNotification) {
+        return new SoftwareModuleDetailsTable(i18n, true, permissionChecker, distributionSetManagement, eventBus,
+                manageDistUIState, uiNotification);
     }
 
     @Override

@@ -56,14 +56,15 @@ public abstract class AbstractDistributionSetDetails
 
     private final DistributionTagToken distributionTagToken;
 
-    private SoftwareModuleDetailsTable softwareModuleTable;
+    private final SoftwareModuleDetailsTable softwareModuleDetailsTable;
 
     protected AbstractDistributionSetDetails(final I18N i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState,
             final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout,
             final DistributionSetManagement distributionSetManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout, final EntityFactory entityFactory,
-            final UINotification uiNotification, final TagManagement tagManagement) {
+            final UINotification uiNotification, final TagManagement tagManagement,
+            final SoftwareModuleDetailsTable softwareModuleDetailsTable) {
         super(i18n, eventBus, permissionChecker, managementUIState);
         this.distributionAddUpdateWindowLayout = distributionAddUpdateWindowLayout;
         this.uiNotification = uiNotification;
@@ -71,6 +72,7 @@ public abstract class AbstractDistributionSetDetails
         this.dsMetadataPopupLayout = dsMetadataPopupLayout;
         this.distributionTagToken = new DistributionTagToken(permissionChecker, i18n, uiNotification, eventBus,
                 managementUIState, tagManagement, distributionSetManagement);
+        this.softwareModuleDetailsTable = softwareModuleDetailsTable;
 
         dsMetadataTable = new DistributionSetMetadatadetailslayout(i18n, permissionChecker, distributionSetManagement,
                 dsMetadataPopupLayout, entityFactory, uiNotification);
@@ -155,13 +157,13 @@ public abstract class AbstractDistributionSetDetails
     }
 
     protected void populateModule() {
-        softwareModuleTable.populateModule(getSelectedBaseEntity());
+        softwareModuleDetailsTable.populateModule(getSelectedBaseEntity());
     }
 
     private VerticalLayout createSoftwareModuleTab() {
         final VerticalLayout softwareLayout = createTabLayout();
         softwareLayout.setSizeFull();
-        softwareLayout.addComponent(softwareModuleTable);
+        softwareLayout.addComponent(softwareModuleDetailsTable);
         return softwareLayout;
     }
 
@@ -184,11 +186,7 @@ public abstract class AbstractDistributionSetDetails
     }
 
     protected SoftwareModuleDetailsTable getSoftwareModuleTable() {
-        return softwareModuleTable;
-    }
-
-    protected void setSoftwareModuleTable(final SoftwareModuleDetailsTable softwareModuleTable) {
-        this.softwareModuleTable = softwareModuleTable;
+        return softwareModuleDetailsTable;
     }
 
     protected DistributionAddUpdateWindowLayout getDistributionAddUpdateWindowLayout() {

@@ -33,13 +33,16 @@ public class DistributionDetails extends AbstractDistributionSetDetails {
             final UINotification uiNotification, final TagManagement tagManagement,
             final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout) {
         super(i18n, eventBus, permissionChecker, managementUIState, distributionAddUpdateWindowLayout,
-                distributionSetManagement, dsMetadataPopupLayout, entityFactory, uiNotification, tagManagement);
-
-        setSoftwareModuleTable(
-                new SoftwareModuleDetailsTable(i18n, false, permissionChecker, null, null, null, uiNotification));
+                distributionSetManagement, dsMetadataPopupLayout, entityFactory, uiNotification, tagManagement,
+                createSoftwareModuleDetailsTable(i18n, permissionChecker, uiNotification));
 
         addTabs(detailsTab);
         restoreState();
+    }
+
+    private static final SoftwareModuleDetailsTable createSoftwareModuleDetailsTable(final I18N i18n,
+            final SpPermissionChecker permissionChecker, final UINotification uiNotification) {
+        return new SoftwareModuleDetailsTable(i18n, false, permissionChecker, null, null, null, uiNotification);
     }
 
     @Override
