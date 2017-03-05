@@ -8,8 +8,15 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import static com.google.common.net.HttpHeaders.CONTENT_DISPOSITION;
+import static com.google.common.net.HttpHeaders.CONTENT_LENGTH;
+import static com.google.common.net.HttpHeaders.ETAG;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
+
 import java.io.IOException;
 import java.io.InputStream;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
@@ -83,9 +90,17 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
                         artifactCache.getId(), artifactCache.getDownloadType());
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
+
+            final HttpServletResponse response = requestResponseContextHolder.getHttpServletResponse();
+            final String etag = artifact.getHashes().getSha1();
+            final long length = artifact.getSize();
+            response.setHeader(CONTENT_DISPOSITION, "attachment;filename=" + downloadId);
+            response.setHeader(ETAG, etag);
+            response.setContentType(APPLICATION_OCTET_STREAM_VALUE);
+            response.setHeader(CONTENT_LENGTH, String.valueOf(length));
+
             try (InputStream inputstream = artifact.getFileInputStream()) {
-                ByteStreams.copy(inputstream,
-                        requestResponseContextHolder.getHttpServletResponse().getOutputStream());
+                ByteStreams.copy(inputstream, requestResponseContextHolder.getHttpServletResponse().getOutputStream());
             } catch (final IOException e) {
                 LOGGER.error("Cannot copy streams", e);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

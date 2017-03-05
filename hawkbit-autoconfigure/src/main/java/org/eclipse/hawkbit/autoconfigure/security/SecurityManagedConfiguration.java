@@ -291,7 +291,7 @@ public class SecurityManagedConfiguration {
         // in memory!
         filterRegBean.setFilter(new ExcludePathAwareShallowETagFilter(
                 "/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download", "/{tenant}/controller/artifacts/**",
-                "/{targetid}/softwaremodules/{softwareModuleId}/artifacts/**"));
+                "/{targetid}/softwaremodules/{softwareModuleId}/artifacts/**", "/api/v1/downloadserver/**"));
 
         return filterRegBean;
     }
