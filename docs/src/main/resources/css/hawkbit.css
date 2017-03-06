@@ -44,7 +44,7 @@ code {
 }
 
 .navbar-inverse .navbar-brand-logo {
-	background-image: url("/img/hawkbit_flower.png");
+	background-image: url("./img/hawkbit_flower.png");
 	background-size: 250px;
 	background-repeat: no-repeat;
 	position: absolute;
@@ -68,7 +68,7 @@ code {
 }
 
 .navbar-lp .navbar-brand-logo {
-	background-image: url("/img/hawkbit_flower.png");
+	background-image: url("./img/hawkbit_flower.png");
 	background-size: 250px;
 	background-repeat: no-repeat;
 	position: absolute;
@@ -99,7 +99,7 @@ code {
 }
 
 .navbar-lp.scroll .navbar-brand-logo {
-	background-image: url("/img/hawkbit_flower.png");
+	background-image: url("./img/hawkbit_flower.png");
 	background-size: 80px;
 	background-repeat: no-repeat;
 	position: absolute;
@@ -266,7 +266,7 @@ footer {
         padding-top: 20px;
     }
 	.navbar-inverse .navbar-brand-logo {
-		background-image: url("/img/hawkbit_flower.png");
+		background-image: url("./img/hawkbit_flower.png");
 		background-size: 100px;
 		background-repeat: no-repeat;
 		position: absolute;
