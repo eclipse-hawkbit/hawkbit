@@ -52,7 +52,7 @@ public interface TargetManagement {
      * @return list of assigned targets
      * 
      * @throws EntityNotFoundException
-     *             if given tagId does not exist
+     *             if given tagId or at least one of the targets do not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     List<Target> assignTag(@NotEmpty Collection<String> controllerIds, @NotNull Long tagId);
@@ -430,7 +430,7 @@ public interface TargetManagement {
      *            the ID of the {@link DistributionSet}
      * @param rsqlParam
      *            the specification to filter the result
-     * @param pageable
+     * @param pageReq
      *            page parameter
      * @return the found {@link Target}s, never {@code null}
      *
@@ -445,7 +445,7 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
     Page<Target> findTargetByInstalledDistributionSet(@NotNull Long distributionSetId, @NotNull String rsqlParam,
-            @NotNull Pageable pageable);
+            @NotNull Pageable pageReq);
 
     /**
      * Retrieves the {@link Target} which have a certain
@@ -579,7 +579,7 @@ public interface TargetManagement {
      * yet assigned, they will be. If all of theme have the tag already assigned
      * they will be removed instead.
      *
-     * @param targetIds
+     * @param controllerIds
      *            to toggle for
      * @param tagName
      *            to toggle
@@ -589,7 +589,7 @@ public interface TargetManagement {
      *             if tag with given name does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    TargetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<String> targetIds, @NotEmpty String tagName);
+    TargetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<String> controllerIds, @NotEmpty String tagName);
 
     /**
      * Un-assign all {@link Target} from a given {@link TargetTag} .

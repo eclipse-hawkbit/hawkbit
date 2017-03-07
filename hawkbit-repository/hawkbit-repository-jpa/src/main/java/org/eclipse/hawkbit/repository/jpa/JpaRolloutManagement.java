@@ -788,6 +788,11 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Modifying
     public void deleteRollout(final long rolloutId) {
         final JpaRollout jpaRollout = rolloutRepository.findOne(rolloutId);
+
+        if (jpaRollout == null) {
+            throw new EntityNotFoundException(Rollout.class, rolloutId);
+        }
+
         if (RolloutStatus.DELETING.equals(jpaRollout.getStatus())) {
             return;
         }

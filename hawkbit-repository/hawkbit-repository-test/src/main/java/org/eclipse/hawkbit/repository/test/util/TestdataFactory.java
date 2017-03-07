@@ -945,7 +945,18 @@ public class TestdataFactory {
         return rolloutManagement.findRolloutById(rollout.getId()).get();
     }
 
+    /**
+     * Create {@link Rollout} with a new {@link DistributionSet} and
+     * {@link Target}s.
+     * 
+     * @param prefix
+     *            for rollouts name, description,
+     *            {@link Target#getControllerId()} filter
+     * @return created {@link Rollout}
+     */
     public Rollout createRollout(final String prefix) {
-        return createRolloutByVariables(prefix, prefix + " description", 10)
+        createTargets(10, prefix);
+        return createRolloutByVariables(prefix, prefix + " description", 10, "controllerId==" + prefix + "*",
+                createDistributionSet(prefix), "50", "5");
     }
 }

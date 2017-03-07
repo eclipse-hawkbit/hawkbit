@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
@@ -29,7 +31,6 @@ import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.google.common.collect.Lists;
@@ -46,9 +47,24 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Tag Management")
 public class TagManagementTest extends AbstractJpaIntegrationTest {
 
-    @Before
-    public void setup() {
-        assertThat(targetTagRepository.findAll()).as("Not tags should be available").isEmpty();
+    @Test
+    @Description("Verifies that management queries react as specfied on calls for non existing entities.")
+    public void nonExistingEntityQueries() {
+        assertThatThrownBy(() -> tagManagement.deleteDistributionSetTag("1234"))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("DistributionSetTag");
+        assertThatThrownBy(() -> tagManagement.deleteTargetTag("1234")).isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("1234").hasMessageContaining("TargetTag");
+        assertThat(tagManagement.findDistributionSetTag("1234")).isNotPresent();
+        assertThat(tagManagement.findDistributionSetTagById(1234L)).isNotPresent();
+        assertThat(tagManagement.findTargetTag("1234")).isNotPresent();
+        assertThat(tagManagement.findTargetTagById(1234L)).isNotPresent();
+        assertThatThrownBy(() -> tagManagement.updateDistributionSetTag(entityFactory.tag().update(1234L)))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("DistributionSetTag");
+        assertThatThrownBy(() -> tagManagement.updateTargetTag(entityFactory.tag().update(1234L)))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("TargetTag");
     }
 
     @Test

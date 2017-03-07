@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -22,7 +23,9 @@ import javax.validation.ConstraintViolationException;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
@@ -38,6 +41,8 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.test.matcher.Expect;
+import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
@@ -53,6 +58,93 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Software Management")
 public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
+
+    @Test
+    @Description("Verifies that management queries react as specfied on calls for non existing entities.")
+    @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 1) })
+    public void nonExistingEntityQueries() {
+        final SoftwareModule module = testdataFactory.createSoftwareModuleApp();
+
+        assertThatThrownBy(() -> softwareManagement.createSoftwareModule(
+                Lists.newArrayList(entityFactory.softwareModule().create().name("xxx").type("1234"))))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("SoftwareModuleType");
+        assertThatThrownBy(() -> softwareManagement
+                .createSoftwareModule(entityFactory.softwareModule().create().name("xxx").type("1234")))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("SoftwareModuleType");
+
+        assertThatThrownBy(() -> softwareManagement.createSoftwareModuleMetadata(1234L,
+                entityFactory.generateMetadata("xxx", "xxx"))).isInstanceOf(EntityNotFoundException.class)
+                        .hasMessageContaining("1234").hasMessageContaining("SoftwareModule");
+        assertThatThrownBy(() -> softwareManagement.createSoftwareModuleMetadata(1234L,
+                Lists.newArrayList(entityFactory.generateMetadata("xxx", "xxx"))))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("SoftwareModule");
+
+        assertThatThrownBy(() -> softwareManagement.deleteSoftwareModule(1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("SoftwareModule");
+        assertThatThrownBy(() -> softwareManagement.deleteSoftwareModules(Lists.newArrayList(1234L)))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("SoftwareModule");
+        assertThatThrownBy(() -> softwareManagement.deleteSoftwareModuleMetadata(1234L, "xxx"))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("SoftwareModule");
+        assertThatThrownBy(() -> softwareManagement.deleteSoftwareModuleMetadata(module.getId(), "1234"))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("SoftwareModuleMetadata");
+
+        assertThatThrownBy(() -> softwareManagement.updateSoftwareModuleMetadata(1234L,
+                entityFactory.generateMetadata("xxx", "xxx"))).isInstanceOf(EntityNotFoundException.class)
+                        .hasMessageContaining("1234").hasMessageContaining("SoftwareModule");
+        assertThatThrownBy(() -> softwareManagement.updateSoftwareModuleMetadata(module.getId(),
+                entityFactory.generateMetadata("1234", "xxx"))).isInstanceOf(EntityNotFoundException.class)
+                        .hasMessageContaining("1234").hasMessageContaining("SoftwareModuleMetadata");
+
+        assertThatThrownBy(() -> softwareManagement.deleteSoftwareModuleType(1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("SoftwareModuleType");
+
+        assertThatThrownBy(() -> softwareManagement.findSoftwareModuleByAssignedTo(pageReq, 1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("DistributionSet");
+
+        assertThat(softwareManagement.findSoftwareModuleById(1234L)).isNotPresent();
+
+        assertThatThrownBy(() -> softwareManagement.findSoftwareModuleByNameAndVersion("xxx", "xxx", 1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("SoftwareModuleType");
+        assertThat(softwareManagement.findSoftwareModuleByNameAndVersion("1234", "1234", osType.getId()))
+                .isNotPresent();
+
+        assertThat(softwareManagement.findSoftwareModuleMetadata(module.getId(), "1234")).isNotPresent();
+        assertThatThrownBy(() -> softwareManagement.findSoftwareModuleMetadata(1234L, "1234"))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("SoftwareModule");
+
+        assertThatThrownBy(() -> softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("SoftwareModule");
+        assertThatThrownBy(
+                () -> softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(1234L, "name==*", pageReq))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("SoftwareModule");
+        assertThatThrownBy(() -> softwareManagement.findSoftwareModulesByType(pageReq, 1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("SoftwareModule");
+
+        assertThat(softwareManagement.findSoftwareModuleTypeById(1234L)).isNotPresent();
+        assertThat(softwareManagement.findSoftwareModuleTypeByKey("1234")).isNotPresent();
+        assertThat(softwareManagement.findSoftwareModuleTypeByName("1234")).isNotPresent();
+        assertThatThrownBy(() -> softwareManagement.updateSoftwareModule(entityFactory.softwareModule().update(1234L)))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("SoftwareModule");
+        assertThatThrownBy(
+                () -> softwareManagement.updateSoftwareModuleType(entityFactory.softwareModuleType().update(1234L)))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("SoftwareModuleType");
+    }
 
     @Test
     @Description("Calling update without changing fields results in no recorded change in the repository including unchanged audit fields.")

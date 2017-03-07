@@ -726,9 +726,10 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    public Optional<DistributionSetMetadata> findDistributionSetMetadata(final Long distributionSet, final String key) {
-        return Optional.ofNullable(
-                distributionSetMetadataRepository.findOne(new DsMetadataCompositeKey(distributionSet, key)));
+    public Optional<DistributionSetMetadata> findDistributionSetMetadata(final Long setId, final String key) {
+        throwExceptionIfDistributionSetDoesNotExist(setId);
+
+        return Optional.ofNullable(distributionSetMetadataRepository.findOne(new DsMetadataCompositeKey(setId, key)));
     }
 
     @Override

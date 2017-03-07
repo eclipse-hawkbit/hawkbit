@@ -82,13 +82,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that management queries react as specfied on calls for non existing entities.")
     public void nonExistingEntityQueries() {
-        final int amountTargetsForRollout = 10;
-        final int amountOtherTargets = 15;
-        final int amountGroups = 5;
-        final String successCondition = "50";
-        final String errorCondition = "80";
-        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
-                amountOtherTargets, amountGroups, successCondition, errorCondition);
+        final Rollout createdRollout = testdataFactory.createRollout("xxx");
 
         assertThatThrownBy(() -> rolloutManagement.deleteRollout(1234L)).isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("1234").hasMessageContaining("Rollout");
@@ -97,8 +91,13 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         assertThat(rolloutManagement.findRolloutByName("1234")).isNotPresent();
         assertThat(rolloutManagement.findRolloutWithDetailedStatus(1234L)).isNotPresent();
 
-        // rolloutManagement.getFinishedPercentForRunningGroup(rolloutId,
-        // rolloutGroupId)
+        assertThatThrownBy(() -> rolloutManagement.getFinishedPercentForRunningGroup(1234L, 1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("Rollout");
+        assertThatThrownBy(() -> rolloutManagement.getFinishedPercentForRunningGroup(createdRollout.getId(), 1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("RolloutGroup");
+
         assertThatThrownBy(() -> rolloutManagement.pauseRollout(1234L)).isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("1234").hasMessageContaining("Rollout");
         assertThatThrownBy(() -> rolloutManagement.resumeRollout(1234L)).isInstanceOf(EntityNotFoundException.class)

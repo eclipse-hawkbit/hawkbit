@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -20,11 +21,16 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.repository.test.matcher.Expect;
+import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -40,6 +46,42 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Target Filter Query Management")
 public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
+
+    @Test
+    @Description("Verifies that management queries react as specfied on calls for non existing entities.")
+    @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void nonExistingEntityQueries() {
+        final DistributionSet set = testdataFactory.createDistributionSet();
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.createTargetFilterQuery(
+                entityFactory.targetFilterQuery().create().name("test filter").query("name==PendingTargets001"));
+
+        assertThatThrownBy(() -> targetFilterQueryManagement.deleteTargetFilterQuery(1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("TargetFilterQuery");
+
+        assertThatThrownBy(
+                () -> targetFilterQueryManagement.findTargetFilterQueryByAutoAssignDS(pageReq, 1234L, "name==*"))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("DistributionSet");
+        assertThat(targetFilterQueryManagement.findTargetFilterQueryById(1234L)).isNotPresent();
+        assertThat(targetFilterQueryManagement.findTargetFilterQueryByName("1234")).isNotPresent();
+        assertThatThrownBy(() -> targetFilterQueryManagement
+                .updateTargetFilterQuery(entityFactory.targetFilterQuery().update(1234L)))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("TargetFilterQuery");
+        assertThatThrownBy(
+                () -> targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(targetFilterQuery.getId(), 1234L))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("DistributionSet");
+        assertThatThrownBy(() -> targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(1234L, set.getId()))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("TargetFilterQuery");
+        assertThatThrownBy(
+                () -> targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(targetFilterQuery.getId(), 1234L))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("DistributionSet");
+    }
 
     @Test
     @Description("Test creation of target filter query.")

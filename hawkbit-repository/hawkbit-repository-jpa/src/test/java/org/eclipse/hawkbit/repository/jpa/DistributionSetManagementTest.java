@@ -154,7 +154,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .hasMessageContaining("DistributionSet");
         assertThatThrownBy(() -> distributionSetManagement.deleteDistributionSetMetadata(1234L, "xxx"))
                 .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
-                .hasMessageContaining("DistributionSetMetadata");
+                .hasMessageContaining("DistributionSet");
         assertThatThrownBy(() -> distributionSetManagement.deleteDistributionSetMetadata(set.getId(), "1234"))
                 .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
                 .hasMessageContaining("DistributionSetMetadata");
@@ -169,7 +169,11 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(distributionSetManagement.findDistributionSetById(1234L)).isNotPresent();
         assertThat(distributionSetManagement.findDistributionSetByIdWithDetails(1234L)).isNotPresent();
         assertThat(distributionSetManagement.findDistributionSetByNameAndVersion("1234", "1234")).isNotPresent();
-        assertThat(distributionSetManagement.findDistributionSetMetadata(1234L, "1234")).isNotPresent();
+
+        assertThatThrownBy(() -> distributionSetManagement.findDistributionSetMetadata(1234L, "xxx"))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("DistributionSet");
+        assertThat(distributionSetManagement.findDistributionSetMetadata(set.getId(), "1234")).isNotPresent();
 
         assertThatThrownBy(
                 () -> distributionSetManagement.findDistributionSetMetadataByDistributionSetId(1234L, pageReq))
@@ -195,7 +199,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         assertThatThrownBy(() -> distributionSetManagement.updateDistributionSetMetadata(1234L,
                 entityFactory.generateMetadata("xxx", "xxx"))).isInstanceOf(EntityNotFoundException.class)
-                        .hasMessageContaining("1234").hasMessageContaining("DistributionSetMetadata");
+                        .hasMessageContaining("1234").hasMessageContaining("DistributionSet");
 
         assertThatThrownBy(() -> distributionSetManagement.updateDistributionSetMetadata(set.getId(),
                 entityFactory.generateMetadata("1234", "xxx"))).isInstanceOf(EntityNotFoundException.class)
@@ -846,7 +850,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(dsToTargetAssigned.getId(), savedTarget.getControllerId());
 
         // create assigned rollout
-        createRolloutByVariables("test", "test", 5, "name==*", dsToRolloutAssigned, "50", "5");
+        testdataFactory.createRolloutByVariables("test", "test", 5, "name==*", dsToRolloutAssigned, "50", "5");
 
         // delete assigned ds
         assertThat(distributionSetRepository.findAll()).hasSize(4);

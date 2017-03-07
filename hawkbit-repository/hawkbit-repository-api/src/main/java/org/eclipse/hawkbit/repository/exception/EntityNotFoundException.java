@@ -102,9 +102,10 @@ public class EntityNotFoundException extends AbstractServerRtException {
      * @param found
      *            collection of the {@link BaseEntity#getId()}s
      */
-    public EntityNotFoundException(final Class<? extends BaseEntity> type, final Collection<Long> expected,
-            final Collection<Long> found) {
+    public EntityNotFoundException(final Class<? extends BaseEntity> type, final Collection<?> expected,
+            final Collection<?> found) {
         this(type.getSimpleName() + "s with given identifiers {" + expected.stream().filter(id -> !found.contains(id))
                 .map(String::valueOf).collect(Collectors.joining(",")) + "} do not exist.");
     }
+
 }

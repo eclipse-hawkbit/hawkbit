@@ -13,6 +13,7 @@ import static com.google.common.collect.Iterables.toArray;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
@@ -36,6 +37,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -62,6 +64,86 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Target Management")
 public class TargetManagementTest extends AbstractJpaIntegrationTest {
+
+    @Test
+    @Description("Verifies that management queries react as specfied on calls for non existing entities.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetTagCreatedEvent.class, count = 1) })
+    public void nonExistingEntityQueries() {
+        final TargetTag tag = tagManagement.createTargetTag(entityFactory.tag().create().name("A"));
+        final Target target = testdataFactory.createTarget();
+
+        assertThatThrownBy(() -> targetManagement.assignTag(Lists.newArrayList(target.getControllerId()), 1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("TargetTag");
+        assertThatThrownBy(() -> targetManagement.assignTag(Lists.newArrayList("1234"), tag.getId()))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("Target");
+
+        assertThatThrownBy(() -> targetManagement.countTargetByAssignedDistributionSet(1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("DistributionSet");
+        assertThatThrownBy(() -> targetManagement.countTargetByInstalledDistributionSet(1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("DistributionSet");
+
+        assertThatThrownBy(() -> targetManagement.countTargetByTargetFilterQuery(1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("TargetFilterQuery");
+        assertThatThrownBy(() -> targetManagement.countTargetsByTargetFilterQueryAndNonDS(1234L, "name==*"))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("DistributionSet");
+
+        assertThatThrownBy(() -> targetManagement.deleteTarget("1234")).isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("1234").hasMessageContaining("Target");
+        assertThatThrownBy(() -> targetManagement.deleteTargets(Lists.newArrayList(1234L)))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("Target");
+
+        assertThatThrownBy(() -> targetManagement.findAllTargetsByTargetFilterQueryAndNonDS(pageReq, 1234L, "name==*"))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("DistributionSet");
+        assertThatThrownBy(() -> targetManagement.findAllTargetsInRolloutGroupWithoutAction(pageReq, 1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("RolloutGroup");
+        assertThatThrownBy(() -> targetManagement.findTargetByAssignedDistributionSet(1234L, pageReq))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("DistributionSet");
+        assertThatThrownBy(() -> targetManagement.findTargetByAssignedDistributionSet(1234L, "name==*", pageReq))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("DistributionSet");
+        assertThat(targetManagement.findTargetByControllerID("1234")).isNotPresent();
+        assertThat(targetManagement.findTargetByControllerIDWithDetails("1234")).isNotPresent();
+        assertThat(targetManagement.findTargetById(1234L)).isNotPresent();
+        assertThatThrownBy(() -> targetManagement.findTargetByInstalledDistributionSet(1234L, pageReq))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("DistributionSet");
+        assertThatThrownBy(() -> targetManagement.findTargetByInstalledDistributionSet(1234L, "name==*", pageReq))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("DistributionSet");
+
+        assertThatThrownBy(
+                () -> targetManagement.toggleTagAssignment(Lists.newArrayList(target.getControllerId()), "1234"))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .hasMessageContaining("TargetTag");
+        assertThatThrownBy(() -> targetManagement.toggleTagAssignment(Lists.newArrayList("1234"), tag.getName()))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("Target");
+
+        assertThatThrownBy(() -> targetManagement.unAssignAllTargetsByTag(1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("TargetTag");
+        assertThatThrownBy(() -> targetManagement.unAssignTag("1234", tag.getId()))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("Target");
+        assertThatThrownBy(() -> targetManagement.unAssignTag(target.getControllerId(), 1234L))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("TargetTag");
+        assertThatThrownBy(() -> targetManagement.updateTarget(entityFactory.target().update("1234")))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .hasMessageContaining("Target");
+
+    }
 
     @Test
     @Description("Ensures that retrieving the target security is only permitted with the necessary permissions.")
@@ -189,7 +271,6 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
                 .getControllerId());
         assignTarget.add(targetManagement.createTarget(entityFactory.target().create().controllerId("targetId1236"))
                 .getControllerId());
-        assignTarget.add("NotExist");
 
         final TargetTag targetTag = tagManagement.createTargetTag(entityFactory.tag().create().name("Tag1"));
 
@@ -200,9 +281,6 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         TargetTag findTargetTag = tagManagement.findTargetTag("Tag1").get();
         assertThat(assignedTargets.size()).as("Assigned targets are wrong")
                 .isEqualTo(findTargetTag.getAssignedToTargets().size());
-
-        assertThat(targetManagement.unAssignTag("NotExist", findTargetTag.getId())).as("Unassign target does not work")
-                .isNull();
 
         final Target unAssignTarget = targetManagement.unAssignTag("targetId123", findTargetTag.getId());
         assertThat(unAssignTarget.getControllerId()).as("Controller id is wrong").isEqualTo("targetId123");
