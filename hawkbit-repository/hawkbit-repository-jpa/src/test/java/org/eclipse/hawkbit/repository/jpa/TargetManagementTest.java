@@ -8,10 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static com.google.common.collect.Iterables.limit;
-import static com.google.common.collect.Iterables.toArray;
-import static com.google.common.collect.Lists.newArrayList;
-import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertNotNull;
@@ -524,7 +520,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         firstList = firstList.stream()
                 .map(t -> targetManagement.updateTarget(
                         entityFactory.target().update(t.getControllerId()).name(t.getName().concat("\tchanged"))))
-                .collect(toList());
+                .collect(Collectors.toList());
 
         // verify that all entries are found
         _founds: for (final Target foundTarget : allFound) {
@@ -553,10 +549,10 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         targetManagement.deleteTarget(extra.getControllerId());
 
         final int numberToDelete = 50;
-        final Iterable<Target> targetsToDelete = limit(firstList, numberToDelete);
-        final Target[] deletedTargets = toArray(targetsToDelete, Target.class);
-        final List<Long> targetsIdsToDelete = newArrayList(targetsToDelete.iterator()).stream().map(Target::getId)
-                .collect(toList());
+        final Iterable<Target> targetsToDelete = Iterables.limit(firstList, numberToDelete);
+        final Target[] deletedTargets = Iterables.toArray(targetsToDelete, Target.class);
+        final List<Long> targetsIdsToDelete = Lists.newArrayList(targetsToDelete.iterator()).stream().map(Target::getId)
+                .collect(Collectors.toList());
 
         targetManagement.deleteTargets(targetsIdsToDelete);
 
@@ -734,14 +730,15 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         toggleTagAssignment(targAs, targTagA);
 
-        assertThat(targetManagement
-                .findTargetsByControllerIDsWithTags(targAs.stream().map(Target::getControllerId).collect(toList())))
-                        .as("Target count is wrong").hasSize(25);
+        assertThat(targetManagement.findTargetsByControllerIDsWithTags(
+                targAs.stream().map(Target::getControllerId).collect(Collectors.toList()))).as("Target count is wrong")
+                        .hasSize(25);
 
         // no lazy loading exception and tag correctly assigned
         assertThat(targetManagement
-                .findTargetsByControllerIDsWithTags(targAs.stream().map(Target::getControllerId).collect(toList()))
-                .stream().map(target -> target.getTags().contains(targTagA)).collect(toList()))
+                .findTargetsByControllerIDsWithTags(
+                        targAs.stream().map(Target::getControllerId).collect(Collectors.toList()))
+                .stream().map(target -> target.getTags().contains(targTagA)).collect(Collectors.toList()))
                         .as("Tags not correctly assigned").containsOnly(true);
     }
 
@@ -791,27 +788,24 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final String rsqlFilter = "tag==Targ-A-Tag,id==target-id-B-00001,id==target-id-B-00008";
         final TargetTag targTagA = tagManagement.createTargetTag(entityFactory.tag().create().name("Targ-A-Tag"));
         final List<String> targAs = testdataFactory.createTargets(25, "target-id-A", "first description").stream()
-                .map(Target::getControllerId).collect(toList());
+                .map(Target::getControllerId).collect(Collectors.toList());
         targetManagement.toggleTagAssignment(targAs, targTagA.getName());
 
         testdataFactory.createTargets(25, "target-id-B", "first description");
 
-        final Page<Target> foundTargets = targetManagement.findTargetsAll(rsqlFilter, new PageRequest(0, 100));
+        final Page<Target> foundTargets = targetManagement.findTargetsAll(rsqlFilter, pageReq);
 
-        assertThat(targetManagement.findTargetsAll(new PageRequest(0, 100)).getNumberOfElements()).as("Total targets")
-                .isEqualTo(50);
+        assertThat(targetManagement.countTargetsAll()).as("Total targets").isEqualTo(50L);
         assertThat(foundTargets.getTotalElements()).as("Targets in RSQL filter").isEqualTo(27L);
-
     }
 
     @Test
     @Description("Verify that the find all targets by ids method contains the entities that we are looking for")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 12) })
     public void verifyFindTargetAllById() {
-        final List<Long> searchIds = new ArrayList<>();
-        searchIds.add(testdataFactory.createTarget("target-4").getId());
-        searchIds.add(testdataFactory.createTarget("target-5").getId());
-        searchIds.add(testdataFactory.createTarget("target-6").getId());
+        final List<Long> searchIds = org.assertj.core.util.Lists.newArrayList(
+                testdataFactory.createTarget("target-4").getId(), testdataFactory.createTarget("target-5").getId(),
+                testdataFactory.createTarget("target-6").getId());
         for (int i = 0; i < 9; i++) {
             testdataFactory.createTarget("test" + i);
         }
