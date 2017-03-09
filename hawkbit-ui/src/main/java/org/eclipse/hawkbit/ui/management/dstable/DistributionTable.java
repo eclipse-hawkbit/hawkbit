@@ -42,7 +42,7 @@ import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.push.DistributionSetUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -87,7 +87,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     private boolean isDistPinned;
     private Button distributinPinnedBtn;
 
-    DistributionTable(final UIEventBus eventBus, final I18N i18n, final SpPermissionChecker permissionChecker,
+    DistributionTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final SpPermissionChecker permissionChecker,
             final UINotification notification, final ManagementUIState managementUIState,
             final ManagementViewClientCriterion managementViewClientCriterion, final TargetManagement targetService,
             final DsMetadataPopupLayout dsMetadataPopupLayout,
@@ -99,7 +99,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         this.targetService = targetService;
         this.dsMetadataPopupLayout = dsMetadataPopupLayout;
         this.distributionSetManagement = distributionSetManagement;
-        notAllowedMsg = i18n.get("message.action.not.allowed");
+        notAllowedMsg = i18n.getMessage("message.action.not.allowed");
 
         addNewContainerDS();
         setColumnProperties();
@@ -285,7 +285,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
                 FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
         manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
         manageMetadataBtn.addStyleName(SPUIStyleDefinitions.DS_METADATA_ICON);
-        manageMetadataBtn.setDescription(i18n.get("tooltip.metadata.icon"));
+        manageMetadataBtn.setDescription(i18n.getMessage("tooltip.metadata.icon"));
         return manageMetadataBtn;
     }
 
@@ -399,7 +399,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         if (!assignedTargets.isEmpty()) {
             assignTargetToDs(getItem(distItemId), assignedTargets);
         } else {
-            notification.displaySuccess(i18n.get("message.no.targets.assiged.fortag", new Object[] { targetTagName }));
+            notification.displaySuccess(i18n.getMessage("message.no.targets.assiged.fortag", new Object[] { targetTagName }));
         }
     }
 
@@ -421,7 +421,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         }
 
         if (targetDetailsList.isEmpty()) {
-            getNotification().displayWarning(i18n.get("targets.not.exists"));
+            getNotification().displayWarning(i18n.getMessage("targets.not.exists"));
             return;
         }
 
@@ -429,7 +429,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         final Optional<DistributionSet> findDistributionSetById = distributionSetManagement
                 .findDistributionSetById(distId);
         if (!findDistributionSetById.isPresent()) {
-            notification.displayWarning(i18n.get("distributionset.not.exists"));
+            notification.displayWarning(i18n.getMessage("distributionset.not.exists"));
             return;
         }
 
@@ -461,7 +461,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     private Boolean isNoTagButton(final String tagData, final String targetNoTagData) {
         if (tagData.equals(targetNoTagData)) {
             notification.displayValidationError(
-                    i18n.get("message.tag.cannot.be.assigned", new Object[] { i18n.get("label.no.tag.assigned") }));
+                    i18n.getMessage("message.tag.cannot.be.assigned", new Object[] { i18n.getMessage("label.no.tag.assigned") }));
             return true;
         }
         return false;
@@ -487,9 +487,9 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     private String getPendingActionMessage(final String message, final String controllerId,
             final String distNameVersion) {
-        String pendActionMsg = i18n.get("message.target.assigned.pending");
+        String pendActionMsg = i18n.getMessage("message.target.assigned.pending");
         if (null == message) {
-            pendActionMsg = i18n.get("message.dist.pending.action", new Object[] { controllerId, distNameVersion });
+            pendActionMsg = i18n.getMessage("message.dist.pending.action", new Object[] { controllerId, distNameVersion });
         }
         return pendActionMsg;
     }
@@ -721,7 +721,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     private void showMetadataDetails(final Object itemId) {
         final Optional<DistributionSet> ds = distributionSetManagement.findDistributionSetById((Long) itemId);
         if (!ds.isPresent()) {
-            notification.displayWarning(i18n.get("distributionset.not.exists"));
+            notification.displayWarning(i18n.getMessage("distributionset.not.exists"));
             return;
         }
         UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds.get(), null));

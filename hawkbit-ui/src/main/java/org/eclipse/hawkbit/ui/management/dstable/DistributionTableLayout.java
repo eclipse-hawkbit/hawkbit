@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.distributions.dstable.DsMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -29,7 +29,7 @@ public class DistributionTableLayout extends AbstractTableLayout<DistributionTab
 
     private static final long serialVersionUID = 6464291374980641235L;
 
-    public DistributionTableLayout(final I18N i18n, final UIEventBus eventBus,
+    public DistributionTableLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState,
             final DistributionSetManagement distributionSetManagement,
             final ManagementViewClientCriterion managementViewClientCriterion, final EntityFactory entityFactory,

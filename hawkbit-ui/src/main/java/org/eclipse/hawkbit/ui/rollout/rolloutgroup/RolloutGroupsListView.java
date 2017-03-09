@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGridLayout;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.Label;
@@ -38,7 +38,7 @@ public class RolloutGroupsListView extends AbstractGridLayout {
      * @param permissionChecker
      *            SpPermissionChecker
      */
-    public RolloutGroupsListView(final I18N i18n, final UIEventBus eventBus,
+    public RolloutGroupsListView(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final RolloutGroupManagement rolloutGroupManagement, final RolloutUIState rolloutUIState,
             final SpPermissionChecker permissionChecker) {
         super(new RolloutGroupsListHeader(eventBus, rolloutUIState, i18n),

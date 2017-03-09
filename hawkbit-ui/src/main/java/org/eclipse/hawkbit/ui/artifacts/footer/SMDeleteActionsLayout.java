@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -45,7 +45,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private final UploadViewClientCriterion uploadViewClientCriterion;
 
-    public SMDeleteActionsLayout(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
+    public SMDeleteActionsLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final UINotification notification, final ArtifactUploadState artifactUploadState,
             final SoftwareManagement softwareManagement, final UploadViewClientCriterion uploadViewClientCriterion) {
         super(i18n, permChecker, eventBus, notification);
@@ -104,7 +104,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected String getDeleteAreaLabel() {
-        return i18n.get("label.software.module.drop.area");
+        return i18n.getMessage("label.software.module.drop.area");
     }
 
     @Override
@@ -132,7 +132,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
             if (artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType()
                     .map(type -> type.getName().equalsIgnoreCase(swModuleTypeName)).orElse(false)) {
                 notification.displayValidationError(
-                        i18n.get("message.swmodule.type.check.delete", new Object[] { swModuleTypeName }));
+                        i18n.getMessage("message.swmodule.type.check.delete", new Object[] { swModuleTypeName }));
             } else {
                 deleteSWModuleType(swModuleTypeName);
                 updateSWActionCount();

@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGridLayout;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -32,7 +32,7 @@ public class RolloutListView extends AbstractGridLayout {
     public RolloutListView(final SpPermissionChecker permissionChecker, final RolloutUIState rolloutUIState,
             final UIEventBus eventBus, final RolloutManagement rolloutManagement,
             final TargetManagement targetManagement, final UINotification uiNotification,
-            final UiProperties uiProperties, final EntityFactory entityFactory, final I18N i18n,
+            final UiProperties uiProperties, final EntityFactory entityFactory, final VaadinMessageSource i18n,
             final TargetFilterQueryManagement targetFilterQueryManagement) {
         super(new RolloutListHeader(permissionChecker, rolloutUIState, eventBus, rolloutManagement, targetManagement,
                 uiNotification, uiProperties, entityFactory, i18n, targetFilterQueryManagement),

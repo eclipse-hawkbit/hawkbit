@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -64,11 +64,11 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
 
     protected transient EventBus.UIEventBus eventBus;
 
-    protected I18N i18n;
+    protected VaadinMessageSource i18n;
 
     protected UINotification notification;
 
-    protected AbstractTable(final UIEventBus eventBus, final I18N i18n, final UINotification notification) {
+    protected AbstractTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification notification) {
         this.eventBus = eventBus;
         this.i18n = i18n;
         this.notification = notification;
@@ -320,17 +320,17 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
     protected List<TableColumn> getTableVisibleColumns() {
         final List<TableColumn> columnList = new ArrayList<>();
         if (!isMaximized()) {
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"),
+            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.getMessage("header.name"),
                     getColumnNameMinimizedSize()));
             return columnList;
         }
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"), 0.2F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.get("header.createdBy"), 0.1F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.1F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.getMessage("header.name"), 0.2F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.getMessage("header.createdBy"), 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.getMessage("header.createdDate"), 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.getMessage("header.modifiedBy"), 0.1F));
         columnList.add(
-                new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"), 0.1F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.2F));
+                new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.getMessage("header.modifiedDate"), 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.getMessage("header.description"), 0.2F));
         setItemDescriptionGenerator((source, itemId, propertyId) -> {
 
             if (SPUILabelDefinitions.VAR_CREATED_BY.equals(propertyId)) {
@@ -395,7 +395,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
 
     private boolean validateDropList(final Set<?> droplist) {
         if (droplist.isEmpty()) {
-            final String actionDidNotWork = i18n.get("message.action.did.not.work", new Object[] {});
+            final String actionDidNotWork = i18n.getMessage("message.action.did.not.work", new Object[] {});
             notification.displayValidationError(actionDidNotWork);
             return false;
         }
@@ -407,7 +407,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
         final Component compsource = transferable.getSourceComponent();
 
         if (!hasDropPermission()) {
-            notification.displayValidationError(i18n.get("message.permission.insufficient"));
+            notification.displayValidationError(i18n.getMessage("message.permission.insufficient"));
             return false;
         }
 
@@ -420,7 +420,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
             return validateDragAndDropWrapper((DragAndDropWrapper) compsource)
                     && validateDropList(getDraggedTargetList(dragEvent));
         }
-        notification.displayValidationError(i18n.get(ACTION_NOT_ALLOWED_MSG));
+        notification.displayValidationError(i18n.getMessage(ACTION_NOT_ALLOWED_MSG));
         return false;
     }
 

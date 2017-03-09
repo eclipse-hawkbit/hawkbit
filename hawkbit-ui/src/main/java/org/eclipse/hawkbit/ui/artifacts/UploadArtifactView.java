@@ -28,7 +28,7 @@ import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.upload.UploadLayout;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +64,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
 
     private final SpPermissionChecker permChecker;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final UINotification uiNotification;
 
@@ -88,7 +88,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
     private DragAndDropWrapper dadw;
 
     @Autowired
-    UploadArtifactView(final UIEventBus eventBus, final SpPermissionChecker permChecker, final I18N i18n,
+    UploadArtifactView(final UIEventBus eventBus, final SpPermissionChecker permChecker, final VaadinMessageSource i18n,
             final UINotification uiNotification, final ArtifactUploadState artifactUploadState,
             final TagManagement tagManagement, final EntityFactory entityFactory,
             final SoftwareManagement softwareManagement, final UploadViewClientCriterion uploadViewClientCriterion,
@@ -256,7 +256,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
     private void checkNoDataAvaialble() {
         if (artifactUploadState.isNoDataAvilableSoftwareModule()) {
 
-            uiNotification.displayValidationError(i18n.get("message.no.data"));
+            uiNotification.displayValidationError(i18n.getMessage("message.no.data"));
         }
     }
 

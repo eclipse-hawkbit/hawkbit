@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.rollout.rolloutgrouptargets;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -34,10 +34,10 @@ public class RolloutGroupTargetsCountLabelMessage extends Label {
 
     private final RolloutGroupTargetsListGrid rolloutGroupTargetsListGrid;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     RolloutGroupTargetsCountLabelMessage(final RolloutUIState rolloutUIState,
-            final RolloutGroupTargetsListGrid rolloutGroupTargetsListGrid, final I18N i18n, final UIEventBus eventBus) {
+            final RolloutGroupTargetsListGrid rolloutGroupTargetsListGrid, final VaadinMessageSource i18n, final UIEventBus eventBus) {
         this.rolloutUIState = rolloutUIState;
         this.rolloutGroupTargetsListGrid = rolloutGroupTargetsListGrid;
         this.i18n = i18n;
@@ -71,7 +71,7 @@ public class RolloutGroupTargetsCountLabelMessage extends Label {
         if (rolloutUIState.getRolloutGroupTargetsTruncated() != null) {
             // set the icon
             setIcon(FontAwesome.INFO_CIRCLE);
-            setDescription(i18n.get("rollout.group.label.target.truncated",
+            setDescription(i18n.getMessage("rollout.group.label.target.truncated",
                     rolloutUIState.getRolloutGroupTargetsTruncated(), SPUIDefinitions.MAX_TABLE_ENTRIES));
             totalTargetTableEnteries += rolloutUIState.getRolloutGroupTargetsTruncated();
         } else {
@@ -79,12 +79,12 @@ public class RolloutGroupTargetsCountLabelMessage extends Label {
             setDescription(null);
         }
 
-        final StringBuilder message = new StringBuilder(i18n.get("label.target.filter.count"));
+        final StringBuilder message = new StringBuilder(i18n.getMessage("label.target.filter.count"));
         message.append(rolloutUIState.getRolloutGroupTargetsTotalCount());
 
         if (totalTargetTableEnteries > SPUIDefinitions.MAX_TABLE_ENTRIES) {
             message.append(HawkbitCommonUtil.SP_STRING_PIPE);
-            message.append(i18n.get("label.filter.shown"));
+            message.append(i18n.getMessage("label.filter.shown"));
             message.append(SPUIDefinitions.MAX_TABLE_ENTRIES);
         }
 

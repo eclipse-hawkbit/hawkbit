@@ -36,7 +36,7 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.footer.ActionTypeOptionGroupLayout.ActionTypeOption;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -80,7 +80,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
     private ConfirmationTab assignmnetTab;
 
-    public ManangementConfirmationWindowLayout(final I18N i18n, final UIEventBus eventBus,
+    public ManangementConfirmationWindowLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final ManagementUIState managementUIState, final TargetManagement targetManagement,
             final DeploymentManagement deploymentManagement,
             final DistributionSetManagement distributionSetManagement) {
@@ -96,13 +96,13 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
     protected Map<String, ConfirmationTab> getConfimrationTabs() {
         final Map<String, ConfirmationTab> tabs = Maps.newHashMapWithExpectedSize(3);
         if (!managementUIState.getDeletedDistributionList().isEmpty()) {
-            tabs.put(i18n.get("caption.delete.dist.accordion.tab"), createDeletedDistributionTab());
+            tabs.put(i18n.getMessage("caption.delete.dist.accordion.tab"), createDeletedDistributionTab());
         }
         if (!managementUIState.getDeletedTargetList().isEmpty()) {
-            tabs.put(i18n.get("caption.delete.target.accordion.tab"), createDeletedTargetTab());
+            tabs.put(i18n.getMessage("caption.delete.target.accordion.tab"), createDeletedTargetTab());
         }
         if (!managementUIState.getAssignedList().isEmpty()) {
-            tabs.put(i18n.get("caption.assign.dist.accordion.tab"), createAssignmentTab());
+            tabs.put(i18n.getMessage("caption.assign.dist.accordion.tab"), createAssignmentTab());
         }
 
         return tabs;
@@ -113,10 +113,10 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         assignmnetTab = new ConfirmationTab();
         assignmnetTab.getConfirmAll().setId(UIComponentIdProvider.SAVE_ASSIGNMENT);
         assignmnetTab.getConfirmAll().setIcon(FontAwesome.SAVE);
-        assignmnetTab.getConfirmAll().setCaption(i18n.get("button.assign.all"));
+        assignmnetTab.getConfirmAll().setCaption(i18n.getMessage("button.assign.all"));
         assignmnetTab.getConfirmAll().addClickListener(event -> saveAllAssignments(assignmnetTab));
 
-        assignmnetTab.getDiscardAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
+        assignmnetTab.getDiscardAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
         assignmnetTab.getDiscardAll().setId(UIComponentIdProvider.DISCARD_ASSIGNMENT);
         assignmnetTab.getDiscardAll().addClickListener(event -> discardAllAssignments(assignmnetTab));
 
@@ -133,8 +133,8 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         assignmnetTab.getTable().setColumnExpandRatio(DISTRIBUTION_NAME, 2);
         assignmnetTab.getTable().setColumnExpandRatio(DISCARD_CHANGES, 1);
         assignmnetTab.getTable().setVisibleColumns(TARGET_NAME, DISTRIBUTION_NAME, DISCARD_CHANGES);
-        assignmnetTab.getTable().setColumnHeaders(i18n.get("header.first.assignment.table"),
-                i18n.get("header.second.assignment.table"), i18n.get("header.third.assignment.table"));
+        assignmnetTab.getTable().setColumnHeaders(i18n.getMessage("header.first.assignment.table"),
+                i18n.getMessage("header.second.assignment.table"), i18n.getMessage("header.third.assignment.table"));
         assignmnetTab.getTable().setColumnAlignment(DISCARD_CHANGES, Align.CENTER);
 
         actionTypeOptionGroupLayout.selectDefaultOption();
@@ -189,7 +189,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         resfreshPinnedDetails(saveAssignedList);
 
         managementUIState.getAssignedList().clear();
-        setActionMessage(i18n.get("message.target.ds.assign.success"));
+        setActionMessage(i18n.getMessage("message.target.ds.assign.success"));
         removeCurrentTab(tab);
         eventBus.publish(this, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
     }
@@ -220,18 +220,18 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
     private String getAssigmentSuccessMessage(final int assignedCount) {
         return FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
-                + i18n.get("message.target.assignment", new Object[] { assignedCount });
+                + i18n.getMessage("message.target.assignment", new Object[] { assignedCount });
     }
 
     private String getDuplicateAssignmentMessage(final int alreadyAssignedCount) {
         return FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
-                + i18n.get("message.target.alreadyAssigned", new Object[] { alreadyAssignedCount });
+                + i18n.getMessage("message.target.alreadyAssigned", new Object[] { alreadyAssignedCount });
     }
 
     private void discardAllAssignments(final ConfirmationTab tab) {
         removeCurrentTab(tab);
         managementUIState.getAssignedList().clear();
-        setActionMessage(i18n.get("message.assign.discard.success"));
+        setActionMessage(i18n.getMessage("message.assign.discard.success"));
         eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS);
     }
 
@@ -275,10 +275,10 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         // TobeDone ? y to set caption every time??
         tab.getConfirmAll().setId(UIComponentIdProvider.TARGET_DELETE_ALL);
         tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
-        tab.getConfirmAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DELETE_ALL));
+        tab.getConfirmAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DELETE_ALL));
         tab.getConfirmAll().addClickListener(event -> deleteAllTargets(tab));
 
-        tab.getDiscardAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
+        tab.getDiscardAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
         tab.getDiscardAll().addClickListener(event -> discardAllTargets(tab));
 
         /* Add items container to the table. */
@@ -292,8 +292,8 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         });
 
         tab.getTable().setVisibleColumns(TARGET_NAME, DISCARD_CHANGES);
-        tab.getTable().setColumnHeaders(i18n.get("header.first.deletetarget.table"),
-                i18n.get("header.second.deletetarget.table"));
+        tab.getTable().setColumnHeaders(i18n.getMessage("header.first.deletetarget.table"),
+                i18n.getMessage("header.second.deletetarget.table"));
 
         tab.getTable().setColumnExpandRatio(TARGET_NAME, SPUIDefinitions.TARGET_DISTRIBUTION_COLUMN_WIDTH);
         tab.getTable().setColumnExpandRatio(DISCARD_CHANGES, SPUIDefinitions.DISCARD_COLUMN_WIDTH);
@@ -307,10 +307,10 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         // TobeDone ? y to set caption every time??
         tab.getConfirmAll().setId(UIComponentIdProvider.DIST_DELETE_ALL);
         tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
-        tab.getConfirmAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DELETE_ALL));
+        tab.getConfirmAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DELETE_ALL));
         tab.getConfirmAll().addClickListener(event -> deleteAllDistributions(tab));
 
-        tab.getDiscardAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
+        tab.getDiscardAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
         tab.getDiscardAll().addClickListener(event -> discardAllDistributions(tab));
 
         /* Add items container to the table. */
@@ -326,8 +326,8 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         tab.getTable().setColumnExpandRatio(DISTRIBUTION_NAME, SPUIDefinitions.TARGET_DISTRIBUTION_COLUMN_WIDTH);
         tab.getTable().setColumnExpandRatio(DISCARD_CHANGES, SPUIDefinitions.DISCARD_COLUMN_WIDTH);
         tab.getTable().setVisibleColumns(DISTRIBUTION_NAME, DISCARD_CHANGES);
-        tab.getTable().setColumnHeaders(i18n.get("header.one.deletedist.table"),
-                i18n.get("header.second.deletedist.table"));
+        tab.getTable().setColumnHeaders(i18n.getMessage("header.one.deletedist.table"),
+                i18n.getMessage("header.second.deletedist.table"));
         tab.getTable().setColumnAlignment(DISCARD_CHANGES, Align.CENTER);
         return tab;
     }
@@ -363,7 +363,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
     private void discardAllDistributions(final ConfirmationTab tab) {
         removeCurrentTab(tab);
         managementUIState.getDeletedDistributionList().clear();
-        setActionMessage(i18n.get("message.dist.discard.success"));
+        setActionMessage(i18n.getMessage("message.dist.discard.success"));
         eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_DISTRIBUTIONS);
     }
 
@@ -376,11 +376,11 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.REMOVE_ENTITY, deletedIds));
 
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
-                + i18n.get("message.dist.deleted", managementUIState.getDeletedDistributionList().size()));
+                + i18n.getMessage("message.dist.deleted", managementUIState.getDeletedDistributionList().size()));
 
         removeDeletedDistributionsFromAssignmentTab();
         removeCurrentTab(tab);
-        setActionMessage(i18n.get("message.dist.delete.success"));
+        setActionMessage(i18n.getMessage("message.dist.delete.success"));
 
         managementUIState.getTargetTableFilters().getPinnedDistId()
                 .ifPresent(distId -> unPinDeletedDS(deletedIds, distId));
@@ -455,7 +455,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
     private void discardAllTargets(final ConfirmationTab tab) {
         removeCurrentTab(tab);
-        setActionMessage(i18n.get("message.target.discard.success"));
+        setActionMessage(i18n.getMessage("message.target.discard.success"));
         managementUIState.getDeletedTargetList().clear();
         eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_TARGETS);
     }
@@ -470,9 +470,9 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.REMOVE_ENTITY, targetIds));
 
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
-                + i18n.get("message.target.deleted", targetIds.size()));
+                + i18n.getMessage("message.target.deleted", targetIds.size()));
         removeCurrentTab(tab);
-        setActionMessage(i18n.get("message.target.delete.success"));
+        setActionMessage(i18n.getMessage("message.target.delete.success"));
         removeDeletedTargetsFromAssignmentTab();
 
         managementUIState.getDistributionTableFilters().getPinnedTarget().ifPresent(this::unPinDeletedTarget);

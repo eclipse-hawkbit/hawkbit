@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -37,7 +37,7 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
 
     private final CreateUpdateDistSetTypeLayout createUpdateDistSetTypeLayout;
 
-    DSTypeFilterHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
+    DSTypeFilterHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final ManageDistUIState manageDistUIState, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UINotification uiNotification,
             final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement) {

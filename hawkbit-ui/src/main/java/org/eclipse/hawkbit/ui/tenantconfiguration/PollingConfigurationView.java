@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.tenantconfiguration.polling.DurationConfigField;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 
 import com.vaadin.ui.Label;
@@ -39,7 +39,7 @@ public class PollingConfigurationView extends BaseConfigurationView
     private Duration tenantPollTime;
     private Duration tenantOverdueTime;
 
-    PollingConfigurationView(final I18N i18n, final ControllerPollProperties controllerPollProperties,
+    PollingConfigurationView(final VaadinMessageSource i18n, final ControllerPollProperties controllerPollProperties,
             final TenantConfigurationManagement tenantConfigurationManagement) {
         this.tenantConfigurationManagement = tenantConfigurationManagement;
 
@@ -71,20 +71,20 @@ public class PollingConfigurationView extends BaseConfigurationView
         final VerticalLayout vLayout = new VerticalLayout();
         vLayout.setMargin(true);
 
-        final Label headerDisSetType = new Label(i18n.get("configuration.polling.title"));
+        final Label headerDisSetType = new Label(i18n.getMessage("configuration.polling.title"));
         headerDisSetType.addStyleName("config-panel-header");
         vLayout.addComponent(headerDisSetType);
 
         fieldPollTime = DurationConfigField.builder(UIComponentIdProvider.SYSTEM_CONFIGURATION_POLLING)
-                .caption(i18n.get("configuration.polling.time"))
-                .checkBoxTooltip(i18n.get("configuration.polling.custom.value")).range(minDuration, maxDuration)
+                .caption(i18n.getMessage("configuration.polling.time"))
+                .checkBoxTooltip(i18n.getMessage("configuration.polling.custom.value")).range(minDuration, maxDuration)
                 .globalDuration(globalPollTime).tenantDuration(tenantPollTime).build();
         fieldPollTime.addChangeListener(this);
         vLayout.addComponent(fieldPollTime);
 
         fieldPollingOverdueTime = DurationConfigField.builder(UIComponentIdProvider.SYSTEM_CONFIGURATION_OVERDUE)
-                .caption(i18n.get("configuration.polling.overduetime"))
-                .checkBoxTooltip(i18n.get("configuration.polling.custom.value")).range(minDuration, maxDuration)
+                .caption(i18n.getMessage("configuration.polling.overduetime"))
+                .checkBoxTooltip(i18n.getMessage("configuration.polling.custom.value")).range(minDuration, maxDuration)
                 .globalDuration(globalOverdueTime).tenantDuration(tenantOverdueTime).build();
         fieldPollingOverdueTime.addChangeListener(this);
         vLayout.addComponent(fieldPollingOverdueTime);

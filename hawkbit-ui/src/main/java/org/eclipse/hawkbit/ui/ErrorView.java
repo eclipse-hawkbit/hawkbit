@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui;
 
 import org.eclipse.hawkbit.ui.menu.DashboardMenu;
 import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -40,12 +40,12 @@ class ErrorView extends VerticalLayout implements View {
 
     private final Label message;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final DashboardMenu dashboardMenu;
 
     @Autowired
-    ErrorView(final I18N i18n, final DashboardMenu dashboardMenu) {
+    ErrorView(final VaadinMessageSource i18n, final DashboardMenu dashboardMenu) {
         this.i18n = i18n;
         this.dashboardMenu = dashboardMenu;
         setMargin(true);
@@ -57,17 +57,17 @@ class ErrorView extends VerticalLayout implements View {
     public void enter(final ViewChangeListener.ViewChangeEvent event) {
         final DashboardMenuItem view = dashboardMenu.getByViewName(event.getViewName());
         if (view == null) {
-            message.setValue(i18n.get("message.error.view", new Object[] { event.getViewName() }));
+            message.setValue(i18n.getMessage("message.error.view", new Object[] { event.getViewName() }));
             return;
         }
         if (dashboardMenu.isAccessDenied(event.getViewName())) {
             final Notification nt = new Notification("Access denied",
-                    i18n.get("message.accessdenied.view", new Object[] { event.getViewName() }), Type.ERROR_MESSAGE,
+                    i18n.getMessage("message.accessdenied.view", new Object[] { event.getViewName() }), Type.ERROR_MESSAGE,
                     false);
             nt.setStyleName(SPUILabelDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE);
             nt.setPosition(Position.BOTTOM_RIGHT);
             nt.show(UI.getCurrent().getPage());
-            message.setValue(i18n.get("message.accessdenied.view", new Object[] { event.getViewName() }));
+            message.setValue(i18n.getMessage("message.accessdenied.view", new Object[] { event.getViewName() }));
         }
     }
 

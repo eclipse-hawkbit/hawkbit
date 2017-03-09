@@ -63,7 +63,7 @@ import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -137,7 +137,7 @@ public class RolloutListGrid extends AbstractGrid {
         statusIconMap.put(RolloutStatus.DELETING, new StatusFontIcon(null, SPUIStyleDefinitions.STATUS_SPINNER_RED));
     }
 
-    RolloutListGrid(final I18N i18n, final UIEventBus eventBus, final RolloutManagement rolloutManagement,
+    RolloutListGrid(final VaadinMessageSource i18n, final UIEventBus eventBus, final RolloutManagement rolloutManagement,
             final UINotification uiNotification, final RolloutUIState rolloutUIState,
             final SpPermissionChecker permissionChecker, final TargetManagement targetManagement,
             final EntityFactory entityFactory, final UiProperties uiProperties,
@@ -310,35 +310,35 @@ public class RolloutListGrid extends AbstractGrid {
 
     @Override
     protected void setColumnHeaderNames() {
-        getColumn(ROLLOUT_RENDERER_DATA).setHeaderCaption(i18n.get("header.name"));
-        getColumn(DS_TYPE).setHeaderCaption(i18n.get("header.type"));
-        getColumn(SW_MODULES).setHeaderCaption(i18n.get("header.swmodules"));
-        getColumn(IS_REQUIRED_MIGRATION_STEP).setHeaderCaption(i18n.get("header.migrations.step"));
-        getColumn(VAR_DIST_NAME_VERSION).setHeaderCaption(i18n.get("header.distributionset"));
-        getColumn(VAR_NUMBER_OF_GROUPS).setHeaderCaption(i18n.get("header.numberofgroups"));
-        getColumn(VAR_TOTAL_TARGETS).setHeaderCaption(i18n.get("header.total.targets"));
-        getColumn(VAR_CREATED_DATE).setHeaderCaption(i18n.get("header.createdDate"));
-        getColumn(VAR_CREATED_USER).setHeaderCaption(i18n.get("header.createdBy"));
-        getColumn(VAR_MODIFIED_DATE).setHeaderCaption(i18n.get("header.modifiedDate"));
-        getColumn(VAR_MODIFIED_BY).setHeaderCaption(i18n.get("header.modifiedBy"));
-        getColumn(VAR_DESC).setHeaderCaption(i18n.get("header.description"));
-        getColumn(VAR_TOTAL_TARGETS_COUNT_STATUS).setHeaderCaption(i18n.get("header.detail.status"));
-        getColumn(VAR_STATUS).setHeaderCaption(i18n.get("header.status"));
+        getColumn(ROLLOUT_RENDERER_DATA).setHeaderCaption(i18n.getMessage("header.name"));
+        getColumn(DS_TYPE).setHeaderCaption(i18n.getMessage("header.type"));
+        getColumn(SW_MODULES).setHeaderCaption(i18n.getMessage("header.swmodules"));
+        getColumn(IS_REQUIRED_MIGRATION_STEP).setHeaderCaption(i18n.getMessage("header.migrations.step"));
+        getColumn(VAR_DIST_NAME_VERSION).setHeaderCaption(i18n.getMessage("header.distributionset"));
+        getColumn(VAR_NUMBER_OF_GROUPS).setHeaderCaption(i18n.getMessage("header.numberofgroups"));
+        getColumn(VAR_TOTAL_TARGETS).setHeaderCaption(i18n.getMessage("header.total.targets"));
+        getColumn(VAR_CREATED_DATE).setHeaderCaption(i18n.getMessage("header.createdDate"));
+        getColumn(VAR_CREATED_USER).setHeaderCaption(i18n.getMessage("header.createdBy"));
+        getColumn(VAR_MODIFIED_DATE).setHeaderCaption(i18n.getMessage("header.modifiedDate"));
+        getColumn(VAR_MODIFIED_BY).setHeaderCaption(i18n.getMessage("header.modifiedBy"));
+        getColumn(VAR_DESC).setHeaderCaption(i18n.getMessage("header.description"));
+        getColumn(VAR_TOTAL_TARGETS_COUNT_STATUS).setHeaderCaption(i18n.getMessage("header.detail.status"));
+        getColumn(VAR_STATUS).setHeaderCaption(i18n.getMessage("header.status"));
 
-        getColumn(RUN_OPTION).setHeaderCaption(i18n.get("header.action.run"));
-        getColumn(PAUSE_OPTION).setHeaderCaption(i18n.get("header.action.pause"));
+        getColumn(RUN_OPTION).setHeaderCaption(i18n.getMessage("header.action.run"));
+        getColumn(PAUSE_OPTION).setHeaderCaption(i18n.getMessage("header.action.pause"));
 
         if (permissionChecker.hasRolloutUpdatePermission()) {
-            getColumn(UPDATE_OPTION).setHeaderCaption(i18n.get("header.action.update"));
+            getColumn(UPDATE_OPTION).setHeaderCaption(i18n.getMessage("header.action.update"));
         }
 
         if (permissionChecker.hasRolloutCreatePermission()) {
-            getColumn(COPY_OPTION).setHeaderCaption(i18n.get("header.action.copy"));
+            getColumn(COPY_OPTION).setHeaderCaption(i18n.getMessage("header.action.copy"));
         }
 
-        getColumn(DELETE_OPTION).setHeaderCaption(i18n.get("header.action.delete"));
+        getColumn(DELETE_OPTION).setHeaderCaption(i18n.getMessage("header.action.delete"));
 
-        joinColumns().setText(i18n.get("header.action"));
+        joinColumns().setText(i18n.getMessage("header.action"));
     }
 
     private HeaderCell joinColumns() {
@@ -473,7 +473,7 @@ public class RolloutListGrid extends AbstractGrid {
         final String rolloutName = (String) row.getItemProperty(VAR_NAME).getValue();
 
         rolloutManagement.pauseRollout(rolloutId);
-        uiNotification.displaySuccess(i18n.get("message.rollout.paused", rolloutName));
+        uiNotification.displaySuccess(i18n.getMessage("message.rollout.paused", rolloutName));
     }
 
     private void startOrResumeRollout(final Long rolloutId) {
@@ -484,27 +484,27 @@ public class RolloutListGrid extends AbstractGrid {
 
         if (RolloutStatus.READY.equals(rolloutStatus)) {
             rolloutManagement.startRollout(rolloutId);
-            uiNotification.displaySuccess(i18n.get("message.rollout.started", rolloutName));
+            uiNotification.displaySuccess(i18n.getMessage("message.rollout.started", rolloutName));
             return;
         }
 
         if (RolloutStatus.PAUSED.equals(rolloutStatus)) {
             rolloutManagement.resumeRollout(rolloutId);
-            uiNotification.displaySuccess(i18n.get("message.rollout.resumed", rolloutName));
+            uiNotification.displaySuccess(i18n.getMessage("message.rollout.resumed", rolloutName));
             return;
         }
     }
 
     private void updateRollout(final Long rolloutId) {
         final CommonDialogWindow addTargetWindow = addUpdateRolloutWindow.getWindow(rolloutId, false);
-        addTargetWindow.setCaption(i18n.get("caption.update.rollout"));
+        addTargetWindow.setCaption(i18n.getMessage("caption.update.rollout"));
         UI.getCurrent().addWindow(addTargetWindow);
         addTargetWindow.setVisible(Boolean.TRUE);
     }
 
     private void copyRollout(final Long rolloutId) {
         final CommonDialogWindow addTargetWindow = addUpdateRolloutWindow.getWindow(rolloutId, true);
-        addTargetWindow.setCaption(i18n.get("caption.create.rollout"));
+        addTargetWindow.setCaption(i18n.getMessage("caption.create.rollout"));
         UI.getCurrent().addWindow(addTargetWindow);
         addTargetWindow.setVisible(Boolean.TRUE);
     }
@@ -517,15 +517,15 @@ public class RolloutListGrid extends AbstractGrid {
         }
 
         final String formattedConfirmationQuestion = getConfirmationQuestion(rollout.get());
-        final ConfirmationDialog confirmationDialog = new ConfirmationDialog(i18n.get("caption.confirm.delete.rollout"),
-                formattedConfirmationQuestion, i18n.get("button.ok"), i18n.get("button.cancel"), ok -> {
+        final ConfirmationDialog confirmationDialog = new ConfirmationDialog(i18n.getMessage("caption.confirm.delete.rollout"),
+                formattedConfirmationQuestion, i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
                     if (!ok) {
                         return;
                     }
                     final Item row = getContainerDataSource().getItem(rolloutId);
                     final String rolloutName = (String) row.getItemProperty(VAR_NAME).getValue();
                     rolloutManagement.deleteRollout(rolloutId);
-                    uiNotification.displaySuccess(i18n.get("message.rollout.deleted", rolloutName));
+                    uiNotification.displaySuccess(i18n.getMessage("message.rollout.deleted", rolloutName));
                 });
         UI.getCurrent().addWindow(confirmationDialog.getWindow());
         confirmationDialog.getWindow().bringToFront();
@@ -541,10 +541,10 @@ public class RolloutListGrid extends AbstractGrid {
         final Long runningActions = statusTotalCount.get(Status.RUNNING);
         String rolloutDetailsMessage = StringUtils.EMPTY;
         if ((scheduledActions > 0) || (runningActions > 0)) {
-            rolloutDetailsMessage = i18n.get("message.delete.rollout.details", runningActions, scheduledActions);
+            rolloutDetailsMessage = i18n.getMessage("message.delete.rollout.details", runningActions, scheduledActions);
         }
 
-        return i18n.get("message.delete.rollout", rollout.getName(), rolloutDetailsMessage);
+        return i18n.getMessage("message.delete.rollout", rollout.getName(), rolloutDetailsMessage);
     }
 
     private String getDescription(final CellReference cell) {
