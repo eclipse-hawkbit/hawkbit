@@ -180,8 +180,10 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private void lookIfUpdateAvailable(final Target target) {
+
         final Optional<Action> actionOptional = controllerManagement
                 .findOldestActiveActionByTarget(target.getControllerId());
+
         if (!actionOptional.isPresent()) {
             return;
         }

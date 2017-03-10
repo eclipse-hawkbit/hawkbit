@@ -119,7 +119,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
         });
     }
 
-    private void createAndSendTarget(String tenant) {
+    private void createAndSendTarget(final String tenant) {
         createAndSendTarget(REGISTER_TARGET, tenant);
     }
 

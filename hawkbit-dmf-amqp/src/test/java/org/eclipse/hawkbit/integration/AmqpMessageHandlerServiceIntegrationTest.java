@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
@@ -18,6 +19,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.ActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.ActionUpdateStatus;
+import org.eclipse.hawkbit.dmf.json.model.AttributeUpdate;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
@@ -29,7 +31,9 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
+import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.Test;
@@ -43,7 +47,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Device Management Federation API")
 @Stories("Amqp Message Handler Service")
-// TODO UPDATE_ATTRIBUTES
 public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegrationTest {
 
     @Test
@@ -415,31 +418,53 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     }
 
     @Test
-    @Description("TODO: Verfiy update the action status to canceld, if the current status is not a canceling state")
+    @Description("Verfiy receiving a download and install message if a deployment is done before the target has polled the first time.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionUpdatedEvent.class, count = 1), @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
-    public void cancelActionStatus() {
-        // TODO: AmqpMessageHandlerService komme nicht in zeile 255 und danach
-        // 189
-        // final DistributionSet distributionSet =
-        // registerTargetAndAssignDistributionSet();
-        // assertDownloadAndInstallMessage(distributionSet);
-        // registerTargetAndAssignDistributionSet(TargetUpdateStatus.PENDING);
-        // final assertCancel
-        // Long actionId = getReplyAction();
-        // actionId = controllerManagament
-        // .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.CANCELING))
-        // .getId();
-        //
-        // assertThat(controllerManagament.findOldestActiveActionByTarget(REGISTER_TARGET).isPresent()).isTrue();
-        // sendActionUpdateStatus(new ActionUpdateStatus(actionId,
-        // ActionStatus.CANCELED));
-        // assertAction(actionId, Status.RUNNING, Status.CANCELING,
-        // Status.CANCELED);
+    public void receiveDownLoadAndInstallMessageAfterAssignment() {
+
+        // setup
+        controllerManagement.findOrRegisterTargetIfItDoesNotexist(REGISTER_TARGET, null);
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        assignDistributionSet(distributionSet.getId(), REGISTER_TARGET);
+
+        // test
+        registerTargetWithExistingTenant(REGISTER_TARGET, 1, TargetUpdateStatus.PENDING);
+
+        // verify
+        assertDownloadAndInstallMessage(distributionSet.getModules());
+        verifyDeadLetterMessages(0);
+    }
+
+    @Test
+    @Description("Verfiy receiving a cancel update message if a deployment is canceled before the target has polled the first time.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
+            @Expect(type = ActionUpdatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 1) })
+    public void cancelActionStatus2() {
+
+        // Setup
+        controllerManagement.findOrRegisterTargetIfItDoesNotexist(REGISTER_TARGET, null);
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        final DistributionSetAssignmentResult distributionSetAssignmentResult = assignDistributionSet(
+                distributionSet.getId(), REGISTER_TARGET);
+        deploymentManagement.cancelAction(distributionSetAssignmentResult.getActions().get(0));
+
+        // test
+        registerTargetWithExistingTenant(REGISTER_TARGET, 1, TargetUpdateStatus.PENDING);
+
+        // verify
+        assertCancelActionMessage(distributionSetAssignmentResult.getActions().get(0));
+        verifyDeadLetterMessages(0);
     }
 
     @Test
@@ -486,39 +511,115 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
 
         sendActionUpdateStatus(new ActionUpdateStatus(actionId, ActionStatus.CANCEL_REJECTED));
         assertAction(actionId, Status.RUNNING, Status.CANCELING, Status.CANCEL_REJECTED);
+
     }
 
-    private Long registerTargetAndSendActionStatus(ActionStatus sendActionStatus) {
+    // TODO events
+    @Test
+    @Description("Verify that sending an update controller attribute message to an existing target works.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
+    public void updateAttributes() {
+
+        // setup
+        final String target = "ControllerAttributeTestTarget";
+        registerAndAssertTargetWithExistingTenant(target, 1);
+        final AttributeUpdate controllerAttribute = new AttributeUpdate();
+        controllerAttribute.getAttributes().put("test1", "testA");
+        controllerAttribute.getAttributes().put("test2", "testB");
+
+        // test
+        sendUpdateAttributeMessage(target, TENANT_EXIST, controllerAttribute);
+
+        // validate
+        assertUpdateAttributes(target, controllerAttribute.getAttributes());
+
+    }
+
+    @Test
+    @Description("Verify that sending an update controller attribute message with no thingid header to an existing target does not work.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 0), @Expect(type = TargetPollEvent.class, count = 1) })
+    public void updateAttributesWithNoThingId() {
+
+        // setup
+        final String target = "ControllerAttributeTestTarget";
+        registerAndAssertTargetWithExistingTenant(target, 1);
+        final AttributeUpdate controllerAttribute = new AttributeUpdate();
+        controllerAttribute.getAttributes().put("test1", "testA");
+        controllerAttribute.getAttributes().put("test2", "testB");
+        final Message createUpdateAttributesMessage = createUpdateAttributesMessage(null, TENANT_EXIST,
+                controllerAttribute);
+        createUpdateAttributesMessage.getMessageProperties().getHeaders().remove(MessageHeaderKey.THING_ID);
+
+        // test
+        getDmfClient().send(createUpdateAttributesMessage);
+
+        // verify
+        verifyDeadLetterMessages(1);
+        final AttributeUpdate controllerAttributeEmpty = new AttributeUpdate();
+        assertUpdateAttributes(target, controllerAttributeEmpty.getAttributes());
+
+    }
+
+    @Test
+    @Description("Verify that sending an update controller attribute message with invalid body to an existing target does not work.")
+    public void updateAttributesWithWrongBody() {
+
+        // setup
+        final String target = "ControllerAttributeTestTarget";
+        registerAndAssertTargetWithExistingTenant(target, 1);
+        final AttributeUpdate controllerAttribute = new AttributeUpdate();
+        controllerAttribute.getAttributes().put("test1", "testA");
+        controllerAttribute.getAttributes().put("test2", "testB");
+        final Message createUpdateAttributesMessageWrongBody = createUpdateAttributesMessageWrongBody(target,
+                TENANT_EXIST);
+
+        // test
+        getDmfClient().send(createUpdateAttributesMessageWrongBody);
+
+        // verify
+        verifyDeadLetterMessages(1);
+
+    }
+
+    private Long registerTargetAndSendActionStatus(final ActionStatus sendActionStatus) {
         final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet();
         final Long actionId = assignmentResult.getActions().get(0);
         sendActionUpdateStatus(new ActionUpdateStatus(actionId, sendActionStatus));
         return actionId;
     }
 
-    private void sendActionUpdateStatus(ActionUpdateStatus actionStatus) {
+    private void sendActionUpdateStatus(final ActionUpdateStatus actionStatus) {
         final Message eventMessage = createEventMessage(TENANT_EXIST, EventTopic.UPDATE_ACTION_STATUS, actionStatus);
         getDmfClient().send(eventMessage);
     }
 
-    private void registerTargetAndSendAndAssertUpdateActionStatus(ActionStatus sendActionStatus,
-            Status expectedActionStatus) {
+    private void registerTargetAndSendAndAssertUpdateActionStatus(final ActionStatus sendActionStatus,
+            final Status expectedActionStatus) {
         final Long actionId = registerTargetAndSendActionStatus(sendActionStatus);
         assertAction(actionId, Status.RUNNING, expectedActionStatus);
     }
 
-    private void assertAction(final Long actionId, Status... expectedActionStates) {
+    private void assertAction(final Long actionId, final Status... expectedActionStates) {
         final Action action = waitUntilIsPresent(() -> controllerManagement.findActionWithDetails(actionId));
         final List<Status> status = action.getActionStatus().stream().map(actionStatus -> actionStatus.getStatus())
                 .collect(Collectors.toList());
         assertThat(status).containsOnly(expectedActionStates);
     }
 
-    private Message createEventMessage(String tenant, EventTopic eventTopic, Object payload) {
+    private Message createEventMessage(final String tenant, final EventTopic eventTopic, final Object payload) {
         final MessageProperties messageProperties = createMessagePropertiesWithTenant(tenant);
         messageProperties.getHeaders().put(MessageHeaderKey.TYPE, MessageType.EVENT.toString());
         messageProperties.getHeaders().put(MessageHeaderKey.TOPIC, eventTopic.toString());
 
         return createMessage(payload, messageProperties);
+    }
+
+    private void sendUpdateAttributeMessage(final String target, final String tenant,
+            final AttributeUpdate attributeUpdate) {
+        final Message updateMessage = createUpdateAttributesMessage(target, tenant, attributeUpdate);
+        getDmfClient().send(updateMessage);
     }
 
 }

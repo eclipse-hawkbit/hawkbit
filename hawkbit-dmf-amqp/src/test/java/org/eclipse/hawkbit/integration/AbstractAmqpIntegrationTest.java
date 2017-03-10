@@ -11,25 +11,25 @@ package org.eclipse.hawkbit.integration;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.concurrent.TimeUnit;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 
 import org.eclipse.hawkbit.AmqpTestConfiguration;
+import org.eclipse.hawkbit.AmqpVHostService;
 import org.eclipse.hawkbit.amqp.AmqpProperties;
 import org.eclipse.hawkbit.amqp.DmfApiConfiguration;
 import org.eclipse.hawkbit.integration.listener.DeadletterListener;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.mockito.Mockito;
-import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
-import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.junit.BrokerRunning;
 import org.springframework.amqp.rabbit.test.RabbitListenerTestHarness;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 
@@ -46,6 +46,15 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
     public static BrokerRunning brokerRunning = BrokerRunning.isRunning();
 
     @Autowired
+    private RabbitTemplate dmfClient;
+
+    @Autowired
+    private RabbitTemplate authenticationClient;
+
+    @Autowired
+    private AmqpVHostService amqpVHostHelper;
+
+    @Autowired
     private RabbitAdmin dmfAdmin;
 
     @Autowired
@@ -54,12 +63,10 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
     @Autowired
     private RabbitListenerTestHarness harness;
 
-    private final RabbitTemplate dmfClient = createDmfClient();
-
     private DeadletterListener deadletterListener;
 
     @Before
-    public void setup() {
+    public void setup() throws MalformedURLException, URISyntaxException {
         purgeQueues();
         deadletterListener = harness.getSpy(DeadletterListener.LISTENER_ID);
         assertThat(deadletterListener).isNotNull();
@@ -71,32 +78,19 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
         purgeQueues();
     }
 
+    @AfterClass
+    public static void cleanup() {
+        AmqpVHostService.deleteCurrentVhost();
+    }
+
     private void purgeQueues() {
         dmfAdmin.purgeQueue(amqpProperties.getReceiverQueue(), false);
         dmfAdmin.purgeQueue(amqpProperties.getDeadLetterQueue(), false);
         dmfAdmin.purgeQueue(AmqpTestConfiguration.REPLY_TO_QUEUE, true);
-    }
 
-    private ConnectionFactory rabbitConnectionFactory() {
-        final CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
-        // TODO: hostname muss konfigurierbar sein
-        connectionFactory.setHost("localhost");
-        return connectionFactory;
-    }
-
-    private RabbitTemplate createDmfClient() {
-        final RabbitTemplate template = new RabbitTemplate(rabbitConnectionFactory());
-        template.setMessageConverter(new Jackson2JsonMessageConverter());
-        template.setReceiveTimeout(TimeUnit.SECONDS.toMillis(35));
-        template.setExchange(getAmqpSettings());
-        return template;
     }
 
     protected abstract String getAmqpSettings();
-
-    protected RabbitTemplate getDmfClient() {
-        return dmfClient;
-    }
 
     protected DeadletterListener getDeadletterListener() {
         return deadletterListener;
@@ -104,6 +98,14 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
 
     protected RabbitAdmin getDmfAdmin() {
         return dmfAdmin;
+    }
+
+    protected RabbitTemplate getDmfClient() {
+        return dmfClient;
+    }
+
+    protected RabbitTemplate getAuthenticationClient() {
+        return authenticationClient;
     }
 
     public RabbitListenerTestHarness getHarness() {
@@ -118,6 +120,10 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
         createConditionFactory().until(() -> {
             Mockito.verify(getDeadletterListener(), Mockito.times(expectedMessages)).handleMessage(Mockito.any());
         });
+    }
+
+    protected String getCurrentVhost() {
+        return amqpVHostHelper.getCurrentVhost();
     }
 
 }

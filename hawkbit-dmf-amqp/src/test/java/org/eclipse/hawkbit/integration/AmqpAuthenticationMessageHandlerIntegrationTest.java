@@ -75,7 +75,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     @Description("UncategorizedAmqpException is thrown as message sent to dmf client is null")
     public void messageIsNull() {
         try {
-            getDmfClient().sendAndReceive(null);
+            getAuthenticationClient().sendAndReceive(null);
             fail("UncategorizedAmqpException is thrown as message sent to dmf client is null");
         } catch (final UncategorizedAmqpException e) {
         } finally {
@@ -87,7 +87,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     @Description("UncategorizedAmqpException is thrown as message sent to dmf client is empty")
     public void messageIsEmpty() {
         try {
-            getDmfClient().sendAndReceive(new Message(null, null));
+            getAuthenticationClient().sendAndReceive(new Message(null, null));
             fail("UncategorizedAmqpException is thrown as message sent to dmf client is empty");
         } catch (final UncategorizedAmqpException e) {
         } finally {
@@ -127,7 +127,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     public void securityTokenIsEmptyString() {
         try {
             final Message message = createAuthenticationMessage(TENANT_EXIST, "");
-            getDmfClient().sendAndReceive(message);
+            getAuthenticationClient().sendAndReceive(message);
             fail("Should fail as tenant security token is an empty String");
         } catch (final ListenerExecutionFailedException e) {
         } finally {
@@ -603,7 +603,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
             messageProperties.setContentType("json");
             return new Message(null, messageProperties);
         }
-        return getDmfClient().getMessageConverter().toMessage(payload, messageProperties);
+        return getAuthenticationClient().getMessageConverter().toMessage(payload, messageProperties);
     }
 
     @Override
@@ -629,7 +629,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
 
     private void verifyResult(final Message returnMessage, final HttpStatus expectedStatus,
             final String expectedMessage) {
-        final DownloadResponse convertedMessage = (DownloadResponse) getDmfClient().getMessageConverter()
+        final DownloadResponse convertedMessage = (DownloadResponse) getAuthenticationClient().getMessageConverter()
                 .fromMessage(returnMessage);
         assertThat(convertedMessage.getResponseCode()).isEqualTo(expectedStatus.value());
         if (!Strings.isNullOrEmpty(expectedMessage)) {
@@ -639,7 +639,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
 
     private Message createAndSendMessage(final String tenant, final TenantSecurityToken securityToken) {
         final Message message = createAuthenticationMessage(null, securityToken);
-        return getDmfClient().sendAndReceive(message);
+        return getAuthenticationClient().sendAndReceive(message);
     }
 
     private Artifact findArtifactOfSoftwareModule(final List<Artifact> artifacts, final SoftwareModule softwareModule) {

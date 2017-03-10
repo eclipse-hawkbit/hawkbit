@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
+import org.eclipse.hawkbit.dmf.json.model.AttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
 import org.eclipse.hawkbit.integration.listener.ReplyToListener;
 import org.eclipse.hawkbit.matcher.SoftwareMouleJsonMatcher;
@@ -123,7 +124,7 @@ public class AmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
         });
     }
 
-    private Long cancelAction(final Long actionId) {
+    protected Long cancelAction(final Long actionId) {
         deploymentManagement.cancelAction(actionId);
         assertCancelActionMessage(actionId);
         return actionId;
@@ -163,6 +164,14 @@ public class AmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
         assertTarget(registerdTarget, expectedTargetStatus);
     }
 
+    protected void registerTargetWithExistingTenant(final String target, final int existingTargetsAfterCreation,
+            final TargetUpdateStatus expectedTargetStatus) {
+        createAndSendTarget(target, TENANT_EXIST);
+        final Target registerdTarget = waitUntilIsPresent(() -> targetManagement.findTargetByControllerID(target));
+        assertAllTargetsCount(existingTargetsAfterCreation);
+        assertThat(registerdTarget.getTargetInfo().getUpdateStatus()).isEqualTo(expectedTargetStatus);
+    }
+
     private void assertTarget(final Target target, final TargetUpdateStatus updateStatus) {
         assertThat(target.getTenant()).isEqualTo(TENANT_EXIST);
         assertThat(target.getDescription()).contains("Plug and Play");
@@ -170,7 +179,7 @@ public class AmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
         assertThat(target.getCreatedBy()).isEqualTo("AMQP-Controller");
         assertThat(target.getTargetInfo().getUpdateStatus()).isEqualTo(updateStatus);
         assertThat(target.getTargetInfo().getAddress())
-                .isEqualTo(IpUtil.createAmqpUri("/", AmqpTestConfiguration.REPLY_TO_EXCHANGE));
+                .isEqualTo(IpUtil.createAmqpUri(getCurrentVhost(), AmqpTestConfiguration.REPLY_TO_EXCHANGE));
     }
 
     protected Message createTargetMessage(final String target, final String tenant) {
@@ -194,6 +203,41 @@ public class AmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
         final MessageProperties messageProperties = new MessageProperties();
         messageProperties.getHeaders().put(MessageHeaderKey.TENANT, tenant);
         return messageProperties;
+    }
+
+    protected Message createUpdateAttributesMessage(final String target, final String tenant,
+            final AttributeUpdate attributeUpdate) {
+        final MessageProperties messageProperties = createMessagePropertiesWithTenant(tenant);
+        messageProperties.getHeaders().put(MessageHeaderKey.THING_ID, target);
+        messageProperties.getHeaders().put(MessageHeaderKey.TYPE, MessageType.EVENT.toString());
+        messageProperties.getHeaders().put(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ATTRIBUTES.toString());
+
+        return createMessage(attributeUpdate, messageProperties);
+
+    }
+
+    protected Message createUpdateAttributesMessageWrongBody(final String target, final String tenant) {
+        final MessageProperties messageProperties = createMessagePropertiesWithTenant(tenant);
+        messageProperties.getHeaders().put(MessageHeaderKey.THING_ID, target);
+        messageProperties.getHeaders().put(MessageHeaderKey.TYPE, MessageType.EVENT.toString());
+        messageProperties.getHeaders().put(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ATTRIBUTES.toString());
+
+        return createMessage("wrongbody", messageProperties);
+
+    }
+
+    protected void assertUpdateAttributes(final String controllerId, final Map<String, String> attributes) {
+        final Target findByControllerId = waitUntilIsPresent(
+                () -> controllerManagement.findByControllerId(controllerId));
+        final Map<String, String> controllerAttributes = findByControllerId.getTargetInfo().getControllerAttributes();
+        assertThat(controllerAttributes.size()).isEqualTo(attributes.size());
+        attributes.forEach((k, v) -> assertKeyValueInMap(k, v, controllerAttributes));
+    }
+
+    private void assertKeyValueInMap(final String key, final String value,
+            final Map<String, String> controllerAttributes) {
+        assertThat(controllerAttributes.containsKey(key)).isTrue();
+        assertThat(controllerAttributes.get(key)).isEqualTo(value);
     }
 
     @Override
