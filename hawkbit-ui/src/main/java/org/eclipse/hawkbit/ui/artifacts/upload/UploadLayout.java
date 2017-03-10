@@ -106,7 +106,7 @@ public class UploadLayout extends VerticalLayout {
 
     private DragAndDropWrapper dropAreaWrapper;
 
-    private Boolean hasDirectory = Boolean.FALSE;
+    private boolean hasDirectory;
 
     private Button uploadStatusButton;
 
@@ -136,13 +136,13 @@ public class UploadLayout extends VerticalLayout {
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final UploadArtifactUIEvent event) {
         if (event == UploadArtifactUIEvent.DELETED_ALL_SOFWARE) {
-            ui.access(() -> updateActionCount());
+            ui.access(this::updateActionCount);
         } else if (event == UploadArtifactUIEvent.MINIMIZED_STATUS_POPUP) {
-            ui.access(() -> showUploadStatusButton());
+            ui.access(this::showUploadStatusButton);
         } else if (event == UploadArtifactUIEvent.MAXIMIZED_STATUS_POPUP) {
-            ui.access(() -> maximizeStatusPopup());
+            ui.access(this::maximizeStatusPopup);
         } else if (event == UploadArtifactUIEvent.ARTIFACT_RESULT_POPUP_CLOSED) {
-            ui.access(() -> closeUploadStatusPopup());
+            ui.access(this::closeUploadStatusPopup);
         }
     }
 
@@ -262,6 +262,24 @@ public class UploadLayout extends VerticalLayout {
                     displayCompositeMessage();
                 }
             }
+        }
+
+        private boolean validate(final DragAndDropEvent event) {
+            // check if drop is valid.If valid ,check if software module is
+            // selected.
+            if (!isFilesDropped(event)) {
+                uiNotification.displayValidationError(i18n.get("message.action.not.allowed"));
+                return false;
+            }
+            return checkIfSoftwareModuleIsSelected();
+        }
+
+        private boolean isFilesDropped(final DragAndDropEvent event) {
+            if (event.getTransferable() instanceof WrapperTransferable) {
+                final Html5File[] files = ((WrapperTransferable) event.getTransferable()).getFiles();
+                return files != null;
+            }
+            return false;
         }
 
         private void processFile(final Html5File file, final SoftwareModule selectedSw) {
@@ -401,34 +419,9 @@ public class UploadLayout extends VerticalLayout {
 
     }
 
-    private Boolean validate(final DragAndDropEvent event) {
-        // check if drop is valid.If valid ,check if software module is
-        // selected.
-        if (!isFilesDropped(event)) {
-            uiNotification.displayValidationError(i18n.get("message.action.not.allowed"));
-            return false;
-        }
-        return checkIfSoftwareModuleIsSelected();
-    }
-
-    private static boolean isFilesDropped(final DragAndDropEvent event) {
-        if (event.getTransferable() instanceof WrapperTransferable) {
-            final Html5File[] files = ((WrapperTransferable) event.getTransferable()).getFiles();
-            return files != null;
-        }
-        return false;
-    }
-
-    Boolean checkIfSoftwareModuleIsSelected() {
-        if (!isSoftwareModuleSelected()) {
-            uiNotification.displayValidationError(i18n.get("message.error.noSwModuleSelected"));
-            return false;
-        }
-        return true;
-    }
-
-    Boolean isSoftwareModuleSelected() {
+    boolean checkIfSoftwareModuleIsSelected() {
         if (!artifactUploadState.getSelectedBaseSwModuleId().isPresent()) {
+            uiNotification.displayValidationError(i18n.get("message.error.noSwModuleSelected"));
             return false;
         }
         return true;

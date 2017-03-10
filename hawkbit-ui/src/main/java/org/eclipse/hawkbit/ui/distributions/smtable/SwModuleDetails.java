@@ -125,17 +125,17 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
     }
 
     @Override
-    protected Boolean onLoadIsTableRowSelected() {
+    protected boolean onLoadIsTableRowSelected() {
         return !manageDistUIState.getSelectedSoftwareModules().isEmpty();
     }
 
     @Override
-    protected Boolean onLoadIsTableMaximized() {
+    protected boolean onLoadIsTableMaximized() {
         return manageDistUIState.isSwModuleTableMaximized();
     }
 
     @Override
-    protected Boolean hasEditPermission() {
+    protected boolean hasEditPermission() {
         return getPermissionChecker().hasUpdateDistributionPermission();
     }
 
@@ -209,7 +209,7 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
     }
 
     @Override
-    protected Boolean isMetadataIconToBeDisplayed() {
+    protected boolean isMetadataIconToBeDisplayed() {
         return true;
     }
 

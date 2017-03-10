@@ -113,18 +113,17 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
     }
 
     @Override
-    protected Boolean onLoadIsTableRowSelected() {
-        return !(managementUIState.getSelectedDsIdName().isPresent()
-                && managementUIState.getSelectedDsIdName().get().isEmpty());
+    protected boolean onLoadIsTableRowSelected() {
+        return managementUIState.getSelectedDsIdName().map(selected -> !selected.isEmpty()).orElse(false);
     }
 
     @Override
-    protected Boolean onLoadIsTableMaximized() {
+    protected boolean onLoadIsTableMaximized() {
         return managementUIState.isDsTableMaximized();
     }
 
     @Override
-    protected Boolean hasEditPermission() {
+    protected boolean hasEditPermission() {
         return getPermissionChecker().hasUpdateDistributionPermission();
     }
 
@@ -191,7 +190,7 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
     }
 
     @Override
-    protected Boolean isMetadataIconToBeDisplayed() {
+    protected boolean isMetadataIconToBeDisplayed() {
         return true;
     }
 

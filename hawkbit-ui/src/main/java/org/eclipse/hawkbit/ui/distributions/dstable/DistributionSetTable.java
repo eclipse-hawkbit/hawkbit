@@ -178,10 +178,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     @Override
     protected Object getItemIdToSelect() {
-        if (manageDistUIState.getSelectedDistributions().isPresent()) {
-            return manageDistUIState.getSelectedDistributions().get();
-        }
-        return null;
+        return manageDistUIState.getSelectedDistributions().orElse(null);
     }
 
     @Override

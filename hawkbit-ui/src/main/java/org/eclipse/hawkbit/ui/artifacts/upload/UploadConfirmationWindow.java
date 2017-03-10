@@ -140,12 +140,9 @@ public class UploadConfirmationWindow implements Button.ClickListener {
         buildLayout();
     }
 
-    private Boolean checkIfArtifactDetailsDisplayed(final Long bSoftwareModuleId) {
-        if (artifactUploadState.getSelectedBaseSoftwareModule().isPresent()
-                && artifactUploadState.getSelectedBaseSoftwareModule().get().getId().equals(bSoftwareModuleId)) {
-            return true;
-        }
-        return false;
+    private boolean checkIfArtifactDetailsDisplayed(final Long bSoftwareModuleId) {
+        return artifactUploadState.getSelectedBaseSoftwareModule()
+                .map(module -> module.getId().equals(bSoftwareModuleId)).orElse(false);
     }
 
     private Boolean preUploadValidation(final List<String> itemIds) {

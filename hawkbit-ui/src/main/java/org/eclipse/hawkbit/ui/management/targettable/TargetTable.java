@@ -283,8 +283,7 @@ public class TargetTable extends AbstractTable<Target, Long> {
 
     @Override
     protected boolean isFirstRowSelectedOnLoad() {
-        return !managementUIState.getSelectedTargetId().isPresent()
-                || managementUIState.getSelectedTargetId().get().isEmpty();
+        return managementUIState.getSelectedTargetId().map(Set::isEmpty).orElse(true);
     }
 
     @Override
@@ -403,9 +402,9 @@ public class TargetTable extends AbstractTable<Target, Long> {
         return pinBtn;
     }
 
-    private boolean isPinned(final TargetIdName pinnedTarget) {
-        return managementUIState.getDistributionTableFilters().getPinnedTarget().isPresent()
-                && managementUIState.getDistributionTableFilters().getPinnedTarget().get().equals(pinnedTarget);
+    private boolean isPinned(final TargetIdName target) {
+        return managementUIState.getDistributionTableFilters().getPinnedTarget()
+                .map(pinnedTarget -> pinnedTarget.equals(target)).orElse(false);
     }
 
     /**
@@ -431,10 +430,8 @@ public class TargetTable extends AbstractTable<Target, Long> {
      */
     private void checkifAlreadyPinned(final Button eventBtn) {
         final TargetIdName newPinnedTargetItemId = (TargetIdName) eventBtn.getData();
-        TargetIdName targetId = null;
-        if (managementUIState.getDistributionTableFilters().getPinnedTarget().isPresent()) {
-            targetId = managementUIState.getDistributionTableFilters().getPinnedTarget().get();
-        }
+        final TargetIdName targetId = managementUIState.getDistributionTableFilters().getPinnedTarget().orElse(null);
+
         if (targetId == null) {
             isTargetPinned = !isTargetPinned;
             managementUIState.getDistributionTableFilters().setPinnedTarget(newPinnedTargetItemId);
@@ -621,7 +618,7 @@ public class TargetTable extends AbstractTable<Target, Long> {
             final List<DistributionSet> findDistributionSetAllById) {
         String message = null;
         final Set<DistributionSetIdName> distributionIdNameSet = findDistributionSetAllById.stream()
-                .map(distributionSet -> new DistributionSetIdName(distributionSet)).collect(Collectors.toSet());
+                .map(DistributionSetIdName::new).collect(Collectors.toSet());
 
         for (final DistributionSetIdName distributionNameId : distributionIdNameSet) {
             if (distributionNameId != null) {
@@ -654,17 +651,6 @@ public class TargetTable extends AbstractTable<Target, Long> {
         }
     }
 
-    /**
-     * Get message for pending Action.
-     *
-     * @param message
-     *            as message
-     * @param distName
-     *            as Name
-     * @param targetId
-     *            as ID of target
-     * @return String as msg
-     */
     private String getPendingActionMessage(final String message, final String distName, final String controllerId) {
         if (message == null) {
             return i18n.get("message.dist.pending.action", new Object[] { controllerId, distName });
@@ -733,15 +719,15 @@ public class TargetTable extends AbstractTable<Target, Long> {
     }
 
     private String getTargetTableStyle(final Long assignedDistributionSetId, final Long installedDistributionSetId) {
-        final Long distPinned = managementUIState.getTargetTableFilters().getPinnedDistId().isPresent()
-                ? managementUIState.getTargetTableFilters().getPinnedDistId().get() : null;
+        return managementUIState.getTargetTableFilters().getPinnedDistId().map(distPinned -> {
+            if (distPinned.equals(installedDistributionSetId)) {
+                return SPUIDefinitions.HIGHTLIGHT_GREEN;
+            } else if (distPinned.equals(assignedDistributionSetId)) {
+                return SPUIDefinitions.HIGHTLIGHT_ORANGE;
+            }
 
-        if (null != distPinned && distPinned.equals(installedDistributionSetId)) {
-            return SPUIDefinitions.HIGHTLIGHT_GREEN;
-        } else if (null != distPinned && distPinned.equals(assignedDistributionSetId)) {
-            return SPUIDefinitions.HIGHTLIGHT_ORANGE;
-        }
-        return null;
+            return null;
+        }).orElse(null);
     }
 
     private String createTargetTableStyle(final Object itemId, final Object propertyId) {
@@ -849,31 +835,30 @@ public class TargetTable extends AbstractTable<Target, Long> {
         final long totalTargetsCount = getTotalTargetsCount();
         managementUIState.setTargetsCountAll(totalTargetsCount);
 
-        Collection<TargetUpdateStatus> status = null;
-        Boolean overdueState = null;
-        String[] targetTags = null;
-        Long distributionId = null;
-        String searchText = null;
-        Long pinnedDistId = null;
+        final boolean noTagClicked = managementUIState.getTargetTableFilters().isNoTagSelected();
+        final Long distributionId = managementUIState.getTargetTableFilters().getDistributionSet()
+                .map(DistributionSetIdName::getId).orElse(null);
+        final Long pinnedDistId = managementUIState.getTargetTableFilters().getPinnedDistId().orElse(null);
+        final String searchText = managementUIState.getTargetTableFilters().getSearchText().map(text -> {
+            if (Strings.isNullOrEmpty(text)) {
+                return null;
+            }
+            return String.format("%%%s%%", text);
+        }).orElse(null);
 
+        String[] targetTags = null;
         if (isFilteredByTags()) {
             targetTags = managementUIState.getTargetTableFilters().getClickedTargetTags().toArray(new String[0]);
         }
+
+        Collection<TargetUpdateStatus> status = null;
         if (isFilteredByStatus()) {
             status = managementUIState.getTargetTableFilters().getClickedStatusTargetTags();
         }
+
+        Boolean overdueState = null;
         if (managementUIState.getTargetTableFilters().isOverdueFilterEnabled()) {
             overdueState = managementUIState.getTargetTableFilters().isOverdueFilterEnabled();
-        }
-        if (managementUIState.getTargetTableFilters().getDistributionSet().isPresent()) {
-            distributionId = managementUIState.getTargetTableFilters().getDistributionSet().get().getId();
-        }
-        if (isFilteredByText()) {
-            searchText = String.format("%%%s%%", managementUIState.getTargetTableFilters().getSearchText().get());
-        }
-        final boolean noTagClicked = managementUIState.getTargetTableFilters().isNoTagSelected();
-        if (managementUIState.getTargetTableFilters().getPinnedDistId().isPresent()) {
-            pinnedDistId = managementUIState.getTargetTableFilters().getPinnedDistId().get();
         }
 
         final long size = getTargetsCountWithFilter(totalTargetsCount, pinnedDistId,
@@ -901,11 +886,6 @@ public class TargetTable extends AbstractTable<Target, Long> {
                     filterParams.getFilterByTagNames());
         }
         return size;
-    }
-
-    private boolean isFilteredByText() {
-        return managementUIState.getTargetTableFilters().getSearchText().isPresent()
-                && !Strings.isNullOrEmpty(managementUIState.getTargetTableFilters().getSearchText().get());
     }
 
     private static boolean noFilterSelected(final Collection<TargetUpdateStatus> status, final Long distributionId,

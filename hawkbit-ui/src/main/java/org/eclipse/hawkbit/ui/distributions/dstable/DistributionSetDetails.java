@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.ui.distributions.dstable;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,7 +27,6 @@ import org.eclipse.hawkbit.ui.common.detailslayout.AbstractNamedVersionedEntityT
 import org.eclipse.hawkbit.ui.common.detailslayout.DistributionSetMetadatadetailslayout;
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsTable;
 import org.eclipse.hawkbit.ui.common.detailslayout.TargetFilterQueryDetailsTable;
-import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.entity.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.common.tagdetails.DistributionTagToken;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -139,42 +137,40 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
 
     @SuppressWarnings("unchecked")
     private void showUnsavedAssignment() {
-        Item item;
-        final Map<DistributionSetIdName, HashSet<SoftwareModuleIdName>> assignedList = manageDistUIState
-                .getAssignedList();
-        final Long selectedDistId = manageDistUIState.getLastSelectedDistribution().isPresent()
-                ? manageDistUIState.getLastSelectedDistribution().get() : null;
-        Set<SoftwareModuleIdName> softwareModuleIdNameList = null;
-
-        for (final Map.Entry<DistributionSetIdName, HashSet<SoftwareModuleIdName>> entry : assignedList.entrySet()) {
-            if (entry.getKey().getId().equals(selectedDistId)) {
-                softwareModuleIdNameList = entry.getValue();
-                break;
-            }
-        }
+        final Set<SoftwareModuleIdName> softwareModuleIdNameList = manageDistUIState.getLastSelectedDistribution()
+                .map(selectedDistId -> manageDistUIState.getAssignedList().entrySet().stream()
+                        .filter(entry -> entry.getKey().getId().equals(selectedDistId)).findAny()
+                        .map(Map.Entry::getValue).orElse(null))
+                .orElse(null);
 
         if (null != softwareModuleIdNameList) {
             if (assignedSWModule == null) {
                 assignedSWModule = new HashMap<>();
             }
 
-            for (final SoftwareModuleIdName swIdName : softwareModuleIdNameList) {
-                final SoftwareModule softwareModule = softwareManagement.findSoftwareModuleById(swIdName.getId()).get();
-                if (assignedSWModule.containsKey(softwareModule.getType().getName())) {
-                    assignedSWModule.get(softwareModule.getType().getName()).append("</br>").append("<I>")
-                            .append(getUnsavedAssigedSwModule(softwareModule.getName(), softwareModule.getVersion()))
-                            .append("<I>");
+            softwareModuleIdNameList.stream().map(SoftwareModuleIdName::getId)
+                    .map(softwareManagement::findSoftwareModuleById)
+                    .forEach(found -> found.ifPresent(softwareModule -> {
 
-                } else {
-                    assignedSWModule.put(softwareModule.getType().getName(),
-                            new StringBuilder().append("<I>").append(
-                                    getUnsavedAssigedSwModule(softwareModule.getName(), softwareModule.getVersion()))
-                                    .append("<I>"));
-                }
+                        if (assignedSWModule.containsKey(softwareModule.getType().getName())) {
+                            assignedSWModule.get(softwareModule.getType().getName()).append("</br>").append("<I>")
+                                    .append(HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(),
+                                            softwareModule.getVersion()))
+                                    .append("<I>");
 
-            }
+                        } else {
+                            assignedSWModule
+                                    .put(softwareModule.getType().getName(),
+                                            new StringBuilder().append("<I>")
+                                                    .append(HawkbitCommonUtil.getFormattedNameVersion(
+                                                            softwareModule.getName(), softwareModule.getVersion()))
+                                                    .append("<I>"));
+                        }
+
+                    }));
+
             for (final Map.Entry<String, StringBuilder> entry : assignedSWModule.entrySet()) {
-                item = softwareModuleTable.getContainerDataSource().getItem(entry.getKey());
+                final Item item = softwareModuleTable.getContainerDataSource().getItem(entry.getKey());
                 if (item != null) {
                     item.getItemProperty(SOFT_MODULE).setValue(createSoftModuleLayout(entry.getValue().toString()));
                 }
@@ -183,20 +179,15 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     }
 
     private Button assignSoftModuleButton(final String softwareModuleName) {
-        if (getPermissionChecker().hasUpdateDistributionPermission()
-                && manageDistUIState.getLastSelectedDistribution().isPresent()
-                && targetManagement.countTargetByAssignedDistributionSet(
-                        manageDistUIState.getLastSelectedDistribution().get()) <= 0) {
+        if (getPermissionChecker().hasUpdateDistributionPermission() && manageDistUIState.getLastSelectedDistribution()
+                .map(selected -> targetManagement.countTargetByAssignedDistributionSet(selected) <= 0).orElse(false)) {
+
             final Button reassignSoftModule = SPUIComponentProvider.getButton(softwareModuleName, "", "", "", true,
                     FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
             reassignSoftModule.setEnabled(false);
             return reassignSoftModule;
         }
         return null;
-    }
-
-    private static String getUnsavedAssigedSwModule(final String name, final String version) {
-        return HawkbitCommonUtil.getFormattedNameVersion(name, version);
     }
 
     @SuppressWarnings("unchecked")
@@ -209,28 +200,33 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         if (assignedSWModule.containsKey(module.getType().getName())) {
             /*
              * If software module type is software, means multiple softwares can
-             * assigned to that type. Hence if multipe softwares belongs to same
-             * type is drroped, then add to the list.
+             * assigned to that type. Hence if multiple softwares belongs to
+             * same type is dropped, then add to the list.
              */
 
             if (module.getType().getMaxAssignments() > 1) {
                 assignedSWModule.get(module.getType().getName()).append("</br>").append("<I>")
-                        .append(getUnsavedAssigedSwModule(module.getName(), module.getVersion())).append("</I>");
+                        .append(HawkbitCommonUtil.getFormattedNameVersion(module.getName(), module.getVersion()))
+                        .append("</I>");
             }
 
             /*
-             * If software mocule type is firmware, means single software can be
+             * If software module type is firmware, means single software can be
              * assigned to that type. Hence if multiple softwares belongs to
              * same type is dropped, then override with previous one.
              */
             if (module.getType().getMaxAssignments() == 1) {
-                assignedSWModule.put(module.getType().getName(), new StringBuilder().append("<I>")
-                        .append(getUnsavedAssigedSwModule(module.getName(), module.getVersion())).append("</I>"));
+                assignedSWModule.put(module.getType().getName(),
+                        new StringBuilder().append("<I>").append(
+                                HawkbitCommonUtil.getFormattedNameVersion(module.getName(), module.getVersion()))
+                                .append("</I>"));
             }
 
         } else {
-            assignedSWModule.put(module.getType().getName(), new StringBuilder().append("<I>")
-                    .append(getUnsavedAssigedSwModule(module.getName(), module.getVersion())).append("</I>"));
+            assignedSWModule.put(module.getType().getName(),
+                    new StringBuilder().append("<I>")
+                            .append(HawkbitCommonUtil.getFormattedNameVersion(module.getName(), module.getVersion()))
+                            .append("</I>"));
         }
 
         for (final Map.Entry<String, StringBuilder> entry : assignedSWModule.entrySet()) {
@@ -322,13 +318,12 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     }
 
     @Override
-    protected Boolean onLoadIsTableRowSelected() {
-        return manageDistUIState.getSelectedDistributions().isPresent()
-                && !manageDistUIState.getSelectedDistributions().get().isEmpty();
+    protected boolean onLoadIsTableRowSelected() {
+        return manageDistUIState.getSelectedDistributions().map(selected -> !selected.isEmpty()).orElse(false);
     }
 
     @Override
-    protected Boolean onLoadIsTableMaximized() {
+    protected boolean onLoadIsTableMaximized() {
         return manageDistUIState.isDsTableMaximized();
     }
 
@@ -349,7 +344,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     }
 
     @Override
-    protected Boolean hasEditPermission() {
+    protected boolean hasEditPermission() {
         return getPermissionChecker().hasUpdateDistributionPermission();
     }
 
@@ -404,7 +399,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     }
 
     @Override
-    protected Boolean isMetadataIconToBeDisplayed() {
+    protected boolean isMetadataIconToBeDisplayed() {
         return true;
     }
 

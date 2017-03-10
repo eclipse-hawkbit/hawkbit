@@ -153,12 +153,12 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
     }
 
     @Override
-    protected Boolean onLoadIsTableRowSelected() {
+    protected boolean onLoadIsTableRowSelected() {
         return artifactUploadState.getSelectedBaseSoftwareModule().isPresent();
     }
 
     @Override
-    protected Boolean onLoadIsTableMaximized() {
+    protected boolean onLoadIsTableMaximized() {
         return artifactUploadState.isSwModuleTableMaximized();
     }
 
@@ -168,7 +168,7 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
     }
 
     @Override
-    protected Boolean hasEditPermission() {
+    protected boolean hasEditPermission() {
         return getPermissionChecker().hasUpdateDistributionPermission();
     }
 
@@ -195,7 +195,7 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
     }
 
     @Override
-    protected Boolean isMetadataIconToBeDisplayed() {
+    protected boolean isMetadataIconToBeDisplayed() {
         return true;
     }
 

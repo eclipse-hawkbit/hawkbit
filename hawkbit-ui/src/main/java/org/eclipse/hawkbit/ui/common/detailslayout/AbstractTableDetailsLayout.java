@@ -302,13 +302,13 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     protected abstract String getEditButtonId();
 
-    protected abstract Boolean onLoadIsTableRowSelected();
+    protected abstract boolean onLoadIsTableRowSelected();
 
-    protected abstract Boolean onLoadIsTableMaximized();
+    protected abstract boolean onLoadIsTableMaximized();
 
     protected abstract String getTabSheetId();
 
-    protected abstract Boolean hasEditPermission();
+    protected abstract boolean hasEditPermission();
 
     public VerticalLayout getDetailsLayout() {
         return detailsLayout;
@@ -334,7 +334,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     protected abstract String getName();
 
-    protected abstract Boolean isMetadataIconToBeDisplayed();
+    protected abstract boolean isMetadataIconToBeDisplayed();
 
     protected abstract void showMetadata(Button.ClickEvent event);
 

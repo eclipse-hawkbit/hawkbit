@@ -146,12 +146,12 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private void populateComponents() {
-        if (filterManagementUIState.getTfQuery().isPresent()) {
-            queryTextField.setValue(filterManagementUIState.getTfQuery().get().getQuery());
-            nameLabel.setValue(filterManagementUIState.getTfQuery().get().getName());
-            oldFilterName = filterManagementUIState.getTfQuery().get().getName();
-            oldFilterQuery = filterManagementUIState.getTfQuery().get().getQuery();
-        }
+        filterManagementUIState.getTfQuery().ifPresent(query -> {
+            queryTextField.setValue(query.getQuery());
+            nameLabel.setValue(query.getName());
+            oldFilterName = query.getName();
+            oldFilterQuery = query.getQuery();
+        });
         breadcrumbName.setValue(nameLabel.getValue());
         queryTextField.showValidationSuccesIcon(filterManagementUIState.getFilterQueryValue());
         titleFilterIconsLayout.addStyleName(SPUIStyleDefinitions.TARGET_FILTER_CAPTION_LAYOUT);

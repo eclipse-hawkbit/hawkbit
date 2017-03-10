@@ -36,8 +36,8 @@ public class PollingConfigurationView extends BaseConfigurationView
     private final DurationConfigField fieldPollTime;
     private final DurationConfigField fieldPollingOverdueTime;
 
-    private Duration tenantPollTime;
-    private Duration tenantOverdueTime;
+    private transient Duration tenantPollTime;
+    private transient Duration tenantOverdueTime;
 
     PollingConfigurationView(final I18N i18n, final ControllerPollProperties controllerPollProperties,
             final TenantConfigurationManagement tenantConfigurationManagement) {

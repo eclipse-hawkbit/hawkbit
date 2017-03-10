@@ -207,10 +207,9 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     @Override
     public void uploadStarted(final StartedEvent event) {
         uploadInterrupted = false;
-        selectedSwForUpload = artifactUploadState.getSelectedBaseSoftwareModule().isPresent()
-                ? artifactUploadState.getSelectedBaseSoftwareModule().get() : null;
+        selectedSwForUpload = artifactUploadState.getSelectedBaseSoftwareModule().orElse(null);
 
-        if (view.isSoftwareModuleSelected()) {
+        if (selectedSwForUpload != null) {
             // single file session
             if (!view.checkIfFileIsDuplicate(event.getFilename(), selectedSwForUpload)) {
                 LOG.debug("Upload started for file :{}", event.getFilename());

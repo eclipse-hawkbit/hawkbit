@@ -14,9 +14,6 @@ import java.time.LocalDateTime;
 /**
  * Object for holding attributes for a simulated update for the device
  * simulator.
- * 
- *
- *
  */
 public class SimulatedUpdate implements Serializable {
 
@@ -27,7 +24,7 @@ public class SimulatedUpdate implements Serializable {
 
     protected final Long actionId;
 
-    protected LocalDateTime startCacheTime;
+    protected transient LocalDateTime startCacheTime;
 
     /**
      * Constructor of the class.

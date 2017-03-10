@@ -141,7 +141,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             final List<DistributionSetUpdateEvent> events, final List<Long> visibleItemIds) {
         final List<Long> setsThatAreVisibleButNotCompleteAnymore = events.stream()
                 .filter(event -> visibleItemIds.contains(event.getEntityId()))
-                .filter(event -> !event.getEntity().isComplete()).map(event -> event.getEntityId())
+                .filter(event -> !event.getEntity().isComplete()).map(DistributionSetUpdateEvent::getEntityId)
                 .collect(Collectors.toList());
 
         if (!setsThatAreVisibleButNotCompleteAnymore.isEmpty()) {
@@ -168,7 +168,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         if (event == DistributionTableFilterEvent.FILTER_BY_TEXT
                 || event == DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT
                 || event == DistributionTableFilterEvent.FILTER_BY_TAG) {
-            UI.getCurrent().access(() -> refreshFilter());
+            UI.getCurrent().access(this::refreshFilter);
         }
     }
 
@@ -291,16 +291,12 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     @Override
     protected boolean isFirstRowSelectedOnLoad() {
-        return !managementUIState.getSelectedDsIdName().isPresent()
-                || managementUIState.getSelectedDsIdName().get().isEmpty();
+        return managementUIState.getSelectedDsIdName().map(Set::isEmpty).orElse(true);
     }
 
     @Override
     protected Object getItemIdToSelect() {
-        if (managementUIState.getSelectedDsIdName().isPresent()) {
-            return managementUIState.getSelectedDsIdName().get();
-        }
-        return null;
+        return managementUIState.getSelectedDsIdName().orElse(null);
     }
 
     @Override
@@ -592,15 +588,13 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     private void checkifAlreadyPinned(final Button eventBtn) {
         final Long newPinnedDistItemId = ((DistributionSetIdName) eventBtn.getData()).getId();
-        Long pinnedDistId = null;
-        if (managementUIState.getTargetTableFilters().getPinnedDistId().isPresent()) {
-            pinnedDistId = managementUIState.getTargetTableFilters().getPinnedDistId().get();
-        }
+        final Long pinnedDistId = managementUIState.getTargetTableFilters().getPinnedDistId().orElse(null);
+
         if (pinnedDistId == null) {
             isDistPinned = !isDistPinned;
             managementUIState.getTargetTableFilters().setPinnedDistId(newPinnedDistItemId);
         } else if (newPinnedDistItemId.equals(pinnedDistId)) {
-            isDistPinned = Boolean.FALSE;
+            isDistPinned = false;
         } else {
             isDistPinned = true;
             managementUIState.getTargetTableFilters().setPinnedDistId(newPinnedDistItemId);
@@ -632,8 +626,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     private void rePinDistribution(final Button pinBtn, final Long distID) {
-        if (managementUIState.getTargetTableFilters().getPinnedDistId().isPresent()
-                && distID.equals(managementUIState.getTargetTableFilters().getPinnedDistId().get())) {
+        if (managementUIState.getTargetTableFilters().getPinnedDistId().map(distID::equals).orElse(false)) {
             applyPinStyle(pinBtn);
             isDistPinned = Boolean.TRUE;
             distributinPinnedBtn = pinBtn;
