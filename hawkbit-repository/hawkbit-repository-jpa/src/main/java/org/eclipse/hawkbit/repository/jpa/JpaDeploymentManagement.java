@@ -70,7 +70,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -350,14 +349,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     }
 
-    private DistributionSetAssignmentResult assignDistributionSetByTargetId(@NotNull final JpaDistributionSet set,
-            @NotEmpty final List<String> tIDs, final ActionType actionType, final long forcedTime) {
-
-        return assignDistributionSetToTargets(set, tIDs.stream()
-                .map(t -> new TargetWithActionType(t, actionType, forcedTime)).collect(Collectors.toList()), null, null,
-                null);
-    }
-
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -383,8 +374,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
             return saveAction;
         } else {
-            throw new CancelActionNotAllowedException(
-                    "Action [id: " + action.getId() + "] is not active and cannot be canceled");
+            throw new CancelActionNotAllowedException(action.getId() + " is not active and cannot be canceled");
         }
     }
 
@@ -416,12 +406,11 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         if (!action.isCancelingOrCanceled()) {
             throw new ForceQuitActionNotAllowedException(
-                    "Action [id: " + action.getId() + "] is not canceled yet and cannot be force quit");
+                    action.getId() + " is not canceled yet and cannot be force quit");
         }
 
         if (!action.isActive()) {
-            throw new ForceQuitActionNotAllowedException(
-                    "Action [id: " + action.getId() + "] is not active and cannot be force quit");
+            throw new ForceQuitActionNotAllowedException(action.getId() + " is not active and cannot be force quit");
         }
 
         LOG.warn("action ({}) was still activ and has been force quite.", action);

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -205,13 +206,16 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
     }
 
     private void resfreshPinnedDetails(final Map<Long, List<TargetIdName>> saveAssignedList) {
-        if (managementUIState.getTargetTableFilters().getPinnedDistId().isPresent()) {
-            if (saveAssignedList.keySet().contains(managementUIState.getTargetTableFilters().getPinnedDistId().get())) {
+        final Optional<Long> pinnedDist = managementUIState.getTargetTableFilters().getPinnedDistId();
+        final Optional<TargetIdName> pinnedTarget = managementUIState.getDistributionTableFilters().getPinnedTarget();
+
+        if (pinnedDist.isPresent()) {
+            if (saveAssignedList.keySet().contains(pinnedDist.get())) {
                 eventBus.publish(this, PinUnpinEvent.PIN_DISTRIBUTION);
             }
-        } else if (managementUIState.getDistributionTableFilters().getPinnedTarget().isPresent()) {
+        } else if (pinnedTarget.isPresent()) {
             final Set<TargetIdName> assignedTargetIds = managementUIState.getAssignedList().keySet();
-            if (assignedTargetIds.contains(managementUIState.getDistributionTableFilters().getPinnedTarget().get())) {
+            if (assignedTargetIds.contains(pinnedTarget.get())) {
                 eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
             }
         }

@@ -163,10 +163,10 @@ public class MongoDBArtifactStore implements ArtifactRepository {
                 storedArtifact = map(result);
             }
         } catch (final NoSuchAlgorithmException | IOException e) {
-            throw new ArtifactStoreException(e.getMessage(), e);
+            throw new ArtifactStoreException(e);
         }
 
-        if (hash != null && hash.getMd5() != null
+        if (hash != null && hash.getMd5() != null && storedArtifact != null
                 && !storedArtifact.getHashes().getMd5().equalsIgnoreCase(hash.getMd5())) {
             throw new HashNotMatchException("The given md5 hash " + hash.getMd5()
                     + " not matching the calculated md5 hash " + storedArtifact.getHashes().getMd5(),
@@ -206,7 +206,7 @@ public class MongoDBArtifactStore implements ArtifactRepository {
      *            the list of mongoDB gridFs files.
      * @return a paged list of artifacts mapped from the given dbFiles
      */
-    private List<DbArtifact> map(final List<GridFSDBFile> dbFiles) {
+    private static List<DbArtifact> map(final List<GridFSDBFile> dbFiles) {
         return dbFiles.stream().map(MongoDBArtifactStore::map).collect(Collectors.toList());
     }
 

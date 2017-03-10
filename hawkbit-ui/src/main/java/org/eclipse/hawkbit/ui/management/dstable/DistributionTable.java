@@ -520,26 +520,24 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     private void styleDistributionTableOnPinning() {
-        if (!managementUIState.getDistributionTableFilters().getPinnedTarget().isPresent()) {
-            return;
-        }
 
-        final Optional<Target> targetObj = targetService.findTargetByControllerIDWithDetails(
-                managementUIState.getDistributionTableFilters().getPinnedTarget().get().getControllerId());
+        managementUIState.getDistributionTableFilters().getPinnedTarget().map(TargetIdName::getControllerId)
+                .map(targetService::findTargetByControllerIDWithDetails)
+                .ifPresent(pinnedTarget -> pinnedTarget.ifPresent(target -> {
 
-        if (targetObj.isPresent()) {
-            final DistributionSet assignedDistribution = targetObj.get().getAssignedDistributionSet();
-            final DistributionSet installedDistribution = targetObj.get().getTargetInfo().getInstalledDistributionSet();
-            Long installedDistId = null;
-            Long assignedDistId = null;
-            if (null != installedDistribution) {
-                installedDistId = installedDistribution.getId();
-            }
-            if (null != assignedDistribution) {
-                assignedDistId = assignedDistribution.getId();
-            }
-            styleDistributionSetTable(installedDistId, assignedDistId);
-        }
+                    final DistributionSet assignedDistribution = target.getAssignedDistributionSet();
+                    final DistributionSet installedDistribution = target.getTargetInfo().getInstalledDistributionSet();
+                    Long installedDistId = null;
+                    Long assignedDistId = null;
+                    if (null != installedDistribution) {
+                        installedDistId = installedDistribution.getId();
+                    }
+                    if (null != assignedDistribution) {
+                        assignedDistId = assignedDistribution.getId();
+                    }
+                    styleDistributionSetTable(installedDistId, assignedDistId);
+                }));
+
     }
 
     private static String getPinnedDistributionStyle(final Long installedDistItemIds,
@@ -569,9 +567,9 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     private void saveDistributionPinnedBtn(final Button pinBtn) {
-        if (managementUIState.getTargetTableFilters().getPinnedDistId().isPresent()
-                && managementUIState.getTargetTableFilters().getPinnedDistId().get()
-                        .equals(((DistributionSetIdName) pinBtn.getData()).getId())) {
+        final Long pinnedId = ((DistributionSetIdName) pinBtn.getData()).getId();
+
+        if (managementUIState.getTargetTableFilters().getPinnedDistId().map(pinnedId::equals).orElse(false)) {
             setDistributinPinnedBtn(pinBtn);
         }
     }

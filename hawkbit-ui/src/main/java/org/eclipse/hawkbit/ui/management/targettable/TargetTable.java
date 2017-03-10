@@ -871,10 +871,11 @@ public class TargetTable extends AbstractTable<Target, Long> {
 
     private long getTargetsCountWithFilter(final long totalTargetsCount, final Long pinnedDistId,
             final FilterParams filterParams) {
+        final Optional<Long> query = managementUIState.getTargetTableFilters().getTargetFilterQuery();
+
         final long size;
-        if (managementUIState.getTargetTableFilters().getTargetFilterQuery().isPresent()) {
-            size = targetManagement.countTargetByTargetFilterQuery(
-                    managementUIState.getTargetTableFilters().getTargetFilterQuery().get());
+        if (query.isPresent()) {
+            size = targetManagement.countTargetByTargetFilterQuery(query.get());
         } else if (noFilterSelected(filterParams.getFilterByStatus(), pinnedDistId,
                 filterParams.getSelectTargetWithNoTag(), filterParams.getFilterByTagNames(),
                 filterParams.getFilterBySearchText())) {

@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -37,7 +36,6 @@ public class ArtifactBeanQuery extends AbstractBeanQuery<Artifact> {
     private static final long serialVersionUID = 1L;
     private Sort sort = new Sort(Direction.DESC, "filename");
     private transient ArtifactManagement artifactManagement;
-    private transient EntityFactory entityFactory;
     private transient Page<Artifact> firstPagetArtifacts;
     private Long baseSwModuleId;
 
@@ -115,12 +113,5 @@ public class ArtifactBeanQuery extends AbstractBeanQuery<Artifact> {
             artifactManagement = SpringContextHelper.getBean(ArtifactManagement.class);
         }
         return artifactManagement;
-    }
-
-    private EntityFactory getEntityFactory() {
-        if (entityFactory == null) {
-            entityFactory = SpringContextHelper.getBean(EntityFactory.class);
-        }
-        return entityFactory;
     }
 }

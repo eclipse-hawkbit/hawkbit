@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.repository.model.ActionWithStatusCount;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
+import org.eclipse.hawkbit.ui.common.entity.TargetIdName;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -803,13 +804,8 @@ public class ActionHistoryTable extends TreeTable {
      * Pinning.
      */
     private void updateDistributionTableStyle() {
-
-        if (!managementUIState.getDistributionTableFilters().getPinnedTarget().isPresent()) {
-            return;
-        }
-        final Long alreadyPinnedControllerId = managementUIState.getDistributionTableFilters().getPinnedTarget().get()
-                .getTargetId();
-        if (alreadyPinnedControllerId.equals(target.getId())) {
+        if (managementUIState.getDistributionTableFilters().getPinnedTarget().map(TargetIdName::getTargetId)
+                .map(target.getId()::equals).orElse(false)) {
             eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
         }
     }

@@ -243,24 +243,21 @@ public class UploadLayout extends VerticalLayout {
                 // selected software module at the time of file drop is
                 // considered for upload
 
-                if (!artifactUploadState.getSelectedBaseSoftwareModule().isPresent()) {
-                    return;
-                }
-
-                final SoftwareModule selectedSw = artifactUploadState.getSelectedBaseSoftwareModule().get();
-                // reset the flag
-                hasDirectory = Boolean.FALSE;
-                for (final Html5File file : files) {
-                    processFile(file, selectedSw);
-                }
-                if (artifactUploadState.getNumberOfFileUploadsExpected().get() > 0) {
-                    processBtn.setEnabled(false);
-                } else {
-                    // If the upload is not started, it signifies all
-                    // dropped files as either duplicate or directory.So
-                    // display message accordingly
-                    displayCompositeMessage();
-                }
+                artifactUploadState.getSelectedBaseSoftwareModule().ifPresent(selectedSw -> {
+                    // reset the flag
+                    hasDirectory = false;
+                    for (final Html5File file : files) {
+                        processFile(file, selectedSw);
+                    }
+                    if (artifactUploadState.getNumberOfFileUploadsExpected().get() > 0) {
+                        processBtn.setEnabled(false);
+                    } else {
+                        // If the upload is not started, it signifies all
+                        // dropped files as either duplicate or directory.So
+                        // display message accordingly
+                        displayCompositeMessage();
+                    }
+                });
             }
         }
 

@@ -172,8 +172,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     @Override
     protected boolean isFirstRowSelectedOnLoad() {
-        return !manageDistUIState.getSelectedDistributions().isPresent()
-                || manageDistUIState.getSelectedDistributions().get().isEmpty();
+        return manageDistUIState.getSelectedDistributions().map(Set::isEmpty).orElse(true);
     }
 
     @Override
@@ -284,8 +283,8 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     private void publishAssignEvent(final Long distId, final SoftwareModule softwareModule) {
-        if (manageDistUIState.getLastSelectedDistribution().isPresent()
-                && manageDistUIState.getLastSelectedDistribution().get().equals(distId)) {
+        if (manageDistUIState.getLastSelectedDistribution().map(distId::equals).orElse(false)) {
+
             eventBus.publish(this,
                     new SoftwareModuleEvent(SoftwareModuleEventType.ASSIGN_SOFTWARE_MODULE, softwareModule));
         }
