@@ -47,6 +47,8 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Target Filter Query Management")
 public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
 
+    private static final String NOT_EXIST_ID = "1234";
+
     @Test
     @Description("Verifies that management queries react as specfied on calls for non existing entities.")
     @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 1),
@@ -56,30 +58,29 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.createTargetFilterQuery(
                 entityFactory.targetFilterQuery().create().name("test filter").query("name==PendingTargets001"));
 
-        assertThatThrownBy(() -> targetFilterQueryManagement.deleteTargetFilterQuery(1234L))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> targetFilterQueryManagement.deleteTargetFilterQuery(NOT_EXIST_IDL))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("TargetFilterQuery");
 
-        assertThatThrownBy(
-                () -> targetFilterQueryManagement.findTargetFilterQueryByAutoAssignDS(pageReq, 1234L, "name==*"))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> targetFilterQueryManagement.findTargetFilterQueryByAutoAssignDS(pageReq, NOT_EXIST_IDL,
+                "name==*")).isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                         .hasMessageContaining("DistributionSet");
-        assertThat(targetFilterQueryManagement.findTargetFilterQueryById(1234L)).isNotPresent();
-        assertThat(targetFilterQueryManagement.findTargetFilterQueryByName("1234")).isNotPresent();
+        assertThat(targetFilterQueryManagement.findTargetFilterQueryById(NOT_EXIST_IDL)).isNotPresent();
+        assertThat(targetFilterQueryManagement.findTargetFilterQueryByName(NOT_EXIST_ID)).isNotPresent();
         assertThatThrownBy(() -> targetFilterQueryManagement
-                .updateTargetFilterQuery(entityFactory.targetFilterQuery().update(1234L)))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .updateTargetFilterQuery(entityFactory.targetFilterQuery().update(NOT_EXIST_IDL)))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                         .hasMessageContaining("TargetFilterQuery");
-        assertThatThrownBy(
-                () -> targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(targetFilterQuery.getId(), 1234L))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> targetFilterQueryManagement
+                .updateTargetFilterQueryAutoAssignDS(targetFilterQuery.getId(), NOT_EXIST_IDL))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                         .hasMessageContaining("DistributionSet");
         assertThatThrownBy(() -> targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(1234L, set.getId()))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("TargetFilterQuery");
-        assertThatThrownBy(
-                () -> targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(targetFilterQuery.getId(), 1234L))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> targetFilterQueryManagement
+                .updateTargetFilterQueryAutoAssignDS(targetFilterQuery.getId(), NOT_EXIST_IDL))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                         .hasMessageContaining("DistributionSet");
     }
 

@@ -37,6 +37,9 @@ import com.google.common.collect.Lists;
         org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration.class })
 public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest {
 
+    protected static final String NOT_EXIST_ID = "1234";
+    protected static final long NOT_EXIST_IDL = Long.parseLong(NOT_EXIST_ID);
+
     @PersistenceContext
     protected EntityManager entityManager;
 

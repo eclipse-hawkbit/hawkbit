@@ -72,7 +72,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Deployment Management")
 public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
-
     private EventHandlerStub eventHandlerStub;
 
     private CancelEventHandlerStub cancelEventHandlerStub;
@@ -95,56 +94,57 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     public void nonExistingEntityQueries() {
         final Target target = testdataFactory.createTarget();
 
-        assertThatThrownBy(() -> deploymentManagement.assignDistributionSet(1234L,
+        assertThatThrownBy(() -> deploymentManagement.assignDistributionSet(NOT_EXIST_IDL,
                 Lists.newArrayList(new TargetWithActionType(target.getControllerId()))))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                         .hasMessageContaining("DistributionSet");
-        assertThatThrownBy(() -> deploymentManagement.assignDistributionSet(1234L,
+        assertThatThrownBy(() -> deploymentManagement.assignDistributionSet(NOT_EXIST_IDL,
                 Lists.newArrayList(new TargetWithActionType(target.getControllerId())), "xxx"))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                         .hasMessageContaining("DistributionSet");
-        assertThatThrownBy(() -> deploymentManagement.assignDistributionSet(1234L, ActionType.FORCED,
+        assertThatThrownBy(() -> deploymentManagement.assignDistributionSet(NOT_EXIST_IDL, ActionType.FORCED,
                 System.currentTimeMillis(), Lists.newArrayList(target.getControllerId())))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                         .hasMessageContaining("DistributionSet");
 
-        assertThatThrownBy(() -> deploymentManagement.cancelAction(1234L)).isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("1234").hasMessageContaining("Action");
-        assertThatThrownBy(() -> deploymentManagement.countActionsByTarget("1234"))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> deploymentManagement.cancelAction(NOT_EXIST_IDL))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
+                .hasMessageContaining("Action");
+        assertThatThrownBy(() -> deploymentManagement.countActionsByTarget(NOT_EXIST_ID))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("Target");
-        assertThatThrownBy(() -> deploymentManagement.countActionsByTarget("xxx", "1234"))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> deploymentManagement.countActionsByTarget("xxx", NOT_EXIST_ID))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("Target");
 
         assertThat(deploymentManagement.findAction(1234L)).isNotPresent();
 
-        assertThatThrownBy(() -> deploymentManagement.findActionsByDistributionSet(pageReq, 1234L))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> deploymentManagement.findActionsByDistributionSet(pageReq, NOT_EXIST_IDL))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("DistributionSet");
-        assertThatThrownBy(() -> deploymentManagement.findActionsByTarget("1234", pageReq))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> deploymentManagement.findActionsByTarget(NOT_EXIST_ID, pageReq))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("Target");
-        assertThatThrownBy(() -> deploymentManagement.findActionsByTarget("id==*", "1234", pageReq))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> deploymentManagement.findActionsByTarget("id==*", NOT_EXIST_ID, pageReq))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("Target");
-        assertThatThrownBy(() -> deploymentManagement.findActionsWithStatusCountByTargetOrderByIdDesc("1234"))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> deploymentManagement.findActionsWithStatusCountByTargetOrderByIdDesc(NOT_EXIST_ID))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("Target");
 
-        assertThat(deploymentManagement.findActionWithDetails(1234L)).isNotPresent();
+        assertThat(deploymentManagement.findActionWithDetails(NOT_EXIST_IDL)).isNotPresent();
 
-        assertThatThrownBy(() -> deploymentManagement.findActiveActionsByTarget("1234"))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> deploymentManagement.findActiveActionsByTarget(NOT_EXIST_ID))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("Target");
-        assertThatThrownBy(() -> deploymentManagement.findInActiveActionsByTarget("1234"))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> deploymentManagement.findInActiveActionsByTarget(NOT_EXIST_ID))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("Target");
-        assertThatThrownBy(() -> deploymentManagement.forceQuitAction(1234L))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> deploymentManagement.forceQuitAction(NOT_EXIST_IDL))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("Action");
-        assertThatThrownBy(() -> deploymentManagement.forceTargetAction(1234L))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> deploymentManagement.forceTargetAction(NOT_EXIST_IDL))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("Action");
     }
 

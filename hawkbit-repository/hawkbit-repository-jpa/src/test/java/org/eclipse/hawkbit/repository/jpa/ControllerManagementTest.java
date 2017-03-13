@@ -56,7 +56,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Controller Management")
 public class ControllerManagementTest extends AbstractJpaIntegrationTest {
-
     @Autowired
     private RepositoryProperties repositoryProperties;
 
@@ -68,63 +67,63 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Target target = testdataFactory.createTarget();
         final SoftwareModule module = testdataFactory.createSoftwareModuleOs();
 
-        assertThatThrownBy(() -> controllerManagement
-                .addCancelActionStatus(entityFactory.actionStatus().create(1234L).status(Action.Status.FINISHED)))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> controllerManagement.addCancelActionStatus(
+                entityFactory.actionStatus().create(NOT_EXIST_IDL).status(Action.Status.FINISHED)))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                         .hasMessageContaining("Action");
 
-        assertThatThrownBy(() -> controllerManagement
-                .addInformationalActionStatus(entityFactory.actionStatus().create(1234L).status(Action.Status.RUNNING)))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> controllerManagement.addInformationalActionStatus(
+                entityFactory.actionStatus().create(NOT_EXIST_IDL).status(Action.Status.RUNNING)))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                         .hasMessageContaining("Action");
 
-        assertThatThrownBy(() -> controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(1234L).status(Action.Status.FINISHED)))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> controllerManagement.addUpdateActionStatus(
+                entityFactory.actionStatus().create(NOT_EXIST_IDL).status(Action.Status.FINISHED)))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                         .hasMessageContaining("Action");
 
-        assertThat(controllerManagement.findActionWithDetails(1234L)).isNotPresent();
-        assertThat(controllerManagement.findByControllerId("1234")).isNotPresent();
-        assertThat(controllerManagement.findByTargetId(1234L)).isNotPresent();
+        assertThat(controllerManagement.findActionWithDetails(NOT_EXIST_IDL)).isNotPresent();
+        assertThat(controllerManagement.findByControllerId(NOT_EXIST_ID)).isNotPresent();
+        assertThat(controllerManagement.findByTargetId(NOT_EXIST_IDL)).isNotPresent();
 
-        assertThatThrownBy(() -> controllerManagement.findOldestActiveActionByTarget("1234"))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> controllerManagement.findOldestActiveActionByTarget(NOT_EXIST_ID))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("Target");
 
         assertThatThrownBy(() -> controllerManagement
-                .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), 1234L))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), NOT_EXIST_IDL))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                         .hasMessageContaining("SoftwareModule");
 
         assertThatThrownBy(
-                () -> controllerManagement.getActionForDownloadByTargetAndSoftwareModule("1234", module.getId()))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                () -> controllerManagement.getActionForDownloadByTargetAndSoftwareModule(NOT_EXIST_ID, module.getId()))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                         .hasMessageContaining("Target");
 
         assertThat(controllerManagement.getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(),
                 module.getId())).isNotPresent();
 
-        assertThatThrownBy(() -> controllerManagement.hasTargetArtifactAssigned(1234L, "XXX"))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> controllerManagement.hasTargetArtifactAssigned(NOT_EXIST_IDL, "XXX"))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("Target");
 
-        assertThatThrownBy(() -> controllerManagement.hasTargetArtifactAssigned("1234", "XXX"))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> controllerManagement.hasTargetArtifactAssigned(NOT_EXIST_ID, "XXX"))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("Target");
 
         assertThat(controllerManagement.hasTargetArtifactAssigned(target.getControllerId(), "XXX")).isFalse();
         assertThat(controllerManagement.hasTargetArtifactAssigned(target.getId(), "XXX")).isFalse();
 
-        assertThatThrownBy(() -> controllerManagement.registerRetrieved(1234L, "test message"))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> controllerManagement.registerRetrieved(NOT_EXIST_IDL, "test message"))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("Action");
 
-        assertThatThrownBy(() -> controllerManagement.updateControllerAttributes("1234", Maps.newHashMap()))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> controllerManagement.updateControllerAttributes(NOT_EXIST_ID, Maps.newHashMap()))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("Target");
 
-        assertThatThrownBy(() -> controllerManagement.updateLastTargetQuery("1234", new URI("http://test.com")))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> controllerManagement.updateLastTargetQuery(NOT_EXIST_ID, new URI("http://test.com")))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("Target");
     }
 

@@ -53,32 +53,34 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     public void nonExistingEntityQueries() throws URISyntaxException {
         final SoftwareModule module = testdataFactory.createSoftwareModuleOs();
 
-        assertThatThrownBy(() -> artifactManagement.createArtifact(IOUtils.toInputStream("test", "UTF-8"), 1234L, "xxx",
-                null, null, false, null)).isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
-                        .hasMessageContaining("SoftwareModule");
+        assertThatThrownBy(() -> artifactManagement.createArtifact(IOUtils.toInputStream("test", "UTF-8"),
+                NOT_EXIST_IDL, "xxx", null, null, false, null)).isInstanceOf(EntityNotFoundException.class)
+                        .hasMessageContaining(NOT_EXIST_ID).hasMessageContaining("SoftwareModule");
 
         assertThatThrownBy(
                 () -> artifactManagement.createArtifact(IOUtils.toInputStream("test", "UTF-8"), 1234L, "xxx", false))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                         .hasMessageContaining("SoftwareModule");
 
-        assertThatThrownBy(() -> artifactManagement.deleteArtifact(1234L)).isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("1234").hasMessageContaining("Artifact");
+        assertThatThrownBy(() -> artifactManagement.deleteArtifact(NOT_EXIST_IDL))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
+                .hasMessageContaining("Artifact");
 
-        assertThat(artifactManagement.findArtifact(1234L)).isNotPresent();
-        assertThatThrownBy(() -> artifactManagement.findArtifactBySoftwareModule(pageReq, 1234L))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThat(artifactManagement.findArtifact(NOT_EXIST_IDL)).isNotPresent();
+        assertThatThrownBy(() -> artifactManagement.findArtifactBySoftwareModule(pageReq, NOT_EXIST_IDL))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("SoftwareModule");
-        assertThat(artifactManagement.findArtifactByFilename("1234").isPresent()).isFalse();
+        assertThat(artifactManagement.findArtifactByFilename(NOT_EXIST_ID).isPresent()).isFalse();
 
-        assertThatThrownBy(() -> artifactManagement.findByFilenameAndSoftwareModule("xxx", 1234L))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> artifactManagement.findByFilenameAndSoftwareModule("xxx", NOT_EXIST_IDL))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("SoftwareModule");
 
-        assertThat(artifactManagement.findByFilenameAndSoftwareModule("1234", module.getId()).isPresent()).isFalse();
+        assertThat(artifactManagement.findByFilenameAndSoftwareModule(NOT_EXIST_ID, module.getId()).isPresent())
+                .isFalse();
 
-        assertThat(artifactManagement.findFirstArtifactBySHA1("1234")).isNotPresent();
-        assertThat(artifactManagement.loadArtifactBinary("1234")).isNotPresent();
+        assertThat(artifactManagement.findFirstArtifactBySHA1(NOT_EXIST_ID)).isNotPresent();
+        assertThat(artifactManagement.loadArtifactBinary(NOT_EXIST_ID)).isNotPresent();
 
     }
 

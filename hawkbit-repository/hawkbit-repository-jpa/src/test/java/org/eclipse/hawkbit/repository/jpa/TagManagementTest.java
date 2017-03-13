@@ -47,23 +47,26 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Tag Management")
 public class TagManagementTest extends AbstractJpaIntegrationTest {
 
+    private static final String NOT_EXIST_ID = "1234";
+
     @Test
     @Description("Verifies that management queries react as specfied on calls for non existing entities.")
     public void nonExistingEntityQueries() {
-        assertThatThrownBy(() -> tagManagement.deleteDistributionSetTag("1234"))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> tagManagement.deleteDistributionSetTag(NOT_EXIST_ID))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("DistributionSetTag");
-        assertThatThrownBy(() -> tagManagement.deleteTargetTag("1234")).isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("1234").hasMessageContaining("TargetTag");
-        assertThat(tagManagement.findDistributionSetTag("1234")).isNotPresent();
-        assertThat(tagManagement.findDistributionSetTagById(1234L)).isNotPresent();
-        assertThat(tagManagement.findTargetTag("1234")).isNotPresent();
-        assertThat(tagManagement.findTargetTagById(1234L)).isNotPresent();
-        assertThatThrownBy(() -> tagManagement.updateDistributionSetTag(entityFactory.tag().update(1234L)))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> tagManagement.deleteTargetTag(NOT_EXIST_ID))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
+                .hasMessageContaining("TargetTag");
+        assertThat(tagManagement.findDistributionSetTag(NOT_EXIST_ID)).isNotPresent();
+        assertThat(tagManagement.findDistributionSetTagById(NOT_EXIST_IDL)).isNotPresent();
+        assertThat(tagManagement.findTargetTag(NOT_EXIST_ID)).isNotPresent();
+        assertThat(tagManagement.findTargetTagById(NOT_EXIST_IDL)).isNotPresent();
+        assertThatThrownBy(() -> tagManagement.updateDistributionSetTag(entityFactory.tag().update(NOT_EXIST_IDL)))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("DistributionSetTag");
-        assertThatThrownBy(() -> tagManagement.updateTargetTag(entityFactory.tag().update(1234L)))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> tagManagement.updateTargetTag(entityFactory.tag().update(NOT_EXIST_IDL)))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("TargetTag");
     }
 

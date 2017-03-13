@@ -79,34 +79,42 @@ import ru.yandex.qatools.allure.annotations.Title;
 @Stories("Rollout Management")
 public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
+    private static final long NOT_EXIST_IDL = 1234L;
+    private static final String NOT_EXIST_ID = "1234";
+
     @Test
     @Description("Verifies that management queries react as specfied on calls for non existing entities.")
     public void nonExistingEntityQueries() {
         final Rollout createdRollout = testdataFactory.createRollout("xxx");
 
-        assertThatThrownBy(() -> rolloutManagement.deleteRollout(1234L)).isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("1234").hasMessageContaining("Rollout");
-
-        assertThat(rolloutManagement.findRolloutById(1234L)).isNotPresent();
-        assertThat(rolloutManagement.findRolloutByName("1234")).isNotPresent();
-        assertThat(rolloutManagement.findRolloutWithDetailedStatus(1234L)).isNotPresent();
-
-        assertThatThrownBy(() -> rolloutManagement.getFinishedPercentForRunningGroup(1234L, 1234L))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> rolloutManagement.deleteRollout(NOT_EXIST_IDL))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("Rollout");
-        assertThatThrownBy(() -> rolloutManagement.getFinishedPercentForRunningGroup(createdRollout.getId(), 1234L))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
-                .hasMessageContaining("RolloutGroup");
 
-        assertThatThrownBy(() -> rolloutManagement.pauseRollout(1234L)).isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("1234").hasMessageContaining("Rollout");
-        assertThatThrownBy(() -> rolloutManagement.resumeRollout(1234L)).isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("1234").hasMessageContaining("Rollout");
-        assertThatThrownBy(() -> rolloutManagement.startRollout(1234L)).isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("1234").hasMessageContaining("Rollout");
+        assertThat(rolloutManagement.findRolloutById(NOT_EXIST_IDL)).isNotPresent();
+        assertThat(rolloutManagement.findRolloutByName(NOT_EXIST_ID)).isNotPresent();
+        assertThat(rolloutManagement.findRolloutWithDetailedStatus(NOT_EXIST_IDL)).isNotPresent();
 
-        assertThatThrownBy(() -> rolloutManagement.updateRollout(entityFactory.rollout().update(1234L)))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
+        assertThatThrownBy(() -> rolloutManagement.getFinishedPercentForRunningGroup(NOT_EXIST_IDL, NOT_EXIST_IDL))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
+                .hasMessageContaining("Rollout");
+        assertThatThrownBy(
+                () -> rolloutManagement.getFinishedPercentForRunningGroup(createdRollout.getId(), NOT_EXIST_IDL))
+                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
+                        .hasMessageContaining("RolloutGroup");
+
+        assertThatThrownBy(() -> rolloutManagement.pauseRollout(NOT_EXIST_IDL))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
+                .hasMessageContaining("Rollout");
+        assertThatThrownBy(() -> rolloutManagement.resumeRollout(NOT_EXIST_IDL))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
+                .hasMessageContaining("Rollout");
+        assertThatThrownBy(() -> rolloutManagement.startRollout(NOT_EXIST_IDL))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
+                .hasMessageContaining("Rollout");
+
+        assertThatThrownBy(() -> rolloutManagement.updateRollout(entityFactory.rollout().update(NOT_EXIST_IDL)))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("Rollout");
     }
 
