@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.autoconfigure.cache;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -49,6 +47,6 @@ public class CacheProperties {
     }
 
     public final TimeUnit getTtlUnit() {
-        return MILLISECONDS;
+        return TimeUnit.MILLISECONDS;
     }
 }

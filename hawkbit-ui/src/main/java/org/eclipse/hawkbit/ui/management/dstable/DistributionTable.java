@@ -567,6 +567,10 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     private void saveDistributionPinnedBtn(final Button pinBtn) {
+        if (pinBtn.getData() == null) {
+            return;
+        }
+
         final Long pinnedId = ((DistributionSetIdName) pinBtn.getData()).getId();
 
         if (managementUIState.getTargetTableFilters().getPinnedDistId().map(pinnedId::equals).orElse(false)) {

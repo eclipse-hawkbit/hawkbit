@@ -8,10 +8,8 @@
  */
 package org.eclipse.hawkbit.security;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.eclipse.hawkbit.security.SecurityConstants.SECURITY_LOG_PREFIX;
-
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
@@ -38,16 +36,17 @@ import com.google.common.cache.CacheBuilder;
 public class DosFilter extends OncePerRequestFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(DosFilter.class);
-    private static final Logger LOG_DOS = LoggerFactory.getLogger(SECURITY_LOG_PREFIX + ".dos");
-    private static final Logger LOG_BLACKLIST = LoggerFactory.getLogger(SECURITY_LOG_PREFIX + ".blacklist");
+    private static final Logger LOG_DOS = LoggerFactory.getLogger(SecurityConstants.SECURITY_LOG_PREFIX + ".dos");
+    private static final Logger LOG_BLACKLIST = LoggerFactory
+            .getLogger(SecurityConstants.SECURITY_LOG_PREFIX + ".blacklist");
 
     private final Pattern ipAdressBlacklist;
 
-    private final Cache<String, AtomicInteger> readCountCache = CacheBuilder.newBuilder().expireAfterAccess(1, SECONDS)
-            .build();
+    private final Cache<String, AtomicInteger> readCountCache = CacheBuilder.newBuilder()
+            .expireAfterAccess(1, TimeUnit.SECONDS).build();
 
-    private final Cache<String, AtomicInteger> writeCountCache = CacheBuilder.newBuilder().expireAfterAccess(1, SECONDS)
-            .build();
+    private final Cache<String, AtomicInteger> writeCountCache = CacheBuilder.newBuilder()
+            .expireAfterAccess(1, TimeUnit.SECONDS).build();
 
     private final Integer maxRead;
     private final Integer maxWrite;

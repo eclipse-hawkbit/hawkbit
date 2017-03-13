@@ -166,8 +166,7 @@ public class MongoDBArtifactStore implements ArtifactRepository {
             throw new ArtifactStoreException(e);
         }
 
-        if (hash != null && hash.getMd5() != null && storedArtifact != null
-                && !storedArtifact.getHashes().getMd5().equalsIgnoreCase(hash.getMd5())) {
+        if (notNull(hash, storedArtifact) && !storedArtifact.getHashes().getMd5().equalsIgnoreCase(hash.getMd5())) {
             throw new HashNotMatchException("The given md5 hash " + hash.getMd5()
                     + " not matching the calculated md5 hash " + storedArtifact.getHashes().getMd5(),
                     HashNotMatchException.MD5);
@@ -175,6 +174,10 @@ public class MongoDBArtifactStore implements ArtifactRepository {
 
         return storedArtifact;
 
+    }
+
+    private static boolean notNull(final DbArtifactHash hash, final GridFsArtifact storedArtifact) {
+        return hash != null && hash.getMd5() != null && storedArtifact != null && storedArtifact.getHashes() != null;
     }
 
     private static String computeSHA1Hash(final InputStream stream, final OutputStream os, final String providedSHA1Sum)

@@ -8,15 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.FILTER_BY_DISTRIBUTION;
-import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.FILTER_BY_TAG;
-import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.FILTER_BY_TARGET_FILTER_QUERY;
-import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.FILTER_BY_TEXT;
-import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.REMOVE_FILTER_BY_DISTRIBUTION;
-import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.REMOVE_FILTER_BY_TAG;
-import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.REMOVE_FILTER_BY_TARGET_FILTER_QUERY;
-import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.REMOVE_FILTER_BY_TEXT;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -709,20 +700,25 @@ public class TargetTable extends AbstractTable<Target, Long> {
     }
 
     private static boolean isRemoveFilterEvent(final TargetFilterEvent filterEvent) {
-        return filterEvent == REMOVE_FILTER_BY_TEXT || filterEvent == REMOVE_FILTER_BY_TAG
-                || filterEvent == REMOVE_FILTER_BY_DISTRIBUTION || filterEvent == REMOVE_FILTER_BY_TARGET_FILTER_QUERY;
+        return filterEvent == TargetFilterEvent.REMOVE_FILTER_BY_TEXT
+                || filterEvent == TargetFilterEvent.REMOVE_FILTER_BY_TAG
+                || filterEvent == TargetFilterEvent.REMOVE_FILTER_BY_DISTRIBUTION
+                || filterEvent == TargetFilterEvent.REMOVE_FILTER_BY_TARGET_FILTER_QUERY;
     }
 
     private static boolean isNormalFilter(final TargetFilterEvent filterEvent) {
-        return filterEvent == FILTER_BY_TEXT || filterEvent == FILTER_BY_TAG || filterEvent == FILTER_BY_DISTRIBUTION
-                || filterEvent == FILTER_BY_TARGET_FILTER_QUERY;
+        return filterEvent == TargetFilterEvent.FILTER_BY_TEXT || filterEvent == TargetFilterEvent.FILTER_BY_TAG
+                || filterEvent == TargetFilterEvent.FILTER_BY_DISTRIBUTION
+                || filterEvent == TargetFilterEvent.FILTER_BY_TARGET_FILTER_QUERY;
     }
 
     private String getTargetTableStyle(final Long assignedDistributionSetId, final Long installedDistributionSetId) {
         return managementUIState.getTargetTableFilters().getPinnedDistId().map(distPinned -> {
             if (distPinned.equals(installedDistributionSetId)) {
                 return SPUIDefinitions.HIGHTLIGHT_GREEN;
-            } else if (distPinned.equals(assignedDistributionSetId)) {
+            }
+
+            if (distPinned.equals(assignedDistributionSetId)) {
                 return SPUIDefinitions.HIGHTLIGHT_ORANGE;
             }
 

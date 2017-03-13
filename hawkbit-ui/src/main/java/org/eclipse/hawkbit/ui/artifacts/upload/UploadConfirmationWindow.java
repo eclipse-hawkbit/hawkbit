@@ -8,9 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.upload;
 
-import static org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions.FAILED;
-import static org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions.SUCCESS;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -637,12 +634,12 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             artifactManagement.createArtifact(fis, baseSw.getId(), providedFileName,
                     HawkbitCommonUtil.trimAndNullIfEmpty(md5Checksum),
                     HawkbitCommonUtil.trimAndNullIfEmpty(sha1Checksum), true, customFile.getMimeType());
-            saveUploadStatus(providedFileName, swModuleNameVersion, SUCCESS, "");
+            saveUploadStatus(providedFileName, swModuleNameVersion, SPUILabelDefinitions.SUCCESS, "");
 
         } catch (final ArtifactUploadFailedException | InvalidSHA1HashException | InvalidMD5HashException
                 | FileNotFoundException e) {
 
-            saveUploadStatus(providedFileName, swModuleNameVersion, FAILED, e.getMessage());
+            saveUploadStatus(providedFileName, swModuleNameVersion, SPUILabelDefinitions.FAILED, e.getMessage());
             LOG.error(ARTIFACT_UPLOAD_EXCEPTION, e);
 
         } catch (final IOException ex) {

@@ -145,7 +145,7 @@ public class ArtifactFilesystemRepository implements ArtifactRepository {
         }
 
         if (!file.delete()) {
-            LOG.error("Could not delete temp file {}", file);
+            LOG.debug("Could not delete temp file {}", file);
         }
         fileSystemArtifact.setArtifactId(artifact.getArtifactId());
         fileSystemArtifact.setContentType(artifact.getContentType());

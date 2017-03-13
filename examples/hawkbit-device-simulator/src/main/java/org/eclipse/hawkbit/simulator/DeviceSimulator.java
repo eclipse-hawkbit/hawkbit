@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.simulator;
 
-import static java.util.concurrent.Executors.newScheduledThreadPool;
-
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -46,7 +44,7 @@ public class DeviceSimulator {
      */
     @Bean
     public ScheduledExecutorService threadPool() {
-        return newScheduledThreadPool(8);
+        return Executors.newScheduledThreadPool(8);
     }
 
     /**
