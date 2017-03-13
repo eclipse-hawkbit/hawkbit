@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.distributions.dstable.DsMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -55,7 +55,7 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
     private final UINotification notificationMessage;
 
-    DistributionDetails(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
+    DistributionDetails(final VaadinMessageSource i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
             final ManagementUIState managementUIState, final DistributionSetManagement distributionSetManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout, final EntityFactory entityFactory,
             final UINotification notificationMessage, final TagManagement tagManagement,
@@ -86,23 +86,23 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
     @Override
     protected String getDefaultCaption() {
-        return getI18n().get("distribution.details.header");
+        return getI18n().getMessage("distribution.details.header");
     }
 
     @Override
     protected void addTabs(final TabSheet detailsTab) {
-        detailsTab.addTab(createDetailsLayout(), getI18n().get("caption.tab.details"), null);
-        detailsTab.addTab(createDescriptionLayout(), getI18n().get("caption.tab.description"), null);
-        detailsTab.addTab(createSoftwareModuleTab(), getI18n().get("caption.softwares.distdetail.tab"), null);
-        detailsTab.addTab(createTagsLayout(), getI18n().get("caption.tags.tab"), null);
-        detailsTab.addTab(createLogLayout(), getI18n().get("caption.logs.tab"), null);
-        detailsTab.addTab(dsMetadataTable, getI18n().get("caption.metadata"), null);
+        detailsTab.addTab(createDetailsLayout(), getI18n().getMessage("caption.tab.details"), null);
+        detailsTab.addTab(createDescriptionLayout(), getI18n().getMessage("caption.tab.description"), null);
+        detailsTab.addTab(createSoftwareModuleTab(), getI18n().getMessage("caption.softwares.distdetail.tab"), null);
+        detailsTab.addTab(createTagsLayout(), getI18n().getMessage("caption.tags.tab"), null);
+        detailsTab.addTab(createLogLayout(), getI18n().getMessage("caption.logs.tab"), null);
+        detailsTab.addTab(dsMetadataTable, getI18n().getMessage("caption.metadata"), null);
     }
 
     @Override
     protected void onEdit(final ClickEvent event) {
         final Window newDistWindow = distributionAddUpdateWindowLayout.getWindow(getSelectedBaseEntityId());
-        newDistWindow.setCaption(getI18n().get(UIComponentIdProvider.DIST_UPDATE_CAPTION));
+        newDistWindow.setCaption(getI18n().getMessage(UIComponentIdProvider.DIST_UPDATE_CAPTION));
         UI.getCurrent().addWindow(newDistWindow);
         newDistWindow.setVisible(Boolean.TRUE);
     }
@@ -159,7 +159,7 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
         detailsTabLayout.removeAllComponents();
 
         if (type != null) {
-            final Label typeLabel = SPUIComponentProvider.createNameValueLabel(getI18n().get("label.dist.details.type"),
+            final Label typeLabel = SPUIComponentProvider.createNameValueLabel(getI18n().getMessage("label.dist.details.type"),
                     type);
             typeLabel.setId(UIComponentIdProvider.DETAILS_TYPE_LABEL_ID);
             detailsTabLayout.addComponent(typeLabel);
@@ -167,8 +167,8 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
         if (isMigrationRequired != null) {
             detailsTabLayout.addComponent(SPUIComponentProvider.createNameValueLabel(
-                    getI18n().get("checkbox.dist.migration.required"),
-                    isMigrationRequired.equals(Boolean.TRUE) ? getI18n().get("label.yes") : getI18n().get("label.no")));
+                    getI18n().getMessage("checkbox.dist.migration.required"),
+                    isMigrationRequired.equals(Boolean.TRUE) ? getI18n().getMessage("label.yes") : getI18n().getMessage("label.no")));
         }
     }
 
@@ -200,7 +200,7 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
         final Optional<DistributionSet> ds = distributionSetManagement
                 .findDistributionSetById(getSelectedBaseEntityId());
         if (!ds.isPresent()) {
-            notificationMessage.displayWarning(getI18n().get("distributionset.not.exists"));
+            notificationMessage.displayWarning(getI18n().getMessage("distributionset.not.exists"));
             return;
         }
         UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds.get(), null));

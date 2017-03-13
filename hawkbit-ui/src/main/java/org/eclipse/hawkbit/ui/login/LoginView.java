@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.im.authentication.MultitenancyIndicator;
 import org.eclipse.hawkbit.im.authentication.TenantUserPasswordAuthenticationToken;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +71,7 @@ public class LoginView extends VerticalLayout implements View {
 
     private final transient VaadinSecurity vaadinSecurity;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final UiProperties uiProperties;
 
@@ -86,7 +86,7 @@ public class LoginView extends VerticalLayout implements View {
     private Button signin;
 
     @Autowired
-    LoginView(final VaadinSecurity vaadinSecurity, final I18N i18n, final UiProperties uiProperties,
+    LoginView(final VaadinSecurity vaadinSecurity, final VaadinMessageSource i18n, final UiProperties uiProperties,
             final MultitenancyIndicator multiTenancyIndicator) {
         this.vaadinSecurity = vaadinSecurity;
         this.i18n = i18n;
@@ -95,8 +95,8 @@ public class LoginView extends VerticalLayout implements View {
     }
 
     void loginAuthenticationFailedNotification() {
-        final Notification notification = new Notification(i18n.get("notification.login.failed.title"));
-        notification.setDescription(i18n.get("notification.login.failed.description"));
+        final Notification notification = new Notification(i18n.getMessage("notification.login.failed.title"));
+        notification.setDescription(i18n.getMessage("notification.login.failed.description"));
         notification.setHtmlContentAllowed(true);
         notification.setStyleName("error closable");
         notification.setPosition(Position.BOTTOM_CENTER);
@@ -106,8 +106,8 @@ public class LoginView extends VerticalLayout implements View {
 
     void loginCredentialsExpiredNotification() {
         final Notification notification = new Notification(
-                i18n.get("notification.login.failed.credentialsexpired.title"));
-        notification.setDescription(i18n.get("notification.login.failed.credentialsexpired.description"));
+                i18n.getMessage("notification.login.failed.credentialsexpired.title"));
+        notification.setDescription(i18n.getMessage("notification.login.failed.credentialsexpired.description"));
         notification.setDelayMsec(10000);
         notification.setHtmlContentAllowed(true);
         notification.setStyleName("error closeable");
@@ -225,7 +225,7 @@ public class LoginView extends VerticalLayout implements View {
     }
 
     private void buildSignInButton() {
-        signin = new Button(i18n.get("button.login.signin"));
+        signin = new Button(i18n.getMessage("button.login.signin"));
         signin.addStyleName(ValoTheme.BUTTON_PRIMARY + " " + ValoTheme.BUTTON_SMALL + " " + "login-button");
         signin.setClickShortcut(KeyCode.ENTER);
         signin.focus();
@@ -233,7 +233,7 @@ public class LoginView extends VerticalLayout implements View {
     }
 
     private void buildPasswordField() {
-        password = new PasswordField(i18n.get("label.login.password"));
+        password = new PasswordField(i18n.getMessage("label.login.password"));
         password.setIcon(FontAwesome.LOCK);
         password.addStyleName(
                 ValoTheme.TEXTFIELD_INLINE_ICON + " " + ValoTheme.TEXTFIELD_SMALL + " " + LOGIN_TEXTFIELD);
@@ -241,7 +241,7 @@ public class LoginView extends VerticalLayout implements View {
     }
 
     private void buildUserField() {
-        username = new TextField(i18n.get("label.login.username"));
+        username = new TextField(i18n.getMessage("label.login.username"));
         username.setIcon(FontAwesome.USER);
         username.addStyleName(
                 ValoTheme.TEXTFIELD_INLINE_ICON + " " + ValoTheme.TEXTFIELD_SMALL + " " + LOGIN_TEXTFIELD);
@@ -250,7 +250,7 @@ public class LoginView extends VerticalLayout implements View {
 
     private void buildTenantField() {
         if (multiTenancyIndicator.isMultiTenancySupported()) {
-            tenant = new TextField(i18n.get("label.login.tenant"));
+            tenant = new TextField(i18n.getMessage("label.login.tenant"));
             tenant.setIcon(FontAwesome.DATABASE);
             tenant.addStyleName(
                     ValoTheme.TEXTFIELD_INLINE_ICON + " " + ValoTheme.TEXTFIELD_SMALL + " " + LOGIN_TEXTFIELD);
@@ -268,7 +268,7 @@ public class LoginView extends VerticalLayout implements View {
 
         if (!uiProperties.getLinks().getDocumentation().getRoot().isEmpty()) {
             final Link docuLink = SPUIComponentProvider.getLink(UIComponentIdProvider.LINK_DOCUMENTATION,
-                    i18n.get("link.documentation.name"), uiProperties.getLinks().getDocumentation().getRoot(),
+                    i18n.getMessage("link.documentation.name"), uiProperties.getLinks().getDocumentation().getRoot(),
                     FontAwesome.QUESTION_CIRCLE, "_blank", linkStyle);
             links.addComponent(docuLink);
             docuLink.addStyleName(ValoTheme.LINK_SMALL);
@@ -276,14 +276,14 @@ public class LoginView extends VerticalLayout implements View {
 
         if (!uiProperties.getDemo().getUser().isEmpty()) {
             final Link demoLink = SPUIComponentProvider.getLink(UIComponentIdProvider.LINK_DEMO,
-                    i18n.get("link.demo.name"), "?demo", FontAwesome.DESKTOP, "_top", linkStyle);
+                    i18n.getMessage("link.demo.name"), "?demo", FontAwesome.DESKTOP, "_top", linkStyle);
             links.addComponent(demoLink);
             demoLink.addStyleName(ValoTheme.LINK_SMALL);
         }
 
         if (!uiProperties.getLinks().getRequestAccount().isEmpty()) {
             final Link requestAccountLink = SPUIComponentProvider.getLink(UIComponentIdProvider.LINK_REQUESTACCOUNT,
-                    i18n.get("link.requestaccount.name"), uiProperties.getLinks().getRequestAccount(),
+                    i18n.getMessage("link.requestaccount.name"), uiProperties.getLinks().getRequestAccount(),
                     FontAwesome.SHOPPING_CART, "", linkStyle);
             links.addComponent(requestAccountLink);
             requestAccountLink.addStyleName(ValoTheme.LINK_SMALL);
@@ -291,7 +291,7 @@ public class LoginView extends VerticalLayout implements View {
 
         if (!uiProperties.getLinks().getUserManagement().isEmpty()) {
             final Link userManagementLink = SPUIComponentProvider.getLink(UIComponentIdProvider.LINK_USERMANAGEMENT,
-                    i18n.get("link.usermanagement.name"), uiProperties.getLinks().getUserManagement(),
+                    i18n.getMessage("link.usermanagement.name"), uiProperties.getLinks().getUserManagement(),
                     FontAwesome.USERS, "_blank", linkStyle);
             links.addComponent(userManagementLink);
             userManagementLink.addStyleName(ValoTheme.LINK_SMALL);
@@ -301,7 +301,7 @@ public class LoginView extends VerticalLayout implements View {
     }
 
     private Component buildUnsupportedMessage() {
-        final Label label = new Label(i18n.get("label.unsupported.browser.ie"));
+        final Label label = new Label(i18n.getMessage("label.unsupported.browser.ie"));
         label.addStyleName(ValoTheme.LABEL_FAILURE);
         return label;
     }

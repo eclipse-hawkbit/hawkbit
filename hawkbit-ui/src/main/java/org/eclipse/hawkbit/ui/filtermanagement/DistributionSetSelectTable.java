@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.ui.distributions.dstable.ManageDistBeanQuery;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
@@ -40,13 +40,13 @@ public class DistributionSetSelectTable extends Table {
 
     private static final long serialVersionUID = -4307487829435471759L;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final ManageDistUIState manageDistUIState;
 
     private Container container;
 
-    DistributionSetSelectTable(final I18N i18n, final UIEventBus eventBus, final ManageDistUIState manageDistUIState) {
+    DistributionSetSelectTable(final VaadinMessageSource i18n, final UIEventBus eventBus, final ManageDistUIState manageDistUIState) {
         this.i18n = i18n;
         this.manageDistUIState = manageDistUIState;
         setStyleName("sp-table");
@@ -98,8 +98,8 @@ public class DistributionSetSelectTable extends Table {
 
     private List<TableColumn> getVisbleColumns() {
         final List<TableColumn> columnList = new ArrayList<>(2);
-        columnList.add(new TableColumn(SPUILabelDefinitions.NAME, i18n.get("header.name"), 0.6F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get("header.version"), 0.4F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.NAME, i18n.getMessage("header.name"), 0.6F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.getMessage("header.version"), 0.4F));
         return columnList;
 
     }

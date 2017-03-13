@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 
@@ -49,10 +49,10 @@ public abstract class AbstractGridHeader extends VerticalLayout {
 
     protected final RolloutUIState rolloutUIState;
 
-    protected final I18N i18n;
+    protected final VaadinMessageSource i18n;
 
     protected AbstractGridHeader(final SpPermissionChecker permissionChecker, final RolloutUIState rolloutUIState,
-            final I18N i18n) {
+            final VaadinMessageSource i18n) {
         this.permissionChecker = permissionChecker;
         this.rolloutUIState = rolloutUIState;
         this.i18n = i18n;

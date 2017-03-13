@@ -61,7 +61,7 @@ import org.eclipse.hawkbit.ui.push.CancelTargetAssignmentEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.AssignInstalledDSTooltipGenerator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -119,7 +119,7 @@ public class TargetTable extends AbstractTable<Target, Long> {
     private Button targetPinnedBtn;
     private boolean isTargetPinned;
 
-    public TargetTable(final UIEventBus eventBus, final I18N i18n, final UINotification notification,
+    public TargetTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification notification,
             final TargetManagement targetManagement, final ManagementUIState managementUIState,
             final SpPermissionChecker permChecker, final ManagementViewClientCriterion managementViewClientCriterion,
             final DistributionSetManagement distributionSetManagement, final TagManagement tagManagement) {
@@ -499,7 +499,7 @@ public class TargetTable extends AbstractTable<Target, Long> {
                 .toString();
         if (tagName.equals(SPUIDefinitions.TARGET_TAG_BUTTON)) {
             notification.displayValidationError(
-                    i18n.get("message.tag.cannot.be.assigned", new Object[] { i18n.get("label.no.tag.assigned") }));
+                    i18n.getMessage("message.tag.cannot.be.assigned", new Object[] { i18n.getMessage("label.no.tag.assigned") }));
             return false;
         }
         return true;
@@ -511,7 +511,7 @@ public class TargetTable extends AbstractTable<Target, Long> {
         final String targTagName = HawkbitCommonUtil.removePrefix(event.getTransferable().getSourceComponent().getId(),
                 SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
         if (targetList.isEmpty()) {
-            final String actionDidNotWork = i18n.get("message.action.did.not.work");
+            final String actionDidNotWork = i18n.getMessage("message.action.did.not.work");
             notification.displayValidationError(actionDidNotWork);
             return;
         }
@@ -540,14 +540,14 @@ public class TargetTable extends AbstractTable<Target, Long> {
         final List<String> controllerIds = targetManagement.findTargetAllById(targetIds).stream()
                 .map(Target::getControllerId).collect(Collectors.toList());
         if (controllerIds.isEmpty()) {
-            notification.displayWarning(i18n.get("targets.not.exists"));
+            notification.displayWarning(i18n.getMessage("targets.not.exists"));
             return new TargetTagAssignmentResult(0, 0, 0, Lists.newArrayListWithCapacity(0),
                     Lists.newArrayListWithCapacity(0), null);
         }
 
         final Optional<TargetTag> tag = tagManagement.findTargetTag(targTagName);
         if (!tag.isPresent()) {
-            notification.displayWarning(i18n.get("targettag.not.exists", new Object[] { targTagName }));
+            notification.displayWarning(i18n.getMessage("targettag.not.exists", new Object[] { targTagName }));
             return new TargetTagAssignmentResult(0, 0, 0, Lists.newArrayListWithCapacity(0),
                     Lists.newArrayListWithCapacity(0), null);
         }
@@ -565,11 +565,11 @@ public class TargetTable extends AbstractTable<Target, Long> {
                 SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
         if (wrapperSource.getId().startsWith(SPUIDefinitions.TARGET_TAG_ID_PREFIXS)) {
             if ("NO TAG".equals(tagName)) {
-                notification.displayValidationError(i18n.get(ACTION_NOT_ALLOWED_MSG));
+                notification.displayValidationError(i18n.getMessage(ACTION_NOT_ALLOWED_MSG));
                 return false;
             }
         } else {
-            notification.displayValidationError(i18n.get(ACTION_NOT_ALLOWED_MSG));
+            notification.displayValidationError(i18n.getMessage(ACTION_NOT_ALLOWED_MSG));
             return false;
         }
 
@@ -595,13 +595,13 @@ public class TargetTable extends AbstractTable<Target, Long> {
         final Object targetItemId = dropData.getItemIdOver();
         LOG.debug("Adding a log to check if targetItemId is null : {} ", targetItemId);
         if (targetItemId == null) {
-            getNotification().displayWarning(i18n.get("target.not.exists", new Object[] { "" }));
+            getNotification().displayWarning(i18n.getMessage("target.not.exists", new Object[] { "" }));
             return;
         }
         final Long targetId = (Long) targetItemId;
         final Optional<Target> target = targetManagement.findTargetById(targetId);
         if (!target.isPresent()) {
-            getNotification().displayWarning(i18n.get("target.not.exists", new Object[] { "" }));
+            getNotification().displayWarning(i18n.getMessage("target.not.exists", new Object[] { "" }));
             return;
         }
         final TargetIdName createTargetIdName = new TargetIdName(target.get());
@@ -610,7 +610,7 @@ public class TargetTable extends AbstractTable<Target, Long> {
                 .findDistributionSetAllById(ids);
 
         if (findDistributionSetAllById.isEmpty()) {
-            notification.displayWarning(i18n.get("distributionsets.not.exists"));
+            notification.displayWarning(i18n.getMessage("distributionsets.not.exists"));
             return;
         }
 
@@ -667,9 +667,9 @@ public class TargetTable extends AbstractTable<Target, Long> {
      */
     private String getPendingActionMessage(final String message, final String distName, final String controllerId) {
         if (message == null) {
-            return i18n.get("message.dist.pending.action", new Object[] { controllerId, distName });
+            return i18n.getMessage("message.dist.pending.action", new Object[] { controllerId, distName });
         }
-        return i18n.get("message.target.assigned.pending");
+        return i18n.getMessage("message.target.assigned.pending");
     }
 
     /**

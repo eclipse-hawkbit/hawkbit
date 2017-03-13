@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterLayout;
 import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
@@ -31,7 +31,7 @@ public class DistSMTypeFilterLayout extends AbstractFilterLayout {
 
     private final ManageDistUIState manageDistUIState;
 
-    public DistSMTypeFilterLayout(final UIEventBus eventBus, final I18N i18n, final SpPermissionChecker permChecker,
+    public DistSMTypeFilterLayout(final UIEventBus eventBus, final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final ManageDistUIState manageDistUIState, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UINotification uiNotification,
             final SoftwareManagement softwareManagement,

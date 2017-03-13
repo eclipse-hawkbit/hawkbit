@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
@@ -24,7 +24,7 @@ public abstract class AbstractNamedVersionedEntityTableDetailsLayout<T extends N
 
     private static final long serialVersionUID = 1L;
 
-    protected AbstractNamedVersionedEntityTableDetailsLayout(final I18N i18n, final UIEventBus eventBus,
+    protected AbstractNamedVersionedEntityTableDetailsLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState) {
         super(i18n, eventBus, permissionChecker, managementUIState);
     }

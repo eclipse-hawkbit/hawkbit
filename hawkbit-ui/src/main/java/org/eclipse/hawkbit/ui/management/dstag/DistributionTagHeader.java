@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -35,7 +35,7 @@ public class DistributionTagHeader extends AbstractFilterHeader implements Refre
     private final ManagementUIState managementUIState;
     private final CreateUpdateDistributionTagLayoutWindow createORUpdateDistributionTagLayout;
 
-    DistributionTagHeader(final I18N i18n, final ManagementUIState managementUIState,
+    DistributionTagHeader(final VaadinMessageSource i18n, final ManagementUIState managementUIState,
             final SpPermissionChecker permChecker, final UIEventBus eventBus, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UINotification uiNotification) {
         super(permChecker, eventBus, i18n);
@@ -59,7 +59,7 @@ public class DistributionTagHeader extends AbstractFilterHeader implements Refre
 
     @Override
     protected String getTitle() {
-        return i18n.get("header.filter.tag", new Object[] {});
+        return i18n.getMessage("header.filter.tag", new Object[] {});
     }
 
     @Override

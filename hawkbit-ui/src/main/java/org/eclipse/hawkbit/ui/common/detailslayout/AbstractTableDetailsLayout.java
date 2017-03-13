@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -45,7 +45,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     private static final long serialVersionUID = 4862529368471627190L;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final SpPermissionChecker permissionChecker;
 
@@ -69,7 +69,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     protected final ManagementUIState managementUIState;
 
-    protected AbstractTableDetailsLayout(final I18N i18n, final UIEventBus eventBus,
+    protected AbstractTableDetailsLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState) {
         this.i18n = i18n;
         this.permissionChecker = permissionChecker;
@@ -87,7 +87,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         return permissionChecker;
     }
 
-    protected I18N getI18n() {
+    protected VaadinMessageSource getI18n() {
         return i18n;
     }
 
@@ -131,7 +131,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         manageMetadataBtn = SPUIComponentProvider.getButton("", "", "", null, false, FontAwesome.LIST_ALT,
                 SPUIButtonStyleSmallNoBorder.class);
         manageMetadataBtn.setId(getEditButtonId());
-        manageMetadataBtn.setDescription(i18n.get("tooltip.metadata.icon"));
+        manageMetadataBtn.setDescription(i18n.getMessage("tooltip.metadata.icon"));
         manageMetadataBtn.addClickListener(this::showMetadata);
         manageMetadataBtn.setEnabled(false);
 
@@ -214,7 +214,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     protected void populateLog() {
         logLayout.removeAllComponents();
 
-        logLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.get("label.created.at"),
+        logLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.getMessage("label.created.at"),
                 SPDateTimeUtil.formatCreatedAt(selectedBaseEntity)));
 
         logLayout.addComponent(SPUIComponentProvider.createCreatedByLabel(i18n, selectedBaseEntity));
@@ -223,7 +223,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
             return;
         }
 
-        logLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.get("label.modified.date"),
+        logLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.getMessage("label.modified.date"),
                 SPDateTimeUtil.formatLastModifiedAt(selectedBaseEntity)));
 
         logLayout.addComponent(SPUIComponentProvider.createLastModifiedByLabel(i18n, selectedBaseEntity));
@@ -316,9 +316,9 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     private void populateDescription() {
         if (selectedBaseEntity != null) {
-            updateDescriptionLayout(i18n.get("label.description"), selectedBaseEntity.getDescription());
+            updateDescriptionLayout(i18n.getMessage("label.description"), selectedBaseEntity.getDescription());
         } else {
-            updateDescriptionLayout(i18n.get("label.description"), null);
+            updateDescriptionLayout(i18n.getMessage("label.description"), null);
         }
     }
 

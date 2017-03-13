@@ -36,7 +36,7 @@ import org.eclipse.hawkbit.ui.dd.criteria.ServerItemIdClientCriterion;
 import org.eclipse.hawkbit.ui.dd.criteria.ServerItemIdClientCriterion.Mode;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -82,7 +82,7 @@ public class UploadLayout extends VerticalLayout {
 
     private final UploadStatusInfoWindow uploadInfoWindow;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final UINotification uiNotification;
 
@@ -115,7 +115,7 @@ public class UploadLayout extends VerticalLayout {
 
     private final transient ArtifactManagement artifactManagement;
 
-    public UploadLayout(final I18N i18n, final UINotification uiNotification, final UIEventBus eventBus,
+    public UploadLayout(final VaadinMessageSource i18n, final UINotification uiNotification, final UIEventBus eventBus,
             final ArtifactUploadState artifactUploadState, final MultipartConfigElement multipartConfigElement,
             final ArtifactManagement artifactManagement) {
         this.uploadInfoWindow = new UploadStatusInfoWindow(eventBus, artifactUploadState, i18n);
@@ -174,7 +174,7 @@ public class UploadLayout extends VerticalLayout {
         final Upload upload = new Upload();
         final UploadHandler uploadHandler = new UploadHandler(null, 0, this, multipartConfigElement.getMaxFileSize(),
                 upload, null, null);
-        upload.setButtonCaption(i18n.get("upload.file"));
+        upload.setButtonCaption(i18n.getMessage("upload.file"));
         upload.setImmediate(true);
         upload.setReceiver(uploadHandler);
         upload.addSucceededListener(uploadHandler);
@@ -299,7 +299,7 @@ public class UploadLayout extends VerticalLayout {
             if (compositeMessage.length() > 0) {
                 compositeMessage.append("<br>");
             }
-            compositeMessage.append(i18n.get("message.no.directory.upload"));
+            compositeMessage.append(i18n.getMessage("message.no.directory.upload"));
         }
         if (!compositeMessage.toString().isEmpty()) {
             uiNotification.displayValidationError(compositeMessage.toString());
@@ -393,10 +393,10 @@ public class UploadLayout extends VerticalLayout {
             return out;
         } catch (final FileNotFoundException e) {
             LOG.error("Upload failed {}", e);
-            throw new ArtifactUploadFailedException(i18n.get("message.file.not.found"));
+            throw new ArtifactUploadFailedException(i18n.getMessage("message.file.not.found"));
         } catch (final IOException e) {
             LOG.error("Upload failed {}", e);
-            throw new ArtifactUploadFailedException(i18n.get("message.upload.failed"));
+            throw new ArtifactUploadFailedException(i18n.getMessage("message.upload.failed"));
         }
 
     }
@@ -405,7 +405,7 @@ public class UploadLayout extends VerticalLayout {
         // check if drop is valid.If valid ,check if software module is
         // selected.
         if (!isFilesDropped(event)) {
-            uiNotification.displayValidationError(i18n.get("message.action.not.allowed"));
+            uiNotification.displayValidationError(i18n.getMessage("message.action.not.allowed"));
             return false;
         }
         return checkIfSoftwareModuleIsSelected();
@@ -421,7 +421,7 @@ public class UploadLayout extends VerticalLayout {
 
     Boolean checkIfSoftwareModuleIsSelected() {
         if (!isSoftwareModuleSelected()) {
-            uiNotification.displayValidationError(i18n.get("message.error.noSwModuleSelected"));
+            uiNotification.displayValidationError(i18n.getMessage("message.error.noSwModuleSelected"));
             return false;
         }
         return true;
@@ -494,10 +494,10 @@ public class UploadLayout extends VerticalLayout {
         if (!duplicateFileNamesList.isEmpty()) {
             final String fileNames = StringUtils.collectionToCommaDelimitedString(duplicateFileNamesList);
             if (duplicateFileNamesList.size() == 1) {
-                message.append(i18n.get("message.no.duplicateFile") + fileNames);
+                message.append(i18n.getMessage("message.no.duplicateFile") + fileNames);
 
             } else if (duplicateFileNamesList.size() > 1) {
-                message.append(i18n.get("message.no.duplicateFiles"));
+                message.append(i18n.getMessage("message.no.duplicateFiles"));
             }
         }
         return message.toString();
@@ -550,7 +550,7 @@ public class UploadLayout extends VerticalLayout {
     private void discardUploadData(final Button.ClickEvent event) {
         if (event.getButton().equals(discardBtn)) {
             if (artifactUploadState.getFileSelected().isEmpty()) {
-                uiNotification.displayValidationError(i18n.get("message.error.noFileSelected"));
+                uiNotification.displayValidationError(i18n.getMessage("message.error.noFileSelected"));
             } else {
                 clearUploadedFileDetails();
             }
@@ -621,7 +621,7 @@ public class UploadLayout extends VerticalLayout {
     private void displayConfirmWindow(final Button.ClickEvent event) {
         if (event.getComponent().getId().equals(UIComponentIdProvider.UPLOAD_PROCESS_BUTTON)) {
             if (artifactUploadState.getFileSelected().isEmpty()) {
-                uiNotification.displayValidationError(i18n.get("message.error.noFileSelected"));
+                uiNotification.displayValidationError(i18n.getMessage("message.error.noFileSelected"));
             } else {
                 currentUploadConfirmationwindow = new UploadConfirmationWindow(this, artifactUploadState, eventBus,
                         artifactManagement);
@@ -635,7 +635,7 @@ public class UploadLayout extends VerticalLayout {
     /**
      * @return
      */
-    I18N getI18n() {
+    VaadinMessageSource getI18n() {
         return i18n;
     }
 

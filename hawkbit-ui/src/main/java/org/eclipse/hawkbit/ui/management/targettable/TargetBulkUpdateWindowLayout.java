@@ -27,7 +27,7 @@ import org.eclipse.hawkbit.ui.management.dstable.DistributionBeanQuery;
 import org.eclipse.hawkbit.ui.management.event.BulkUploadPopupEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.state.TargetBulkUpload;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -62,7 +62,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * Bulk target upload layout.
  */
 public class TargetBulkUpdateWindowLayout extends CustomComponent {
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final transient TargetManagement targetManagement;
     private final transient DistributionSetManagement distributionSetManagement;
@@ -96,7 +96,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     private Button minimizeButton;
     private Button closeButton;
 
-    TargetBulkUpdateWindowLayout(final I18N i18n, final TargetManagement targetManagement, final UIEventBus eventBus,
+    TargetBulkUpdateWindowLayout(final VaadinMessageSource i18n, final TargetManagement targetManagement, final UIEventBus eventBus,
             final ManagementUIState managementUIState, final DeploymentManagement deploymentManagement,
             final UiProperties uiproperties, final SpPermissionChecker checker, final UINotification uinotification,
             final TagManagement tagManagement, final DistributionSetManagement distributionSetManagement,
@@ -145,7 +145,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         bulkUploader = getBulkUploadHandler();
         linkToSystemConfigHelp = SPUIComponentProvider
                 .getHelpLink(uiproperties.getLinks().getDocumentation().getDeploymentView());
-        windowCaption = new Label(i18n.get("caption.bulk.upload.targets"));
+        windowCaption = new Label(i18n.getMessage("caption.bulk.upload.targets"));
         minimizeButton = getMinimizeButton();
         closeButton = getCloseButton();
     }
@@ -194,8 +194,8 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     }
 
     private TextArea getDescriptionTextArea() {
-        final TextArea description = new TextAreaBuilder().caption(i18n.get("textfield.description"))
-                .style("text-area-style").prompt(i18n.get("textfield.description")).immediate(true)
+        final TextArea description = new TextAreaBuilder().caption(i18n.getMessage("textfield.description"))
+                .style("text-area-style").prompt(i18n.getMessage("textfield.description")).immediate(true)
                 .id(UIComponentIdProvider.BULK_UPLOAD_DESC).buildTextComponent();
         description.setNullRepresentation(StringUtils.EMPTY);
         description.setWidth("100%");
@@ -204,8 +204,8 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
 
     private ComboBox getDsComboField() {
         final Container container = createContainer();
-        final ComboBox dsComboBox = SPUIComponentProvider.getComboBox(i18n.get("bulkupload.ds.name"), "", null, null,
-                false, "", i18n.get("bulkupload.ds.name"));
+        final ComboBox dsComboBox = SPUIComponentProvider.getComboBox(i18n.getMessage("bulkupload.ds.name"), "", null, null,
+                false, "", i18n.getMessage("bulkupload.ds.name"));
         dsComboBox.setSizeUndefined();
         dsComboBox.addStyleName(SPUIDefinitions.BULK_UPLOD_DS_COMBO_STYLE);
         dsComboBox.setImmediate(true);

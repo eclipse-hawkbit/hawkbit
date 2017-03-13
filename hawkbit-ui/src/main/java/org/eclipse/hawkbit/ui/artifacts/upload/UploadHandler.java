@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.ui.artifacts.event.UploadFileStatus;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent.UploadStatusEventType;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +65,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     private volatile boolean aborted;
 
     private String failureReason;
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
     private transient EventBus.UIEventBus eventBus;
     private final SoftwareModule selectedSw;
     private SoftwareModule selectedSwForUpload;
@@ -82,7 +82,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         this.upload = upload;
         this.mimeType = mimeType;
         this.selectedSw = selectedSw;
-        this.i18n = SpringContextHelper.getBean(I18N.class);
+        this.i18n = SpringContextHelper.getBean(VaadinMessageSource.class);
         this.eventBus = SpringContextHelper.getBean(EventBus.UIEventBus.class);
         this.artifactUploadState = SpringContextHelper.getBean(ArtifactUploadState.class);
         eventBus.subscribe(this);
@@ -218,7 +218,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
                         new UploadFileStatus(event.getFilename(), 0, 0, selectedSwForUpload)));
             }
         } else {
-            failureReason = i18n.get("message.upload.failed");
+            failureReason = i18n.getMessage("message.upload.failed");
             upload.interruptUpload();
             // actual interrupt will happen a bit late so setting the below
             // flag
@@ -248,13 +248,13 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         if (!uploadInterrupted) {
             if (aborted) {
                 LOG.info("User aborted file upload for file : {}", fileName);
-                failureReason = i18n.get("message.uploadedfile.aborted");
+                failureReason = i18n.getMessage("message.uploadedfile.aborted");
                 interruptFileUpload();
                 return;
             }
             if (readBytes > maxSize || contentLength > maxSize) {
                 LOG.error("User tried to upload more than was allowed ({}).", maxSize);
-                failureReason = i18n.get("message.uploadedfile.size.exceeded", maxSize);
+                failureReason = i18n.getMessage("message.uploadedfile.size.exceeded", maxSize);
                 interruptFileUpload();
                 return;
             }
@@ -273,13 +273,13 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     public void onProgress(final StreamingProgressEvent event) {
         if (aborted) {
             LOG.info("User aborted  the upload for file : {}", event.getFileName());
-            failureReason = i18n.get("message.uploadedfile.aborted");
+            failureReason = i18n.getMessage("message.uploadedfile.aborted");
             interruptFileStreaming();
             return;
         }
         if (event.getBytesReceived() > maxSize || event.getContentLength() > maxSize) {
             LOG.error("User tried to upload more than was allowed ({}).", maxSize);
-            failureReason = i18n.get("message.uploadedfile.size.exceeded", maxSize);
+            failureReason = i18n.getMessage("message.uploadedfile.size.exceeded", maxSize);
             interruptFileStreaming();
             return;
         }

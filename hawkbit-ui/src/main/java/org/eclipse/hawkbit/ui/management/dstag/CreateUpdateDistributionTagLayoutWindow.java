@@ -25,7 +25,7 @@ import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -44,7 +44,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     private static final String TARGET_TAG_NAME_DYNAMIC_STYLE = "new-target-tag-name";
     private static final String MSG_TEXTFIELD_NAME = "textfield.name";
 
-    CreateUpdateDistributionTagLayoutWindow(final I18N i18n, final TagManagement tagManagement,
+    CreateUpdateDistributionTagLayoutWindow(final VaadinMessageSource i18n, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
             final UINotification uiNotification) {
         super(i18n, tagManagement, entityFactory, eventBus, permChecker, uiNotification);
@@ -101,7 +101,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
             displaySuccess(newDistTag.getName());
             resetDistTagValues();
         } else {
-            displayValidationError(i18n.get(SPUILabelDefinitions.MISSING_TAG_NAME));
+            displayValidationError(i18n.getMessage(SPUILabelDefinitions.MISSING_TAG_NAME));
         }
     }
 
@@ -121,7 +121,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
         tagName.removeStyleName(TARGET_TAG_NAME_DYNAMIC_STYLE);
         tagName.addStyleName(SPUIDefinitions.NEW_TARGET_TAG_NAME);
         tagName.setValue("");
-        tagName.setInputPrompt(i18n.get(MSG_TEXTFIELD_NAME));
+        tagName.setInputPrompt(i18n.getMessage(MSG_TEXTFIELD_NAME));
         setColor(ColorPickerConstants.START_COLOR);
         getWindow().setVisible(false);
         tagPreviewBtnClicked = false;
@@ -166,7 +166,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
 
     @Override
     protected String getWindowCaption() {
-        return i18n.get("caption.add.tag");
+        return i18n.getMessage("caption.add.tag");
     }
 
     @Override
