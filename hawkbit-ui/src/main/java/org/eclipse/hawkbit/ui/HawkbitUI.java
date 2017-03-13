@@ -22,7 +22,6 @@ import org.eclipse.hawkbit.ui.menu.DashboardMenu;
 import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
 import org.eclipse.hawkbit.ui.push.EventPushStrategy;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.slf4j.Logger;
@@ -75,9 +74,6 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
 
     @Autowired
     private transient ApplicationContext context;
-
-    @Autowired
-    private VaadinMessageSource i18n;
 
     @Autowired
     private DashboardMenu dashboardMenu;
