@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.components;
 import java.util.Map;
 
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 
@@ -45,8 +45,8 @@ public class SPTargetAttributesLayout {
      * @param controllerAttibs
      */
     private void decorate(final Map<String, String> controllerAttibs) {
-        final I18N i18n = SpringContextHelper.getBean(I18N.class);
-        final Label title = new Label(i18n.get("label.target.controller.attrs"), ContentMode.HTML);
+        final VaadinMessageSource i18n = SpringContextHelper.getBean(VaadinMessageSource.class);
+        final Label title = new Label(i18n.getMessage("label.target.controller.attrs"), ContentMode.HTML);
         title.addStyleName(SPUIDefinitions.TEXT_STYLE);
         targetAttributesLayout.addComponent(title);
         if (HawkbitCommonUtil.isNotNullOrEmpty(controllerAttibs)) {

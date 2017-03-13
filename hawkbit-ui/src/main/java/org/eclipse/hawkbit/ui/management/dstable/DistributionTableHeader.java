@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
@@ -31,7 +31,7 @@ import com.vaadin.ui.Button.ClickEvent;
 public class DistributionTableHeader extends AbstractTableHeader {
     private static final long serialVersionUID = 7597766804650170127L;
 
-    DistributionTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
+    DistributionTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
             final ManagementUIState managementUIState) {
         super(i18n, permChecker, eventbus, managementUIState, null, null);
     }
@@ -47,7 +47,7 @@ public class DistributionTableHeader extends AbstractTableHeader {
 
     @Override
     protected String getHeaderCaption() {
-        return i18n.get("header.dist.table");
+        return i18n.getMessage("header.dist.table");
     }
 
     @Override

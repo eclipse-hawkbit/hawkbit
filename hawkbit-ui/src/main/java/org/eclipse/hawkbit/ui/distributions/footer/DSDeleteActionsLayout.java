@@ -29,7 +29,7 @@ import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -61,7 +61,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private final DistributionsViewClientCriterion distributionsViewClientCriterion;
 
-    public DSDeleteActionsLayout(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
+    public DSDeleteActionsLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final UINotification notification, final SystemManagement systemManagement,
             final ManageDistUIState manageDistUIState,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
@@ -106,7 +106,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected String getDeleteAreaLabel() {
-        return i18n.get("label.components.drop.area");
+        return i18n.getMessage("label.components.drop.area");
     }
 
     @Override
@@ -146,9 +146,9 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
                 SPUIDefinitions.DISTRIBUTION_SET_TYPE_ID_PREFIXS);
         if (isDsTypeSelected(distTypeName)) {
             notification
-                    .displayValidationError(i18n.get("message.dist.type.check.delete", new Object[] { distTypeName }));
+                    .displayValidationError(i18n.getMessage("message.dist.type.check.delete", new Object[] { distTypeName }));
         } else if (isDefaultDsType(distTypeName)) {
-            notification.displayValidationError(i18n.get("message.cannot.delete.default.dstype"));
+            notification.displayValidationError(i18n.getMessage("message.cannot.delete.default.dstype"));
         } else {
             manageDistUIState.getSelectedDeleteDistSetTypes().add(distTypeName);
             updateDSActionCount();
@@ -173,7 +173,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
         if (manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType()
                 .map(type -> type.getName().equalsIgnoreCase(swModuleTypeName)).orElse(false)) {
             notification.displayValidationError(
-                    i18n.get("message.swmodule.type.check.delete", new Object[] { swModuleTypeName }));
+                    i18n.getMessage("message.swmodule.type.check.delete", new Object[] { swModuleTypeName }));
         } else {
             manageDistUIState.getSelectedDeleteSWModuleTypes().add(swModuleTypeName);
             updateDSActionCount();
@@ -188,7 +188,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
                 .findDistributionSetAllById(ids);
 
         if (findDistributionSetAllById.isEmpty()) {
-            notification.displayWarning(i18n.get("distributionsets.not.exists"));
+            notification.displayWarning(i18n.getMessage("distributionsets.not.exists"));
             return;
         }
 
@@ -199,9 +199,9 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
         manageDistUIState.getDeletedDistributionList().addAll(distributionIdNameSet);
         final int newDeletedDistributionsSize = manageDistUIState.getDeletedDistributionList().size();
         if (newDeletedDistributionsSize == existingDeletedDistributionsSize) {
-            notification.displayValidationError(i18n.get("message.targets.already.deleted"));
+            notification.displayValidationError(i18n.getMessage("message.targets.already.deleted"));
         } else if (newDeletedDistributionsSize - existingDeletedDistributionsSize != distributionIdNameSet.size()) {
-            notification.displayValidationError(i18n.get("message.dist.deleted.pending"));
+            notification.displayValidationError(i18n.getMessage("message.dist.deleted.pending"));
         }
 
     }

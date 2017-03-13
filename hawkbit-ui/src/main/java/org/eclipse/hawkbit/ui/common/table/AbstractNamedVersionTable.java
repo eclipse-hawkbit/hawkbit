@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.common.table;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -33,7 +33,7 @@ public abstract class AbstractNamedVersionTable<E extends NamedVersionedEntity, 
 
     private static final long serialVersionUID = 780050712209750719L;
 
-    protected AbstractNamedVersionTable(final UIEventBus eventBus, final I18N i18n, final UINotification notification) {
+    protected AbstractNamedVersionTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification notification) {
         super(eventBus, i18n, notification);
         setMultiSelect(true);
         setSelectable(true);
@@ -44,7 +44,7 @@ public abstract class AbstractNamedVersionTable<E extends NamedVersionedEntity, 
         final List<TableColumn> columnList = super.getTableVisibleColumns();
         final float versionColumnSize = isMaximized() ? 0.1F : 0.2F;
         columnList
-                .add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get("header.version"), versionColumnSize));
+                .add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.getMessage("header.version"), versionColumnSize));
         return columnList;
     }
 

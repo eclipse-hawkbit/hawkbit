@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -47,7 +47,7 @@ public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends Abst
     private static final String TYPE_NAME_DYNAMIC_STYLE = "new-tag-name";
     private static final String TYPE_DESC_DYNAMIC_STYLE = "new-tag-desc";
 
-    public CreateUpdateTypeLayout(final I18N i18n, final TagManagement tagManagement, final EntityFactory entityFactory,
+    public CreateUpdateTypeLayout(final VaadinMessageSource i18n, final TagManagement tagManagement, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification) {
         super(i18n, tagManagement, entityFactory, eventBus, permChecker, uiNotification);
     }
@@ -61,14 +61,14 @@ public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends Abst
     @Override
     protected void createRequiredComponents() {
 
-        createTagStr = i18n.get("label.create.type");
-        updateTagStr = i18n.get("label.update.type");
-        comboLabel = new LabelBuilder().name(i18n.get("label.choose.type")).buildLabel();
-        colorLabel = new LabelBuilder().name(i18n.get("label.choose.type.color")).buildLabel();
+        createTagStr = i18n.getMessage("label.create.type");
+        updateTagStr = i18n.getMessage("label.update.type");
+        comboLabel = new LabelBuilder().name(i18n.getMessage("label.choose.type")).buildLabel();
+        colorLabel = new LabelBuilder().name(i18n.getMessage("label.choose.type.color")).buildLabel();
         colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
 
-        tagNameComboBox = SPUIComponentProvider.getComboBox(i18n.get("label.combobox.type"), "", null, null, false, "",
-                i18n.get("label.combobox.type"));
+        tagNameComboBox = SPUIComponentProvider.getComboBox(i18n.getMessage("label.combobox.type"), "", null, null, false, "",
+                i18n.getMessage("label.combobox.type"));
         tagNameComboBox.setId(SPUIDefinitions.NEW_DISTRIBUTION_SET_TYPE_NAME_COMBO);
         tagNameComboBox.addStyleName(SPUIDefinitions.FILTER_TYPE_COMBO_STYLE);
         tagNameComboBox.setImmediate(true);

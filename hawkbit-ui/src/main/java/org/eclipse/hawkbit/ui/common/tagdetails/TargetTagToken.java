@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.data.domain.PageRequest;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -44,7 +44,7 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
 
     private final transient TargetManagement targetManagement;
 
-    public TargetTagToken(final SpPermissionChecker checker, final I18N i18n, final UINotification uinotification,
+    public TargetTagToken(final SpPermissionChecker checker, final VaadinMessageSource i18n, final UINotification uinotification,
             final UIEventBus eventBus, final ManagementUIState managementUIState, final TagManagement tagManagement,
             final TargetManagement targetManagement) {
         super(checker, i18n, uinotification, eventBus, managementUIState, tagManagement);
@@ -58,7 +58,7 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
 
     @Override
     protected String getTokenInputPrompt() {
-        return i18n.get("combo.type.tag.name");
+        return i18n.getMessage("combo.type.tag.name");
     }
 
     @Override
@@ -69,7 +69,7 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
                 eventBus.publish(this, ManagementUIEvent.ASSIGN_TARGET_TAG);
             }
         } else {
-            uinotification.displayValidationError(i18n.get("message.error.missing.tagname"));
+            uinotification.displayValidationError(i18n.getMessage("message.error.missing.tagname"));
         }
     }
 

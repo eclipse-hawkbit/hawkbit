@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.state.TargetTableFilters;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -43,7 +43,7 @@ public class CountMessageLabel extends Label {
 
     private final transient TargetManagement targetManagement;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final ManagementUIState managementUIState;
 
@@ -63,7 +63,7 @@ public class CountMessageLabel extends Label {
      * @param targetTable
      *            TargetTable
      */
-    public CountMessageLabel(final UIEventBus eventBus, final TargetManagement targetManagement, final I18N i18n,
+    public CountMessageLabel(final UIEventBus eventBus, final TargetManagement targetManagement, final VaadinMessageSource i18n,
             final ManagementUIState managementUIState, final TargetTable targetTable) {
         this.targetManagement = targetManagement;
         this.i18n = i18n;
@@ -129,20 +129,20 @@ public class CountMessageLabel extends Label {
 
         if (targFilParams.hasFilter()) {
             message.append(HawkbitCommonUtil.SP_STRING_PIPE);
-            message.append(i18n.get("label.filter.targets"));
+            message.append(i18n.getMessage("label.filter.targets"));
             if (managementUIState.getTargetsTruncated() != null) {
                 message.append(targetTable.size() + managementUIState.getTargetsTruncated());
             } else {
                 message.append(targetTable.size());
             }
             message.append(HawkbitCommonUtil.SP_STRING_PIPE);
-            final String status = i18n.get("label.filter.status");
-            final String overdue = i18n.get("label.filter.overdue");
-            final String tags = i18n.get("label.filter.tags");
-            final String text = i18n.get("label.filter.text");
-            final String dists = i18n.get("label.filter.dist");
-            final String custom = i18n.get("label.filter.custom");
-            final StringBuilder filterMesgBuf = new StringBuilder(i18n.get("label.filter"));
+            final String status = i18n.getMessage("label.filter.status");
+            final String overdue = i18n.getMessage("label.filter.overdue");
+            final String tags = i18n.getMessage("label.filter.tags");
+            final String text = i18n.getMessage("label.filter.text");
+            final String dists = i18n.getMessage("label.filter.dist");
+            final String custom = i18n.getMessage("label.filter.custom");
+            final StringBuilder filterMesgBuf = new StringBuilder(i18n.getMessage("label.filter"));
             filterMesgBuf.append(StringUtils.SPACE);
             filterMesgBuf.append(getStatusMsg(targFilParams.getClickedStatusTargetTags(), status));
             filterMesgBuf.append(getOverdueStateMsg(targFilParams.isOverdueFilterEnabled(), overdue));
@@ -162,7 +162,7 @@ public class CountMessageLabel extends Label {
         if ((targetTable.size() + Optional.ofNullable(managementUIState.getTargetsTruncated())
                 .orElse(0L)) > SPUIDefinitions.MAX_TABLE_ENTRIES) {
             message.append(HawkbitCommonUtil.SP_STRING_PIPE);
-            message.append(i18n.get("label.filter.shown"));
+            message.append(i18n.getMessage("label.filter.shown"));
             message.append(SPUIDefinitions.MAX_TABLE_ENTRIES);
         }
 
@@ -173,14 +173,14 @@ public class CountMessageLabel extends Label {
         if (managementUIState.getTargetsTruncated() != null) {
             // set the icon
             setIcon(FontAwesome.INFO_CIRCLE);
-            setDescription(i18n.get("label.target.filter.truncated", managementUIState.getTargetsTruncated(),
+            setDescription(i18n.getMessage("label.target.filter.truncated", managementUIState.getTargetsTruncated(),
                     SPUIDefinitions.MAX_TABLE_ENTRIES));
         } else {
             setIcon(null);
             setDescription(null);
         }
 
-        final StringBuilder message = new StringBuilder(i18n.get("label.target.filter.count"));
+        final StringBuilder message = new StringBuilder(i18n.getMessage("label.target.filter.count"));
         message.append(managementUIState.getTargetsCountAll());
 
         return message;
@@ -195,11 +195,11 @@ public class CountMessageLabel extends Label {
     private void displayCountLabel(final Long distId) {
         final Long targetsWithAssigedDsCount = targetManagement.countTargetByAssignedDistributionSet(distId);
         final Long targetsWithInstalledDsCount = targetManagement.countTargetByInstalledDistributionSet(distId);
-        final StringBuilder message = new StringBuilder(i18n.get("label.target.count"));
+        final StringBuilder message = new StringBuilder(i18n.getMessage("label.target.count"));
         message.append("<span class=\"assigned-count-message\">");
-        message.append(i18n.get("label.assigned.count", new Object[] { targetsWithAssigedDsCount }));
+        message.append(i18n.getMessage("label.assigned.count", new Object[] { targetsWithAssigedDsCount }));
         message.append("</span>, <span class=\"installed-count-message\"> ");
-        message.append(i18n.get("label.installed.count", new Object[] { targetsWithInstalledDsCount }));
+        message.append(i18n.getMessage("label.installed.count", new Object[] { targetsWithInstalledDsCount }));
         message.append("</span>");
         setValue(message.toString());
     }

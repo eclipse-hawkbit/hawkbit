@@ -29,7 +29,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -83,7 +83,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
     private final ManageDistUIState manageDistUIState;
 
-    DistributionsConfirmationWindowLayout(final I18N i18n, final UIEventBus eventBus,
+    DistributionsConfirmationWindowLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final DistributionSetManagement dsManagement, final SoftwareManagement softwareManagement,
             final ManageDistUIState manageDistUIState) {
         super(i18n, eventBus);
@@ -97,27 +97,27 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         final Map<String, ConfirmationTab> tabs = Maps.newHashMapWithExpectedSize(5);
         /* Create tab for SW Modules delete */
         if (!manageDistUIState.getDeleteSofwareModulesList().isEmpty()) {
-            tabs.put(i18n.get("caption.delete.swmodule.accordion.tab"), createSMDeleteConfirmationTab());
+            tabs.put(i18n.getMessage("caption.delete.swmodule.accordion.tab"), createSMDeleteConfirmationTab());
         }
 
         /* Create tab for SW Module Type delete */
         if (!manageDistUIState.getSelectedDeleteSWModuleTypes().isEmpty()) {
-            tabs.put(i18n.get("caption.delete.sw.module.type.accordion.tab"), createSMtypeDeleteConfirmationTab());
+            tabs.put(i18n.getMessage("caption.delete.sw.module.type.accordion.tab"), createSMtypeDeleteConfirmationTab());
         }
 
         /* Create tab for Distributions delete */
         if (!manageDistUIState.getDeletedDistributionList().isEmpty()) {
-            tabs.put(i18n.get("caption.delete.dist.accordion.tab"), createDistDeleteConfirmationTab());
+            tabs.put(i18n.getMessage("caption.delete.dist.accordion.tab"), createDistDeleteConfirmationTab());
         }
 
         /* Create tab for Distribution Set Types delete */
         if (!manageDistUIState.getSelectedDeleteDistSetTypes().isEmpty()) {
-            tabs.put(i18n.get("caption.delete.dist.set.type.accordion.tab"), createDistSetTypeDeleteConfirmationTab());
+            tabs.put(i18n.getMessage("caption.delete.dist.set.type.accordion.tab"), createDistSetTypeDeleteConfirmationTab());
         }
 
         /* Create tab for Assign Software Module */
         if (!manageDistUIState.getAssignedList().isEmpty()) {
-            tabs.put(i18n.get("caption.assign.dist.accordion.tab"), createAssignSWModuleConfirmationTab());
+            tabs.put(i18n.getMessage("caption.assign.dist.accordion.tab"), createAssignSWModuleConfirmationTab());
         }
 
         return tabs;
@@ -129,10 +129,10 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
         tab.getConfirmAll().setId(UIComponentIdProvider.SW_DELETE_ALL);
         tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
-        tab.getConfirmAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DELETE_ALL));
+        tab.getConfirmAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DELETE_ALL));
         tab.getConfirmAll().addClickListener(event -> deleteSMAll(tab));
 
-        tab.getDiscardAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
+        tab.getDiscardAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
         tab.getDiscardAll().addClickListener(event -> discardSMAll(tab));
 
         /* Add items container to the table. */
@@ -145,8 +145,8 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         });
 
         tab.getTable().setVisibleColumns(SW_MODULE_NAME_MSG, SW_DISCARD_CHGS);
-        tab.getTable().setColumnHeaders(i18n.get("upload.swModuleTable.header"),
-                i18n.get("header.second.deletetarget.table"));
+        tab.getTable().setColumnHeaders(i18n.getMessage("upload.swModuleTable.header"),
+                i18n.getMessage("header.second.deletetarget.table"));
 
         tab.getTable().setColumnExpandRatio(SW_MODULE_NAME_MSG, SPUIDefinitions.TARGET_DISTRIBUTION_COLUMN_WIDTH);
         tab.getTable().setColumnExpandRatio(SW_DISCARD_CHGS, SPUIDefinitions.DISCARD_COLUMN_WIDTH);
@@ -165,10 +165,10 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.REMOVE_ENTITY, swmoduleIds));
 
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
-                + i18n.get("message.swModule.deleted", swmoduleIds.size()));
+                + i18n.getMessage("message.swModule.deleted", swmoduleIds.size()));
         manageDistUIState.getDeleteSofwareModulesList().clear();
         removeCurrentTab(tab);
-        setActionMessage(i18n.get("message.software.delete.success"));
+        setActionMessage(i18n.getMessage("message.software.delete.success"));
         eventBus.publish(this, SaveActionWindowEvent.DELETE_ALL_SOFWARE);
     }
 
@@ -194,7 +194,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     private void discardSMAll(final ConfirmationTab tab) {
         removeCurrentTab(tab);
         manageDistUIState.getDeleteSofwareModulesList().clear();
-        setActionMessage(i18n.get("message.software.discard.success"));
+        setActionMessage(i18n.getMessage("message.software.discard.success"));
         eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_SOFTWARE);
     }
 
@@ -239,10 +239,10 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
         tab.getConfirmAll().setId(UIComponentIdProvider.SAVE_DELETE_SW_MODULE_TYPE);
         tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
-        tab.getConfirmAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DELETE_ALL));
+        tab.getConfirmAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DELETE_ALL));
         tab.getConfirmAll().addClickListener(event -> deleteSMtypeAll(tab));
 
-        tab.getDiscardAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
+        tab.getDiscardAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
         tab.getDiscardAll().setId(UIComponentIdProvider.DISCARD_SW_MODULE_TYPE);
         tab.getDiscardAll().addClickListener(event -> discardSMtypeAll(tab));
 
@@ -264,8 +264,8 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         });
 
         tab.getTable().setVisibleColumns(SW_MODULE_TYPE_NAME, DISCARD);
-        tab.getTable().setColumnHeaders(i18n.get("header.first.delete.swmodule.type.table"),
-                i18n.get("header.second.delete.swmodule.type.table"));
+        tab.getTable().setColumnHeaders(i18n.getMessage("header.first.delete.swmodule.type.table"),
+                i18n.getMessage("header.second.delete.swmodule.type.table"));
 
         tab.getTable().setColumnExpandRatio(SW_MODULE_TYPE_NAME, 2);
         tab.getTable().setColumnExpandRatio(SW_DISCARD_CHGS, SPUIDefinitions.DISCARD_COLUMN_WIDTH);
@@ -281,17 +281,17 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
                     .ifPresent(softwareManagement::deleteSoftwareModuleType);
         }
         addToConsolitatedMsg(FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
-                + i18n.get("message.sw.module.type.delete", new Object[] { deleteSWModuleTypeCount }));
+                + i18n.getMessage("message.sw.module.type.delete", new Object[] { deleteSWModuleTypeCount }));
         manageDistUIState.getSelectedDeleteSWModuleTypes().clear();
         removeCurrentTab(tab);
-        setActionMessage(i18n.get("message.software.type.delete.success"));
+        setActionMessage(i18n.getMessage("message.software.type.delete.success"));
         eventBus.publish(this, SaveActionWindowEvent.SAVED_DELETE_SW_MODULE_TYPES);
     }
 
     private void discardSMtypeAll(final ConfirmationTab tab) {
         removeCurrentTab(tab);
         manageDistUIState.getSelectedDeleteSWModuleTypes().clear();
-        setActionMessage(i18n.get("message.software.type.discard.success"));
+        setActionMessage(i18n.getMessage("message.software.type.discard.success"));
         eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_DELETE_SW_MODULE_TYPES);
     }
 
@@ -331,10 +331,10 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
         tab.getConfirmAll().setId(UIComponentIdProvider.DIST_DELETE_ALL);
         tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
-        tab.getConfirmAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DELETE_ALL));
+        tab.getConfirmAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DELETE_ALL));
         tab.getConfirmAll().addClickListener(event -> deleteDistAll(tab));
 
-        tab.getDiscardAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
+        tab.getDiscardAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
         tab.getDiscardAll().addClickListener(event -> discardDistAll(tab));
 
         /* Add items container to the table. */
@@ -348,8 +348,8 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         });
 
         tab.getTable().setVisibleColumns(DIST_NAME, DISCARD);
-        tab.getTable().setColumnHeaders(i18n.get("header.one.deletedist.table"),
-                i18n.get("header.second.deletedist.table"));
+        tab.getTable().setColumnHeaders(i18n.getMessage("header.one.deletedist.table"),
+                i18n.getMessage("header.second.deletedist.table"));
 
         tab.getTable().setColumnExpandRatio(DIST_NAME, SPUIDefinitions.TARGET_DISTRIBUTION_COLUMN_WIDTH);
         tab.getTable().setColumnExpandRatio(DISCARD, SPUIDefinitions.DISCARD_COLUMN_WIDTH);
@@ -375,7 +375,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         dsManagement.deleteDistributionSet(Lists.newArrayList(deletedIds));
 
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
-                + i18n.get("message.dist.deleted", deletedIds.length));
+                + i18n.getMessage("message.dist.deleted", deletedIds.length));
 
         manageDistUIState.getDeletedDistributionList()
                 .forEach(deletedIdname -> manageDistUIState.getAssignedList().remove(deletedIdname));
@@ -387,7 +387,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     private void discardDistAll(final ConfirmationTab tab) {
         removeCurrentTab(tab);
         manageDistUIState.getDeletedDistributionList().clear();
-        setActionMessage(i18n.get("message.dist.discard.success"));
+        setActionMessage(i18n.getMessage("message.dist.discard.success"));
         eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_DISTRIBUTIONS);
 
     }
@@ -429,10 +429,10 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
         tab.getConfirmAll().setId(UIComponentIdProvider.SAVE_DELETE_DIST_SET_TYPE);
         tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
-        tab.getConfirmAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DELETE_ALL));
+        tab.getConfirmAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DELETE_ALL));
         tab.getConfirmAll().addClickListener(event -> deleteDistSetTypeAll(tab));
 
-        tab.getDiscardAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
+        tab.getDiscardAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
         tab.getDiscardAll().setId(UIComponentIdProvider.DISCARD_DIST_SET_TYPE);
         tab.getDiscardAll().addClickListener(event -> discardDistSetTypeAll(tab));
 
@@ -448,8 +448,8 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         });
 
         tab.getTable().setVisibleColumns(DIST_SET_NAME, DISCARD);
-        tab.getTable().setColumnHeaders(i18n.get("header.first.delete.dist.type.table"),
-                i18n.get("header.second.delete.dist.type.table"));
+        tab.getTable().setColumnHeaders(i18n.getMessage("header.first.delete.dist.type.table"),
+                i18n.getMessage("header.second.delete.dist.type.table"));
 
         tab.getTable().setColumnExpandRatio(DIST_SET_NAME, 2);
         tab.getTable().setColumnExpandRatio(DISCARD, SPUIDefinitions.DISCARD_COLUMN_WIDTH);
@@ -465,17 +465,17 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
                 .forEach(dsManagement::deleteDistributionSetType);
 
         addToConsolitatedMsg(FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
-                + i18n.get("message.dist.type.delete", new Object[] { deleteDistTypeCount }));
+                + i18n.getMessage("message.dist.type.delete", new Object[] { deleteDistTypeCount }));
         manageDistUIState.getSelectedDeleteDistSetTypes().clear();
         removeCurrentTab(tab);
-        setActionMessage(i18n.get("message.dist.set.type.deleted.success"));
+        setActionMessage(i18n.getMessage("message.dist.set.type.deleted.success"));
         eventBus.publish(this, SaveActionWindowEvent.SAVED_DELETE_DIST_SET_TYPES);
     }
 
     private void discardDistSetTypeAll(final ConfirmationTab tab) {
         removeCurrentTab(tab);
         manageDistUIState.getSelectedDeleteDistSetTypes().clear();
-        setActionMessage(i18n.get("message.dist.type.discard.success"));
+        setActionMessage(i18n.getMessage("message.dist.type.discard.success"));
         eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_DELETE_DIST_SET_TYPES);
     }
 
@@ -517,10 +517,10 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
         assignmnetTab.getConfirmAll().setId(UIComponentIdProvider.SAVE_ASSIGNMENT);
         assignmnetTab.getConfirmAll().setIcon(FontAwesome.SAVE);
-        assignmnetTab.getConfirmAll().setCaption(i18n.get("button.assign.all"));
+        assignmnetTab.getConfirmAll().setCaption(i18n.getMessage("button.assign.all"));
         assignmnetTab.getConfirmAll().addClickListener(event -> saveAllAssignments(assignmnetTab));
 
-        assignmnetTab.getDiscardAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
+        assignmnetTab.getDiscardAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
         assignmnetTab.getDiscardAll().setId(UIComponentIdProvider.DISCARD_ASSIGNMENT);
         assignmnetTab.getDiscardAll().addClickListener(event -> discardAllSWAssignments(assignmnetTab));
 
@@ -542,8 +542,8 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         });
 
         assignmnetTab.getTable().setVisibleColumns(DIST_NAME, SOFTWARE_MODULE_NAME, DISCARD);
-        assignmnetTab.getTable().setColumnHeaders(i18n.get("header.dist.first.assignment.table"),
-                i18n.get("header.dist.second.assignment.table"), i18n.get("header.third.assignment.table"));
+        assignmnetTab.getTable().setColumnHeaders(i18n.getMessage("header.dist.first.assignment.table"),
+                i18n.getMessage("header.dist.second.assignment.table"), i18n.getMessage("header.third.assignment.table"));
 
         assignmnetTab.getTable().setColumnExpandRatio(DIST_NAME, 2);
         assignmnetTab.getTable().setColumnExpandRatio(SOFTWARE_MODULE_NAME, 2);
@@ -593,7 +593,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
             count += entry.getValue().size();
         }
         addToConsolitatedMsg(FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
-                + i18n.get("message.software.assignment", new Object[] { count }));
+                + i18n.getMessage("message.software.assignment", new Object[] { count }));
         manageDistUIState.getAssignedList().clear();
         manageDistUIState.getConsolidatedDistSoftwarewList().clear();
         removeCurrentTab(tab);
@@ -604,7 +604,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         removeCurrentTab(tab);
         manageDistUIState.getAssignedList().clear();
         manageDistUIState.getConsolidatedDistSoftwarewList().clear();
-        setActionMessage(i18n.get("message.assign.discard.success"));
+        setActionMessage(i18n.getMessage("message.assign.discard.success"));
         eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS);
     }
 

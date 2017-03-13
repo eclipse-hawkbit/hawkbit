@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -57,7 +57,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private static final String BREADCRUMB_CUSTOM_FILTERS = "breadcrumb.target.filter.custom.filters";
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final transient EventBus.UIEventBus eventBus;
 
@@ -105,7 +105,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private LayoutClickListener nameLayoutClickListner;
 
-    CreateOrUpdateFilterHeader(final I18N i18n, final UIEventBus eventBus,
+    CreateOrUpdateFilterHeader(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final FilterManagementUIState filterManagementUIState,
             final TargetFilterQueryManagement targetFilterQueryManagement, final SpPermissionChecker permissionChecker,
             final UINotification notification, final UiProperties uiProperties, final EntityFactory entityFactory,
@@ -193,16 +193,16 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         final Button createFilterViewLink = SPUIComponentProvider.getButton(null, "", "", null, false, null,
                 SPUIButtonStyleSmallNoBorder.class);
         createFilterViewLink.setStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link rollout-caption-links");
-        createFilterViewLink.setDescription(i18n.get(BREADCRUMB_CUSTOM_FILTERS));
-        createFilterViewLink.setCaption(i18n.get(BREADCRUMB_CUSTOM_FILTERS));
+        createFilterViewLink.setDescription(i18n.getMessage(BREADCRUMB_CUSTOM_FILTERS));
+        createFilterViewLink.setCaption(i18n.getMessage(BREADCRUMB_CUSTOM_FILTERS));
         createFilterViewLink.addClickListener(value -> showCustomFiltersView());
 
         return createFilterViewLink;
     }
 
     private TextField createNameTextField() {
-        final TextField nameField = new TextFieldBuilder().caption(i18n.get("textfield.customfiltername"))
-                .prompt(i18n.get("textfield.customfiltername")).immediate(true)
+        final TextField nameField = new TextFieldBuilder().caption(i18n.getMessage("textfield.customfiltername"))
+                .prompt(i18n.getMessage("textfield.customfiltername")).immediate(true)
                 .id(UIComponentIdProvider.CUSTOM_FILTER_ADD_NAME).buildTextComponent();
         nameField.setPropertyDataSource(nameLabel);
         nameField.addTextChangeListener(this::onFilterNameChange);
@@ -241,7 +241,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private void buildLayout() {
         captionLayout = new HorizontalLayout();
-        captionLayout.setDescription(i18n.get("tooltip.click.to.edit"));
+        captionLayout.setDescription(i18n.getMessage("tooltip.click.to.edit"));
         captionLayout.setId(UIComponentIdProvider.TARGET_FILTER_QUERY_NAME_LAYOUT_ID);
 
         titleFilterIconsLayout = new HorizontalLayout();
@@ -371,7 +371,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.createTargetFilterQuery(entityFactory
                 .targetFilterQuery().create().name(nameTextField.getValue()).query(queryTextField.getValue()));
         notification.displaySuccess(
-                i18n.get("message.create.filter.success", new Object[] { targetFilterQuery.getName() }));
+                i18n.getMessage("message.create.filter.success", new Object[] { targetFilterQuery.getName() }));
         eventBus.publish(this, CustomFilterUIEvent.CREATE_TARGET_FILTER_QUERY);
     }
 
@@ -387,7 +387,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         filterManagementUIState.setTfQuery(updatedTargetFilter);
         oldFilterName = nameTextField.getValue();
         oldFilterQuery = queryTextField.getValue();
-        notification.displaySuccess(i18n.get("message.update.filter.success"));
+        notification.displaySuccess(i18n.getMessage("message.update.filter.success"));
         eventBus.publish(this, CustomFilterUIEvent.UPDATED_TARGET_FILTER_QUERY);
     }
 
@@ -401,7 +401,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private boolean doesAlreadyExists() {
         if (targetFilterQueryManagement.findTargetFilterQueryByName(nameTextField.getValue()).isPresent()) {
-            notification.displayValidationError(i18n.get("message.target.filter.duplicate", nameTextField.getValue()));
+            notification.displayValidationError(i18n.getMessage("message.target.filter.duplicate", nameTextField.getValue()));
             return true;
         }
         return false;
@@ -410,7 +410,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     private boolean manadatoryFieldsPresent() {
         if (Strings.isNullOrEmpty(nameTextField.getValue())
                 || Strings.isNullOrEmpty(filterManagementUIState.getFilterQueryValue())) {
-            notification.displayValidationError(i18n.get("message.target.filter.validation"));
+            notification.displayValidationError(i18n.getMessage("message.target.filter.validation"));
             return false;
         }
         return true;

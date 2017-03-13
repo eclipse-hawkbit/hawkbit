@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
@@ -53,7 +53,7 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
 
     private final SoftwareModuleMetadatadetailslayout swmMetadataTable;
 
-    SwModuleDetails(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
+    SwModuleDetails(final VaadinMessageSource i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
             final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow,
             final ManageDistUIState manageDistUIState, final SoftwareManagement softwareManagement,
             final SwMetadataPopupLayout swMetadataPopupLayout, final EntityFactory entityFactory) {
@@ -101,7 +101,7 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
     protected void onEdit(final ClickEvent event) {
         final Window addSoftwareModule = softwareModuleAddUpdateWindow
                 .createUpdateSoftwareModuleWindow(getSelectedBaseEntityId());
-        addSoftwareModule.setCaption(getI18n().get("upload.caption.update.swmodule"));
+        addSoftwareModule.setCaption(getI18n().getMessage("upload.caption.update.swmodule"));
         UI.getCurrent().addWindow(addSoftwareModule);
         addSoftwareModule.setVisible(Boolean.TRUE);
     }
@@ -113,15 +113,15 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
 
     @Override
     protected void addTabs(final TabSheet detailsTab) {
-        detailsTab.addTab(createDetailsLayout(), getI18n().get("caption.tab.details"), null);
-        detailsTab.addTab(createDescriptionLayout(), getI18n().get("caption.tab.description"), null);
-        detailsTab.addTab(createLogLayout(), getI18n().get("caption.logs.tab"), null);
-        detailsTab.addTab(swmMetadataTable, getI18n().get("caption.metadata"), null);
+        detailsTab.addTab(createDetailsLayout(), getI18n().getMessage("caption.tab.details"), null);
+        detailsTab.addTab(createDescriptionLayout(), getI18n().getMessage("caption.tab.description"), null);
+        detailsTab.addTab(createLogLayout(), getI18n().getMessage("caption.logs.tab"), null);
+        detailsTab.addTab(swmMetadataTable, getI18n().getMessage("caption.metadata"), null);
     }
 
     @Override
     protected String getDefaultCaption() {
-        return getI18n().get("upload.swModuleTable.header");
+        return getI18n().getMessage("upload.swModuleTable.header");
     }
 
     @Override
@@ -148,9 +148,9 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
         if (getSelectedBaseEntity() != null) {
             String maxAssign;
             if (getSelectedBaseEntity().getType().getMaxAssignments() == 1) {
-                maxAssign = getI18n().get("label.singleAssign.type");
+                maxAssign = getI18n().getMessage("label.singleAssign.type");
             } else {
-                maxAssign = getI18n().get("label.multiAssign.type");
+                maxAssign = getI18n().getMessage("label.multiAssign.type");
             }
             updateSwModuleDetailsLayout(getSelectedBaseEntity().getType().getName(),
                     getSelectedBaseEntity().getVendor(), maxAssign);
@@ -164,19 +164,19 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
         final VerticalLayout detailsTabLayout = getDetailsLayout();
         detailsTabLayout.removeAllComponents();
 
-        final Label vendorLabel = SPUIComponentProvider.createNameValueLabel(getI18n().get("label.dist.details.vendor"),
+        final Label vendorLabel = SPUIComponentProvider.createNameValueLabel(getI18n().getMessage("label.dist.details.vendor"),
                 HawkbitCommonUtil.trimAndNullIfEmpty(vendor) == null ? "" : vendor);
         vendorLabel.setId(UIComponentIdProvider.DETAILS_VENDOR_LABEL_ID);
         detailsTabLayout.addComponent(vendorLabel);
 
         if (type != null) {
-            final Label typeLabel = SPUIComponentProvider.createNameValueLabel(getI18n().get("label.dist.details.type"),
+            final Label typeLabel = SPUIComponentProvider.createNameValueLabel(getI18n().getMessage("label.dist.details.type"),
                     type);
             typeLabel.setId(UIComponentIdProvider.DETAILS_TYPE_LABEL_ID);
             detailsTabLayout.addComponent(typeLabel);
         }
 
-        final Label assignLabel = SPUIComponentProvider.createNameValueLabel(getI18n().get("label.assigned.type"),
+        final Label assignLabel = SPUIComponentProvider.createNameValueLabel(getI18n().getMessage("label.assigned.type"),
                 HawkbitCommonUtil.trimAndNullIfEmpty(maxAssign) == null ? "" : maxAssign);
         assignLabel.setId(UIComponentIdProvider.SWM_DTLS_MAX_ASSIGN);
         detailsTabLayout.addComponent(assignLabel);

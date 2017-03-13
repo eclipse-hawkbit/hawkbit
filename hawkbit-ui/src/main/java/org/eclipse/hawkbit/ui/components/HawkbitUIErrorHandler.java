@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,9 +100,9 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
 
         final String errorMessage = extractMessageFrom(ex);
 
-        final I18N i18n = SpringContextHelper.getBean(I18N.class);
-        return new HawkbitErrorNotificationMessage(STYLE, i18n.get("caption.error"),
-                i18n.get("message.error.temp", errorMessage), false);
+        final VaadinMessageSource i18n = SpringContextHelper.getBean(VaadinMessageSource.class);
+        return new HawkbitErrorNotificationMessage(STYLE, i18n.getMessage("caption.error"),
+                i18n.getMessage("message.error.temp", errorMessage), false);
     }
 
     private String extractMessageFrom(final Throwable ex) {

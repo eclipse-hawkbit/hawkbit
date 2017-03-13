@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -48,7 +48,7 @@ public class RolloutGroupsListHeader extends AbstractGridHeader {
      * @param i18n
      *            I18N
      */
-    public RolloutGroupsListHeader(final UIEventBus eventBus, final RolloutUIState rolloutUiState, final I18N i18n) {
+    public RolloutGroupsListHeader(final UIEventBus eventBus, final RolloutUIState rolloutUiState, final VaadinMessageSource i18n) {
         super(null, rolloutUiState, i18n);
         this.eventBus = eventBus;
         eventBus.subscribe(this);
@@ -142,8 +142,8 @@ public class RolloutGroupsListHeader extends AbstractGridHeader {
         final Button rolloutsListViewLink = SPUIComponentProvider.getButton(null, "", "", null, false, null,
                 SPUIButtonStyleSmallNoBorder.class);
         rolloutsListViewLink.setStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link rollout-caption-links");
-        rolloutsListViewLink.setDescription(i18n.get("message.rollouts"));
-        rolloutsListViewLink.setCaption(i18n.get("message.rollouts"));
+        rolloutsListViewLink.setDescription(i18n.getMessage("message.rollouts"));
+        rolloutsListViewLink.setCaption(i18n.getMessage("message.rollouts"));
         rolloutsListViewLink.addClickListener(value -> showRolloutListView());
 
         final HorizontalLayout headerCaptionLayout = new HorizontalLayout();

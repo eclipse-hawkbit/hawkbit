@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -35,7 +35,7 @@ public class CertificateAuthenticationConfigurationItem extends AbstractAuthenti
     private final TextField caRootAuthorityTextField;
 
     public CertificateAuthenticationConfigurationItem(final TenantConfigurationManagement tenantConfigurationManagement,
-            final I18N i18n) {
+            final VaadinMessageSource i18n) {
         super(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED, tenantConfigurationManagement, i18n);
 
         super.init("label.configuration.auth.header");

@@ -27,7 +27,7 @@ import org.eclipse.hawkbit.ui.rollout.rollout.RolloutListView;
 import org.eclipse.hawkbit.ui.rollout.rolloutgroup.RolloutGroupsListView;
 import org.eclipse.hawkbit.ui.rollout.rolloutgrouptargets.RolloutGroupTargetsListView;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
@@ -71,7 +71,7 @@ public class RolloutView extends VerticalLayout implements View {
             final UIEventBus eventBus, final RolloutManagement rolloutManagement,
             final RolloutGroupManagement rolloutGroupManagement, final TargetManagement targetManagement,
             final UINotification uiNotification, final UiProperties uiProperties, final EntityFactory entityFactory,
-            final I18N i18n, final TargetFilterQueryManagement targetFilterQueryManagement) {
+            final VaadinMessageSource i18n, final TargetFilterQueryManagement targetFilterQueryManagement) {
         this.permChecker = permissionChecker;
         this.rolloutManagement = rolloutManagement;
         this.rolloutListView = new RolloutListView(permissionChecker, rolloutUIState, eventBus, rolloutManagement,

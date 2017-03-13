@@ -26,7 +26,7 @@ import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -79,7 +79,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private static final String MD5HASH = "md5Hash";
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final transient EventBus.UIEventBus eventBus;
 
@@ -101,7 +101,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private final transient ArtifactManagement artifactManagement;
 
-    public ArtifactDetailsLayout(final I18N i18n, final UIEventBus eventBus,
+    public ArtifactDetailsLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final ArtifactUploadState artifactUploadState, final UINotification uINotification,
             final ArtifactManagement artifactManagement) {
         this.i18n = i18n;
@@ -250,12 +250,12 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private void confirmAndDeleteArtifact(final Long id, final String fileName) {
 
-        final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.get("caption.delete.artifact.confirmbox"),
-                i18n.get("message.delete.artifact", new Object[] { fileName }), i18n.get("button.ok"),
-                i18n.get("button.cancel"), ok -> {
+        final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.getMessage("caption.delete.artifact.confirmbox"),
+                i18n.getMessage("message.delete.artifact", new Object[] { fileName }), i18n.getMessage("button.ok"),
+                i18n.getMessage("button.cancel"), ok -> {
                     if (ok) {
                         artifactManagement.deleteArtifact(id);
-                        uINotification.displaySuccess(i18n.get("message.artifact.deleted", fileName));
+                        uINotification.displaySuccess(i18n.getMessage("message.artifact.deleted", fileName));
                         if (artifactUploadState.getSelectedBaseSwModuleId().isPresent()) {
                             populateArtifactDetails(artifactUploadState.getSelectedBaseSwModuleId().get(),
                                     HawkbitCommonUtil.getFormattedNameVersion(
@@ -273,15 +273,15 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private void setTableColumnDetails(final Table table) {
 
-        table.setColumnHeader(PROVIDED_FILE_NAME, i18n.get("upload.file.name"));
-        table.setColumnHeader(SIZE, i18n.get("upload.size"));
+        table.setColumnHeader(PROVIDED_FILE_NAME, i18n.getMessage("upload.file.name"));
+        table.setColumnHeader(SIZE, i18n.getMessage("upload.size"));
         if (fullWindowMode) {
-            table.setColumnHeader(SHA1HASH, i18n.get("upload.sha1"));
-            table.setColumnHeader(MD5HASH, i18n.get("upload.md5"));
+            table.setColumnHeader(SHA1HASH, i18n.getMessage("upload.sha1"));
+            table.setColumnHeader(MD5HASH, i18n.getMessage("upload.md5"));
         }
-        table.setColumnHeader(CREATE_MODIFIED_DATE_UPLOAD, i18n.get("upload.last.modified.date"));
+        table.setColumnHeader(CREATE_MODIFIED_DATE_UPLOAD, i18n.getMessage("upload.last.modified.date"));
         if (!readOnly) {
-            table.setColumnHeader(ACTION, i18n.get("upload.action"));
+            table.setColumnHeader(ACTION, i18n.getMessage("upload.action"));
         }
 
         table.setColumnExpandRatio(PROVIDED_FILE_NAME, 3.5F);

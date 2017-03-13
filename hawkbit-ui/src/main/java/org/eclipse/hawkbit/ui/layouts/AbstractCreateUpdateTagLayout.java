@@ -34,7 +34,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -77,7 +77,7 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     protected static final String TAG_DYNAMIC_STYLE = "tag-color-preview";
     protected static final String MESSAGE_ERROR_MISSING_TAGNAME = "message.error.missing.tagname";
 
-    protected I18N i18n;
+    protected VaadinMessageSource i18n;
 
     protected transient TagManagement tagManagement;
 
@@ -130,7 +130,7 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
      * @param uiNotification
      *            UINotification
      */
-    public AbstractCreateUpdateTagLayout(final I18N i18n, final TagManagement tagManagement,
+    public AbstractCreateUpdateTagLayout(final VaadinMessageSource i18n, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
             final UINotification uiNotification) {
         this.i18n = i18n;
@@ -196,26 +196,26 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
 
     protected void createRequiredComponents() {
 
-        createTagStr = i18n.get("label.create.tag");
-        updateTagStr = i18n.get("label.update.tag");
-        comboLabel = new LabelBuilder().name(i18n.get("label.choose.tag")).buildLabel();
-        colorLabel = new LabelBuilder().name(i18n.get("label.choose.tag.color")).buildLabel();
+        createTagStr = i18n.getMessage("label.create.tag");
+        updateTagStr = i18n.getMessage("label.update.tag");
+        comboLabel = new LabelBuilder().name(i18n.getMessage("label.choose.tag")).buildLabel();
+        colorLabel = new LabelBuilder().name(i18n.getMessage("label.choose.tag.color")).buildLabel();
         colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
 
-        tagName = new TextFieldBuilder().caption(i18n.get("textfield.name"))
+        tagName = new TextFieldBuilder().caption(i18n.getMessage("textfield.name"))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_NAME).required(true)
-                .prompt(i18n.get("textfield.name")).immediate(true).id(SPUIDefinitions.NEW_TARGET_TAG_NAME)
+                .prompt(i18n.getMessage("textfield.name")).immediate(true).id(SPUIDefinitions.NEW_TARGET_TAG_NAME)
                 .buildTextComponent();
 
-        tagDesc = new TextAreaBuilder().caption(i18n.get("textfield.description"))
+        tagDesc = new TextAreaBuilder().caption(i18n.getMessage("textfield.description"))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_DESC)
-                .prompt(i18n.get("textfield.description")).immediate(true).id(SPUIDefinitions.NEW_TARGET_TAG_DESC)
+                .prompt(i18n.getMessage("textfield.description")).immediate(true).id(SPUIDefinitions.NEW_TARGET_TAG_DESC)
                 .buildTextComponent();
 
         tagDesc.setNullRepresentation(StringUtils.EMPTY);
 
         tagNameComboBox = SPUIComponentProvider.getComboBox(null, "", null, null, false, "",
-                i18n.get("label.combobox.tag"));
+                i18n.getMessage("label.combobox.tag"));
         tagNameComboBox.addStyleName(SPUIDefinitions.FILTER_TYPE_COMBO_STYLE);
         tagNameComboBox.setImmediate(true);
         tagNameComboBox.setId(UIComponentIdProvider.DIST_TAG_COMBO);
@@ -587,12 +587,12 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
             eventBus.publish(this, new DistributionSetTagTableEvent(BaseEntityEventType.UPDATED_ENTITY,
                     (DistributionSetTag) targetObj));
         }
-        uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { targetObj.getName() }));
+        uiNotification.displaySuccess(i18n.getMessage("message.update.success", new Object[] { targetObj.getName() }));
 
     }
 
     protected void displaySuccess(final String tagName) {
-        uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { tagName }));
+        uiNotification.displaySuccess(i18n.getMessage("message.save.success", new Object[] { tagName }));
     }
 
     protected void displayValidationError(final String errorMessage) {
@@ -610,7 +610,7 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     private boolean isDuplicateByName() {
         final Optional<E> existingType = findEntityByName();
         existingType.ifPresent(type -> uiNotification
-                .displayValidationError(i18n.get("message.tag.duplicate.check", new Object[] { type.getName() })));
+                .displayValidationError(i18n.getMessage("message.tag.duplicate.check", new Object[] { type.getName() })));
 
         return existingType.isPresent();
     }
