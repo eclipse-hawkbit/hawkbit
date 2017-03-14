@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
-import static org.eclipse.hawkbit.repository.FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -214,7 +212,7 @@ public final class RSQLUtility {
             simpleTypeConverter = new SimpleTypeConverter();
         }
 
-        private void beginLevel(boolean isOr) {
+        private void beginLevel(final boolean isOr) {
             level++;
             isOrLevel = isOr;
             joinsInLevel.put(level, new HashSet<>(2));
@@ -227,19 +225,18 @@ public final class RSQLUtility {
         }
 
         private Set<Join<Object, Object>> getCurrentJoins() {
-            if(level > 0) {
+            if (level > 0) {
                 return joinsInLevel.get(level);
             }
             return Collections.emptySet();
         }
 
         private Optional<Join<Object, Object>> findCurrentJoinOfType(final Class<?> type) {
-            return getCurrentJoins().stream()
-                    .filter(j -> type.equals(j.getJavaType())).findFirst();
+            return getCurrentJoins().stream().filter(j -> type.equals(j.getJavaType())).findAny();
         }
 
-        private void addCurrentJoin(Join<Object, Object> join) {
-            if(level > 0) {
+        private void addCurrentJoin(final Join<Object, Object> join) {
+            if (level > 0) {
                 getCurrentJoins().add(join);
             }
         }
@@ -272,7 +269,7 @@ public final class RSQLUtility {
 
         private String getAndValidatePropertyFieldName(final A propertyEnum, final ComparisonNode node) {
 
-            final String[] graph = node.getSelector().split("\\" + SUB_ATTRIBUTE_SEPERATOR);
+            final String[] graph = node.getSelector().split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
 
             validateMapParamter(propertyEnum, node, graph);
 
@@ -286,7 +283,7 @@ public final class RSQLUtility {
             for (int i = 1; i < graph.length; i++) {
 
                 final String propertyField = graph[i];
-                fieldNameBuilder.append(SUB_ATTRIBUTE_SEPERATOR).append(propertyField);
+                fieldNameBuilder.append(FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR).append(propertyField);
 
                 // the key of map is not in the graph
                 if (propertyEnum.isMap() && graph.length == (i + 1)) {
@@ -347,7 +344,7 @@ public final class RSQLUtility {
          */
         private Path<Object> getFieldPath(final A enumField, final String finalProperty) {
             Path<Object> fieldPath = null;
-            final String[] split = finalProperty.split("\\" + SUB_ATTRIBUTE_SEPERATOR);
+            final String[] split = finalProperty.split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
 
             for (int i = 0; i < split.length; i++) {
                 final boolean isMapKeyField = enumField.isMap() && i == (split.length - 1);
@@ -360,13 +357,13 @@ public final class RSQLUtility {
                 if (fieldPath instanceof PluralJoin) {
                     final Join<Object, ?> join = (Join<Object, ?>) fieldPath;
                     final From<?, Object> joinParent = join.getParent();
-                    Optional<Join<Object, Object>> currentJoinOfType = findCurrentJoinOfType(join.getJavaType());
-                    if(currentJoinOfType.isPresent() && isOrLevel) {
+                    final Optional<Join<Object, Object>> currentJoinOfType = findCurrentJoinOfType(join.getJavaType());
+                    if (currentJoinOfType.isPresent() && isOrLevel) {
                         // remove the additional join and use the existing one
                         joinParent.getJoins().remove(join);
                         fieldPath = currentJoinOfType.get();
                     } else {
-                        Join<Object, Object> newJoin = joinParent.join(fieldNameSplit, JoinType.LEFT);
+                        final Join<Object, Object> newJoin = joinParent.join(fieldNameSplit, JoinType.LEFT);
                         addCurrentJoin(newJoin);
                         fieldPath = newJoin;
                     }
@@ -414,7 +411,7 @@ public final class RSQLUtility {
                         final String enumFieldName = enumField.name().toLowerCase();
 
                         if (enumField.isMap()) {
-                            return enumFieldName + SUB_ATTRIBUTE_SEPERATOR + "keyName";
+                            return enumFieldName + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR + "keyName";
                         }
 
                         return enumFieldName;
@@ -423,7 +420,8 @@ public final class RSQLUtility {
             final List<String> expectedSubFieldList = Arrays.stream(enumType.getEnumConstants())
                     .filter(enumField -> !enumField.getSubEntityAttributes().isEmpty()).flatMap(enumField -> {
                         final List<String> subEntity = enumField.getSubEntityAttributes().stream()
-                                .map(fieldName -> enumField.name().toLowerCase() + SUB_ATTRIBUTE_SEPERATOR + fieldName)
+                                .map(fieldName -> enumField.name().toLowerCase()
+                                        + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR + fieldName)
                                 .collect(Collectors.toList());
 
                         return subEntity.stream();
@@ -434,7 +432,7 @@ public final class RSQLUtility {
 
         private A getFieldEnumByName(final ComparisonNode node) {
             String enumName = node.getSelector();
-            final String[] graph = enumName.split("\\" + SUB_ATTRIBUTE_SEPERATOR);
+            final String[] graph = enumName.split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
             if (graph.length != 0) {
                 enumName = graph[0];
             }
@@ -613,7 +611,7 @@ public final class RSQLUtility {
             if (!enumField.isMap()) {
                 return null;
             }
-            final String[] graph = node.getSelector().split("\\" + SUB_ATTRIBUTE_SEPERATOR);
+            final String[] graph = node.getSelector().split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
             final String keyValue = graph[graph.length - 1];
             if (fieldPath instanceof MapJoin) {
                 // Currently we support only string key .So below cast is safe.

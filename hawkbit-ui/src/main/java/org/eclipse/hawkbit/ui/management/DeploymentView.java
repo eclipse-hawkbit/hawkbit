@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.management;
 
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 import javax.annotation.PostConstruct;
 
@@ -55,10 +56,11 @@ import org.eclipse.hawkbit.ui.push.TargetDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetTagCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetTagDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetTagUpdatedEventContainer;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -85,7 +87,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
 
     private final SpPermissionChecker permChecker;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final UINotification uiNotification;
 
@@ -112,7 +114,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
     private final DeploymentViewMenuItem deploymentViewMenuItem;
 
     @Autowired
-    DeploymentView(final UIEventBus eventbus, final SpPermissionChecker permChecker, final I18N i18n,
+    DeploymentView(final UIEventBus eventbus, final SpPermissionChecker permChecker, final VaadinMessageSource i18n,
             final UINotification uiNotification, final ManagementUIState managementUIState,
             final DeploymentManagement deploymentManagement, final UIEventBus eventBus,
             final DistributionTableFilters distFilterParameters,
@@ -121,7 +123,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
             final ManagementViewClientCriterion managementViewClientCriterion, final TagManagement tagManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement,
             final NotificationUnreadButton notificationUnreadButton,
-            final DeploymentViewMenuItem deploymentViewMenuItem) {
+            final DeploymentViewMenuItem deploymentViewMenuItem, @Qualifier("uiExecutor") final Executor uiExecutor) {
         super(eventBus, notificationUnreadButton);
         this.permChecker = permChecker;
         this.i18n = i18n;
@@ -142,7 +144,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
 
         this.targetTableLayout = new TargetTableLayout(eventbus, targetTable, targetManagement, entityFactory, i18n,
                 eventBus, uiNotification, managementUIState, managementViewClientCriterion, deploymentManagement,
-                uiproperties, permChecker, uiNotification, tagManagement, distributionSetManagement);
+                uiproperties, permChecker, uiNotification, tagManagement, distributionSetManagement, uiExecutor);
 
         this.distributionTagLayout = new DistributionTagLayout(eventbus, managementUIState, i18n, permChecker, eventBus,
                 tagManagement, entityFactory, uiNotification, distFilterParameters, distributionSetManagement,
@@ -355,7 +357,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
 
     private void checkNoDataAvaialble() {
         if (managementUIState.isNoDataAvilableTarget() && managementUIState.isNoDataAvailableDistribution()) {
-            uiNotification.displayValidationError(i18n.get("message.no.data"));
+            uiNotification.displayValidationError(i18n.getMessage("message.no.data"));
         }
     }
 

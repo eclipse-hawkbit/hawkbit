@@ -15,11 +15,8 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
  * has been created for a specific rollout.
  *
  */
-public class RolloutGroupCreatedEvent extends RemoteEntityEvent<RolloutGroup> {
-
+public class RolloutGroupCreatedEvent extends AbstractRolloutGroupEvent {
     private static final long serialVersionUID = 1L;
-
-    private Long rolloutId;
 
     /**
      * Default constructor.
@@ -33,16 +30,12 @@ public class RolloutGroupCreatedEvent extends RemoteEntityEvent<RolloutGroup> {
      * 
      * @param rolloutGroup
      *            the updated rolloutGroup
+     * @param rolloutId
+     *            of the related rollout
      * @param applicationId
      *            the origin application id
      */
-    public RolloutGroupCreatedEvent(final RolloutGroup rolloutGroup, final String applicationId) {
-        super(rolloutGroup, applicationId);
-        this.rolloutId = rolloutGroup.getRollout().getId();
+    public RolloutGroupCreatedEvent(final RolloutGroup rolloutGroup, final Long rolloutId, final String applicationId) {
+        super(rolloutGroup, rolloutId, applicationId);
     }
-
-    public Long getRolloutId() {
-        return rolloutId;
-    }
-
 }

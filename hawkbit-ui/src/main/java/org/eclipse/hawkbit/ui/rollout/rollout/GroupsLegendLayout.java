@@ -8,17 +8,18 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import java.util.Collections;
+import java.util.List;
+
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupsValidation;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
-import java.util.Collections;
-import java.util.List;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.VerticalLayout;
 
 /**
  * Displays a legend for the Groups of a Rollout with the count of targets in
@@ -29,7 +30,7 @@ public class GroupsLegendLayout extends VerticalLayout {
 
     private static final long serialVersionUID = 5483206203739308677L;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private Label totalTargetsLabel;
 
@@ -42,7 +43,7 @@ public class GroupsLegendLayout extends VerticalLayout {
     /**
      * Initializes a new GroupsLegendLayout
      */
-    GroupsLegendLayout(final I18N i18n) {
+    GroupsLegendLayout(final VaadinMessageSource i18n) {
         this.i18n = i18n;
 
         init();
@@ -89,7 +90,7 @@ public class GroupsLegendLayout extends VerticalLayout {
         label.addStyleName("rollout-target-count-loading");
         label.setImmediate(true);
         label.setSizeUndefined();
-        label.setValue(i18n.get("label.rollout.calculating"));
+        label.setValue(i18n.getMessage("label.rollout.calculating"));
         return label;
     }
 
@@ -108,12 +109,12 @@ public class GroupsLegendLayout extends VerticalLayout {
     }
 
     private String getTotalTargetMessage(final long totalTargetsCount) {
-        return i18n.get("label.target.filter.count") + totalTargetsCount;
+        return i18n.getMessage("label.target.filter.count") + totalTargetsCount;
     }
 
     /**
-     * Display an indication that the legend is being calculated.
-     * When the loading process is done one of the populate methods should be called.
+     * Display an indication that the legend is being calculated. When the
+     * loading process is done one of the populate methods should be called.
      */
     public void displayLoading() {
         populateGroupsLegendByTargetCounts(Collections.emptyList());
@@ -152,7 +153,7 @@ public class GroupsLegendLayout extends VerticalLayout {
             if (targetsPerGroup.size() > i) {
                 final Long targetCount = targetsPerGroup.get(i);
                 label.setValue(
-                        getTargetsInGroupMessage(targetCount, i18n.get("textfield.rollout.group.default.name", i + 1)));
+                        getTargetsInGroupMessage(targetCount, i18n.getMessage("textfield.rollout.group.default.name", i + 1)));
                 label.setVisible(true);
             } else {
                 label.setValue("");
@@ -178,7 +179,8 @@ public class GroupsLegendLayout extends VerticalLayout {
      * @param groups
      *            List of groups with their name
      */
-    public void populateGroupsLegendByValidation(final RolloutGroupsValidation validation, final List<RolloutGroupCreate> groups) {
+    public void populateGroupsLegendByValidation(final RolloutGroupsValidation validation,
+            final List<RolloutGroupCreate> groups) {
         loadingLabel.setVisible(false);
         if (validation == null) {
             return;
@@ -239,7 +241,7 @@ public class GroupsLegendLayout extends VerticalLayout {
     }
 
     private String getTargetsInGroupMessage(final Long targets, final String groupName) {
-        return i18n.get("label.rollout.targets.in.group", targets, groupName);
+        return i18n.getMessage("label.rollout.targets.in.group", targets, groupName);
     }
 
 }

@@ -19,9 +19,9 @@ import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -50,7 +50,7 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
      * @param notification
      * @param managementUIState
      */
-    public ActionHistoryLayout(final I18N i18n, final DeploymentManagement deploymentManagement,
+    public ActionHistoryLayout(final VaadinMessageSource i18n, final DeploymentManagement deploymentManagement,
             final UIEventBus eventBus, final UINotification notification, final ManagementUIState managementUIState) {
         super(i18n, eventBus);
         managementUIState.setActionHistoryMaximized(false);
@@ -76,11 +76,10 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
             setData(SPUIDefinitions.DATA_AVAILABLE);
             UI.getCurrent().access(() -> populateActionHistoryDetails(targetUIEvent.getEntity()));
         } else if (BaseEntityEventType.REMOVE_ENTITY == targetUIEvent.getEventType()
-                && targetUIEvent.getEntityIds()
-                        .contains(managementUIState.getLastSelectedTargetId())) {
+                && targetUIEvent.getEntityIds().contains(managementUIState.getLastSelectedTargetId())) {
             setData(SPUIDefinitions.NO_DATA);
             UI.getCurrent().access(this::populateActionHistoryDetails);
-         }
+        }
     }
 
     /**
@@ -92,7 +91,7 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
      * the state changes to maximize and hence the dependent grids are updated.
      */
     @Override
-    public void registerDetails(AbstractGrid<?>.DetailsSupport details) {
+    public void registerDetails(final AbstractGrid<?>.DetailsSupport details) {
         this.details = details;
         grid.addSelectionListener(event -> {
             masterForDetails = (Long) event.getSelected().stream().findFirst().orElse(null);
@@ -185,7 +184,8 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
          * @param abstractGridHeader
          * @param maximizeButtonId
          */
-        protected ActionHistoryHeaderMaxSupport(DefaultGridHeader abstractGridHeader, String maximizeButtonId) {
+        protected ActionHistoryHeaderMaxSupport(final DefaultGridHeader abstractGridHeader,
+                final String maximizeButtonId) {
             abstractGridHeader.super(maximizeButtonId);
             this.abstractGridHeader = abstractGridHeader;
         }

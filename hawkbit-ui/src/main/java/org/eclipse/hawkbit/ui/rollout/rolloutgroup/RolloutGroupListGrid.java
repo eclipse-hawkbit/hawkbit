@@ -30,7 +30,7 @@ import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -77,7 +77,21 @@ public class RolloutGroupListGrid extends AbstractGrid<LazyQueryContainer> {
                 new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_RED));
     }
 
-    public RolloutGroupListGrid(final I18N i18n, final UIEventBus eventBus,
+    /**
+     * Constructor for RolloutGroupListGrid (Header with breadcrumbs)
+     * 
+     * @param i18n
+     *            I18N
+     * @param eventBus
+     *            UIEventBus
+     * @param rolloutGroupManagement
+     *            RolloutGroupManagement
+     * @param rolloutUIState
+     *            RolloutUIState
+     * @param permissionChecker
+     *            SpPermissionChecker
+     */
+    public RolloutGroupListGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final RolloutGroupManagement rolloutGroupManagement, final RolloutUIState rolloutUIState,
             final SpPermissionChecker permissionChecker) {
         super(i18n, eventBus, permissionChecker);
@@ -89,6 +103,11 @@ public class RolloutGroupListGrid extends AbstractGrid<LazyQueryContainer> {
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final RolloutEvent event) {
+        if (RolloutEvent.SHOW_ROLLOUTS == event) {
+            rolloutUIState.setShowRollOuts(true);
+            rolloutUIState.setShowRolloutGroups(false);
+            rolloutUIState.setShowRolloutGroupTargets(false);
+        }
         if (RolloutEvent.SHOW_ROLLOUT_GROUPS != event) {
             return;
         }
@@ -109,7 +128,6 @@ public class RolloutGroupListGrid extends AbstractGrid<LazyQueryContainer> {
         if (!rolloutUIState.isShowRolloutGroups()) {
             return;
         }
-
         ((LazyQueryContainer) getContainerDataSource()).refresh();
     }
 
@@ -151,7 +169,6 @@ public class RolloutGroupListGrid extends AbstractGrid<LazyQueryContainer> {
                 false);
         rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS,
                 TotalTargetCountStatus.class, null, false, false);
-
     }
 
     @Override
@@ -179,22 +196,22 @@ public class RolloutGroupListGrid extends AbstractGrid<LazyQueryContainer> {
 
     @Override
     protected void setColumnHeaderNames() {
-        getColumn(ROLLOUT_RENDERER_DATA).setHeaderCaption(i18n.get("header.name"));
-        getColumn(SPUILabelDefinitions.VAR_STATUS).setHeaderCaption(i18n.get("header.status"));
+        getColumn(ROLLOUT_RENDERER_DATA).setHeaderCaption(i18n.getMessage("header.name"));
+        getColumn(SPUILabelDefinitions.VAR_STATUS).setHeaderCaption(i18n.getMessage("header.status"));
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS)
-                .setHeaderCaption(i18n.get("header.detail.status"));
+                .setHeaderCaption(i18n.getMessage("header.detail.status"));
         getColumn(SPUILabelDefinitions.ROLLOUT_GROUP_INSTALLED_PERCENTAGE)
-                .setHeaderCaption(i18n.get("header.rolloutgroup.installed.percentage"));
+                .setHeaderCaption(i18n.getMessage("header.rolloutgroup.installed.percentage"));
         getColumn(SPUILabelDefinitions.ROLLOUT_GROUP_ERROR_THRESHOLD)
-                .setHeaderCaption(i18n.get("header.rolloutgroup.threshold.error"));
+                .setHeaderCaption(i18n.getMessage("header.rolloutgroup.threshold.error"));
         getColumn(SPUILabelDefinitions.ROLLOUT_GROUP_THRESHOLD)
-                .setHeaderCaption(i18n.get("header.rolloutgroup.threshold"));
-        getColumn(SPUILabelDefinitions.VAR_CREATED_USER).setHeaderCaption(i18n.get("header.createdBy"));
-        getColumn(SPUILabelDefinitions.VAR_CREATED_DATE).setHeaderCaption(i18n.get("header.createdDate"));
-        getColumn(SPUILabelDefinitions.VAR_MODIFIED_DATE).setHeaderCaption(i18n.get("header.modifiedDate"));
-        getColumn(SPUILabelDefinitions.VAR_MODIFIED_BY).setHeaderCaption(i18n.get("header.modifiedBy"));
-        getColumn(SPUILabelDefinitions.VAR_DESC).setHeaderCaption(i18n.get("header.description"));
-        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS).setHeaderCaption(i18n.get("header.total.targets"));
+                .setHeaderCaption(i18n.getMessage("header.rolloutgroup.threshold"));
+        getColumn(SPUILabelDefinitions.VAR_CREATED_USER).setHeaderCaption(i18n.getMessage("header.createdBy"));
+        getColumn(SPUILabelDefinitions.VAR_CREATED_DATE).setHeaderCaption(i18n.getMessage("header.createdDate"));
+        getColumn(SPUILabelDefinitions.VAR_MODIFIED_DATE).setHeaderCaption(i18n.getMessage("header.modifiedDate"));
+        getColumn(SPUILabelDefinitions.VAR_MODIFIED_BY).setHeaderCaption(i18n.getMessage("header.modifiedBy"));
+        getColumn(SPUILabelDefinitions.VAR_DESC).setHeaderCaption(i18n.getMessage("header.description"));
+        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS).setHeaderCaption(i18n.getMessage("header.total.targets"));
     }
 
     @Override
@@ -288,9 +305,10 @@ public class RolloutGroupListGrid extends AbstractGrid<LazyQueryContainer> {
 
         @Override
         public void click(final RendererClickEvent event) {
-            rolloutUIState.setRolloutGroup(
-                    rolloutGroupManagement.findRolloutGroupWithDetailedStatus((Long) event.getItemId()));
-            eventBus.publish(this, RolloutEvent.SHOW_ROLLOUT_GROUP_TARGETS);
+            rolloutGroupManagement.findRolloutGroupWithDetailedStatus((Long) event.getItemId()).ifPresent(group -> {
+                rolloutUIState.setRolloutGroup(group);
+                eventBus.publish(this, RolloutEvent.SHOW_ROLLOUT_GROUP_TARGETS);
+            });
         }
     }
 
@@ -361,8 +379,8 @@ public class RolloutGroupListGrid extends AbstractGrid<LazyQueryContainer> {
             final String codePoint = HawkbitCommonUtil.getCodePoint(statusFontIcon);
             return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(),
                     UIComponentIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
-
         }
 
     }
+
 }

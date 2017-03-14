@@ -31,7 +31,6 @@ import com.vaadin.ui.themes.ValoTheme;
  *
  */
 public class ConfirmationDialog implements Button.ClickListener {
-    /** Serial version UID. */
     private static final long serialVersionUID = 1L;
     /** The confirmation callback. */
     private transient ConfirmationDialogCallback callback;

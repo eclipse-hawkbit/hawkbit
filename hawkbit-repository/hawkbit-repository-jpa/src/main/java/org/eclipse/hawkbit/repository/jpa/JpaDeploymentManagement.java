@@ -71,7 +71,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -175,8 +174,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final Collection<TargetWithActionType> targets, final String actionMessage) {
         final JpaDistributionSet set = distributoinSetRepository.findOne(dsID);
         if (set == null) {
-            throw new EntityNotFoundException(
-                    String.format("no %s with id %d found", DistributionSet.class.getSimpleName(), dsID));
+            throw new EntityNotFoundException(DistributionSet.class, dsID);
         }
 
         return assignDistributionSetToTargets(set, targets, null, null, actionMessage);
@@ -227,7 +225,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         final List<JpaTarget> targets = Lists.partition(controllerIDs, Constants.MAX_ENTRIES_IN_STATEMENT).stream()
                 .map(ids -> targetRepository
                         .findAll(TargetSpecifications.hasControllerIdAndAssignedDistributionSetIdNot(ids, set.getId())))
-                .flatMap(t -> t.stream()).collect(Collectors.toList());
+                .flatMap(List::stream).collect(Collectors.toList());
 
         if (targets.isEmpty()) {
             // detaching as it is not necessary to persist the set itself
@@ -352,22 +350,14 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     }
 
-    private DistributionSetAssignmentResult assignDistributionSetByTargetId(@NotNull final JpaDistributionSet set,
-            @NotEmpty final List<String> tIDs, final ActionType actionType, final long forcedTime) {
-
-        return assignDistributionSetToTargets(set, tIDs.stream()
-                .map(t -> new TargetWithActionType(t, actionType, forcedTime)).collect(Collectors.toList()), null, null,
-                null);
-    }
-
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Action cancelAction(final Long actionId) {
         LOG.debug("cancelAction({})", actionId);
 
-        final JpaAction action = Optional.ofNullable(actionRepository.findOne(actionId))
-                .orElseThrow(() -> new EntityNotFoundException("Action with given ID " + actionId + " not found"));
+        final JpaAction action = actionRepository.findById(actionId)
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
         if (action.isCancelingOrCanceled()) {
             throw new CancelActionNotAllowedException("Actions in canceling or canceled state cannot be canceled");
@@ -385,8 +375,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
             return saveAction;
         } else {
-            throw new CancelActionNotAllowedException(
-                    "Action [id: " + action.getId() + "] is not active and cannot be canceled");
+            throw new CancelActionNotAllowedException(action.getId() + " is not active and cannot be canceled");
         }
     }
 
@@ -413,17 +402,16 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Action forceQuitAction(final Long actionId) {
-        final JpaAction action = Optional.ofNullable(actionRepository.findOne(actionId))
-                .orElseThrow(() -> new EntityNotFoundException("Action with given ID " + actionId + " not found"));
+        final JpaAction action = actionRepository.findById(actionId)
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
         if (!action.isCancelingOrCanceled()) {
             throw new ForceQuitActionNotAllowedException(
-                    "Action [id: " + action.getId() + "] is not canceled yet and cannot be force quit");
+                    action.getId() + " is not canceled yet and cannot be force quit");
         }
 
         if (!action.isActive()) {
-            throw new ForceQuitActionNotAllowedException(
-                    "Action [id: " + action.getId() + "] is not active and cannot be force quit");
+            throw new ForceQuitActionNotAllowedException(action.getId() + " is not active and cannot be force quit");
         }
 
         LOG.warn("action ({}) was still activ and has been force quite.", action);
@@ -458,6 +446,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final RolloutGroup rolloutGroupParent, final int limit) {
         final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         def.setName("startScheduledActions");
+        def.setReadOnly(false);
+        def.setIsolationLevel(Isolation.READ_UNCOMMITTED.value());
         def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         return new TransactionTemplate(txManager, def).execute(status -> {
             final Page<Action> rolloutGroupActions = findActionsByRolloutAndRolloutGroupParent(rollout,
@@ -543,13 +533,13 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    public Action findAction(final Long actionId) {
-        return actionRepository.findOne(actionId);
+    public Optional<Action> findAction(final Long actionId) {
+        return Optional.ofNullable(actionRepository.findOne(actionId));
     }
 
     @Override
-    public Action findActionWithDetails(final Long actionId) {
-        return actionRepository.findById(actionId);
+    public Optional<Action> findActionWithDetails(final Long actionId) {
+        return actionRepository.getById(actionId);
     }
 
     @Override
@@ -578,30 +568,46 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     public List<Action> findActiveActionsByTarget(final String controllerId) {
+        throwExceptionIfTargetFoesNotExist(controllerId);
+
         return actionRepository.findByActiveAndTarget(controllerId, true);
     }
 
     @Override
     public List<Action> findInActiveActionsByTarget(final String controllerId) {
+        throwExceptionIfTargetFoesNotExist(controllerId);
+
         return actionRepository.findByActiveAndTarget(controllerId, false);
     }
 
     @Override
     public Long countActionsByTarget(final String controllerId) {
+        throwExceptionIfTargetFoesNotExist(controllerId);
+
         return actionRepository.countByTargetControllerId(controllerId);
     }
 
     @Override
     public Long countActionsByTarget(final String rsqlParam, final String controllerId) {
+        throwExceptionIfTargetFoesNotExist(controllerId);
+
         return actionRepository.count(createSpecificationFor(controllerId, rsqlParam));
+    }
+
+    private void throwExceptionIfTargetFoesNotExist(final String controllerId) {
+        if (!targetRepository.existsByControllerId(controllerId)) {
+            throw new EntityNotFoundException(Target.class, controllerId);
+        }
     }
 
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public Action forceTargetAction(final Long actionId) {
-        final JpaAction action = actionRepository.findOne(actionId);
-        if (action != null && !action.isForced()) {
+        final JpaAction action = actionRepository.findById(actionId)
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
+
+        if (!action.isForced()) {
             action.setActionType(ActionType.FORCED);
             return actionRepository.save(action);
         }
@@ -610,11 +616,19 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final Long actionId) {
+        if (!actionRepository.exists(actionId)) {
+            throw new EntityNotFoundException(Action.class, actionId);
+        }
+
         return actionStatusRepository.findByActionId(pageReq, actionId);
     }
 
     @Override
     public Page<ActionStatus> findActionStatusByActionWithMessages(final Pageable pageReq, final Long actionId) {
+        if (!actionRepository.exists(actionId)) {
+            throw new EntityNotFoundException(Action.class, actionId);
+        }
+
         return actionStatusRepository.getByActionId(pageReq, actionId);
     }
 

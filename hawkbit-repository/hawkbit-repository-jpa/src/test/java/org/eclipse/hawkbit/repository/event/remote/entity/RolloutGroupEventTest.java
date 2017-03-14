@@ -8,8 +8,10 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import java.lang.reflect.Constructor;
 import java.util.UUID;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -45,6 +47,47 @@ public class RolloutGroupEventTest extends AbstractRemoteEntityEventTest<Rollout
     }
 
     @Override
+    protected RemoteEntityEvent<?> createRemoteEvent(final RolloutGroup baseEntity,
+            final Class<? extends RemoteEntityEvent<?>> eventType) {
+
+        Constructor<?> constructor = null;
+        for (final Constructor<?> constructors : eventType.getDeclaredConstructors()) {
+            if (constructors.getParameterCount() == 3) {
+                constructor = constructors;
+            }
+        }
+
+        if (constructor == null) {
+            throw new IllegalArgumentException("No suitable constructor foundes");
+        }
+
+        try {
+            return (RemoteEntityEvent<?>) constructor.newInstance(baseEntity, 1L, "Node");
+        } catch (final ReflectiveOperationException e) {
+            fail("Exception should not happen " + e.getMessage());
+        }
+        return null;
+    }
+
+    @Override
+    protected RemoteEntityEvent<?> assertEntity(final RolloutGroup baseEntity, final RemoteEntityEvent<?> e) {
+        final AbstractRolloutGroupEvent event = (AbstractRolloutGroupEvent) e;
+
+        assertThat(event.getEntity()).isSameAs(baseEntity);
+        assertThat(event.getRolloutId()).isEqualTo(1L);
+
+        AbstractRolloutGroupEvent underTestCreatedEvent = (AbstractRolloutGroupEvent) createProtoStuffEvent(event);
+        assertThat(underTestCreatedEvent.getEntity()).isEqualTo(baseEntity);
+        assertThat(underTestCreatedEvent.getRolloutId()).isEqualTo(1L);
+
+        underTestCreatedEvent = (AbstractRolloutGroupEvent) createJacksonEvent(event);
+        assertThat(underTestCreatedEvent.getEntity()).isEqualTo(baseEntity);
+        assertThat(underTestCreatedEvent.getRolloutId()).isEqualTo(1L);
+
+        return underTestCreatedEvent;
+    }
+
+    @Override
     protected RolloutGroup createEntity() {
         testdataFactory.createTarget(UUID.randomUUID().toString());
 
@@ -56,7 +99,7 @@ public class RolloutGroupEventTest extends AbstractRemoteEntityEventTest<Rollout
                 10, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "10").build());
 
-        return rolloutManagement.findRolloutById(entity.getId()).getRolloutGroups().get(0);
+        return rolloutManagement.findRolloutById(entity.getId()).get().getRolloutGroups().get(0);
     }
 
 }

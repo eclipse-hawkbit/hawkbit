@@ -78,6 +78,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -104,7 +106,7 @@ import com.google.common.collect.Lists;
 public abstract class AbstractIntegrationTest implements EnvironmentAware {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
-    protected static final Pageable pageReq = new PageRequest(0, 400);
+    protected static final Pageable pageReq = new PageRequest(0, 400, new Sort(Direction.ASC, "id"));
 
     /**
      * Constant for MediaType HAL with encoding UTF-8. Necessary since Spring
@@ -149,9 +151,6 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
     @Autowired
     protected WebApplicationContext context;
-
-    @Autowired
-    protected ControllerManagement controllerManagament;
 
     @Autowired
     protected AuditingHandler auditingHandler;
@@ -211,12 +210,12 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
         @Override
         protected void starting(final Description description) {
             LOG.info("Starting Test {}...", description.getMethodName());
-        };
+        }
 
         @Override
         protected void succeeded(final Description description) {
             LOG.info("Test {} succeeded.", description.getMethodName());
-        };
+        }
 
         @Override
         protected void failed(final Throwable e, final Description description) {
@@ -252,7 +251,7 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     }
 
     protected Long getOsModule(final DistributionSet ds) {
-        return ds.findFirstModuleByType(osType).getId();
+        return ds.findFirstModuleByType(osType).get().getId();
     }
 
     protected Action prepareFinishedUpdate() {
@@ -267,10 +266,10 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
                 .next();
         Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId()).get(0);
 
-        savedAction = controllerManagament.addUpdateActionStatus(
+        savedAction = controllerManagement.addUpdateActionStatus(
                 entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.RUNNING));
 
-        return controllerManagament.addUpdateActionStatus(
+        return controllerManagement.addUpdateActionStatus(
                 entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.FINISHED));
     }
 
@@ -287,9 +286,9 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
                 conditions);
 
         // Run here, because Scheduler is disabled during tests
-        rolloutManagement.fillRolloutGroupsWithTargets(rollout.getId());
+        rolloutManagement.handleRollouts();
 
-        return rolloutManagement.findRolloutById(rollout.getId());
+        return rolloutManagement.findRolloutById(rollout.getId()).get();
     }
 
     @Before

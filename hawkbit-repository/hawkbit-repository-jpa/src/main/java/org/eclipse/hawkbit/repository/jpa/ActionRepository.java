@@ -16,7 +16,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -53,7 +52,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return the found {@link Action}
      */
     @EntityGraph(value = "Action.all", type = EntityGraphType.LOAD)
-    JpaAction findById(Long actionId);
+    Optional<Action> getById(Long actionId);
 
     /**
      * Retrieves all {@link Action}s which are referring the given
@@ -124,14 +123,14 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      *
      * @param targetId
      *            to search for
-     * @param module
+     * @param moduleId
      *            to search for
      * @return action if there is one with assigned target and module is part of
      *         assigned {@link DistributionSet}.
      */
-    @Query("Select a from JpaAction a join a.distributionSet ds join ds.modules modul where a.target.controllerId = :target and modul = :module order by a.id desc")
+    @Query("Select a from JpaAction a join a.distributionSet ds join ds.modules modul where a.target.controllerId = :target and modul.id = :module order by a.id desc")
     List<Action> findActionByTargetAndSoftwareModule(@Param("target") final String targetId,
-            @Param("module") JpaSoftwareModule module);
+            @Param("module") Long moduleId);
 
     /**
      * Retrieves all {@link Action}s which are referring the given
@@ -207,6 +206,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      *            the status which the actions should not have
      * @return the found list of {@link Action}s
      */
+    @EntityGraph(attributePaths = { "target" }, type = EntityGraphType.LOAD)
     @Query("SELECT a FROM JpaAction a WHERE a.active = true AND a.distributionSet.requiredMigrationStep = false AND a.target IN ?1 AND a.status != ?2")
     List<JpaAction> findByActiveAndTargetIdInAndActionStatusNotEqualToAndDistributionSetRequiredMigrationStep(
             Collection<Long> targetIds, Action.Status notStatus);
@@ -286,6 +286,44 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     Long countByRolloutIdAndRolloutGroupIdAndStatus(Long rolloutId, Long rolloutGroupId, Action.Status status);
 
     /**
+     * Counts all actions referring to a given rollout and status.
+     * 
+     * @param rolloutId
+     *            the ID of the rollout the actions belong to
+     * @param status
+     *            the status the actions should have
+     * @return the count of actions referring to a rollout and are in a given
+     *         status
+     */
+    Long countByRolloutIdAndStatus(Long rolloutId, Action.Status status);
+
+    /**
+     * Returns {@code true} if actions for the given rollout exists, otherwise
+     * {@code false}
+     * 
+     * @param rolloutId
+     *            the ID of the rollout the actions belong to
+     * @return {@code true} if actions for the given rollout exists, otherwise
+     *         {@code false}
+     */
+    @Query("SELECT CASE WHEN COUNT(a)>0 THEN 'true' ELSE 'false' END FROM JpaAction a WHERE a.rollout.id=:rolloutId")
+    boolean existsByRolloutId(@Param("rolloutId") Long rolloutId);
+
+    /**
+     * Returns {@code true} if actions for the given rollout exists, otherwise
+     * {@code false}
+     * 
+     * @param rolloutId
+     *            the ID of the rollout the actions belong to
+     * @param status
+     *            the action is not to be in
+     * @return {@code true} if actions for the given rollout exists, otherwise
+     *         {@code false}
+     */
+    @Query("SELECT CASE WHEN COUNT(a)>0 THEN 'true' ELSE 'false' END FROM JpaAction a WHERE a.rollout.id=:rolloutId AND a.status != :status")
+    boolean existsByRolloutIdAndStatusNotIn(@Param("rolloutId") Long rolloutId, @Param("status") Status status);
+
+    /**
      * Retrieving all actions referring to a given rollout with a specific
      * action as parent reference and a specific status.
      *
@@ -302,6 +340,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return the actions referring a specific rollout and a specific parent
      *         rolloutgroup in a specific status
      */
+    @EntityGraph(attributePaths = { "target" }, type = EntityGraphType.LOAD)
     Page<Action> findByRolloutAndRolloutGroupParentAndStatus(Pageable pageable, JpaRollout rollout,
             JpaRolloutGroup rolloutGroupParent, Status actionStatus);
 
@@ -317,19 +356,22 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return the actions referring a specific rollout and a specific parent
      *         rolloutgroup in a specific status
      */
+    @EntityGraph(attributePaths = { "target" }, type = EntityGraphType.LOAD)
     Page<Action> findByRolloutAndRolloutGroupParentIsNullAndStatus(Pageable pageable, JpaRollout rollout,
             Status actionStatus);
 
     /**
      * Retrieves all actions for a specific rollout and in a specific status.
-     *
+     * 
+     * @param pageable
+     *            page parameters
      * @param rolloutId
      *            the rollout the actions beglong to
      * @param actionStatus
      *            the status of the actions
      * @return the actions referring a specific rollout an in a specific status
      */
-    List<Action> findByRolloutIdAndStatus(Long rolloutId, Status actionStatus);
+    Page<JpaAction> findByRolloutIdAndStatus(Pageable pageable, Long rolloutId, Status actionStatus);
 
     /**
      * Get list of objects which has details of status and count of targets in
@@ -375,4 +417,15 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     @Query("SELECT NEW org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus(a.rolloutGroup.id, a.status , COUNT(a.target)) FROM JpaAction a WHERE a.rolloutGroup.id IN ?1 GROUP BY a.rolloutGroup.id, a.status")
     List<TotalTargetCountActionStatus> getStatusCountByRolloutGroupId(List<Long> rolloutGroupId);
 
+    /**
+     * Deletes all actions with the given IDs.
+     * 
+     * @param actionIDs
+     *            the IDs of the actions to be deleted.
+     */
+    @Modifying
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
+    @Query("DELETE FROM JpaAction a WHERE a.id IN ?1")
+    void deleteByIdIn(final Collection<Long> actionIDs);
 }

@@ -8,11 +8,15 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
+import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
@@ -23,10 +27,9 @@ import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
-import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -48,7 +51,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
     private static final long serialVersionUID = -5217675246477211483L;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final UINotification uiNotifcation;
 
@@ -88,7 +91,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
      * @param entityFactory
      *            EntityFactory
      */
-    public SoftwareModuleAddUpdateWindow(final I18N i18n, final UINotification uiNotifcation, final UIEventBus eventBus,
+    public SoftwareModuleAddUpdateWindow(final VaadinMessageSource i18n, final UINotification uiNotifcation, final UIEventBus eventBus,
             final SoftwareManagement softwareManagement, final EntityFactory entityFactory) {
         this.i18n = i18n;
         this.uiNotifcation = uiNotifcation;
@@ -115,6 +118,57 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         @Override
         public boolean canWindowSaveOrUpdate() {
             return editSwModule || !isDuplicate();
+        }
+
+        private void addNewBaseSoftware() {
+            final String name = HawkbitCommonUtil.trimAndNullIfEmpty(nameTextField.getValue());
+            final String version = HawkbitCommonUtil.trimAndNullIfEmpty(versionTextField.getValue());
+            final String vendor = HawkbitCommonUtil.trimAndNullIfEmpty(vendorTextField.getValue());
+            final String description = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
+            final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
+
+            final SoftwareModuleType softwareModuleTypeByName = softwareManagement.findSoftwareModuleTypeByName(type)
+                    .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, type));
+            final SoftwareModuleCreate softwareModule = entityFactory.softwareModule().create()
+                    .type(softwareModuleTypeByName).name(name).version(version).description(description).vendor(vendor);
+
+            final SoftwareModule newSoftwareModule = softwareManagement.createSoftwareModule(softwareModule);
+
+            if (newSoftwareModule != null) {
+                eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.ADD_ENTITY, newSoftwareModule));
+                uiNotifcation.displaySuccess(i18n.getMessage("message.save.success",
+                        new Object[] { newSoftwareModule.getName() + ":" + newSoftwareModule.getVersion() }));
+            }
+        }
+
+        private boolean isDuplicate() {
+            final String name = nameTextField.getValue();
+            final String version = versionTextField.getValue();
+            final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
+
+            final Optional<Long> moduleType = softwareManagement.findSoftwareModuleTypeByName(type)
+                    .map(SoftwareModuleType::getId);
+            if (moduleType.isPresent() && softwareManagement
+                    .findSoftwareModuleByNameAndVersion(name, version, moduleType.get()).isPresent()) {
+                uiNotifcation.displayValidationError(
+                        i18n.getMessage("message.duplicate.softwaremodule", new Object[] { name, version }));
+                return true;
+            }
+            return false;
+        }
+
+        /**
+         * updates a softwareModule
+         */
+        private void updateSwModule() {
+            final SoftwareModule newSWModule = softwareManagement.updateSoftwareModule(entityFactory.softwareModule()
+                    .update(baseSwModuleId).description(descTextArea.getValue()).vendor(vendorTextField.getValue()));
+            if (newSWModule != null) {
+                uiNotifcation.displaySuccess(i18n.getMessage("message.save.success",
+                        new Object[] { newSWModule.getName() + ":" + newSWModule.getVersion() }));
+
+                eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.UPDATED_ENTITY, newSWModule));
+            }
         }
     }
 
@@ -154,13 +208,13 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         vendorTextField.setRequired(false);
         vendorTextField.setNullRepresentation(StringUtils.EMPTY);
 
-        descTextArea = new TextAreaBuilder().caption(i18n.get("textfield.description")).style("text-area-style")
-                .prompt(i18n.get("textfield.description")).id(UIComponentIdProvider.ADD_SW_MODULE_DESCRIPTION)
+        descTextArea = new TextAreaBuilder().caption(i18n.getMessage("textfield.description")).style("text-area-style")
+                .prompt(i18n.getMessage("textfield.description")).id(UIComponentIdProvider.ADD_SW_MODULE_DESCRIPTION)
                 .buildTextComponent();
         descTextArea.setNullRepresentation(StringUtils.EMPTY);
 
-        typeComboBox = SPUIComponentProvider.getComboBox(i18n.get("upload.swmodule.type"), "", null, null, true, null,
-                i18n.get("upload.swmodule.type"));
+        typeComboBox = SPUIComponentProvider.getComboBox(i18n.getMessage("upload.swmodule.type"), "", null, null, true, null,
+                i18n.getMessage("upload.swmodule.type"));
         typeComboBox.setId(UIComponentIdProvider.SW_MODULE_TYPE);
         typeComboBox.setStyleName(SPUIDefinitions.COMBO_BOX_SPECIFIC_STYLE + " " + ValoTheme.COMBOBOX_TINY);
         typeComboBox.setNewItemsAllowed(Boolean.FALSE);
@@ -168,7 +222,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
     }
 
     private TextField createTextField(final String in18Key, final String id) {
-        return new TextFieldBuilder().caption(i18n.get(in18Key)).required(true).prompt(i18n.get(in18Key))
+        return new TextFieldBuilder().caption(i18n.getMessage(in18Key)).required(true).prompt(i18n.getMessage(in18Key))
                 .immediate(true).id(id).buildTextComponent();
     }
 
@@ -206,7 +260,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         setCompositionRoot(formLayout);
 
         final CommonDialogWindow window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
-                .caption(i18n.get("upload.caption.add.new.swmodule")).content(this).layout(formLayout).i18n(i18n)
+                .caption(i18n.getMessage("upload.caption.add.new.swmodule")).content(this).layout(formLayout).i18n(i18n)
                 .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
         nameTextField.setEnabled(!editSwModule);
         versionTextField.setEnabled(!editSwModule);
@@ -217,57 +271,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         return window;
     }
 
-    private void addNewBaseSoftware() {
-        final String name = HawkbitCommonUtil.trimAndNullIfEmpty(nameTextField.getValue());
-        final String version = HawkbitCommonUtil.trimAndNullIfEmpty(versionTextField.getValue());
-        final String vendor = HawkbitCommonUtil.trimAndNullIfEmpty(vendorTextField.getValue());
-        final String description = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
-        final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
-
-        final SoftwareModuleCreate softwareModule = entityFactory.softwareModule().create()
-                .type(softwareManagement.findSoftwareModuleTypeByName(type)).name(name).version(version)
-                .description(description).vendor(vendor);
-
-        final SoftwareModule newSoftwareModule = softwareManagement.createSoftwareModule(softwareModule);
-
-        if (newSoftwareModule != null) {
-            eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.ADD_ENTITY, newSoftwareModule));
-            uiNotifcation.displaySuccess(i18n.get("message.save.success",
-                    new Object[] { newSoftwareModule.getName() + ":" + newSoftwareModule.getVersion() }));
-        }
-    }
-
-    private boolean isDuplicate() {
-        final String name = nameTextField.getValue();
-        final String version = versionTextField.getValue();
-        final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
-
-        final SoftwareManagement swMgmtService = SpringContextHelper.getBean(SoftwareManagement.class);
-        final SoftwareModule swModule = swMgmtService.findSoftwareModuleByNameAndVersion(name, version,
-                swMgmtService.findSoftwareModuleTypeByName(type).getId());
-
-        if (swModule != null) {
-            uiNotifcation.displayValidationError(
-                    i18n.get("message.duplicate.softwaremodule", new Object[] { name, version }));
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * updates a softwareModule
-     */
-    private void updateSwModule() {
-        final SoftwareModule newSWModule = softwareManagement.updateSoftwareModule(entityFactory.softwareModule()
-                .update(baseSwModuleId).description(descTextArea.getValue()).vendor(vendorTextField.getValue()));
-        if (newSWModule != null) {
-            uiNotifcation.displaySuccess(i18n.get("message.save.success",
-                    new Object[] { newSWModule.getName() + ":" + newSWModule.getVersion() }));
-
-            eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.UPDATED_ENTITY, newSWModule));
-        }
-    }
-
     /**
      * fill the data of a softwareModule in the content of the window
      */
@@ -276,16 +279,17 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
             return;
         }
         editSwModule = Boolean.TRUE;
-        final SoftwareModule swModule = softwareManagement.findSoftwareModuleById(baseSwModuleId);
-        nameTextField.setValue(swModule.getName());
-        versionTextField.setValue(swModule.getVersion());
-        vendorTextField.setValue(HawkbitCommonUtil.trimAndNullIfEmpty(swModule.getVendor()));
-        descTextArea.setValue(HawkbitCommonUtil.trimAndNullIfEmpty(swModule.getDescription()));
+        softwareManagement.findSoftwareModuleById(baseSwModuleId).ifPresent(swModule -> {
+            nameTextField.setValue(swModule.getName());
+            versionTextField.setValue(swModule.getVersion());
+            vendorTextField.setValue(HawkbitCommonUtil.trimAndNullIfEmpty(swModule.getVendor()));
+            descTextArea.setValue(HawkbitCommonUtil.trimAndNullIfEmpty(swModule.getDescription()));
 
-        if (swModule.getType().isDeleted()) {
-            typeComboBox.addItem(swModule.getType().getName());
-        }
-        typeComboBox.setValue(swModule.getType().getName());
+            if (swModule.getType().isDeleted()) {
+                typeComboBox.addItem(swModule.getType().getName());
+            }
+            typeComboBox.setValue(swModule.getType().getName());
+        });
     }
 
     public FormLayout getFormLayout() {

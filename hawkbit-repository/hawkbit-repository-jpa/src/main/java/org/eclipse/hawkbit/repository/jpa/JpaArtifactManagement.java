@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.io.InputStream;
-import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
@@ -18,7 +17,6 @@ import org.eclipse.hawkbit.artifact.repository.HashNotMatchException;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
@@ -60,10 +58,12 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     private static Artifact checkForExistingArtifact(final String filename, final boolean overrideExisting,
             final SoftwareModule softwareModule) {
-        if (softwareModule.getArtifactByFilename(filename).isPresent()) {
+        final Optional<Artifact> artifact = softwareModule.getArtifactByFilename(filename);
+
+        if (artifact.isPresent()) {
             if (overrideExisting) {
                 LOG.debug("overriding existing artifact with new filename {}", filename);
-                return softwareModule.getArtifactByFilename(filename).get();
+                return artifact.get();
             } else {
                 throw new EntityAlreadyExistsException("File with that name already exists in the Software Module");
             }
@@ -105,23 +105,16 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public boolean clearArtifactBinary(final Long existing) {
-        return clearArtifactBinary(Optional.ofNullable(localArtifactRepository.findOne(existing))
-                .orElseThrow(() -> new EntityNotFoundException("Artifact with given ID" + existing + " not found.")));
-    }
+    public boolean clearArtifactBinary(final String sha1Hash, final Long moduleId) {
 
-    private boolean clearArtifactBinary(final JpaArtifact existing) {
-
-        for (final Artifact lArtifact : localArtifactRepository.findBySha1Hash(existing.getSha1Hash())) {
-            if (!lArtifact.getSoftwareModule().isDeleted()
-                    && Long.compare(lArtifact.getSoftwareModule().getId(), existing.getSoftwareModule().getId()) != 0) {
-                return false;
-            }
+        if (localArtifactRepository.existsWithSha1HashAndSoftwareModuleIdIsNot(sha1Hash, moduleId)) {
+            // there are still other artifacts that need the binary
+            return false;
         }
 
         try {
-            LOG.debug("deleting artifact from repository {}", existing.getSha1Hash());
-            artifactRepository.deleteBySha1(existing.getSha1Hash());
+            LOG.debug("deleting artifact from repository {}", sha1Hash);
+            artifactRepository.deleteBySha1(sha1Hash);
             return true;
         } catch (final ArtifactStoreException e) {
             throw new ArtifactDeleteFailedException(e);
@@ -132,13 +125,10 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteArtifact(final Long id) {
-        final JpaArtifact existing = localArtifactRepository.findOne(id);
+        final JpaArtifact existing = (JpaArtifact) findArtifact(id)
+                .orElseThrow(() -> new EntityNotFoundException(Artifact.class, id));
 
-        if (null == existing) {
-            return;
-        }
-
-        clearArtifactBinary(existing);
+        clearArtifactBinary(existing.getSha1Hash(), existing.getSoftwareModule().getId());
 
         ((JpaSoftwareModule) existing.getSoftwareModule()).removeArtifact(existing);
         softwareModuleRepository.save((JpaSoftwareModule) existing.getSoftwareModule());
@@ -146,34 +136,43 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     @Override
-    public Artifact findArtifact(final Long id) {
-        return localArtifactRepository.findOne(id);
+    public Optional<Artifact> findArtifact(final Long id) {
+        return Optional.ofNullable(localArtifactRepository.findOne(id));
     }
 
     @Override
-    public List<Artifact> findByFilenameAndSoftwareModule(final String filename, final Long softwareModuleId) {
-        return localArtifactRepository.findByFilenameAndSoftwareModuleId(filename, softwareModuleId);
+    public Optional<Artifact> findByFilenameAndSoftwareModule(final String filename, final Long softwareModuleId) {
+        throwExceptionIfSoftwareModuleDoesNotExist(softwareModuleId);
+
+        return localArtifactRepository.findFirstByFilenameAndSoftwareModuleId(filename, softwareModuleId);
     }
 
     @Override
-    public Artifact findFirstArtifactBySHA1(final String sha1Hash) {
+    public Optional<Artifact> findFirstArtifactBySHA1(final String sha1Hash) {
         return localArtifactRepository.findFirstBySha1Hash(sha1Hash);
     }
 
     @Override
-    public List<Artifact> findArtifactByFilename(final String filename) {
-        return localArtifactRepository.findByFilename(filename);
+    public Optional<Artifact> findArtifactByFilename(final String filename) {
+        return localArtifactRepository.findFirstByFilename(filename);
     }
 
     @Override
     public Page<Artifact> findArtifactBySoftwareModule(final Pageable pageReq, final Long swId) {
+        throwExceptionIfSoftwareModuleDoesNotExist(swId);
+
         return localArtifactRepository.findBySoftwareModuleId(pageReq, swId);
     }
 
+    private void throwExceptionIfSoftwareModuleDoesNotExist(final Long swId) {
+        if (!softwareModuleRepository.exists(swId)) {
+            throw new EntityNotFoundException(SoftwareModule.class, swId);
+        }
+    }
+
     @Override
-    public DbArtifact loadArtifactBinary(final String sha1Hash) {
-        return Optional.ofNullable(artifactRepository.getArtifactBySha1(sha1Hash))
-                .orElseThrow(() -> new ArtifactBinaryNotFoundException(sha1Hash));
+    public Optional<DbArtifact> loadArtifactBinary(final String sha1Hash) {
+        return Optional.ofNullable(artifactRepository.getArtifactBySha1(sha1Hash));
     }
 
     private Artifact storeArtifactMetadata(final SoftwareModule softwareModule, final String providedFilename,
@@ -208,7 +207,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
         if (softwareModule == null) {
             LOG.debug("no software module with ID {} exists", moduleId);
-            throw new EntityNotFoundException("Software Module: " + moduleId);
+            throw new EntityNotFoundException(SoftwareModule.class, moduleId);
         }
         return softwareModule;
     }

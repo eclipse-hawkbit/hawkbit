@@ -8,11 +8,11 @@
  */
 package org.eclipse.hawkbit.ui.utils;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorderUH;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
 import org.junit.Test;
 
 import com.vaadin.ui.Button;
@@ -33,12 +33,12 @@ public class SPUIComponentProviderTest {
      * @throws Exception
      */
     @Test
-    public void checkButtonFactory() throws Exception {
+    public void checkButtonFactory() {
 
         // Checking Dyanmic Factory
-        Button placeHolderButton = null;
-        placeHolderButton = SPUIComponentProvider.getButton("", "Test", "Test",
-                SPUIDefinitions.SP_BUTTON_STATUS_STYLE, true, null, SPUIButtonStyleSmallNoBorderUH.class);
+        Button placeHolderButton;
+        placeHolderButton = SPUIComponentProvider.getButton("", "Test", "Test", SPUIDefinitions.SP_BUTTON_STATUS_STYLE,
+                true, null, SPUIButtonStyleSmall.class);
         assertThat(placeHolderButton).isInstanceOf(SPUIButton.class);
         assertThat(placeHolderButton.getCaption()).isEqualTo("Test");
         assertThat(placeHolderButton.getStyleName()).isEqualTo(SPUIDefinitions.SP_BUTTON_STATUS_STYLE);

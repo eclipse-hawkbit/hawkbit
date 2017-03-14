@@ -23,11 +23,6 @@ import com.vaadin.server.WebBrowser;
 
 /**
  * Common Util to get date/time related information.
- *
- *
- *
- *
- *
  */
 public final class SPDateTimeUtil {
 
@@ -169,7 +164,8 @@ public final class SPDateTimeUtil {
      *            'year'
      * @return a formatted string for duration label
      */
-    public static String getDurationFormattedString(final long startMillis, final long endMillis, final I18N i18N) {
+    public static String getDurationFormattedString(final long startMillis, final long endMillis,
+            final VaadinMessageSource i18N) {
         final String formatDuration = DurationFormatUtils.formatPeriod(startMillis, endMillis, DURATION_FORMAT, false,
                 getBrowserTimeZone());
 
@@ -182,8 +178,8 @@ public final class SPDateTimeUtil {
             }
             final int value = Integer.parseInt(split[index]);
             if (value != 0) {
-                final String suffix = (value == 1) ? i18N.get(DURATION_I18N.get(index).getSingle())
-                        : i18N.get(DURATION_I18N.get(index).getPlural());
+                final String suffix = (value == 1) ? i18N.getMessage(DURATION_I18N.get(index).getSingle())
+                        : i18N.getMessage(DURATION_I18N.get(index).getPlural());
                 formattedDuration.append(value).append(' ').append(suffix);
             }
 

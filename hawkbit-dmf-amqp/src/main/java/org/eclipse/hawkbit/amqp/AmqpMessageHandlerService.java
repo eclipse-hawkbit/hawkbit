@@ -28,7 +28,6 @@ import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -294,7 +293,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private Status hanldeCancelRejectedState(final Message message, final Action action) {
         if (action.isCancelingOrCanceled()) {
-            return Status.WARNING;
+            return Status.CANCEL_REJECTED;
         } else {
             logAndThrowMessageError(message,
                     "Cancel recjected message is not allowed, if action is on state: " + action.getStatus());
@@ -317,26 +316,24 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         return controllerManagement.addUpdateActionStatus(actionStatus);
     }
 
+    // Exception squid:S3655 - logAndThrowMessageError throws exception, i.e.
+    // get will not be called
+    @SuppressWarnings("squid:S3655")
     private Action checkActionExist(final Message message, final ActionUpdateStatus actionUpdateStatus) {
         final Long actionId = actionUpdateStatus.getActionId();
         LOG.debug("Target notifies intermediate about action {} with status {}.", actionId,
-                actionUpdateStatus.getActionStatus().name());
+                actionUpdateStatus.getActionStatus());
 
         if (actionId == null) {
             logAndThrowMessageError(message, "Invalid message no action id");
         }
 
-        try {
-            final Action findActionWithDetails = controllerManagement.findActionWithDetails(actionId);
-            if (findActionWithDetails == null) {
-                logAndThrowMessageError(message,
-                        "Got intermediate notification about action " + actionId + " but action does not exist");
-            }
-            return findActionWithDetails;
-        } catch (@SuppressWarnings("squid:S1166") final EntityNotFoundException e) {
+        final Optional<Action> findActionWithDetails = controllerManagement.findActionWithDetails(actionId);
+        if (!findActionWithDetails.isPresent()) {
             logAndThrowMessageError(message,
                     "Got intermediate notification about action " + actionId + " but action does not exist");
         }
-        return null;
+
+        return findActionWithDetails.get();
     }
 }

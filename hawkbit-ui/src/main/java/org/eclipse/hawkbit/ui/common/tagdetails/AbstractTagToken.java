@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -64,7 +64,7 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
 
     protected SpPermissionChecker checker;
 
-    protected I18N i18n;
+    protected VaadinMessageSource i18n;
 
     protected UINotification uinotification;
 
@@ -77,7 +77,7 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
     @SuppressWarnings("squid:S1948")
     protected T selectedEntity;
 
-    protected AbstractTagToken(final SpPermissionChecker checker, final I18N i18n, final UINotification uinotification,
+    protected AbstractTagToken(final SpPermissionChecker checker, final VaadinMessageSource i18n, final UINotification uinotification,
             final UIEventBus eventBus, final ManagementUIState managementUIState) {
         this.checker = checker;
         this.i18n = i18n;
@@ -252,7 +252,7 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
     }
 
     protected Long getTagIdByTagName(final Long tagId) {
-        return tagDetails.entrySet().stream().filter(entry -> entry.getValue().getId().equals(tagId)).findFirst()
+        return tagDetails.entrySet().stream().filter(entry -> entry.getValue().getId().equals(tagId)).findAny()
                 .map(entry -> entry.getKey()).orElse(null);
 
     }

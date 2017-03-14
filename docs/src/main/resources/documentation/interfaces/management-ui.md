@@ -83,8 +83,8 @@ Allows to:
 Software rollout in large scale, rollout status overview and rollout management.
 
 ## Features explained
-- Create, update and start of rollouts.
-- Pause and resume of rollouts.
+- Create, update, copy and delete of rollouts.
+- Start, pause and resume of rollouts.
 - Progress monitoring for the entire rollout and the individual groups.
 - Drill down to see the groups in a rollout and targets in each group.
 - Rollout attributes:

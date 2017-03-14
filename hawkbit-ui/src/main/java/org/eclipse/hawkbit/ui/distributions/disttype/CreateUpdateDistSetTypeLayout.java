@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.distributions.disttype;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,7 +33,7 @@ import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent.DistributionSetTypeEnum;
 import org.eclipse.hawkbit.ui.layouts.CreateUpdateTypeLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -102,7 +103,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
      * @param distributionSetManagement
      *            DistributionSetManagement
      */
-    public CreateUpdateDistSetTypeLayout(final I18N i18n, final TagManagement tagManagement,
+    public CreateUpdateDistSetTypeLayout(final VaadinMessageSource i18n, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
             final UINotification uiNotification, final SoftwareManagement softwareManagement,
             final DistributionSetManagement distributionSetManagement) {
@@ -122,16 +123,16 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
         typeKey = createTextField("textfield.key", SPUIDefinitions.DIST_SET_TYPE_KEY,
                 SPUIDefinitions.NEW_DISTRIBUTION_TYPE_KEY);
 
-        tagDesc = new TextAreaBuilder().caption(i18n.get("textfield.description"))
+        tagDesc = new TextAreaBuilder().caption(i18n.getMessage("textfield.description"))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.DIST_SET_TYPE_DESC)
-                .prompt(i18n.get("textfield.description")).immediate(true)
+                .prompt(i18n.getMessage("textfield.description")).immediate(true)
                 .id(SPUIDefinitions.NEW_DISTRIBUTION_TYPE_DESC).buildTextComponent();
         tagDesc.setNullRepresentation(StringUtils.EMPTY);
     }
 
     private TextField createTextField(final String in18Key, final String styleName, final String id) {
-        return new TextFieldBuilder().caption(i18n.get(in18Key)).styleName(ValoTheme.TEXTFIELD_TINY + " " + styleName)
-                .required(true).prompt(i18n.get(in18Key)).immediate(true).id(id).buildTextComponent();
+        return new TextFieldBuilder().caption(i18n.getMessage(in18Key)).styleName(ValoTheme.TEXTFIELD_TINY + " " + styleName)
+                .required(true).prompt(i18n.getMessage(in18Key)).immediate(true).id(id).buildTextComponent();
     }
 
     @Override
@@ -152,11 +153,11 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
 
     @Override
     protected Color getColorForColorPicker() {
-        final DistributionSetType existedDistType = distributionSetManagement
+        final Optional<DistributionSetType> existedDistType = distributionSetManagement
                 .findDistributionSetTypeByName(tagNameComboBox.getValue().toString());
-        if (null != existedDistType) {
-            return existedDistType.getColour() != null
-                    ? ColorPickerHelper.rgbToColorConverter(existedDistType.getColour())
+        if (existedDistType.isPresent()) {
+            return existedDistType.get().getColour() != null
+                    ? ColorPickerHelper.rgbToColorConverter(existedDistType.get().getColour())
                     : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR);
         }
         return ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR);
@@ -214,7 +215,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
         addTooltTipToSelectedTable();
         selectedTable.setImmediate(true);
         selectedTable.setVisibleColumns(DIST_TYPE_NAME, DIST_TYPE_MANDATORY);
-        selectedTable.setColumnHeaders(i18n.get("header.dist.twintable.selected"), STAR);
+        selectedTable.setColumnHeaders(i18n.getMessage("header.dist.twintable.selected"), STAR);
         selectedTable.setColumnExpandRatio(DIST_TYPE_NAME, 0.75F);
         selectedTable.setColumnExpandRatio(DIST_TYPE_MANDATORY, 0.25F);
         selectedTable.setRequired(true);
@@ -230,9 +231,9 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
                 final Item item = selectedTable.getItem(itemId);
                 final String description = (String) (item.getItemProperty(DIST_TYPE_DESCRIPTION).getValue());
                 if (DIST_TYPE_NAME.equals(propertyId) && HawkbitCommonUtil.trimAndNullIfEmpty(description) != null) {
-                    return i18n.get("label.description") + description;
+                    return i18n.getMessage("label.description") + description;
                 } else if (DIST_TYPE_MANDATORY.equals(propertyId)) {
-                    return i18n.get("tooltip.check.for.mandatory");
+                    return i18n.getMessage("tooltip.check.for.mandatory");
                 }
                 return null;
             }
@@ -262,7 +263,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
         sourceTable.setContainerDataSource(sourceTableContainer);
 
         sourceTable.setVisibleColumns(new Object[] { DIST_TYPE_NAME });
-        sourceTable.setColumnHeaders(i18n.get("header.dist.twintable.available"));
+        sourceTable.setColumnHeaders(i18n.getMessage("header.dist.twintable.available"));
         sourceTable.setColumnExpandRatio(DIST_TYPE_NAME, 1.0F);
         getSourceTableData();
         addTooltip();
@@ -334,7 +335,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
                 final Item item = sourceTable.getItem(itemId);
                 final String description = (String) item.getItemProperty(DIST_TYPE_DESCRIPTION).getValue();
                 if (DIST_TYPE_NAME.equals(propertyId) && HawkbitCommonUtil.trimAndNullIfEmpty(description) != null) {
-                    return i18n.get("label.description") + description;
+                    return i18n.getMessage("label.description") + description;
                 }
                 return null;
             }
@@ -399,11 +400,11 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
             final DistributionSetType newDistType = distributionSetManagement.createDistributionSetType(
                     entityFactory.distributionSetType().create().key(typeKeyValue).name(typeNameValue)
                             .description(typeDescValue).colour(colorPicked).mandatory(mandatory).optional(optional));
-            uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { newDistType.getName() }));
+            uiNotification.displaySuccess(i18n.getMessage("message.save.success", new Object[] { newDistType.getName() }));
             eventBus.publish(this,
                     new DistributionSetTypeEvent(DistributionSetTypeEnum.ADD_DIST_SET_TYPE, newDistType));
         } else {
-            uiNotification.displayValidationError(i18n.get("message.error.missing.typenameorkey"));
+            uiNotification.displayValidationError(i18n.getMessage("message.error.missing.typenameorkey"));
         }
     }
 
@@ -438,7 +439,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
 
         final DistributionSetType updateDistSetType = distributionSetManagement.updateDistributionSetType(update);
 
-        uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { updateDistSetType.getName() }));
+        uiNotification.displaySuccess(i18n.getMessage("message.update.success", new Object[] { updateDistSetType.getName() }));
         eventBus.publish(this,
                 new DistributionSetTypeEvent(DistributionSetTypeEnum.UPDATE_DIST_SET_TYPE, updateDistSetType));
 
@@ -522,12 +523,10 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
      */
     @Override
     protected void setTagDetails(final String distSetTypeSelected) {
-
         tagName.setValue(distSetTypeSelected);
         getSourceTableData();
         selectedTable.getContainerDataSource().removeAllItems();
-        final DistributionSetType selectedTypeTag = fetchDistributionSetType(distSetTypeSelected);
-        if (null != selectedTypeTag) {
+        distributionSetManagement.findDistributionSetTypeByName(distSetTypeSelected).ifPresent(selectedTypeTag -> {
             tagDesc.setValue(selectedTypeTag.getDescription());
             typeKey.setValue(selectedTypeTag.getKey());
             if (distributionSetManagement.countDistributionSetsByType(selectedTypeTag.getId()) <= 0) {
@@ -535,26 +534,18 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
                 selectedTable.setEnabled(true);
             } else {
                 uiNotification.displayValidationError(
-                        selectedTypeTag.getName() + "  " + i18n.get("message.error.dist.set.type.update"));
+                        selectedTypeTag.getName() + "  " + i18n.getMessage("message.error.dist.set.type.update"));
                 distTypeSelectLayout.setEnabled(false);
                 selectedTable.setEnabled(false);
             }
 
             createOriginalSelectedTableContainer();
-            for (final SoftwareModuleType swModuleType : selectedTypeTag.getOptionalModuleTypes()) {
-                addTargetTableforUpdate(swModuleType, false);
-            }
-
-            for (final SoftwareModuleType swModuleType : selectedTypeTag.getMandatoryModuleTypes()) {
-                addTargetTableforUpdate(swModuleType, true);
-            }
+            selectedTypeTag.getOptionalModuleTypes()
+                    .forEach(swModuleType -> addTargetTableforUpdate(swModuleType, false));
+            selectedTypeTag.getMandatoryModuleTypes()
+                    .forEach(swModuleType -> addTargetTableforUpdate(swModuleType, true));
             setColorPickerComponentsColor(selectedTypeTag.getColour());
-        }
-    }
-
-    private DistributionSetType fetchDistributionSetType(final String distTypeName) {
-
-        return distributionSetManagement.findDistributionSetTypeByName(distTypeName);
+        });
     }
 
     @SuppressWarnings("unchecked")
@@ -590,23 +581,23 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
     }
 
     @Override
-    protected DistributionSetType findEntityByKey() {
+    protected Optional<DistributionSetType> findEntityByKey() {
         return distributionSetManagement.findDistributionSetTypeByKey(typeKey.getValue());
     }
 
     @Override
-    protected DistributionSetType findEntityByName() {
+    protected Optional<DistributionSetType> findEntityByName() {
         return distributionSetManagement.findDistributionSetTypeByName(tagName.getValue());
     }
 
     @Override
     protected String getDuplicateKeyErrorMessage(final DistributionSetType existingType) {
-        return i18n.get("message.type.key.duplicate.check", new Object[] { existingType.getKey() });
+        return i18n.getMessage("message.type.key.duplicate.check", new Object[] { existingType.getKey() });
     }
 
     @Override
     protected String getWindowCaption() {
-        return i18n.get("caption.add.type");
+        return i18n.getMessage("caption.add.type");
     }
 
     @Override

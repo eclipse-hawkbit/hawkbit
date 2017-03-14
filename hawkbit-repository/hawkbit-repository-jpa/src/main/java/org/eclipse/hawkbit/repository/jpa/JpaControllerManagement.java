@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ToManyAttributeEntriesException;
 import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
@@ -38,7 +39,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
@@ -87,6 +87,9 @@ public class JpaControllerManagement implements ControllerManagement {
     private TargetRepository targetRepository;
 
     @Autowired
+    private SoftwareModuleRepository softwareModuleRepository;
+
+    @Autowired
     private TargetManagement targetManagement;
 
     @Autowired
@@ -100,9 +103,6 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Autowired
     private RepositoryProperties repositoryProperties;
-
-    @Autowired
-    private TenantConfigurationRepository tenantConfigurationRepository;
 
     @Autowired
     private TenantConfigurationManagement tenantConfigurationManagement;
@@ -135,46 +135,61 @@ public class JpaControllerManagement implements ControllerManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public Target updateLastTargetQuery(final String controllerId, final URI address) {
-        final Target target = Optional.ofNullable(targetRepository.findByControllerId(controllerId))
-                .orElseThrow(() -> new EntityNotFoundException("Target with given ID " + controllerId + " not found"));
+        final Target target = targetRepository.findByControllerId(controllerId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         return updateTargetStatus(target.getTargetInfo(), null, System.currentTimeMillis(), address).getTarget();
     }
 
     @Override
-    public Action getActionForDownloadByTargetAndSoftwareModule(final String controllerId,
-            final SoftwareModule module) {
-        final List<Action> action = actionRepository.findActionByTargetAndSoftwareModule(controllerId,
-                (JpaSoftwareModule) module);
+    public Optional<Action> getActionForDownloadByTargetAndSoftwareModule(final String controllerId,
+            final Long moduleId) {
+        throwExceptionIfTargetDoesNotExist(controllerId);
+        throwExceptionIfSoftwareModuleDoesNotExist(moduleId);
+
+        final List<Action> action = actionRepository.findActionByTargetAndSoftwareModule(controllerId, moduleId);
 
         if (action.isEmpty() || action.get(0).isCancelingOrCanceled()) {
-            throw new EntityNotFoundException(
-                    "No assigment found for module " + module.getId() + " to target " + controllerId);
+            return Optional.empty();
         }
 
-        return action.get(0);
+        return Optional.ofNullable(action.get(0));
+    }
+
+    private void throwExceptionIfTargetDoesNotExist(final String controllerId) {
+        if (!targetRepository.existsByControllerId(controllerId)) {
+            throw new EntityNotFoundException(Target.class, controllerId);
+        }
+    }
+
+    private void throwExceptionIfTargetDoesNotExist(final Long targetId) {
+        if (!targetRepository.exists(targetId)) {
+            throw new EntityNotFoundException(Target.class, targetId);
+        }
+    }
+
+    private void throwExceptionIfSoftwareModuleDoesNotExist(final Long moduleId) {
+        if (!softwareModuleRepository.exists(moduleId)) {
+            throw new EntityNotFoundException(SoftwareModule.class, moduleId);
+        }
     }
 
     @Override
     public boolean hasTargetArtifactAssigned(final String controllerId, final String sha1Hash) {
-        final Target target = targetRepository.findByControllerId(controllerId);
-        if (target == null) {
-            return false;
-        }
-        return actionRepository.count(ActionSpecifications.hasTargetAssignedArtifact(target, sha1Hash)) > 0;
+        throwExceptionIfTargetDoesNotExist(controllerId);
+        return actionRepository.count(ActionSpecifications.hasTargetAssignedArtifact(controllerId, sha1Hash)) > 0;
     }
 
     @Override
     public boolean hasTargetArtifactAssigned(final Long targetId, final String sha1Hash) {
-        final Target target = targetRepository.findOne(targetId);
-        if (target == null) {
-            return false;
-        }
-        return actionRepository.count(ActionSpecifications.hasTargetAssignedArtifact(target, sha1Hash)) > 0;
+        throwExceptionIfTargetDoesNotExist(targetId);
+        return actionRepository.count(ActionSpecifications.hasTargetAssignedArtifact(targetId, sha1Hash)) > 0;
     }
 
     @Override
     public Optional<Action> findOldestActiveActionByTarget(final String controllerId) {
+        throwExceptionIfTargetDoesNotExist(controllerId);
+
         // used in favorite to findFirstByTargetAndActiveOrderByIdAsc due to
         // DATAJPA-841 issue.
         return actionRepository.findFirstByTargetControllerIdAndActive(new Sort(Direction.ASC, "id"), controllerId,
@@ -182,8 +197,8 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public Action findActionWithDetails(final Long actionId) {
-        return getActionAndThrowExceptionIfNotFound(actionId);
+    public Optional<Action> findActionWithDetails(final Long actionId) {
+        return actionRepository.getById(actionId);
     }
 
     @Override
@@ -242,26 +257,29 @@ public class JpaControllerManagement implements ControllerManagement {
         final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
 
         final JpaAction action = getActionAndThrowExceptionIfNotFound(create.getActionId());
+
+        if (!action.isCancelingOrCanceled()) {
+            throw new CancelActionNotAllowedException("The action is not in canceling state.");
+        }
+
         final JpaActionStatus actionStatus = create.build();
 
-        checkForToManyStatusEntries(action);
-        action.setStatus(actionStatus.getStatus());
-
         switch (actionStatus.getStatus()) {
-        case WARNING:
-        case ERROR:
-        case RUNNING:
-            break;
         case CANCELED:
         case FINISHED:
             handleFinishedCancelation(actionStatus, action);
             break;
-        case RETRIEVED:
-            actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Cancellation request retrieved.");
+        case ERROR:
+        case CANCEL_REJECTED:
+            // Cancellation rejected. Back to running.
+            action.setStatus(Status.RUNNING);
             break;
         default:
-            // do nothing
+            // information status entry - check for a potential DOS attack
+            checkForToManyStatusEntries(action);
+            break;
         }
+
         actionStatus.setAction(actionRepository.save(action));
         actionStatusRepository.save(actionStatus);
 
@@ -306,17 +324,11 @@ public class JpaControllerManagement implements ControllerManagement {
 
     /**
      * Sets {@link TargetUpdateStatus} based on given {@link ActionStatus}.
-     *
-     * @param actionStatus
-     * @param action
-     * @return
      */
     private Action handleAddUpdateActionStatus(final JpaActionStatus actionStatus, final JpaAction action) {
         LOG.debug("addUpdateActionStatus for action {}", action.getId());
 
         JpaTarget target = (JpaTarget) action.getTarget();
-        // check for a potential DOS attack
-        checkForToManyStatusEntries(action);
 
         switch (actionStatus.getStatus()) {
         case ERROR:
@@ -327,10 +339,9 @@ public class JpaControllerManagement implements ControllerManagement {
         case FINISHED:
             handleFinishedAndStoreInTargetStatus(target, action);
             break;
-        case CANCELED:
-        case WARNING:
-        case RUNNING:
         default:
+            // information status entry - check for a potential DOS attack
+            checkForToManyStatusEntries(action);
             break;
         }
 
@@ -338,8 +349,6 @@ public class JpaControllerManagement implements ControllerManagement {
         actionStatusRepository.save(actionStatus);
 
         LOG.debug("addUpdateActionStatus {} for target {} is finished.", action, target.getId());
-
-        action.setStatus(actionStatus.getStatus());
 
         return actionRepository.save(action);
     }
@@ -396,11 +405,8 @@ public class JpaControllerManagement implements ControllerManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public Target updateControllerAttributes(final String controllerId, final Map<String, String> data) {
-        final JpaTarget target = targetRepository.findByControllerId(controllerId);
-
-        if (target == null) {
-            throw new EntityNotFoundException(controllerId);
-        }
+        final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         final JpaTargetInfo targetInfo = (JpaTargetInfo) target.getTargetInfo();
         targetInfo.getControllerAttributes().putAll(data);
@@ -443,8 +449,7 @@ public class JpaControllerManagement implements ControllerManagement {
      *         {@link Status#RETRIEVED}
      */
     private Action handleRegisterRetrieved(final Long actionId, final String message) {
-        final JpaAction action = Optional.ofNullable(actionRepository.findById(actionId)).orElseThrow(
-                () -> new EntityNotFoundException("Actionw ith given ID " + actionId + " doesn not exist."));
+        final JpaAction action = getActionAndThrowExceptionIfNotFound(actionId);
         // do a manual query with CriteriaBuilder to avoid unnecessary field
         // queries and an extra
         // count query made by spring-data when using pageable requests, we
@@ -500,8 +505,8 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     private JpaAction getActionAndThrowExceptionIfNotFound(final Long actionId) {
-        return Optional.ofNullable(actionRepository.findById(actionId))
-                .orElseThrow(() -> new EntityNotFoundException("Action with ID " + actionId + " not found!"));
+        return actionRepository.findById(actionId)
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
     }
 
     @Override
@@ -512,13 +517,13 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public Target findByControllerId(final String controllerId) {
+    public Optional<Target> findByControllerId(final String controllerId) {
         return targetRepository.findByControllerId(controllerId);
     }
 
     @Override
-    public Target findByTargetId(final Long targetId) {
-        return targetRepository.findOne(targetId);
+    public Optional<Target> findByTargetId(final Long targetId) {
+        return Optional.ofNullable(targetRepository.findOne(targetId));
     }
 
 }

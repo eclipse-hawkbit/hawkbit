@@ -19,18 +19,18 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Size;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.hibernate.validator.constraints.NotEmpty;
+import org.springframework.util.CollectionUtils;
 
 /**
  * A distribution set type defines which software module types can or have to be
@@ -49,12 +49,12 @@ import org.hibernate.validator.constraints.NotEmpty;
 public class JpaDistributionSetType extends AbstractJpaNamedEntity implements DistributionSetType {
     private static final long serialVersionUID = 1L;
 
-    @OneToMany(targetEntity = DistributionSetTypeElement.class, cascade = {
-            CascadeType.ALL }, fetch = FetchType.EAGER, orphanRemoval = true)
-    @JoinColumn(name = "distribution_set_type", insertable = false, updatable = false)
+    @CascadeOnDelete
+    @OneToMany(mappedBy = "dsType", targetEntity = DistributionSetTypeElement.class, cascade = {
+            CascadeType.PERSIST }, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<DistributionSetTypeElement> elements;
 
-    @Column(name = "type_key", nullable = false, length = 64)
+    @Column(name = "type_key", nullable = false, updatable = false, length = 64)
     @Size(max = 64)
     @NotEmpty
     private String key;
@@ -170,7 +170,7 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
 
         // check if this was in the list before before
         final Optional<DistributionSetTypeElement> existing = elements.stream()
-                .filter(element -> element.getSmType().getKey().equals(smType.getKey())).findFirst();
+                .filter(element -> element.getSmType().getKey().equals(smType.getKey())).findAny();
 
         if (existing.isPresent()) {
             existing.get().setMandatory(mandatory);
@@ -187,7 +187,7 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
         }
 
         // we search by id (standard equals compares also revison)
-        elements.stream().filter(element -> element.getSmType().getId().equals(smTypeId)).findFirst()
+        elements.stream().filter(element -> element.getSmType().getId().equals(smTypeId)).findAny()
                 .ifPresent(elements::remove);
 
         return this;

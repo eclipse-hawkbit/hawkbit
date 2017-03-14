@@ -19,9 +19,10 @@ import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.AssignInstalledDSTooltipGenerator;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -52,7 +53,7 @@ public class CreateOrUpdateFilterTable extends Table {
 
     private static final long serialVersionUID = 6887304217281629713L;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final FilterManagementUIState filterManagementUIState;
 
@@ -66,7 +67,7 @@ public class CreateOrUpdateFilterTable extends Table {
 
     private static final String INSTALL_DIST_SET = "installedDistributionSet";
 
-    CreateOrUpdateFilterTable(final I18N i18n, final UIEventBus eventBus,
+    CreateOrUpdateFilterTable(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final FilterManagementUIState filterManagementUIState) {
         this.i18n = i18n;
         this.filterManagementUIState = filterManagementUIState;
@@ -179,14 +180,14 @@ public class CreateOrUpdateFilterTable extends Table {
 
     private List<TableColumn> getVisbleColumns() {
         final List<TableColumn> columnList = Lists.newArrayListWithExpectedSize(7);
-        columnList.add(new TableColumn(SPUILabelDefinitions.NAME, i18n.get("header.name"), 0.15F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.get("header.createdBy"), 0.1F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.1F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.NAME, i18n.getMessage("header.name"), 0.15F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.getMessage("header.createdBy"), 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.getMessage("header.createdDate"), 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.getMessage("header.modifiedBy"), 0.1F));
         columnList.add(
-                new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"), 0.1F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.1F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.STATUS_ICON, i18n.get("header.status"), 0.1F));
+                new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.getMessage("header.modifiedDate"), 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.getMessage("header.description"), 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.STATUS_ICON, i18n.getMessage("header.status"), 0.1F));
 
         return columnList;
     }
@@ -199,23 +200,23 @@ public class CreateOrUpdateFilterTable extends Table {
         label.setContentMode(ContentMode.HTML);
         if (targetStatus == TargetUpdateStatus.PENDING) {
             label.setDescription("Pending");
-            label.setStyleName("statusIconYellow");
+            label.setStyleName(SPUIStyleDefinitions.STATUS_ICON_YELLOW);
             label.setValue(FontAwesome.ADJUST.getHtml());
         } else if (targetStatus == TargetUpdateStatus.REGISTERED) {
             label.setDescription("Registered");
-            label.setStyleName("statusIconLightBlue");
+            label.setStyleName(SPUIStyleDefinitions.STATUS_ICON_LIGHT_BLUE);
             label.setValue(FontAwesome.DOT_CIRCLE_O.getHtml());
         } else if (targetStatus == TargetUpdateStatus.ERROR) {
-            label.setDescription(i18n.get("label.error"));
-            label.setStyleName("statusIconRed");
+            label.setDescription(i18n.getMessage("label.error"));
+            label.setStyleName(SPUIStyleDefinitions.STATUS_ICON_RED);
             label.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
         } else if (targetStatus == TargetUpdateStatus.IN_SYNC) {
-            label.setStyleName("statusIconGreen");
+            label.setStyleName(SPUIStyleDefinitions.STATUS_ICON_GREEN);
             label.setDescription("In-Synch");
             label.setValue(FontAwesome.CHECK_CIRCLE.getHtml());
         } else if (targetStatus == TargetUpdateStatus.UNKNOWN) {
-            label.setStyleName("statusIconBlue");
-            label.setDescription(i18n.get("label.unknown"));
+            label.setStyleName(SPUIStyleDefinitions.STATUS_ICON_BLUE);
+            label.setDescription(i18n.getMessage("label.unknown"));
             label.setValue(FontAwesome.QUESTION_CIRCLE.getHtml());
         }
         return label;

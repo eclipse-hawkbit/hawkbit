@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -25,7 +24,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -73,7 +72,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     private static final String KEY = "key";
 
-    protected I18N i18n;
+    protected VaadinMessageSource i18n;
 
     private final UINotification uiNotification;
 
@@ -96,7 +95,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     private HorizontalLayout mainLayout;
     protected SpPermissionChecker permChecker;
 
-    protected AbstractMetadataPopupLayout(final I18N i18n, final UINotification uiNotification,
+    protected AbstractMetadataPopupLayout(final VaadinMessageSource i18n, final UINotification uiNotification,
             final UIEventBus eventBus, final SpPermissionChecker permChecker) {
         this.i18n = i18n;
         this.uiNotification = uiNotification;
@@ -162,7 +161,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         this.selectedEntity = selectedEntity;
     }
 
-    protected abstract void checkForDuplicate(E entity, String value);
+    protected abstract boolean checkForDuplicate(E entity, String value);
 
     protected abstract M createMetadata(E entity, String key, String value);
 
@@ -231,8 +230,8 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     }
 
     private TextField createKeyTextField() {
-        final TextField keyField = new TextFieldBuilder().caption(i18n.get("textfield.key")).required(true)
-                .prompt(i18n.get("textfield.key")).immediate(true).id(UIComponentIdProvider.METADATA_KEY_FIELD_ID)
+        final TextField keyField = new TextFieldBuilder().caption(i18n.getMessage("textfield.key")).required(true)
+                .prompt(i18n.getMessage("textfield.key")).immediate(true).id(UIComponentIdProvider.METADATA_KEY_FIELD_ID)
                 .maxLengthAllowed(128).buildTextComponent();
         keyField.addTextChangeListener(this::onKeyChange);
         keyField.setTextChangeEventMode(TextChangeEventMode.EAGER);
@@ -241,8 +240,8 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     }
 
     private TextArea createValueTextField() {
-        valueTextArea = new TextAreaBuilder().caption(i18n.get("textfield.value")).required(true)
-                .prompt(i18n.get("textfield.value")).immediate(true).id(UIComponentIdProvider.METADATA_VALUE_ID)
+        valueTextArea = new TextAreaBuilder().caption(i18n.getMessage("textfield.value")).required(true)
+                .prompt(i18n.getMessage("textfield.value")).immediate(true).id(UIComponentIdProvider.METADATA_VALUE_ID)
                 .maxLengthAllowed(4000).buildTextComponent();
         valueTextArea.setNullRepresentation(StringUtils.EMPTY);
         valueTextArea.setSizeFull();
@@ -262,8 +261,8 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         metadataGrid.setSelectionMode(SelectionMode.SINGLE);
         metadataGrid.setColumnReorderingAllowed(true);
         metadataGrid.setContainerDataSource(getMetadataContainer());
-        metadataGrid.getColumn(KEY).setHeaderCaption(i18n.get("header.key"));
-        metadataGrid.getColumn(VALUE).setHeaderCaption(i18n.get("header.value"));
+        metadataGrid.getColumn(KEY).setHeaderCaption(i18n.getMessage("header.key"));
+        metadataGrid.getColumn(VALUE).setHeaderCaption(i18n.getMessage("header.value"));
         metadataGrid.getColumn(VALUE).setHidden(true);
         metadataGrid.addSelectionListener(this::onRowClick);
         metadataGrid.getColumn(DELETE_BUTTON).setHeaderCaption("");
@@ -279,8 +278,8 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         final String value = (String) item.getItemProperty(VALUE).getValue();
 
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
-                i18n.get("caption.metadata.delete.action.confirmbox"), i18n.get("message.confirm.delete.metadata", key),
-                i18n.get("button.ok"), i18n.get("button.cancel"), ok -> {
+                i18n.getMessage("caption.metadata.delete.action.confirmbox"), i18n.getMessage("message.confirm.delete.metadata", key),
+                i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
                     if (ok) {
                         handleOkDeleteMetadata(event, key, value);
                     }
@@ -291,7 +290,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     private void handleOkDeleteMetadata(final RendererClickEvent event, final String key, final String value) {
         deleteMetadata(getSelectedEntity(), key, value);
-        uiNotification.displaySuccess(i18n.get("message.metadata.deleted.successfully", key));
+        uiNotification.displaySuccess(i18n.getMessage("message.metadata.deleted.successfully", key));
         final Object selectedRow = metaDataGrid.getSelectedRow();
         metaDataGrid.getContainerDataSource().removeItem(event.getItemId());
         // force grid to refresh
@@ -321,14 +320,14 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     }
 
     private Button createAddIcon() {
-        addIcon = SPUIComponentProvider.getButton(UIComponentIdProvider.METADTA_ADD_ICON_ID, i18n.get("button.save"),
+        addIcon = SPUIComponentProvider.getButton(UIComponentIdProvider.METADTA_ADD_ICON_ID, i18n.getMessage("button.save"),
                 null, null, false, FontAwesome.PLUS, SPUIButtonStyleSmallNoBorder.class);
         addIcon.addClickListener(event -> onAdd());
         return addIcon;
     }
 
     private Label createHeaderCaption() {
-        return new LabelBuilder().name(i18n.get("caption.metadata")).buildCaptionLabel();
+        return new LabelBuilder().name(i18n.getMessage("caption.metadata")).buildCaptionLabel();
     }
 
     private static IndexedContainer getMetadataContainer() {
@@ -388,7 +387,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
             if (metaDataGrid.getSelectedRow() == null) {
                 if (!duplicateCheck(entity)) {
                     final M metadata = createMetadata(entity, key, value);
-                    uiNotification.displaySuccess(i18n.get("message.metadata.saved", metadata.getKey()));
+                    uiNotification.displaySuccess(i18n.getMessage("message.metadata.saved", metadata.getKey()));
                     addItemToGrid(metadata.getKey(), metadata.getValue());
                     metaDataGrid.scrollToEnd();
                     metaDataGrid.select(metadata.getKey());
@@ -400,7 +399,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
                 }
             } else {
                 final M metadata = updateMetadata(entity, key, value);
-                uiNotification.displaySuccess(i18n.get("message.metadata.updated", metadata.getKey()));
+                uiNotification.displaySuccess(i18n.getMessage("message.metadata.updated", metadata.getKey()));
                 updateItemInGrid(metadata.getKey());
                 metaDataGrid.select(metadata.getKey());
                 addIcon.setEnabled(true);
@@ -411,30 +410,28 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     private boolean mandatoryCheck() {
         if (keyTextField.getValue().isEmpty()) {
-            uiNotification.displayValidationError(i18n.get("message.key.missing"));
+            uiNotification.displayValidationError(i18n.getMessage("message.key.missing"));
             return false;
         }
         if (valueTextArea.getValue().isEmpty()) {
-            uiNotification.displayValidationError(i18n.get("message.value.missing"));
+            uiNotification.displayValidationError(i18n.getMessage("message.value.missing"));
             return false;
         }
         return true;
     }
 
     private boolean duplicateCheck(final E entity) {
-        try {
-            checkForDuplicate(entity, keyTextField.getValue());
-            // we do not want to log the exception here, does not make sense
-        } catch (@SuppressWarnings("squid:S1166") final EntityNotFoundException exception) {
+        if (!checkForDuplicate(entity, keyTextField.getValue())) {
             return false;
         }
-        uiNotification.displayValidationError(i18n.get("message.metadata.duplicate.check", keyTextField.getValue()));
+
+        uiNotification.displayValidationError(i18n.getMessage("message.metadata.duplicate.check", keyTextField.getValue()));
         return true;
     }
 
     private String getMetadataCaption(final String nameVersionStr) {
         final StringBuilder caption = new StringBuilder();
-        caption.append(HawkbitCommonUtil.DIV_DESCRIPTION_START + i18n.get("caption.metadata.popup") + " "
+        caption.append(HawkbitCommonUtil.DIV_DESCRIPTION_START + i18n.getMessage("caption.metadata.popup") + " "
                 + HawkbitCommonUtil.getBoldHTMLText(nameVersionStr));
         caption.append(HawkbitCommonUtil.DIV_DESCRIPTION_END);
         return caption.toString();
@@ -458,9 +455,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     private void onRowClick(final SelectionEvent event) {
         final Set<Object> itemsSelected = event.getSelected();
         if (!itemsSelected.isEmpty()) {
-            final Object itemSelected = itemsSelected.stream().findFirst().isPresent()
-                    ? itemsSelected.stream().findFirst().get() : null;
-            popualateKeyValue(itemSelected);
+            popualateKeyValue(itemsSelected.iterator().next());
             addIcon.setEnabled(true);
         } else {
             keyTextField.clear();

@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDownloadArtifactRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -60,14 +61,13 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
     @ResponseBody
     public ResponseEntity<InputStream> downloadArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("artifactId") final Long artifactId) {
-        final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, artifactId);
+        final SoftwareModule module = softwareManagement.findSoftwareModuleById(softwareModuleId)
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
+        final Artifact artifact = module.getArtifact(artifactId)
+                .orElseThrow(() -> new EntityNotFoundException(Artifact.class, artifactId));
 
-        if (null == module || !module.getArtifact(artifactId).isPresent()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        final Artifact artifact = module.getArtifact(artifactId).get();
-        final DbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash());
+        final DbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash())
+                .orElseThrow(() -> new ArtifactBinaryNotFoundException(artifact.getSha1Hash()));
         final HttpServletRequest request = requestResponseContextHolder.getHttpServletRequest();
         final String ifMatch = request.getHeader("If-Match");
         if (ifMatch != null && !RestResourceConversionHelper.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
@@ -77,17 +77,6 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
         return RestResourceConversionHelper.writeFileResponse(artifact,
                 requestResponseContextHolder.getHttpServletResponse(), request, file);
 
-    }
-
-    private SoftwareModule findSoftwareModuleWithExceptionIfNotFound(final Long softwareModuleId,
-            final Long artifactId) {
-        final SoftwareModule module = softwareManagement.findSoftwareModuleById(softwareModuleId);
-        if (module == null) {
-            throw new EntityNotFoundException("SoftwareModule with Id {" + softwareModuleId + "} does not exist");
-        } else if (artifactId != null && !module.getArtifact(artifactId).isPresent()) {
-            throw new EntityNotFoundException("Artifact with Id {" + artifactId + "} does not exist");
-        }
-        return module;
     }
 
 }

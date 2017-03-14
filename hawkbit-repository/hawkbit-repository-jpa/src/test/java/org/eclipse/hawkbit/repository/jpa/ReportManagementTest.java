@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static org.fest.assertions.Assertions.assertThat;
-import static org.fest.assertions.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -139,7 +139,7 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
             final Target createTarget = testdataFactory.createTarget("t" + month);
             final DistributionSetAssignmentResult result = assignDistributionSet(distributionSet,
                     Lists.newArrayList(createTarget));
-            controllerManagament.registerRetrieved(result.getActions().get(0),
+            controllerManagement.registerRetrieved(result.getActions().get(0),
                     "Controller retrieved update action and should start now the download.");
         }
         DataReportSeries<LocalDate> feedbackReceivedOverTime = reportManagement
@@ -160,7 +160,7 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
             final Target createTarget = testdataFactory.createTarget("t2" + month);
             final DistributionSetAssignmentResult result = assignDistributionSet(distributionSet,
                     Lists.newArrayList(createTarget));
-            controllerManagament.registerRetrieved(result.getActions().get(0),
+            controllerManagement.registerRetrieved(result.getActions().get(0),
                     "Controller retrieved update action and should start now the download.");
         }
         feedbackReceivedOverTime = reportManagement.feedbackReceivedOverTime(DateTypes.perMonth(), from, to);

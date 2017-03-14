@@ -36,12 +36,8 @@ public class JpaTargetFilterQueryCreate extends AbstractTargetFilterQueryUpdateC
     }
 
     private DistributionSet findDistributionSetAndThrowExceptionIfNotFound(final Long setId) {
-        final DistributionSet set = distributionSetManagement.findDistributionSetById(setId);
-
-        if (set == null) {
-            throw new EntityNotFoundException("Distribution set cannot be set as it does not exixt" + setId);
-        }
-        return set;
+        return distributionSetManagement.findDistributionSetById(setId)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, setId));
     }
 
 }

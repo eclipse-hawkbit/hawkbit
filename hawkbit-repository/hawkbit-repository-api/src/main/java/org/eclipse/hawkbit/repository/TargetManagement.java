@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.constraints.NotNull;
 
@@ -64,6 +65,9 @@ public interface TargetManagement {
      *            to search for
      *
      * @return number of found {@link Target}s.
+     * 
+     * @throws EntityNotFoundException
+     *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
@@ -94,6 +98,9 @@ public interface TargetManagement {
      *            flag to select targets with no tag assigned
      *
      * @return the found number {@link Target}s
+     * 
+     * @throws EntityNotFoundException
+     *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Long countTargetByFilters(Collection<TargetUpdateStatus> status, Boolean overdueState, String searchText,
@@ -106,6 +113,9 @@ public interface TargetManagement {
      * @param distId
      *            to search for
      * @return number of found {@link Target}s.
+     * 
+     * @throws EntityNotFoundException
+     *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
@@ -175,10 +185,13 @@ public interface TargetManagement {
      *
      * @param targetIDs
      *            the IDs of the targets to be deleted
+     * 
+     * @throws EntityNotFoundException
+     *             if (at least one) of the given target IDs does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
     void deleteTargets(@NotEmpty Collection<Long> targetIDs);
-    
+
     /**
      * Deletes target with the given IDs.
      *
@@ -203,10 +216,13 @@ public interface TargetManagement {
      * @param rsqlParam
      *            filter definition in RSQL syntax
      * @return a page of the found {@link Target}s
+     * 
+     * @throws EntityNotFoundException
+     *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findAllTargetsByTargetFilterQueryAndNonDS(@NotNull Pageable pageRequest, Long distributionSetId,
-            @NotNull String rsqlParam);
+    Page<Target> findAllTargetsByTargetFilterQueryAndNonDS(@NotNull Pageable pageRequest,
+            @NotNull Long distributionSetId, @NotNull String rsqlParam);
 
     /**
      * Counts all targets for all the given parameter {@link TargetFilterQuery}
@@ -218,6 +234,9 @@ public interface TargetManagement {
      * @param rsqlParam
      *            filter definition in RSQL syntax
      * @return the count of found {@link Target}s
+     * 
+     * @throws EntityNotFoundException
+     *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Long countTargetsByTargetFilterQueryAndNonDS(@NotNull Long distributionSetId, @NotNull String rsqlParam);
@@ -261,6 +280,9 @@ public interface TargetManagement {
      * @param group
      *            the {@link RolloutGroup}
      * @return the found {@link Target}s
+     * 
+     * @throws EntityNotFoundException
+     *             if rollout group with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<Target> findAllTargetsInRolloutGroupWithoutAction(@NotNull Pageable pageRequest, @NotNull Long group);
@@ -276,6 +298,9 @@ public interface TargetManagement {
      * @param pageReq
      *            page parameter
      * @return the found {@link Target}s
+     * 
+     * @throws EntityNotFoundException
+     *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
     Page<Target> findTargetByAssignedDistributionSet(@NotNull Long distributionSetID, @NotNull Pageable pageReq);
@@ -297,7 +322,8 @@ public interface TargetManagement {
      *             given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException
      *             if the RSQL syntax is wrong
-     *
+     * @throws EntityNotFoundException
+     *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
     Page<Target> findTargetByAssignedDistributionSet(@NotNull Long distributionSetID, @NotNull String rsqlParam,
@@ -322,10 +348,10 @@ public interface TargetManagement {
      *
      * @param controllerId
      *            to look for.
-     * @return {@link Target} or <code>null</code> if it does not exist
+     * @return {@link Target}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Target findTargetByControllerID(@NotEmpty String controllerId);
+    Optional<Target> findTargetByControllerID(@NotEmpty String controllerId);
 
     /**
      * Find {@link Target} based on given ID returns found Target with details,
@@ -337,10 +363,10 @@ public interface TargetManagement {
      *
      * @param controllerId
      *            to look for.
-     * @return {@link Target} or <code>null</code> if it does not exist
+     * @return {@link Target}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Target findTargetByControllerIDWithDetails(@NotEmpty String controllerId);
+    Optional<Target> findTargetByControllerIDWithDetails(@NotEmpty String controllerId);
 
     /**
      * Filter {@link Target}s for all the given parameters. If all parameters
@@ -369,6 +395,9 @@ public interface TargetManagement {
      *            flag to select targets with no tag assigned
      *
      * @return the found {@link Target}s
+     * 
+     * @throws EntityNotFoundException
+     *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Slice<Target> findTargetByFilters(@NotNull Pageable pageable, Collection<TargetUpdateStatus> status,
@@ -385,6 +414,9 @@ public interface TargetManagement {
      * @param pageReq
      *            page parameter
      * @return the found {@link Target}s
+     * 
+     * @throws EntityNotFoundException
+     *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
     Page<Target> findTargetByInstalledDistributionSet(@NotNull Long distributionSetID, @NotNull Pageable pageReq);
@@ -407,6 +439,9 @@ public interface TargetManagement {
      *             given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException
      *             if the RSQL syntax is wrong
+     * 
+     * @throws EntityNotFoundException
+     *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
     Page<Target> findTargetByInstalledDistributionSet(@NotNull Long distributionSetId, @NotNull String rsqlParam,
@@ -506,6 +541,9 @@ public interface TargetManagement {
      *            non-null value; filters are AND-gated
      * @return a paged result {@link Page} of the {@link Target}s in a defined
      *         order.
+     * 
+     * @throws EntityNotFoundException
+     *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Slice<Target> findTargetsAllOrderByLinkedDistributionSet(@NotNull Pageable pageable,
@@ -546,6 +584,9 @@ public interface TargetManagement {
      * @param tagName
      *            to toggle
      * @return TagAssigmentResult with all meta data of the assignment outcome.
+     * 
+     * @throws EntityNotFoundException
+     *             if tag with given name does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     TargetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<String> targetIds, @NotEmpty String tagName);
@@ -600,10 +641,10 @@ public interface TargetManagement {
      * 
      * @param id
      *            to look for
-     * @return {@link Target} or <code>null</code> if it does not exist
+     * @return {@link Target}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Target findTargetById(Long id);
+    Optional<Target> findTargetById(Long id);
 
     /**
      * Retrieves all targets without details, i.e. NO {@link Target#getTags()}

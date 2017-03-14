@@ -8,37 +8,30 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.apache.commons.lang3.ArrayUtils.isEmpty;
-import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.isNotNullOrEmpty;
-import static org.eclipse.hawkbit.ui.utils.SPUIDefinitions.TARGET_TABLE_CREATE_AT_SORT_ORDER;
-import static org.springframework.data.domain.Sort.Direction.ASC;
-import static org.springframework.data.domain.Sort.Direction.DESC;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.ProxyTarget;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.util.CollectionUtils;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
 
@@ -52,7 +45,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
     private static final long serialVersionUID = -5645680058303167558L;
 
-    private Sort sort = new Sort(TARGET_TABLE_CREATE_AT_SORT_ORDER, "id");
+    private Sort sort = new Sort(SPUIDefinitions.TARGET_TABLE_CREATE_AT_SORT_ORDER, "id");
     private transient Collection<TargetUpdateStatus> status;
     private transient Boolean overdueState;
     private String[] targetTags;
@@ -60,9 +53,9 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
     private String searchText;
     private Boolean noTagClicked;
     private transient TargetManagement targetManagement;
-    private transient I18N i18N;
+    private transient VaadinMessageSource i18N;
     private Long pinnedDistId;
-    private TargetFilterQuery targetFilterQuery;
+    private Long targetFilterQueryId;
     private ManagementUIState managementUIState;
 
     /**
@@ -82,26 +75,26 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
         super(definition, queryConfig, sortIds, sortStates);
 
-        if (isNotNullOrEmpty(queryConfig)) {
+        if (HawkbitCommonUtil.isNotNullOrEmpty(queryConfig)) {
             status = (Collection<TargetUpdateStatus>) queryConfig.get(SPUIDefinitions.FILTER_BY_STATUS);
             overdueState = (Boolean) queryConfig.get(SPUIDefinitions.FILTER_BY_OVERDUE_STATE);
             targetTags = (String[]) queryConfig.get(SPUIDefinitions.FILTER_BY_TAG);
             noTagClicked = (Boolean) queryConfig.get(SPUIDefinitions.FILTER_BY_NO_TAG);
             distributionId = (Long) queryConfig.get(SPUIDefinitions.FILTER_BY_DISTRIBUTION);
             searchText = (String) queryConfig.get(SPUIDefinitions.FILTER_BY_TEXT);
-            targetFilterQuery = (TargetFilterQuery) queryConfig.get(SPUIDefinitions.FILTER_BY_TARGET_FILTER_QUERY);
+            targetFilterQueryId = (Long) queryConfig.get(SPUIDefinitions.FILTER_BY_TARGET_FILTER_QUERY);
             if (!Strings.isNullOrEmpty(searchText)) {
                 searchText = String.format("%%%s%%", searchText);
             }
             pinnedDistId = (Long) queryConfig.get(SPUIDefinitions.ORDER_BY_DISTRIBUTION);
         }
 
-        if (!isEmpty(sortStates)) {
+        if (!ArrayUtils.isEmpty(sortStates)) {
 
-            sort = new Sort(sortStates[0] ? ASC : DESC, (String) sortIds[0]);
+            sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortIds[0]);
 
             for (int targetId = 1; targetId < sortIds.length; targetId++) {
-                sort.and(new Sort(sortStates[targetId] ? ASC : DESC, (String) sortIds[targetId]));
+                sort.and(new Sort(sortStates[targetId] ? Direction.ASC : Direction.DESC, (String) sortIds[targetId]));
             }
         }
     }
@@ -119,8 +112,8 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             targetBeans = getTargetManagement().findTargetsAllOrderByLinkedDistributionSet(
                     new OffsetBasedPageRequest(startIndex, SPUIDefinitions.PAGE_SIZE, sort), pinnedDistId,
                     new FilterParams(distributionId, status, overdueState, searchText, noTagClicked, targetTags));
-        } else if (null != targetFilterQuery) {
-            targetBeans = getTargetManagement().findTargetsByTargetFilterQuery(targetFilterQuery.getId(),
+        } else if (null != targetFilterQueryId) {
+            targetBeans = getTargetManagement().findTargetsByTargetFilterQuery(targetFilterQueryId,
                     new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         } else if (!isAnyFilterSelected()) {
             targetBeans = getTargetManagement().findTargetsAll(
@@ -150,11 +143,10 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
                 prxyTarget.setInstalledDistributionSet(null);
                 prxyTarget.setAssignedDistributionSet(null);
             } else {
-                final Target target = getTargetManagement().findTargetByControllerIDWithDetails(targ.getControllerId());
-                final DistributionSet installedDistributionSet = target.getTargetInfo().getInstalledDistributionSet();
-                prxyTarget.setInstalledDistributionSet(installedDistributionSet);
-                final DistributionSet assignedDistributionSet = target.getAssignedDistributionSet();
-                prxyTarget.setAssignedDistributionSet(assignedDistributionSet);
+                getTargetManagement().findTargetByControllerIDWithDetails(targ.getControllerId()).ifPresent(target -> {
+                    prxyTarget.setInstalledDistributionSet(target.getTargetInfo().getInstalledDistributionSet());
+                    prxyTarget.setAssignedDistributionSet(target.getAssignedDistributionSet());
+                });
             }
 
             prxyTarget.setUpdateStatus(targ.getTargetInfo().getUpdateStatus());
@@ -188,8 +180,8 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
     public int size() {
         final long totSize = getTargetManagement().countTargetsAll();
         long size;
-        if (null != targetFilterQuery) {
-            size = getTargetManagement().countTargetByTargetFilterQuery(targetFilterQuery.getId());
+        if (null != targetFilterQueryId) {
+            size = getTargetManagement().countTargetByTargetFilterQuery(targetFilterQueryId);
         } else if (!isAnyFilterSelected()) {
             size = totSize;
         } else {
@@ -211,8 +203,8 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
     private boolean isAnyFilterSelected() {
         final boolean isFilterSelected = isTagSelected() || isOverdueFilterEnabled();
-        return isFilterSelected || CollectionUtils.isNotEmpty(status) || distributionId != null
-                || !isNullOrEmpty(searchText);
+        return isFilterSelected || !CollectionUtils.isEmpty(status) || distributionId != null
+                || !Strings.isNullOrEmpty(searchText);
     }
 
     private TargetManagement getTargetManagement() {
@@ -229,9 +221,9 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         return managementUIState;
     }
 
-    private I18N getI18N() {
+    private VaadinMessageSource getI18N() {
         if (i18N == null) {
-            i18N = SpringContextHelper.getBean(I18N.class);
+            i18N = SpringContextHelper.getBean(VaadinMessageSource.class);
         }
         return i18N;
     }

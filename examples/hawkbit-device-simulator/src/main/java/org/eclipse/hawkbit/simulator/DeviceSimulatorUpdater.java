@@ -153,6 +153,7 @@ public class DeviceSimulatorUpdater {
             if (device.getProgress() <= 0 && modules != null) {
                 device.setUpdateStatus(simulateDownloads(device.getTargetSecurityToken()));
                 if (isErrorResponse(device.getUpdateStatus())) {
+                    device.setProgress(1.0);
                     callback.updateFinished(device, actionId);
                     eventbus.post(new ProgressUpdate(device));
                     return;
@@ -216,13 +217,16 @@ public class DeviceSimulatorUpdater {
 
         private static UpdateStatus downloadUrl(final String url, final String targetToken, final String sha1Hash,
                 final long size) {
-            LOGGER.debug("Downloading {} with token {}, expected sha1 hash {} and size {}", url,
-                    hideTokenDetails(targetToken), sha1Hash, size);
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Downloading {} with token {}, expected sha1 hash {} and size {}", url,
+                        hideTokenDetails(targetToken), sha1Hash, size);
+            }
 
             try {
                 return readAndCheckDownloadUrl(url, targetToken, sha1Hash, size);
             } catch (IOException | KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
-                LOGGER.error("Failed to download" + url, e);
+                LOGGER.error("Failed to download " + url, e);
                 return new UpdateStatus(ResponseStatus.ERROR, "Failed to download " + url + ": " + e.getMessage());
             }
 

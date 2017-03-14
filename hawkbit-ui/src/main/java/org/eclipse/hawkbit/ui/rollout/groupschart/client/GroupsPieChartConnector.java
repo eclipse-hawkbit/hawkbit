@@ -8,10 +8,11 @@
  */
 package org.eclipse.hawkbit.ui.rollout.groupschart.client;
 
-import com.vaadin.client.communication.StateChangeEvent;
 import org.eclipse.hawkbit.ui.rollout.groupschart.GroupsPieChart;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.ui.AbstractComponentConnector;
 import com.vaadin.shared.ui.Connect;
 

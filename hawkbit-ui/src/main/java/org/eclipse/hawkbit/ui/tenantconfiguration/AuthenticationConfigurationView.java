@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.ui.tenantconfiguration.authentication.AuthenticationC
 import org.eclipse.hawkbit.ui.tenantconfiguration.authentication.CertificateAuthenticationConfigurationItem;
 import org.eclipse.hawkbit.ui.tenantconfiguration.authentication.GatewaySecurityTokenAuthenticationConfigurationItem;
 import org.eclipse.hawkbit.ui.tenantconfiguration.authentication.TargetSecurityTokenAuthenticationConfigurationItem;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -37,7 +37,7 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
 
     private static final long serialVersionUID = 1L;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final CertificateAuthenticationConfigurationItem certificateAuthenticationConfigurationItem;
 
@@ -55,7 +55,7 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
 
     private CheckBox downloadAnonymousCheckBox;
 
-    AuthenticationConfigurationView(final I18N i18n, final TenantConfigurationManagement tenantConfigurationManagement,
+    AuthenticationConfigurationView(final VaadinMessageSource i18n, final TenantConfigurationManagement tenantConfigurationManagement,
             final SecurityTokenGenerator securityTokenGenerator) {
         this.i18n = i18n;
         this.certificateAuthenticationConfigurationItem = new CertificateAuthenticationConfigurationItem(
@@ -81,7 +81,7 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
         vLayout.setMargin(true);
         vLayout.setSizeFull();
 
-        final Label headerDisSetType = new Label(i18n.get("configuration.authentication.title"));
+        final Label headerDisSetType = new Label(i18n.getMessage("configuration.authentication.title"));
         headerDisSetType.addStyleName("config-panel-header");
         vLayout.addComponent(headerDisSetType);
 

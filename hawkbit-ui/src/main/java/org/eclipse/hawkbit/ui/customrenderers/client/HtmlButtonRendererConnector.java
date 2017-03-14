@@ -14,7 +14,7 @@ import com.vaadin.client.connectors.ButtonRendererConnector;
 import com.vaadin.shared.ui.Connect;
 
 /**
- *  A connector for {@link HtmlButtonRenderer}.
+ * A connector for {@link HtmlButtonRenderer}.
  *
  */
 @Connect(org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer.class)

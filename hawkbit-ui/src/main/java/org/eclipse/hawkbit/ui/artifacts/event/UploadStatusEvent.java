@@ -16,8 +16,8 @@ package org.eclipse.hawkbit.ui.artifacts.event;
 public class UploadStatusEvent {
 
     /**
-     * TenantAwareEvent type definition of events during the artifact upload life-cycle
-     * from receiving the upload until the process end.
+     * TenantAwareEvent type definition of events during the artifact upload
+     * life-cycle from receiving the upload until the process end.
      */
     public enum UploadStatusEventType {
         RECEIVE_UPLOAD, UPLOAD_FAILED, UPLOAD_IN_PROGRESS, UPLOAD_STARTED, UPLOAD_FINISHED, UPLOAD_SUCCESSFUL, UPLOAD_STREAMING_FAILED, UPLOAD_STREAMING_FINISHED, ABORT_UPLOAD

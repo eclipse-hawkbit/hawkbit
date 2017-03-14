@@ -15,7 +15,6 @@ import java.util.Map;
 
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.components.ProxyDistribution;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -23,7 +22,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
@@ -56,7 +55,7 @@ public class TargetFilterTable extends Table {
 
     private static final long serialVersionUID = -4307487829435474759L;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final UINotification notification;
 
@@ -72,7 +71,7 @@ public class TargetFilterTable extends Table {
 
     private static final int PROPERTY_DEPT = 3;
 
-    public TargetFilterTable(final I18N i18n, final UINotification notification, final UIEventBus eventBus,
+    public TargetFilterTable(final VaadinMessageSource i18n, final UINotification notification, final UIEventBus eventBus,
             final FilterManagementUIState filterManagementUIState,
             final TargetFilterQueryManagement targetFilterQueryManagement, final ManageDistUIState manageDistUIState,
             final TargetManagement targetManagement) {
@@ -141,14 +140,14 @@ public class TargetFilterTable extends Table {
 
     private List<TableColumn> getVisbleColumns() {
         final List<TableColumn> columnList = new ArrayList<>(7);
-        columnList.add(new TableColumn(SPUILabelDefinitions.NAME, i18n.get("header.name"), 0.2F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_USER, i18n.get("header.createdBy"), 0.1F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.2F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.1F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_MODIFIED_DATE, i18n.get("header.modifiedDate"), 0.2F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.NAME, i18n.getMessage("header.name"), 0.2F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_USER, i18n.getMessage("header.createdBy"), 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.getMessage("header.createdDate"), 0.2F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_MODIFIED_BY, i18n.getMessage("header.modifiedBy"), 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_MODIFIED_DATE, i18n.getMessage("header.modifiedDate"), 0.2F));
         columnList.add(new TableColumn(SPUILabelDefinitions.AUTO_ASSIGN_DISTRIBUTION_SET,
-                i18n.get("header.auto.assignment.ds"), 0.1F));
-        columnList.add(new TableColumn(SPUIDefinitions.CUSTOM_FILTER_DELETE, i18n.get("header.delete"), 0.1F));
+                i18n.getMessage("header.auto.assignment.ds"), 0.1F));
+        columnList.add(new TableColumn(SPUIDefinitions.CUSTOM_FILTER_DELETE, i18n.getMessage("header.delete"), 0.1F));
         return columnList;
 
     }
@@ -162,7 +161,7 @@ public class TargetFilterTable extends Table {
         final Item row = getItem(itemId);
         final String tfName = (String) row.getItemProperty(SPUILabelDefinitions.NAME).getValue();
         final Button deleteIcon = SPUIComponentProvider.getButton(getDeleteIconId(tfName), "",
-                SPUILabelDefinitions.DELETE_CUSTOM_FILTER, ValoTheme.BUTTON_TINY + " " + "redicon", true,
+                SPUILabelDefinitions.DELETE_CUSTOM_FILTER, ValoTheme.BUTTON_TINY + " " + "blueicon", true,
                 FontAwesome.TRASH_O, SPUIButtonStyleSmallNoBorder.class);
         deleteIcon.setData(itemId);
         deleteIcon.addClickListener(this::onDelete);
@@ -176,12 +175,12 @@ public class TargetFilterTable extends Table {
 
     private void onDelete(final ClickEvent event) {
         /* Display the confirmation */
-        final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.get("caption.filter.delete.confirmbox"),
-                i18n.get("message.delete.filter.confirm"), i18n.get("button.ok"), i18n.get("button.cancel"), ok -> {
+        final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.getMessage("caption.filter.delete.confirmbox"),
+                i18n.getMessage("message.delete.filter.confirm"), i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
                     if (ok) {
                         final Long rowId = (Long) ((Button) event.getComponent()).getData();
                         final String deletedFilterName = targetFilterQueryManagement.findTargetFilterQueryById(rowId)
-                                .getName();
+                                .get().getName();
                         targetFilterQueryManagement.deleteTargetFilterQuery(rowId);
 
                         /*
@@ -190,7 +189,7 @@ public class TargetFilterTable extends Table {
                          */
 
                         notification.displaySuccess(
-                                i18n.get("message.delete.filter.success", new Object[] { deletedFilterName }));
+                                i18n.getMessage("message.delete.filter.success", new Object[] { deletedFilterName }));
                         refreshContainer();
                     }
                 });
@@ -229,11 +228,11 @@ public class TargetFilterTable extends Table {
         final String buttonId = "distSetButton";
         Button updateIcon;
         if (distSet == null) {
-            updateIcon = SPUIComponentProvider.getButton(buttonId, i18n.get("button.no.auto.assignment"),
-                    i18n.get("button.auto.assignment.desc"), null, false, null, SPUIButtonStyleSmallNoBorder.class);
+            updateIcon = SPUIComponentProvider.getButton(buttonId, i18n.getMessage("button.no.auto.assignment"),
+                    i18n.getMessage("button.auto.assignment.desc"), null, false, null, SPUIButtonStyleSmallNoBorder.class);
         } else {
             updateIcon = SPUIComponentProvider.getButton(buttonId, distSet.getNameVersion(),
-                    i18n.get("button.auto.assignment.desc"), null, false, null, SPUIButtonStyleSmallNoBorder.class);
+                    i18n.getMessage("button.auto.assignment.desc"), null, false, null, SPUIButtonStyleSmallNoBorder.class);
         }
 
         updateIcon.addClickListener(this::onClickOfDistributionSetButton);
@@ -253,12 +252,12 @@ public class TargetFilterTable extends Table {
 
     private void onClickOfDetailButton(final ClickEvent event) {
         final String targetFilterName = (String) ((Button) event.getComponent()).getData();
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .findTargetFilterQueryByName(targetFilterName);
-        filterManagementUIState.setFilterQueryValue(targetFilterQuery.getQuery());
-        filterManagementUIState.setTfQuery(targetFilterQuery);
-        filterManagementUIState.setEditViewDisplayed(true);
-        eventBus.publish(this, CustomFilterUIEvent.TARGET_FILTER_DETAIL_VIEW);
+        targetFilterQueryManagement.findTargetFilterQueryByName(targetFilterName).ifPresent(targetFilterQuery -> {
+            filterManagementUIState.setFilterQueryValue(targetFilterQuery.getQuery());
+            filterManagementUIState.setTfQuery(targetFilterQuery);
+            filterManagementUIState.setEditViewDisplayed(true);
+            eventBus.publish(this, CustomFilterUIEvent.TARGET_FILTER_DETAIL_VIEW);
+        });
     }
 
     private void populateTableData() {

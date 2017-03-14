@@ -49,7 +49,7 @@ public class TenantConfigurationProperties {
      * @return the TenantConfigurationKey with the name keyName
      */
     public TenantConfigurationKey fromKeyName(final String keyName) {
-        return configuration.values().stream().filter(conf -> conf.getKeyName().equals(keyName)).findFirst()
+        return configuration.values().stream().filter(conf -> conf.getKeyName().equals(keyName)).findAny()
                 .orElseThrow(() -> new InvalidTenantConfigurationKeyException(
                         "The given configuration key " + keyName + " does not exist."));
     }

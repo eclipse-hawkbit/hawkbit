@@ -29,7 +29,8 @@ import java.util.List;
  * unassigned targets will be displayed.
  *
  */
-@SuppressWarnings("squid:TrailingCommentCheck")
+// Exception squid - non Java 8 compatible GWT code that runs on browser
+@SuppressWarnings({ "squid:TrailingCommentCheck", "squid:S1604" })
 public class GroupsPieChartWidget extends DockLayoutPanel {
 
     private static final String ATTR_VISIBILITY = "visibility";

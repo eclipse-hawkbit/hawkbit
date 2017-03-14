@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.common.detailslayout;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -18,10 +19,11 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.dstable.DsMetadataPopupLayout;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.springframework.data.domain.PageRequest;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
@@ -51,13 +53,13 @@ public class DistributionSetMetadatadetailslayout extends Table {
 
     private final transient EntityFactory entityFactory;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private Long selectedDistSetId;
 
     private final UINotification notification;
 
-    public DistributionSetMetadatadetailslayout(final I18N i18n, final SpPermissionChecker permissionChecker,
+    public DistributionSetMetadatadetailslayout(final VaadinMessageSource i18n, final SpPermissionChecker permissionChecker,
             final DistributionSetManagement distributionSetManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout, final EntityFactory entityFactory,
             final UINotification notification) {
@@ -83,7 +85,8 @@ public class DistributionSetMetadatadetailslayout extends Table {
         }
         selectedDistSetId = distributionSet.getId();
         final List<DistributionSetMetadata> dsMetadataList = distributionSetManagement
-                .findDistributionSetMetadataByDistributionSetId(selectedDistSetId);
+                .findDistributionSetMetadataByDistributionSetId(selectedDistSetId, new PageRequest(0, 500))
+                .getContent();
         if (null != dsMetadataList && !dsMetadataList.isEmpty()) {
             dsMetadataList.forEach(dsMetadata -> setDSMetadataProperties(dsMetadata));
         }
@@ -108,7 +111,7 @@ public class DistributionSetMetadatadetailslayout extends Table {
     private IndexedContainer getDistSetContainer() {
         final IndexedContainer container = new IndexedContainer();
         container.addContainerProperty(METADATA_KEY, String.class, "");
-        setColumnExpandRatio(METADATA_KEY, 0.7f);
+        setColumnExpandRatio(METADATA_KEY, 0.7F);
         setColumnAlignment(METADATA_KEY, Align.LEFT);
 
         if (permissionChecker.hasUpdateDistributionPermission()) {
@@ -120,7 +123,7 @@ public class DistributionSetMetadatadetailslayout extends Table {
     }
 
     private void addDSMetadataTableHeader() {
-        setColumnHeader(METADATA_KEY, i18n.get("header.key"));
+        setColumnHeader(METADATA_KEY, i18n.getMessage("header.key"));
     }
 
     private void setDSMetadataProperties(final DistributionSetMetadata dsMetadata) {
@@ -148,15 +151,15 @@ public class DistributionSetMetadatadetailslayout extends Table {
     }
 
     private void showMetadataDetails(final Long selectedDistSetId, final String metadataKey) {
-        final DistributionSet distSet = distributionSetManagement.findDistributionSetById(selectedDistSetId);
-        if (distSet == null) {
-            notification.displayWarning(i18n.get("distributionset.not.exists"));
+        final Optional<DistributionSet> distSet = distributionSetManagement.findDistributionSetById(selectedDistSetId);
+        if (!distSet.isPresent()) {
+            notification.displayWarning(i18n.getMessage("distributionset.not.exists"));
             return;
         }
 
         /* display the window */
-        UI.getCurrent()
-                .addWindow(dsMetadataPopupLayout.getWindow(distSet, entityFactory.generateMetadata(metadataKey, "")));
+        UI.getCurrent().addWindow(
+                dsMetadataPopupLayout.getWindow(distSet.get(), entityFactory.generateMetadata(metadataKey, "")));
     }
 
 }

@@ -8,15 +8,13 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.upload;
 
-import static org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions.FAILED;
-import static org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions.SUCCESS;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
@@ -31,7 +29,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleTiny;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -92,7 +90,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
 
     private static final String ALREADY_EXISTS_MSG = "upload.artifact.alreadyExists";
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private Window window;
 
@@ -139,12 +137,9 @@ public class UploadConfirmationWindow implements Button.ClickListener {
         buildLayout();
     }
 
-    private Boolean checkIfArtifactDetailsDisplayed(final Long bSoftwareModuleId) {
-        if (artifactUploadState.getSelectedBaseSoftwareModule().isPresent()
-                && artifactUploadState.getSelectedBaseSoftwareModule().get().getId().equals(bSoftwareModuleId)) {
-            return true;
-        }
-        return false;
+    private boolean checkIfArtifactDetailsDisplayed(final Long bSoftwareModuleId) {
+        return artifactUploadState.getSelectedBaseSoftwareModule()
+                .map(module -> module.getId().equals(bSoftwareModuleId)).orElse(false);
     }
 
     private Boolean preUploadValidation(final List<String> itemIds) {
@@ -196,16 +191,16 @@ public class UploadConfirmationWindow implements Button.ClickListener {
         final Item item = uploadDetailsTable.getItem(itemId);
         if (HawkbitCommonUtil.trimAndNullIfEmpty(fileName) != null) {
             final Long baseSwId = (Long) item.getItemProperty(BASE_SOFTWARE_ID).getValue();
-            final List<Artifact> artifactList = artifactManagement.findByFilenameAndSoftwareModule(fileName, baseSwId);
-            if (!artifactList.isEmpty()) {
+            final Optional<Artifact> artifact = artifactManagement.findByFilenameAndSoftwareModule(fileName, baseSwId);
+            if (artifact.isPresent()) {
                 warningIconLabel.setVisible(true);
                 if (isErrorIcon(warningIconLabel)) {
                     warningIconLabel.removeStyleName(SPUIStyleDefinitions.ERROR_LABEL);
                     redErrorLabelCount--;
                 }
-                warningIconLabel.setDescription(i18n.get(ALREADY_EXISTS_MSG));
+                warningIconLabel.setDescription(i18n.getMessage(ALREADY_EXISTS_MSG));
                 if (checkForDuplicate(fileName, itemId, baseSwId)) {
-                    warningIconLabel.setDescription(i18n.get("message.duplicate.filename"));
+                    warningIconLabel.setDescription(i18n.getMessage("message.duplicate.filename"));
                     warningIconLabel.addStyleName(SPUIStyleDefinitions.ERROR_LABEL);
                     redErrorLabelCount++;
                 }
@@ -213,7 +208,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
                 warningIconLabel.setVisible(false);
                 if (warningIconLabel.getStyleName().contains(SPUIStyleDefinitions.ERROR_LABEL)) {
                     warningIconLabel.removeStyleName(SPUIStyleDefinitions.ERROR_LABEL);
-                    warningIconLabel.setDescription(i18n.get(ALREADY_EXISTS_MSG));
+                    warningIconLabel.setDescription(i18n.getMessage(ALREADY_EXISTS_MSG));
                     redErrorLabelCount--;
                 }
             }
@@ -247,7 +242,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             newItem.getItemProperty(SIZE).setValue(customFile.getFileSize());
             final Button deleteIcon = SPUIComponentProvider.getButton(
                     UIComponentIdProvider.UPLOAD_DELETE_ICON + "-" + itemId, "", SPUILabelDefinitions.DISCARD,
-                    ValoTheme.BUTTON_TINY + " " + "redicon", true, FontAwesome.TRASH_O,
+                    ValoTheme.BUTTON_TINY + " " + "blueicon", true, FontAwesome.TRASH_O,
                     SPUIButtonStyleSmallNoBorder.class);
             deleteIcon.addClickListener(this);
             deleteIcon.setData(itemId);
@@ -342,7 +337,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
                 final Label warningLabel = (Label) layout.getComponent(1);
                 if (warningLabel.isVisible()) {
                     warningLabel.removeStyleName(SPUIStyleDefinitions.ERROR_LABEL);
-                    warningLabel.setDescription(i18n.get(ALREADY_EXISTS_MSG));
+                    warningLabel.setDescription(i18n.getMessage(ALREADY_EXISTS_MSG));
                     newItem.getItemProperty(WARNING_ICON).setValue(warningLabel);
                     redErrorLabelCount--;
                     break;
@@ -397,7 +392,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
                 final Label iconLabel = (Label) layout.getComponent(1);
                 if (!iconLabel.getStyleName().contains(SPUIStyleDefinitions.ERROR_LABEL)) {
                     iconLabel.setVisible(true);
-                    iconLabel.setDescription(i18n.get("message.duplicate.filename"));
+                    iconLabel.setDescription(i18n.getMessage("message.duplicate.filename"));
                     iconLabel.addStyleName(SPUIStyleDefinitions.ERROR_LABEL);
                     redErrorLabelCount++;
                 }
@@ -438,11 +433,11 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             final Label errorLabel, final String oldFileName, final Long currentSwId) {
         if (warningLabel == null && (errorLabelCount > 1 || (duplicateCount == 1 && errorLabelCount == 1))) {
 
-            final List<Artifact> artifactList = artifactManagement.findByFilenameAndSoftwareModule(oldFileName,
+            final Optional<Artifact> artifactList = artifactManagement.findByFilenameAndSoftwareModule(oldFileName,
                     currentSwId);
             errorLabel.removeStyleName(SPUIStyleDefinitions.ERROR_LABEL);
-            errorLabel.setDescription(i18n.get(ALREADY_EXISTS_MSG));
-            if (artifactList.isEmpty()) {
+            errorLabel.setDescription(i18n.getMessage(ALREADY_EXISTS_MSG));
+            if (!artifactList.isPresent()) {
                 errorLabel.setVisible(false);
             }
             redErrorLabelCount--;
@@ -479,12 +474,12 @@ public class UploadConfirmationWindow implements Button.ClickListener {
 
         uploadDetailsTable.setContainerDataSource(tabelContainer);
         uploadDetailsTable.setPageLength(10);
-        uploadDetailsTable.setColumnHeader(FILE_NAME_LAYOUT, i18n.get("upload.file.name"));
-        uploadDetailsTable.setColumnHeader(SW_MODULE_NAME, i18n.get("upload.swModuleTable.header"));
-        uploadDetailsTable.setColumnHeader(SHA1_CHECKSUM, i18n.get("upload.sha1"));
-        uploadDetailsTable.setColumnHeader(MD5_CHECKSUM, i18n.get("upload.md5"));
-        uploadDetailsTable.setColumnHeader(SIZE, i18n.get("upload.size"));
-        uploadDetailsTable.setColumnHeader(ACTION, i18n.get("upload.action"));
+        uploadDetailsTable.setColumnHeader(FILE_NAME_LAYOUT, i18n.getMessage("upload.file.name"));
+        uploadDetailsTable.setColumnHeader(SW_MODULE_NAME, i18n.getMessage("upload.swModuleTable.header"));
+        uploadDetailsTable.setColumnHeader(SHA1_CHECKSUM, i18n.getMessage("upload.sha1"));
+        uploadDetailsTable.setColumnHeader(MD5_CHECKSUM, i18n.getMessage("upload.md5"));
+        uploadDetailsTable.setColumnHeader(SIZE, i18n.getMessage("upload.size"));
+        uploadDetailsTable.setColumnHeader(ACTION, i18n.getMessage("upload.action"));
 
         uploadDetailsTable.setColumnExpandRatio(FILE_NAME_LAYOUT, 0.25F);
         uploadDetailsTable.setColumnExpandRatio(SW_MODULE_NAME, 0.17F);
@@ -515,7 +510,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
         window.setDraggable(Boolean.TRUE);
         window.setModal(true);
         window.addCloseListener(event -> onPopupClose());
-        window.setCaption(i18n.get("header.caption.upload.details"));
+        window.setCaption(i18n.getMessage("header.caption.upload.details"));
         window.addStyleName(SPUIStyleDefinitions.CONFIRMATION_WINDOW_CAPTION);
     }
 
@@ -613,7 +608,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
                     Page.getCurrent().getBrowserWindowHeight());
         } else {
             uploadLayout.getUINotification()
-                    .displayValidationError(uploadLayout.getI18n().get("message.error.noProvidedName"));
+                    .displayValidationError(uploadLayout.getI18n().getMessage("message.error.noProvidedName"));
         }
 
     }
@@ -639,12 +634,12 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             artifactManagement.createArtifact(fis, baseSw.getId(), providedFileName,
                     HawkbitCommonUtil.trimAndNullIfEmpty(md5Checksum),
                     HawkbitCommonUtil.trimAndNullIfEmpty(sha1Checksum), true, customFile.getMimeType());
-            saveUploadStatus(providedFileName, swModuleNameVersion, SUCCESS, "");
+            saveUploadStatus(providedFileName, swModuleNameVersion, SPUILabelDefinitions.SUCCESS, "");
 
         } catch (final ArtifactUploadFailedException | InvalidSHA1HashException | InvalidMD5HashException
                 | FileNotFoundException e) {
 
-            saveUploadStatus(providedFileName, swModuleNameVersion, FAILED, e.getMessage());
+            saveUploadStatus(providedFileName, swModuleNameVersion, SPUILabelDefinitions.FAILED, e.getMessage());
             LOG.error(ARTIFACT_UPLOAD_EXCEPTION, e);
 
         } catch (final IOException ex) {

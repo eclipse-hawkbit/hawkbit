@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionStatus;
@@ -26,6 +27,8 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -40,6 +43,8 @@ import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
 public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
     private static final long serialVersionUID = -8841076207255485907L;
+
+    private static final Logger LOG = LoggerFactory.getLogger(RolloutGroupTargetsBeanQuery.class);
 
     private static final Sort sort = new Sort(Direction.ASC, "id");
 
@@ -133,11 +138,19 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
     public int size() {
         long size = 0;
 
-        if (rolloutGroup.isPresent()) {
-            firstPageTargetSets = getRolloutGroupManagement().findAllTargetsWithActionStatus(
-                    new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), rolloutGroup.get().getId());
-            size = firstPageTargetSets.getTotalElements();
+        try {
+            firstPageTargetSets = rolloutGroup.map(group -> getRolloutGroupManagement()
+                    .findAllTargetsWithActionStatus(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), group.getId()))
+                    .orElse(null);
+
+            size = firstPageTargetSets == null ? 0 : firstPageTargetSets.getTotalElements();
+        } catch (final EntityNotFoundException e) {
+            LOG.error("Rollout does not exists. Redirect to Rollouts overview", e);
+            rolloutUIState.setShowRolloutGroupTargets(false);
+            rolloutUIState.setShowRollOuts(true);
+            return 0;
         }
+
         getRolloutUIState().setRolloutGroupTargetsTotalCount(size);
         if (size > SPUIDefinitions.MAX_TABLE_ENTRIES) {
             getRolloutUIState().setRolloutGroupTargetsTruncated(size - SPUIDefinitions.MAX_TABLE_ENTRIES);

@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -52,7 +53,7 @@ public interface SoftwareModuleTypeRepository
      * @return all {@link SoftwareModuleType}s in the repository with given
      *         {@link SoftwareModuleType#getKey()}
      */
-    JpaSoftwareModuleType findByKey(String key);
+    Optional<SoftwareModuleType> findByKey(String key);
 
     /**
      *
@@ -61,7 +62,7 @@ public interface SoftwareModuleTypeRepository
      * @return all {@link SoftwareModuleType}s in the repository with given
      *         {@link SoftwareModuleType#getName()}
      */
-    JpaSoftwareModuleType findByName(String name);
+    Optional<SoftwareModuleType> findByName(String name);
 
     /**
      * retrieves all software module types with a given

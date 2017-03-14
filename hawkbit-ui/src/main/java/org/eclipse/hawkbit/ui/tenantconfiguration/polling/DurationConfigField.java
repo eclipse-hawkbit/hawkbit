@@ -32,7 +32,7 @@ public final class DurationConfigField extends GridLayout implements Configurati
 
     private final CheckBox checkBox = new CheckBox();
     private final DurationField durationField = new DurationField();
-    private Duration globalDuration;
+    private transient Duration globalDuration;
 
     private DurationConfigField(final String id) {
         super(2, 2);
@@ -124,7 +124,7 @@ public final class DurationConfigField extends GridLayout implements Configurati
     }
 
     private void notifyConfigurationChanged() {
-        configurationChangeListeners.forEach(listener -> listener.configurationHasChanged());
+        configurationChangeListeners.forEach(ConfigurationItemChangeListener::configurationHasChanged);
     }
 
     @Override

@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.filtermanagement.footer;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -36,9 +36,9 @@ public class TargetFilterCountMessageLabel extends Label {
 
     private final FilterManagementUIState filterManagementUIState;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
-    public TargetFilterCountMessageLabel(final FilterManagementUIState filterManagementUIState, final I18N i18n,
+    public TargetFilterCountMessageLabel(final FilterManagementUIState filterManagementUIState, final VaadinMessageSource i18n,
             final UIEventBus eventBus) {
         this.filterManagementUIState = filterManagementUIState;
         this.i18n = i18n;
@@ -70,11 +70,11 @@ public class TargetFilterCountMessageLabel extends Label {
             if (null != filterManagementUIState.getFilterQueryValue()) {
                 totalTargets = filterManagementUIState.getTargetsCountAll().get();
             }
-            final StringBuilder targetMessage = new StringBuilder(i18n.get("label.target.filtered.total"));
+            final StringBuilder targetMessage = new StringBuilder(i18n.getMessage("label.target.filtered.total"));
             if (filterManagementUIState.getTargetsTruncated() != null) {
                 // set the icon
                 setIcon(FontAwesome.INFO_CIRCLE);
-                setDescription(i18n.get("label.target.filter.truncated", filterManagementUIState.getTargetsTruncated(),
+                setDescription(i18n.getMessage("label.target.filter.truncated", filterManagementUIState.getTargetsTruncated(),
                         SPUIDefinitions.MAX_TABLE_ENTRIES));
 
             } else {
@@ -85,7 +85,7 @@ public class TargetFilterCountMessageLabel extends Label {
 
             if (totalTargets > SPUIDefinitions.MAX_TABLE_ENTRIES) {
                 targetMessage.append(HawkbitCommonUtil.SP_STRING_PIPE);
-                targetMessage.append(i18n.get("label.filter.shown"));
+                targetMessage.append(i18n.getMessage("label.filter.shown"));
                 targetMessage.append(SPUIDefinitions.MAX_TABLE_ENTRIES);
             }
 

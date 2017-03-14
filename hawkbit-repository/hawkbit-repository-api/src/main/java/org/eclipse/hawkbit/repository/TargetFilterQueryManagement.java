@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.util.Optional;
+
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -42,6 +44,9 @@ public interface TargetFilterQueryManagement {
      *
      * @param targetFilterQueryId
      *            IDs of target filter query to be deleted
+     * 
+     * @throws EntityNotFoundException
+     *             if filter with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
     void deleteTargetFilterQuery(@NotNull Long targetFilterQueryId);
@@ -118,7 +123,7 @@ public interface TargetFilterQueryManagement {
      * @return the page with the found {@link TargetFilterQuery}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetFilterQuery> findTargetFilterQueryByQuery(@NotNull Pageable pageable, String query);
+    Page<TargetFilterQuery> findTargetFilterQueryByQuery(@NotNull Pageable pageable, @NotNull String query);
 
     /**
      * Retrieves all target filter query which {@link TargetFilterQuery}.
@@ -159,7 +164,7 @@ public interface TargetFilterQueryManagement {
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    TargetFilterQuery findTargetFilterQueryById(@NotNull Long targetFilterQueryId);
+    Optional<TargetFilterQuery> findTargetFilterQueryById(@NotNull Long targetFilterQueryId);
 
     /**
      * Find target filter query by name.
@@ -170,7 +175,7 @@ public interface TargetFilterQueryManagement {
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    TargetFilterQuery findTargetFilterQueryByName(@NotNull String targetFilterQueryName);
+    Optional<TargetFilterQuery> findTargetFilterQueryByName(@NotNull String targetFilterQueryName);
 
     /**
      * updates the {@link TargetFilterQuery}.

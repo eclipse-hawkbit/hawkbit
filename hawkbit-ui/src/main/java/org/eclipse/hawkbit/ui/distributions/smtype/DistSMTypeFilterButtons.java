@@ -74,8 +74,8 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
 
     @Override
     protected boolean isClickedByDefault(final String typeName) {
-        return manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType().isPresent() && manageDistUIState
-                .getSoftwareModuleFilters().getSoftwareModuleType().get().getName().equals(typeName);
+        return manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType()
+                .map(type -> type.getName().equals(typeName)).orElse(false);
     }
 
     @Override

@@ -29,11 +29,11 @@ import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -49,7 +49,6 @@ import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.UI;
-
 
 /**
  * This grid presents the action history for a selected target.
@@ -78,10 +77,9 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     private static final String VIRT_PROP_ACTION_FORCE_QUIT = "force-quit-action";
 
     private static final Object[] maxColumnOrder = new Object[] { ProxyAction.PXY_ACTION_IS_ACTIVE_DECO,
-            ProxyAction.PXY_ACTION_ID, ProxyAction.PXY_ACTION_DS_NAME_VERSION,
-            ProxyAction.PXY_ACTION_LAST_MODIFIED_AT, ProxyAction.PXY_ACTION_STATUS, ProxyAction.PXY_ACTION_ROLLOUT_NAME,
-            VIRT_PROP_FORCED, VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL, VIRT_PROP_ACTION_FORCE,
-            VIRT_PROP_ACTION_FORCE_QUIT };
+            ProxyAction.PXY_ACTION_ID, ProxyAction.PXY_ACTION_DS_NAME_VERSION, ProxyAction.PXY_ACTION_LAST_MODIFIED_AT,
+            ProxyAction.PXY_ACTION_STATUS, ProxyAction.PXY_ACTION_ROLLOUT_NAME, VIRT_PROP_FORCED, VIRT_PROP_TIMEFORCED,
+            VIRT_PROP_ACTION_CANCEL, VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT };
 
     private static final Object[] minColumnOrder = new Object[] { ProxyAction.PXY_ACTION_IS_ACTIVE_DECO,
             ProxyAction.PXY_ACTION_DS_NAME_VERSION, ProxyAction.PXY_ACTION_LAST_MODIFIED_AT,
@@ -93,8 +91,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     private static final String[] centerAlignedColumns = new String[] { ProxyAction.PXY_ACTION_IS_ACTIVE_DECO,
             ProxyAction.PXY_ACTION_STATUS };
 
-    private static final String[] rightAlignedColumns = new String[] { VIRT_PROP_FORCED,
-            ProxyAction.PXY_ACTION_ID };
+    private static final String[] rightAlignedColumns = new String[] { VIRT_PROP_FORCED, ProxyAction.PXY_ACTION_ID };
 
     private final transient DeploymentManagement deploymentManagement;
     private final UINotification notification;
@@ -120,7 +117,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
      * @param notification
      * @param managementUIState
      */
-    protected ActionHistoryGrid(final I18N i18n, final DeploymentManagement deploymentManagement,
+    protected ActionHistoryGrid(final VaadinMessageSource i18n, final DeploymentManagement deploymentManagement,
             final UIEventBus eventBus, final UINotification notification, final ManagementUIState managementUIState) {
         super(i18n, eventBus, null);
         this.deploymentManagement = deploymentManagement;
@@ -132,7 +129,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         setGeneratedPropertySupport(new ActionHistoryGeneratedPropertySupport());
         setDetailsSupport(new DetailsSupport());
 
-        LabelConfig conf = new LabelConfig();
+        final LabelConfig conf = new LabelConfig();
         states = conf.createStatusLabelConfig(i18n, UIComponentIdProvider.ACTION_HISTORY_TABLE_STATUS_LABEL_ID);
         activeStates = conf
                 .createActiveStatusLabelConfig(UIComponentIdProvider.ACTION_HISTORY_TABLE_ACTIVESTATE_LABEL_ID);
@@ -237,20 +234,20 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     private StatusFontIcon createCancelButtonMetadata(final Action action) {
-        boolean isDisabled = !action.isActive() || action.isCancelingOrCanceled();
-        return new StatusFontIcon(FontAwesome.TIMES, STATUS_ICON_NEUTRAL, i18n.get("message.cancel.action"),
+        final boolean isDisabled = !action.isActive() || action.isCancelingOrCanceled();
+        return new StatusFontIcon(FontAwesome.TIMES, STATUS_ICON_NEUTRAL, i18n.getMessage("message.cancel.action"),
                 UIComponentIdProvider.ACTION_HISTORY_TABLE_CANCEL_ID, isDisabled);
     }
 
     private StatusFontIcon createForceButtonMetadata(final Action action) {
-        boolean isDisabled = !action.isActive() || action.isForce() || action.isCancelingOrCanceled();
-        return new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_NEUTRAL, i18n.get("message.force.action"),
+        final boolean isDisabled = !action.isActive() || action.isForce() || action.isCancelingOrCanceled();
+        return new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_NEUTRAL, i18n.getMessage("message.force.action"),
                 UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCE_ID, isDisabled);
     }
 
     private StatusFontIcon createForceQuitButtonMetadata(final Action action) {
-        boolean isDisabled = !action.isActive() || !action.isCancelingOrCanceled();
-        return new StatusFontIcon(FontAwesome.TIMES, STATUS_ICON_RED, i18n.get("message.forcequit.action"),
+        final boolean isDisabled = !action.isActive() || !action.isCancelingOrCanceled();
+        return new StatusFontIcon(FontAwesome.TIMES, STATUS_ICON_RED, i18n.getMessage("message.forcequit.action"),
                 UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCE_QUIT_ID, isDisabled);
     }
 
@@ -301,14 +298,15 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
      */
     private void confirmAndForceAction(final Long actionId) {
         /* Display the confirmation */
-        final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.get("caption.force.action.confirmbox"),
-                i18n.get("message.force.action.confirm"), i18n.get(BUTTON_OK), i18n.get(BUTTON_CANCEL), ok -> {
+        final ConfirmationDialog confirmDialog = new ConfirmationDialog(
+                i18n.getMessage("caption.force.action.confirmbox"), i18n.getMessage("message.force.action.confirm"),
+                i18n.getMessage(BUTTON_OK), i18n.getMessage(BUTTON_CANCEL), ok -> {
                     if (!ok) {
                         return;
                     }
                     deploymentManagement.forceTargetAction(actionId);
                     populateAndUpdateTargetDetails(selectedTarget);
-                    notification.displaySuccess(i18n.get("message.force.action.success"));
+                    notification.displaySuccess(i18n.getMessage("message.force.action.success"));
                 });
         UI.getCurrent().addWindow(confirmDialog.getWindow());
 
@@ -323,17 +321,19 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
      */
     private void confirmAndForceQuitAction(final Long actionId) {
         /* Display the confirmation */
-        final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.get("caption.forcequit.action.confirmbox"),
-                i18n.get("message.forcequit.action.confirm"), i18n.get(BUTTON_OK), i18n.get(BUTTON_CANCEL), ok -> {
+        final ConfirmationDialog confirmDialog = new ConfirmationDialog(
+                i18n.getMessage("caption.forcequit.action.confirmbox"),
+                i18n.getMessage("message.forcequit.action.confirm"), i18n.getMessage(BUTTON_OK),
+                i18n.getMessage(BUTTON_CANCEL), ok -> {
                     if (!ok) {
                         return;
                     }
                     final boolean cancelResult = forceQuitActiveAction(actionId);
                     if (cancelResult) {
                         populateAndUpdateTargetDetails(selectedTarget);
-                        notification.displaySuccess(i18n.get("message.forcequit.action.success"));
+                        notification.displaySuccess(i18n.getMessage("message.forcequit.action.success"));
                     } else {
-                        notification.displayValidationError(i18n.get("message.forcequit.action.failed"));
+                        notification.displayValidationError(i18n.getMessage("message.forcequit.action.failed"));
                     }
                 }, FontAwesome.WARNING);
         UI.getCurrent().addWindow(confirmDialog.getWindow());
@@ -352,17 +352,18 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
             return;
         }
 
-        final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.get("caption.cancel.action.confirmbox"),
-                i18n.get("message.cancel.action.confirm"), i18n.get(BUTTON_OK), i18n.get(BUTTON_CANCEL), ok -> {
+        final ConfirmationDialog confirmDialog = new ConfirmationDialog(
+                i18n.getMessage("caption.cancel.action.confirmbox"), i18n.getMessage("message.cancel.action.confirm"),
+                i18n.getMessage(BUTTON_OK), i18n.getMessage(BUTTON_CANCEL), ok -> {
                     if (!ok) {
                         return;
                     }
                     final boolean cancelResult = cancelActiveAction(actionId);
                     if (cancelResult) {
                         populateAndUpdateTargetDetails(selectedTarget);
-                        notification.displaySuccess(i18n.get("message.cancel.action.success"));
+                        notification.displaySuccess(i18n.getMessage("message.cancel.action.success"));
                     } else {
-                        notification.displayValidationError(i18n.get("message.cancel.action.failed"));
+                        notification.displayValidationError(i18n.getMessage("message.cancel.action.failed"));
                     }
                 });
         UI.getCurrent().addWindow(confirmDialog.getWindow());
@@ -440,7 +441,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
 
     @Override
     protected void setColumnHeaderNames() {
-        HeaderRow newHeaderRow = resetHeaderDefaultRow();
+        final HeaderRow newHeaderRow = resetHeaderDefaultRow();
 
         getColumn(ProxyAction.PXY_ACTION_IS_ACTIVE_DECO).setHeaderCaption(SPUIDefinitions.ACTION_HIS_TBL_ACTIVE);
         getColumn(ProxyAction.PXY_ACTION_DS_NAME_VERSION).setHeaderCaption(SPUIDefinitions.ACTION_HIS_TBL_DIST);
@@ -460,8 +461,8 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         setColumnsSize(107.0, 500.0, ProxyAction.PXY_ACTION_DS_NAME_VERSION);
         setColumnsSize(100.0, 120.0, ProxyAction.PXY_ACTION_LAST_MODIFIED_AT);
         setColumnsSize(53.0, 55.0, ProxyAction.PXY_ACTION_STATUS);
-        setColumnsSize(FIXED_PIX_MIN, FIXED_PIX_MIN, VIRT_PROP_FORCED, VIRT_PROP_TIMEFORCED,
-                VIRT_PROP_ACTION_CANCEL, VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT);
+        setColumnsSize(FIXED_PIX_MIN, FIXED_PIX_MIN, VIRT_PROP_FORCED, VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL,
+                VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT);
     }
 
     /**
@@ -474,8 +475,8 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
      * @param columnPropertyIds
      *            all the columns the min and max should be set for.
      */
-    private void setColumnsSize(double min, double max, String... columnPropertyIds) {
-        for (String columnPropertyId : columnPropertyIds) {
+    private void setColumnsSize(final double min, final double max, final String... columnPropertyIds) {
+        for (final String columnPropertyId : columnPropertyIds) {
             getColumn(columnPropertyId).setMinimumWidth(min);
             getColumn(columnPropertyId).setMaximumWidth(max);
         }
@@ -539,7 +540,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
 
         @Override
         protected GeneratedPropertyContainer addGeneratedContainerProperties() {
-            GeneratedPropertyContainer decoratedContainer = getDecoratedContainer();
+            final GeneratedPropertyContainer decoratedContainer = getDecoratedContainer();
 
             decoratedContainer.addGeneratedProperty(VIRT_PROP_FORCED, new GenericPropertyValueGenerator());
             decoratedContainer.addGeneratedProperty(VIRT_PROP_TIMEFORCED, new GenericPropertyValueGenerator());
@@ -614,7 +615,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
          *            adapts <code>IsActiveDecoration</code> to
          *            <code>String</code>
          */
-        public HtmlIsActiveLabelConverter(LabelAdapter<IsActiveDecoration> adapter) {
+        public HtmlIsActiveLabelConverter(final LabelAdapter<IsActiveDecoration> adapter) {
             this.addAdapter(adapter);
         }
 
@@ -650,7 +651,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
          * @param adapter
          *            adapts <code>Action</code> to <code>String</code>
          */
-        public HtmlVirtPropLabelConverter(LabelAdapter<Action> adapter) {
+        public HtmlVirtPropLabelConverter(final LabelAdapter<Action> adapter) {
             this.addAdapter(adapter);
         }
 
@@ -672,7 +673,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
          * @param adapter
          *            adapts <code>Action</code> to <code>StatusFontIcon</code>
          */
-        public ActionGridButtonConverter(GridButtonAdapter<Action> adapter) {
+        public ActionGridButtonConverter(final GridButtonAdapter<Action> adapter) {
             this.addAdapter(adapter);
         }
 
@@ -690,7 +691,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         private static final long serialVersionUID = 1L;
 
         @Override
-        public Action getValue(Item item, Object itemId, Object propertyId) {
+        public Action getValue(final Item item, final Object itemId, final Object propertyId) {
             return (Action) item.getItemProperty(ProxyAction.PXY_ACTION).getValue();
         }
 
@@ -709,12 +710,12 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
 
         private final String buttonLabel;
 
-        public ButtonPropertyValueGenerator(String buttonLabel) {
+        public ButtonPropertyValueGenerator(final String buttonLabel) {
             this.buttonLabel = buttonLabel;
         }
 
         @Override
-        public String getValue(Item item, Object itemId, Object propertyId) {
+        public String getValue(final Item item, final Object itemId, final Object propertyId) {
             return buttonLabel;
         }
 
@@ -737,36 +738,27 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
          * @param statusLabelId
          * @return the configured map
          */
-        public Map<Action.Status, StatusFontIcon> createStatusLabelConfig(final I18N i18n,
+        public Map<Action.Status, StatusFontIcon> createStatusLabelConfig(final VaadinMessageSource i18n,
                 final String statusLabelId) {
-            HashMap<Action.Status, StatusFontIcon> stateMap = Maps.newHashMapWithExpectedSize(9);
-            stateMap.put(Action.Status.FINISHED,
-                    new StatusFontIcon(FontAwesome.CHECK_CIRCLE, STATUS_ICON_GREEN, i18n.get("label.finished"),
-                            statusLabelId));
-            stateMap.put(Action.Status.ERROR,
-                    new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, STATUS_ICON_RED, i18n.get("label.error"),
-                            statusLabelId));
-            stateMap.put(Action.Status.WARNING,
-                    new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, STATUS_ICON_ORANGE, i18n.get("label.warning"),
-                            statusLabelId));
-            stateMap.put(Action.Status.RUNNING,
-                    new StatusFontIcon(FontAwesome.ADJUST, STATUS_ICON_PENDING, i18n.get("label.running"),
-                            statusLabelId));
-            stateMap.put(Action.Status.CANCELING,
-                    new StatusFontIcon(FontAwesome.TIMES_CIRCLE, STATUS_ICON_PENDING, i18n.get("label.cancelling"),
-                            statusLabelId));
-            stateMap.put(Action.Status.CANCELED,
-                    new StatusFontIcon(FontAwesome.TIMES_CIRCLE, STATUS_ICON_GREEN, i18n.get("label.cancelled"),
-                            statusLabelId));
-            stateMap.put(Action.Status.RETRIEVED,
-                    new StatusFontIcon(FontAwesome.CIRCLE_O, STATUS_ICON_PENDING, i18n.get("label.retrieved"),
-                            statusLabelId));
-            stateMap.put(Action.Status.DOWNLOAD,
-                    new StatusFontIcon(FontAwesome.CLOUD_DOWNLOAD, STATUS_ICON_PENDING, i18n.get("label.download"),
-                            statusLabelId));
-            stateMap.put(Action.Status.SCHEDULED,
-                    new StatusFontIcon(FontAwesome.HOURGLASS_1, STATUS_ICON_PENDING, i18n.get("label.scheduled"),
-                            statusLabelId));
+            final HashMap<Action.Status, StatusFontIcon> stateMap = Maps.newHashMapWithExpectedSize(9);
+            stateMap.put(Action.Status.FINISHED, new StatusFontIcon(FontAwesome.CHECK_CIRCLE, STATUS_ICON_GREEN,
+                    i18n.getMessage("label.finished"), statusLabelId));
+            stateMap.put(Action.Status.ERROR, new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, STATUS_ICON_RED,
+                    i18n.getMessage("label.error"), statusLabelId));
+            stateMap.put(Action.Status.WARNING, new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, STATUS_ICON_ORANGE,
+                    i18n.getMessage("label.warning"), statusLabelId));
+            stateMap.put(Action.Status.RUNNING, new StatusFontIcon(FontAwesome.ADJUST, STATUS_ICON_PENDING,
+                    i18n.getMessage("label.running"), statusLabelId));
+            stateMap.put(Action.Status.CANCELING, new StatusFontIcon(FontAwesome.TIMES_CIRCLE, STATUS_ICON_PENDING,
+                    i18n.getMessage("label.cancelling"), statusLabelId));
+            stateMap.put(Action.Status.CANCELED, new StatusFontIcon(FontAwesome.TIMES_CIRCLE, STATUS_ICON_GREEN,
+                    i18n.getMessage("label.cancelled"), statusLabelId));
+            stateMap.put(Action.Status.RETRIEVED, new StatusFontIcon(FontAwesome.CIRCLE_O, STATUS_ICON_PENDING,
+                    i18n.getMessage("label.retrieved"), statusLabelId));
+            stateMap.put(Action.Status.DOWNLOAD, new StatusFontIcon(FontAwesome.CLOUD_DOWNLOAD, STATUS_ICON_PENDING,
+                    i18n.getMessage("label.download"), statusLabelId));
+            stateMap.put(Action.Status.SCHEDULED, new StatusFontIcon(FontAwesome.HOURGLASS_1, STATUS_ICON_PENDING,
+                    i18n.getMessage("label.scheduled"), statusLabelId));
             return stateMap;
         }
 
@@ -777,7 +769,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
          * @return the configured map
          */
         public Map<IsActiveDecoration, StatusFontIcon> createActiveStatusLabelConfig(final String activeStateId) {
-            HashMap<IsActiveDecoration, StatusFontIcon> activeStateMap = Maps.newHashMapWithExpectedSize(4);
+            final HashMap<IsActiveDecoration, StatusFontIcon> activeStateMap = Maps.newHashMapWithExpectedSize(4);
             activeStateMap.put(IsActiveDecoration.SCHEDULED,
                     new StatusFontIcon(FontAwesome.HOURGLASS_1, STATUS_ICON_PENDING, "Scheduled", activeStateId));
             activeStateMap.put(IsActiveDecoration.ACTIVE,

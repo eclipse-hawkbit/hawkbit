@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -25,7 +26,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.push.SoftwareModuleUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -64,7 +65,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     private final SwMetadataPopupLayout swMetadataPopupLayout;
 
-    SoftwareModuleTable(final UIEventBus eventBus, final I18N i18n, final UINotification uiNotification,
+    SoftwareModuleTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification uiNotification,
             final ArtifactUploadState artifactUploadState, final SoftwareManagement softwareManagement,
             final UploadViewClientCriterion uploadViewClientCriterion,
             final SwMetadataPopupLayout swMetadataPopupLayout) {
@@ -148,7 +149,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     }
 
     @Override
-    protected SoftwareModule findEntityByTableValue(final Long entityTableId) {
+    protected Optional<SoftwareModule> findEntityByTableValue(final Long entityTableId) {
         return softwareManagement.findSoftwareModuleById(entityTableId);
     }
 
@@ -223,7 +224,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
             columnList.add(new TableColumn(SPUILabelDefinitions.METADATA_ICON, "", 0.1F));
             return columnList;
         }
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VENDOR, i18n.get("header.vendor"), 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VENDOR, i18n.getMessage("header.vendor"), 0.1F));
         return columnList;
     }
 
@@ -247,7 +248,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
                 UIComponentIdProvider.SW_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
                 FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
         manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
-        manageMetadataBtn.setDescription(i18n.get("tooltip.metadata.icon"));
+        manageMetadataBtn.setDescription(i18n.getMessage("tooltip.metadata.icon"));
         return manageMetadataBtn;
     }
 
@@ -259,9 +260,8 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     }
 
     private void showMetadataDetails(final Long itemId) {
-        final SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(itemId);
-        /* display the window */
-        UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null));
+        softwareManagement.findSoftwareModuleById(itemId)
+                .ifPresent(swmodule -> UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null)));
     }
 
 }

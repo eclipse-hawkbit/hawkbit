@@ -14,13 +14,14 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.state.CustomFile;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.AbstractConfirmationWindowLayout;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -54,7 +55,7 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
 
     private final ArtifactUploadState artifactUploadState;
 
-    UploadViewConfirmationWindowLayout(final I18N i18n, final UIEventBus eventBus,
+    UploadViewConfirmationWindowLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SoftwareManagement softwareManagement, final ArtifactUploadState artifactUploadState) {
         super(i18n, eventBus);
         this.softwareManagement = softwareManagement;
@@ -65,10 +66,10 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
     protected Map<String, ConfirmationTab> getConfimrationTabs() {
         final Map<String, ConfirmationTab> tabs = Maps.newHashMapWithExpectedSize(2);
         if (!artifactUploadState.getDeleteSofwareModules().isEmpty()) {
-            tabs.put(i18n.get("caption.delete.swmodule.accordion.tab"), createSMDeleteConfirmationTab());
+            tabs.put(i18n.getMessage("caption.delete.swmodule.accordion.tab"), createSMDeleteConfirmationTab());
         }
         if (!artifactUploadState.getSelectedDeleteSWModuleTypes().isEmpty()) {
-            tabs.put(i18n.get("caption.delete.sw.module.type.accordion.tab"), createSMtypeDeleteConfirmationTab());
+            tabs.put(i18n.getMessage("caption.delete.sw.module.type.accordion.tab"), createSMtypeDeleteConfirmationTab());
         }
         return tabs;
     }
@@ -78,10 +79,10 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
 
         tab.getConfirmAll().setId(UIComponentIdProvider.SW_DELETE_ALL);
         tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
-        tab.getConfirmAll().setCaption(i18n.get("button.delete.all"));
+        tab.getConfirmAll().setCaption(i18n.getMessage("button.delete.all"));
         tab.getConfirmAll().addClickListener(event -> deleteSMAll(tab));
 
-        tab.getDiscardAll().setCaption(i18n.get("button.discard.all"));
+        tab.getDiscardAll().setCaption(i18n.getMessage("button.discard.all"));
         tab.getDiscardAll().addClickListener(event -> discardSMAll(tab));
 
         // Add items container to the table.
@@ -94,8 +95,8 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
         });
 
         tab.getTable().setVisibleColumns(SW_MODULE_NAME_MSG, SW_DISCARD_CHGS);
-        tab.getTable().setColumnHeaders(i18n.get("upload.swModuleTable.header"),
-                i18n.get("header.second.deletetarget.table"));
+        tab.getTable().setColumnHeaders(i18n.getMessage("upload.swModuleTable.header"),
+                i18n.getMessage("header.second.deletetarget.table"));
 
         tab.getTable().setColumnExpandRatio(SW_MODULE_NAME_MSG, SPUIDefinitions.TARGET_DISTRIBUTION_COLUMN_WIDTH);
         tab.getTable().setColumnExpandRatio(SW_DISCARD_CHGS, SPUIDefinitions.DISCARD_COLUMN_WIDTH);
@@ -144,7 +145,7 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
         final Set<Long> swmoduleIds = artifactUploadState.getDeleteSofwareModules().keySet();
         softwareManagement.deleteSoftwareModules(swmoduleIds);
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
-                + i18n.get("message.swModule.deleted", artifactUploadState.getDeleteSofwareModules().size()));
+                + i18n.getMessage("message.swModule.deleted", artifactUploadState.getDeleteSofwareModules().size()));
         /*
          * Check if any information / files pending to upload for the deleted
          * software modules. If so, then delete the files from the upload list.
@@ -166,14 +167,14 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
         }
         artifactUploadState.getDeleteSofwareModules().clear();
         removeCurrentTab(tab);
-        setActionMessage(i18n.get("message.software.delete.success"));
+        setActionMessage(i18n.getMessage("message.software.delete.success"));
         eventBus.publish(this, UploadArtifactUIEvent.DELETED_ALL_SOFWARE);
     }
 
     private void discardSMAll(final ConfirmationTab tab) {
         removeCurrentTab(tab);
         artifactUploadState.getDeleteSofwareModules().clear();
-        setActionMessage(i18n.get("message.software.discard.success"));
+        setActionMessage(i18n.getMessage("message.software.discard.success"));
         eventBus.publish(this, UploadArtifactUIEvent.DISCARD_ALL_DELETE_SOFTWARE);
     }
 
@@ -182,10 +183,10 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
 
         tab.getConfirmAll().setId(UIComponentIdProvider.SAVE_DELETE_SW_MODULE_TYPE);
         tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
-        tab.getConfirmAll().setCaption(i18n.get("button.delete.all"));
+        tab.getConfirmAll().setCaption(i18n.getMessage("button.delete.all"));
         tab.getConfirmAll().addClickListener(event -> deleteSMtypeAll(tab));
 
-        tab.getDiscardAll().setCaption(i18n.get("button.discard.all"));
+        tab.getDiscardAll().setCaption(i18n.getMessage("button.discard.all"));
         tab.getDiscardAll().addClickListener(event -> discardSMtypeAll(tab));
 
         // Add items container to the table.
@@ -199,8 +200,8 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
         });
 
         tab.getTable().setVisibleColumns(SW_MODULE_TYPE_NAME, DISCARD);
-        tab.getTable().setColumnHeaders(i18n.get("header.first.delete.swmodule.type.table"),
-                i18n.get("header.second.delete.swmodule.type.table"));
+        tab.getTable().setColumnHeaders(i18n.getMessage("header.first.delete.swmodule.type.table"),
+                i18n.getMessage("header.second.delete.swmodule.type.table"));
 
         tab.getTable().setColumnExpandRatio(SW_MODULE_TYPE_NAME, 2);
         tab.getTable().setColumnExpandRatio(SW_DISCARD_CHGS, SPUIDefinitions.DISCARD_COLUMN_WIDTH);
@@ -238,22 +239,21 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
     private void deleteSMtypeAll(final ConfirmationTab tab) {
         final int deleteSWModuleTypeCount = artifactUploadState.getSelectedDeleteSWModuleTypes().size();
         for (final String swModuleTypeName : artifactUploadState.getSelectedDeleteSWModuleTypes()) {
-
-            softwareManagement.deleteSoftwareModuleType(
-                    softwareManagement.findSoftwareModuleTypeByName(swModuleTypeName).getId());
+            softwareManagement.findSoftwareModuleTypeByName(swModuleTypeName).map(SoftwareModuleType::getId)
+                    .ifPresent(softwareManagement::deleteSoftwareModuleType);
         }
         addToConsolitatedMsg(FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
-                + i18n.get("message.sw.module.type.delete", new Object[] { deleteSWModuleTypeCount }));
+                + i18n.getMessage("message.sw.module.type.delete", new Object[] { deleteSWModuleTypeCount }));
         artifactUploadState.getSelectedDeleteSWModuleTypes().clear();
         removeCurrentTab(tab);
-        setActionMessage(i18n.get("message.software.type.delete.success"));
+        setActionMessage(i18n.getMessage("message.software.type.delete.success"));
         eventBus.publish(this, UploadArtifactUIEvent.DELETED_ALL_SOFWARE_TYPE);
     }
 
     private void discardSMtypeAll(final ConfirmationTab tab) {
         removeCurrentTab(tab);
         artifactUploadState.getSelectedDeleteSWModuleTypes().clear();
-        setActionMessage(i18n.get("message.software.type.discard.success"));
+        setActionMessage(i18n.getMessage("message.software.type.discard.success"));
         eventBus.publish(this, UploadArtifactUIEvent.DISCARD_ALL_DELETE_SOFTWARE_TYPE);
     }
 }

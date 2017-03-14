@@ -11,10 +11,10 @@ package org.eclipse.hawkbit.ui.management.actionhistory;
 import java.util.Map;
 
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -49,7 +49,7 @@ public class ActionStatusMsgGrid extends AbstractGrid<LazyQueryContainer> {
      * @param i18n
      * @param eventBus
      */
-    protected ActionStatusMsgGrid(final I18N i18n, final UIEventBus eventBus) {
+    protected ActionStatusMsgGrid(final VaadinMessageSource i18n, final UIEventBus eventBus) {
         super(i18n, eventBus, null);
         noMsgText = createNoMessageProxy(i18n);
 
@@ -65,9 +65,9 @@ public class ActionStatusMsgGrid extends AbstractGrid<LazyQueryContainer> {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public void itemClick(ItemClickEvent event) {
-                    Object itemId = event.getItemId();
-                    setDetailsVisible(itemId, !isDetailsVisible(itemId));
+            public void itemClick(final ItemClickEvent event) {
+                final Object itemId = event.getItemId();
+                setDetailsVisible(itemId, !isDetailsVisible(itemId));
             }
         });
 
@@ -82,7 +82,7 @@ public class ActionStatusMsgGrid extends AbstractGrid<LazyQueryContainer> {
 
     @Override
     public void refreshContainer() {
-        for (Object itemId : getContainerDataSource().getItemIds()) {
+        for (final Object itemId : getContainerDataSource().getItemIds()) {
             setDetailsVisible(itemId, false);
         }
         configureQueryFactory();
@@ -143,7 +143,6 @@ public class ActionStatusMsgGrid extends AbstractGrid<LazyQueryContainer> {
         // no specific column renderers
     }
 
-
     @Override
     protected void setHiddenColumns() {
         getColumn(ProxyMessage.PXY_MSG_ID).setHidable(false);
@@ -169,17 +168,17 @@ public class ActionStatusMsgGrid extends AbstractGrid<LazyQueryContainer> {
      * @param i18n
      * @return default text
      */
-    private static String createNoMessageProxy(final I18N i18n) {
-        return i18n.get("message.no.available");
+    private static String createNoMessageProxy(final VaadinMessageSource i18n) {
+        return i18n.getMessage("message.no.available");
     }
 
     protected class MessageDetailsGenerator implements DetailsGenerator {
         private static final long serialVersionUID = 1L;
 
         @Override
-        public Component getDetails(RowReference rowReference) {
+        public Component getDetails(final RowReference rowReference) {
             // Find the bean to generate details for
-            Item item = rowReference.getItem();
+            final Item item = rowReference.getItem();
             final String message = (String) item.getItemProperty(ProxyMessage.PXY_MSG_VALUE).getValue();
 
             final TextArea textArea = new TextArea();

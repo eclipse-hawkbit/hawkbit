@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.layouts;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
@@ -31,7 +34,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -74,7 +77,7 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     protected static final String TAG_DYNAMIC_STYLE = "tag-color-preview";
     protected static final String MESSAGE_ERROR_MISSING_TAGNAME = "message.error.missing.tagname";
 
-    protected I18N i18n;
+    protected VaadinMessageSource i18n;
 
     protected transient TagManagement tagManagement;
 
@@ -127,7 +130,7 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
      * @param uiNotification
      *            UINotification
      */
-    public AbstractCreateUpdateTagLayout(final I18N i18n, final TagManagement tagManagement,
+    public AbstractCreateUpdateTagLayout(final VaadinMessageSource i18n, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
             final UINotification uiNotification) {
         this.i18n = i18n;
@@ -147,7 +150,7 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
         @Override
         public void saveOrUpdate() {
             if (isUpdateAction()) {
-                updateEntity(findEntityByName());
+                updateEntity(findEntityByName().orElse(null));
                 return;
             }
 
@@ -193,26 +196,26 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
 
     protected void createRequiredComponents() {
 
-        createTagStr = i18n.get("label.create.tag");
-        updateTagStr = i18n.get("label.update.tag");
-        comboLabel = new LabelBuilder().name(i18n.get("label.choose.tag")).buildLabel();
-        colorLabel = new LabelBuilder().name(i18n.get("label.choose.tag.color")).buildLabel();
+        createTagStr = i18n.getMessage("label.create.tag");
+        updateTagStr = i18n.getMessage("label.update.tag");
+        comboLabel = new LabelBuilder().name(i18n.getMessage("label.choose.tag")).buildLabel();
+        colorLabel = new LabelBuilder().name(i18n.getMessage("label.choose.tag.color")).buildLabel();
         colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
 
-        tagName = new TextFieldBuilder().caption(i18n.get("textfield.name"))
+        tagName = new TextFieldBuilder().caption(i18n.getMessage("textfield.name"))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_NAME).required(true)
-                .prompt(i18n.get("textfield.name")).immediate(true).id(SPUIDefinitions.NEW_TARGET_TAG_NAME)
+                .prompt(i18n.getMessage("textfield.name")).immediate(true).id(SPUIDefinitions.NEW_TARGET_TAG_NAME)
                 .buildTextComponent();
 
-        tagDesc = new TextAreaBuilder().caption(i18n.get("textfield.description"))
+        tagDesc = new TextAreaBuilder().caption(i18n.getMessage("textfield.description"))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_DESC)
-                .prompt(i18n.get("textfield.description")).immediate(true).id(SPUIDefinitions.NEW_TARGET_TAG_DESC)
+                .prompt(i18n.getMessage("textfield.description")).immediate(true).id(SPUIDefinitions.NEW_TARGET_TAG_DESC)
                 .buildTextComponent();
 
         tagDesc.setNullRepresentation(StringUtils.EMPTY);
 
         tagNameComboBox = SPUIComponentProvider.getComboBox(null, "", null, null, false, "",
-                i18n.get("label.combobox.tag"));
+                i18n.getMessage("label.combobox.tag"));
         tagNameComboBox.addStyleName(SPUIDefinitions.FILTER_TYPE_COMBO_STYLE);
         tagNameComboBox.setImmediate(true);
         tagNameComboBox.setId(UIComponentIdProvider.DIST_TAG_COMBO);
@@ -295,16 +298,17 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
      * @return the color which should be selected in the color-picker component.
      */
     protected Color getColorForColorPicker() {
-        final TargetTag targetTagSelected = tagManagement.findTargetTag(tagNameComboBox.getValue().toString());
-        if (targetTagSelected == null) {
-            final DistributionSetTag distTag = tagManagement
-                    .findDistributionSetTag(tagNameComboBox.getValue().toString());
-            return distTag.getColour() != null ? ColorPickerHelper.rgbToColorConverter(distTag.getColour())
-                    : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR);
+        final Optional<TargetTag> targetTagSelected = tagManagement
+                .findTargetTag(tagNameComboBox.getValue().toString());
+        if (targetTagSelected.isPresent()) {
+            return ColorPickerHelper.rgbToColorConverter(targetTagSelected.map(TargetTag::getColour)
+                    .filter(Objects::nonNull).orElse(ColorPickerConstants.DEFAULT_COLOR));
         }
-        return targetTagSelected.getColour() != null
-                ? ColorPickerHelper.rgbToColorConverter(targetTagSelected.getColour())
-                : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR);
+
+        return ColorPickerHelper.rgbToColorConverter(tagManagement
+                .findDistributionSetTag(tagNameComboBox.getValue().toString()).map(DistributionSetTag::getColour)
+                .filter(Objects::nonNull).orElse(ColorPickerConstants.DEFAULT_COLOR));
+
     }
 
     private void tagNameChosen(final ValueChangeEvent event) {
@@ -583,12 +587,12 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
             eventBus.publish(this, new DistributionSetTagTableEvent(BaseEntityEventType.UPDATED_ENTITY,
                     (DistributionSetTag) targetObj));
         }
-        uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { targetObj.getName() }));
+        uiNotification.displaySuccess(i18n.getMessage("message.update.success", new Object[] { targetObj.getName() }));
 
     }
 
     protected void displaySuccess(final String tagName) {
-        uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { tagName }));
+        uiNotification.displaySuccess(i18n.getMessage("message.save.success", new Object[] { tagName }));
     }
 
     protected void displayValidationError(final String errorMessage) {
@@ -604,14 +608,11 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     }
 
     private boolean isDuplicateByName() {
-        final E existingType = findEntityByName();
-        if (existingType != null) {
-            uiNotification.displayValidationError(
-                    i18n.get("message.tag.duplicate.check", new Object[] { existingType.getName() }));
-            return true;
-        }
+        final Optional<E> existingType = findEntityByName();
+        existingType.ifPresent(type -> uiNotification
+                .displayValidationError(i18n.getMessage("message.tag.duplicate.check", new Object[] { type.getName() })));
 
-        return false;
+        return existingType.isPresent();
     }
 
     protected boolean isDuplicate() {
@@ -658,7 +659,7 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     public void removeColorChangeListener(final ColorChangeListener listener) {
     }
 
-    protected abstract E findEntityByName();
+    protected abstract Optional<E> findEntityByName();
 
     protected abstract String getWindowCaption();
 

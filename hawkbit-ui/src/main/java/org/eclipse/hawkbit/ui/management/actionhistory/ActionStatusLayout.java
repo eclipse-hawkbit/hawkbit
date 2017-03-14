@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.management.actionhistory;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGridComponentLayout;
 import org.eclipse.hawkbit.ui.common.grid.DefaultGridHeader;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
@@ -29,7 +29,8 @@ public class ActionStatusLayout extends AbstractGridComponentLayout {
      * @param eventBus
      * @param managementUIState
      */
-    public ActionStatusLayout(I18N i18n, UIEventBus eventBus, ManagementUIState managementUIState) {
+    public ActionStatusLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
+            final ManagementUIState managementUIState) {
         super(i18n, eventBus);
         this.managementUIState = managementUIState;
         init();

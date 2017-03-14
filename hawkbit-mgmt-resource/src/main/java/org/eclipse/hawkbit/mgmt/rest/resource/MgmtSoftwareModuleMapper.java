@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifactHash;
@@ -107,7 +108,7 @@ public final class MgmtSoftwareModuleMapper {
         response.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getArtifacts(response.getModuleId()))
                 .withRel(MgmtRestConstants.SOFTWAREMODULE_V1_ARTIFACT));
         response.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getSoftwareModule(response.getModuleId()))
-                .withRel("self"));
+                .withSelfRel());
 
         response.add(linkTo(methodOn(MgmtSoftwareModuleTypeRestApi.class)
                 .getSoftwareModuleType(baseSofwareModule.getType().getId()))
@@ -116,7 +117,7 @@ public final class MgmtSoftwareModuleMapper {
         response.add(linkTo(methodOn(MgmtSoftwareModuleResource.class).getMetadata(response.getModuleId(),
                 Integer.parseInt(MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET),
                 Integer.parseInt(MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT), null, null))
-                        .withRel("metadata"));
+                        .withRel("metadata").expand(ArrayUtils.toArray()));
         return response;
     }
 
@@ -135,7 +136,7 @@ public final class MgmtSoftwareModuleMapper {
         MgmtRestModelMapper.mapBaseToBase(artifactRest, artifact);
 
         artifactRest.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class)
-                .getArtifact(artifact.getSoftwareModule().getId(), artifact.getId())).withRel("self"));
+                .getArtifact(artifact.getSoftwareModule().getId(), artifact.getId())).withSelfRel());
 
         artifactRest.add(linkTo(methodOn(MgmtDownloadArtifactResource.class)
                 .downloadArtifact(artifact.getSoftwareModule().getId(), artifact.getId())).withRel("download"));

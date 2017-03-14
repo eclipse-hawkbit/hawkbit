@@ -67,7 +67,7 @@ public class MgmtUiAutoConfiguration {
      * UI has an own strategy.
      * 
      * @param applicationContext
-     *            the context to add the listener
+     *            the context to add the listener to
      * @param executorService
      *            the general scheduler service
      * @param eventBus

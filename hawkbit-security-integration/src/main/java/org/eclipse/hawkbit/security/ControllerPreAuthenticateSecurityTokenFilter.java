@@ -78,27 +78,24 @@ public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractContro
 
     @Override
     public HeaderAuthentication getPreAuthenticatedCredentials(final TenantSecurityToken securityToken) {
-        final Target target = systemSecurityContext.runAsSystemAsTenant(() -> {
+        final Optional<Target> target = systemSecurityContext.runAsSystemAsTenant(() -> {
             if (securityToken.getTargetId() != null) {
                 return controllerManagement.findByTargetId(securityToken.getTargetId());
             }
             return controllerManagement.findByControllerId(securityToken.getControllerId());
         }, securityToken.getTenant());
 
-        if (target == null) {
-            return null;
-        }
-        final String targetSecurityToken = systemSecurityContext.runAsSystemAsTenant(() -> target.getSecurityToken(),
-                securityToken.getTenant());
-        return new HeaderAuthentication(target.getControllerId(), targetSecurityToken);
+        return target.map(t -> new HeaderAuthentication(t.getControllerId(),
+                systemSecurityContext.runAsSystemAsTenant(() -> t.getSecurityToken(), securityToken.getTenant())))
+                .orElse(null);
     }
 
     private String resolveControllerId(final TenantSecurityToken securityToken) {
         if (securityToken.getControllerId() != null) {
             return securityToken.getControllerId();
         }
-        final Optional<Target> foundTarget = Optional.ofNullable(systemSecurityContext.runAsSystemAsTenant(
-                () -> controllerManagement.findByTargetId(securityToken.getTargetId()), securityToken.getTenant()));
+        final Optional<Target> foundTarget = systemSecurityContext.runAsSystemAsTenant(
+                () -> controllerManagement.findByTargetId(securityToken.getTargetId()), securityToken.getTenant());
         if (!foundTarget.isPresent()) {
             return null;
         }

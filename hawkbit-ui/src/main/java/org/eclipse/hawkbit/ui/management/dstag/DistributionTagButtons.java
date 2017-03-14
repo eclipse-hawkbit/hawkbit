@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.tag.TagIdName;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -48,7 +48,7 @@ public class DistributionTagButtons extends AbstractFilterButtons implements Ref
     private final transient EntityFactory entityFactory;
 
     DistributionTagButtons(final UIEventBus eventBus, final ManagementUIState managementUIState,
-            final EntityFactory entityFactory, final I18N i18n, final UINotification notification,
+            final EntityFactory entityFactory, final VaadinMessageSource i18n, final UINotification notification,
             final SpPermissionChecker permChecker, final DistributionTableFilters distFilterParameters,
             final DistributionSetManagement distributionSetManagement,
             final ManagementViewClientCriterion managementViewClientCriterion) {

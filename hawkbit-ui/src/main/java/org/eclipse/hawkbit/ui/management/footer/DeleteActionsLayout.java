@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.management.footer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,7 +38,7 @@ import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -76,7 +77,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private final transient DistributionSetManagement distributionSetManagement;
 
-    public DeleteActionsLayout(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
+    public DeleteActionsLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final UINotification notification, final TagManagement tagManagementService,
             final ManagementViewClientCriterion managementViewClientCriterion,
             final ManagementUIState managementUIState, final TargetManagement targetManagement,
@@ -155,7 +156,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected String getDeleteAreaLabel() {
-        return i18n.get("label.components.drop.area");
+        return i18n.getMessage("label.components.drop.area");
     }
 
     @Override
@@ -172,7 +173,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
     protected void processDroppedComponent(final DragAndDropEvent event) {
         final Component source = event.getTransferable().getSourceComponent();
         if (!DeleteActionsLayoutHelper.isComponentDeletable(source)) {
-            notification.displayValidationError(i18n.get("message.cannot.delete"));
+            notification.displayValidationError(i18n.getMessage("message.cannot.delete"));
         } else {
             processDeletion(event, source);
         }
@@ -196,7 +197,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
     private boolean tagNotInUSeInBulkUpload(final Component source) {
         final String tagName = HawkbitCommonUtil.removePrefix(source.getId(), SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
         if (managementUIState.getTargetTableFilters().getBulkUpload().getAssignedTagNames().contains(tagName)) {
-            notification.displayValidationError(i18n.get("message.tag.use.bulk.upload", tagName));
+            notification.displayValidationError(i18n.getMessage("message.tag.use.bulk.upload", tagName));
             return false;
         }
         return true;
@@ -242,7 +243,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         final String tagName = HawkbitCommonUtil.removePrefix(source.getId(),
                 SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS);
         if (managementUIState.getDistributionTableFilters().getDistSetTags().contains(tagName)) {
-            notification.displayValidationError(i18n.get("message.tag.delete", new Object[] { tagName }));
+            notification.displayValidationError(i18n.getMessage("message.tag.delete", new Object[] { tagName }));
         } else {
             tagManagementService.deleteDistributionSetTag(tagName);
 
@@ -252,14 +253,14 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
                         new DistributionSetTagTableEvent(BaseEntityEventType.REMOVE_ENTITY, Arrays.asList(id)));
             }
 
-            notification.displaySuccess(i18n.get("message.delete.success", new Object[] { tagName }));
+            notification.displaySuccess(i18n.getMessage("message.delete.success", new Object[] { tagName }));
         }
     }
 
     private void deleteTargetTag(final Component source) {
         final String tagName = HawkbitCommonUtil.removePrefix(source.getId(), SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
         if (managementUIState.getTargetTableFilters().getClickedTargetTags().contains(tagName)) {
-            notification.displayValidationError(i18n.get("message.tag.delete", new Object[] { tagName }));
+            notification.displayValidationError(i18n.getMessage("message.tag.delete", new Object[] { tagName }));
         } else {
             tagManagementService.deleteTargetTag(tagName);
 
@@ -268,7 +269,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
                 eventBus.publish(this, new TargetTagTableEvent(BaseEntityEventType.REMOVE_ENTITY, Arrays.asList(id)));
             }
 
-            notification.displaySuccess(i18n.get("message.delete.success", new Object[] { tagName }));
+            notification.displaySuccess(i18n.getMessage("message.delete.success", new Object[] { tagName }));
         }
     }
 
@@ -290,7 +291,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
                 .findDistributionSetAllById(ids);
 
         if (findDistributionSetAllById.isEmpty()) {
-            notification.displayWarning(i18n.get("distributionsets.not.exists"));
+            notification.displayWarning(i18n.getMessage("distributionsets.not.exists"));
             return;
         }
 
@@ -316,7 +317,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         if (newDeletedSize - existingDeletedSize == currentValues.size()) {
             return;
         }
-        notification.displayValidationError(i18n.get(messageKey));
+        notification.displayValidationError(i18n.getMessage(messageKey));
     }
 
     private void showAlreadyDeletedDistributionSetNotfication(final int existingDeletedSize, final int newDeletedSize,
@@ -325,18 +326,19 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         if (newDeletedSize != existingDeletedSize) {
             return;
         }
-        notification.displayValidationError(i18n.get(messageKey));
+        notification.displayValidationError(i18n.getMessage(messageKey));
     }
 
     private boolean isDsInUseInBulkUpload(final Set<Long> distributionIdNameSet, final Long dsInBulkUpload) {
         if (distributionIdNameSet.contains(dsInBulkUpload)) {
-            final DistributionSet distributionSet = distributionSetManagement.findDistributionSetById(dsInBulkUpload);
-            if (distributionSet == null) {
-                notification.displayWarning(i18n.get("distributionset.not.exists"));
+            final Optional<DistributionSet> distributionSet = distributionSetManagement
+                    .findDistributionSetById(dsInBulkUpload);
+            if (!distributionSet.isPresent()) {
+                notification.displayWarning(i18n.getMessage("distributionset.not.exists"));
                 return true;
             }
-            notification.displayValidationError(i18n.get("message.tag.use.bulk.upload", HawkbitCommonUtil
-                    .getFormattedNameVersion(distributionSet.getName(), distributionSet.getVersion())));
+            notification.displayValidationError(i18n.getMessage("message.tag.use.bulk.upload", HawkbitCommonUtil
+                    .getFormattedNameVersion(distributionSet.get().getName(), distributionSet.get().getVersion())));
             return true;
         }
         return false;
@@ -348,7 +350,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         final Set<Long> targetIdSet = targetTable.getDeletedEntityByTransferable(transferable);
         final Collection<Target> findTargetAllById = targetManagement.findTargetAllById(targetIdSet);
         if (findTargetAllById.isEmpty()) {
-            notification.displayWarning(i18n.get("targets.not.exists"));
+            notification.displayWarning(i18n.getMessage("targets.not.exists"));
             return;
         }
 
@@ -377,7 +379,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private Boolean canTargetBeDeleted() {
         if (!permChecker.hasDeleteTargetPermission()) {
-            notification.displayValidationError(i18n.get("message.permission.insufficient"));
+            notification.displayValidationError(i18n.getMessage("message.permission.insufficient"));
             return false;
         }
         return true;
@@ -385,7 +387,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private Boolean canDSBeDeleted() {
         if (!permChecker.hasDeleteDistributionPermission()) {
-            notification.displayValidationError(i18n.get("message.permission.insufficient"));
+            notification.displayValidationError(i18n.getMessage("message.permission.insufficient"));
             return false;
         }
         return true;
@@ -403,8 +405,8 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected void restoreBulkUploadStatusCount() {
-        final Long failedCount = managementUIState.getTargetTableFilters().getBulkUpload().getFailedUploadCount();
-        final Long successCount = managementUIState.getTargetTableFilters().getBulkUpload().getSucessfulUploadCount();
+        final int failedCount = managementUIState.getTargetTableFilters().getBulkUpload().getFailedUploadCount();
+        final int successCount = managementUIState.getTargetTableFilters().getBulkUpload().getSucessfulUploadCount();
         if (failedCount != 0 || successCount != 0) {
             setUploadStatusButtonCaption(failedCount + successCount);
             enableBulkUploadStatusButton();

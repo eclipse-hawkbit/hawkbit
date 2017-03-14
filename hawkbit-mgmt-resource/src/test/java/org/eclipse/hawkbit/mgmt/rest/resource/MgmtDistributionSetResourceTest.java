@@ -8,11 +8,10 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -30,7 +29,6 @@ import java.util.Set;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
@@ -42,7 +40,6 @@ import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.springframework.context.annotation.Description;
@@ -54,6 +51,7 @@ import com.google.common.collect.Sets;
 import com.jayway.jsonpath.JsonPath;
 
 import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Step;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Management API")
@@ -427,7 +425,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .version("anotherVersion").requiredMigrationStep(true));
 
         // load also lazy stuff
-        set = distributionSetManagement.findDistributionSetByIdWithDetails(set.getId());
+        set = distributionSetManagement.findDistributionSetByIdWithDetails(set.getId()).get();
 
         assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
                 .hasSize(1);
@@ -450,9 +448,9 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("$.content.[0].lastModifiedAt", equalTo(set.getLastModifiedAt())))
                 .andExpect(jsonPath("$.content.[0].version", equalTo(set.getVersion())))
                 .andExpect(jsonPath("$.content.[0].modules.[?(@.type==" + runtimeType.getKey() + ")].id",
-                        contains(set.findFirstModuleByType(runtimeType).getId().intValue())))
+                        contains(set.findFirstModuleByType(runtimeType).get().getId().intValue())))
                 .andExpect(jsonPath("$.content.[0].modules.[?(@.type==" + appType.getKey() + ")].id",
-                        contains(set.findFirstModuleByType(appType).getId().intValue())))
+                        contains(set.findFirstModuleByType(appType).get().getId().intValue())))
                 .andExpect(jsonPath("$.content.[0].modules.[?(@.type==" + osType.getKey() + ")].id",
                         contains(getOsModule(set).intValue())));
     }
@@ -481,9 +479,9 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("$.lastModifiedAt", equalTo(set.getLastModifiedAt())))
                 .andExpect(jsonPath("$.version", equalTo(set.getVersion())))
                 .andExpect(jsonPath("$.modules.[?(@.type==" + runtimeType.getKey() + ")].id",
-                        contains(set.findFirstModuleByType(runtimeType).getId().intValue())))
+                        contains(set.findFirstModuleByType(runtimeType).get().getId().intValue())))
                 .andExpect(jsonPath("$.modules.[?(@.type==" + appType.getKey() + ")].id",
-                        contains(set.findFirstModuleByType(appType).getId().intValue())))
+                        contains(set.findFirstModuleByType(appType).get().getId().intValue())))
                 .andExpect(jsonPath("$.modules.[?(@.type==" + osType.getKey() + ")].id",
                         contains(getOsModule(set).intValue())));
 
@@ -492,7 +490,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Ensures that multipe DS posted to API are created in the repository.")
-    public void createDistributionSets() throws JSONException, Exception {
+    public void createDistributionSets() throws Exception {
         assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
                 .hasSize(0);
 
@@ -507,61 +505,16 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         DistributionSet three = testdataFactory.generateDistributionSet("three", "three", standardDsType,
                 Lists.newArrayList(os, jvm, ah), true);
 
-        final List<DistributionSet> sets = Lists.newArrayList(one, two, three);
-
         final long current = System.currentTimeMillis();
 
-        final MvcResult mvcResult = mvc
-                .perform(post("/rest/v1/distributionsets/").content(JsonBuilder.distributionSets(sets))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(jsonPath("[0]name", equalTo(one.getName())))
-                .andExpect(jsonPath("[0]description", equalTo(one.getDescription())))
-                .andExpect(jsonPath("[0]type", equalTo(standardDsType.getKey())))
-                .andExpect(jsonPath("[0]createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("[0]version", equalTo(one.getVersion())))
-                .andExpect(jsonPath("[0]complete", equalTo(Boolean.TRUE)))
-                .andExpect(jsonPath("[0]requiredMigrationStep", equalTo(one.isRequiredMigrationStep())))
-                .andExpect(jsonPath("[0].modules.[?(@.type==" + runtimeType.getKey() + ")].id",
-                        contains(one.findFirstModuleByType(runtimeType).getId().intValue())))
-                .andExpect(jsonPath("[0].modules.[?(@.type==" + appType.getKey() + ")].id",
-                        contains(one.findFirstModuleByType(appType).getId().intValue())))
-                .andExpect(jsonPath("[0].modules.[?(@.type==" + osType.getKey() + ")].id",
-                        contains(one.findFirstModuleByType(osType).getId().intValue())))
-                .andExpect(jsonPath("[1]name", equalTo(two.getName())))
-                .andExpect(jsonPath("[1]description", equalTo(two.getDescription())))
-                .andExpect(jsonPath("[1]complete", equalTo(Boolean.TRUE)))
-                .andExpect(jsonPath("[1]type", equalTo(standardDsType.getKey())))
-                .andExpect(jsonPath("[1]createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("[1]version", equalTo(two.getVersion())))
-                .andExpect(jsonPath("[1].modules.[?(@.type==" + runtimeType.getKey() + ")].id",
-                        contains(two.findFirstModuleByType(runtimeType).getId().intValue())))
-                .andExpect(jsonPath("[1].modules.[?(@.type==" + appType.getKey() + ")].id",
-                        contains(two.findFirstModuleByType(appType).getId().intValue())))
-                .andExpect(jsonPath("[1].modules.[?(@.type==" + osType.getKey() + ")].id",
-                        contains(two.findFirstModuleByType(osType).getId().intValue())))
-                .andExpect(jsonPath("[1]requiredMigrationStep", equalTo(two.isRequiredMigrationStep())))
-                .andExpect(jsonPath("[2]name", equalTo(three.getName())))
-                .andExpect(jsonPath("[2]description", equalTo(three.getDescription())))
-                .andExpect(jsonPath("[2]complete", equalTo(Boolean.TRUE)))
-                .andExpect(jsonPath("[2]type", equalTo(standardDsType.getKey())))
-                .andExpect(jsonPath("[2]createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("[2]version", equalTo(three.getVersion())))
-                .andExpect(jsonPath("[2].modules.[?(@.type==" + runtimeType.getKey() + ")].id",
-                        contains(three.findFirstModuleByType(runtimeType).getId().intValue())))
-                .andExpect(jsonPath("[2].modules.[?(@.type==" + appType.getKey() + ")].id",
-                        contains(three.findFirstModuleByType(appType).getId().intValue())))
-                .andExpect(jsonPath("[2].modules.[?(@.type==" + osType.getKey() + ")].id",
-                        contains(three.findFirstModuleByType(osType).getId().intValue())))
-                .andExpect(jsonPath("[2]requiredMigrationStep", equalTo(three.isRequiredMigrationStep()))).andReturn();
+        final MvcResult mvcResult = executeMgmtTargetPost(one, two, three);
 
-        one = distributionSetManagement.findDistributionSetByIdWithDetails(
-                distributionSetManagement.findDistributionSetByNameAndVersion("one", "one").getId());
-        two = distributionSetManagement.findDistributionSetByIdWithDetails(
-                distributionSetManagement.findDistributionSetByNameAndVersion("two", "two").getId());
-        three = distributionSetManagement.findDistributionSetByIdWithDetails(
-                distributionSetManagement.findDistributionSetByNameAndVersion("three", "three").getId());
+        one = distributionSetManagement.findDistributionSetByIdWithDetails(distributionSetManagement
+                .findDistributionSetsAll("name==one", pageReq, false).getContent().get(0).getId()).get();
+        two = distributionSetManagement.findDistributionSetByIdWithDetails(distributionSetManagement
+                .findDistributionSetsAll("name==two", pageReq, false).getContent().get(0).getId()).get();
+        three = distributionSetManagement.findDistributionSetByIdWithDetails(distributionSetManagement
+                .findDistributionSetsAll("name==three", pageReq, false).getContent().get(0).getId()).get();
 
         assertThat(
                 JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
@@ -603,6 +556,56 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         assertThat(three.getCreatedAt()).isGreaterThanOrEqualTo(current);
     }
 
+    @Step
+    private MvcResult executeMgmtTargetPost(final DistributionSet one, final DistributionSet two,
+            final DistributionSet three) throws Exception {
+        return mvc
+                .perform(post("/rest/v1/distributionsets/")
+                        .content(JsonBuilder.distributionSets(Lists.newArrayList(one, two, three)))
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("[0]name", equalTo(one.getName())))
+                .andExpect(jsonPath("[0]description", equalTo(one.getDescription())))
+                .andExpect(jsonPath("[0]type", equalTo(standardDsType.getKey())))
+                .andExpect(jsonPath("[0]createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("[0]version", equalTo(one.getVersion())))
+                .andExpect(jsonPath("[0]complete", equalTo(Boolean.TRUE)))
+                .andExpect(jsonPath("[0]requiredMigrationStep", equalTo(one.isRequiredMigrationStep())))
+                .andExpect(jsonPath("[0].modules.[?(@.type==" + runtimeType.getKey() + ")].id",
+                        contains(one.findFirstModuleByType(runtimeType).get().getId().intValue())))
+                .andExpect(jsonPath("[0].modules.[?(@.type==" + appType.getKey() + ")].id",
+                        contains(one.findFirstModuleByType(appType).get().getId().intValue())))
+                .andExpect(jsonPath("[0].modules.[?(@.type==" + osType.getKey() + ")].id",
+                        contains(one.findFirstModuleByType(osType).get().getId().intValue())))
+                .andExpect(jsonPath("[1]name", equalTo(two.getName())))
+                .andExpect(jsonPath("[1]description", equalTo(two.getDescription())))
+                .andExpect(jsonPath("[1]complete", equalTo(Boolean.TRUE)))
+                .andExpect(jsonPath("[1]type", equalTo(standardDsType.getKey())))
+                .andExpect(jsonPath("[1]createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("[1]version", equalTo(two.getVersion())))
+                .andExpect(jsonPath("[1].modules.[?(@.type==" + runtimeType.getKey() + ")].id",
+                        contains(two.findFirstModuleByType(runtimeType).get().getId().intValue())))
+                .andExpect(jsonPath("[1].modules.[?(@.type==" + appType.getKey() + ")].id",
+                        contains(two.findFirstModuleByType(appType).get().getId().intValue())))
+                .andExpect(jsonPath("[1].modules.[?(@.type==" + osType.getKey() + ")].id",
+                        contains(two.findFirstModuleByType(osType).get().getId().intValue())))
+                .andExpect(jsonPath("[1]requiredMigrationStep", equalTo(two.isRequiredMigrationStep())))
+                .andExpect(jsonPath("[2]name", equalTo(three.getName())))
+                .andExpect(jsonPath("[2]description", equalTo(three.getDescription())))
+                .andExpect(jsonPath("[2]complete", equalTo(Boolean.TRUE)))
+                .andExpect(jsonPath("[2]type", equalTo(standardDsType.getKey())))
+                .andExpect(jsonPath("[2]createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("[2]version", equalTo(three.getVersion())))
+                .andExpect(jsonPath("[2].modules.[?(@.type==" + runtimeType.getKey() + ")].id",
+                        contains(three.findFirstModuleByType(runtimeType).get().getId().intValue())))
+                .andExpect(jsonPath("[2].modules.[?(@.type==" + appType.getKey() + ")].id",
+                        contains(three.findFirstModuleByType(appType).get().getId().intValue())))
+                .andExpect(jsonPath("[2].modules.[?(@.type==" + osType.getKey() + ")].id",
+                        contains(three.findFirstModuleByType(osType).get().getId().intValue())))
+                .andExpect(jsonPath("[2]requiredMigrationStep", equalTo(three.isRequiredMigrationStep()))).andReturn();
+    }
+
     @Test
     @Description("Ensures that DS deletion request to API is reflected by the repository.")
     public void deleteUnassignedistributionSet() throws Exception {
@@ -623,6 +626,13 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
                 .isEmpty();
         assertThat(distributionSetManagement.countDistributionSetsAll()).isEqualTo(0);
+    }
+
+    @Test
+    @Description("Ensures that DS deletion request to API on an entity that does not exist results in NOT_FOUND.")
+    public void deleteDistributionSetThatDoesNotExistLeadsToNotFound() throws Exception {
+        mvc.perform(delete("/rest/v1/distributionsets/1234")).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -667,7 +677,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        final DistributionSet setupdated = distributionSetManagement.findDistributionSetById(set.getId());
+        final DistributionSet setupdated = distributionSetManagement.findDistributionSetById(set.getId()).get();
 
         assertThat(setupdated.isRequiredMigrationStep()).isEqualTo(true);
         assertThat(setupdated.getVersion()).isEqualTo("anotherVersion");
@@ -693,7 +703,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden());
 
-        final DistributionSet setupdated = distributionSetManagement.findDistributionSetById(set.getId());
+        final DistributionSet setupdated = distributionSetManagement.findDistributionSetById(set.getId()).get();
 
         assertThat(setupdated.isRequiredMigrationStep()).isEqualTo(false);
         assertThat(setupdated.getVersion()).isEqualTo(set.getVersion());
@@ -776,10 +786,10 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("[1]key", equalTo(knownKey2)))
                 .andExpect(jsonPath("[1]value", equalTo(knownValue2)));
 
-        final DistributionSetMetadata metaKey1 = distributionSetManagement.findDistributionSetMetadata(testDS.getId(),
-                knownKey1);
-        final DistributionSetMetadata metaKey2 = distributionSetManagement.findDistributionSetMetadata(testDS.getId(),
-                knownKey2);
+        final DistributionSetMetadata metaKey1 = distributionSetManagement
+                .findDistributionSetMetadata(testDS.getId(), knownKey1).get();
+        final DistributionSetMetadata metaKey2 = distributionSetManagement
+                .findDistributionSetMetadata(testDS.getId(), knownKey2).get();
 
         assertThat(metaKey1.getValue()).isEqualTo(knownValue1);
         assertThat(metaKey2.getValue()).isEqualTo(knownValue2);
@@ -804,8 +814,8 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("key", equalTo(knownKey))).andExpect(jsonPath("value", equalTo(updateValue)));
 
-        final DistributionSetMetadata assertDS = distributionSetManagement.findDistributionSetMetadata(testDS.getId(),
-                knownKey);
+        final DistributionSetMetadata assertDS = distributionSetManagement
+                .findDistributionSetMetadata(testDS.getId(), knownKey).get();
         assertThat(assertDS.getValue()).isEqualTo(updateValue);
 
     }
@@ -823,12 +833,28 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         mvc.perform(delete("/rest/v1/distributionsets/{dsId}/metadata/{key}", testDS.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        try {
-            distributionSetManagement.findDistributionSetMetadata(testDS.getId(), knownKey);
-            fail("expected EntityNotFoundException but didn't throw");
-        } catch (final EntityNotFoundException e) {
-            // ok as expected
-        }
+        assertThat(distributionSetManagement.findDistributionSetMetadata(testDS.getId(), knownKey).isPresent())
+                .isFalse();
+    }
+
+    @Test
+    @Description("Ensures that DS metadata deletion request to API on an entity that does not exist results in NOT_FOUND.")
+    public void deleteMetadataThatDoesNotExistLeadsToNotFound() throws Exception {
+        // prepare and create metadata for deletion
+        final String knownKey = "knownKey";
+        final String knownValue = "knownValue";
+
+        final DistributionSet testDS = testdataFactory.createDistributionSet("one");
+        createDistributionSetMetadata(testDS.getId(), entityFactory.generateMetadata(knownKey, knownValue));
+
+        mvc.perform(delete("/rest/v1/distributionsets/{dsId}/metadata/XXX", testDS.getId(), knownKey))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+
+        mvc.perform(delete("/rest/v1/distributionsets/1234/metadata/{key}", knownKey))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+
+        assertThat(distributionSetManagement.findDistributionSetMetadata(testDS.getId(), knownKey).isPresent())
+                .isTrue();
     }
 
     @Test

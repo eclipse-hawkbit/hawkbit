@@ -155,21 +155,26 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
         LOG.info("download security check for target {} and artifact {} granted", controllerId, sha1Hash);
     }
 
-    private Optional<String> findArtifactByFileResource(final FileResource fileResource) {
+    private Optional<org.eclipse.hawkbit.repository.model.Artifact> findArtifactByFileResource(
+            final FileResource fileResource) {
         if (fileResource.getSha1() != null) {
-            return Optional.ofNullable(fileResource.getSha1());
-        } else if (fileResource.getFilename() != null) {
-            return artifactManagement.findArtifactByFilename(fileResource.getFilename()).stream().findFirst()
-                    .map(org.eclipse.hawkbit.repository.model.Artifact::getSha1Hash);
-        } else if (fileResource.getArtifactId() != null) {
-            return Optional.ofNullable(artifactManagement.findArtifact(fileResource.getArtifactId()))
-                    .map(org.eclipse.hawkbit.repository.model.Artifact::getSha1Hash);
-        } else if (fileResource.getSoftwareModuleFilenameResource() != null) {
-            return artifactManagement
-                    .findByFilenameAndSoftwareModule(fileResource.getSoftwareModuleFilenameResource().getFilename(),
-                            fileResource.getSoftwareModuleFilenameResource().getSoftwareModuleId())
-                    .stream().findFirst().map(org.eclipse.hawkbit.repository.model.Artifact::getSha1Hash);
+            return artifactManagement.findFirstArtifactBySHA1(fileResource.getSha1());
         }
+
+        if (fileResource.getFilename() != null) {
+            return artifactManagement.findArtifactByFilename(fileResource.getFilename());
+        }
+
+        if (fileResource.getArtifactId() != null) {
+            return artifactManagement.findArtifact(fileResource.getArtifactId());
+        }
+
+        if (fileResource.getSoftwareModuleFilenameResource() != null) {
+            return artifactManagement.findByFilenameAndSoftwareModule(
+                    fileResource.getSoftwareModuleFilenameResource().getFilename(),
+                    fileResource.getSoftwareModuleFilenameResource().getSoftwareModuleId());
+        }
+
         return Optional.empty();
     }
 
@@ -190,24 +195,19 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
         try {
             SecurityContextHolder.getContext().setAuthentication(authenticationManager.doAuthenticate(secruityToken));
 
-            final Optional<String> sha1Hash = findArtifactByFileResource(fileResource);
+            final String sha1Hash = findArtifactByFileResource(fileResource)
+                    .map(org.eclipse.hawkbit.repository.model.Artifact::getSha1Hash)
+                    .orElseThrow(() -> new EntityNotFoundException());
 
-            if (!sha1Hash.isPresent()) {
-                LOG.info("target {} requested file resource {} which does not exists to download",
-                        secruityToken.getControllerId(), fileResource);
-                throw new EntityNotFoundException();
-            }
+            checkIfArtifactIsAssignedToTarget(secruityToken, sha1Hash);
 
-            checkIfArtifactIsAssignedToTarget(secruityToken, sha1Hash.get());
+            final Artifact artifact = convertDbArtifact(artifactManagement.loadArtifactBinary(sha1Hash).orElseThrow(
+                    () -> new EntityNotFoundException(org.eclipse.hawkbit.repository.model.Artifact.class, sha1Hash)));
 
-            final Artifact artifact = convertDbArtifact(artifactManagement.loadArtifactBinary(sha1Hash.get()));
-            if (artifact == null) {
-                throw new EntityNotFoundException();
-            }
             authentificationResponse.setArtifact(artifact);
             final String downloadId = UUID.randomUUID().toString();
             // SHA1 key is set, download by SHA1
-            final DownloadArtifactCache downloadCache = new DownloadArtifactCache(DownloadType.BY_SHA1, sha1Hash.get());
+            final DownloadArtifactCache downloadCache = new DownloadArtifactCache(DownloadType.BY_SHA1, sha1Hash);
             cache.put(downloadId, downloadCache);
             authentificationResponse
                     .setDownloadUrl(UriComponentsBuilder.fromUri(hostnameResolver.resolveHostname().toURI())

@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.common.grid;
 
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -29,7 +29,7 @@ public abstract class AbstractGridComponentLayout extends VerticalLayout {
     private static final long serialVersionUID = -3766179797384539821L;
 
     protected final transient EventBus.UIEventBus eventBus;
-    protected final I18N i18n;
+    protected final VaadinMessageSource i18n;
 
     protected AbstractOrderedLayout gridHeader;
     protected Grid grid;
@@ -45,7 +45,7 @@ public abstract class AbstractGridComponentLayout extends VerticalLayout {
      * @param notification
      * @param managementUIState
      */
-    public AbstractGridComponentLayout(final I18N i18n, final UIEventBus eventBus) {
+    public AbstractGridComponentLayout(final VaadinMessageSource i18n, final UIEventBus eventBus) {
         super();
         this.i18n = i18n;
         this.eventBus = eventBus;
@@ -103,9 +103,9 @@ public abstract class AbstractGridComponentLayout extends VerticalLayout {
      *            the details of another grid the selection of this grid should
      *            be registered for as master.
      */
-    public void registerDetails(AbstractGrid<?>.DetailsSupport details) {
+    public void registerDetails(final AbstractGrid<?>.DetailsSupport details) {
         grid.addSelectionListener(event -> {
-            Long masterId = (Long) event.getSelected().stream().findFirst().orElse(null);
+            final Long masterId = (Long) event.getSelected().stream().findFirst().orElse(null);
             details.populateMasterDataAndRecalculateContainer(masterId);
         });
     }
@@ -150,7 +150,7 @@ public abstract class AbstractGridComponentLayout extends VerticalLayout {
      * @param footerSupport
      *            encapsulates footer layout.
      */
-    public void setFooterSupport(AbstractFooterSupport footerSupport) {
+    public void setFooterSupport(final AbstractFooterSupport footerSupport) {
         this.footerSupport = footerSupport;
     }
 

@@ -128,8 +128,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     @Override
     public ResponseEntity<List<MgmtTarget>> getAssignedTargets(@PathVariable("targetTagId") final Long targetTagId) {
         final TargetTag targetTag = findTargetTagById(targetTagId);
-        return new ResponseEntity<>(MgmtTargetMapper.toResponseWithLinksAndPollStatus(targetTag.getAssignedToTargets()),
-                HttpStatus.OK);
+        return new ResponseEntity<>(MgmtTargetMapper.toResponse(targetTag.getAssignedToTargets()), HttpStatus.OK);
     }
 
     @Override
@@ -154,7 +153,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
         LOG.debug("Assign Targets {} for target tag {}", assignedTargetRequestBodies.size(), targetTagId);
         final List<Target> assignedTarget = this.targetManagement
                 .assignTag(findTargetControllerIds(assignedTargetRequestBodies), targetTagId);
-        return new ResponseEntity<>(MgmtTargetMapper.toResponseWithLinksAndPollStatus(assignedTarget), HttpStatus.OK);
+        return new ResponseEntity<>(MgmtTargetMapper.toResponse(assignedTarget), HttpStatus.OK);
     }
 
     @Override
@@ -174,11 +173,8 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     private TargetTag findTargetTagById(final Long targetTagId) {
-        final TargetTag tag = this.tagManagement.findTargetTagById(targetTagId);
-        if (tag == null) {
-            throw new EntityNotFoundException("Target Tag with Id {" + targetTagId + "} does not exist");
-        }
-        return tag;
+        return tagManagement.findTargetTagById(targetTagId)
+                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagId));
     }
 
     private List<String> findTargetControllerIds(

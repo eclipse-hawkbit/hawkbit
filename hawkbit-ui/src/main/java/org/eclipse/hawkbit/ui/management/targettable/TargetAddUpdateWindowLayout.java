@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
+import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -20,7 +22,7 @@ import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -42,7 +44,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     private static final long serialVersionUID = -6659290471705262389L;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final transient TargetManagement targetManagement;
 
@@ -60,7 +62,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     private FormLayout formLayout;
     private CommonDialogWindow window;
 
-    TargetAddUpdateWindowLayout(final I18N i18n, final TargetManagement targetManagement, final UIEventBus eventBus,
+    TargetAddUpdateWindowLayout(final VaadinMessageSource i18n, final TargetManagement targetManagement, final UIEventBus eventBus,
             final UINotification uINotification, final EntityFactory entityFactory) {
         this.i18n = i18n;
         this.targetManagement = targetManagement;
@@ -94,18 +96,18 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     private void createRequiredComponents() {
         controllerIDTextField = createTextField("prompt.target.id", UIComponentIdProvider.TARGET_ADD_CONTROLLER_ID);
-        controllerIDTextField.addValidator(new RegexpValidator("[.\\S]*", i18n.get("message.target.whitespace.check")));
+        controllerIDTextField.addValidator(new RegexpValidator("[.\\S]*", i18n.getMessage("message.target.whitespace.check")));
         nameTextField = createTextField("textfield.name", UIComponentIdProvider.TARGET_ADD_NAME);
         nameTextField.setRequired(false);
 
-        descTextArea = new TextAreaBuilder().caption(i18n.get("textfield.description")).style("text-area-style")
-                .prompt(i18n.get("textfield.description")).immediate(true).id(UIComponentIdProvider.TARGET_ADD_DESC)
+        descTextArea = new TextAreaBuilder().caption(i18n.getMessage("textfield.description")).style("text-area-style")
+                .prompt(i18n.getMessage("textfield.description")).immediate(true).id(UIComponentIdProvider.TARGET_ADD_DESC)
                 .buildTextComponent();
         descTextArea.setNullRepresentation(StringUtils.EMPTY);
     }
 
     private TextField createTextField(final String in18Key, final String id) {
-        return new TextFieldBuilder().caption(i18n.get(in18Key)).required(true).prompt(i18n.get(in18Key))
+        return new TextFieldBuilder().caption(i18n.getMessage(in18Key)).required(true).prompt(i18n.getMessage(in18Key))
                 .immediate(true).id(id).buildTextComponent();
     }
 
@@ -127,7 +129,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         final Target target = targetManagement.updateTarget(entityFactory.target().update(controllerId)
                 .name(nameTextField.getValue()).description(descTextArea.getValue()));
         /* display success msg */
-        uINotification.displaySuccess(i18n.get("message.update.success", new Object[] { target.getName() }));
+        uINotification.displaySuccess(i18n.getMessage("message.update.success", new Object[] { target.getName() }));
         // publishing through event bus
         eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.UPDATED_ENTITY, target));
     }
@@ -142,12 +144,12 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
         eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.ADD_ENTITY, newTarget));
 
-        uINotification.displaySuccess(i18n.get("message.save.success", new Object[] { newTarget.getName() }));
+        uINotification.displaySuccess(i18n.getMessage("message.save.success", new Object[] { newTarget.getName() }));
     }
 
     public Window createNewWindow() {
         window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
-                .caption(i18n.get(UIComponentIdProvider.TARGET_ADD_CAPTION)).content(this).layout(formLayout).i18n(i18n)
+                .caption(i18n.getMessage(UIComponentIdProvider.TARGET_ADD_CAPTION)).content(this).layout(formLayout).i18n(i18n)
                 .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
 
         return window;
@@ -162,12 +164,12 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
      * @return window or {@code null} if target is not exists.
      */
     public Window getWindow(final String controllerId) {
-        final Target target = targetManagement.findTargetByControllerID(controllerId);
-        if (target == null) {
-            uINotification.displayWarning(i18n.get("target.not.exists", new Object[] { controllerId }));
+        final Optional<Target> target = targetManagement.findTargetByControllerID(controllerId);
+        if (!target.isPresent()) {
+            uINotification.displayWarning(i18n.getMessage("target.not.exists", new Object[] { controllerId }));
             return null;
         }
-        populateValuesOfTarget(target);
+        populateValuesOfTarget(target.get());
         createNewWindow();
         window.addStyleName("target-update-window");
         return window;
@@ -188,10 +190,10 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     private boolean isDuplicate() {
         final String newControlllerId = controllerIDTextField.getValue();
-        final Target existingTarget = targetManagement.findTargetByControllerID(newControlllerId.trim());
-        if (existingTarget != null) {
+        final Optional<Target> existingTarget = targetManagement.findTargetByControllerID(newControlllerId.trim());
+        if (existingTarget.isPresent()) {
             uINotification.displayValidationError(
-                    i18n.get("message.target.duplicate.check", new Object[] { newControlllerId }));
+                    i18n.getMessage("message.target.duplicate.check", new Object[] { newControlllerId }));
             return true;
         } else {
             return false;

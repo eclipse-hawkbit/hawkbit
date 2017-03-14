@@ -24,7 +24,7 @@ import org.eclipse.hawkbit.ui.push.DistributionSetTagCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionSetTagDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionSetTagUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
@@ -48,7 +48,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
     // To Be Done : have to set this value based on view???
     private static final Boolean NOTAGS_SELECTED = Boolean.FALSE;
 
-    public DistributionTagToken(final SpPermissionChecker checker, final I18N i18n, final UINotification uinotification,
+    public DistributionTagToken(final SpPermissionChecker checker, final VaadinMessageSource i18n, final UINotification uinotification,
             final UIEventBus eventBus, final ManagementUIState managementUIState, final TagManagement tagManagement,
             final DistributionSetManagement distributionSetManagement) {
         super(checker, i18n, uinotification, eventBus, managementUIState);
@@ -63,7 +63,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
 
     @Override
     protected String getTokenInputPrompt() {
-        return i18n.get("combo.type.tag.name");
+        return i18n.getMessage("combo.type.tag.name");
     }
 
     @Override
@@ -74,7 +74,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
                 eventBus.publish(this, ManagementUIEvent.ASSIGN_DISTRIBUTION_TAG);
             }
         } else {
-            uinotification.displayValidationError(i18n.get("message.error.missing.tagname"));
+            uinotification.displayValidationError(i18n.getMessage("message.error.missing.tagname"));
         }
     }
 

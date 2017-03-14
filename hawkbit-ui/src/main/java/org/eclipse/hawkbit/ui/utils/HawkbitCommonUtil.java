@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.utils;
 
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -19,13 +19,11 @@ import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
-import org.vaadin.alump.distributionbar.DistributionBar;
 
 import com.google.common.base.Strings;
 import com.vaadin.data.Container;
@@ -34,6 +32,7 @@ import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.UI;
 
 /**
  * Common util class.
@@ -187,7 +186,7 @@ public final class HawkbitCommonUtil {
      * @param i18N
      * @return PollStatusToolTip
      */
-    public static String getPollStatusToolTip(final PollStatus pollStatus, final I18N i18N) {
+    public static String getPollStatusToolTip(final PollStatus pollStatus, final VaadinMessageSource i18N) {
         if (pollStatus != null && pollStatus.getLastPollDate() != null && pollStatus.isOverdue()) {
             final TimeZone tz = SPDateTimeUtil.getBrowserTimeZone();
             return "Overdue for " + SPDateTimeUtil.getDurationFormattedString(
@@ -309,29 +308,29 @@ public final class HawkbitCommonUtil {
      * @return message
      */
     public static String createAssignmentMessage(final String tagName,
-            final AssignmentResult<? extends NamedEntity> result, final I18N i18n) {
+            final AssignmentResult<? extends NamedEntity> result, final VaadinMessageSource i18n) {
         final StringBuilder formMsg = new StringBuilder();
         final int assignedCount = result.getAssigned();
         final int alreadyAssignedCount = result.getAlreadyAssigned();
         final int unassignedCount = result.getUnassigned();
         if (assignedCount == 1) {
-            formMsg.append(i18n.get("message.target.assigned.one",
+            formMsg.append(i18n.getMessage("message.target.assigned.one",
                     new Object[] { result.getAssignedEntity().get(0).getName(), tagName })).append("<br>");
         } else if (assignedCount > 1) {
-            formMsg.append(i18n.get("message.target.assigned.many", new Object[] { assignedCount, tagName }))
+            formMsg.append(i18n.getMessage("message.target.assigned.many", new Object[] { assignedCount, tagName }))
                     .append("<br>");
 
             if (alreadyAssignedCount > 0) {
-                final String alreadyAssigned = i18n.get("message.target.alreadyAssigned",
+                final String alreadyAssigned = i18n.getMessage("message.target.alreadyAssigned",
                         new Object[] { alreadyAssignedCount });
                 formMsg.append(alreadyAssigned).append("<br>");
             }
         }
         if (unassignedCount == 1) {
-            formMsg.append(i18n.get("message.target.unassigned.one",
+            formMsg.append(i18n.getMessage("message.target.unassigned.one",
                     new Object[] { result.getUnassignedEntity().get(0).getName(), tagName })).append("<br>");
         } else if (unassignedCount > 1) {
-            formMsg.append(i18n.get("message.target.unassigned.many", new Object[] { unassignedCount, tagName }))
+            formMsg.append(i18n.getMessage("message.target.unassigned.many", new Object[] { unassignedCount, tagName }))
                     .append("<br>");
         }
         return formMsg.toString();
@@ -456,24 +455,17 @@ public final class HawkbitCommonUtil {
                     .getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).getValue();
             pinBtn.removeStyleName("statusIconRed statusIconBlue statusIconGreen statusIconYellow statusIconLightBlue");
             if (updateStatus == TargetUpdateStatus.ERROR) {
-                pinBtn.addStyleName("statusIconRed");
+                pinBtn.addStyleName(SPUIStyleDefinitions.STATUS_ICON_RED);
             } else if (updateStatus == TargetUpdateStatus.UNKNOWN) {
-                pinBtn.addStyleName("statusIconBlue");
+                pinBtn.addStyleName(SPUIStyleDefinitions.STATUS_ICON_BLUE);
             } else if (updateStatus == TargetUpdateStatus.IN_SYNC) {
-                pinBtn.addStyleName("statusIconGreen");
+                pinBtn.addStyleName(SPUIStyleDefinitions.STATUS_ICON_GREEN);
             } else if (updateStatus == TargetUpdateStatus.PENDING) {
-                pinBtn.addStyleName("statusIconYellow");
+                pinBtn.addStyleName(SPUIStyleDefinitions.STATUS_ICON_YELLOW);
             } else if (updateStatus == TargetUpdateStatus.REGISTERED) {
-                pinBtn.addStyleName("statusIconLightBlue");
+                pinBtn.addStyleName(SPUIStyleDefinitions.STATUS_ICON_LIGHT_BLUE);
             }
         }
-    }
-
-    private static void setBarPartSize(final DistributionBar bar, final String statusName, final int count,
-            final int index) {
-        bar.setPartSize(index, count);
-        bar.setPartTooltip(index, statusName);
-        bar.setPartStyleName(index, "status-bar-part-" + statusName);
     }
 
     /**
@@ -507,39 +499,6 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     * Reset the values of status progress bar on change of values.
-     *
-     * @param bar
-     *            DistributionBar
-     * @param item
-     *            row of the table
-     */
-    private static void setProgressBarDetails(final DistributionBar bar, final Item item) {
-        bar.setNumberOfParts(6);
-        final Long notStartedTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED, item);
-        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.NOTSTARTED.toString().toLowerCase(),
-                notStartedTargetsCount.intValue(), 0);
-        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.SCHEDULED.toString().toLowerCase(),
-                getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED, item).intValue(), 1);
-        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.RUNNING.toString().toLowerCase(),
-                getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING, item).intValue(), 2);
-        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.ERROR.toString().toLowerCase(),
-                getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR, item).intValue(), 3);
-        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.FINISHED.toString().toLowerCase(),
-                getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED, item).intValue(), 4);
-        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.CANCELLED.toString().toLowerCase(),
-                getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED, item).intValue(), 5);
-    }
-
-    private static boolean isNoTargets(final Long... statusCount) {
-        return (Arrays.asList(statusCount).stream().filter(value -> value > 0).toArray().length) == 0;
-    }
-
-    private static Long getStatusCount(final String propertName, final Item item) {
-        return (Long) item.getItemProperty(propertName).getValue();
-    }
-
-    /**
      * Returns a formatted string as needed by label custom render .This string
      * holds the properties of a status label.
      *
@@ -549,7 +508,7 @@ public final class HawkbitCommonUtil {
      *            label style
      * @param id
      *            label id
-     * @return
+     * @return formatted string
      */
     public static String getStatusLabelDetailsInString(final String value, final String style, final String id) {
         final StringBuilder val = new StringBuilder();
@@ -575,5 +534,18 @@ public final class HawkbitCommonUtil {
         }
         return statusFontIcon.getFontIcon() != null ? Integer.toString(statusFontIcon.getFontIcon().getCodepoint())
                 : null;
+    }
+
+    /**
+     * Gets the locale of the current Vaadin UI. If the locale can not be
+     * determined, the default locale is returned instead.
+     *
+     * @return the current locale, never {@code null}.
+     * @see com.vaadin.ui.UI#getLocale()
+     * @see java.util.Locale#getDefault()
+     */
+    public static Locale getLocale() {
+        final UI currentUI = UI.getCurrent();
+        return currentUI == null ? Locale.getDefault() : currentUI.getLocale();
     }
 }

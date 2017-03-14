@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.autoassign;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.stream.Collectors;

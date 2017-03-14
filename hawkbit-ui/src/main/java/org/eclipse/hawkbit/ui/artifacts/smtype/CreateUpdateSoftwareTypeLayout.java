@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtype;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -27,7 +28,7 @@ import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.layouts.CreateUpdateTypeLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -79,7 +80,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
      * @param swTypeManagementService
      *            SoftwareManagement
      */
-    public CreateUpdateSoftwareTypeLayout(final I18N i18n, final TagManagement tagManagement,
+    public CreateUpdateSoftwareTypeLayout(final VaadinMessageSource i18n, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
             final UINotification uiNotification, final SoftwareManagement swTypeManagementService) {
         super(i18n, tagManagement, entityFactory, eventBus, permChecker, uiNotification);
@@ -97,8 +98,8 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
 
         super.createRequiredComponents();
 
-        singleAssignStr = i18n.get("label.singleAssign.type");
-        multiAssignStr = i18n.get("label.multiAssign.type");
+        singleAssignStr = i18n.getMessage("label.singleAssign.type");
+        multiAssignStr = i18n.getMessage("label.multiAssign.type");
         singleAssign = new LabelBuilder().name(singleAssignStr).buildLabel();
 
         multiAssign = new LabelBuilder().name(multiAssignStr).buildLabel();
@@ -107,9 +108,9 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
 
         typeKey = createTextField("textfield.key", SPUIDefinitions.TYPE_KEY, SPUIDefinitions.NEW_SOFTWARE_TYPE_KEY);
 
-        tagDesc = new TextAreaBuilder().caption(i18n.get("textfield.description"))
+        tagDesc = new TextAreaBuilder().caption(i18n.getMessage("textfield.description"))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_DESC)
-                .prompt(i18n.get("textfield.description")).immediate(true).id(SPUIDefinitions.NEW_SOFTWARE_TYPE_DESC)
+                .prompt(i18n.getMessage("textfield.description")).immediate(true).id(SPUIDefinitions.NEW_SOFTWARE_TYPE_DESC)
                 .buildTextComponent();
         tagDesc.setNullRepresentation(StringUtils.EMPTY);
 
@@ -119,18 +120,19 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
     @Override
     protected Color getColorForColorPicker() {
 
-        final SoftwareModuleType typeSelected = swTypeManagementService
+        final Optional<SoftwareModuleType> typeSelected = swTypeManagementService
                 .findSoftwareModuleTypeByName(tagNameComboBox.getValue().toString());
-        if (null != typeSelected) {
-            return typeSelected.getColour() != null ? ColorPickerHelper.rgbToColorConverter(typeSelected.getColour())
+        if (typeSelected.isPresent()) {
+            return typeSelected.get().getColour() != null
+                    ? ColorPickerHelper.rgbToColorConverter(typeSelected.get().getColour())
                     : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR);
         }
         return ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR);
     }
 
     private TextField createTextField(final String in18Key, final String styleName, final String id) {
-        return new TextFieldBuilder().caption(i18n.get(in18Key)).styleName(ValoTheme.TEXTFIELD_TINY + " " + styleName)
-                .required(true).prompt(i18n.get(in18Key)).immediate(true).id(id).buildTextComponent();
+        return new TextFieldBuilder().caption(i18n.getMessage(in18Key)).styleName(ValoTheme.TEXTFIELD_TINY + " " + styleName)
+                .required(true).prompt(i18n.getMessage(in18Key)).immediate(true).id(id).buildTextComponent();
     }
 
     @Override
@@ -144,7 +146,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
 
     @Override
     protected String getWindowCaption() {
-        return i18n.get("caption.add.type");
+        return i18n.getMessage("caption.add.type");
     }
 
     /**
@@ -195,9 +197,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
     @Override
     protected void setTagDetails(final String targetTagSelected) {
         tagName.setValue(targetTagSelected);
-        final SoftwareModuleType selectedTypeTag = swTypeManagementService
-                .findSoftwareModuleTypeByName(targetTagSelected);
-        if (null != selectedTypeTag) {
+        swTypeManagementService.findSoftwareModuleTypeByName(targetTagSelected).ifPresent(selectedTypeTag -> {
             tagDesc.setValue(selectedTypeTag.getDescription());
             typeKey.setValue(selectedTypeTag.getKey());
             if (selectedTypeTag.getMaxAssignments() == 1) {
@@ -206,7 +206,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
                 assignOptiongroup.setValue(multiAssignStr);
             }
             setColorPickerComponentsColor(selectedTypeTag.getColour());
-        }
+        });
     }
 
     private void singleMultiOptionGroup() {
@@ -236,18 +236,18 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
     }
 
     @Override
-    protected SoftwareModuleType findEntityByKey() {
+    protected Optional<SoftwareModuleType> findEntityByKey() {
         return swTypeManagementService.findSoftwareModuleTypeByKey(typeKey.getValue());
     }
 
     @Override
-    protected SoftwareModuleType findEntityByName() {
+    protected Optional<SoftwareModuleType> findEntityByName() {
         return swTypeManagementService.findSoftwareModuleTypeByName(tagName.getValue());
     }
 
     @Override
     protected String getDuplicateKeyErrorMessage(final SoftwareModuleType existingType) {
-        return i18n.get("message.type.key.swmodule.duplicate.check", new Object[] { existingType.getKey() });
+        return i18n.getMessage("message.type.key.swmodule.duplicate.check", new Object[] { existingType.getKey() });
     }
 
     private void createNewSWModuleType() {
@@ -267,11 +267,11 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
             final SoftwareModuleType newSWType = swTypeManagementService.createSoftwareModuleType(
                     entityFactory.softwareModuleType().create().key(typeKeyValue).name(typeNameValue)
                             .description(typeDescValue).colour(colorPicked).maxAssignments(assignNumber));
-            uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { newSWType.getName() }));
+            uiNotification.displaySuccess(i18n.getMessage("message.save.success", new Object[] { newSWType.getName() }));
             eventBus.publish(this,
                     new SoftwareModuleTypeEvent(SoftwareModuleTypeEnum.ADD_SOFTWARE_MODULE_TYPE, newSWType));
         } else {
-            uiNotification.displayValidationError(i18n.get("message.error.missing.typenameorkey"));
+            uiNotification.displayValidationError(i18n.getMessage("message.error.missing.typenameorkey"));
         }
     }
 
@@ -279,7 +279,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
         swTypeManagementService.updateSoftwareModuleType(
                 entityFactory.softwareModuleType().update(existingType.getId()).description(tagDesc.getValue())
                         .colour(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview())));
-        uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { existingType.getName() }));
+        uiNotification.displaySuccess(i18n.getMessage("message.update.success", new Object[] { existingType.getName() }));
         eventBus.publish(this,
                 new SoftwareModuleTypeEvent(SoftwareModuleTypeEnum.UPDATE_SOFTWARE_MODULE_TYPE, existingType));
     }

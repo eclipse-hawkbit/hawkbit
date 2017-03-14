@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.management.targettag;
 import java.io.Serializable;
 
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterSingleButtonClick;
 import org.eclipse.hawkbit.ui.management.event.TargetFilterEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
@@ -51,10 +50,11 @@ public class CustomTargetTagFilterButtonClick extends AbstractFilterSingleButton
 
     @Override
     protected void filterClicked(final Button clickedButton) {
-        final TargetFilterQuery targetFilterQuery = this.targetFilterQueryManagement
-                .findTargetFilterQueryById((Long) clickedButton.getData());
-        this.managementUIState.getTargetTableFilters().setTargetFilterQuery(targetFilterQuery.getId());
-        this.eventBus.publish(this, TargetFilterEvent.FILTER_BY_TARGET_FILTER_QUERY);
+        targetFilterQueryManagement.findTargetFilterQueryById((Long) clickedButton.getData())
+                .ifPresent(targetFilterQuery -> {
+                    this.managementUIState.getTargetTableFilters().setTargetFilterQuery(targetFilterQuery.getId());
+                    this.eventBus.publish(this, TargetFilterEvent.FILTER_BY_TARGET_FILTER_QUERY);
+                });
     }
 
     protected void processButtonClick(final ClickEvent event) {

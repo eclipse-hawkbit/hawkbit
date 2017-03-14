@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 
@@ -32,11 +32,9 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * 
  * SoftwareModule Metadata details layout.
  *
  */
-
 @SpringComponent
 @UIScope
 public class SoftwareModuleMetadatadetailslayout extends Table {
@@ -51,7 +49,7 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
 
     private SwMetadataPopupLayout swMetadataPopupLayout;
 
-    private I18N i18n;
+    private VaadinMessageSource i18n;
 
     private Long selectedSWModuleId;
 
@@ -71,7 +69,7 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
      * @param entityFactory
      *            the entity factory service
      */
-    public void init(final I18N i18n, final SpPermissionChecker permissionChecker,
+    public void init(final VaadinMessageSource i18n, final SpPermissionChecker permissionChecker,
             final SoftwareManagement softwareManagement, final SwMetadataPopupLayout swMetadataPopupLayout,
             final EntityFactory entityFactory) {
         this.i18n = i18n;
@@ -145,7 +143,7 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
     }
 
     private void addSMMetadataTableHeader() {
-        setColumnHeader(METADATA_KEY, i18n.get("header.key"));
+        setColumnHeader(METADATA_KEY, i18n.getMessage("header.key"));
     }
 
     private void setSWMetadataProperties(final SoftwareModuleMetadata swMetadata) {
@@ -174,10 +172,8 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
     }
 
     private void showMetadataDetails(final Long selectedSWModuleId, final String metadataKey) {
-        final SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(selectedSWModuleId);
-        /* display the window */
-        UI.getCurrent()
-                .addWindow(swMetadataPopupLayout.getWindow(swmodule, entityFactory.generateMetadata(metadataKey, "")));
+        softwareManagement.findSoftwareModuleById(selectedSWModuleId).ifPresent(swmodule -> UI.getCurrent()
+                .addWindow(swMetadataPopupLayout.getWindow(swmodule, entityFactory.generateMetadata(metadataKey, ""))));
     }
 
 }

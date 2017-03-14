@@ -15,9 +15,9 @@ import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
 import org.eclipse.hawkbit.ui.management.actionhistory.ActionHistoryGrid.LabelConfig;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -49,13 +49,13 @@ public class ActionStatusGrid extends AbstractGrid<LazyQueryContainer> {
      * @param i18n
      * @param eventBus
      */
-    protected ActionStatusGrid(final I18N i18n, final UIEventBus eventBus) {
+    protected ActionStatusGrid(final VaadinMessageSource i18n, final UIEventBus eventBus) {
         super(i18n, eventBus, null);
 
         setSingleSelectionSupport(new SingleSelectionSupport());
         setDetailsSupport(new DetailsSupport());
 
-        LabelConfig conf = new ActionHistoryGrid.LabelConfig();
+        final LabelConfig conf = new ActionHistoryGrid.LabelConfig();
         states = conf.createStatusLabelConfig(i18n, UIComponentIdProvider.ACTION_STATUS_GRID_STATUS_LABEL_ID);
         alignGenerator = new AlignCellStyleGenerator(leftAlignedColumns, centerAlignedColumns, null);
         modTimetooltipGenerator = new ModifiedTimeTooltipGenerator(ProxyActionStatus.PXY_AS_CREATED_AT);

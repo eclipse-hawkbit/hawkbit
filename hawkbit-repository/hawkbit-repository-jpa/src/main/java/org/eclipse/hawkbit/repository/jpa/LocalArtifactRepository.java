@@ -13,9 +13,11 @@ import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.model.Artifact;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,13 +57,28 @@ public interface LocalArtifactRepository extends BaseEntityRepository<JpaArtifac
     List<Artifact> findBySha1Hash(String sha1Hash);
 
     /**
+     * Verifies if an artifact exists that has given hash and is still related
+     * to a {@link SoftwareModule} other than a given one and not
+     * {@link SoftwareModule#isDeleted()}.
+     * 
+     * @param sha1
+     *            to search for
+     * @param moduleId
+     *            to ignore in relationship check
+     * 
+     * @return <code>true</code> if such an artifact exists
+     */
+    @Query("SELECT CASE WHEN COUNT(a)>0 THEN 'true' ELSE 'false' END FROM JpaArtifact a WHERE a.sha1Hash = :sha1 AND a.softwareModule.id != :moduleId AND a.softwareModule.deleted = 0")
+    boolean existsWithSha1HashAndSoftwareModuleIdIsNot(@Param("sha1") String sha1, @Param("moduleId") Long moduleId);
+
+    /**
      * Searches for a {@link Artifact} based on given gridFsFileName.
      *
      * @param sha1Hash
      *            to search
      * @return {@link Artifact} the first in the result list
      */
-    JpaArtifact findFirstBySha1Hash(String sha1Hash);
+    Optional<Artifact> findFirstBySha1Hash(String sha1Hash);
 
     /**
      * Searches for a {@link Artifact} based user provided filename at upload.
@@ -70,7 +87,7 @@ public interface LocalArtifactRepository extends BaseEntityRepository<JpaArtifac
      *            to search
      * @return list of {@link Artifact}.
      */
-    List<Artifact> findByFilename(String filename);
+    Optional<Artifact> findFirstByFilename(String filename);
 
     /**
      * Searches for local artifact for a base software module.
@@ -94,6 +111,6 @@ public interface LocalArtifactRepository extends BaseEntityRepository<JpaArtifac
      *            selected software module id
      * @return list of {@link Artifact}.
      */
-    List<Artifact> findByFilenameAndSoftwareModuleId(final String filename, final Long softwareModuleId);
+    Optional<Artifact> findFirstByFilenameAndSoftwareModuleId(final String filename, final Long softwareModuleId);
 
 }

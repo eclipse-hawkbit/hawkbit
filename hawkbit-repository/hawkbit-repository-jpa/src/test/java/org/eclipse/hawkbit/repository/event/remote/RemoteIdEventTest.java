@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 import java.lang.reflect.Constructor;
@@ -63,6 +63,12 @@ public class RemoteIdEventTest extends AbstractRemoteEventTest {
     @Description("Verifies that the software module id is correct reloaded")
     public void testSoftwareModuleDeletedEvent() {
         assertAndCreateRemoteEvent(SoftwareModuleDeletedEvent.class);
+    }
+
+    @Test
+    @Description("Verifies that the rollout id is correct reloaded")
+    public void testRolloutDeletedEvent() {
+        assertAndCreateRemoteEvent(RolloutDeletedEvent.class);
     }
 
     protected void assertAndCreateRemoteEvent(final Class<? extends RemoteIdEvent> eventType) {

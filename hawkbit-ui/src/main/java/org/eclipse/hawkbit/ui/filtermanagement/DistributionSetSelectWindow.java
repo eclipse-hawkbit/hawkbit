@@ -12,6 +12,7 @@ import java.io.Serializable;
 
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
@@ -20,7 +21,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorderWithIcon;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.vaadin.spring.events.EventBus;
@@ -47,7 +48,7 @@ public class DistributionSetSelectWindow
 
     private static final long serialVersionUID = 4752345414134989396L;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final DistributionSetSelectTable dsTable;
 
@@ -61,7 +62,7 @@ public class DistributionSetSelectWindow
     private CheckBox checkBox;
     private Long tfqId;
 
-    DistributionSetSelectWindow(final I18N i18n, final UIEventBus eventBus, final TargetManagement targetManagement,
+    DistributionSetSelectWindow(final VaadinMessageSource i18n, final UIEventBus eventBus, final TargetManagement targetManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final ManageDistUIState manageDistUIState) {
         this.i18n = i18n;
         this.dsTable = new DistributionSetSelectTable(i18n, eventBus, manageDistUIState);
@@ -71,9 +72,9 @@ public class DistributionSetSelectWindow
     }
 
     private void initLocal() {
-        final Label label = new Label(i18n.get("label.auto.assign.description"));
+        final Label label = new Label(i18n.getMessage("label.auto.assign.description"));
 
-        checkBox = new CheckBox(i18n.get("label.auto.assign.enable"));
+        checkBox = new CheckBox(i18n.getMessage("label.auto.assign.enable"));
         checkBox.setId(UIComponentIdProvider.DIST_SET_SELECT_ENABLE_ID);
         checkBox.setImmediate(true);
         checkBox.addValueChangeListener(this);
@@ -84,7 +85,7 @@ public class DistributionSetSelectWindow
         verticalLayout.addComponent(dsTable);
 
         window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
-                .caption(i18n.get("caption.select.auto.assign.dist")).content(verticalLayout).layout(verticalLayout)
+                .caption(i18n.getMessage("caption.select.auto.assign.dist")).content(verticalLayout).layout(verticalLayout)
                 .i18n(i18n).saveDialogCloseListener(this).buildCommonDialogWindow();
         window.setId(UIComponentIdProvider.DIST_SET_SELECT_WINDOW_ID);
     }
@@ -104,10 +105,8 @@ public class DistributionSetSelectWindow
      */
     public void showForTargetFilter(final Long tfqId) {
         this.tfqId = tfqId;
-        final TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryById(tfqId);
-        if (tfq == null) {
-            throw new IllegalStateException("TargetFilterQuery does not exist for the given id");
-        }
+        final TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryById(tfqId)
+                .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, tfqId));
 
         initLocal();
 
@@ -165,7 +164,8 @@ public class DistributionSetSelectWindow
     }
 
     private void updateTargetFilterQueryDS(final Long targetFilterQueryId, final Long dsId) {
-        final TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryById(targetFilterQueryId);
+        final TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryById(targetFilterQueryId)
+                .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));
 
         if (dsId != null) {
             confirmWithConsequencesDialog(tfq, dsId);
@@ -212,7 +212,7 @@ public class DistributionSetSelectWindow
 
         public ConfirmConsequencesDialog(final TargetFilterQuery targetFilterQuery, final Long dsId,
                 final ConfirmCallback callback) {
-            super(i18n.get("caption.confirm.assign.consequences"));
+            super(i18n.getMessage("caption.confirm.assign.consequences"));
 
             this.callback = callback;
             this.targetFilterQuery = targetFilterQuery;
@@ -236,10 +236,10 @@ public class DistributionSetSelectWindow
                     targetFilterQuery.getQuery());
             Label mainTextLabel;
             if (targetsCount == 0) {
-                mainTextLabel = new Label(i18n.get("message.confirm.assign.consequences.none"));
+                mainTextLabel = new Label(i18n.getMessage("message.confirm.assign.consequences.none"));
             } else {
                 mainTextLabel = new Label(
-                        i18n.get("message.confirm.assign.consequences.text", new Object[] { targetsCount }));
+                        i18n.getMessage("message.confirm.assign.consequences.text", new Object[] { targetsCount }));
             }
 
             layout.addComponent(mainTextLabel);
@@ -250,7 +250,7 @@ public class DistributionSetSelectWindow
             buttonsLayout.addStyleName("actionButtonsMargin");
             layout.addComponent(buttonsLayout);
 
-            okButton = SPUIComponentProvider.getButton(UIComponentIdProvider.SAVE_BUTTON, i18n.get("button.ok"), "", "",
+            okButton = SPUIComponentProvider.getButton(UIComponentIdProvider.SAVE_BUTTON, i18n.getMessage("button.ok"), "", "",
                     true, FontAwesome.SAVE, SPUIButtonStyleNoBorderWithIcon.class);
             okButton.setSizeUndefined();
             okButton.addStyleName("default-color");
@@ -260,7 +260,7 @@ public class DistributionSetSelectWindow
             buttonsLayout.setExpandRatio(okButton, 1.0F);
 
             final Button cancelButton = SPUIComponentProvider.getButton(UIComponentIdProvider.CANCEL_BUTTON,
-                    i18n.get("button.cancel"), "", "", true, FontAwesome.TIMES, SPUIButtonStyleNoBorderWithIcon.class);
+                    i18n.getMessage("button.cancel"), "", "", true, FontAwesome.TIMES, SPUIButtonStyleNoBorderWithIcon.class);
             cancelButton.setSizeUndefined();
             cancelButton.addStyleName("default-color");
             cancelButton.addClickListener(this);
