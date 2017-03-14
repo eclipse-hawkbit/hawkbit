@@ -12,8 +12,6 @@ package org.eclipse.hawkbit.ui.utils;
 /**
  * Interface to provide the unchanged constants.
  */
-// Exception squid:S00104 - file length unproblematic. Constants only.
-@SuppressWarnings("squid:S00104")
 public final class UIComponentIdProvider {
     /**
      * ID-Target.
@@ -67,50 +65,29 @@ public final class UIComponentIdProvider {
      * ID for add target filter icon
      */
     public static final String TARGET_FILTER_ADD_ICON_ID = "target.filter.add.id";
-    /**
-     * ID-Dist.
-     */
+
     public static final String DIST_TABLE_ID = "dist.tableId";
 
     public static final String DIST_ADD_CAPTION = "caption.add.dist";
 
     public static final String DIST_UPDATE_CAPTION = "caption.update.dist";
 
-    /**
-     * ID-Dist.Name.
-     */
     public static final String DIST_ADD_NAME = "dist.add.name";
-    /**
-     * ID-Dist.Version.
-     */
+
     public static final String DIST_ADD_VERSION = "dist.add.version";
-    /**
-     * ID-Dist.DistSetType.
-     */
+
     public static final String DIST_ADD_DISTSETTYPE = "dist.add.distsettype";
-    /**
-     * ID-Dist.desc.
-     */
+
     public static final String DIST_ADD_DESC = "dist.add.desc";
-    /**
-     * /** ID-Dist.DELETE.
-     */
+
     public static final String DIST_DELETE_ALL = "dist.delete.all";
-    /**
-     * ID-Dist.MigCheck.
-     */
+
     public static final String DIST_ADD_MIGRATION_CHECK = "dist.add.required.migration";
-    /**
-     * ID-Dist.Search.icon.
-     */
+
     public static final String DIST_SEARCH_ICON = "dist.search.rest.icon";
-    /**
-     * ID-Dist.Search.txt.
-     */
+
     public static final String DIST_SEARCH_TEXTFIELD = "dist.search.textfield";
-    /**
-     * ID - Dist.Add.
-     */
+
     public static final String DIST_ADD_ICON = "dist.add.icon";
     /**
      * ID for Distribution Tag ComboBox
