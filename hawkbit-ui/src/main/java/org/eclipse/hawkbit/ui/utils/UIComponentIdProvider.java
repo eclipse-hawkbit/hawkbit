@@ -12,6 +12,8 @@ package org.eclipse.hawkbit.ui.utils;
 /**
  * Interface to provide the unchanged constants.
  */
+// Exception squid:S00104 - file length unproblematic. Constants only.
+@SuppressWarnings("squid:S00104")
 public final class UIComponentIdProvider {
     /**
      * ID-Target.
@@ -997,7 +999,7 @@ public final class UIComponentIdProvider {
 
     public static final String NOTIFICATION_UNREAD_ID = "notification.unread";
 
-    public static final String NOTIFICATION_UNREAD_POPUP_id = "notification.unread.popup";
+    public static final String NOTIFICATION_UNREAD_POPUP_ID = "notification.unread.popup";
 
     public static final String NOTIFICATION_MENU_ID = "notification.menu.";
 
