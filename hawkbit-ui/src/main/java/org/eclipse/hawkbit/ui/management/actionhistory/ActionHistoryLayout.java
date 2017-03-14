@@ -53,7 +53,6 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
     public ActionHistoryLayout(final VaadinMessageSource i18n, final DeploymentManagement deploymentManagement,
             final UIEventBus eventBus, final UINotification notification, final ManagementUIState managementUIState) {
         super(i18n, eventBus);
-        managementUIState.setActionHistoryMaximized(false);
         this.deploymentManagement = deploymentManagement;
         this.notification = notification;
         this.managementUIState = managementUIState;

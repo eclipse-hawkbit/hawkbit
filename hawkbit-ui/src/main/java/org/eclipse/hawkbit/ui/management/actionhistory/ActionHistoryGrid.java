@@ -106,7 +106,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
 
     private final BeanQueryFactory<ActionBeanQuery> targetQF = new BeanQueryFactory<>(ActionBeanQuery.class);
 
-    Boolean forceClientRefreshToggle = Boolean.TRUE;
+    boolean forceClientRefreshToggle = true;
 
     /**
      * Constructor.
@@ -125,7 +125,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         this.managementUIState = managementUIState;
 
         setMaximizeSupport(new ActionHistoryMaximizeSupport());
-        setSingleSelectionSupport(new SingleSelectionSupport());
+        setSingleSelectionSupport(new SingleSelectionSupport(managementUIState.isActionHistoryMaximized()));
         setGeneratedPropertySupport(new ActionHistoryGeneratedPropertySupport());
         setDetailsSupport(new DetailsSupport());
 
@@ -447,7 +447,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         getColumn(ProxyAction.PXY_ACTION_DS_NAME_VERSION).setHeaderCaption(SPUIDefinitions.ACTION_HIS_TBL_DIST);
         getColumn(ProxyAction.PXY_ACTION_LAST_MODIFIED_AT).setHeaderCaption(SPUIDefinitions.ACTION_HIS_TBL_DATETIME);
         getColumn(ProxyAction.PXY_ACTION_STATUS).setHeaderCaption(SPUIDefinitions.ACTION_HIS_TBL_STATUS);
-        getColumn(VIRT_PROP_FORCED).setHeaderCaption(forceClientRefreshToggle.toString());
+        getColumn(VIRT_PROP_FORCED).setHeaderCaption(String.valueOf(forceClientRefreshToggle));
         forceClientRefreshToggle = !forceClientRefreshToggle;
 
         newHeaderRow.join(VIRT_PROP_FORCED, VIRT_PROP_TIMEFORCED).setText(SPUIDefinitions.ACTION_HIS_TBL_FORCED);
@@ -486,6 +486,8 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
      * Creates the grid content for maximized-state.
      */
     private void createMaximizedContent() {
+        getSingleSelectionSupport().enable();
+        getDetailsSupport().populateSelection();
         getMaximizeSupport().createMaximizedContent();
         recalculateColumnWidths();
     }
@@ -494,6 +496,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
      * Creates the grid content for normal (minimized) state.
      */
     private void createMinimizedContent() {
+        getSingleSelectionSupport().disable();
         getMaximizeSupport().createMinimizedContent();
         recalculateColumnWidths();
     }

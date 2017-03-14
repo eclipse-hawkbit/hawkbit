@@ -52,7 +52,7 @@ public class ActionStatusGrid extends AbstractGrid<LazyQueryContainer> {
     protected ActionStatusGrid(final VaadinMessageSource i18n, final UIEventBus eventBus) {
         super(i18n, eventBus, null);
 
-        setSingleSelectionSupport(new SingleSelectionSupport());
+        setSingleSelectionSupport(new SingleSelectionSupport(true));
         setDetailsSupport(new DetailsSupport());
 
         final LabelConfig conf = new ActionHistoryGrid.LabelConfig();

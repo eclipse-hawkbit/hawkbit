@@ -13,9 +13,9 @@ import java.util.Locale;
 
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -51,7 +51,8 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
      * @param eventBus
      * @param permissionChecker
      */
-    protected AbstractGrid(final VaadinMessageSource i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker) {
+    protected AbstractGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
+            final SpPermissionChecker permissionChecker) {
         this.i18n = i18n;
         this.eventBus = eventBus;
         this.permissionChecker = permissionChecker;
@@ -149,7 +150,7 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
      * @param maximizeSupport
      *            encapsulates behavior for minimize and maximize.
      */
-    protected void setMaximizeSupport(AbstractMaximizeSupport maximizeSupport) {
+    protected void setMaximizeSupport(final AbstractMaximizeSupport maximizeSupport) {
         this.maximizeSupport = maximizeSupport;
     }
 
@@ -182,7 +183,7 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
      * @param generatedPropertySupport
      *            that encapsulates behavior for generated properties
      */
-    protected void setGeneratedPropertySupport(AbstractGeneratedPropertySupport generatedPropertySupport) {
+    protected void setGeneratedPropertySupport(final AbstractGeneratedPropertySupport generatedPropertySupport) {
         this.generatedPropertySupport = generatedPropertySupport;
     }
 
@@ -216,7 +217,7 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
      *            encapsulates behavior for single-selection and offers some
      *            convenient functionality.
      */
-    protected void setSingleSelectionSupport(SingleSelectionSupport singleSelectionSupport) {
+    protected void setSingleSelectionSupport(final SingleSelectionSupport singleSelectionSupport) {
         this.singleSelectionSupport = singleSelectionSupport;
     }
 
@@ -248,7 +249,7 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
      * @param detailsSupport
      *            encapsulates behavior for changes of master-selection.
      */
-    protected void setDetailsSupport(DetailsSupport detailsSupport) {
+    protected void setDetailsSupport(final DetailsSupport detailsSupport) {
         this.detailsSupport = detailsSupport;
     }
 
@@ -339,7 +340,7 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
      */
     protected HeaderRow resetHeaderDefaultRow() {
         getHeader().removeRow(getHeader().getDefaultRow());
-        HeaderRow newHeaderRow = getHeader().appendRow();
+        final HeaderRow newHeaderRow = getHeader().appendRow();
         getHeader().setDefaultRow(newHeaderRow);
         return newHeaderRow;
     }
@@ -363,7 +364,7 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
         public void populateMasterDataAndRecalculateContainer(final Long master) {
             this.master = master;
             recalculateContainer();
-            populateSelection(master);
+            populateSelection();
         }
 
         /**
@@ -377,15 +378,14 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
         public void populateMasterDataAndRecreateContainer(final Long master) {
             this.master = master;
             recreateContainer();
-            populateSelection(master);
+            populateSelection();
         }
 
         /**
          * Propagates the selection if needed.
          *
-         * @param master
          */
-        private void populateSelection(final Long master) {
+        public void populateSelection() {
             if (master != null && hasSingleSelectionSupport()) {
                 getSingleSelectionSupport().selectFirstRow();
             } else if (master == null && hasSingleSelectionSupport()) {
@@ -471,8 +471,8 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
     /**
      * Grids that are used in conjunction with
      * {@link GeneratedPropertyContainer}, might use
-     * {@link AbstractGeneratedPropertySupport} to get type-save access to the raw
-     * container as well as the decorated container.
+     * {@link AbstractGeneratedPropertySupport} to get type-save access to the
+     * raw container as well as the decorated container.
      */
     protected abstract class AbstractGeneratedPropertySupport {
 
@@ -513,7 +513,7 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
          *            raw-container to be wrapped.
          * @return decorated container.
          */
-        protected GeneratedPropertyContainer decorate(T container) {
+        protected GeneratedPropertyContainer decorate(final T container) {
             return new GeneratedPropertyContainer(container);
         }
     }
@@ -522,15 +522,34 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
      * Support for single selection on the grid.
      */
     protected class SingleSelectionSupport {
+        private boolean enabled;
 
-        public SingleSelectionSupport() {
+        public SingleSelectionSupport(final boolean enabled) {
+            if (enabled) {
+                enable();
+            } else {
+                disable();
+            }
+        }
+
+        public void enable() {
+            enabled = true;
             setSelectionMode(SelectionMode.SINGLE);
         }
 
+        public void disable() {
+            enabled = false;
+            setSelectionMode(SelectionMode.NONE);
+        }
+
         /**
-         * Selects the first row if available.
+         * Selects the first row if available and enabled.
          */
         public void selectFirstRow() {
+            if (!enabled) {
+                return;
+            }
+
             final Indexed container = getContainerDataSource();
             final int size = container.size();
             if (size > 0) {
@@ -578,7 +597,7 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
          * @param right
          *            list of propertyIds that should be right-aligned
          */
-        public AlignCellStyleGenerator(String[] left, String[] center, String[] right) {
+        public AlignCellStyleGenerator(final String[] left, final String[] center, final String[] right) {
             this.left = left;
             this.center = center;
             this.right = right;
@@ -610,15 +629,15 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
          *
          * @param datePropertyId
          */
-        public ModifiedTimeTooltipGenerator(String datePropertyId) {
+        public ModifiedTimeTooltipGenerator(final String datePropertyId) {
             this.datePropertyId = datePropertyId;
         }
 
         @Override
-        public String getDescription(CellReference cell) {
+        public String getDescription(final CellReference cell) {
             String tooltip = null;
             if (datePropertyId.equals(cell.getPropertyId())) {
-                Long timestamp = (Long) cell.getItem().getItemProperty(datePropertyId).getValue();
+                final Long timestamp = (Long) cell.getItem().getItemProperty(datePropertyId).getValue();
                 tooltip = SPDateTimeUtil.getFormattedDate(timestamp);
             }
             return tooltip;
@@ -633,13 +652,14 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
         private static final long serialVersionUID = 1247513913478717845L;
 
         @Override
-        public Long convertToModel(String value, Class<? extends Long> targetType, Locale locale) {
+        public Long convertToModel(final String value, final Class<? extends Long> targetType, final Locale locale) {
             // not needed
             return null;
         }
 
         @Override
-        public String convertToPresentation(Long value, Class<? extends String> targetType, Locale locale) {
+        public String convertToPresentation(final Long value, final Class<? extends String> targetType,
+                final Locale locale) {
             return SPDateTimeUtil.getFormattedDate(value, SPUIDefinitions.LAST_QUERY_DATE_FORMAT_SHORT);
         }
 

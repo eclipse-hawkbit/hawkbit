@@ -51,7 +51,7 @@ public class DefaultGridHeader extends VerticalLayout {
      * @param managementUIState
      * @param titleText
      */
-    public DefaultGridHeader(final ManagementUIState managementUIState, String titleText) {
+    public DefaultGridHeader(final ManagementUIState managementUIState, final String titleText) {
         this.managementUIState = managementUIState;
         this.titleText = titleText;
     }
@@ -127,7 +127,7 @@ public class DefaultGridHeader extends VerticalLayout {
      *            encapsulates layout of min-max-button and behavior for
      *            minimize and maximize.
      */
-    public void setHeaderMaximizeSupport(AbstractHeaderMaximizeSupport maximizeSupport) {
+    public void setHeaderMaximizeSupport(final AbstractHeaderMaximizeSupport maximizeSupport) {
         this.maximizeSupport = maximizeSupport;
     }
 
@@ -157,7 +157,7 @@ public class DefaultGridHeader extends VerticalLayout {
      *
      * @param newTitle
      */
-    public void updateTitle(String newTitle) {
+    public void updateTitle(final String newTitle) {
         title.setValue(newTitle);
     }
 
@@ -174,7 +174,7 @@ public class DefaultGridHeader extends VerticalLayout {
          *
          * @param maximizeButtonId
          */
-        protected AbstractHeaderMaximizeSupport(String maximizeButtonId) {
+        protected AbstractHeaderMaximizeSupport(final String maximizeButtonId) {
             maxMinButton = createMinMaxButton(maximizeButtonId);
             // listener for maximizing action history
             maxMinButton.addClickListener(event -> maxMinButtonClicked());
@@ -189,12 +189,12 @@ public class DefaultGridHeader extends VerticalLayout {
                 // Clicked on max Icon
                 showMinIcon();
                 maximize();
-                managementUIState.setActionHistoryMaximized(Boolean.TRUE);
+                managementUIState.setActionHistoryMaximized(true);
             } else {
                 // Clicked on min icon
                 showMaxIcon();
                 minimize();
-                managementUIState.setActionHistoryMaximized(Boolean.FALSE);
+                managementUIState.setActionHistoryMaximized(false);
             }
         }
 
@@ -217,9 +217,9 @@ public class DefaultGridHeader extends VerticalLayout {
          *            the button id for the min-max-button
          * @return newly cretaed min-max-button
          */
-        protected SPUIButton createMinMaxButton(String buttonId) {
-            return (SPUIButton) SPUIComponentProvider.getButton(buttonId, "", "Maximize", null,
-                    true, FontAwesome.EXPAND, SPUIButtonStyleSmallNoBorder.class);
+        protected SPUIButton createMinMaxButton(final String buttonId) {
+            return (SPUIButton) SPUIComponentProvider.getButton(buttonId, "", "Maximize", null, true,
+                    FontAwesome.EXPAND, SPUIButtonStyleSmallNoBorder.class);
         }
 
         /**

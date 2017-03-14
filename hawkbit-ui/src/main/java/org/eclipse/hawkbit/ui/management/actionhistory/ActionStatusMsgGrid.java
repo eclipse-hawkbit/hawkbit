@@ -53,7 +53,7 @@ public class ActionStatusMsgGrid extends AbstractGrid<LazyQueryContainer> {
         super(i18n, eventBus, null);
         noMsgText = createNoMessageProxy(i18n);
 
-        setSingleSelectionSupport(new SingleSelectionSupport());
+        setSingleSelectionSupport(new SingleSelectionSupport(true));
         setDetailsSupport(new DetailsSupport());
 
         alignGenerator = new AlignCellStyleGenerator(null, null, rightAlignedColumns);
