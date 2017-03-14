@@ -67,10 +67,7 @@ public class DistributionTableHeader extends AbstractTableHeader {
 
     @Override
     protected String onLoadSearchBoxValue() {
-        if (managementUIState.getDistributionTableFilters().getSearchText().isPresent()) {
-            return managementUIState.getDistributionTableFilters().getSearchText().get();
-        }
-        return null;
+        return managementUIState.getDistributionTableFilters().getSearchText().orElse(null);
     }
 
     @Override

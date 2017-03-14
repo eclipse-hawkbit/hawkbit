@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.management.dstable;
 
 import java.util.Optional;
+import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -113,18 +114,17 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
     }
 
     @Override
-    protected Boolean onLoadIsTableRowSelected() {
-        return !(managementUIState.getSelectedDsIdName().isPresent()
-                && managementUIState.getSelectedDsIdName().get().isEmpty());
+    protected boolean onLoadIsTableRowSelected() {
+        return managementUIState.getSelectedDsIdName().map(Set::isEmpty).orElse(true);
     }
 
     @Override
-    protected Boolean onLoadIsTableMaximized() {
+    protected boolean onLoadIsTableMaximized() {
         return managementUIState.isDsTableMaximized();
     }
 
     @Override
-    protected Boolean hasEditPermission() {
+    protected boolean hasEditPermission() {
         return getPermissionChecker().hasUpdateDistributionPermission();
     }
 
@@ -191,7 +191,7 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
     }
 
     @Override
-    protected Boolean isMetadataIconToBeDisplayed() {
+    protected boolean isMetadataIconToBeDisplayed() {
         return true;
     }
 

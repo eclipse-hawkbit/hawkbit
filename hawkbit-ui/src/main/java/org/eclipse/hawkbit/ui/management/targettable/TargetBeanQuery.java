@@ -8,18 +8,12 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.apache.commons.lang3.ArrayUtils.isEmpty;
-import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.isNotNullOrEmpty;
-import static org.eclipse.hawkbit.ui.utils.SPUIDefinitions.TARGET_TABLE_CREATE_AT_SORT_ORDER;
-import static org.springframework.data.domain.Sort.Direction.ASC;
-import static org.springframework.data.domain.Sort.Direction.DESC;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -36,6 +30,7 @@ import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.util.CollectionUtils;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
@@ -50,7 +45,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
     private static final long serialVersionUID = -5645680058303167558L;
 
-    private Sort sort = new Sort(TARGET_TABLE_CREATE_AT_SORT_ORDER, "id");
+    private Sort sort = new Sort(SPUIDefinitions.TARGET_TABLE_CREATE_AT_SORT_ORDER, "id");
     private transient Collection<TargetUpdateStatus> status;
     private transient Boolean overdueState;
     private String[] targetTags;
@@ -80,7 +75,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
         super(definition, queryConfig, sortIds, sortStates);
 
-        if (isNotNullOrEmpty(queryConfig)) {
+        if (HawkbitCommonUtil.isNotNullOrEmpty(queryConfig)) {
             status = (Collection<TargetUpdateStatus>) queryConfig.get(SPUIDefinitions.FILTER_BY_STATUS);
             overdueState = (Boolean) queryConfig.get(SPUIDefinitions.FILTER_BY_OVERDUE_STATE);
             targetTags = (String[]) queryConfig.get(SPUIDefinitions.FILTER_BY_TAG);
@@ -94,12 +89,12 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             pinnedDistId = (Long) queryConfig.get(SPUIDefinitions.ORDER_BY_DISTRIBUTION);
         }
 
-        if (!isEmpty(sortStates)) {
+        if (!ArrayUtils.isEmpty(sortStates)) {
 
-            sort = new Sort(sortStates[0] ? ASC : DESC, (String) sortIds[0]);
+            sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortIds[0]);
 
             for (int targetId = 1; targetId < sortIds.length; targetId++) {
-                sort.and(new Sort(sortStates[targetId] ? ASC : DESC, (String) sortIds[targetId]));
+                sort.and(new Sort(sortStates[targetId] ? Direction.ASC : Direction.DESC, (String) sortIds[targetId]));
             }
         }
     }
@@ -209,7 +204,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
     private boolean isAnyFilterSelected() {
         final boolean isFilterSelected = isTagSelected() || isOverdueFilterEnabled();
         return isFilterSelected || !CollectionUtils.isEmpty(status) || distributionId != null
-                || !isNullOrEmpty(searchText);
+                || !Strings.isNullOrEmpty(searchText);
     }
 
     private TargetManagement getTargetManagement() {

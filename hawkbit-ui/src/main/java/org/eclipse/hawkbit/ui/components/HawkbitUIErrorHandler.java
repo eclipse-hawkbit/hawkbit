@@ -8,13 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.components;
 
-import static com.vaadin.ui.themes.ValoTheme.NOTIFICATION_CLOSABLE;
-import static com.vaadin.ui.themes.ValoTheme.NOTIFICATION_FAILURE;
-import static com.vaadin.ui.themes.ValoTheme.NOTIFICATION_SMALL;
-import static java.lang.System.lineSeparator;
-import static java.util.stream.Collectors.joining;
-
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
@@ -33,6 +28,7 @@ import com.vaadin.shared.Connector;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Default handler for Hawkbit UI.
@@ -42,7 +38,8 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = LoggerFactory.getLogger(HawkbitUIErrorHandler.class);
 
-    private static final String STYLE = NOTIFICATION_FAILURE + " " + NOTIFICATION_SMALL + " " + NOTIFICATION_CLOSABLE;
+    private static final String STYLE = ValoTheme.NOTIFICATION_FAILURE + " " + ValoTheme.NOTIFICATION_SMALL + " "
+            + ValoTheme.NOTIFICATION_CLOSABLE;
 
     @Override
     public void error(final ErrorEvent event) {
@@ -121,6 +118,6 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
         }
 
         return violations.stream().map(violation -> violation.getPropertyPath() + " " + violation.getMessage())
-                .collect(joining(lineSeparator()));
+                .collect(Collectors.joining(System.lineSeparator()));
     }
 }

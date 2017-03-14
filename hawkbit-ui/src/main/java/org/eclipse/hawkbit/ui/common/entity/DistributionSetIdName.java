@@ -65,7 +65,7 @@ public class DistributionSetIdName implements Serializable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (id == null ? 0 : id.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
     }
 
@@ -77,7 +77,7 @@ public class DistributionSetIdName implements Serializable {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof DistributionSetIdName)) {
+        if (getClass() != obj.getClass()) {
             return false;
         }
         final DistributionSetIdName other = (DistributionSetIdName) obj;

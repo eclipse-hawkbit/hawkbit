@@ -139,10 +139,7 @@ public class DistributionSetSelectTable extends Table {
     }
 
     private Object getItemIdToSelect() {
-        if (manageDistUIState.getSelectedDistributions().isPresent()) {
-            return manageDistUIState.getSelectedDistributions().get();
-        }
-        return null;
+        return manageDistUIState.getSelectedDistributions().orElse(null);
     }
 
     private void selectRow() {

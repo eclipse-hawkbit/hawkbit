@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.simulator.amqp;
 
-import static org.eclipse.hawkbit.simulator.amqp.AmqpProperties.CONFIGURATION_PREFIX;
-
 import java.time.Duration;
 import java.util.Map;
 
@@ -43,7 +41,7 @@ import com.google.common.collect.Maps;
  */
 @Configuration
 @EnableConfigurationProperties(AmqpProperties.class)
-@ConditionalOnProperty(prefix = CONFIGURATION_PREFIX, name = "enabled")
+@ConditionalOnProperty(prefix = AmqpProperties.CONFIGURATION_PREFIX, name = "enabled")
 public class AmqpConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmqpConfiguration.class);

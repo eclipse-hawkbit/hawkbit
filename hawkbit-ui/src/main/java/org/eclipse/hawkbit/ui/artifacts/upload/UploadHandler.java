@@ -17,8 +17,8 @@ import org.eclipse.hawkbit.ui.artifacts.event.UploadFileStatus;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent.UploadStatusEventType;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vaadin.spring.events.EventBus;
@@ -207,16 +207,13 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     @Override
     public void uploadStarted(final StartedEvent event) {
         uploadInterrupted = false;
-        selectedSwForUpload = artifactUploadState.getSelectedBaseSoftwareModule().isPresent()
-                ? artifactUploadState.getSelectedBaseSoftwareModule().get() : null;
+        selectedSwForUpload = artifactUploadState.getSelectedBaseSoftwareModule().orElse(null);
 
-        if (view.isSoftwareModuleSelected()) {
-            // single file session
-            if (!view.checkIfFileIsDuplicate(event.getFilename(), selectedSwForUpload)) {
-                LOG.debug("Upload started for file :{}", event.getFilename());
-                eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_STARTED,
-                        new UploadFileStatus(event.getFilename(), 0, 0, selectedSwForUpload)));
-            }
+        if (selectedSwForUpload != null && view.checkIfSoftwareModuleIsSelected()
+                && !view.checkIfFileIsDuplicate(event.getFilename(), selectedSwForUpload)) {
+            LOG.debug("Upload started for file :{}", event.getFilename());
+            eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_STARTED,
+                    new UploadFileStatus(event.getFilename(), 0, 0, selectedSwForUpload)));
         } else {
             failureReason = i18n.getMessage("message.upload.failed");
             upload.interruptUpload();

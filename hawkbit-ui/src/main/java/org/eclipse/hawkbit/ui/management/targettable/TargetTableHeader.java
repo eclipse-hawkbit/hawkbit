@@ -239,8 +239,7 @@ public class TargetTableHeader extends AbstractTableHeader {
     }
 
     private String getSearchText() {
-        return managementUIState.getTargetTableFilters().getSearchText().isPresent()
-                ? managementUIState.getTargetTableFilters().getSearchText().get() : null;
+        return managementUIState.getTargetTableFilters().getSearchText().orElse(null);
     }
 
     @Override
@@ -423,9 +422,7 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     @Override
     protected void displayFilterDropedInfoOnLoad() {
-        if (managementUIState.getTargetTableFilters().getDistributionSet().isPresent()) {
-            addFilterTextField(managementUIState.getTargetTableFilters().getDistributionSet().get());
-        }
+        managementUIState.getTargetTableFilters().getDistributionSet().ifPresent(this::addFilterTextField);
     }
 
     @Override

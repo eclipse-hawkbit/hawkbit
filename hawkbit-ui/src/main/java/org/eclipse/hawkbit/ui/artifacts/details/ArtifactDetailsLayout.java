@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.ArtifactDetailsEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
@@ -114,11 +113,11 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         createComponents();
         buildLayout();
         eventBus.subscribe(this);
-        if (artifactUploadState.getSelectedBaseSoftwareModule().isPresent()) {
-            final SoftwareModule selectedSoftwareModule = artifactUploadState.getSelectedBaseSoftwareModule().get();
-            populateArtifactDetails(selectedSoftwareModule.getId(), HawkbitCommonUtil
-                    .getFormattedNameVersion(selectedSoftwareModule.getName(), selectedSoftwareModule.getVersion()));
-        }
+        artifactUploadState.getSelectedBaseSoftwareModule()
+                .ifPresent(selectedSoftwareModule -> populateArtifactDetails(selectedSoftwareModule.getId(),
+                        HawkbitCommonUtil.getFormattedNameVersion(selectedSoftwareModule.getName(),
+                                selectedSoftwareModule.getVersion())));
+
         if (isMaximized()) {
             maximizedArtifactDetailsView();
         }

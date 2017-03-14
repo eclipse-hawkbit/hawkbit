@@ -129,12 +129,12 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
     }
 
     @Override
-    protected Boolean onLoadIsTableRowSelected() {
+    protected boolean onLoadIsTableRowSelected() {
         return managementUIState.getLastSelectedTargetId() != null;
     }
 
     @Override
-    protected Boolean onLoadIsTableMaximized() {
+    protected boolean onLoadIsTableMaximized() {
         return managementUIState.isTargetTableMaximized();
     }
 
@@ -239,7 +239,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
     }
 
     @Override
-    protected Boolean hasEditPermission() {
+    protected boolean hasEditPermission() {
         return getPermissionChecker().hasUpdateTargetPermission();
     }
 
@@ -259,7 +259,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
     }
 
     @Override
-    protected Boolean isMetadataIconToBeDisplayed() {
+    protected boolean isMetadataIconToBeDisplayed() {
         return false;
     }
 

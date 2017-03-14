@@ -9,13 +9,12 @@
 
 package org.eclipse.hawkbit.repository.test.matcher;
 
-import static java.util.Optional.ofNullable;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.Matchers.equalTo;
 
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.test.util.TestContextProvider;
@@ -60,7 +59,7 @@ public class EventVerifier implements TestRule {
     }
 
     private Optional<Expect[]> getExpectationsFrom(final Description description) {
-        return ofNullable(description.getAnnotation(ExpectEvents.class)).map(ExpectEvents::value);
+        return Optional.ofNullable(description.getAnnotation(ExpectEvents.class)).map(ExpectEvents::value);
     }
 
     private void beforeTest() {
@@ -78,8 +77,8 @@ public class EventVerifier implements TestRule {
 
         for (final Expect expectedEvent : expectedEvents) {
             try {
-                Awaitility.await().atMost(5, SECONDS).until(() -> eventCaptor.getCountFor(expectedEvent.type()),
-                        equalTo(expectedEvent.count()));
+                Awaitility.await().atMost(5, TimeUnit.SECONDS)
+                        .until(() -> eventCaptor.getCountFor(expectedEvent.type()), equalTo(expectedEvent.count()));
 
             } catch (final ConditionTimeoutException ex) {
                 Assert.fail("Did not receive the expected amount of events form " + expectedEvent.type() + " Expected: "

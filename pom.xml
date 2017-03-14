@@ -160,9 +160,9 @@
       <!-- Release - END -->
 
       <!-- Sonar - START -->
-      <sonar.host.url>https://sonar.eu-gb.mybluemix.net</sonar.host.url>
+      <sonar.host.url>https://sonar.ops.bosch-iot-rollouts.com</sonar.host.url>
       <sonar.github.repository>eclipse/hawkbit</sonar.github.repository>
-      <sonar.links.homepage>https://projects.eclipse.org/projects/iot.hawkbit</sonar.links.homepage>
+      <sonar.links.homepage>https://www.eclipse.org/hawkbit</sonar.links.homepage>
       <sonar.links.ci>https://circleci.com/gh/eclipse/hawkbit</sonar.links.ci>
       <jacoco.version>0.7.7.201606060606</jacoco.version>
       <jacoco.outputDir>${project.basedir}/../target/</jacoco.outputDir>
@@ -296,7 +296,7 @@
             <plugin>
                <groupId>org.sonarsource.scanner.maven</groupId>
                <artifactId>sonar-maven-plugin</artifactId>
-               <version>3.1.1</version>
+               <version>3.2</version>
             </plugin>
             <plugin>
                <groupId>org.eclipse.m2e</groupId>

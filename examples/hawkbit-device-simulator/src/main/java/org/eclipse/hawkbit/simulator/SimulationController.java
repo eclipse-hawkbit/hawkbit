@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.simulator;
 
-import static org.eclipse.hawkbit.simulator.amqp.AmqpProperties.CONFIGURATION_PREFIX;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -84,7 +82,7 @@ public class SimulationController {
         if (protocol == Protocol.DMF_AMQP && isDmfDisabled()) {
             return ResponseEntity.badRequest()
                     .body("The AMQP interface has been disabled, to use DMF protocol you need to enable the AMQP interface via '"
-                            + CONFIGURATION_PREFIX + ".enabled=true'");
+                            + AmqpProperties.CONFIGURATION_PREFIX + ".enabled=true'");
         }
 
         for (int i = 0; i < amount; i++) {

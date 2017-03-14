@@ -658,13 +658,6 @@ public class JpaSoftwareManagement implements SoftwareManagement {
         return Optional.ofNullable(softwareModuleMetadataRepository.findOne(new SwMetadataCompositeKey(moduleId, key)));
     }
 
-    private void checkAndThrowAlreadyExistsIfSoftwareModuleMetadataExists(final SwMetadataCompositeKey metadataId) {
-        if (softwareModuleMetadataRepository.exists(metadataId)) {
-            throw new EntityAlreadyExistsException(
-                    "Metadata entry with key '" + metadataId.getKey() + "' already exists");
-        }
-    }
-
     private static void throwMetadataKeyAlreadyExists(final String metadataKey) {
         throw new EntityAlreadyExistsException("Metadata entry with key '" + metadataKey + "' already exists");
     }

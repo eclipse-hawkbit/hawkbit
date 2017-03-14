@@ -8,10 +8,6 @@
  */
 package org.eclipse.hawkbit.autoconfigure.security;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static org.springframework.context.annotation.AdviceMode.ASPECTJ;
-import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
-
 import java.io.IOException;
 
 import javax.annotation.PostConstruct;
@@ -55,8 +51,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.boot.context.embedded.ServletListenerRegistrationBean;
+import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -88,14 +86,16 @@ import org.vaadin.spring.security.web.VaadinRedirectStrategy;
 import org.vaadin.spring.security.web.authentication.VaadinAuthenticationSuccessHandler;
 import org.vaadin.spring.security.web.authentication.VaadinUrlAuthenticationSuccessHandler;
 
+import com.google.common.collect.Lists;
+
 /**
  * All configurations related to HawkBit's authentication and authorization
  * layer.
  */
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true, mode = ASPECTJ, proxyTargetClass = true, securedEnabled = true)
-@Order(value = HIGHEST_PRECEDENCE)
+@EnableGlobalMethodSecurity(prePostEnabled = true, mode = AdviceMode.ASPECTJ, proxyTargetClass = true, securedEnabled = true)
+@Order(value = Ordered.HIGHEST_PRECEDENCE)
 public class SecurityManagedConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(SecurityManagedConfiguration.class);
@@ -217,7 +217,7 @@ public class SecurityManagedConfiguration {
 
                 final AnonymousAuthenticationFilter anoymousFilter = new AnonymousAuthenticationFilter(
                         "controllerAnonymousFilter", "anonymous",
-                        newArrayList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS),
+                        Lists.newArrayList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS),
                                 new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_DOWNLOAD_ROLE)));
                 anoymousFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
                 httpSec.requestMatchers().antMatchers("/*/controller/v1/**", "/*/controller/artifacts/v1/**").and()

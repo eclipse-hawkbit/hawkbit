@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.management.footer;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -29,7 +30,6 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.google.common.base.Optional;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Label;
@@ -103,9 +103,10 @@ public class CountMessageLabel extends Label {
      */
     @EventBusListenerMethod(scope = EventScope.UI)
     public void onEvent(final PinUnpinEvent event) {
-        if (event == PinUnpinEvent.PIN_DISTRIBUTION
-                && managementUIState.getTargetTableFilters().getPinnedDistId().isPresent()) {
-            displayCountLabel(managementUIState.getTargetTableFilters().getPinnedDistId().get());
+        final Optional<Long> pinnedDist = managementUIState.getTargetTableFilters().getPinnedDistId();
+
+        if (event == PinUnpinEvent.PIN_DISTRIBUTION && pinnedDist.isPresent()) {
+            displayCountLabel(pinnedDist.get());
         } else {
             setValue("");
             displayTargetCountStatus();
@@ -158,8 +159,8 @@ public class CountMessageLabel extends Label {
             message.append(filterMesage);
         }
 
-        if ((targetTable.size() + Optional.fromNullable(managementUIState.getTargetsTruncated())
-                .or(0L)) > SPUIDefinitions.MAX_TABLE_ENTRIES) {
+        if ((targetTable.size() + Optional.ofNullable(managementUIState.getTargetsTruncated())
+                .orElse(0L)) > SPUIDefinitions.MAX_TABLE_ENTRIES) {
             message.append(HawkbitCommonUtil.SP_STRING_PIPE);
             message.append(i18n.getMessage("label.filter.shown"));
             message.append(SPUIDefinitions.MAX_TABLE_ENTRIES);

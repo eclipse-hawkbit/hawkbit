@@ -121,7 +121,7 @@ public class TenantUsage {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof TenantUsage)) {
+        if (getClass() != obj.getClass()) {
             return false;
         }
         final TenantUsage other = (TenantUsage) obj;
@@ -137,14 +137,18 @@ public class TenantUsage {
         if (targets != other.targets) {
             return false;
         }
-        if (!this.getUsageData().equals(other.getUsageData())) {
-            return false;
-        }
         if (tenantName == null) {
             if (other.tenantName != null) {
                 return false;
             }
         } else if (!tenantName.equals(other.tenantName)) {
+            return false;
+        }
+        if (usageData == null) {
+            if (other.usageData != null) {
+                return false;
+            }
+        } else if (!usageData.equals(other.usageData)) {
             return false;
         }
         return true;

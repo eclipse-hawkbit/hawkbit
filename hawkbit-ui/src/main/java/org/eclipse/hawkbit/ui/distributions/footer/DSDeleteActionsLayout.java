@@ -170,9 +170,8 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
         final String swModuleTypeName = HawkbitCommonUtil.removePrefix(swTypeId,
                 SPUIDefinitions.SOFTWARE_MODULE_TAG_ID_PREFIXS);
 
-        if (manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType().isPresent()
-                && manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType().get().getName()
-                        .equalsIgnoreCase(swModuleTypeName)) {
+        if (manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType()
+                .map(type -> type.getName().equalsIgnoreCase(swModuleTypeName)).orElse(false)) {
             notification.displayValidationError(
                     i18n.getMessage("message.swmodule.type.check.delete", new Object[] { swModuleTypeName }));
         } else {
@@ -194,7 +193,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
         }
 
         final Set<DistributionSetIdName> distributionIdNameSet = findDistributionSetAllById.stream()
-                .map(distributionSet -> new DistributionSetIdName(distributionSet)).collect(Collectors.toSet());
+                .map(DistributionSetIdName::new).collect(Collectors.toSet());
 
         final int existingDeletedDistributionsSize = manageDistUIState.getDeletedDistributionList().size();
         manageDistUIState.getDeletedDistributionList().addAll(distributionIdNameSet);
