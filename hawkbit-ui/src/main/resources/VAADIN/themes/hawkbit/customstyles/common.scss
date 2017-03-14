@@ -23,8 +23,9 @@
     }
     
     .view-header-layout{
-       width: 100%;
+       width: 100% !important;
        padding-right: 20px;
+       padding-bottom: 0.3em
     }
     
   .v-ui {
@@ -51,10 +52,10 @@
       padding-right: 20px;
       padding-left: 20px;
       min-width: 1000px;
-      min-height: 400px;
+      min-height: 500px;
 	  border: 0px;   
 	  background-color: transparent;   
-	  box-shadow: none;
+	  box-shadow: none
     }
 
     //View background styles
@@ -65,7 +66,7 @@
       background-position: bottom;
       background-repeat: no-repeat;
       border-left: 0 solid #fff;
-      padding-top: 80px;
+      padding-top: 70px;
       overflow: auto;
     }
 
@@ -76,7 +77,7 @@
       font-weight: bold;
       height: 32px;
       line-height: 50px;
-      padding-bottom: 5px;
+      padding-bottom: 0px;
       padding-left: 15px;
       padding-top: 0;
       position: absolute;
@@ -103,7 +104,7 @@
       background: $logo-image no-repeat right top;
       background-position: $logo-position;
       content: "";
-      height: 80px;
+      height: 70px;
       position: absolute;
       top: 0;
       width: 100%;
