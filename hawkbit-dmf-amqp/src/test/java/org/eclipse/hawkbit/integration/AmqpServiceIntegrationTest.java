@@ -45,6 +45,7 @@ public class AmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
 
     protected static final String TENANT_EXIST = "DEFAULT";
     protected static final String REGISTER_TARGET = "NewDmfTarget";
+    protected static final String CREATED_BY = "AMQP-Controller";
 
     private ReplyToListener replyToListener;
     private DistributionSet distributionSet;
@@ -81,7 +82,7 @@ public class AmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
     protected DistributionSetAssignmentResult registerTargetAndAssignDistributionSet(final Long assignDs,
             final TargetUpdateStatus expectedStatus,
             final Set<org.eclipse.hawkbit.repository.model.SoftwareModule> expectedSoftwareModulesInMessage) {
-        registerAndAssertTargetWithExistingTenant(REGISTER_TARGET, 1, expectedStatus);
+        registerAndAssertTargetWithExistingTenant(REGISTER_TARGET, 1, expectedStatus, CREATED_BY);
 
         final DistributionSetAssignmentResult assignmentResult = assignDistributionSet(assignDs, REGISTER_TARGET);
         assertDownloadAndInstallMessage(expectedSoftwareModulesInMessage);
@@ -153,30 +154,45 @@ public class AmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
 
     protected void registerAndAssertTargetWithExistingTenant(final String target,
             final int existingTargetsAfterCreation) {
-        registerAndAssertTargetWithExistingTenant(target, existingTargetsAfterCreation, TargetUpdateStatus.REGISTERED);
+
+        registerAndAssertTargetWithExistingTenant(target, existingTargetsAfterCreation, TargetUpdateStatus.REGISTERED,
+                CREATED_BY);
+
     }
 
     protected void registerAndAssertTargetWithExistingTenant(final String target,
-            final int existingTargetsAfterCreation, final TargetUpdateStatus expectedTargetStatus) {
+            final int existingTargetsAfterCreation, final TargetUpdateStatus expectedTargetStatus,
+            final String createdBy) {
         createAndSendTarget(target, TENANT_EXIST);
         final Target registerdTarget = waitUntilIsPresent(() -> targetManagement.findTargetByControllerID(target));
         assertAllTargetsCount(existingTargetsAfterCreation);
-        assertTarget(registerdTarget, expectedTargetStatus);
+        assertTarget(registerdTarget, expectedTargetStatus, createdBy);
     }
 
-    protected void registerTargetWithExistingTenant(final String target, final int existingTargetsAfterCreation,
-            final TargetUpdateStatus expectedTargetStatus) {
+    protected void registerSameTargetAndAssertBasedOnLastPolling(final String target,
+            final int existingTargetsAfterCreation, final TargetUpdateStatus expectedTargetStatus,
+            final Long pollingTimeTargetOld) {
         createAndSendTarget(target, TENANT_EXIST);
-        final Target registerdTarget = waitUntilIsPresent(() -> targetManagement.findTargetByControllerID(target));
+        final Target registerdTarget = waitUntilIsPresent(
+                () -> findTargetBasedOnNewPolltime(target, pollingTimeTargetOld));
         assertAllTargetsCount(existingTargetsAfterCreation);
         assertThat(registerdTarget.getTargetInfo().getUpdateStatus()).isEqualTo(expectedTargetStatus);
     }
 
-    private void assertTarget(final Target target, final TargetUpdateStatus updateStatus) {
+    private Optional<Target> findTargetBasedOnNewPolltime(final String target, final Long pollingTimeTargetOld) {
+        final Optional<Target> target2 = targetManagement.findTargetByControllerIDWithDetails(target);
+        final Long pollingTimeTargetNew = target2.get().getTargetInfo().getLastTargetQuery();
+        if (pollingTimeTargetOld < pollingTimeTargetNew) {
+            return target2;
+        }
+        return Optional.empty();
+    }
+
+    private void assertTarget(final Target target, final TargetUpdateStatus updateStatus, final String createdBy) {
         assertThat(target.getTenant()).isEqualTo(TENANT_EXIST);
         assertThat(target.getDescription()).contains("Plug and Play");
         assertThat(target.getDescription()).contains(target.getControllerId());
-        assertThat(target.getCreatedBy()).isEqualTo("AMQP-Controller");
+        assertThat(target.getCreatedBy()).isEqualTo(createdBy);
         assertThat(target.getTargetInfo().getUpdateStatus()).isEqualTo(updateStatus);
         assertThat(target.getTargetInfo().getAddress())
                 .isEqualTo(IpUtil.createAmqpUri(getCurrentVhost(), AmqpTestConfiguration.REPLY_TO_EXCHANGE));

@@ -58,13 +58,10 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
 
         final String target2 = "Target2";
         registerAndAssertTargetWithExistingTenant(target2, 2);
-
-        // already registered target should not increase targets
-        // TODO 2 sekunden Micha weiß Lösung! Erst selber überlegen
-        registerAndAssertTargetWithExistingTenant(REGISTER_TARGET, 2);
-
+        final Long pollingTimeTarget2 = targetManagement.findTargetByControllerIDWithDetails(target2).get()
+                .getTargetInfo().getLastTargetQuery();
+        registerSameTargetAndAssertBasedOnLastPolling(target2, 2, TargetUpdateStatus.REGISTERED, pollingTimeTarget2);
         Mockito.verifyZeroInteractions(getDeadletterListener());
-
     }
 
     @Test
@@ -433,11 +430,11 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         assignDistributionSet(distributionSet.getId(), REGISTER_TARGET);
 
         // test
-        registerTargetWithExistingTenant(REGISTER_TARGET, 1, TargetUpdateStatus.PENDING);
+        registerAndAssertTargetWithExistingTenant(REGISTER_TARGET, 1, TargetUpdateStatus.PENDING, "bumlux");
 
         // verify
         assertDownloadAndInstallMessage(distributionSet.getModules());
-        verifyDeadLetterMessages(0);
+        Mockito.verifyZeroInteractions(getDeadletterListener());
     }
 
     @Test
@@ -450,7 +447,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
             @Expect(type = ActionUpdatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1) })
-    public void cancelActionStatus2() {
+    public void receiveCancelUpdateMessageAfterAssignmentWasCanceled() {
 
         // Setup
         controllerManagement.findOrRegisterTargetIfItDoesNotexist(REGISTER_TARGET, null);
@@ -460,11 +457,11 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         deploymentManagement.cancelAction(distributionSetAssignmentResult.getActions().get(0));
 
         // test
-        registerTargetWithExistingTenant(REGISTER_TARGET, 1, TargetUpdateStatus.PENDING);
+        registerAndAssertTargetWithExistingTenant(REGISTER_TARGET, 1, TargetUpdateStatus.PENDING, "bumlux");
 
         // verify
         assertCancelActionMessage(distributionSetAssignmentResult.getActions().get(0));
-        verifyDeadLetterMessages(0);
+        Mockito.verifyZeroInteractions(getDeadletterListener());
     }
 
     @Test
@@ -511,10 +508,8 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
 
         sendActionUpdateStatus(new ActionUpdateStatus(actionId, ActionStatus.CANCEL_REJECTED));
         assertAction(actionId, Status.RUNNING, Status.CANCELING, Status.CANCEL_REJECTED);
-
     }
 
-    // TODO events
     @Test
     @Description("Verify that sending an update controller attribute message to an existing target works.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
@@ -533,7 +528,6 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
 
         // validate
         assertUpdateAttributes(target, controllerAttribute.getAttributes());
-
     }
 
     @Test
@@ -559,11 +553,12 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         verifyDeadLetterMessages(1);
         final AttributeUpdate controllerAttributeEmpty = new AttributeUpdate();
         assertUpdateAttributes(target, controllerAttributeEmpty.getAttributes());
-
     }
 
     @Test
     @Description("Verify that sending an update controller attribute message with invalid body to an existing target does not work.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 0), @Expect(type = TargetPollEvent.class, count = 1) })
     public void updateAttributesWithWrongBody() {
 
         // setup
@@ -580,7 +575,6 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
 
         // verify
         verifyDeadLetterMessages(1);
-
     }
 
     private Long registerTargetAndSendActionStatus(final ActionStatus sendActionStatus) {
