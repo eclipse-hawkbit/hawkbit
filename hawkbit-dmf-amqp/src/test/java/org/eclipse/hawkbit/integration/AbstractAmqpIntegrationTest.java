@@ -15,50 +15,42 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
 import org.eclipse.hawkbit.AmqpTestConfiguration;
-import org.eclipse.hawkbit.AmqpVHostService;
-import org.eclipse.hawkbit.amqp.AmqpProperties;
+import org.eclipse.hawkbit.RabbitMqSetupService;
 import org.eclipse.hawkbit.amqp.DmfApiConfiguration;
 import org.eclipse.hawkbit.integration.listener.DeadletterListener;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.mockito.Mockito;
-import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.junit.BrokerRunning;
 import org.springframework.amqp.rabbit.test.RabbitListenerTestHarness;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 
 import com.jayway.awaitility.Awaitility;
 import com.jayway.awaitility.core.ConditionFactory;
 
 @SpringApplicationConfiguration(classes = { RepositoryApplicationConfiguration.class, AmqpTestConfiguration.class,
         DmfApiConfiguration.class })
-// TODO Für jeden Test eigenen vhost siehe datenbank schema --> cleaning
+// Dirty context is necessary to create a new vhost and recreate all necessary
+// beans after every test class.
+@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTest {
 
     @ClassRule
-    // TODO: hostname muss konfigurierbar sein
     public static BrokerRunning brokerRunning = BrokerRunning.isRunning();
+    static {
+        brokerRunning.setHostName(RabbitMqSetupService.getHostname());
+    }
 
     @Autowired
+    @Qualifier("dmfClient")
     private RabbitTemplate dmfClient;
-
-    @Autowired
-    private RabbitTemplate authenticationClient;
-
-    @Autowired
-    private AmqpVHostService amqpVHostHelper;
-
-    @Autowired
-    private RabbitAdmin dmfAdmin;
-
-    @Autowired
-    private AmqpProperties amqpProperties;
 
     @Autowired
     private RabbitListenerTestHarness harness;
@@ -67,45 +59,20 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
 
     @Before
     public void setup() throws MalformedURLException, URISyntaxException {
-        purgeQueues();
         deadletterListener = harness.getSpy(DeadletterListener.LISTENER_ID);
         assertThat(deadletterListener).isNotNull();
         Mockito.reset(deadletterListener);
+        dmfClient.setExchange(getExchange());
     }
 
-    @After
-    public void clear() {
-        purgeQueues();
-    }
-
-    @AfterClass
-    public static void cleanup() {
-        AmqpVHostService.deleteCurrentVhost();
-    }
-
-    private void purgeQueues() {
-        dmfAdmin.purgeQueue(amqpProperties.getReceiverQueue(), false);
-        dmfAdmin.purgeQueue(amqpProperties.getDeadLetterQueue(), false);
-        dmfAdmin.purgeQueue(AmqpTestConfiguration.REPLY_TO_QUEUE, true);
-
-    }
-
-    protected abstract String getAmqpSettings();
+    protected abstract String getExchange();
 
     protected DeadletterListener getDeadletterListener() {
         return deadletterListener;
     }
 
-    protected RabbitAdmin getDmfAdmin() {
-        return dmfAdmin;
-    }
-
     protected RabbitTemplate getDmfClient() {
         return dmfClient;
-    }
-
-    protected RabbitTemplate getAuthenticationClient() {
-        return authenticationClient;
     }
 
     public RabbitListenerTestHarness getHarness() {
@@ -120,10 +87,6 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
         createConditionFactory().until(() -> {
             Mockito.verify(getDeadletterListener(), Mockito.times(expectedMessages)).handleMessage(Mockito.any());
         });
-    }
-
-    protected String getCurrentVhost() {
-        return amqpVHostHelper.getCurrentVhost();
     }
 
 }

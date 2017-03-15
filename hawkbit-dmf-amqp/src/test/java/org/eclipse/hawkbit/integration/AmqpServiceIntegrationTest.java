@@ -17,6 +17,7 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import org.eclipse.hawkbit.AmqpTestConfiguration;
+import org.eclipse.hawkbit.RabbitMqSetupService;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
@@ -35,13 +36,14 @@ import org.junit.Before;
 import org.mockito.Mockito;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * 
  * Common class for {@link AmqpMessageHandlerServiceIntegrationTest} and
  * {@link AmqpMessageDispatcherServiceIntegrationTest}.
  */
-public class AmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
+public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
 
     protected static final String TENANT_EXIST = "DEFAULT";
     protected static final String REGISTER_TARGET = "NewDmfTarget";
@@ -50,11 +52,15 @@ public class AmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
     private ReplyToListener replyToListener;
     private DistributionSet distributionSet;
 
+    @Autowired
+    private RabbitMqSetupService rabbitMqSetupService;
+
     @Before
     public void initListener() {
         replyToListener = getHarness().getSpy(ReplyToListener.LISTENER_ID);
         assertThat(replyToListener).isNotNull();
         Mockito.reset(replyToListener);
+        getDmfClient().setExchange(AmqpSettings.DMF_EXCHANGE);
     }
 
     protected <T> T waitUntilIsPresent(final Callable<Optional<T>> callable) {
@@ -194,8 +200,8 @@ public class AmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
         assertThat(target.getDescription()).contains(target.getControllerId());
         assertThat(target.getCreatedBy()).isEqualTo(createdBy);
         assertThat(target.getTargetInfo().getUpdateStatus()).isEqualTo(updateStatus);
-        assertThat(target.getTargetInfo().getAddress())
-                .isEqualTo(IpUtil.createAmqpUri(getCurrentVhost(), AmqpTestConfiguration.REPLY_TO_EXCHANGE));
+        assertThat(target.getTargetInfo().getAddress()).isEqualTo(
+                IpUtil.createAmqpUri(rabbitMqSetupService.getVirtualHost(), AmqpTestConfiguration.REPLY_TO_EXCHANGE));
     }
 
     protected Message createTargetMessage(final String target, final String tenant) {
@@ -257,7 +263,7 @@ public class AmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
     }
 
     @Override
-    protected String getAmqpSettings() {
+    protected String getExchange() {
         return AmqpSettings.DMF_EXCHANGE;
     }
 

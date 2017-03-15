@@ -165,9 +165,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         if (!IpUtil.isAmqpUri(address)) {
             return;
         }
-
-        System.out.println("jkjkjk" + address.toString());
-
         final Message message = getMessageConverter().toMessage(actionId,
                 createConnectorMessageProperties(tenant, controllerId, EventTopic.CANCEL_DOWNLOAD));
 
