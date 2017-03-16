@@ -19,10 +19,6 @@
    <artifactId>hawkbit-repository-jpa</artifactId>
    <name>hawkBit :: Repository JPA Implementation</name>
 
-   <properties>
-      <jacoco.outputDir>${project.basedir}/../../target/</jacoco.outputDir>
-   </properties>
-
    <repositories>
       <repository>
          <id>com.ethlo.eclipselink.tools</id>
