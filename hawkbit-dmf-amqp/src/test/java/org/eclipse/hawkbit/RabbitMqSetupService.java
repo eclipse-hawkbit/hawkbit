@@ -25,6 +25,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.rabbitmq.http.client.Client;
 import com.rabbitmq.http.client.domain.UserPermissions;
 
+/**
+ * Creates and deletes a new virtual host if the rabbit mq management api is
+ * available.
+ * 
+ *
+ */
 public class RabbitMqSetupService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AmqpAuthenticationMessageHandler.class);
@@ -82,6 +88,9 @@ public class RabbitMqSetupService {
     }
 
     public String getVirtualHost() {
+        if (StringUtils.isEmpty(virtualHost)) {
+            return "/";
+        }
         return virtualHost;
     }
 

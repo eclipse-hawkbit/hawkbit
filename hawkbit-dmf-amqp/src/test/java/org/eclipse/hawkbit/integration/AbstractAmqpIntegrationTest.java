@@ -9,19 +9,17 @@
 package org.eclipse.hawkbit.integration;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import org.eclipse.hawkbit.AmqpTestConfiguration;
 import org.eclipse.hawkbit.amqp.DmfApiConfiguration;
-import org.eclipse.hawkbit.integration.listener.DeadletterListener;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.junit.Before;
 import org.junit.Rule;
-import org.mockito.Mockito;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.junit.BrokerRunning;
-import org.springframework.amqp.rabbit.test.RabbitListenerTestHarness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -46,41 +44,27 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
     @Qualifier("dmfClient")
     private RabbitTemplate dmfClient;
 
-    @Autowired
-    private RabbitListenerTestHarness harness;
-
-    private DeadletterListener deadletterListener;
-
     @Before
     public void setup() {
-        deadletterListener = harness.getSpy(DeadletterListener.LISTENER_ID);
-        assertThat(deadletterListener).isNotNull();
-        Mockito.reset(deadletterListener);
         dmfClient.setExchange(getExchange());
     }
 
     protected abstract String getExchange();
 
-    protected DeadletterListener getDeadletterListener() {
-        return deadletterListener;
-    }
-
     protected RabbitTemplate getDmfClient() {
         return dmfClient;
-    }
-
-    public RabbitListenerTestHarness getHarness() {
-        return harness;
     }
 
     protected ConditionFactory createConditionFactory() {
         return Awaitility.await().atMost(2, SECONDS);
     }
 
-    protected void verifyDeadLetterMessages(final int expectedMessages) {
-        createConditionFactory().until(() -> {
-            Mockito.verify(getDeadletterListener(), Mockito.times(expectedMessages)).handleMessage(Mockito.any());
-        });
+    protected Message createMessage(final Object payload, final MessageProperties messageProperties) {
+        if (payload == null) {
+            messageProperties.setContentType("json");
+            return new Message(null, messageProperties);
+        }
+        return getDmfClient().getMessageConverter().toMessage(payload, messageProperties);
     }
 
 }

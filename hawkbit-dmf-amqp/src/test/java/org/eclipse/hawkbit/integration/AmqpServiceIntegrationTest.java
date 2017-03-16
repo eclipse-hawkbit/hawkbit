@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.AttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
+import org.eclipse.hawkbit.integration.listener.DeadletterListener;
 import org.eclipse.hawkbit.integration.listener.ReplyToListener;
 import org.eclipse.hawkbit.matcher.SoftwareMouleJsonMatcher;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -36,6 +37,7 @@ import org.junit.Before;
 import org.mockito.Mockito;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.rabbit.test.RabbitListenerTestHarness;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -49,15 +51,22 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
     protected static final String REGISTER_TARGET = "NewDmfTarget";
     protected static final String CREATED_BY = "AMQP-Controller";
 
+    private DeadletterListener deadletterListener;
     private ReplyToListener replyToListener;
     private DistributionSet distributionSet;
+
+    @Autowired
+    private RabbitListenerTestHarness harness;
 
     @Autowired
     private RabbitMqSetupService rabbitMqSetupService;
 
     @Before
     public void initListener() {
-        replyToListener = getHarness().getSpy(ReplyToListener.LISTENER_ID);
+        deadletterListener = harness.getSpy(DeadletterListener.LISTENER_ID);
+        assertThat(deadletterListener).isNotNull();
+        Mockito.reset(deadletterListener);
+        replyToListener = harness.getSpy(ReplyToListener.LISTENER_ID);
         assertThat(replyToListener).isNotNull();
         Mockito.reset(replyToListener);
         getDmfClient().setExchange(AmqpSettings.DMF_EXCHANGE);
@@ -73,6 +82,16 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         } catch (final Exception e) {
             return null;
         }
+    }
+
+    protected void verifyDeadLetterMessages(final int expectedMessages) {
+        createConditionFactory().until(() -> {
+            Mockito.verify(getDeadletterListener(), Mockito.times(expectedMessages)).handleMessage(Mockito.any());
+        });
+    }
+
+    protected DeadletterListener getDeadletterListener() {
+        return deadletterListener;
     }
 
     protected DistributionSet getDistributionSet() {
@@ -211,14 +230,6 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         messageProperties.setReplyTo(AmqpTestConfiguration.REPLY_TO_EXCHANGE);
 
         return createMessage("", messageProperties);
-    }
-
-    protected Message createMessage(final Object payload, final MessageProperties messageProperties) {
-        if (payload == null) {
-            messageProperties.setContentType("json");
-            return new Message(null, messageProperties);
-        }
-        return getDmfClient().getMessageConverter().toMessage(payload, messageProperties);
     }
 
     protected MessageProperties createMessagePropertiesWithTenant(final String tenant) {
