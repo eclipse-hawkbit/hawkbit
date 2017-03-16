@@ -15,6 +15,9 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.eclipse.hawkbit.amqp.AmqpAuthenticationMessageHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -24,12 +27,18 @@ import com.rabbitmq.http.client.domain.UserPermissions;
 
 public class RabbitMqSetupService {
 
-    public static final String RABBITMQ_HOSTNAME_ENV = "RABBITMQ_HOSTNAME";
+    private static final Logger LOG = LoggerFactory.getLogger(AmqpAuthenticationMessageHandler.class);
 
     private static Client rabbitmqHttpClient;
     private String virtualHost;
 
-    protected static Client getRabbitmqHttpClient() {
+    private final String hostname;
+
+    public RabbitMqSetupService(String hostname) {
+        this.hostname = hostname;
+    }
+
+    protected Client getRabbitmqHttpClient() {
         if (rabbitmqHttpClient == null) {
             try {
                 rabbitmqHttpClient = new Client("http://" + getHostname() + ":15672/api/", "guest", "guest");
@@ -42,18 +51,33 @@ public class RabbitMqSetupService {
 
     @PostConstruct
     void createVirtualHost() {
-        virtualHost = RandomStringUtils.random(7, "abcdefghijklmnopqrstuvwxyz");
+        try {
+            if (!getRabbitmqHttpClient().alivenessTest("/")) {
+                throw new AlivenessException(getHostname());
 
+            }
+        } catch (final AlivenessException e) {
+            ReflectionUtils.rethrowRuntimeException(e);
+        } catch (final Exception e) {
+            LOG.error("Connection to management rejected. Maybe no broker is avaiable at host {}", hostname);
+            return;
+        }
+
+        virtualHost = RandomStringUtils.random(7, "abcdefghijklmnopqrstuvwxyz");
         try {
             getRabbitmqHttpClient().createVhost(virtualHost);
+            getRabbitmqHttpClient().updatePermissions(virtualHost, "guest", createUserPermissionsFullAccess());
         } catch (final JsonProcessingException e) {
             ReflectionUtils.rethrowRuntimeException(e);
         }
-        getRabbitmqHttpClient().updatePermissions(virtualHost, "guest", createUserPermissionsFullAccess());
+
     }
 
     @PreDestroy
     void deleteVirtualHost() {
+        if (StringUtils.isEmpty(virtualHost)) {
+            return;
+        }
         getRabbitmqHttpClient().deleteVhost(virtualHost);
     }
 
@@ -61,8 +85,7 @@ public class RabbitMqSetupService {
         return virtualHost;
     }
 
-    public static String getHostname() {
-        final String hostname = System.getenv(RABBITMQ_HOSTNAME_ENV);
+    public String getHostname() {
         if (StringUtils.isEmpty(hostname)) {
             return "localhost";
         }
@@ -76,6 +99,13 @@ public class RabbitMqSetupService {
         permissions.setConfigure(".*");
         permissions.setWrite(".*");
         return permissions;
+    }
+
+    private static class AlivenessException extends RuntimeException {
+        public AlivenessException(String hostname) {
+            super("Aliveness test failed for " + hostname
+                    + ":15672 guest/quest; rabbit mq management api not available");
+        }
     }
 
 }

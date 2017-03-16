@@ -30,8 +30,10 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.junit.BrokerRunning;
 import org.springframework.amqp.rabbit.test.RabbitListenerTest;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -157,7 +159,7 @@ public class AmqpTestConfiguration {
     @Bean
     public ConnectionFactory rabbitConnectionFactory(final RabbitMqSetupService rabbitmqSetupService) {
         final CachingConnectionFactory factory = new CachingConnectionFactory();
-        factory.setHost(RabbitMqSetupService.getHostname());
+        factory.setHost(rabbitmqSetupService.getHostname());
         factory.setPort(5672);
         factory.setUsername("guest");
         factory.setPassword("guest");
@@ -166,7 +168,15 @@ public class AmqpTestConfiguration {
     }
 
     @Bean
-    public RabbitMqSetupService rabbitmqSetupService() {
-        return new RabbitMqSetupService();
+    public RabbitMqSetupService rabbitmqSetupService(RabbitProperties properties) {
+        return new RabbitMqSetupService(properties.getHost());
     }
+
+    @Bean
+    public BrokerRunning brokerRunning(RabbitMqSetupService rabbitmqSetupService) {
+        final BrokerRunning brokerRunning = BrokerRunning.isRunning();
+        brokerRunning.setHostName(rabbitmqSetupService.getHostname());
+        return brokerRunning;
+    }
+
 }

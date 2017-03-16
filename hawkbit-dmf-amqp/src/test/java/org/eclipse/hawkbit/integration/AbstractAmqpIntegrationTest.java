@@ -11,17 +11,13 @@ package org.eclipse.hawkbit.integration;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-
 import org.eclipse.hawkbit.AmqpTestConfiguration;
-import org.eclipse.hawkbit.RabbitMqSetupService;
 import org.eclipse.hawkbit.amqp.DmfApiConfiguration;
 import org.eclipse.hawkbit.integration.listener.DeadletterListener;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.junit.Before;
-import org.junit.ClassRule;
+import org.junit.Rule;
 import org.mockito.Mockito;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.junit.BrokerRunning;
@@ -42,11 +38,9 @@ import com.jayway.awaitility.core.ConditionFactory;
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTest {
 
-    @ClassRule
-    public static BrokerRunning brokerRunning = BrokerRunning.isRunning();
-    static {
-        brokerRunning.setHostName(RabbitMqSetupService.getHostname());
-    }
+    @Rule
+    @Autowired
+    public BrokerRunning brokerRunning;
 
     @Autowired
     @Qualifier("dmfClient")
@@ -58,7 +52,7 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
     private DeadletterListener deadletterListener;
 
     @Before
-    public void setup() throws MalformedURLException, URISyntaxException {
+    public void setup() {
         deadletterListener = harness.getSpy(DeadletterListener.LISTENER_ID);
         assertThat(deadletterListener).isNotNull();
         Mockito.reset(deadletterListener);
