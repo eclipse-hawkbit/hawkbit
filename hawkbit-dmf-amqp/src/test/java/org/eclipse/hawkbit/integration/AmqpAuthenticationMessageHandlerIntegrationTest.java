@@ -34,7 +34,6 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.listener.exception.ListenerExecutionFailedException;
 import org.springframework.context.annotation.Description;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.BadCredentialsException;
 
 import com.google.common.base.Strings;
 
@@ -58,17 +57,13 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     @Test
     @Description("Login fails as the given tenant does not exists.")
     public void loginFailedBadCredentials() {
-        try {
-            final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_NOT_EXIST, TARGET,
-                    FileResource.createFileResourceBySha1("12345"));
 
-            createAndSendMessage(TENANT_NOT_EXIST, securityToken);
+        final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_NOT_EXIST, TARGET,
+                FileResource.createFileResourceBySha1("12345"));
+        final Message createAndSendMessage = createAndSendMessage(TENANT_NOT_EXIST, securityToken);
 
-            fail("BadCredentialsException is thrown as no anonymous download is allowed");
-        } catch (final BadCredentialsException e) {
-        } finally {
-            verifyDeadLetterZeroInteractions();
-        }
+        verifyResult(createAndSendMessage, HttpStatus.FORBIDDEN, "Login failed");
+        verifyDeadLetterZeroInteractions();
     }
 
     @Test
@@ -113,13 +108,19 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     @Test
     @Description("Security Token in the message is null.")
     public void securityTokenIsNull() {
-        try {
-            createAndSendMessage(TENANT_EXIST, null);
-            fail("Should fail as tenant security token is null");
-        } catch (final ListenerExecutionFailedException e) {
-        } finally {
-            verifyDeadLetterZeroInteractions();
-        }
+        // try {
+        // TODO always null - check again
+        createAndSendMessage(TENANT_EXIST, null);
+        verifyDeadLetterMessages(1);
+        System.out.println();
+        // verifyDeadLetterZeroInteractions();
+        // fail("Should fail as tenant security token is null");
+        // } catch (final Exception e) {
+        // // ListenerExecutionFailedException
+        // System.out.println(e);
+        // } finally {
+        // verifyDeadLetterZeroInteractions();
+        // }
     }
 
     @Test
@@ -142,7 +143,6 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
         try {
             final TenantSecurityToken securityToken = createTenantSecurityToken(null, TARGET,
                     FileResource.createFileResourceBySha1("12345"));
-
             createAndSendMessage(TENANT_EXIST, securityToken);
             fail("Should fail as tenant in tenant security token is null");
         } catch (final Exception e) {
@@ -159,6 +159,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
             final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET, null);
 
             createAndSendMessage(TENANT_EXIST, securityToken);
+            System.out.println("Stop");
             fail("Should fail due to a NullPointerException as the fileResource is null");
         } catch (final NullPointerException e) {
         } finally {
@@ -632,6 +633,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
         }
     }
 
+    // TODO tenant warum null -> check
     private Message createAndSendMessage(final String tenant, final TenantSecurityToken securityToken) {
         final Message message = createAuthenticationMessage(null, securityToken);
         return getDmfClient().sendAndReceive(message);
