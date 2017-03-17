@@ -41,7 +41,7 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentE
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.state.TargetBulkUpload;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,7 +85,7 @@ public class BulkUploadHandler extends CustomComponent
 
     private final ComboBox comboBox;
     private final TextArea descTextArea;
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
     private final transient DeploymentManagement deploymentManagement;
     private final transient DistributionSetManagement distributionSetManagement;
 
@@ -108,7 +108,7 @@ public class BulkUploadHandler extends CustomComponent
     BulkUploadHandler(final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout,
             final TargetManagement targetManagement, final TagManagement tagManagement,
             final EntityFactory entityFactory, final DistributionSetManagement distributionSetManagement,
-            final ManagementUIState managementUIState, final DeploymentManagement deploymentManagement, final I18N i18n,
+            final ManagementUIState managementUIState, final DeploymentManagement deploymentManagement, final VaadinMessageSource i18n,
             final UI uiInstance, final Executor uiExecutor) {
         this.uiInstance = uiInstance;
         this.comboBox = targetBulkUpdateWindowLayout.getDsNamecomboBox();
@@ -305,7 +305,7 @@ public class BulkUploadHandler extends CustomComponent
             final List<String> targetsList = targetBulkUpload.getTargetsCreated();
             final Long dsSelected = (Long) comboBox.getValue();
             if (!distributionSetManagement.findDistributionSetById(dsSelected).isPresent()) {
-                return i18n.get("message.bulk.upload.assignment.failed");
+                return i18n.getMessage("message.bulk.upload.assignment.failed");
             }
             deploymentManagement.assignDistributionSet(targetBulkUpload.getDsNameAndVersion(), actionType,
                     forcedTimeStamp, targetsList);
@@ -328,9 +328,9 @@ public class BulkUploadHandler extends CustomComponent
                 return null;
             }
             if (deletedTags.size() == 1) {
-                return i18n.get("message.bulk.upload.tag.assignment.failed", deletedTags.get(0));
+                return i18n.getMessage("message.bulk.upload.tag.assignment.failed", deletedTags.get(0));
             }
-            return i18n.get("message.bulk.upload.tag.assignments.failed");
+            return i18n.getMessage("message.bulk.upload.tag.assignments.failed");
         }
 
         private boolean ifTagsSelected() {
@@ -392,7 +392,7 @@ public class BulkUploadHandler extends CustomComponent
         if (!event.getFilename().endsWith(".csv")) {
 
             new HawkbitErrorNotificationMessage(SPUILabelDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE, null,
-                    i18n.get("bulk.targets.upload"), true).show(Page.getCurrent());
+                    i18n.getMessage("bulk.targets.upload"), true).show(Page.getCurrent());
             LOG.error("Wrong file format for file {}", event.getFilename());
             upload.interruptUpload();
         } else {

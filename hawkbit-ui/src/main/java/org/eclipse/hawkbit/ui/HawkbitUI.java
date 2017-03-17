@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.ui.menu.DashboardEvent.PostViewChangeEvent;
 import org.eclipse.hawkbit.ui.menu.DashboardMenu;
 import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
 import org.eclipse.hawkbit.ui.push.EventPushStrategy;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.slf4j.Logger;
@@ -74,9 +74,6 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
 
     @Autowired
     private transient ApplicationContext context;
-
-    @Autowired
-    private I18N i18n;
 
     @Autowired
     private DashboardMenu dashboardMenu;
@@ -200,7 +197,7 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
             UI.getCurrent().setErrorHandler(new HawkbitUIErrorHandler());
         }
 
-        LOG.info("Current locale of the application is : {}", i18n.getLocale());
+        LOG.info("Current locale of the application is : {}", HawkbitCommonUtil.getLocale());
     }
 
     private Component buildHeader() {

@@ -85,7 +85,7 @@ public class TargetIdName implements Serializable {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof TargetIdName)) {
+        if (getClass() != obj.getClass()) {
             return false;
         }
         final TargetIdName other = (TargetIdName) obj;

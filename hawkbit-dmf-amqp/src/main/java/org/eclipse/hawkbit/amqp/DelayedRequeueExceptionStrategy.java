@@ -10,6 +10,9 @@ package org.eclipse.hawkbit.amqp;
 
 import java.util.concurrent.TimeUnit;
 
+import javax.validation.ConstraintViolationException;
+
+import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
@@ -19,6 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler;
 import org.springframework.amqp.rabbit.listener.FatalExceptionStrategy;
+import org.springframework.amqp.support.converter.MessageConversionException;
+import org.springframework.messaging.MessageHandlingException;
 
 /**
  * Custom {@link FatalExceptionStrategy} that markes defined hawkBit internal
@@ -59,11 +64,23 @@ public class DelayedRequeueExceptionStrategy extends ConditionalRejectingErrorHa
     }
 
     private boolean invalidMessage(final Throwable cause) {
-        return doesNotExist(cause) || cause instanceof TooManyStatusEntriesException
-                || cause instanceof InvalidTargetAddressException || cause instanceof ToManyAttributeEntriesException;
+        return doesNotExist(cause) || quotaHit(cause) || invalidContent(cause) || invalidState(cause);
+    }
+
+    private boolean invalidState(final Throwable cause) {
+        return cause instanceof CancelActionNotAllowedException;
+    }
+
+    private boolean quotaHit(final Throwable cause) {
+        return cause instanceof TooManyStatusEntriesException || cause instanceof ToManyAttributeEntriesException;
     }
 
     private boolean doesNotExist(final Throwable cause) {
         return cause instanceof TenantNotExistException || cause instanceof EntityNotFoundException;
+    }
+
+    private boolean invalidContent(final Throwable cause) {
+        return cause instanceof ConstraintViolationException || cause instanceof InvalidTargetAddressException
+                || cause instanceof MessageConversionException || cause instanceof MessageHandlingException;
     }
 }

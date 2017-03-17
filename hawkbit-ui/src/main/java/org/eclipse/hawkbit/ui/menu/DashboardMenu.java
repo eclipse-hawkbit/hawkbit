@@ -25,7 +25,7 @@ import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.menu.DashboardEvent.PostViewChangeEvent;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -61,7 +61,7 @@ public final class DashboardMenu extends CustomComponent {
 
     private static final String ID = "dashboard-menu";
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final UiProperties uiProperties;
 
@@ -82,7 +82,7 @@ public final class DashboardMenu extends CustomComponent {
     private boolean accessibleViewsEmpty;
 
     @Autowired
-    DashboardMenu(final I18N i18n, final UiProperties uiProperties, final HawkbitServerProperties serverProperties,
+    DashboardMenu(final VaadinMessageSource i18n, final UiProperties uiProperties, final HawkbitServerProperties serverProperties,
             final PermissionService permissionService, final List<DashboardMenuItem> dashboardVaadinViews) {
         this.i18n = i18n;
         this.uiProperties = uiProperties;
@@ -138,7 +138,7 @@ public final class DashboardMenu extends CustomComponent {
     }
 
     private Component buildTitle() {
-        final Label logo = new Label("<strong>" + i18n.get("menu.title") + "</strong>", ContentMode.HTML);
+        final Label logo = new Label("<strong>" + i18n.getMessage("menu.title") + "</strong>", ContentMode.HTML);
         logo.setSizeUndefined();
         final HorizontalLayout logoWrapper = new HorizontalLayout(logo);
         logoWrapper.setComponentAlignment(logo, Alignment.TOP_CENTER);
@@ -154,9 +154,9 @@ public final class DashboardMenu extends CustomComponent {
 
         if (!uiProperties.getLinks().getDocumentation().getRoot().isEmpty()) {
             final Link docuLink = SPUIComponentProvider.getLink(UIComponentIdProvider.LINK_DOCUMENTATION,
-                    i18n.get("link.documentation.name"), uiProperties.getLinks().getDocumentation().getRoot(),
+                    i18n.getMessage("link.documentation.name"), uiProperties.getLinks().getDocumentation().getRoot(),
                     FontAwesome.QUESTION_CIRCLE, "_blank", linkStyle);
-            docuLink.setDescription(i18n.get("link.documentation.name"));
+            docuLink.setDescription(i18n.getMessage("link.documentation.name"));
             docuLink.setSizeFull();
             links.addComponent(docuLink);
             links.setComponentAlignment(docuLink, Alignment.BOTTOM_CENTER);
@@ -164,9 +164,9 @@ public final class DashboardMenu extends CustomComponent {
 
         if (!uiProperties.getLinks().getUserManagement().isEmpty()) {
             final Link userManagementLink = SPUIComponentProvider.getLink(UIComponentIdProvider.LINK_USERMANAGEMENT,
-                    i18n.get("link.usermanagement.name"), uiProperties.getLinks().getUserManagement(),
+                    i18n.getMessage("link.usermanagement.name"), uiProperties.getLinks().getUserManagement(),
                     FontAwesome.USERS, "_blank", linkStyle);
-            userManagementLink.setDescription(i18n.get("link.usermanagement.name"));
+            userManagementLink.setDescription(i18n.getMessage("link.usermanagement.name"));
             links.addComponent(userManagementLink);
             userManagementLink.setSizeFull();
             links.setComponentAlignment(userManagementLink, Alignment.BOTTOM_CENTER);
@@ -174,9 +174,9 @@ public final class DashboardMenu extends CustomComponent {
 
         if (!uiProperties.getLinks().getSupport().isEmpty()) {
             final Link supportLink = SPUIComponentProvider.getLink(UIComponentIdProvider.LINK_SUPPORT,
-                    i18n.get("link.support.name"), uiProperties.getLinks().getSupport(), FontAwesome.ENVELOPE_O, "",
+                    i18n.getMessage("link.support.name"), uiProperties.getLinks().getSupport(), FontAwesome.ENVELOPE_O, "",
                     linkStyle);
-            supportLink.setDescription(i18n.get("link.support.name"));
+            supportLink.setDescription(i18n.getMessage("link.support.name"));
             supportLink.setSizeFull();
             links.addComponent(supportLink);
             links.setComponentAlignment(supportLink, Alignment.BOTTOM_CENTER);

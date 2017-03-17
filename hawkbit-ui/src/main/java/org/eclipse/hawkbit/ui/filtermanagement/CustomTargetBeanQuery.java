@@ -24,7 +24,7 @@ import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.ProxyTarget;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
@@ -48,7 +48,7 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
     private Sort sort = new Sort(Direction.ASC, "id");
     private transient TargetManagement targetManagement;
     private FilterManagementUIState filterManagementUIState;
-    private transient I18N i18N;
+    private transient VaadinMessageSource i18N;
     private String filterQuery;
 
     /**
@@ -157,9 +157,9 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         return filterManagementUIState;
     }
 
-    private I18N getI18N() {
+    private VaadinMessageSource getI18N() {
         if (i18N == null) {
-            i18N = SpringContextHelper.getBean(I18N.class);
+            i18N = SpringContextHelper.getBean(VaadinMessageSource.class);
         }
         return i18N;
     }

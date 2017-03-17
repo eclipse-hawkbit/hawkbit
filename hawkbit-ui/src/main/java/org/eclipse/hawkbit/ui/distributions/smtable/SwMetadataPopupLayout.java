@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.AbstractMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
 import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent.MetadataUIEvent;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -35,7 +35,7 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
 
     private final transient EntityFactory entityFactory;
 
-    public SwMetadataPopupLayout(final I18N i18n, final UINotification uiNotification, final UIEventBus eventBus,
+    public SwMetadataPopupLayout(final VaadinMessageSource i18n, final UINotification uiNotification, final UIEventBus eventBus,
             final SoftwareManagement softwareManagement, final EntityFactory entityFactory,
             final SpPermissionChecker permChecker) {
         super(i18n, uiNotification, eventBus, permChecker);

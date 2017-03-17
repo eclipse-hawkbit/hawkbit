@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.autoconfigure.cache;
 
-import static com.google.common.cache.CacheBuilder.newBuilder;
-
 import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -87,7 +85,7 @@ public class CacheAutoConfiguration {
             final GuavaCacheManager cacheManager = new GuavaCacheManager();
 
             if (cacheProperties.getTtl() > 0) {
-                final CacheBuilder<Object, Object> cacheBuilder = newBuilder()
+                final CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder()
                         .expireAfterWrite(cacheProperties.getTtl(), cacheProperties.getTtlUnit());
                 cacheManager.setCacheBuilder(cacheBuilder);
             }

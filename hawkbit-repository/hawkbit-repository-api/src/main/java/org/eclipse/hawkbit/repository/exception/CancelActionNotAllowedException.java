@@ -15,13 +15,10 @@ import org.eclipse.hawkbit.exception.SpServerError;
  * Thrown if cancellation of action is requested where the action cannot be
  * cancelled (e.g. the action is not active or is already a canceled action) or
  * controller provides cancellation feedback on an action that is actually not
- * in caneling state.
+ * in canceling state.
  *
  */
 public final class CancelActionNotAllowedException extends AbstractServerRtException {
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     /**

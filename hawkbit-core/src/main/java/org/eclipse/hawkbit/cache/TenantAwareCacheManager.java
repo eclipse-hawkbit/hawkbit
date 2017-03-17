@@ -8,9 +8,8 @@
  */
 package org.eclipse.hawkbit.cache;
 
-import static java.util.Collections.emptyList;
-
 import java.util.Collection;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -64,7 +63,7 @@ public class TenantAwareCacheManager implements TenancyCacheManager {
     public Collection<String> getCacheNames() {
         String currentTenant = tenantAware.getCurrentTenant();
         if (isTenantInvalid(currentTenant)) {
-            return emptyList();
+            return Collections.emptyList();
         }
 
         currentTenant = currentTenant.toUpperCase();
