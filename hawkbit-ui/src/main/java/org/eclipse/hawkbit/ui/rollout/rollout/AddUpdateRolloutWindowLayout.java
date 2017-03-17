@@ -51,7 +51,7 @@ import org.eclipse.hawkbit.ui.management.footer.ActionTypeOptionGroupLayout.Acti
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.groupschart.GroupsPieChart;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -117,7 +117,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private final DefineGroupsLayout defineGroupsLayout;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final transient EventBus.UIEventBus eventBus;
 
@@ -161,7 +161,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     AddUpdateRolloutWindowLayout(final RolloutManagement rolloutManagement, final TargetManagement targetManagement,
             final UINotification uiNotification, final UiProperties uiProperties, final EntityFactory entityFactory,
-            final I18N i18n, final UIEventBus eventBus, final TargetFilterQueryManagement targetFilterQueryManagement) {
+            final VaadinMessageSource i18n, final UIEventBus eventBus, final TargetFilterQueryManagement targetFilterQueryManagement) {
         actionTypeOptionGroupLayout = new ActionTypeOptionGroupLayout(i18n);
         autoStartOptionGroupLayout = new AutoStartOptionGroupLayout(i18n);
         this.rolloutManagement = rolloutManagement;
@@ -210,12 +210,12 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         private void createRollout() {
             final Rollout rolloutToCreate = saveRollout();
-            uiNotification.displaySuccess(i18n.get("message.save.success", rolloutToCreate.getName()));
+            uiNotification.displaySuccess(i18n.getMessage("message.save.success", rolloutToCreate.getName()));
         }
 
         private boolean duplicateCheck() {
             if (rolloutManagement.findRolloutByName(getRolloutName()).isPresent()) {
-                uiNotification.displayValidationError(i18n.get("message.rollout.duplicate.check", getRolloutName()));
+                uiNotification.displayValidationError(i18n.getMessage("message.rollout.duplicate.check", getRolloutName()));
                 return false;
             }
             return true;
@@ -250,7 +250,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                 return;
             }
 
-            uiNotification.displaySuccess(i18n.get("message.update.success", updatedRollout.getName()));
+            uiNotification.displaySuccess(i18n.getMessage("message.update.success", updatedRollout.getName()));
             eventBus.publish(this, RolloutEvent.UPDATE_ROLLOUT);
         }
 
@@ -258,7 +258,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             final String rolloutNameVal = getRolloutName();
             if (!rollout.getName().equals(rolloutNameVal)
                     && rolloutManagement.findRolloutByName(rolloutNameVal).isPresent()) {
-                uiNotification.displayValidationError(i18n.get("message.rollout.duplicate.check", rolloutNameVal));
+                uiNotification.displayValidationError(i18n.getMessage("message.rollout.duplicate.check", rolloutNameVal));
                 return false;
             }
             return true;
@@ -342,7 +342,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private CommonDialogWindow createWindow() {
-        return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(i18n.get("caption.configure.rollout"))
+        return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(i18n.getMessage("caption.configure.rollout"))
                 .content(this).layout(this).i18n(i18n)
                 .helpLink(uiProperties.getLinks().getDocumentation().getRolloutView())
                 .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
@@ -451,25 +451,25 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private Label getMandatoryLabel(final String key) {
-        final Label mandatoryLabel = getLabel(i18n.get(key));
+        final Label mandatoryLabel = getLabel(i18n.getMessage(key));
         mandatoryLabel.setContentMode(ContentMode.HTML);
         mandatoryLabel.setValue(mandatoryLabel.getValue().concat(" <span style='color:#ed473b'>*</span>"));
         return mandatoryLabel;
     }
 
     private Label getLabel(final String key) {
-        return new LabelBuilder().name(i18n.get(key)).buildLabel();
+        return new LabelBuilder().name(i18n.getMessage(key)).buildLabel();
     }
 
     private TextField createTextField(final String in18Key, final String id) {
-        return new TextFieldBuilder().prompt(i18n.get(in18Key)).immediate(true).id(id).buildTextComponent();
+        return new TextFieldBuilder().prompt(i18n.getMessage(in18Key)).immediate(true).id(id).buildTextComponent();
     }
 
     private TextField createIntegerTextField(final String in18Key, final String id) {
         final TextField textField = createTextField(in18Key, id);
         textField.setNullRepresentation(StringUtils.EMPTY);
         textField.setConverter(new StringToIntegerConverter());
-        textField.setConversionError(i18n.get(MESSAGE_ENTER_NUMBER));
+        textField.setConversionError(i18n.getMessage(MESSAGE_ENTER_NUMBER));
         textField.setSizeUndefined();
         return textField;
     }
@@ -530,10 +530,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         tabSheet.setStyleName(SPUIStyleDefinitions.ROLLOUT_GROUPS);
 
         final TabSheet.Tab simpleTab = tabSheet.addTab(createSimpleGroupDefinitionTab(),
-                i18n.get("caption.rollout.tabs.simple"));
+                i18n.getMessage("caption.rollout.tabs.simple"));
         simpleTab.setId(UIComponentIdProvider.ROLLOUT_SIMPLE_TAB);
 
-        final TabSheet.Tab advancedTab = tabSheet.addTab(defineGroupsLayout, i18n.get("caption.rollout.tabs.advanced"));
+        final TabSheet.Tab advancedTab = tabSheet.addTab(defineGroupsLayout, i18n.getMessage("caption.rollout.tabs.advanced"));
         advancedTab.setId(UIComponentIdProvider.ROLLOUT_ADVANCED_TAB);
 
         tabSheet.addSelectedTabChangeListener(event -> validateGroups());
@@ -693,7 +693,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private ComboBox createTargetFilterQueryCombo() {
         return new ComboBoxBuilder().setValueChangeListener(this::onTargetFilterChange)
-                .setPrompt(i18n.get("prompt.target.filter")).setId(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_COMBO_ID)
+                .setPrompt(i18n.getMessage("prompt.target.filter")).setId(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_COMBO_ID)
                 .buildCombBox();
     }
 
@@ -712,7 +712,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private String getTargetPerGroupMessage(final String value) {
-        return new StringBuilder(i18n.get("label.target.per.group")).append(value).toString();
+        return new StringBuilder(i18n.getMessage("label.target.per.group")).append(value).toString();
     }
 
     private void populateTargetFilterQuery() {
@@ -753,7 +753,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private TextArea createDescription() {
         final TextArea descriptionField = new TextAreaBuilder().style("text-area-style")
-                .prompt(i18n.get("textfield.description")).id(UIComponentIdProvider.ROLLOUT_DESCRIPTION_ID)
+                .prompt(i18n.getMessage("textfield.description")).id(UIComponentIdProvider.ROLLOUT_DESCRIPTION_ID)
                 .buildTextComponent();
         descriptionField.setNullRepresentation(StringUtils.EMPTY);
         descriptionField.setSizeUndefined();
@@ -804,7 +804,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private ComboBox createDistributionSetCombo() {
-        return new ComboBoxBuilder().setPrompt(i18n.get("prompt.distribution.set"))
+        return new ComboBoxBuilder().setPrompt(i18n.getMessage("prompt.distribution.set"))
                 .setId(UIComponentIdProvider.ROLLOUT_DS_ID).buildCombBox();
     }
 
@@ -833,11 +833,11 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         @Override
         public void validate(final Object value) {
             if (isNoOfGroupsOrTargetFilterEmpty()) {
-                uiNotification.displayValidationError(i18n.get("message.rollout.noofgroups.or.targetfilter.missing"));
+                uiNotification.displayValidationError(i18n.getMessage("message.rollout.noofgroups.or.targetfilter.missing"));
             } else {
                 if (value != null) {
                     final int groupSize = getGroupSize();
-                    new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, groupSize), 0, groupSize)
+                    new IntegerRangeValidator(i18n.getMessage(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, groupSize), 0, groupSize)
                             .validate(Integer.valueOf(value.toString()));
                 }
             }
@@ -860,7 +860,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         @Override
         public void validate(final Object value) {
             if (value != null) {
-                new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, 100), 0, 100)
+                new IntegerRangeValidator(i18n.getMessage(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, 100), 0, 100)
                         .validate(Integer.valueOf(value.toString()));
             }
         }
@@ -872,7 +872,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         @Override
         public void validate(final Object value) {
             if (value != null) {
-                new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 1, 500), 1, 500)
+                new IntegerRangeValidator(i18n.getMessage(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 1, 500), 1, 500)
                         .validate(Integer.valueOf(value.toString()));
             }
         }
@@ -895,7 +895,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         setAutoStartType(rollout);
 
         if (copy) {
-            rolloutName.setValue(i18n.get("textfield.rollout.copied.name", rollout.getName()));
+            rolloutName.setValue(i18n.getMessage("textfield.rollout.copied.name", rollout.getName()));
             populateTargetFilterQuery(rollout);
 
             defineGroupsLayout.populateByRollout(rollout);

@@ -25,7 +25,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorderWithIcon;
 import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
 import org.eclipse.hawkbit.ui.management.targettable.TargetAddUpdateWindowLayout;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroupItemComponent;
@@ -97,7 +97,7 @@ public class CommonDialogWindow extends Window {
 
     private List<AbstractField<?>> allComponents;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private transient SaveDialogCloseListener closeListener;
 
@@ -121,7 +121,7 @@ public class CommonDialogWindow extends Window {
      */
     public CommonDialogWindow(final String caption, final Component content, final String helpLink,
             final SaveDialogCloseListener closeListener, final ClickListener cancelButtonClickListener,
-            final AbstractLayout layout, final I18N i18n) {
+            final AbstractLayout layout, final VaadinMessageSource i18n) {
         checkNotNull(closeListener);
         this.caption = caption;
         this.content = content;
@@ -428,7 +428,7 @@ public class CommonDialogWindow extends Window {
             return;
         }
 
-        final Label mandatoryLabel = new Label(i18n.get("label.mandatory.field"));
+        final Label mandatoryLabel = new Label(i18n.getMessage("label.mandatory.field"));
         mandatoryLabel.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR + " " + ValoTheme.LABEL_TINY);
 
         if (content instanceof TargetAddUpdateWindowLayout) {

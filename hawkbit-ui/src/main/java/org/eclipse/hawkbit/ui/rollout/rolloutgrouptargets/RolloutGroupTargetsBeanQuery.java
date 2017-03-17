@@ -138,18 +138,19 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
     public int size() {
         long size = 0;
 
-        if (rolloutGroup.isPresent()) {
-            try {
-                firstPageTargetSets = getRolloutGroupManagement().findAllTargetsWithActionStatus(
-                        new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), rolloutGroup.get().getId());
-                size = firstPageTargetSets.getTotalElements();
-            } catch (final EntityNotFoundException e) {
-                LOG.error("Rollout does not exists. Redirect to Rollouts overview", e);
-                rolloutUIState.setShowRolloutGroupTargets(false);
-                rolloutUIState.setShowRollOuts(true);
-                return 0;
-            }
+        try {
+            firstPageTargetSets = rolloutGroup.map(group -> getRolloutGroupManagement()
+                    .findAllTargetsWithActionStatus(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), group.getId()))
+                    .orElse(null);
+
+            size = firstPageTargetSets == null ? 0 : firstPageTargetSets.getTotalElements();
+        } catch (final EntityNotFoundException e) {
+            LOG.error("Rollout does not exists. Redirect to Rollouts overview", e);
+            rolloutUIState.setShowRolloutGroupTargets(false);
+            rolloutUIState.setShowRollOuts(true);
+            return 0;
         }
+
         getRolloutUIState().setRolloutGroupTargetsTotalCount(size);
         if (size > SPUIDefinitions.MAX_TABLE_ENTRIES) {
             getRolloutUIState().setRolloutGroupTargetsTruncated(size - SPUIDefinitions.MAX_TABLE_ENTRIES);

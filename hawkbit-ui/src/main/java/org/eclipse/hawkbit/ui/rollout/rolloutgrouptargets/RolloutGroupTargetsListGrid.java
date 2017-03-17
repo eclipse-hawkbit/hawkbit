@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -81,7 +81,7 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
      * @param rolloutUIState
      *            RolloutUIState
      */
-    public RolloutGroupTargetsListGrid(final I18N i18n, final UIEventBus eventBus,
+    public RolloutGroupTargetsListGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final RolloutUIState rolloutUIState) {
         super(i18n, eventBus, null);
         this.rolloutUIState = rolloutUIState;
@@ -147,13 +147,13 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
 
     @Override
     protected void setColumnHeaderNames() {
-        getColumn(SPUILabelDefinitions.VAR_NAME).setHeaderCaption(i18n.get("header.name"));
-        getColumn(SPUILabelDefinitions.VAR_STATUS).setHeaderCaption(i18n.get("header.status"));
-        getColumn(SPUILabelDefinitions.VAR_CREATED_DATE).setHeaderCaption(i18n.get("header.createdDate"));
-        getColumn(SPUILabelDefinitions.VAR_CREATED_BY).setHeaderCaption(i18n.get("header.createdBy"));
-        getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE).setHeaderCaption(i18n.get("header.modifiedDate"));
-        getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).setHeaderCaption(i18n.get("header.modifiedBy"));
-        getColumn(SPUILabelDefinitions.VAR_DESC).setHeaderCaption(i18n.get("header.description"));
+        getColumn(SPUILabelDefinitions.VAR_NAME).setHeaderCaption(i18n.getMessage("header.name"));
+        getColumn(SPUILabelDefinitions.VAR_STATUS).setHeaderCaption(i18n.getMessage("header.status"));
+        getColumn(SPUILabelDefinitions.VAR_CREATED_DATE).setHeaderCaption(i18n.getMessage("header.createdDate"));
+        getColumn(SPUILabelDefinitions.VAR_CREATED_BY).setHeaderCaption(i18n.getMessage("header.createdBy"));
+        getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE).setHeaderCaption(i18n.getMessage("header.modifiedDate"));
+        getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).setHeaderCaption(i18n.getMessage("header.modifiedBy"));
+        getColumn(SPUILabelDefinitions.VAR_DESC).setHeaderCaption(i18n.getMessage("header.description"));
     }
 
     @Override
@@ -279,7 +279,7 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
             return RolloutGroupStatus.READY.toString().toLowerCase();
         } else if (rolloutGroup != null && rolloutGroup.getStatus() == RolloutGroupStatus.FINISHED) {
             final String ds = rolloutUIState.getRolloutDistributionSet().orElse("");
-            return i18n.get("message.dist.already.assigned", new Object[] { ds });
+            return i18n.getMessage("message.dist.already.assigned", new Object[] { ds });
         }
         return "unknown";
     }

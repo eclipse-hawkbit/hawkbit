@@ -8,18 +8,14 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.details;
 
-import static org.apache.commons.lang3.ArrayUtils.isEmpty;
-import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.isNotNullOrEmpty;
-import static org.springframework.data.domain.Sort.Direction.ASC;
-import static org.springframework.data.domain.Sort.Direction.DESC;
-
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.model.Artifact;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.springframework.data.domain.Page;
@@ -37,7 +33,6 @@ public class ArtifactBeanQuery extends AbstractBeanQuery<Artifact> {
     private static final long serialVersionUID = 1L;
     private Sort sort = new Sort(Direction.DESC, "filename");
     private transient ArtifactManagement artifactManagement;
-    private transient EntityFactory entityFactory;
     private transient Page<Artifact> firstPagetArtifacts;
     private Long baseSwModuleId;
 
@@ -58,15 +53,15 @@ public class ArtifactBeanQuery extends AbstractBeanQuery<Artifact> {
 
         super(definition, queryConfig, sortIds, sortStates);
 
-        if (isNotNullOrEmpty(queryConfig)) {
+        if (HawkbitCommonUtil.isNotNullOrEmpty(queryConfig)) {
             baseSwModuleId = (Long) queryConfig.get(SPUIDefinitions.BY_BASE_SOFTWARE_MODULE);
         }
 
-        if (!isEmpty(sortStates)) {
-            sort = new Sort(sortStates[0] ? ASC : DESC, (String) sortIds[0]);
+        if (!ArrayUtils.isEmpty(sortStates)) {
+            sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortIds[0]);
 
             for (int targetId = 1; targetId < sortIds.length; targetId++) {
-                sort.and(new Sort(sortStates[targetId] ? ASC : DESC, (String) sortIds[targetId]));
+                sort.and(new Sort(sortStates[targetId] ? Direction.ASC : Direction.DESC, (String) sortIds[targetId]));
             }
         }
     }
@@ -115,12 +110,5 @@ public class ArtifactBeanQuery extends AbstractBeanQuery<Artifact> {
             artifactManagement = SpringContextHelper.getBean(ArtifactManagement.class);
         }
         return artifactManagement;
-    }
-
-    private EntityFactory getEntityFactory() {
-        if (entityFactory == null) {
-            entityFactory = SpringContextHelper.getBean(EntityFactory.class);
-        }
-        return entityFactory;
     }
 }

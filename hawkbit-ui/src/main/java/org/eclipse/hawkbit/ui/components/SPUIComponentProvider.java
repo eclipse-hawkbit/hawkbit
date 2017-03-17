@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUIComboBoxDecorator;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -231,8 +231,8 @@ public final class SPUIComponentProvider {
      *            the entity
      * @return the label
      */
-    public static Label createCreatedByLabel(final I18N i18n, final BaseEntity baseEntity) {
-        return createUsernameLabel(i18n.get("label.created.by"),
+    public static Label createCreatedByLabel(final VaadinMessageSource i18n, final BaseEntity baseEntity) {
+        return createUsernameLabel(i18n.getMessage("label.created.by"),
                 baseEntity == null ? StringUtils.EMPTY : baseEntity.getCreatedBy());
     }
 
@@ -246,8 +246,8 @@ public final class SPUIComponentProvider {
      *            the entity
      * @return the label
      */
-    public static Label createLastModifiedByLabel(final I18N i18n, final BaseEntity baseEntity) {
-        return createUsernameLabel(i18n.get("label.modified.by"),
+    public static Label createLastModifiedByLabel(final VaadinMessageSource i18n, final BaseEntity baseEntity) {
+        return createUsernameLabel(i18n.getMessage("label.modified.by"),
                 baseEntity == null ? StringUtils.EMPTY : baseEntity.getLastModifiedBy());
     }
 

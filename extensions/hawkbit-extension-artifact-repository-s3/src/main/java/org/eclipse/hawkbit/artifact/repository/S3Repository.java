@@ -106,7 +106,9 @@ public class S3Repository implements ArtifactRepository {
         } catch (final IOException e) {
             throw new ArtifactStoreException(e.getMessage(), e);
         } finally {
-            file.delete();
+            if (!file.delete()) {
+                LOG.error("Could not delete temp file {}", file);
+            }
         }
     }
 

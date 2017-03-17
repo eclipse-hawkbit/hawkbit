@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
@@ -35,7 +35,7 @@ public class SoftwareModuleTableHeader extends AbstractTableHeader {
 
     private final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow;
 
-    SoftwareModuleTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
+    SoftwareModuleTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
             final ArtifactUploadState artifactUploadState,
             final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow) {
         super(i18n, permChecker, eventbus, null, null, artifactUploadState);
@@ -51,7 +51,7 @@ public class SoftwareModuleTableHeader extends AbstractTableHeader {
 
     @Override
     protected String getHeaderCaption() {
-        return i18n.get("upload.swModuleTable.header");
+        return i18n.getMessage("upload.swModuleTable.header");
     }
 
     @Override
@@ -154,7 +154,7 @@ public class SoftwareModuleTableHeader extends AbstractTableHeader {
     @Override
     protected void addNewItem(final ClickEvent event) {
         final Window addSoftwareModule = softwareModuleAddUpdateWindow.createAddSoftwareModuleWindow();
-        addSoftwareModule.setCaption(i18n.get("upload.caption.add.new.swmodule"));
+        addSoftwareModule.setCaption(i18n.getMessage("upload.caption.add.new.swmodule"));
         UI.getCurrent().addWindow(addSoftwareModule);
         addSoftwareModule.setVisible(Boolean.TRUE);
     }

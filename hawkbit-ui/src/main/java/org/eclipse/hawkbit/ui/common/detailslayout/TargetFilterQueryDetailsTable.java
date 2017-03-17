@@ -12,7 +12,7 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 
 import com.vaadin.data.Container;
@@ -32,9 +32,9 @@ public class TargetFilterQueryDetailsTable extends Table {
     private static final String TFQ_NAME = "name";
     private static final String TFQ_QUERY = "query";
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
-    public TargetFilterQueryDetailsTable(final I18N i18n) {
+    public TargetFilterQueryDetailsTable(final VaadinMessageSource i18n) {
         this.i18n = i18n;
         createTable();
     }
@@ -90,8 +90,8 @@ public class TargetFilterQueryDetailsTable extends Table {
     }
 
     private void addTableHeader() {
-        setColumnHeader(TFQ_NAME, i18n.get("header.target.filter.name"));
-        setColumnHeader(TFQ_QUERY, i18n.get("header.target.filter.query"));
+        setColumnHeader(TFQ_NAME, i18n.getMessage("header.target.filter.name"));
+        setColumnHeader(TFQ_QUERY, i18n.getMessage("header.target.filter.query"));
     }
 
 }

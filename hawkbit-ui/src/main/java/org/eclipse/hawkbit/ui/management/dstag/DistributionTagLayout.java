@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
@@ -38,7 +38,7 @@ public class DistributionTagLayout extends AbstractFilterLayout implements Refre
 
     private final ManagementUIState managementUIState;
 
-    public DistributionTagLayout(final UIEventBus eventbus, final ManagementUIState managementUIState, final I18N i18n,
+    public DistributionTagLayout(final UIEventBus eventbus, final ManagementUIState managementUIState, final VaadinMessageSource i18n,
             final SpPermissionChecker permChecker, final UIEventBus eventBus, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UINotification uiNotification,
             final DistributionTableFilters distFilterParameters,

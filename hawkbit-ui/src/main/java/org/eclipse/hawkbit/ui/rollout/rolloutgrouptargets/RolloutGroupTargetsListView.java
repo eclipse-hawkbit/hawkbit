@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.rollout.rolloutgrouptargets;
 
 import org.eclipse.hawkbit.ui.common.grid.AbstractGridLayout;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.Label;
@@ -24,7 +24,7 @@ public class RolloutGroupTargetsListView extends AbstractGridLayout {
 
     private final RolloutGroupTargetsCountLabelMessage rolloutGroupTargetsCountLabelMessage;
 
-    public RolloutGroupTargetsListView(final UIEventBus eventBus, final I18N i18n,
+    public RolloutGroupTargetsListView(final UIEventBus eventBus, final VaadinMessageSource i18n,
             final RolloutUIState rolloutUIState) {
         super(new RolloutGroupTargetsListHeader(eventBus, i18n, rolloutUIState),
                 new RolloutGroupTargetsListGrid(i18n, eventBus, rolloutUIState));

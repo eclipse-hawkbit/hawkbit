@@ -40,7 +40,7 @@ import org.eclipse.hawkbit.ui.push.DistributionCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.SoftwareModuleCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.SoftwareModuleDeletedEventContainer;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +69,7 @@ public class DistributionsView extends AbstractNotificationView implements Brows
 
     private final SpPermissionChecker permChecker;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final UINotification uiNotification;
 
@@ -90,7 +90,7 @@ public class DistributionsView extends AbstractNotificationView implements Brows
     private GridLayout mainLayout;
 
     @Autowired
-    DistributionsView(final SpPermissionChecker permChecker, final UIEventBus eventBus, final I18N i18n,
+    DistributionsView(final SpPermissionChecker permChecker, final UIEventBus eventBus, final VaadinMessageSource i18n,
             final UINotification uiNotification, final ManageDistUIState manageDistUIState,
             final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
             final TargetManagement targetManagement, final EntityFactory entityFactory,
@@ -228,7 +228,7 @@ public class DistributionsView extends AbstractNotificationView implements Brows
     private void checkNoDataAvaialble() {
         if (manageDistUIState.isNoDataAvilableSwModule() && manageDistUIState.isNoDataAvailableDist()) {
 
-            uiNotification.displayValidationError(i18n.get("message.no.data"));
+            uiNotification.displayValidationError(i18n.getMessage("message.no.data"));
         }
     }
 

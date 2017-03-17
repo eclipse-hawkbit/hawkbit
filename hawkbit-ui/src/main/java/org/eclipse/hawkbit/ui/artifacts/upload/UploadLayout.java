@@ -36,12 +36,12 @@ import org.eclipse.hawkbit.ui.dd.criteria.ServerItemIdClientCriterion;
 import org.eclipse.hawkbit.ui.dd.criteria.ServerItemIdClientCriterion.Mode;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -82,7 +82,7 @@ public class UploadLayout extends VerticalLayout {
 
     private final UploadStatusInfoWindow uploadInfoWindow;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final UINotification uiNotification;
 
@@ -106,7 +106,7 @@ public class UploadLayout extends VerticalLayout {
 
     private DragAndDropWrapper dropAreaWrapper;
 
-    private Boolean hasDirectory = Boolean.FALSE;
+    private boolean hasDirectory;
 
     private Button uploadStatusButton;
 
@@ -115,7 +115,7 @@ public class UploadLayout extends VerticalLayout {
 
     private final transient ArtifactManagement artifactManagement;
 
-    public UploadLayout(final I18N i18n, final UINotification uiNotification, final UIEventBus eventBus,
+    public UploadLayout(final VaadinMessageSource i18n, final UINotification uiNotification, final UIEventBus eventBus,
             final ArtifactUploadState artifactUploadState, final MultipartConfigElement multipartConfigElement,
             final ArtifactManagement artifactManagement) {
         this.uploadInfoWindow = new UploadStatusInfoWindow(eventBus, artifactUploadState, i18n);
@@ -136,13 +136,13 @@ public class UploadLayout extends VerticalLayout {
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final UploadArtifactUIEvent event) {
         if (event == UploadArtifactUIEvent.DELETED_ALL_SOFWARE) {
-            ui.access(() -> updateActionCount());
+            ui.access(this::updateActionCount);
         } else if (event == UploadArtifactUIEvent.MINIMIZED_STATUS_POPUP) {
-            ui.access(() -> showUploadStatusButton());
+            ui.access(this::showUploadStatusButton);
         } else if (event == UploadArtifactUIEvent.MAXIMIZED_STATUS_POPUP) {
-            ui.access(() -> maximizeStatusPopup());
+            ui.access(this::maximizeStatusPopup);
         } else if (event == UploadArtifactUIEvent.ARTIFACT_RESULT_POPUP_CLOSED) {
-            ui.access(() -> closeUploadStatusPopup());
+            ui.access(this::closeUploadStatusPopup);
         }
     }
 
@@ -174,7 +174,7 @@ public class UploadLayout extends VerticalLayout {
         final Upload upload = new Upload();
         final UploadHandler uploadHandler = new UploadHandler(null, 0, this, multipartConfigElement.getMaxFileSize(),
                 upload, null, null);
-        upload.setButtonCaption(i18n.get("upload.file"));
+        upload.setButtonCaption(i18n.getMessage("upload.file"));
         upload.setImmediate(true);
         upload.setReceiver(uploadHandler);
         upload.addSucceededListener(uploadHandler);
@@ -243,25 +243,40 @@ public class UploadLayout extends VerticalLayout {
                 // selected software module at the time of file drop is
                 // considered for upload
 
-                if (!artifactUploadState.getSelectedBaseSoftwareModule().isPresent()) {
-                    return;
-                }
-
-                final SoftwareModule selectedSw = artifactUploadState.getSelectedBaseSoftwareModule().get();
-                // reset the flag
-                hasDirectory = Boolean.FALSE;
-                for (final Html5File file : files) {
-                    processFile(file, selectedSw);
-                }
-                if (artifactUploadState.getNumberOfFileUploadsExpected().get() > 0) {
-                    processBtn.setEnabled(false);
-                } else {
-                    // If the upload is not started, it signifies all
-                    // dropped files as either duplicate or directory.So
-                    // display message accordingly
-                    displayCompositeMessage();
-                }
+                artifactUploadState.getSelectedBaseSoftwareModule().ifPresent(selectedSw -> {
+                    // reset the flag
+                    hasDirectory = false;
+                    for (final Html5File file : files) {
+                        processFile(file, selectedSw);
+                    }
+                    if (artifactUploadState.getNumberOfFileUploadsExpected().get() > 0) {
+                        processBtn.setEnabled(false);
+                    } else {
+                        // If the upload is not started, it signifies all
+                        // dropped files as either duplicate or directory.So
+                        // display message accordingly
+                        displayCompositeMessage();
+                    }
+                });
             }
+        }
+
+        private boolean validate(final DragAndDropEvent event) {
+            // check if drop is valid.If valid ,check if software module is
+            // selected.
+            if (!isFilesDropped(event)) {
+                uiNotification.displayValidationError(i18n.getMessage("message.action.not.allowed"));
+                return false;
+            }
+            return checkIfSoftwareModuleIsSelected();
+        }
+
+        private boolean isFilesDropped(final DragAndDropEvent event) {
+            if (event.getTransferable() instanceof WrapperTransferable) {
+                final Html5File[] files = ((WrapperTransferable) event.getTransferable()).getFiles();
+                return files != null;
+            }
+            return false;
         }
 
         private void processFile(final Html5File file, final SoftwareModule selectedSw) {
@@ -299,7 +314,7 @@ public class UploadLayout extends VerticalLayout {
             if (compositeMessage.length() > 0) {
                 compositeMessage.append("<br>");
             }
-            compositeMessage.append(i18n.get("message.no.directory.upload"));
+            compositeMessage.append(i18n.getMessage("message.no.directory.upload"));
         }
         if (!compositeMessage.toString().isEmpty()) {
             uiNotification.displayValidationError(compositeMessage.toString());
@@ -393,42 +408,17 @@ public class UploadLayout extends VerticalLayout {
             return out;
         } catch (final FileNotFoundException e) {
             LOG.error("Upload failed {}", e);
-            throw new ArtifactUploadFailedException(i18n.get("message.file.not.found"));
+            throw new ArtifactUploadFailedException(i18n.getMessage("message.file.not.found"));
         } catch (final IOException e) {
             LOG.error("Upload failed {}", e);
-            throw new ArtifactUploadFailedException(i18n.get("message.upload.failed"));
+            throw new ArtifactUploadFailedException(i18n.getMessage("message.upload.failed"));
         }
 
     }
 
-    private Boolean validate(final DragAndDropEvent event) {
-        // check if drop is valid.If valid ,check if software module is
-        // selected.
-        if (!isFilesDropped(event)) {
-            uiNotification.displayValidationError(i18n.get("message.action.not.allowed"));
-            return false;
-        }
-        return checkIfSoftwareModuleIsSelected();
-    }
-
-    private static boolean isFilesDropped(final DragAndDropEvent event) {
-        if (event.getTransferable() instanceof WrapperTransferable) {
-            final Html5File[] files = ((WrapperTransferable) event.getTransferable()).getFiles();
-            return files != null;
-        }
-        return false;
-    }
-
-    Boolean checkIfSoftwareModuleIsSelected() {
-        if (!isSoftwareModuleSelected()) {
-            uiNotification.displayValidationError(i18n.get("message.error.noSwModuleSelected"));
-            return false;
-        }
-        return true;
-    }
-
-    Boolean isSoftwareModuleSelected() {
+    boolean checkIfSoftwareModuleIsSelected() {
         if (!artifactUploadState.getSelectedBaseSwModuleId().isPresent()) {
+            uiNotification.displayValidationError(i18n.getMessage("message.error.noSwModuleSelected"));
             return false;
         }
         return true;
@@ -494,10 +484,10 @@ public class UploadLayout extends VerticalLayout {
         if (!duplicateFileNamesList.isEmpty()) {
             final String fileNames = StringUtils.collectionToCommaDelimitedString(duplicateFileNamesList);
             if (duplicateFileNamesList.size() == 1) {
-                message.append(i18n.get("message.no.duplicateFile") + fileNames);
+                message.append(i18n.getMessage("message.no.duplicateFile") + fileNames);
 
             } else if (duplicateFileNamesList.size() > 1) {
-                message.append(i18n.get("message.no.duplicateFiles"));
+                message.append(i18n.getMessage("message.no.duplicateFiles"));
             }
         }
         return message.toString();
@@ -550,7 +540,7 @@ public class UploadLayout extends VerticalLayout {
     private void discardUploadData(final Button.ClickEvent event) {
         if (event.getButton().equals(discardBtn)) {
             if (artifactUploadState.getFileSelected().isEmpty()) {
-                uiNotification.displayValidationError(i18n.get("message.error.noFileSelected"));
+                uiNotification.displayValidationError(i18n.getMessage("message.error.noFileSelected"));
             } else {
                 clearUploadedFileDetails();
             }
@@ -621,7 +611,7 @@ public class UploadLayout extends VerticalLayout {
     private void displayConfirmWindow(final Button.ClickEvent event) {
         if (event.getComponent().getId().equals(UIComponentIdProvider.UPLOAD_PROCESS_BUTTON)) {
             if (artifactUploadState.getFileSelected().isEmpty()) {
-                uiNotification.displayValidationError(i18n.get("message.error.noFileSelected"));
+                uiNotification.displayValidationError(i18n.getMessage("message.error.noFileSelected"));
             } else {
                 currentUploadConfirmationwindow = new UploadConfirmationWindow(this, artifactUploadState, eventBus,
                         artifactManagement);
@@ -635,7 +625,7 @@ public class UploadLayout extends VerticalLayout {
     /**
      * @return
      */
-    I18N getI18n() {
+    VaadinMessageSource getI18n() {
         return i18n;
     }
 

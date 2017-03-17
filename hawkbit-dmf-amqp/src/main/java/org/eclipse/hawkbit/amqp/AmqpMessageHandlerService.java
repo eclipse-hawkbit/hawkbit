@@ -324,7 +324,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final Long actionId = actionUpdateStatus.getActionId();
 
         LOG.debug("Target notifies intermediate about action {} with status {}.", actionId,
-                actionUpdateStatus.getActionStatus().name());
+                actionUpdateStatus.getActionStatus());
 
         final Optional<Action> findActionWithDetails = controllerManagement.findActionWithDetails(actionId);
         if (!findActionWithDetails.isPresent()) {

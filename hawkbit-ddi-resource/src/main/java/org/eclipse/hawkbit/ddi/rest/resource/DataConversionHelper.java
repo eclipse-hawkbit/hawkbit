@@ -8,9 +8,6 @@
  */
 package org.eclipse.hawkbit.ddi.rest.resource;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,6 +33,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.data.ResponseList;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpRequest;
 
 import com.google.common.base.Charsets;
@@ -107,27 +105,30 @@ public final class DataConversionHelper {
 
         if (action != null) {
             if (action.isCancelingOrCanceled()) {
-                result.add(linkTo(
-                        methodOn(DdiRootController.class, tenantAware.getCurrentTenant()).getControllerCancelAction(
-                                tenantAware.getCurrentTenant(), target.getControllerId(), action.getId()))
-                                        .withRel(DdiRestConstants.CANCEL_ACTION));
+                result.add(ControllerLinkBuilder
+                        .linkTo(ControllerLinkBuilder.methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
+                                .getControllerCancelAction(tenantAware.getCurrentTenant(), target.getControllerId(),
+                                        action.getId()))
+                        .withRel(DdiRestConstants.CANCEL_ACTION));
             } else {
                 // we need to add the hashcode here of the actionWithStatus
                 // because the action might
                 // have changed from 'soft' to 'forced' type and we need to
                 // change the payload of the
                 // response because of eTags.
-                result.add(linkTo(methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
-                        .getControllerBasedeploymentAction(tenantAware.getCurrentTenant(), target.getControllerId(),
-                                action.getId(), calculateEtag(action)))
-                                        .withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION));
+                result.add(ControllerLinkBuilder
+                        .linkTo(ControllerLinkBuilder.methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
+                                .getControllerBasedeploymentAction(tenantAware.getCurrentTenant(),
+                                        target.getControllerId(), action.getId(), calculateEtag(action)))
+                        .withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION));
             }
         }
 
         if (target.getTargetInfo().isRequestControllerAttributes()) {
-            result.add(linkTo(methodOn(DdiRootController.class, tenantAware.getCurrentTenant()).putConfigData(null,
-                    tenantAware.getCurrentTenant(), target.getControllerId()))
-                            .withRel(DdiRestConstants.CONFIG_DATA_ACTION));
+            result.add(ControllerLinkBuilder
+                    .linkTo(ControllerLinkBuilder.methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
+                            .putConfigData(null, tenantAware.getCurrentTenant(), target.getControllerId()))
+                    .withRel(DdiRestConstants.CONFIG_DATA_ACTION));
         }
         return result;
     }

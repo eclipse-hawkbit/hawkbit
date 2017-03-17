@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
 import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -28,7 +28,7 @@ public class SwModuleTableLayout extends AbstractTableLayout<SwModuleTable> {
 
     private static final long serialVersionUID = 6464291374980641235L;
 
-    public SwModuleTableLayout(final I18N i18n, final UINotification uiNotification, final UIEventBus eventBus,
+    public SwModuleTableLayout(final VaadinMessageSource i18n, final UINotification uiNotification, final UIEventBus eventBus,
             final SoftwareManagement softwareManagement, final EntityFactory entityFactory,
             final ManageDistUIState manageDistUIState, final SpPermissionChecker permChecker,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,

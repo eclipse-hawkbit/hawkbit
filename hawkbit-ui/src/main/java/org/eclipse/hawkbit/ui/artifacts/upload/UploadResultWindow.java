@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleTiny;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -51,7 +51,7 @@ public class UploadResultWindow implements Button.ClickListener {
 
     private IndexedContainer tabelContainer;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private static final String FILE_NAME = "fileName";
 
@@ -71,7 +71,7 @@ public class UploadResultWindow implements Button.ClickListener {
      * @param i18n
      *            I18N
      */
-    UploadResultWindow(final List<UploadStatus> uploadResultList, final I18N i18n, final EventBus.UIEventBus eventBus) {
+    UploadResultWindow(final List<UploadStatus> uploadResultList, final VaadinMessageSource i18n, final EventBus.UIEventBus eventBus) {
         this.uploadResultList = uploadResultList;
         this.i18n = i18n;
         this.eventBus = eventBus;
@@ -110,11 +110,11 @@ public class UploadResultWindow implements Button.ClickListener {
                     .setValue(HawkbitCommonUtil.getFormatedLabel(uploadResult.getBaseSwModuleName()));
 
             if (uploadResult.getUploadResult().equals(SPUILabelDefinitions.SUCCESS)) {
-                statusLabel = new Label(HawkbitCommonUtil.getFormatedLabel(i18n.get("upload.success")));
+                statusLabel = new Label(HawkbitCommonUtil.getFormatedLabel(i18n.getMessage("upload.success")));
                 statusLabel.addStyleName("validation-success");
                 newItem.getItemProperty(UPLOAD_RESULT).setValue(statusLabel);
             } else {
-                statusLabel = new Label(HawkbitCommonUtil.getFormatedLabel(i18n.get("upload.failed")));
+                statusLabel = new Label(HawkbitCommonUtil.getFormatedLabel(i18n.getMessage("upload.failed")));
                 statusLabel.addStyleName("validation-failed");
                 newItem.getItemProperty(UPLOAD_RESULT).setValue(statusLabel);
             }
@@ -138,10 +138,10 @@ public class UploadResultWindow implements Button.ClickListener {
 
         uploadResultTable.setContainerDataSource(tabelContainer);
         uploadResultTable.setPageLength(10);
-        uploadResultTable.setColumnHeader(FILE_NAME, i18n.get("upload.file.name"));
-        uploadResultTable.setColumnHeader(BASE_SW_MODULE, i18n.get("upload.swModuleTable.header"));
-        uploadResultTable.setColumnHeader(UPLOAD_RESULT, i18n.get("upload.result.status"));
-        uploadResultTable.setColumnHeader(REASON, i18n.get("upload.reason"));
+        uploadResultTable.setColumnHeader(FILE_NAME, i18n.getMessage("upload.file.name"));
+        uploadResultTable.setColumnHeader(BASE_SW_MODULE, i18n.getMessage("upload.swModuleTable.header"));
+        uploadResultTable.setColumnHeader(UPLOAD_RESULT, i18n.getMessage("upload.result.status"));
+        uploadResultTable.setColumnHeader(REASON, i18n.getMessage("upload.reason"));
 
         uploadResultTable.setColumnExpandRatio(FILE_NAME, 0.2f);
         uploadResultTable.setColumnExpandRatio(BASE_SW_MODULE, 0.2f);

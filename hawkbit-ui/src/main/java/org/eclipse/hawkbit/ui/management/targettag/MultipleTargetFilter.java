@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -48,7 +48,7 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
     private final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout;
     private final SpPermissionChecker permChecker;
     private final ManagementUIState managementUIState;
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
     private final transient EventBus.UIEventBus eventBus;
 
     private VerticalLayout simpleFilterTab;
@@ -56,7 +56,7 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
     private Button config;
 
     MultipleTargetFilter(final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout,
-            final SpPermissionChecker permChecker, final ManagementUIState managementUIState, final I18N i18n,
+            final SpPermissionChecker permChecker, final ManagementUIState managementUIState, final VaadinMessageSource i18n,
             final UIEventBus eventBus, final ManagementViewClientCriterion managementViewClientCriterion,
             final UINotification notification, final EntityFactory entityFactory,
             final TargetFilterQueryManagement targetFilterQueryManagement) {
@@ -129,7 +129,7 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
         targetTagTableLayout.setComponentAlignment(filterByButtons, Alignment.MIDDLE_CENTER);
         targetTagTableLayout.setId(UIComponentIdProvider.TARGET_TAG_DROP_AREA_ID);
         targetTagTableLayout.setExpandRatio(filterByButtons, 1.0F);
-        simpleFilterTab.setCaption(i18n.get("caption.filter.simple"));
+        simpleFilterTab.setCaption(i18n.getMessage("caption.filter.simple"));
         simpleFilterTab.addComponent(targetTagTableLayout);
         simpleFilterTab.setExpandRatio(targetTagTableLayout, 1.0F);
         simpleFilterTab.addComponent(filterByStatusFotter);
@@ -140,7 +140,7 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
     }
 
     private Component getComplexFilterTab() {
-        targetFilterQueryButtonsTab.setCaption(i18n.get("caption.filter.custom"));
+        targetFilterQueryButtonsTab.setCaption(i18n.getMessage("caption.filter.custom"));
         return targetFilterQueryButtonsTab;
     }
 
@@ -153,7 +153,7 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
      */
     @Override
     public void selectedTabChange(final SelectedTabChangeEvent event) {
-        if (i18n.get("caption.filter.simple").equals(getSelectedTab().getCaption())) {
+        if (i18n.getMessage("caption.filter.simple").equals(getSelectedTab().getCaption())) {
             managementUIState.setCustomFilterSelected(false);
             eventBus.publish(this, ManagementUIEvent.RESET_TARGET_FILTER_QUERY);
         } else {

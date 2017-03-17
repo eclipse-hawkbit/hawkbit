@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.common.builder;
 
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 
@@ -29,7 +29,7 @@ public class WindowBuilder {
     private ClickListener cancelButtonClickListener;
     private String helpLink;
     private AbstractLayout layout;
-    private I18N i18n;
+    private VaadinMessageSource i18n;
     private final String type;
     private String id;
 
@@ -124,7 +124,7 @@ public class WindowBuilder {
      *            the i18n
      * @return the window builder
      */
-    public WindowBuilder i18n(final I18N i18n) {
+    public WindowBuilder i18n(final VaadinMessageSource i18n) {
         this.i18n = i18n;
         return this;
     }
