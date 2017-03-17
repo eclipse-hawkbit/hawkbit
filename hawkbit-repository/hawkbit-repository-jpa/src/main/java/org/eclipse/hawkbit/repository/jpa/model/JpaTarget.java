@@ -63,8 +63,6 @@ import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
-import org.eclipse.persistence.queries.UpdateObjectQuery;
-import org.eclipse.persistence.sessions.changesets.ObjectChangeSet;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -387,15 +385,14 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     }
 
     @Override
+    public List<String> getUpdateIgnoreFields() {
+        return TARGET_UPDATE_EVENT_IGNORE_FIELDS;
+    }
+
+    @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
-        final ObjectChangeSet objectChanges = ((UpdateObjectQuery) descriptorEvent.getQuery()).getObjectChangeSet();
-
-        if (objectChanges.getChangedAttributeNames().stream()
-                .filter(field -> !TARGET_UPDATE_EVENT_IGNORE_FIELDS.contains(field)).findAny().isPresent()) {
-
-            EventPublisherHolder.getInstance().getEventPublisher()
-                    .publishEvent(new TargetUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
-        }
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new TargetUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override

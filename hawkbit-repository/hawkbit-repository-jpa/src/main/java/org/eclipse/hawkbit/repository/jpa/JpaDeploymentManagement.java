@@ -311,8 +311,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         target.setUpdateStatus(TargetUpdateStatus.PENDING);
         entityManager.detach(target);
 
-        afterCommit.afterCommit(() -> eventPublisher
-                .publishEvent(new TargetUpdatedEvent(action.getTarget(), applicationContext.getId())));
+        afterCommit.afterCommit(
+                () -> eventPublisher.publishEvent(new TargetUpdatedEvent(target, applicationContext.getId())));
         afterCommit.afterCommit(() -> eventPublisher
                 .publishEvent(new TargetAssignDistributionSetEvent(action, applicationContext.getId())));
     }
@@ -468,8 +468,10 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         final Set<Long> overrideObsoleteUpdateActions = overrideObsoleteUpdateActions(
                 Collections.singletonList(action.getTarget().getId()));
 
-        if (((JpaTarget) action.getTarget()).getAssignedDistributionSet() != null && action.getDistributionSet().getId()
-                .equals(((JpaTarget) action.getTarget()).getAssignedDistributionSet().getId())) {
+        JpaTarget target = (JpaTarget) action.getTarget();
+
+        if (target.getAssignedDistributionSet() != null
+                && action.getDistributionSet().getId().equals(target.getAssignedDistributionSet().getId())) {
             // the target has already the distribution set assigned, we don't
             // need to start the scheduled action, just finish it.
             action.setStatus(Status.FINISHED);
@@ -485,7 +487,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         setRunningActionStatus(savedAction, null);
 
-        final JpaTarget target = (JpaTarget) entityManager.merge(savedAction.getTarget());
+        target = (JpaTarget) entityManager.merge(savedAction.getTarget());
 
         target.setAssignedDistributionSet(savedAction.getDistributionSet());
         target.setUpdateStatus(TargetUpdateStatus.PENDING);
