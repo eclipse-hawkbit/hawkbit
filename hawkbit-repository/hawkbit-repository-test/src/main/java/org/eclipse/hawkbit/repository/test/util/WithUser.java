@@ -74,4 +74,6 @@ public @interface WithUser {
      * @return removeFromAllPermission
      */
     String[] removeFromAllPermission() default {};
+
+    boolean controller() default false;
 }

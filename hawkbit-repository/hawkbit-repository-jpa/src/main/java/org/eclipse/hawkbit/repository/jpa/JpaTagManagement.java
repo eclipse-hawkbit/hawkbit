@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaTagCreate;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.specifications.TagSpecification;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
@@ -240,6 +241,11 @@ public class JpaTagManagement implements TagManagement {
                 virtualPropertyReplacer);
 
         return convertDsPage(distributionSetTagRepository.findAll(spec, pageable), pageable);
+    }
+
+    @Override
+    public Page<TargetTag> findAllTargetTags(final Pageable pageable, final String controllerId) {
+        return convertTPage(targetTagRepository.findAll(TagSpecification.ofTarget(controllerId), pageable), pageable);
     }
 
 }

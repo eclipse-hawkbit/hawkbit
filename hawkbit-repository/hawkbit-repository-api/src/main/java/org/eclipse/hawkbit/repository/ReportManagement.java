@@ -18,7 +18,7 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
-import org.eclipse.hawkbit.repository.model.TargetInfo;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.report.model.DataReportSeries;
 import org.eclipse.hawkbit.repository.report.model.InnerOuterDataReportSeries;
@@ -183,8 +183,8 @@ public interface ReportManagement {
 
     /**
      * Generates a report as a {@link ListReportSeries} targets polled based on
-     * the {@link TargetInfo#getLastTargetQuery()} within an hour, day, week,
-     * month, year, more than a year, never.
+     * the {@link Target#getLastTargetQuery()} within an hour, day, week, month,
+     * year, more than a year, never.
      *
      * The order of the numbers within the {@link DataReportSeries} is the order
      * hour, day, week, month, year, more than a year, never.

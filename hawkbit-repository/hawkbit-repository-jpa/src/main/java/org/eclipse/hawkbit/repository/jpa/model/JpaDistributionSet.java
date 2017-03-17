@@ -99,8 +99,8 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @OneToMany(mappedBy = "autoAssignDistributionSet", targetEntity = JpaTargetFilterQuery.class, fetch = FetchType.LAZY)
     private List<TargetFilterQuery> autoAssignFilters;
 
-    @OneToMany(mappedBy = "installedDistributionSet", targetEntity = JpaTargetInfo.class, fetch = FetchType.LAZY)
-    private List<JpaTargetInfo> installedAtTargets;
+    @OneToMany(mappedBy = "installedDistributionSet", targetEntity = JpaTarget.class, fetch = FetchType.LAZY)
+    private List<JpaTarget> installedAtTargets;
 
     @OneToMany(mappedBy = "distributionSet", targetEntity = JpaAction.class, fetch = FetchType.LAZY)
     private List<JpaAction> actions;

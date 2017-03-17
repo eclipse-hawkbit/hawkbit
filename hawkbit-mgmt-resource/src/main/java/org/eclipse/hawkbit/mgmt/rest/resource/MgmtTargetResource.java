@@ -137,8 +137,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<MgmtTargetAttributes> getAttributes(@PathVariable("controllerId") final String controllerId) {
-        final Target foundTarget = findTargetWithExceptionIfNotFound(controllerId);
-        final Map<String, String> controllerAttributes = foundTarget.getTargetInfo().getControllerAttributes();
+        final Map<String, String> controllerAttributes = targetManagement.getControllerAttributes(controllerId);
         if (controllerAttributes.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -267,16 +266,13 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     @Override
     public ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(
             @PathVariable("controllerId") final String controllerId) {
-        final Target findTarget = findTargetWithExceptionIfNotFound(controllerId);
-        final MgmtDistributionSet distributionSetRest = MgmtDistributionSetMapper
-                .toResponse(findTarget.getAssignedDistributionSet());
-        final HttpStatus retStatus;
+        final MgmtDistributionSet distributionSetRest = deploymentManagement.getAssignedDistributionSet(controllerId)
+                .map(MgmtDistributionSetMapper::toResponse).orElse(null);
+
         if (distributionSetRest == null) {
-            retStatus = HttpStatus.NO_CONTENT;
-        } else {
-            retStatus = HttpStatus.OK;
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(distributionSetRest, retStatus);
+        return new ResponseEntity<>(distributionSetRest, HttpStatus.OK);
     }
 
     @Override
@@ -302,16 +298,13 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     @Override
     public ResponseEntity<MgmtDistributionSet> getInstalledDistributionSet(
             @PathVariable("controllerId") final String controllerId) {
-        final Target findTarget = findTargetWithExceptionIfNotFound(controllerId);
-        final MgmtDistributionSet distributionSetRest = MgmtDistributionSetMapper
-                .toResponse(findTarget.getTargetInfo().getInstalledDistributionSet());
-        final HttpStatus retStatus;
+        final MgmtDistributionSet distributionSetRest = deploymentManagement.getInstalledDistributionSet(controllerId)
+                .map(MgmtDistributionSetMapper::toResponse).orElse(null);
+
         if (distributionSetRest == null) {
-            retStatus = HttpStatus.NO_CONTENT;
-        } else {
-            retStatus = HttpStatus.OK;
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(distributionSetRest, retStatus);
+        return new ResponseEntity<>(distributionSetRest, HttpStatus.OK);
     }
 
     private Target findTargetWithExceptionIfNotFound(final String controllerId) {

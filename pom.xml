@@ -107,6 +107,7 @@
       <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->
       <!-- Newer versions needed than defined in Boot -->      
       <spring-hateoas.version>0.23.0.RELEASE</spring-hateoas.version>
+      <assertj.version>3.6.2</assertj.version>
       <!-- Older versions needed than defined in Boot -->
       <!-- Incompatible changes in 2.2 -->
       <json-path.version>2.0.0</json-path.version>

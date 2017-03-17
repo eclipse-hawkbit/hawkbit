@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.management.targettable;
 import java.net.URI;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -56,18 +57,24 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
     private final TargetAddUpdateWindowLayout targetAddUpdateWindowLayout;
 
+    private final transient TargetManagement targetManagement;
+
+    private final transient DeploymentManagement deploymentManagement;
+
     private VerticalLayout assignedDistLayout;
     private VerticalLayout installedDistLayout;
 
     TargetDetails(final VaadinMessageSource i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
             final ManagementUIState managementUIState, final UINotification uiNotification,
             final TagManagement tagManagement, final TargetManagement targetManagement,
-            final EntityFactory entityFactory) {
+            final DeploymentManagement deploymentManagement, final EntityFactory entityFactory) {
         super(i18n, eventBus, permissionChecker, managementUIState);
         this.targetTagToken = new TargetTagToken(permissionChecker, i18n, uiNotification, eventBus, managementUIState,
                 tagManagement, targetManagement);
         targetAddUpdateWindowLayout = new TargetAddUpdateWindowLayout(i18n, targetManagement, eventBus, uiNotification,
                 entityFactory);
+        this.targetManagement = targetManagement;
+        this.deploymentManagement = deploymentManagement;
         addTabs(detailsTab);
         restoreState();
     }
@@ -141,18 +148,22 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
     @Override
     protected void populateDetailsWidget() {
         if (getSelectedBaseEntity() != null) {
-            updateDetailsLayout(getSelectedBaseEntity().getControllerId(),
-                    getSelectedBaseEntity().getTargetInfo().getAddress(), getSelectedBaseEntity().getSecurityToken(),
-                    SPDateTimeUtil.getFormattedDate(getSelectedBaseEntity().getTargetInfo().getLastTargetQuery()));
-            populateDistributionDtls(installedDistLayout,
-                    getSelectedBaseEntity().getTargetInfo().getInstalledDistributionSet());
-            populateDistributionDtls(assignedDistLayout, getSelectedBaseEntity().getAssignedDistributionSet());
+            updateAttributesLayout(targetManagement.getControllerAttributes(getSelectedBaseEntity().getControllerId()));
+
+            updateDetailsLayout(getSelectedBaseEntity().getControllerId(), getSelectedBaseEntity().getAddress(),
+                    getSelectedBaseEntity().getSecurityToken(),
+                    SPDateTimeUtil.getFormattedDate(getSelectedBaseEntity().getLastTargetQuery()));
+
+            populateDistributionDtls(installedDistLayout, deploymentManagement
+                    .getAssignedDistributionSet(getSelectedBaseEntity().getControllerId()).orElse(null));
+            populateDistributionDtls(assignedDistLayout, deploymentManagement
+                    .getInstalledDistributionSet(getSelectedBaseEntity().getControllerId()).orElse(null));
         } else {
             updateDetailsLayout(null, null, null, null);
             populateDistributionDtls(installedDistLayout, null);
             populateDistributionDtls(assignedDistLayout, null);
         }
-        updateAttributesLayout(getSelectedBaseEntity());
+
     }
 
     @Override

@@ -39,7 +39,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
