@@ -57,7 +57,7 @@ public class EntityPropertyChangeListener extends DescriptorEventAdapter {
 
     private static boolean isFireUpdate(final EventAwareEntity entity, final UpdateObjectQuery query) {
         return entity.getUpdateIgnoreFields().isEmpty() || query.getObjectChangeSet().getChangedAttributeNames()
-                .stream().filter(field -> !entity.getUpdateIgnoreFields().contains(field)).findAny().isPresent();
+                .stream().anyMatch(field -> !entity.getUpdateIgnoreFields().contains(field));
     }
 
 }
