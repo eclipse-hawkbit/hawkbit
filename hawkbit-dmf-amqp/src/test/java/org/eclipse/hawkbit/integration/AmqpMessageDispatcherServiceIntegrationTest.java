@@ -68,10 +68,6 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 3) })
     public void assignDistributionSetMultipleTimes() {
-        // TODO: Check fachlichkeit
-        // Assign DS
-        // Assign anderes DS,
-        // Was muss in den Cancel und Install Nachrichten drin sein
         final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet();
 
         final DistributionSet distributionSet2 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());

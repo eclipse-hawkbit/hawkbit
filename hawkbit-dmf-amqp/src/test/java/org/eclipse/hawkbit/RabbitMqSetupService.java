@@ -10,14 +10,15 @@ package org.eclipse.hawkbit;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.amqp.AmqpAuthenticationMessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -40,14 +41,21 @@ public class RabbitMqSetupService {
 
     private final String hostname;
 
-    public RabbitMqSetupService(String hostname) {
-        this.hostname = hostname;
+    private String username;
+
+    private String password;
+
+    public RabbitMqSetupService(RabbitProperties properties) {
+        hostname = properties.getHost();
+        username = properties.getUsername();
+        password = properties.getPassword();
     }
 
     protected Client getRabbitmqHttpClient() {
         if (rabbitmqHttpClient == null) {
             try {
-                rabbitmqHttpClient = new Client("http://" + getHostname() + ":15672/api/", "guest", "guest");
+                rabbitmqHttpClient = new Client("http://" + getHostname() + ":15672/api/", getUsername(),
+                        getPassword());
             } catch (MalformedURLException | URISyntaxException e) {
                 ReflectionUtils.rethrowRuntimeException(e);
             }
@@ -69,10 +77,10 @@ public class RabbitMqSetupService {
             return;
         }
 
-        virtualHost = RandomStringUtils.random(7, "abcdefghijklmnopqrstuvwxyz");
+        virtualHost = UUID.randomUUID().toString();
         try {
             getRabbitmqHttpClient().createVhost(virtualHost);
-            getRabbitmqHttpClient().updatePermissions(virtualHost, "guest", createUserPermissionsFullAccess());
+            getRabbitmqHttpClient().updatePermissions(virtualHost, getUsername(), createUserPermissionsFullAccess());
         } catch (final JsonProcessingException e) {
             ReflectionUtils.rethrowRuntimeException(e);
         }
@@ -95,10 +103,21 @@ public class RabbitMqSetupService {
     }
 
     public String getHostname() {
-        if (StringUtils.isEmpty(hostname)) {
-            return "localhost";
-        }
         return hostname;
+    }
+
+    public String getPassword() {
+        if (StringUtils.isEmpty(password)) {
+            password = "guest";
+        }
+        return password;
+    }
+
+    public String getUsername() {
+        if (StringUtils.isEmpty(username)) {
+            username = "guest";
+        }
+        return username;
     }
 
     private UserPermissions createUserPermissionsFullAccess() {

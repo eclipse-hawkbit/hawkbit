@@ -116,7 +116,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     public void artifactForFileResourceSHA1FoundByTargetIdTargetExistsButIsNotAssigned() {
         final Target target = createTarget(TARGET);
 
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet("one");
+        final DistributionSet distributionSet = createDistributionSet();
         final List<Artifact> artifacts = createArtifacts(distributionSet);
         final String sha1Hash = artifacts.get(0).getSha1Hash();
         final TenantSecurityToken securityToken = createTenantSecurityToken(target.getTenant(), target.getId(), null,
@@ -144,7 +144,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     @Description("Verfiy that the receive message contains a 404 code, if there is no existing target for the given controller id")
     public void artifactForFileResourceSHA1FoundTargetNotExists() {
         enableAnonymousAuthentification();
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet("one");
+        final DistributionSet distributionSet = createDistributionSet();
         final List<Artifact> artifacts = createArtifacts(distributionSet);
         final String sha1Hash = artifacts.get(0).getSha1Hash();
         final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
@@ -161,7 +161,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     public void artifactForFileResourceSHA1FoundTargetExistsButNotAssigned() {
         createTarget(TARGET);
 
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet("one");
+        final DistributionSet distributionSet = createDistributionSet();
         final List<Artifact> artifacts = createArtifacts(distributionSet);
         final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
                 FileResource.createFileResourceBySha1(artifacts.get(0).getSha1Hash()));
@@ -177,7 +177,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     public void artifactForFileResourceSHA1FoundTargetExistsIsAssigned() {
         createTarget(TARGET);
 
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet("one");
+        final DistributionSet distributionSet = createDistributionSet();
         final List<Artifact> artifacts = createArtifacts(distributionSet);
         final Artifact artifact = artifacts.get(0);
         final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
@@ -196,7 +196,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     public void artifactForFileResourceSHA1FoundByTargetIdTargetExistsIsAssigned() {
         final Target target = createTarget(TARGET);
 
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet("one");
+        final DistributionSet distributionSet = createDistributionSet();
         final List<Artifact> artifacts = createArtifacts(distributionSet);
         final Artifact artifact = artifacts.get(0);
         final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, target.getId(), null,
@@ -214,7 +214,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     @Description("Verfiy that the receive message contains a 200 code and a artfiact without a controller id (anonymous enabled)")
     public void anonymousAuthentification() {
         enableAnonymousAuthentification();
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet("one");
+        final DistributionSet distributionSet = createDistributionSet();
         final List<Artifact> artifacts = createArtifacts(distributionSet);
         final Artifact artifact = artifacts.get(0);
         final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, null, null,
@@ -230,7 +230,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     public void targetTokenAuthentification() {
         createTarget(TARGET);
 
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet("one");
+        final DistributionSet distributionSet = createDistributionSet();
         final List<Artifact> artifacts = createArtifacts(distributionSet);
         final Artifact artifact = artifacts.get(0);
         final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
@@ -262,7 +262,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     public void artifactForFileResourceFileNameFoundTargetExistsButNotAssigned() {
         createTarget(TARGET);
 
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet("one");
+        final DistributionSet distributionSet = createDistributionSet();
         final List<Artifact> artifacts = createArtifacts(distributionSet);
         final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
                 FileResource.createFileResourceByFilename(artifacts.get(0).getFilename()));
@@ -399,7 +399,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
 
     private TenantSecurityToken createTenantSecurityToken(final String tenant, final Long targetId,
             final String controllerId, final FileResource fileResource) {
-        final TenantSecurityToken tenantSecurityToken = new TenantSecurityToken(tenant, null, null, targetId,
+        final TenantSecurityToken tenantSecurityToken = new TenantSecurityToken(tenant, null, controllerId, targetId,
                 fileResource);
         tenantSecurityToken.putHeader(TenantSecurityToken.AUTHORIZATION_HEADER, TARGET_TOKEN_HEADER);
         return tenantSecurityToken;
@@ -411,7 +411,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
 
     private List<Artifact> createArtifacts(final DistributionSet distributionSet) {
         final List<Artifact> artifacts = new ArrayList<>();
-        for (final org.eclipse.hawkbit.repository.model.SoftwareModule module : distributionSet.getModules()) {
+        for (final SoftwareModule module : distributionSet.getModules()) {
             artifacts.addAll(testdataFactory.createArtifacts(module.getId()));
         }
         return artifacts;

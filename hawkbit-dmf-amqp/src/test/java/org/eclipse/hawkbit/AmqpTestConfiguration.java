@@ -161,21 +161,23 @@ public class AmqpTestConfiguration {
         final CachingConnectionFactory factory = new CachingConnectionFactory();
         factory.setHost(rabbitmqSetupService.getHostname());
         factory.setPort(5672);
-        factory.setUsername("guest");
-        factory.setPassword("guest");
+        factory.setUsername(rabbitmqSetupService.getUsername());
+        factory.setPassword(rabbitmqSetupService.getPassword());
         factory.setVirtualHost(rabbitmqSetupService.getVirtualHost());
         return factory;
     }
 
     @Bean
     public RabbitMqSetupService rabbitmqSetupService(RabbitProperties properties) {
-        return new RabbitMqSetupService(properties.getHost());
+        return new RabbitMqSetupService(properties);
     }
 
     @Bean
     public BrokerRunning brokerRunning(RabbitMqSetupService rabbitmqSetupService) {
         final BrokerRunning brokerRunning = BrokerRunning.isRunning();
         brokerRunning.setHostName(rabbitmqSetupService.getHostname());
+        brokerRunning.getConnectionFactory().setUsername(rabbitmqSetupService.getUsername());
+        brokerRunning.getConnectionFactory().setPassword(rabbitmqSetupService.getPassword());
         return brokerRunning;
     }
 
