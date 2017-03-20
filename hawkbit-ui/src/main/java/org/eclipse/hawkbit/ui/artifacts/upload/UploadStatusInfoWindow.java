@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -59,7 +59,7 @@ public class UploadStatusInfoWindow extends Window {
 
     private final ArtifactUploadState artifactUploadState;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private static final String PROGRESS = "Progress";
 
@@ -93,7 +93,7 @@ public class UploadStatusInfoWindow extends Window {
 
     private ConfirmationDialog confirmDialog;
 
-    UploadStatusInfoWindow(final UIEventBus eventBus, final ArtifactUploadState artifactUploadState, final I18N i18n) {
+    UploadStatusInfoWindow(final UIEventBus eventBus, final ArtifactUploadState artifactUploadState, final VaadinMessageSource i18n) {
         this.eventBus = eventBus;
         this.artifactUploadState = artifactUploadState;
         this.i18n = i18n;
@@ -193,7 +193,7 @@ public class UploadStatusInfoWindow extends Window {
         grid.getColumn(PROGRESS).setRenderer(new ProgressBarRenderer());
         grid.setColumnOrder(STATUS, PROGRESS, FILE_NAME, SPUILabelDefinitions.NAME_VERSION, REASON);
         setColumnWidth();
-        grid.getColumn(SPUILabelDefinitions.NAME_VERSION).setHeaderCaption(i18n.get("upload.swModuleTable.header"));
+        grid.getColumn(SPUILabelDefinitions.NAME_VERSION).setHeaderCaption(i18n.getMessage("upload.swModuleTable.header"));
         grid.setFrozenColumnCount(5);
     }
 
@@ -466,8 +466,8 @@ public class UploadStatusInfoWindow extends Window {
     }
 
     private void createConfirmDialog() {
-        confirmDialog = new ConfirmationDialog(i18n.get("caption.confirm.abort.action"),
-                i18n.get("message.abort.upload"), i18n.get("button.ok"), i18n.get("button.cancel"), ok -> {
+        confirmDialog = new ConfirmationDialog(i18n.getMessage("caption.confirm.abort.action"),
+                i18n.getMessage("message.abort.upload"), i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
                     if (ok) {
                         eventBus.publish(this, UploadStatusEventType.ABORT_UPLOAD);
                         uploadAborted = true;

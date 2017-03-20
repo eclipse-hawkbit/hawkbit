@@ -82,8 +82,8 @@ public class WithSpringAuthorityRule implements TestRule {
                         new UserPrincipal(annotation.principal(), annotation.principal(), annotation.principal(),
                                 annotation.principal(), null, annotation.tenantId()),
                         annotation.credentials(), authorities);
-                testingAuthenticationToken
-                        .setDetails(new TenantAwareAuthenticationDetails(annotation.tenantId(), false));
+                testingAuthenticationToken.setDetails(
+                        new TenantAwareAuthenticationDetails(annotation.tenantId(), annotation.controller()));
                 return testingAuthenticationToken;
             }
 
@@ -171,33 +171,39 @@ public class WithSpringAuthorityRule implements TestRule {
         }
     }
 
+    public static WithUser withController(final String principal, final String... authorities) {
+        return withUserAndTenant(principal, "default", true, true, true, authorities);
+    }
+
     public static WithUser withUser(final String principal, final String... authorities) {
-        return withUserAndTenant(principal, "default", true, true, authorities);
+        return withUserAndTenant(principal, "default", true, true, false, authorities);
     }
 
     public static WithUser withUser(final String principal, final boolean allSpPermision, final String... authorities) {
-        return withUserAndTenant(principal, "default", true, allSpPermision, authorities);
+        return withUserAndTenant(principal, "default", true, allSpPermision, false, authorities);
     }
 
     public static WithUser withUser(final boolean autoCreateTenant) {
-        return withUserAndTenant("bumlux", "default", autoCreateTenant, true, new String[] {});
+        return withUserAndTenant("bumlux", "default", autoCreateTenant, true, false, new String[] {});
     }
 
     public static WithUser withUserAndTenant(final String principal, final String tenant, final String... authorities) {
-        return withUserAndTenant(principal, tenant, true, true, new String[] {});
+        return withUserAndTenant(principal, tenant, true, true, false, new String[] {});
     }
 
     public static WithUser withUserAndTenant(final String principal, final String tenant,
-            final boolean autoCreateTenant, final boolean allSpPermission, final String... authorities) {
-        return createWithUser(principal, tenant, autoCreateTenant, allSpPermission, authorities);
+            final boolean autoCreateTenant, final boolean allSpPermission, final boolean controller,
+            final String... authorities) {
+        return createWithUser(principal, tenant, autoCreateTenant, allSpPermission, controller, authorities);
     }
 
     private static WithUser privilegedUser() {
-        return createWithUser("bumlux", "default", true, true, new String[] { "ROLE_CONTROLLER", "ROLE_SYSTEM_CODE" });
+        return createWithUser("bumlux", "default", true, true, false,
+                new String[] { "ROLE_CONTROLLER", "ROLE_SYSTEM_CODE" });
     }
 
     private static WithUser createWithUser(final String principal, final String tenant, final boolean autoCreateTenant,
-            final boolean allSpPermission, final String... authorities) {
+            final boolean allSpPermission, final boolean controller, final String... authorities) {
         return new WithUser() {
 
             @Override
@@ -238,6 +244,11 @@ public class WithSpringAuthorityRule implements TestRule {
             @Override
             public boolean autoCreateTenant() {
                 return autoCreateTenant;
+            }
+
+            @Override
+            public boolean controller() {
+                return controller;
             }
         };
     }

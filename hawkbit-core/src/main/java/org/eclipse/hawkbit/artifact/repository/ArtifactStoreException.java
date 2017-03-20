@@ -11,9 +11,6 @@ package org.eclipse.hawkbit.artifact.repository;
 /**
  * {@link ArtifactStoreException} is thrown in case storing of an artifact was
  * not successful.
- * 
- *
- *
  */
 public class ArtifactStoreException extends RuntimeException {
 
@@ -25,7 +22,7 @@ public class ArtifactStoreException extends RuntimeException {
      * @param message
      *            the message of the exception
      * @param cause
-     *            the cause of the exception
+     *            of the exception
      */
     public ArtifactStoreException(final String message, final Throwable cause) {
         super(message, cause);
@@ -39,5 +36,15 @@ public class ArtifactStoreException extends RuntimeException {
      */
     public ArtifactStoreException(final String message) {
         super(message);
+    }
+
+    /**
+     * Constructs a ArtifactStoreException with cause.
+     * 
+     * @param cause
+     *            of the exception
+     */
+    public ArtifactStoreException(final Throwable cause) {
+        super(cause);
     }
 }

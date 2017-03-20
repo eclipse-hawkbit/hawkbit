@@ -273,12 +273,12 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     public void findByFilenameAndSoftwareModule() {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        assertThat(artifactManagement.findByFilenameAndSoftwareModule("file1", sm.getId()).isPresent()).isFalse();
+        assertThat(artifactManagement.findByFilenameAndSoftwareModule("file1", sm.getId())).isNotPresent();
 
         artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024), sm.getId(), "file1", false);
         artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024), sm.getId(), "file2", false);
 
-        assertThat(artifactManagement.findByFilenameAndSoftwareModule("file1", sm.getId()).isPresent()).isTrue();
+        assertThat(artifactManagement.findByFilenameAndSoftwareModule("file1", sm.getId())).isPresent();
 
     }
 }

@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
@@ -43,6 +44,7 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
+import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -314,7 +316,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         testdataFactory.createTarget();
         assignDistributionSet(dsId, TestdataFactory.DEFAULT_CONTROLLER_ID);
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
+                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
 
         return deploymentManagement.findActiveActionsByTarget(TestdataFactory.DEFAULT_CONTROLLER_ID).get(0).getId();
     }
@@ -369,7 +371,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             final TargetUpdateStatus expectedTargetUpdateStatus, final Action.Status expectedActionActionStatus,
             final Action.Status expectedActionStatus, final boolean actionActive) {
         final TargetUpdateStatus targetStatus = targetManagement.findTargetByControllerID(controllerId).get()
-                .getTargetInfo().getUpdateStatus();
+                .getUpdateStatus();
         assertThat(targetStatus).isEqualTo(expectedTargetUpdateStatus);
         final Action action = deploymentManagement.findAction(actionId).get();
         assertThat(action.getStatus()).isEqualTo(expectedActionActionStatus);
@@ -426,7 +428,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(target).as("target should not be null").isNotNull();
 
         final Target sameTarget = controllerManagement.findOrRegisterTargetIfItDoesNotexist("AA", null);
-        assertThat(target).as("Target should be the equals").isEqualTo(sameTarget);
+        assertThat(target.getId()).as("Target should be the equals").isEqualTo(sameTarget.getId());
         assertThat(targetRepository.count()).as("Only 1 target should be registred").isEqualTo(1L);
 
         // throws exception
@@ -538,7 +540,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         // nothing changed as "feedback after close" is disabled
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
+                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         assertThat(actionStatusRepository.count()).isEqualTo(3);
         assertThat(deploymentManagement.findActionStatusByAction(pageReq, action.getId()).getNumberOfElements())
@@ -563,7 +565,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         // nothing changed as "feedback after close" is disabled
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
+                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         // however, additional action status has been stored
         assertThat(actionStatusRepository.findAll(pageReq).getNumberOfElements()).isEqualTo(4);
@@ -575,12 +577,23 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     @Description("Ensures that target attribute update is reflected by the repository.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 3) })
-    public void updateTargetAttributes() {
+    public void updateTargetAttributes() throws Exception {
         final String controllerId = "test123";
-        testdataFactory.createTarget(controllerId);
-        addAttributeAndVerify(controllerId);
-        addSecondAttributeAndVerify(controllerId);
-        updateAttributeAndVerify(controllerId);
+        final Target target = testdataFactory.createTarget(controllerId);
+
+        securityRule.runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+            addAttributeAndVerify(controllerId);
+            addSecondAttributeAndVerify(controllerId);
+            updateAttributeAndVerify(controllerId);
+            return null;
+        });
+
+        // verify that audit information has not changed
+        final Target targetVerify = targetManagement.findTargetByControllerID(controllerId).get();
+        assertThat(targetVerify.getCreatedBy()).isEqualTo(target.getCreatedBy());
+        assertThat(targetVerify.getCreatedAt()).isEqualTo(target.getCreatedAt());
+        assertThat(targetVerify.getLastModifiedBy()).isEqualTo(target.getLastModifiedBy());
+        assertThat(targetVerify.getLastModifiedAt()).isEqualTo(target.getLastModifiedAt());
     }
 
     @Step
@@ -589,8 +602,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         testData.put("test1", "testdata1");
         controllerManagement.updateControllerAttributes(controllerId, testData);
 
-        final Target target = targetManagement.findTargetByControllerIDWithDetails(controllerId).get();
-        assertThat(target.getTargetInfo().getControllerAttributes()).as("Controller Attributes are wrong")
+        assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong")
                 .isEqualTo(testData);
     }
 
@@ -600,9 +612,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         testData.put("test2", "testdata20");
         controllerManagement.updateControllerAttributes(controllerId, testData);
 
-        final Target target = targetManagement.findTargetByControllerIDWithDetails(controllerId).get();
         testData.put("test1", "testdata1");
-        assertThat(target.getTargetInfo().getControllerAttributes()).as("Controller Attributes are wrong")
+        assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong")
                 .isEqualTo(testData);
     }
 
@@ -613,9 +624,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         controllerManagement.updateControllerAttributes(controllerId, testData);
 
-        final Target target = targetManagement.findTargetByControllerIDWithDetails(controllerId).get();
         testData.put("test2", "testdata20");
-        assertThat(target.getTargetInfo().getControllerAttributes()).as("Controller Attributes are wrong")
+        assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong")
                 .isEqualTo(testData);
     }
 }

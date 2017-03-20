@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.hawkbit.ui.push.EventContainer;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +48,7 @@ public class NotificationUnreadButton extends Button {
     private AbstractNotificationView currentView;
     private Window notificationsWindow;
     private transient Map<Class<?>, NotificationUnreadValue> unreadNotifications;
-    private transient I18N i18n;
+    private transient VaadinMessageSource i18n;
 
     /**
      * Constructor.
@@ -57,7 +57,7 @@ public class NotificationUnreadButton extends Button {
      *            i18n
      */
     @Autowired
-    NotificationUnreadButton(final I18N i18n) {
+    NotificationUnreadButton(final VaadinMessageSource i18n) {
         this.i18n = i18n;
         this.unreadNotifications = new ConcurrentHashMap<>();
         setIcon(FontAwesome.BELL);
@@ -76,7 +76,7 @@ public class NotificationUnreadButton extends Button {
         notificationsLayout.setMargin(true);
         notificationsLayout.setSpacing(true);
 
-        final Label title = new Label(i18n.get(TITLE));
+        final Label title = new Label(i18n.getMessage(TITLE));
         title.addStyleName(ValoTheme.LABEL_H3);
         title.addStyleName(ValoTheme.LABEL_NO_MARGIN);
         notificationsLayout.addComponent(title);
@@ -118,7 +118,7 @@ public class NotificationUnreadButton extends Button {
     private void createNotification(final VerticalLayout notificationsLayout,
             final NotificationUnreadValue notificationUnreadValue) {
         final Label contentLabel = new Label(notificationUnreadValue.getUnreadNotifications() + " "
-                + i18n.get(notificationUnreadValue.getUnreadNotificationMessageKey()));
+                + i18n.getMessage(notificationUnreadValue.getUnreadNotificationMessageKey()));
         notificationsLayout.addComponent(contentLabel);
     }
 
@@ -172,7 +172,7 @@ public class NotificationUnreadButton extends Button {
             setEnabled(true);
             setCaption("<div class='" + STYLE_UNREAD_COUNTER + "'>" + unreadNotificationCounter + "</div>");
         }
-        setDescription(i18n.get(DESCRIPTION, new Object[] { unreadNotificationCounter }));
+        setDescription(i18n.getMessage(DESCRIPTION, new Object[] { unreadNotificationCounter }));
     }
 
     private static class NotificationUnreadValue {

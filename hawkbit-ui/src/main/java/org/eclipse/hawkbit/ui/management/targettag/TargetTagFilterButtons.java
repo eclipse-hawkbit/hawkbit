@@ -24,7 +24,7 @@ import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.tag.TagIdName;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -57,7 +57,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
 
     private final ManagementViewClientCriterion managementViewClientCriterion;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final UINotification notification;
 
@@ -66,7 +66,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
     private final transient EntityFactory entityFactory;
 
     TargetTagFilterButtons(final UIEventBus eventBus, final ManagementUIState managementUIState,
-            final ManagementViewClientCriterion managementViewClientCriterion, final I18N i18n,
+            final ManagementViewClientCriterion managementViewClientCriterion, final VaadinMessageSource i18n,
             final UINotification notification, final SpPermissionChecker permChecker,
             final EntityFactory entityFactory) {
         super(eventBus, new TargetTagFilterButtonClick(eventBus, managementUIState));
@@ -136,7 +136,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
         final String tagName = ((DragAndDropWrapper) (event.getTargetDetails().getTarget())).getData().toString();
         if (tagName.equals(SPUIDefinitions.TARGET_TAG_BUTTON)) {
             notification.displayValidationError(
-                    i18n.get("message.tag.cannot.be.assigned", new Object[] { i18n.get("label.no.tag.assigned") }));
+                    i18n.getMessage("message.tag.cannot.be.assigned", new Object[] { i18n.getMessage("label.no.tag.assigned") }));
             return false;
         }
         return true;
@@ -153,7 +153,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
         final Transferable transferable = event.getTransferable();
         final Component compsource = transferable.getSourceComponent();
         if (!(compsource instanceof AbstractTable)) {
-            notification.displayValidationError(i18n.get(SPUILabelDefinitions.ACTION_NOT_ALLOWED));
+            notification.displayValidationError(i18n.getMessage(SPUILabelDefinitions.ACTION_NOT_ALLOWED));
             return false;
         }
 
@@ -167,7 +167,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
 
         final Set<?> deletedEntityByTransferable = source.getDeletedEntityByTransferable(tabletransferable);
         if (deletedEntityByTransferable.isEmpty()) {
-            final String actionDidNotWork = i18n.get("message.action.did.not.work", new Object[] {});
+            final String actionDidNotWork = i18n.getMessage("message.action.did.not.work", new Object[] {});
             notification.displayValidationError(actionDidNotWork);
             return false;
         }
@@ -183,7 +183,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
     private boolean checkForTargetUpdatePermission() {
         if (!permChecker.hasUpdateTargetPermission()) {
 
-            notification.displayValidationError(i18n.get("message.permission.insufficient"));
+            notification.displayValidationError(i18n.getMessage("message.permission.insufficient"));
             return false;
         }
 
@@ -229,7 +229,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
 
     private boolean validateIfSourceisTargetTable(final Table source) {
         if (!source.getId().equals(UIComponentIdProvider.TARGET_TABLE_ID)) {
-            notification.displayValidationError(i18n.get(SPUILabelDefinitions.ACTION_NOT_ALLOWED));
+            notification.displayValidationError(i18n.getMessage(SPUILabelDefinitions.ACTION_NOT_ALLOWED));
             return false;
         }
         return true;

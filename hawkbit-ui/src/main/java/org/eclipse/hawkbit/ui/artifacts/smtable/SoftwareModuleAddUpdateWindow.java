@@ -27,7 +27,7 @@ import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -51,7 +51,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
     private static final long serialVersionUID = -5217675246477211483L;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final UINotification uiNotifcation;
 
@@ -91,7 +91,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
      * @param entityFactory
      *            EntityFactory
      */
-    public SoftwareModuleAddUpdateWindow(final I18N i18n, final UINotification uiNotifcation, final UIEventBus eventBus,
+    public SoftwareModuleAddUpdateWindow(final VaadinMessageSource i18n, final UINotification uiNotifcation, final UIEventBus eventBus,
             final SoftwareManagement softwareManagement, final EntityFactory entityFactory) {
         this.i18n = i18n;
         this.uiNotifcation = uiNotifcation;
@@ -136,7 +136,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
             if (newSoftwareModule != null) {
                 eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.ADD_ENTITY, newSoftwareModule));
-                uiNotifcation.displaySuccess(i18n.get("message.save.success",
+                uiNotifcation.displaySuccess(i18n.getMessage("message.save.success",
                         new Object[] { newSoftwareModule.getName() + ":" + newSoftwareModule.getVersion() }));
             }
         }
@@ -151,7 +151,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
             if (moduleType.isPresent() && softwareManagement
                     .findSoftwareModuleByNameAndVersion(name, version, moduleType.get()).isPresent()) {
                 uiNotifcation.displayValidationError(
-                        i18n.get("message.duplicate.softwaremodule", new Object[] { name, version }));
+                        i18n.getMessage("message.duplicate.softwaremodule", new Object[] { name, version }));
                 return true;
             }
             return false;
@@ -164,7 +164,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
             final SoftwareModule newSWModule = softwareManagement.updateSoftwareModule(entityFactory.softwareModule()
                     .update(baseSwModuleId).description(descTextArea.getValue()).vendor(vendorTextField.getValue()));
             if (newSWModule != null) {
-                uiNotifcation.displaySuccess(i18n.get("message.save.success",
+                uiNotifcation.displaySuccess(i18n.getMessage("message.save.success",
                         new Object[] { newSWModule.getName() + ":" + newSWModule.getVersion() }));
 
                 eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.UPDATED_ENTITY, newSWModule));
@@ -208,13 +208,13 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         vendorTextField.setRequired(false);
         vendorTextField.setNullRepresentation(StringUtils.EMPTY);
 
-        descTextArea = new TextAreaBuilder().caption(i18n.get("textfield.description")).style("text-area-style")
-                .prompt(i18n.get("textfield.description")).id(UIComponentIdProvider.ADD_SW_MODULE_DESCRIPTION)
+        descTextArea = new TextAreaBuilder().caption(i18n.getMessage("textfield.description")).style("text-area-style")
+                .prompt(i18n.getMessage("textfield.description")).id(UIComponentIdProvider.ADD_SW_MODULE_DESCRIPTION)
                 .buildTextComponent();
         descTextArea.setNullRepresentation(StringUtils.EMPTY);
 
-        typeComboBox = SPUIComponentProvider.getComboBox(i18n.get("upload.swmodule.type"), "", null, null, true, null,
-                i18n.get("upload.swmodule.type"));
+        typeComboBox = SPUIComponentProvider.getComboBox(i18n.getMessage("upload.swmodule.type"), "", null, null, true, null,
+                i18n.getMessage("upload.swmodule.type"));
         typeComboBox.setId(UIComponentIdProvider.SW_MODULE_TYPE);
         typeComboBox.setStyleName(SPUIDefinitions.COMBO_BOX_SPECIFIC_STYLE + " " + ValoTheme.COMBOBOX_TINY);
         typeComboBox.setNewItemsAllowed(Boolean.FALSE);
@@ -222,7 +222,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
     }
 
     private TextField createTextField(final String in18Key, final String id) {
-        return new TextFieldBuilder().caption(i18n.get(in18Key)).required(true).prompt(i18n.get(in18Key))
+        return new TextFieldBuilder().caption(i18n.getMessage(in18Key)).required(true).prompt(i18n.getMessage(in18Key))
                 .immediate(true).id(id).buildTextComponent();
     }
 
@@ -260,7 +260,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         setCompositionRoot(formLayout);
 
         final CommonDialogWindow window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
-                .caption(i18n.get("upload.caption.add.new.swmodule")).content(this).layout(formLayout).i18n(i18n)
+                .caption(i18n.getMessage("upload.caption.add.new.swmodule")).content(this).layout(formLayout).i18n(i18n)
                 .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
         nameTextField.setEnabled(!editSwModule);
         versionTextField.setEnabled(!editSwModule);

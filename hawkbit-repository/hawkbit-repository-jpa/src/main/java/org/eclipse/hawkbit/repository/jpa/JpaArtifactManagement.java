@@ -58,10 +58,12 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     private static Artifact checkForExistingArtifact(final String filename, final boolean overrideExisting,
             final SoftwareModule softwareModule) {
-        if (softwareModule.getArtifactByFilename(filename).isPresent()) {
+        final Optional<Artifact> artifact = softwareModule.getArtifactByFilename(filename);
+
+        if (artifact.isPresent()) {
             if (overrideExisting) {
                 LOG.debug("overriding existing artifact with new filename {}", filename);
-                return softwareModule.getArtifactByFilename(filename).get();
+                return artifact.get();
             } else {
                 throw new EntityAlreadyExistsException("File with that name already exists in the Software Module");
             }

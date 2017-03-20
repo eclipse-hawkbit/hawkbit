@@ -19,7 +19,6 @@
    <artifactId>hawkbit-repository-jpa</artifactId>
    <name>hawkBit :: Repository JPA Implementation</name>
 
-
    <repositories>
       <repository>
          <id>com.ethlo.eclipselink.tools</id>

@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.AbstractMetadataPopupLayout;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.data.domain.PageRequest;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -36,7 +36,7 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
 
     private final transient EntityFactory entityFactory;
 
-    public DsMetadataPopupLayout(final I18N i18n, final UINotification uiNotification, final UIEventBus eventBus,
+    public DsMetadataPopupLayout(final VaadinMessageSource i18n, final UINotification uiNotification, final UIEventBus eventBus,
             final DistributionSetManagement distributionSetManagement, final EntityFactory entityFactory,
             final SpPermissionChecker permChecker) {
         super(i18n, uiNotification, eventBus, permChecker);

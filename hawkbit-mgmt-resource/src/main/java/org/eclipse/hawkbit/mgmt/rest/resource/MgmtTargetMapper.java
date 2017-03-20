@@ -69,7 +69,7 @@ public final class MgmtTargetMapper {
     }
 
     static void addPollStatus(final Target target, final MgmtTarget targetRest) {
-        final PollStatus pollStatus = target.getTargetInfo().getPollStatus();
+        final PollStatus pollStatus = target.getPollStatus();
         if (pollStatus != null) {
             final MgmtPollStatus pollStatusRest = new MgmtPollStatus();
             pollStatusRest.setLastRequestAt(
@@ -111,9 +111,9 @@ public final class MgmtTargetMapper {
         targetRest.setControllerId(target.getControllerId());
         targetRest.setDescription(target.getDescription());
         targetRest.setName(target.getName());
-        targetRest.setUpdateStatus(target.getTargetInfo().getUpdateStatus().name().toLowerCase());
+        targetRest.setUpdateStatus(target.getUpdateStatus().name().toLowerCase());
 
-        final URI address = target.getTargetInfo().getAddress();
+        final URI address = target.getAddress();
         if (address != null) {
             if (IpUtil.isIpAddresKnown(address)) {
                 targetRest.setIpAddress(address.getHost());
@@ -130,8 +130,8 @@ public final class MgmtTargetMapper {
         targetRest.setSecurityToken(target.getSecurityToken());
 
         // last target query is the last controller request date
-        final Long lastTargetQuery = target.getTargetInfo().getLastTargetQuery();
-        final Long installationDate = target.getTargetInfo().getInstallationDate();
+        final Long lastTargetQuery = target.getLastTargetQuery();
+        final Long installationDate = target.getInstallationDate();
 
         if (lastTargetQuery != null) {
             targetRest.setLastControllerRequestAt(lastTargetQuery);

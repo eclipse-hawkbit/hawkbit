@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.simulator.amqp;
 
-import static org.eclipse.hawkbit.simulator.amqp.AmqpProperties.CONFIGURATION_PREFIX;
-
 import java.util.Map;
 
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
@@ -35,7 +33,7 @@ import com.google.common.collect.Lists;
  *
  */
 @Component
-@ConditionalOnProperty(prefix = CONFIGURATION_PREFIX, name = "enabled")
+@ConditionalOnProperty(prefix = AmqpProperties.CONFIGURATION_PREFIX, name = "enabled")
 public class SpReceiverService extends ReceiverService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReceiverService.class);
 

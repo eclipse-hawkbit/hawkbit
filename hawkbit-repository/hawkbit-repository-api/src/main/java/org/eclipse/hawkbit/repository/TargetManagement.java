@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.validation.constraints.NotNull;
@@ -26,7 +27,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -108,7 +108,7 @@ public interface TargetManagement {
 
     /**
      * Counts number of targets with given
-     * {@link TargetInfo#getInstalledDistributionSet()}.
+     * {@link Target#getInstalledDistributionSet()}.
      *
      * @param distId
      *            to search for
@@ -342,9 +342,7 @@ public interface TargetManagement {
     List<Target> findTargetByControllerID(@NotEmpty Collection<String> controllerIDs);
 
     /**
-     * Find a {@link Target} based a given ID. The returned target will not
-     * contain details (e.g {@link Target#getTags()} and
-     * {@link Target#getActions()})
+     * Find a {@link Target} based a given ID.
      *
      * @param controllerId
      *            to look for.
@@ -352,21 +350,6 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Optional<Target> findTargetByControllerID(@NotEmpty String controllerId);
-
-    /**
-     * Find {@link Target} based on given ID returns found Target with details,
-     * i.e. {@link Target#getTags()} and {@link Target#getActions()} are
-     * possible.
-     *
-     * Note: try to use {@link #findTargetByControllerID(String)} as much as
-     * possible.
-     *
-     * @param controllerId
-     *            to look for.
-     * @return {@link Target}
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Optional<Target> findTargetByControllerIDWithDetails(@NotEmpty String controllerId);
 
     /**
      * Filter {@link Target}s for all the given parameters. If all parameters
@@ -523,8 +506,7 @@ public interface TargetManagement {
      * order:
      * <p>
      * 1) {@link Target}s which have the given {@link DistributionSet} as
-     * {@link Target#getTargetInfo()}
-     * {@link TargetInfo#getInstalledDistributionSet()}
+     * {@link Target#getTarget()} {@link Target#getInstalledDistributionSet()}
      * <p>
      * 2) {@link Target}s which have the given {@link DistributionSet} as
      * {@link Target#getAssignedDistributionSet()}
@@ -548,20 +530,6 @@ public interface TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Slice<Target> findTargetsAllOrderByLinkedDistributionSet(@NotNull Pageable pageable,
             @NotNull Long orderByDistributionId, FilterParams filterParams);
-
-    /**
-     * retrieves a list of {@link Target}s by their controller ID with details,
-     * i.e. {@link Target#getTags()} are possible.
-     *
-     * Note: try to use {@link #findTargetByControllerID(String)} as much as
-     * possible.
-     *
-     * @param controllerIDs
-     *            {@link Target}s Names parameter
-     * @return the found {@link Target}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<Target> findTargetsByControllerIDsWithTags(@NotNull List<String> controllerIDs);
 
     /**
      * Find targets by tag name.
@@ -656,4 +624,16 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     List<Target> findTargetAllById(@NotNull Collection<Long> ids);
+
+    /**
+     * Get controller attributes of given {@link Target}.
+     * 
+     * @param controllerId
+     *            of the target
+     * @return controller attributes as key/value pairs
+     * 
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
+     */
+    Map<String, String> getControllerAttributes(@NotEmpty String controllerId);
 }

@@ -47,17 +47,17 @@ public enum TargetFields implements FieldNameProvider {
     /**
      * The updateStatus field.
      */
-    UPDATESTATUS("targetInfo.updateStatus"),
+    UPDATESTATUS("updateStatus"),
 
     /**
      * The ip-address field.
      */
-    IPADDRESS("targetInfo.address"),
+    IPADDRESS("address"),
 
     /**
      * The attribute map of target info.
      */
-    ATTRIBUTE("targetInfo.controllerAttributes", true),
+    ATTRIBUTE("controllerAttributes", true),
 
     /**
      * distribution sets which is assigned to the target.
@@ -67,7 +67,7 @@ public enum TargetFields implements FieldNameProvider {
     /**
      * distribution sets which is installed on the target.
      */
-    INSTALLEDDS("targetInfo.installedDistributionSet", "name", "version"),
+    INSTALLEDDS("installedDistributionSet", "name", "version"),
 
     /**
      * The tags field.
@@ -75,9 +75,9 @@ public enum TargetFields implements FieldNameProvider {
     TAG("tags.name"),
 
     /**
-     * Last time the target or DMF client polled.
+     * Last time the DDI or DMF client polled.
      */
-    LASTCONTROLLERREQUESTAT("targetInfo.lastTargetQuery");
+    LASTCONTROLLERREQUESTAT("lastTargetQuery");
 
     private final String fieldName;
     private List<String> subEntityAttribues;

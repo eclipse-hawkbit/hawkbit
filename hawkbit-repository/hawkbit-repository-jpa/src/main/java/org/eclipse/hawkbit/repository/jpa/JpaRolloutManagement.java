@@ -432,7 +432,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             throw new RolloutIllegalStateException("First Group is not the first group.");
         }
 
-        deploymentManagement.startScheduledActionsByRolloutGroupParent(rollout, null);
+        deploymentManagement.startScheduledActionsByRolloutGroupParent(rollout.getId(), null);
 
         rolloutGroup.setStatus(RolloutGroupStatus.RUNNING);
         rolloutGroupRepository.save(rolloutGroup);

@@ -127,7 +127,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     private Message getCaptureAdressEvent(final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
         final Target target = targetManagement
                 .findTargetByControllerID(targetAssignDistributionSetEvent.getControllerId()).get();
-        final Message sendMessage = createArgumentCapture(target.getTargetInfo().getAddress());
+        final Message sendMessage = createArgumentCapture(target.getAddress());
         return sendMessage;
     }
 
@@ -207,7 +207,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
                         .stream().filter(dmfartifact -> dmfartifact.getFilename().equals(dbArtifact.getFilename()))
                         .findAny();
 
-                assertTrue("The artifact should exist in message", found.isPresent());
+                assertThat(found).as("The artifact should exist in message").isPresent();
                 assertThat(found.get().getSize()).isEqualTo(dbArtifact.getSize());
                 assertThat(found.get().getHashes().getMd5()).isEqualTo(dbArtifact.getMd5Hash());
                 assertThat(found.get().getHashes().getSha1()).isEqualTo(dbArtifact.getSha1Hash());
@@ -223,7 +223,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         amqpMessageDispatcherService
                 .targetCancelAssignmentToDistributionSet(cancelTargetAssignmentDistributionSetEvent);
         final Message sendMessage = createArgumentCapture(
-                cancelTargetAssignmentDistributionSetEvent.getEntity().getTargetInfo().getAddress());
+                cancelTargetAssignmentDistributionSetEvent.getEntity().getAddress());
         assertCancelMessage(sendMessage);
 
     }

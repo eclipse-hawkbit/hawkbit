@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.footer.TargetFilterCountMessageLabel;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,7 +65,7 @@ public class FilterManagementView extends VerticalLayout implements View {
     private final transient EventBus.UIEventBus eventBus;
 
     @Autowired
-    FilterManagementView(final I18N i18n, final UIEventBus eventBus,
+    FilterManagementView(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final FilterManagementUIState filterManagementUIState,
             final TargetFilterQueryManagement targetFilterQueryManagement, final SpPermissionChecker permissionChecker,
             final UINotification notification, final UiProperties uiProperties, final EntityFactory entityFactory,

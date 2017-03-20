@@ -80,9 +80,6 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     protected LocalArtifactRepository artifactRepository;
 
     @Autowired
-    protected TargetInfoRepository targetInfoRepository;
-
-    @Autowired
     protected RolloutGroupRepository rolloutGroupRepository;
 
     @Autowired

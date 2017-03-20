@@ -512,7 +512,12 @@ public class TestdataFactory {
      */
     public Target createTarget(final String controllerId) {
         final Target target = targetManagement.createTarget(entityFactory.target().create().controllerId(controllerId));
-        assertThat(target.getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.UNKNOWN);
+        assertThat(target.getCreatedBy()).isNotNull();
+        assertThat(target.getCreatedAt()).isNotNull();
+        assertThat(target.getLastModifiedBy()).isNotNull();
+        assertThat(target.getLastModifiedAt()).isNotNull();
+
+        assertThat(target.getUpdateStatus()).isEqualTo(TargetUpdateStatus.UNKNOWN);
         return target;
     }
 

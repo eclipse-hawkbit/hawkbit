@@ -280,11 +280,9 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
 
     private Action assignSet(final JpaTarget target, final JpaDistributionSet ds) {
         assignDistributionSet(ds.getId(), target.getControllerId());
-        assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).get().getTargetInfo()
-                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
-        assertThat(
-                targetManagement.findTargetByControllerID(target.getControllerId()).get().getAssignedDistributionSet())
-                        .isEqualTo(ds);
+        assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).get().getUpdateStatus())
+                .isEqualTo(TargetUpdateStatus.PENDING);
+        assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get()).isEqualTo(ds);
         final Action action = actionRepository.findByTargetAndDistributionSet(pageReq, target, ds).getContent().get(0);
         assertThat(action).isNotNull();
         return action;
@@ -383,7 +381,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         // [VERIFY EXPECTED RESULT]:
         // verify: SoftwareModule is deleted
         assertThat(softwareModuleRepository.findAll()).hasSize(0);
-        assertThat(softwareManagement.findSoftwareModuleById(unassignedModule.getId()).isPresent()).isFalse();
+        assertThat(softwareManagement.findSoftwareModuleById(unassignedModule.getId())).isNotPresent();
 
         // verify: binary data of artifact is deleted
         assertArtfiactNull(artifact1, artifact2);
@@ -493,8 +491,8 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         // [VERIFY EXPECTED RESULT]:
         // verify: SoftwareModuleX is deleted, and ModuelY still exists
         assertThat(softwareModuleRepository.findAll()).hasSize(1);
-        assertThat(softwareManagement.findSoftwareModuleById(moduleX.getId()).isPresent()).isFalse();
-        assertThat(softwareManagement.findSoftwareModuleById(moduleY.getId()).isPresent()).isTrue();
+        assertThat(softwareManagement.findSoftwareModuleById(moduleX.getId())).isNotPresent();
+        assertThat(softwareManagement.findSoftwareModuleById(moduleY.getId())).isPresent();
 
         // verify: binary data of artifact is not deleted
         assertArtfiactNotNull(artifactY);
@@ -916,7 +914,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
                 .createSoftwareModuleMetadata(ah.getId(), entityFactory.generateMetadata(knownKey1, knownValue1))
                 .getSoftwareModule();
 
-        assertThat(softwareManagement.findSoftwareModuleMetadata(ah.getId(), "doesnotexist").isPresent()).isFalse();
+        assertThat(softwareManagement.findSoftwareModuleMetadata(ah.getId(), "doesnotexist")).isNotPresent();
     }
 
     @Test

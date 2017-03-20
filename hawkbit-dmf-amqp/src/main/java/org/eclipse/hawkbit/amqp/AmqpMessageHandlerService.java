@@ -189,7 +189,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final Action action = actionOptional.get();
         if (action.isCancelingOrCanceled()) {
             amqpMessageDispatcherService.sendCancelMessageToTarget(target.getTenant(), target.getControllerId(),
-                    action.getId(), target.getTargetInfo().getAddress());
+                    action.getId(), target.getAddress());
             return;
         }
 
@@ -322,7 +322,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     private Action checkActionExist(final Message message, final ActionUpdateStatus actionUpdateStatus) {
         final Long actionId = actionUpdateStatus.getActionId();
         LOG.debug("Target notifies intermediate about action {} with status {}.", actionId,
-                actionUpdateStatus.getActionStatus().name());
+                actionUpdateStatus.getActionStatus());
 
         if (actionId == null) {
             logAndThrowMessageError(message, "Invalid message no action id");

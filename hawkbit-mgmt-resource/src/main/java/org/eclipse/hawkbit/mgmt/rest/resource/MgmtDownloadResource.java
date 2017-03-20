@@ -8,11 +8,6 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
-import static com.google.common.net.HttpHeaders.CONTENT_DISPOSITION;
-import static com.google.common.net.HttpHeaders.CONTENT_LENGTH;
-import static com.google.common.net.HttpHeaders.ETAG;
-import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
-
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -30,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -37,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.google.common.io.ByteStreams;
+import com.google.common.net.HttpHeaders;
 
 /**
  * A resource for download artifacts.
@@ -94,10 +91,10 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
             final HttpServletResponse response = requestResponseContextHolder.getHttpServletResponse();
             final String etag = artifact.getHashes().getSha1();
             final long length = artifact.getSize();
-            response.setHeader(CONTENT_DISPOSITION, "attachment;filename=" + downloadId);
-            response.setHeader(ETAG, etag);
-            response.setContentType(APPLICATION_OCTET_STREAM_VALUE);
-            response.setHeader(CONTENT_LENGTH, String.valueOf(length));
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + downloadId);
+            response.setHeader(HttpHeaders.ETAG, etag);
+            response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+            response.setContentLengthLong(length);
 
             try (InputStream inputstream = artifact.getFileInputStream()) {
                 ByteStreams.copy(inputstream, requestResponseContextHolder.getHttpServletResponse().getOutputStream());

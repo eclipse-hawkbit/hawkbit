@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.specifications;
 import java.util.Collection;
 
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ListJoin;
 import javax.persistence.criteria.Path;
@@ -24,8 +23,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -200,10 +197,9 @@ public final class DistributionSetSpecification {
      */
     public static Specification<JpaDistributionSet> installedTarget(final String installedTargetId) {
         return (dsRoot, query, cb) -> {
-            final ListJoin<JpaDistributionSet, JpaTargetInfo> installedTargetJoin = dsRoot
+            final ListJoin<JpaDistributionSet, JpaTarget> installedTargetJoin = dsRoot
                     .join(JpaDistributionSet_.installedAtTargets, JoinType.INNER);
-            final Join<JpaTargetInfo, JpaTarget> targetJoin = installedTargetJoin.join(JpaTargetInfo_.target);
-            return cb.equal(targetJoin.get(JpaTarget_.controllerId), installedTargetId);
+            return cb.equal(installedTargetJoin.get(JpaTarget_.controllerId), installedTargetId);
         };
     }
 
