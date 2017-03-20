@@ -177,7 +177,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         return new LabelBuilder().name(getDefaultCaption()).buildCaptionLabel();
     }
 
-    protected VerticalLayout createTabLayout() {
+    protected final VerticalLayout createTabLayout() {
         final VerticalLayout tabLayout = SPUIComponentProvider.getDetailTabLayout();
         tabLayout.addStyleName("details-layout");
         return tabLayout;
