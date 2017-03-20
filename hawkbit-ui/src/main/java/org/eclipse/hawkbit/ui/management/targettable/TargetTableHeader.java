@@ -35,7 +35,7 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUITargetDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -77,7 +77,7 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     private final transient DistributionSetManagement distributionSetManagement;
 
-    TargetTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
+    TargetTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
             final UINotification notification, final ManagementUIState managementUIState,
             final ManagementViewClientCriterion managementViewClientCriterion, final TargetManagement targetManagement,
             final DeploymentManagement deploymentManagement, final UiProperties uiproperties, final UIEventBus eventBus,
@@ -166,7 +166,7 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     @Override
     protected String getHeaderCaption() {
-        return i18n.get("header.target.table");
+        return i18n.getMessage("header.target.table");
     }
 
     @Override
@@ -239,8 +239,7 @@ public class TargetTableHeader extends AbstractTableHeader {
     }
 
     private String getSearchText() {
-        return managementUIState.getTargetTableFilters().getSearchText().isPresent()
-                ? managementUIState.getTargetTableFilters().getSearchText().get() : null;
+        return managementUIState.getTargetTableFilters().getSearchText().orElse(null);
     }
 
     @Override
@@ -280,7 +279,7 @@ public class TargetTableHeader extends AbstractTableHeader {
     protected void addNewItem(final ClickEvent event) {
         targetAddUpdateWindow.resetComponents();
         final Window addTargetWindow = targetAddUpdateWindow.createNewWindow();
-        addTargetWindow.setCaption(i18n.get(UIComponentIdProvider.TARGET_ADD_CAPTION));
+        addTargetWindow.setCaption(i18n.getMessage(UIComponentIdProvider.TARGET_ADD_CAPTION));
         UI.getCurrent().addWindow(addTargetWindow);
         addTargetWindow.setVisible(Boolean.TRUE);
     }
@@ -343,7 +342,7 @@ public class TargetTableHeader extends AbstractTableHeader {
             final Optional<DistributionSet> distributionSet = distributionSetManagement
                     .findDistributionSetById(distributionSetId);
             if (!distributionSet.isPresent()) {
-                notification.displayWarning(i18n.get("distributionset.not.exists"));
+                notification.displayWarning(i18n.getMessage("distributionset.not.exists"));
                 return;
             }
             final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distributionSet.get());
@@ -366,16 +365,16 @@ public class TargetTableHeader extends AbstractTableHeader {
             final Table source = transferable.getSourceComponent();
 
             if (!source.getId().equals(UIComponentIdProvider.DIST_TABLE_ID)) {
-                notification.displayValidationError(i18n.get("message.action.not.allowed"));
+                notification.displayValidationError(i18n.getMessage("message.action.not.allowed"));
                 isValid = Boolean.FALSE;
             } else {
                 if (getDropppedDistributionDetails(transferable).size() > 1) {
-                    notification.displayValidationError(i18n.get("message.onlyone.distribution.dropallowed"));
+                    notification.displayValidationError(i18n.getMessage("message.onlyone.distribution.dropallowed"));
                     isValid = Boolean.FALSE;
                 }
             }
         } else {
-            notification.displayValidationError(i18n.get("message.action.not.allowed"));
+            notification.displayValidationError(i18n.getMessage("message.action.not.allowed"));
             isValid = Boolean.FALSE;
         }
         return isValid;
@@ -423,9 +422,7 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     @Override
     protected void displayFilterDropedInfoOnLoad() {
-        if (managementUIState.getTargetTableFilters().getDistributionSet().isPresent()) {
-            addFilterTextField(managementUIState.getTargetTableFilters().getDistributionSet().get());
-        }
+        managementUIState.getTargetTableFilters().getDistributionSet().ifPresent(this::addFilterTextField);
     }
 
     @Override

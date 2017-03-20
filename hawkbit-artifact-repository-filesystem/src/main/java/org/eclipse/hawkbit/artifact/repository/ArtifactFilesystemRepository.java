@@ -24,6 +24,8 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Splitter;
 import com.google.common.io.BaseEncoding;
@@ -43,6 +45,8 @@ import com.google.common.io.Files;
  * SHA1-hash {@code (/basepath/[two digit sha1]/[two digit sha1])}.
  */
 public class ArtifactFilesystemRepository implements ArtifactRepository {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ArtifactFilesystemRepository.class);
 
     private static final String TEMP_FILE_PREFIX = "tmp";
     private static final String TEMP_FILE_SUFFIX = "artifactrepo";
@@ -119,7 +123,9 @@ public class ArtifactFilesystemRepository implements ArtifactRepository {
         } catch (final IOException e) {
             throw new ArtifactStoreException(e.getMessage(), e);
         } catch (final HashNotMatchException e) {
-            file.delete();
+            if (!file.delete()) {
+                LOG.error("Could not delete temp file {}", file);
+            }
             throw e;
         }
         return artifact;
@@ -138,7 +144,9 @@ public class ArtifactFilesystemRepository implements ArtifactRepository {
             }
         }
 
-        file.delete();
+        if (!file.delete()) {
+            LOG.debug("Could not delete temp file {}", file);
+        }
         fileSystemArtifact.setArtifactId(artifact.getArtifactId());
         fileSystemArtifact.setContentType(artifact.getContentType());
         fileSystemArtifact.setHashes(artifact.getHashes());

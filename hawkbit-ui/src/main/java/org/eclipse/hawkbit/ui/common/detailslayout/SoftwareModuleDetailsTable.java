@@ -24,7 +24,7 @@ import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.slf4j.Logger;
@@ -65,7 +65,7 @@ public class SoftwareModuleDetailsTable extends Table {
 
     private final transient DistributionSetManagement distributionSetManagement;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final transient EventBus.UIEventBus eventBus;
 
@@ -92,7 +92,7 @@ public class SoftwareModuleDetailsTable extends Table {
      * @param uiNotification
      *            UINotification for displaying error and success notifications
      */
-    public SoftwareModuleDetailsTable(final I18N i18n, final boolean isUnassignSoftModAllowed,
+    public SoftwareModuleDetailsTable(final VaadinMessageSource i18n, final boolean isUnassignSoftModAllowed,
             final SpPermissionChecker permissionChecker, final DistributionSetManagement distributionSetManagement,
             final EventBus.UIEventBus eventBus, final ManageDistUIState manageDistUIState,
             final UINotification uiNotification) {
@@ -133,8 +133,8 @@ public class SoftwareModuleDetailsTable extends Table {
 
     private void addSWModuleTableHeader() {
         setColumnHeader(SOFT_TYPE_MANDATORY, "");
-        setColumnHeader(SOFT_TYPE_NAME, i18n.get("header.caption.typename"));
-        setColumnHeader(SOFT_MODULE, i18n.get("header.caption.softwaremodule"));
+        setColumnHeader(SOFT_TYPE_NAME, i18n.getMessage("header.caption.typename"));
+        setColumnHeader(SOFT_MODULE, i18n.getMessage("header.caption.softwaremodule"));
     }
 
     /**
@@ -186,7 +186,7 @@ public class SoftwareModuleDetailsTable extends Table {
             final Set<SoftwareModule> alreadyAssignedSwModules) {
         final SoftwareModule unAssignedSw = getSoftwareModule(event.getButton().getId(), alreadyAssignedSwModules);
         if (distributionSetManagement.isDistributionSetInUse(distributionSet.getId())) {
-            uiNotification.displayValidationError(i18n.get("message.error.notification.ds.target.assigned",
+            uiNotification.displayValidationError(i18n.getMessage("message.error.notification.ds.target.assigned",
                     distributionSet.getName(), distributionSet.getVersion()));
         } else {
             final DistributionSet newDistributionSet = distributionSetManagement
@@ -194,7 +194,7 @@ public class SoftwareModuleDetailsTable extends Table {
             manageDistUIState.setLastSelectedEntity(newDistributionSet.getId());
             eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, newDistributionSet));
             eventBus.publish(this, DistributionsUIEvent.ORDER_BY_DISTRIBUTION);
-            uiNotification.displaySuccess(i18n.get("message.sw.unassigned", unAssignedSw.getName()));
+            uiNotification.displaySuccess(i18n.getMessage("message.sw.unassigned", unAssignedSw.getName()));
         }
 
     }

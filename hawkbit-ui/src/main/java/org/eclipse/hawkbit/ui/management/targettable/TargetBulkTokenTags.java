@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.tagdetails.AbstractTargetTagToken;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.data.domain.PageRequest;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -29,7 +29,7 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken {
 
     private static final int MAX_TAGS = 500;
 
-    TargetBulkTokenTags(final SpPermissionChecker checker, final I18N i18n, final UINotification uinotification,
+    TargetBulkTokenTags(final SpPermissionChecker checker, final VaadinMessageSource i18n, final UINotification uinotification,
             final UIEventBus eventBus, final ManagementUIState managementUIState, final TagManagement tagManagement) {
         super(checker, i18n, uinotification, eventBus, managementUIState, tagManagement);
     }
@@ -52,7 +52,7 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken {
 
     @Override
     protected String getTokenInputPrompt() {
-        return i18n.get("combo.type.tag.name");
+        return i18n.getMessage("combo.type.tag.name");
     }
 
     @Override

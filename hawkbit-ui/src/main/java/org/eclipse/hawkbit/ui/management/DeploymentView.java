@@ -52,7 +52,7 @@ import org.eclipse.hawkbit.ui.push.TargetDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetTagCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetTagDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetTagUpdatedEventContainer;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,7 +83,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
 
     private final SpPermissionChecker permChecker;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final UINotification uiNotification;
 
@@ -106,7 +106,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
     private final DeploymentViewMenuItem deploymentViewMenuItem;
 
     @Autowired
-    DeploymentView(final UIEventBus eventbus, final SpPermissionChecker permChecker, final I18N i18n,
+    DeploymentView(final UIEventBus eventbus, final SpPermissionChecker permChecker, final VaadinMessageSource i18n,
             final UINotification uiNotification, final ManagementUIState managementUIState,
             final DeploymentManagement deploymentManagement, final UIEventBus eventBus,
             final DistributionTableFilters distFilterParameters,
@@ -141,7 +141,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
                 managementViewClientCriterion);
         this.distributionTableLayoutNew = new DistributionTableLayout(i18n, eventBus, permChecker, managementUIState,
                 distributionSetManagement, managementViewClientCriterion, entityFactory, uiNotification, tagManagement,
-                systemManagement, targetManagement);
+                systemManagement, targetManagement, deploymentManagement);
         this.deleteAndActionsLayout = new DeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
                 tagManagement, managementViewClientCriterion, managementUIState, targetManagement, targetTable,
                 deploymentManagement, distributionSetManagement);
@@ -347,7 +347,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
 
     private void checkNoDataAvaialble() {
         if (managementUIState.isNoDataAvilableTarget() && managementUIState.isNoDataAvailableDistribution()) {
-            uiNotification.displayValidationError(i18n.get("message.no.data"));
+            uiNotification.displayValidationError(i18n.getMessage("message.no.data"));
         }
     }
 

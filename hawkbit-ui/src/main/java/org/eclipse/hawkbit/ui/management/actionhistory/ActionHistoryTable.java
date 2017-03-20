@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.repository.model.ActionWithStatusCount;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
+import org.eclipse.hawkbit.ui.common.entity.TargetIdName;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -31,7 +32,7 @@ import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -75,7 +76,7 @@ public class ActionHistoryTable extends TreeTable {
     private static final String BUTTON_CANCEL = "button.cancel";
     private static final String BUTTON_OK = "button.ok";
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
     private final transient DeploymentManagement deploymentManagement;
     private final transient EventBus.UIEventBus eventBus;
     private final UINotification notification;
@@ -86,7 +87,7 @@ public class ActionHistoryTable extends TreeTable {
 
     private Target target;
 
-    ActionHistoryTable(final I18N i18n, final DeploymentManagement deploymentManagement, final UIEventBus eventBus,
+    ActionHistoryTable(final VaadinMessageSource i18n, final DeploymentManagement deploymentManagement, final UIEventBus eventBus,
             final UINotification notification, final ManagementUIState managementUIState) {
         this.i18n = i18n;
         this.deploymentManagement = deploymentManagement;
@@ -388,20 +389,20 @@ public class ActionHistoryTable extends TreeTable {
         final boolean isActionActive = target != null && SPUIDefinitions.ACTIVE.equals(activeValue);
 
         final Button actionCancel = SPUIComponentProvider.getButton(
-                UIComponentIdProvider.ACTION_HISTORY_TABLE_CANCEL_ID, "", i18n.get("message.cancel.action"),
+                UIComponentIdProvider.ACTION_HISTORY_TABLE_CANCEL_ID, "", i18n.getMessage("message.cancel.action"),
                 ValoTheme.BUTTON_TINY, true, FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
         actionCancel.setEnabled(isActionActive && !actionWithActiveStatus.isCancelingOrCanceled());
         actionCancel.addClickListener(event -> confirmAndCancelAction(actionId));
 
         final Button actionForce = SPUIComponentProvider.getButton(UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCE_ID,
-                "", i18n.get("message.force.action"), ValoTheme.BUTTON_TINY, true, FontAwesome.BOLT,
+                "", i18n.getMessage("message.force.action"), ValoTheme.BUTTON_TINY, true, FontAwesome.BOLT,
                 SPUIButtonStyleSmallNoBorder.class);
         actionForce.setEnabled(
                 isActionActive && !actionWithActiveStatus.isForce() && !actionWithActiveStatus.isCancelingOrCanceled());
         actionForce.addClickListener(event -> confirmAndForceAction(actionId));
 
         final Button actionForceQuit = SPUIComponentProvider.getButton(
-                UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCE_QUIT_ID, "", i18n.get("message.forcequit.action"),
+                UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCE_QUIT_ID, "", i18n.getMessage("message.forcequit.action"),
                 ValoTheme.BUTTON_TINY + " redicon", true, FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
         actionForceQuit.setEnabled(isActionActive && actionWithActiveStatus.isCancelingOrCanceled());
         actionForceQuit.addClickListener(event -> confirmAndForceQuitAction(actionId));
@@ -520,7 +521,7 @@ public class ActionHistoryTable extends TreeTable {
             return label;
         }
 
-        label.setDescription(i18n.get(mapping.getDescriptionI18N()));
+        label.setDescription(i18n.getMessage(mapping.getDescriptionI18N()));
         label.setStyleName(mapping.getStyleName());
         label.setValue(mapping.getIcon().getHtml());
         return label;
@@ -653,7 +654,7 @@ public class ActionHistoryTable extends TreeTable {
             }
         } else {
             /* Messages are not available */
-            updateStatusMessages.append(i18n.get("message.no.available"));
+            updateStatusMessages.append(i18n.getMessage("message.no.available"));
         }
         textArea.setValue(updateStatusMessages.toString());
         textArea.setReadOnly(Boolean.TRUE);
@@ -696,14 +697,14 @@ public class ActionHistoryTable extends TreeTable {
      */
     private void confirmAndForceAction(final Long actionId) {
         /* Display the confirmation */
-        final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.get("caption.force.action.confirmbox"),
-                i18n.get("message.force.action.confirm"), i18n.get(BUTTON_OK), i18n.get(BUTTON_CANCEL), ok -> {
+        final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.getMessage("caption.force.action.confirmbox"),
+                i18n.getMessage("message.force.action.confirm"), i18n.getMessage(BUTTON_OK), i18n.getMessage(BUTTON_CANCEL), ok -> {
                     if (!ok) {
                         return;
                     }
                     deploymentManagement.forceTargetAction(actionId);
                     populateAndupdateTargetDetails(target);
-                    notification.displaySuccess(i18n.get("message.force.action.success"));
+                    notification.displaySuccess(i18n.getMessage("message.force.action.success"));
                 });
         UI.getCurrent().addWindow(confirmDialog.getWindow());
 
@@ -712,17 +713,17 @@ public class ActionHistoryTable extends TreeTable {
 
     private void confirmAndForceQuitAction(final Long actionId) {
         /* Display the confirmation */
-        final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.get("caption.forcequit.action.confirmbox"),
-                i18n.get("message.forcequit.action.confirm"), i18n.get(BUTTON_OK), i18n.get(BUTTON_CANCEL), ok -> {
+        final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.getMessage("caption.forcequit.action.confirmbox"),
+                i18n.getMessage("message.forcequit.action.confirm"), i18n.getMessage(BUTTON_OK), i18n.getMessage(BUTTON_CANCEL), ok -> {
                     if (!ok) {
                         return;
                     }
                     final boolean cancelResult = forceQuitActiveAction(actionId);
                     if (cancelResult) {
                         populateAndupdateTargetDetails(target);
-                        notification.displaySuccess(i18n.get("message.forcequit.action.success"));
+                        notification.displaySuccess(i18n.getMessage("message.forcequit.action.success"));
                     } else {
-                        notification.displayValidationError(i18n.get("message.forcequit.action.failed"));
+                        notification.displayValidationError(i18n.getMessage("message.forcequit.action.failed"));
                     }
                 }, FontAwesome.WARNING);
         UI.getCurrent().addWindow(confirmDialog.getWindow());
@@ -741,17 +742,17 @@ public class ActionHistoryTable extends TreeTable {
             return;
         }
 
-        final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.get("caption.cancel.action.confirmbox"),
-                i18n.get("message.cancel.action.confirm"), i18n.get(BUTTON_OK), i18n.get(BUTTON_CANCEL), ok -> {
+        final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.getMessage("caption.cancel.action.confirmbox"),
+                i18n.getMessage("message.cancel.action.confirm"), i18n.getMessage(BUTTON_OK), i18n.getMessage(BUTTON_CANCEL), ok -> {
                     if (!ok) {
                         return;
                     }
                     final boolean cancelResult = cancelActiveAction(actionId);
                     if (cancelResult) {
                         populateAndupdateTargetDetails(target);
-                        notification.displaySuccess(i18n.get("message.cancel.action.success"));
+                        notification.displaySuccess(i18n.getMessage("message.cancel.action.success"));
                     } else {
-                        notification.displayValidationError(i18n.get("message.cancel.action.failed"));
+                        notification.displayValidationError(i18n.getMessage("message.cancel.action.failed"));
                     }
                 });
         UI.getCurrent().addWindow(confirmDialog.getWindow());
@@ -803,13 +804,8 @@ public class ActionHistoryTable extends TreeTable {
      * Pinning.
      */
     private void updateDistributionTableStyle() {
-
-        if (!managementUIState.getDistributionTableFilters().getPinnedTarget().isPresent()) {
-            return;
-        }
-        final Long alreadyPinnedControllerId = managementUIState.getDistributionTableFilters().getPinnedTarget().get()
-                .getTargetId();
-        if (alreadyPinnedControllerId.equals(target.getId())) {
+        if (managementUIState.getDistributionTableFilters().getPinnedTarget().map(TargetIdName::getTargetId)
+                .map(target.getId()::equals).orElse(false)) {
             eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
         }
     }

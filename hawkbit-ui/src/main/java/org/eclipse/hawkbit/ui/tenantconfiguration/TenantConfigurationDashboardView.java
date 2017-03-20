@@ -25,7 +25,7 @@ import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.tenantconfiguration.ConfigurationItem.ConfigurationItemChangeListener;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +60,7 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
 
     private final PollingConfigurationView pollingConfigurationView;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final UiProperties uiProperties;
 
@@ -75,7 +75,7 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
     private Collection<ConfigurationGroup> customConfigurationViews;
 
     @Autowired
-    TenantConfigurationDashboardView(final I18N i18n, final UiProperties uiProperties,
+    TenantConfigurationDashboardView(final VaadinMessageSource i18n, final UiProperties uiProperties,
             final UINotification uINotification, final SystemManagement systemManagement,
             final DistributionSetManagement distributionSetManagement,
             final TenantConfigurationManagement tenantConfigurationManagement,
@@ -133,14 +133,14 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
         saveConfigurationBtn = SPUIComponentProvider.getButton(UIComponentIdProvider.SYSTEM_CONFIGURATION_SAVE, "", "",
                 "", true, FontAwesome.SAVE, SPUIButtonStyleSmallNoBorder.class);
         saveConfigurationBtn.setEnabled(false);
-        saveConfigurationBtn.setDescription(i18n.get("configuration.savebutton.tooltip"));
+        saveConfigurationBtn.setDescription(i18n.getMessage("configuration.savebutton.tooltip"));
         saveConfigurationBtn.addClickListener(event -> saveConfiguration());
         hlayout.addComponent(saveConfigurationBtn);
 
         undoConfigurationBtn = SPUIComponentProvider.getButton(UIComponentIdProvider.SYSTEM_CONFIGURATION_CANCEL, "",
                 "", "", true, FontAwesome.UNDO, SPUIButtonStyleSmallNoBorder.class);
         undoConfigurationBtn.setEnabled(false);
-        undoConfigurationBtn.setDescription(i18n.get("configuration.cancellbutton.tooltip"));
+        undoConfigurationBtn.setDescription(i18n.getMessage("configuration.cancellbutton.tooltip"));
         undoConfigurationBtn.addClickListener(event -> undoConfiguration());
         hlayout.addComponent(undoConfigurationBtn);
 
@@ -156,7 +156,7 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
         final boolean isUserInputValid = configurationViews.stream().allMatch(ConfigurationGroup::isUserInputValid);
 
         if (!isUserInputValid) {
-            uINotification.displayValidationError(i18n.get("notification.configuration.save.notpossible"));
+            uINotification.displayValidationError(i18n.getMessage("notification.configuration.save.notpossible"));
             return;
         }
         configurationViews.forEach(ConfigurationGroup::save);
@@ -164,7 +164,7 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
         // More methods
         saveConfigurationBtn.setEnabled(false);
         undoConfigurationBtn.setEnabled(false);
-        uINotification.displaySuccess(i18n.get("notification.configuration.save.successful"));
+        uINotification.displaySuccess(i18n.getMessage("notification.configuration.save.successful"));
     }
 
     private void undoConfiguration() {

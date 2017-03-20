@@ -24,7 +24,6 @@ import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ListJoin;
 import javax.persistence.criteria.Root;
@@ -33,8 +32,6 @@ import org.eclipse.hawkbit.repository.ReportManagement;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.report.model.DataReportSeries;
@@ -85,19 +82,18 @@ public class JpaReportManagement implements ReportManagement {
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
         final Root<JpaTarget> targetRoot = query.from(JpaTarget.class);
-        final Join<JpaTarget, JpaTargetInfo> targetInfo = targetRoot.join(JpaTarget_.targetInfo);
-        final Expression<Long> countColumn = cb.count(targetInfo.get(JpaTargetInfo_.targetId));
+        final Expression<Long> countColumn = cb.count(targetRoot.get(JpaTarget_.id));
         final CriteriaQuery<Object[]> multiselect = query
-                .multiselect(targetInfo.get(JpaTargetInfo_.updateStatus), countColumn)
-                .groupBy(targetInfo.get(JpaTargetInfo_.updateStatus))
-                .orderBy(cb.desc(targetInfo.get(JpaTargetInfo_.updateStatus)));
+                .multiselect(targetRoot.get(JpaTarget_.updateStatus), countColumn)
+                .groupBy(targetRoot.get(JpaTarget_.updateStatus))
+                .orderBy(cb.desc(targetRoot.get(JpaTarget_.updateStatus)));
 
         // | col1 | col2 |
         // | U_STATUS | COUNT |
         final List<Object[]> resultList = entityManager.createQuery(multiselect).getResultList();
 
         final List<DataReportSeriesItem<TargetUpdateStatus>> reportSeriesItems = resultList.stream()
-                .map(r -> new DataReportSeriesItem<TargetUpdateStatus>((TargetUpdateStatus) r[0], (Long) r[1]))
+                .map(r -> new DataReportSeriesItem<>((TargetUpdateStatus) r[0], (Long) r[1]))
                 .collect(Collectors.toList());
 
         return new DataReportSeries<>("Target Status Overview", reportSeriesItems);
@@ -117,25 +113,25 @@ public class JpaReportManagement implements ReportManagement {
         final List<DataReportSeriesItem<SeriesTime>> resultList = new ArrayList<>();
 
         // hours
-        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.HOUR,
+        resultList.add(new DataReportSeriesItem<>(SeriesTime.HOUR,
                 entityManager.createQuery(createCountSelectTargetsLastPoll(cb, beforeHour, now)).getSingleResult()));
         // days
-        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.DAY, entityManager
+        resultList.add(new DataReportSeriesItem<>(SeriesTime.DAY, entityManager
                 .createQuery(createCountSelectTargetsLastPoll(cb, beforeDay, beforeHour)).getSingleResult()));
         // weeks
-        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.WEEK, entityManager
+        resultList.add(new DataReportSeriesItem<>(SeriesTime.WEEK, entityManager
                 .createQuery(createCountSelectTargetsLastPoll(cb, beforeWeek, beforeDay)).getSingleResult()));
         // months
-        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.MONTH, entityManager
+        resultList.add(new DataReportSeriesItem<>(SeriesTime.MONTH, entityManager
                 .createQuery(createCountSelectTargetsLastPoll(cb, beforeMonth, beforeWeek)).getSingleResult()));
         // years
-        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.YEAR, entityManager
+        resultList.add(new DataReportSeriesItem<>(SeriesTime.YEAR, entityManager
                 .createQuery(createCountSelectTargetsLastPoll(cb, beforeYear, beforeMonth)).getSingleResult()));
         // years
-        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.MORE_THAN_YEAR,
+        resultList.add(new DataReportSeriesItem<>(SeriesTime.MORE_THAN_YEAR,
                 entityManager.createQuery(createCountSelectTargetsLastPoll(cb, null, beforeYear)).getSingleResult()));
         // never
-        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.NEVER,
+        resultList.add(new DataReportSeriesItem<>(SeriesTime.NEVER,
                 entityManager.createQuery(createCountSelectTargetsLastPoll(cb, null, null)).getSingleResult()));
 
         return new DataReportSeries<>("TargetLastPoll", resultList);
@@ -172,8 +168,8 @@ public class JpaReportManagement implements ReportManagement {
         final CriteriaBuilder cbTopX = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Object[]> queryTopX = cbTopX.createQuery(Object[].class);
         final Root<JpaDistributionSet> rootTopX = queryTopX.from(JpaDistributionSet.class);
-        final ListJoin<JpaDistributionSet, JpaTargetInfo> joinTopX = rootTopX
-                .join(JpaDistributionSet_.installedAtTargets, JoinType.LEFT);
+        final ListJoin<JpaDistributionSet, JpaTarget> joinTopX = rootTopX.join(JpaDistributionSet_.installedAtTargets,
+                JoinType.LEFT);
         final Expression<Long> countColumn = cbTopX.count(joinTopX);
         // top x usage query
         final CriteriaQuery<Object[]> groupBy = queryTopX
@@ -270,14 +266,13 @@ public class JpaReportManagement implements ReportManagement {
         // count select statement
         final CriteriaQuery<Long> countSelect = cb.createQuery(Long.class);
         final Root<JpaTarget> countSelectRoot = countSelect.from(JpaTarget.class);
-        final Join<JpaTarget, JpaTargetInfo> targetInfoJoin = countSelectRoot.join(JpaTarget_.targetInfo);
         countSelect.select(cb.count(countSelectRoot));
         if (start != null && end != null) {
-            countSelect.where(cb.between(targetInfoJoin.get(JpaTargetInfo_.lastTargetQuery), start, end));
+            countSelect.where(cb.between(countSelectRoot.get(JpaTarget_.lastTargetQuery), start, end));
         } else if (from == null && to != null) {
-            countSelect.where(cb.lessThanOrEqualTo(targetInfoJoin.get(JpaTargetInfo_.lastTargetQuery), end));
+            countSelect.where(cb.lessThanOrEqualTo(countSelectRoot.get(JpaTarget_.lastTargetQuery), end));
         } else {
-            countSelect.where(cb.isNull(targetInfoJoin.get(JpaTargetInfo_.lastTargetQuery)));
+            countSelect.where(cb.isNull(countSelectRoot.get(JpaTarget_.lastTargetQuery)));
         }
         return countSelect;
     }
@@ -314,10 +309,10 @@ public class JpaReportManagement implements ReportManagement {
                     outerReportItems.add(outer.toItem());
                 }
             } else {
-                outerReportItems.add(new DataReportSeriesItem<String>("misc", inner.count));
+                outerReportItems.add(new DataReportSeriesItem<>("misc", inner.count));
             }
 
-            innerOuterReport.add(new InnerOuterDataReportSeries<String>(
+            innerOuterReport.add(new InnerOuterDataReportSeries<>(
                     new DataReportSeries<>("DS-Name", Collections.singletonList(inner.toItem())),
                     new DataReportSeries<>("DS-Version", outerReportItems)));
         }

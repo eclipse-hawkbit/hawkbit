@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
@@ -36,4 +39,12 @@ public interface EventAwareEntity {
      * @param descriptorEvent
      */
     void fireDeleteEvent(DescriptorEvent descriptorEvent);
+
+    /**
+     * @return list of entity fields that if the only changed fields prevents
+     *         {@link #fireUpdateEvent(DescriptorEvent)} call.
+     */
+    default List<String> getUpdateIgnoreFields() {
+        return Collections.emptyList();
+    }
 }

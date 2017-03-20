@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 /**
  * This class represents the UI item for the anonymous download by in the
@@ -24,7 +24,7 @@ public class AnonymousDownloadAuthenticationConfigurationItem extends AbstractAu
     private boolean configurationEnabledChange;
 
     public AnonymousDownloadAuthenticationConfigurationItem(
-            final TenantConfigurationManagement tenantConfigurationManagement, final I18N i18n) {
+            final TenantConfigurationManagement tenantConfigurationManagement, final VaadinMessageSource i18n) {
         super(TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED, tenantConfigurationManagement, i18n);
 
         super.init("label.configuration.anonymous.download");

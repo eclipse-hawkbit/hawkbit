@@ -84,7 +84,7 @@ public class UploadStatusObject implements Serializable {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof UploadStatusObject)) {
+        if (getClass() != obj.getClass()) {
             return false;
         }
         final UploadStatusObject other = (UploadStatusObject) obj;

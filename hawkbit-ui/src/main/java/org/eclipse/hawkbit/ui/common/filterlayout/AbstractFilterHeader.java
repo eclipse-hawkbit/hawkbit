@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -41,9 +41,9 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
 
     private Button hideIcon;
 
-    protected final I18N i18n;
+    protected final VaadinMessageSource i18n;
 
-    protected AbstractFilterHeader(final SpPermissionChecker permChecker, final UIEventBus eventBus, final I18N i18n) {
+    protected AbstractFilterHeader(final SpPermissionChecker permChecker, final UIEventBus eventBus, final VaadinMessageSource i18n) {
         this.permChecker = permChecker;
         this.eventBus = eventBus;
         this.i18n = i18n;

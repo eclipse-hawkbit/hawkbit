@@ -620,6 +620,16 @@ public final class UIComponentIdProvider {
     public static final String TARGET_FILTER_TBL_SEARCH_RESET_ID = "target.filter.search.rest.icon";
 
     /**
+     * ID - simple filter- Accordion-Tab
+     */
+    public static final String SIMPLE_FILTER_ACCORDION_TAB = "simple.filter.accordion.tab";
+
+    /**
+     * ID - custom filter- Accordion-Tab
+     */
+    public static final String CUSTOM_FILTER_ACCORDION_TAB = "custom.filter.accordion.tab";
+
+    /**
      * ID- Customfilter.Name.
      */
     public static final String CUSTOM_FILTER_ADD_NAME = "custom.filter.add.name";

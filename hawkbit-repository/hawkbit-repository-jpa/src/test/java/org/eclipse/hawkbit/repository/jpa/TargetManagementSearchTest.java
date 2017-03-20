@@ -604,13 +604,13 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         assertThat(result.getNumberOfElements()).isEqualTo(9);
         final List<Target> expected = new ArrayList<>();
         expected.addAll(targInstalled.stream().sorted(byId)
-                .filter(item -> lastTargetQueryAlwaysOverdue.equals(item.getTargetInfo().getLastTargetQuery()))
+                .filter(item -> lastTargetQueryAlwaysOverdue.equals(item.getLastTargetQuery()))
                 .collect(Collectors.toList()));
         expected.addAll(targAssigned.stream().sorted(byId)
-                .filter(item -> lastTargetQueryAlwaysOverdue.equals(item.getTargetInfo().getLastTargetQuery()))
+                .filter(item -> lastTargetQueryAlwaysOverdue.equals(item.getLastTargetQuery()))
                 .collect(Collectors.toList()));
         expected.addAll(notAssigned.stream().sorted(byId)
-                .filter(item -> lastTargetQueryAlwaysOverdue.equals(item.getTargetInfo().getLastTargetQuery()))
+                .filter(item -> lastTargetQueryAlwaysOverdue.equals(item.getLastTargetQuery()))
                 .collect(Collectors.toList()));
 
         assertThat(result.getContent()).containsExactly(expected.toArray(new Target[0]));

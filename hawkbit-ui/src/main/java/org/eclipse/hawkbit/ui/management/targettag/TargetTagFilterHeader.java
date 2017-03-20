@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -27,7 +27,7 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
 
     private final ManagementUIState managementUIState;
 
-    TargetTagFilterHeader(final I18N i18n, final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout,
+    TargetTagFilterHeader(final VaadinMessageSource i18n, final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout,
             final ManagementUIState managementUIState, final SpPermissionChecker permChecker,
             final UIEventBus eventBus) {
         super(permChecker, eventBus, i18n);
@@ -50,7 +50,7 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
 
     @Override
     protected String getTitle() {
-        return i18n.get("header.target.filter.tag", new Object[] {});
+        return i18n.getMessage("header.target.filter.tag", new Object[] {});
     }
 
     @Override

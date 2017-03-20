@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 /**
  * This class represents the UI item for the target security token section in
@@ -24,7 +24,7 @@ public class TargetSecurityTokenAuthenticationConfigurationItem extends Abstract
     private boolean configurationEnabledChange;
 
     public TargetSecurityTokenAuthenticationConfigurationItem(
-            final TenantConfigurationManagement tenantConfigurationManagement, final I18N i18n) {
+            final TenantConfigurationManagement tenantConfigurationManagement, final VaadinMessageSource i18n) {
         super(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, tenantConfigurationManagement,
                 i18n);
 
