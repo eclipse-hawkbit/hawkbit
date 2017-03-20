@@ -118,7 +118,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     void sendUpdateMessageToTarget(final String tenant, final Target target, final Long actionId,
             final Collection<org.eclipse.hawkbit.repository.model.SoftwareModule> modules) {
 
-        final URI targetAdress = target.getTargetInfo().getAddress();
+        final URI targetAdress = target.getAddress();
         if (!IpUtil.isAmqpUri(targetAdress)) {
             return;
         }
@@ -153,7 +153,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         }
 
         sendCancelMessageToTarget(cancelEvent.getTenant(), cancelEvent.getEntity().getControllerId(),
-                cancelEvent.getActionId(), cancelEvent.getEntity().getTargetInfo().getAddress());
+                cancelEvent.getActionId(), cancelEvent.getEntity().getAddress());
     }
 
     private boolean isFromSelf(final RemoteApplicationEvent event) {

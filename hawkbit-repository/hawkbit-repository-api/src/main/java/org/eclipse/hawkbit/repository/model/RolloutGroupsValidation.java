@@ -8,8 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * Represents information to validate the correct distribution of targets to

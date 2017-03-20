@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -23,10 +24,10 @@ import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.ProxyTarget;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -53,6 +54,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
     private String searchText;
     private Boolean noTagClicked;
     private transient TargetManagement targetManagement;
+    private transient DeploymentManagement deploymentManagement;
     private transient VaadinMessageSource i18N;
     private Long pinnedDistId;
     private Long targetFilterQueryId;
@@ -129,10 +131,10 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             prxyTarget.setName(targ.getName());
             prxyTarget.setDescription(targ.getDescription());
             prxyTarget.setControllerId(targ.getControllerId());
-            prxyTarget.setInstallationDate(targ.getTargetInfo().getInstallationDate());
-            prxyTarget.setAddress(targ.getTargetInfo().getAddress());
-            prxyTarget.setLastTargetQuery(targ.getTargetInfo().getLastTargetQuery());
-            prxyTarget.setUpdateStatus(targ.getTargetInfo().getUpdateStatus());
+            prxyTarget.setInstallationDate(targ.getInstallationDate());
+            prxyTarget.setAddress(targ.getAddress());
+            prxyTarget.setLastTargetQuery(targ.getLastTargetQuery());
+            prxyTarget.setUpdateStatus(targ.getUpdateStatus());
             prxyTarget.setLastModifiedDate(SPDateTimeUtil.getFormattedDate(targ.getLastModifiedAt()));
             prxyTarget.setCreatedDate(SPDateTimeUtil.getFormattedDate(targ.getCreatedAt()));
             prxyTarget.setCreatedAt(targ.getCreatedAt());
@@ -143,17 +145,15 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
                 prxyTarget.setInstalledDistributionSet(null);
                 prxyTarget.setAssignedDistributionSet(null);
             } else {
-                getTargetManagement().findTargetByControllerIDWithDetails(targ.getControllerId()).ifPresent(target -> {
-                    prxyTarget.setInstalledDistributionSet(target.getTargetInfo().getInstalledDistributionSet());
-                    prxyTarget.setAssignedDistributionSet(target.getAssignedDistributionSet());
-                });
+                getDeploymentManagement().getAssignedDistributionSet(targ.getControllerId())
+                        .ifPresent(prxyTarget::setAssignedDistributionSet);
+                getDeploymentManagement().getInstalledDistributionSet(targ.getControllerId())
+                        .ifPresent(prxyTarget::setInstalledDistributionSet);
             }
 
-            prxyTarget.setUpdateStatus(targ.getTargetInfo().getUpdateStatus());
-            prxyTarget.setLastTargetQuery(targ.getTargetInfo().getLastTargetQuery());
-            prxyTarget.setTargetInfo(targ.getTargetInfo());
-            prxyTarget.setPollStatusToolTip(
-                    HawkbitCommonUtil.getPollStatusToolTip(prxyTarget.getTargetInfo().getPollStatus(), getI18N()));
+            prxyTarget.setUpdateStatus(targ.getUpdateStatus());
+            prxyTarget.setLastTargetQuery(targ.getLastTargetQuery());
+            prxyTarget.setPollStatusToolTip(HawkbitCommonUtil.getPollStatusToolTip(targ.getPollStatus(), getI18N()));
             proxyTargetBeans.add(prxyTarget);
         }
         return proxyTargetBeans;
@@ -212,6 +212,13 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             targetManagement = SpringContextHelper.getBean(TargetManagement.class);
         }
         return targetManagement;
+    }
+
+    private DeploymentManagement getDeploymentManagement() {
+        if (deploymentManagement == null) {
+            deploymentManagement = SpringContextHelper.getBean(DeploymentManagement.class);
+        }
+        return deploymentManagement;
     }
 
     private ManagementUIState getManagementUIState() {

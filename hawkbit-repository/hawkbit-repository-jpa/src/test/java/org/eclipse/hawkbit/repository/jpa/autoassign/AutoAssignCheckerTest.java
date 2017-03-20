@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -146,12 +145,13 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
             final int count) {
         final List<Long> targetIds = targets.stream().map(Target::getId).collect(Collectors.toList());
 
-        final Slice<Target> targetsAll = targetManagement.findTargetsAll(new PageRequest(0, 1000));
+        final Slice<Target> targetsAll = targetManagement.findTargetsAll(pageReq);
         assertThat(targetsAll).as("Count of targets").hasSize(count);
 
         for (final Target target : targetsAll) {
             if (targetIds.contains(target.getId())) {
-                assertThat(target.getAssignedDistributionSet()).as("assigned DS").isEqualTo(set);
+                assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get())
+                        .as("assigned DS").isEqualTo(set);
             }
         }
 

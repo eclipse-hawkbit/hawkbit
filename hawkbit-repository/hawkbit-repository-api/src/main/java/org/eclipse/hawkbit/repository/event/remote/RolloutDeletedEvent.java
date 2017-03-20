@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
-import org.eclipse.hawkbit.repository.event.remote.RemoteIdEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 
 /**

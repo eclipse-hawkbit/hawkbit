@@ -12,7 +12,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.builder.AbstractTargetUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 
 /**
@@ -40,11 +39,9 @@ public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> im
         }
 
         target.setDescription(description);
-        final JpaTargetInfo targetInfo = (JpaTargetInfo) target.getTargetInfo();
-
-        targetInfo.setAddress(address);
-        targetInfo.setUpdateStatus(getStatus().orElse(TargetUpdateStatus.UNKNOWN));
-        getLastTargetQuery().ifPresent(targetInfo::setLastTargetQuery);
+        target.setAddress(address);
+        target.setUpdateStatus(getStatus().orElse(TargetUpdateStatus.UNKNOWN));
+        getLastTargetQuery().ifPresent(target::setLastTargetQuery);
 
         return target;
     }

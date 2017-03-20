@@ -8,13 +8,11 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
+import javax.validation.constraints.NotNull;
+
 import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.hibernate.validator.constraints.NotEmpty;
-
-import javax.validation.constraints.NotNull;
-import java.util.Optional;
 
 /**
  * Builder to update an existing {@link Rollout} entry. Defines all fields that

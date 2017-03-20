@@ -10,24 +10,31 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <modelVersion>4.0.0</modelVersion>
+
    <parent>
       <groupId>org.eclipse.hawkbit</groupId>
       <artifactId>hawkbit-parent</artifactId>
       <version>0.2.0-SNAPSHOT</version>
    </parent>
-   <artifactId>hawkbit-extensions-parent</artifactId>
-   <packaging>pom</packaging>
-   <name>hawkBit :: Extensions</name>
-   <description>Parent pom for hawkBit extensions</description>
 
-   <properties>
-      <jacoco.outputDir>${project.basedir}/../../target/</jacoco.outputDir>
-   </properties>
+   <artifactId>hawkbit-runtime-parent</artifactId>
+   <name>hawkBit :: Runtime</name>
+   <packaging>pom</packaging>
+
+   <distributionManagement>
+      <repository>
+         <id>repo.eclipse.org</id>
+         <name>hawkBit Repository - Release</name>
+         <url>https://repo.eclipse.org/content/repositories/hawkbit-releases</url>
+      </repository>
+      <snapshotRepository>
+         <id>repo.eclipse.org</id>
+         <name>hawkBit Repository - Release</name>
+         <url>https://repo.eclipse.org/content/repositories/hawkbit-snapshots</url>
+      </snapshotRepository>
+   </distributionManagement>
 
    <modules>
-      <module>hawkbit-extension-uaa</module>
-      <module>hawkbit-extension-artifact-repository-mongo</module>
-      <module>hawkbit-extension-artifact-repository-s3</module>
+      <module>hawkbit-update-server</module>
    </modules>
-
 </project>

@@ -18,7 +18,7 @@
    </parent>
 
    <artifactId>hawkbit-examples-parent</artifactId>
-   <name>hawkBit-example :: Parent</name>
+   <name>hawkBit :: Examples</name>
    <packaging>pom</packaging>
    
    <distributionManagement>
@@ -36,7 +36,6 @@
 
    <modules>
       <module>hawkbit-device-simulator</module>
-      <module>hawkbit-example-app</module>
       <module>hawkbit-example-core-feign-client</module>
       <module>hawkbit-example-ddi-feign-client</module>
       <module>hawkbit-example-mgmt-feign-client</module>

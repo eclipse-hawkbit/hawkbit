@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -108,6 +109,12 @@ public interface DistributionSetRepository
      */
     @Query("select DISTINCT d from JpaDistributionSet d join fetch d.modules m join d.actions a where a.id = :action")
     JpaDistributionSet findByActionId(@Param("action") Long action);
+
+    @Query("select DISTINCT ds from JpaDistributionSet ds join fetch ds.modules join ds.assignedToTargets t where t.controllerId = :controllerId")
+    Optional<DistributionSet> findAssignedToTarget(@Param("controllerId") String controllerId);
+
+    @Query("select DISTINCT ds from JpaDistributionSet ds join fetch ds.modules join ds.installedAtTargets t where t.controllerId = :controllerId")
+    Optional<DistributionSet> findInstalledAtTarget(@Param("controllerId") String controllerId);
 
     /**
      * Counts {@link DistributionSet} instances of given type in the repository.

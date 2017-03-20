@@ -74,7 +74,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         mvc.perform(delete(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId()))
                 .andExpect(status().isOk());
 
-        assertThat(targetFilterQueryManagement.findTargetFilterQueryById(filterQuery.getId()).isPresent()).isFalse();
+        assertThat(targetFilterQueryManagement.findTargetFilterQueryById(filterQuery.getId())).isNotPresent();
     }
 
     @Test

@@ -27,8 +27,6 @@ import org.eclipse.hawkbit.repository.model.ActionWithStatusCount;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
@@ -373,15 +371,15 @@ public interface DeploymentManagement {
     /**
      * Starts all scheduled actions of an RolloutGroup parent.
      *
-     * @param rollout
+     * @param rolloutId
      *            the rollout the actions belong to
-     * @param rolloutGroupParent
+     * @param rolloutGroupParentId
      *            the parent rollout group the actions should reference. null
      *            references the first group
      * @return the amount of started actions
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long startScheduledActionsByRolloutGroupParent(@NotNull Rollout rollout, RolloutGroup rolloutGroupParent);
+    long startScheduledActionsByRolloutGroupParent(@NotNull Long rolloutId, Long rolloutGroupParentId);
 
     /**
      * All {@link ActionStatus} entries in the repository.
@@ -392,4 +390,29 @@ public interface DeploymentManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<ActionStatus> findActionStatusAll(@NotNull Pageable pageable);
+
+    /**
+     * Returns {@link DistributionSet} that is assigned to given {@link Target}.
+     * 
+     * @param controllerId
+     *            of target
+     * @return assigned {@link DistributionSet}
+     * 
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
+     */
+    Optional<DistributionSet> getAssignedDistributionSet(@NotEmpty String controllerId);
+
+    /**
+     * Returns {@link DistributionSet} that is installed on given
+     * {@link Target}.
+     * 
+     * @param controllerId
+     *            of target
+     * @return installed {@link DistributionSet}
+     * 
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
+     */
+    Optional<DistributionSet> getInstalledDistributionSet(@NotEmpty String controllerId);
 }

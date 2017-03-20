@@ -41,8 +41,7 @@
       <module>hawkbit-artifact-repository-filesystem</module>
       <module>hawkbit-autoconfigure</module>
       <module>hawkbit-test-report</module>
-      <module>examples</module>
-      <module>extensions</module>
+      <module>hawkbit-runtime</module>
       <module>hawkbit-starters</module>
    </modules>
 
@@ -105,8 +104,9 @@
       <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
 
       <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->
-      <!-- Newer versions needed than defined in Boot -->      
+      <!-- Newer versions needed than defined in Boot -->
       <spring-hateoas.version>0.23.0.RELEASE</spring-hateoas.version>
+      <assertj.version>3.6.2</assertj.version>
       <!-- Older versions needed than defined in Boot -->
       <!-- Incompatible changes in 2.2 -->
       <json-path.version>2.0.0</json-path.version>
@@ -150,7 +150,7 @@
       <feign.extension.version>9.3.1</feign.extension.version>
       <jayway.awaitility.version>1.7.0</jayway.awaitility.version>
       <io-protostuff.version>1.5.2</io-protostuff.version>
-     
+
       <!-- Misc libraries versions - END -->
 
       <!-- Release - START -->
@@ -164,15 +164,15 @@
       <sonar.github.repository>eclipse/hawkbit</sonar.github.repository>
       <sonar.links.homepage>https://www.eclipse.org/hawkbit</sonar.links.homepage>
       <sonar.links.ci>https://circleci.com/gh/eclipse/hawkbit</sonar.links.ci>
-      <jacoco.version>0.7.7.201606060606</jacoco.version>
+      <sonar.exclusions>**/target/generated-sources/apt/**,**/src/test/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**</sonar.exclusions>
+      <sonar.coverage.exclusions>**/src/main/java/org/eclipse/hawkbit/ui/**,**/target/generated-sources/apt/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**,**/examples/**</sonar.coverage.exclusions>
+      <jacoco.version>0.7.9</jacoco.version>
       <jacoco.outputDir>${project.basedir}/../target/</jacoco.outputDir>
-      <jacoco.out.ut.file>jacoco-ut.exec</jacoco.out.ut.file>
-      <sonar.jacoco.reportPath>${jacoco.outputDir}/${jacoco.out.ut.file}</sonar.jacoco.reportPath>
-      <jacoco.out.it.file>jacoco-it.exec</jacoco.out.it.file>
-      <sonar.jacoco.itReportPath>${jacoco.outputDir}/${jacoco.out.it.file}</sonar.jacoco.itReportPath>
+      <jacoco.reportPath>${jacoco.outputDir}/jacoco-ut.exec</jacoco.reportPath>
+      <jacoco.itReportPath>${jacoco.outputDir}/jacoco-it.exec</jacoco.itReportPath>
+      <sonar.jacoco.reportPaths>${jacoco.reportPath},${jacoco.itReportPath}</sonar.jacoco.reportPaths>
       <!-- Sonar - END -->
    </properties>
-
 
    <build>
       <plugins>
@@ -216,7 +216,7 @@
             <version>1.4.1</version>
             <executions>
                <execution>
-                  <!-- Make sure that only non-snapshot versions are used for the dependencies. Only active when property 'snapshotDependencyAllowed' is 
+                  <!-- Make sure that only non-snapshot versions are used for the dependencies. Only active when property 'snapshotDependencyAllowed' is
                      false. -->
                   <id>enforce-no-snapshots</id>
                   <goals>
@@ -258,7 +258,7 @@
                      <goal>prepare-agent</goal>
                   </goals>
                   <configuration>
-                     <destFile>${sonar.jacoco.reportPath}</destFile>
+                     <destFile>${jacoco.reportPath}</destFile>
                      <propertyName>jacoco.agent.ut.arg</propertyName>
                      <append>true</append>
                   </configuration>
@@ -270,7 +270,7 @@
                      <goal>prepare-agent</goal>
                   </goals>
                   <configuration>
-                     <destFile>${sonar.jacoco.itReportPath}</destFile>
+                     <destFile>${jacoco.itReportPath}</destFile>
                      <propertyName>jacoco.agent.it.arg</propertyName>
                      <append>true</append>
                   </configuration>
@@ -293,11 +293,6 @@
 
       <pluginManagement>
          <plugins>
-            <plugin>
-               <groupId>org.sonarsource.scanner.maven</groupId>
-               <artifactId>sonar-maven-plugin</artifactId>
-               <version>3.2</version>
-            </plugin>
             <plugin>
                <groupId>org.eclipse.m2e</groupId>
                <artifactId>lifecycle-mapping</artifactId>
@@ -418,10 +413,10 @@
          <build>
             <plugins>
                <plugin>
-                  <!-- Use the Nexus Staging plugin as a full replacement for the standard Maven Deploy plugin. See https://github.com/sonatype/nexus-maven-plugins/tree/master/staging/maven-plugin 
-                     why this makes sense :-) We can control whether we want to deploy to the Eclipse repo or Maven Central by a combination of the version being a SNAPSHOT 
-                     or RELEASE version and property skipStaging=true/false. In any case we can take advantage of the plugin's "deferred deploy" feature which makes sure that 
-                     all artifacts of a multi-module project are deployed as a whole at the end of the build process instead of deploying each module's artifacts individually 
+                  <!-- Use the Nexus Staging plugin as a full replacement for the standard Maven Deploy plugin. See https://github.com/sonatype/nexus-maven-plugins/tree/master/staging/maven-plugin
+                     why this makes sense :-) We can control whether we want to deploy to the Eclipse repo or Maven Central by a combination of the version being a SNAPSHOT
+                     or RELEASE version and property skipStaging=true/false. In any case we can take advantage of the plugin's "deferred deploy" feature which makes sure that
+                     all artifacts of a multi-module project are deployed as a whole at the end of the build process instead of deploying each module's artifacts individually
                      as part of building the module. -->
                   <groupId>org.sonatype.plugins</groupId>
                   <artifactId>nexus-staging-maven-plugin</artifactId>
@@ -632,7 +627,7 @@
             <artifactId>feign-jaxrs</artifactId>
             <version>${feign.extension.version}</version>
          </dependency>
-        
+
         <!-- Protostuff Io -->
       <dependency>
          <groupId>io.protostuff</groupId>
@@ -644,7 +639,7 @@
          <artifactId>protostuff-runtime</artifactId>
          <version>${io-protostuff.version}</version>
       </dependency>
-         
+
          <!-- RSQL / FIQL parser -->
          <dependency>
             <groupId>cz.jirutka.rsql</groupId>

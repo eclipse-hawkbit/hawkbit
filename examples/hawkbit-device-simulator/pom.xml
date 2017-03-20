@@ -19,7 +19,7 @@
    </parent>
 
    <artifactId>hawkbit-device-simulator</artifactId>
-   <name>hawkBit-example :: Device Simulator</name>
+   <name>hawkBit :: Examples :: Device Simulator</name>
    <description>Device Management Federation API based simulator</description>
 
    <build>

@@ -341,8 +341,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      *         rolloutgroup in a specific status
      */
     @EntityGraph(attributePaths = { "target" }, type = EntityGraphType.LOAD)
-    Page<Action> findByRolloutAndRolloutGroupParentAndStatus(Pageable pageable, JpaRollout rollout,
-            JpaRolloutGroup rolloutGroupParent, Status actionStatus);
+    Page<Action> findByRolloutIdAndRolloutGroupParentIdAndStatus(Pageable pageable, Long rollout,
+            Long rolloutGroupParent, Status actionStatus);
 
     /**
      * Retrieving all actions referring to the first group of a rollout.
@@ -357,7 +357,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      *         rolloutgroup in a specific status
      */
     @EntityGraph(attributePaths = { "target" }, type = EntityGraphType.LOAD)
-    Page<Action> findByRolloutAndRolloutGroupParentIsNullAndStatus(Pageable pageable, JpaRollout rollout,
+    Page<Action> findByRolloutIdAndRolloutGroupParentIsNullAndStatus(Pageable pageable, Long rollout,
             Status actionStatus);
 
     /**

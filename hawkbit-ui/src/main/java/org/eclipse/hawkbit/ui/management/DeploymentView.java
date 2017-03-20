@@ -151,7 +151,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
                 managementViewClientCriterion);
         this.distributionTableLayout = new DistributionTableLayout(i18n, eventBus, permChecker, managementUIState,
                 distributionSetManagement, managementViewClientCriterion, entityFactory, uiNotification, tagManagement,
-                systemManagement, targetManagement);
+                systemManagement, targetManagement, deploymentManagement);
         this.deleteAndActionsLayout = new DeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
                 tagManagement, managementViewClientCriterion, managementUIState, targetManagement, targetTable,
                 deploymentManagement, distributionSetManagement);

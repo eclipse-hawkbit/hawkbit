@@ -262,8 +262,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     @Step("Check the status of the rollout groups and the rollout")
     private void verifyRolloutAndAllGroupsAreFinished(final Rollout createdRollout) {
         rolloutManagement.handleRollouts();
-        final List<RolloutGroup> runningRolloutGroups = rolloutGroupManagement.findRolloutGroupsByRolloutId(
-                createdRollout.getId(), new OffsetBasedPageRequest(0, 10, new Sort(Direction.ASC, "id"))).getContent();
+        final List<RolloutGroup> runningRolloutGroups = rolloutGroupManagement
+                .findRolloutGroupsByRolloutId(createdRollout.getId(), pageReq).getContent();
         assertThat(runningRolloutGroups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.FINISHED);
         assertThat(runningRolloutGroups.get(1).getStatus()).isEqualTo(RolloutGroupStatus.FINISHED);
         assertThat(runningRolloutGroups.get(2).getStatus()).isEqualTo(RolloutGroupStatus.FINISHED);
@@ -568,13 +568,12 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         // 5 targets are in the group and the DS has been assigned
         final List<RolloutGroup> rolloutGroups = createdRollout.getRolloutGroups();
         final Page<Target> targets = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroups.get(0).getId(),
-                new OffsetBasedPageRequest(0, 20, new Sort(Direction.ASC, "id")));
+                pageReq);
         final List<Target> targetList = targets.getContent();
         assertThat(targetList.size()).isEqualTo(5);
-        for (final Target t : targetList) {
-            final DistributionSet assignedDs = t.getAssignedDistributionSet();
-            assertThat(assignedDs.getId()).isEqualTo(ds.getId());
-        }
+
+        targets.getContent().stream().map(Target::getControllerId).map(deploymentManagement::getAssignedDistributionSet)
+                .forEach(d -> assertThat(d.get().getId()).isEqualTo(ds.getId()));
 
         final List<Target> targetToCancel = new ArrayList<>();
         targetToCancel.add(targetList.get(0));
@@ -674,7 +673,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutManagement.handleRollouts();
 
         rolloutTwo = rolloutManagement.findRolloutById(rolloutTwo.getId()).get();
-        // 6 error targets are know running
+        // 6 error targets are now running
         expectedTargetCountStatus = createInitStatusMap();
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 6L);
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.FINISHED, 9L);
@@ -684,10 +683,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final List<Target> targetList = targetPage.getContent();
         // 15 targets in finished/IN_SYNC status and same DS assigned
         assertThat(targetList.size()).isEqualTo(amountTargetsForRollout);
-        for (final Target t : targetList) {
-            final DistributionSet ds = t.getAssignedDistributionSet();
-            assertThat(ds).isEqualTo(distributionSet);
-        }
+        targetList.stream().map(Target::getControllerId).map(deploymentManagement::getAssignedDistributionSet)
+                .forEach(d -> assertThat(d.get()).isEqualTo(distributionSet));
     }
 
     @Test
@@ -1425,7 +1422,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = RolloutGroupUpdatedEvent.class, count = 16),
             @Expect(type = RolloutUpdatedEvent.class, count = 6),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = TargetCreatedEvent.class, count = 25), @Expect(type = TargetUpdatedEvent.class, count = 4),
+            @Expect(type = TargetCreatedEvent.class, count = 25), @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 5),
             @Expect(type = ActionCreatedEvent.class, count = 10), @Expect(type = ActionUpdatedEvent.class, count = 2),
@@ -1504,7 +1501,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             final Map<TotalTargetCountStatus.Status, Long> expectedTotalCountStates) {
         for (final Map.Entry<TotalTargetCountStatus.Status, Long> entry : expectedTotalCountStates.entrySet()) {
             final Long countReady = totalTargetCountStatus.getTotalTargetCountByStatus(entry.getKey());
-            assertThat(countReady).isEqualTo(entry.getValue());
+            assertThat(countReady).as("targets in status " + entry.getKey()).isEqualTo(entry.getValue());
         }
     }
 
