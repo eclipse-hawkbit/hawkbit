@@ -49,7 +49,7 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
 
     protected static final String TENANT_EXIST = "DEFAULT";
     protected static final String REGISTER_TARGET = "NewDmfTarget";
-    protected static final String CREATED_BY = "AMQP-Controller";
+    protected static final String CREATED_BY = "CONTROLLER_PLUG_AND_PLAY";
 
     private DeadletterListener deadletterListener;
     private ReplyToListener replyToListener;
@@ -201,12 +201,12 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         final Target registerdTarget = waitUntilIsPresent(
                 () -> findTargetBasedOnNewPolltime(target, pollingTimeTargetOld));
         assertAllTargetsCount(existingTargetsAfterCreation);
-        assertThat(registerdTarget.getTargetInfo().getUpdateStatus()).isEqualTo(expectedTargetStatus);
+        assertThat(registerdTarget.getUpdateStatus()).isEqualTo(expectedTargetStatus);
     }
 
-    private Optional<Target> findTargetBasedOnNewPolltime(final String target, final Long pollingTimeTargetOld) {
-        final Optional<Target> target2 = targetManagement.findTargetByControllerIDWithDetails(target);
-        final Long pollingTimeTargetNew = target2.get().getTargetInfo().getLastTargetQuery();
+    private Optional<Target> findTargetBasedOnNewPolltime(final String controllerId, final Long pollingTimeTargetOld) {
+        final Optional<Target> target2 = controllerManagement.findByControllerId(controllerId);
+        final Long pollingTimeTargetNew = target2.get().getLastTargetQuery();
         if (pollingTimeTargetOld < pollingTimeTargetNew) {
             return target2;
         }
@@ -218,8 +218,8 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         assertThat(target.getDescription()).contains("Plug and Play");
         assertThat(target.getDescription()).contains(target.getControllerId());
         assertThat(target.getCreatedBy()).isEqualTo(createdBy);
-        assertThat(target.getTargetInfo().getUpdateStatus()).isEqualTo(updateStatus);
-        assertThat(target.getTargetInfo().getAddress()).isEqualTo(
+        assertThat(target.getUpdateStatus()).isEqualTo(updateStatus);
+        assertThat(target.getAddress()).isEqualTo(
                 IpUtil.createAmqpUri(rabbitMqSetupService.getVirtualHost(), AmqpTestConfiguration.REPLY_TO_EXCHANGE));
     }
 
@@ -262,7 +262,8 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
     protected void assertUpdateAttributes(final String controllerId, final Map<String, String> attributes) {
         final Target findByControllerId = waitUntilIsPresent(
                 () -> controllerManagement.findByControllerId(controllerId));
-        final Map<String, String> controllerAttributes = findByControllerId.getTargetInfo().getControllerAttributes();
+        final Map<String, String> controllerAttributes = targetManagement
+                .getControllerAttributes(findByControllerId.getControllerId());
         assertThat(controllerAttributes.size()).isEqualTo(attributes.size());
         attributes.forEach((k, v) -> assertKeyValueInMap(k, v, controllerAttributes));
     }

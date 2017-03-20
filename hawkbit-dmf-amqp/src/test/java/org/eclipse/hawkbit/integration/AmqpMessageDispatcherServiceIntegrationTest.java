@@ -53,7 +53,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
             final Optional<Target> findTargetByControllerID = targetManagement
                     .findTargetByControllerID(REGISTER_TARGET);
             return findTargetByControllerID.isPresent() && TargetUpdateStatus.PENDING
-                    .equals(findTargetByControllerID.get().getTargetInfo().getUpdateStatus());
+                    .equals(findTargetByControllerID.get().getUpdateStatus());
         });
         assertDownloadAndInstallMessage(getDistributionSet().getModules());
     }
@@ -80,7 +80,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
             final Optional<Target> findTargetByControllerID = targetManagement
                     .findTargetByControllerID(REGISTER_TARGET);
             return findTargetByControllerID.isPresent() && TargetUpdateStatus.PENDING
-                    .equals(findTargetByControllerID.get().getTargetInfo().getUpdateStatus());
+                    .equals(findTargetByControllerID.get().getUpdateStatus());
         });
         assertCancelActionMessage(assignmentResult.getActions().get(0));
 
@@ -103,7 +103,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
             final Optional<Target> findTargetByControllerID = targetManagement
                     .findTargetByControllerID(REGISTER_TARGET);
             return findTargetByControllerID.isPresent() && TargetUpdateStatus.PENDING
-                    .equals(findTargetByControllerID.get().getTargetInfo().getUpdateStatus());
+                    .equals(findTargetByControllerID.get().getUpdateStatus());
         });
         assertCancelActionMessage(actionId);
 

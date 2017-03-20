@@ -58,8 +58,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
 
         final String target2 = "Target2";
         registerAndAssertTargetWithExistingTenant(target2, 2);
-        final Long pollingTimeTarget2 = targetManagement.findTargetByControllerIDWithDetails(target2).get()
-                .getTargetInfo().getLastTargetQuery();
+        final Long pollingTimeTarget2 = controllerManagement.findByControllerId(target2).get().getLastTargetQuery();
         registerSameTargetAndAssertBasedOnLastPolling(target2, 2, TargetUpdateStatus.REGISTERED, pollingTimeTarget2);
         Mockito.verifyZeroInteractions(getDeadletterListener());
     }
