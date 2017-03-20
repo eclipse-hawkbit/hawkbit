@@ -8,16 +8,27 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.net.URI;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
@@ -25,14 +36,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedAttributeNode;
-import javax.persistence.NamedEntityGraph;
+import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -45,14 +53,21 @@ import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHol
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
+import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
+import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.springframework.data.domain.Persistable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
 
 /**
  * JPA implementation of {@link Target}.
@@ -64,25 +79,26 @@ import org.springframework.data.domain.Persistable;
         @Index(name = "sp_idx_target_02", columnList = "tenant,name"),
         @Index(name = "sp_idx_target_03", columnList = "tenant,controller_id,assigned_distribution_set"),
         @Index(name = "sp_idx_target_04", columnList = "tenant,created_at"),
+        @Index(name = "sp_idx_target_05", columnList = "tenant,address"),
         @Index(name = "sp_idx_target_prim", columnList = "tenant,id") }, uniqueConstraints = @UniqueConstraint(columnNames = {
                 "controller_id", "tenant" }, name = "uk_tenant_controller_id"))
-@NamedEntityGraph(name = "Target.detail", attributeNodes = { @NamedAttributeNode("tags"),
-        @NamedAttributeNode(value = "assignedDistributionSet"), @NamedAttributeNode(value = "targetInfo") })
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
-public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Long>, Target, EventAwareEntity {
+public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAwareEntity {
 
     private static final long serialVersionUID = 1L;
+
+    private static final Logger LOG = LoggerFactory.getLogger(JpaTarget.class);
+
+    private static final List<String> TARGET_UPDATE_EVENT_IGNORE_FIELDS = Lists.newArrayList("lastTargetQuery",
+            "lastTargetQuery", "address", "optLockRevision", "lastModifiedAt", "lastModifiedBy");
 
     @Column(name = "controller_id", length = 64)
     @Size(min = 1, max = 64)
     @NotEmpty
     @Pattern(regexp = "[.\\S]*", message = "has whitespaces which are not allowed")
     private String controllerId;
-
-    @Transient
-    private boolean entityNew;
 
     @CascadeOnDelete
     @ManyToMany(targetEntity = JpaTargetTag.class)
@@ -94,16 +110,6 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
     @CascadeOnDelete
     @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, targetEntity = JpaAction.class)
     private List<JpaAction> actions;
-
-    @ManyToOne(optional = true, fetch = FetchType.LAZY, targetEntity = JpaDistributionSet.class)
-    @JoinColumn(name = "assigned_distribution_set", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_assign_ds"))
-    private JpaDistributionSet assignedDistributionSet;
-
-    @CascadeOnDelete
-    @OneToOne(cascade = { CascadeType.PERSIST,
-            CascadeType.MERGE }, fetch = FetchType.LAZY, targetEntity = JpaTargetInfo.class)
-    @PrimaryKeyJoinColumn
-    private JpaTargetInfo targetInfo;
 
     /**
      * the security token of the target which allows if enabled to authenticate
@@ -117,6 +123,46 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
     @CascadeOnDelete
     @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
     private List<RolloutTargetGroup> rolloutTargetGroup;
+
+    @Column(name = "address", length = 512)
+    @Size(max = 512)
+    private String address;
+
+    @Column(name = "last_target_query")
+    private Long lastTargetQuery;
+
+    @Column(name = "install_date")
+    private Long installationDate;
+
+    @Column(name = "update_status", nullable = false, length = 16)
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    private TargetUpdateStatus updateStatus = TargetUpdateStatus.UNKNOWN;
+
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "installed_distribution_set", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_inst_ds"))
+    private JpaDistributionSet installedDistributionSet;
+
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_distribution_set", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_assign_ds"))
+    private JpaDistributionSet assignedDistributionSet;
+
+    /**
+     * Read only on management API. Are committed by controller.
+     */
+    @CascadeOnDelete
+    @ElementCollection
+    @Column(name = "attribute_value", length = 128)
+    @MapKeyColumn(name = "attribute_key", nullable = false, length = 32)
+    @CollectionTable(name = "sp_target_attributes", joinColumns = {
+            @JoinColumn(name = "target_id", nullable = false, updatable = false) }, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_attrib_target"))
+    private final Map<String, String> controllerAttributes = Collections.synchronizedMap(new HashMap<String, String>());
+
+    // set default request controller attributes to true, because we want to
+    // request them the first
+    // time
+    @Column(name = "request_controller_attributes", nullable = false)
+    private boolean requestControllerAttributes = true;
 
     /**
      * Constructor.
@@ -140,14 +186,12 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
         this.controllerId = controllerId;
         setName(controllerId);
         this.securityToken = securityToken;
-        targetInfo = new JpaTargetInfo(this);
     }
 
     JpaTarget() {
         // empty constructor for JPA.
     }
 
-    @Override
     public DistributionSet getAssignedDistributionSet() {
         return assignedDistributionSet;
     }
@@ -157,7 +201,6 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
         return controllerId;
     }
 
-    @Override
     public Set<TargetTag> getTags() {
         if (tags == null) {
             return Collections.emptySet();
@@ -198,7 +241,6 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
         this.controllerId = controllerId;
     }
 
-    @Override
     public List<Action> getActions() {
         if (actions == null) {
             return Collections.emptyList();
@@ -213,36 +255,6 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
         }
 
         return actions.add((JpaAction) action);
-    }
-
-    @Override
-    @Transient
-    public boolean isNew() {
-        return entityNew;
-    }
-
-    /**
-     * @param entityNew
-     *            the isNew to set
-     */
-    public void setNew(final boolean entityNew) {
-        this.entityNew = entityNew;
-    }
-
-    /**
-     * @return the targetInfo
-     */
-    @Override
-    public TargetInfo getTargetInfo() {
-        return targetInfo;
-    }
-
-    /**
-     * @param targetInfo
-     *            the targetInfo to set
-     */
-    public void setTargetInfo(final TargetInfo targetInfo) {
-        this.targetInfo = (JpaTargetInfo) targetInfo;
     }
 
     /**
@@ -260,23 +272,121 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
         return null;
     }
 
-    /**
-     * @param securityToken
-     *            the securityToken to set
-     */
     public void setSecurityToken(final String securityToken) {
         this.securityToken = securityToken;
     }
 
+    /**
+     * @return the ipAddress
+     */
+    @Override
+    public URI getAddress() {
+        if (address == null) {
+            return null;
+        }
+        try {
+            return URI.create(address);
+        } catch (final IllegalArgumentException e) {
+            LOG.warn("Invalid address provided. Cloud not be configured to URI", e);
+            return null;
+        }
+    }
+
+    /**
+     * @return the poll time which holds the last poll time of the target, the
+     *         next poll time and the overdue time. In case the
+     *         {@link #lastTargetQuery} is not set e.g. the target never polled
+     *         before this method returns {@code null}
+     */
+    @Override
+    public PollStatus getPollStatus() {
+        if (lastTargetQuery == null) {
+            return null;
+        }
+        return SystemSecurityContextHolder.getInstance().getSystemSecurityContext().runAsSystem(() -> {
+            final Duration pollTime = DurationHelper.formattedStringToDuration(TenantConfigurationManagementHolder
+                    .getInstance().getTenantConfigurationManagement()
+                    .getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class).getValue());
+            final Duration overdueTime = DurationHelper.formattedStringToDuration(
+                    TenantConfigurationManagementHolder.getInstance().getTenantConfigurationManagement()
+                            .getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class)
+                            .getValue());
+            final LocalDateTime currentDate = LocalDateTime.now();
+            final LocalDateTime lastPollDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(lastTargetQuery),
+                    ZoneId.systemDefault());
+            final LocalDateTime nextPollDate = lastPollDate.plus(pollTime);
+            final LocalDateTime overdueDate = nextPollDate.plus(overdueTime);
+            return new PollStatus(lastPollDate, nextPollDate, overdueDate, currentDate);
+        });
+    }
+
+    @Override
+    public Long getLastTargetQuery() {
+        return lastTargetQuery;
+    }
+
+    @Override
+    public Long getInstallationDate() {
+        return installationDate;
+    }
+
+    @Override
+    public TargetUpdateStatus getUpdateStatus() {
+        return updateStatus;
+    }
+
+    public JpaDistributionSet getInstalledDistributionSet() {
+        return installedDistributionSet;
+    }
+
+    public Map<String, String> getControllerAttributes() {
+        return controllerAttributes;
+    }
+
+    @Override
+    public boolean isRequestControllerAttributes() {
+        return requestControllerAttributes;
+    }
+
     @Override
     public String toString() {
-        return "Target [controllerId=" + controllerId + ", getId()=" + getId() + "]";
+        return "JpaTarget [controllerId=" + controllerId + ", revision=" + getOptLockRevision() + ", id=" + getId()
+                + "]";
+    }
+
+    public void setAddress(final String address) {
+        this.address = address;
+    }
+
+    public void setLastTargetQuery(final Long lastTargetQuery) {
+        this.lastTargetQuery = lastTargetQuery;
+    }
+
+    public void setInstallationDate(final Long installationDate) {
+        this.installationDate = installationDate;
+    }
+
+    public void setInstalledDistributionSet(final JpaDistributionSet installedDistributionSet) {
+        this.installedDistributionSet = installedDistributionSet;
+    }
+
+    public void setUpdateStatus(final TargetUpdateStatus updateStatus) {
+        this.updateStatus = updateStatus;
+    }
+
+    public void setRequestControllerAttributes(final boolean requestControllerAttributes) {
+        this.requestControllerAttributes = requestControllerAttributes;
     }
 
     @Override
     public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher()
                 .publishEvent(new TargetCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+    }
+
+    @Override
+    public List<String> getUpdateIgnoreFields() {
+        return TARGET_UPDATE_EVENT_IGNORE_FIELDS;
     }
 
     @Override

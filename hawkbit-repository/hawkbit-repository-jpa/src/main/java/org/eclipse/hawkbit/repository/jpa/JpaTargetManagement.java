@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -20,8 +21,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
@@ -38,11 +37,8 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetCreate;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetUpdate;
-import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
@@ -100,9 +96,6 @@ public class JpaTargetManagement implements TargetManagement {
     private TargetTagRepository targetTagRepository;
 
     @Autowired
-    private TargetInfoRepository targetInfoRepository;
-
-    @Autowired
     private NoCountPagingRepository criteriaNoCountDao;
 
     @Autowired
@@ -123,28 +116,6 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Optional<Target> findTargetByControllerIDWithDetails(final String controllerId) {
-        final Optional<Target> result = targetRepository.findByControllerId(controllerId);
-        // load lazy relations
-        if (!result.isPresent()) {
-            return result;
-        }
-
-        result.get().getTargetInfo().getControllerAttributes().size();
-        if (result.get().getTargetInfo() != null
-                && result.get().getTargetInfo().getInstalledDistributionSet() != null) {
-            result.get().getTargetInfo().getInstalledDistributionSet().getName();
-            result.get().getTargetInfo().getInstalledDistributionSet().getModules().size();
-        }
-        if (result.get().getAssignedDistributionSet() != null) {
-            result.get().getAssignedDistributionSet().getName();
-            result.get().getAssignedDistributionSet().getModules().size();
-        }
-
-        return result;
-    }
-
-    @Override
     public List<Target> findTargetByControllerID(final Collection<String> controllerIDs) {
         return Collections.unmodifiableList(targetRepository
                 .findAll(TargetSpecifications.byControllerIdWithStatusAndAssignedInJoin(controllerIDs)));
@@ -157,16 +128,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Slice<Target> findTargetsAll(final Pageable pageable) {
-        // workarround - no join fetch allowed that is why we need specification
-        // instead of query for
-        // count() of Pageable
-        final Specification<JpaTarget> spec = (root, query, cb) -> {
-            if (!query.getResultType().isAssignableFrom(Long.class)) {
-                root.fetch(JpaTarget_.targetInfo);
-            }
-            return cb.conjunction();
-        };
-        return convertPage(criteriaNoCountDao.findAll(spec, pageable, JpaTarget.class), pageable);
+        return convertPage(criteriaNoCountDao.findAll(pageable, JpaTarget.class), pageable);
     }
 
     @Override
@@ -189,14 +151,6 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public List<Target> findTargetsByControllerIDsWithTags(final List<String> controllerIDs) {
-        final List<List<String>> partition = Lists.partition(controllerIDs, Constants.MAX_ENTRIES_IN_STATEMENT);
-        return partition.stream()
-                .map(ids -> targetRepository.findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(ids)))
-                .flatMap(t -> t.stream()).collect(Collectors.toList());
-    }
-
-    @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public Target updateTarget(final TargetUpdate u) {
@@ -205,11 +159,9 @@ public class JpaTargetManagement implements TargetManagement {
         final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(update.getControllerId())
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, update.getControllerId()));
 
-        target.setNew(false);
-
         update.getName().ifPresent(target::setName);
         update.getDescription().ifPresent(target::setDescription);
-        update.getAddress().ifPresent(address -> ((JpaTargetInfo) target.getTargetInfo()).setAddress(address));
+        update.getAddress().ifPresent(target::setAddress);
         update.getSecurityToken().ifPresent(target::setSecurityToken);
 
         return targetRepository.save(target);
@@ -282,7 +234,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public Page<Target> findTargetByInstalledDistributionSet(final Long distributionSetID, final Pageable pageReq) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetID);
-        return targetRepository.findByTargetInfoInstalledDistributionSetId(pageReq, distributionSetID);
+        return targetRepository.findByInstalledDistributionSetId(pageReq, distributionSetID);
     }
 
     @Override
@@ -303,7 +255,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Page<Target> findTargetByUpdateStatus(final Pageable pageable, final TargetUpdateStatus status) {
-        return targetRepository.findByTargetInfoUpdateStatus(pageable, status);
+        return targetRepository.findByUpdateStatus(pageable, status);
     }
 
     @Override
@@ -312,8 +264,7 @@ public class JpaTargetManagement implements TargetManagement {
             final Boolean selectTargetWithNoTag, final String... tagNames) {
         final List<Specification<JpaTarget>> specList = buildSpecificationList(
                 new FilterParams(installedOrAssignedDistributionSetId, status, overdueState, searchText,
-                        selectTargetWithNoTag, tagNames),
-                true);
+                        selectTargetWithNoTag, tagNames));
         return findByCriteriaAPI(pageable, specList);
     }
 
@@ -323,16 +274,14 @@ public class JpaTargetManagement implements TargetManagement {
             final Boolean selectTargetWithNoTag, final String... tagNames) {
         final List<Specification<JpaTarget>> specList = buildSpecificationList(
                 new FilterParams(installedOrAssignedDistributionSetId, status, overdueState, searchText,
-                        selectTargetWithNoTag, tagNames),
-                true);
+                        selectTargetWithNoTag, tagNames));
         return countByCriteriaAPI(specList);
     }
 
-    private List<Specification<JpaTarget>> buildSpecificationList(final FilterParams filterParams,
-            final boolean fetch) {
+    private List<Specification<JpaTarget>> buildSpecificationList(final FilterParams filterParams) {
         final List<Specification<JpaTarget>> specList = new ArrayList<>();
         if (filterParams.getFilterByStatus() != null && !filterParams.getFilterByStatus().isEmpty()) {
-            specList.add(TargetSpecifications.hasTargetUpdateStatus(filterParams.getFilterByStatus(), fetch));
+            specList.add(TargetSpecifications.hasTargetUpdateStatus(filterParams.getFilterByStatus()));
         }
         if (filterParams.getOverdueState() != null) {
             specList.add(TargetSpecifications.isOverdue(TimestampCalculator.calculateOverdueTimestamp()));
@@ -470,15 +419,11 @@ public class JpaTargetManagement implements TargetManagement {
         final CriteriaQuery<JpaTarget> query = cb.createQuery(JpaTarget.class);
         final Root<JpaTarget> targetRoot = query.from(JpaTarget.class);
 
-        // necessary joins for the select
-        final Join<JpaTarget, JpaTargetInfo> targetInfo = (Join<JpaTarget, JpaTargetInfo>) targetRoot
-                .fetch(JpaTarget_.targetInfo, JoinType.LEFT);
-
         // select case expression to retrieve the case value as a column to be
         // able to order based on
         // this column, installed first,...
         final Expression<Object> selectCase = cb.selectCase()
-                .when(cb.equal(targetInfo.get(JpaTargetInfo_.installedDistributionSet).get(JpaDistributionSet_.id),
+                .when(cb.equal(targetRoot.get(JpaTarget_.installedDistributionSet).get(JpaDistributionSet_.id),
                         orderByDistributionId), 1)
                 .when(cb.equal(targetRoot.get(JpaTarget_.assignedDistributionSet).get(JpaDistributionSet_.id),
                         orderByDistributionId), 2)
@@ -487,8 +432,8 @@ public class JpaTargetManagement implements TargetManagement {
         query.distinct(true);
         // build the specifications and then to predicates necessary by the
         // given filters
-        final Predicate[] specificationsForMultiSelect = specificationsToPredicate(
-                buildSpecificationList(filterParams, true), targetRoot, query, cb);
+        final Predicate[] specificationsForMultiSelect = specificationsToPredicate(buildSpecificationList(filterParams),
+                targetRoot, query, cb);
 
         // if we have some predicates then add it to the where clause of the
         // multiselect
@@ -532,7 +477,7 @@ public class JpaTargetManagement implements TargetManagement {
     public Long countTargetByInstalledDistributionSet(final Long distId) {
         throwEntityNotFoundIfDsDoesNotExist(distId);
 
-        return targetRepository.countByTargetInfoInstalledDistributionSetId(distId);
+        return targetRepository.countByInstalledDistributionSetId(distId);
     }
 
     @Override
@@ -611,14 +556,7 @@ public class JpaTargetManagement implements TargetManagement {
             throw new EntityAlreadyExistsException();
         }
 
-        target.setNew(true);
-        final JpaTarget savedTarget = targetRepository.save(target);
-        final JpaTargetInfo targetInfo = (JpaTargetInfo) savedTarget.getTargetInfo();
-
-        targetInfo.setNew(true);
-        final Target targetToReturn = targetInfoRepository.save(targetInfo).getTarget();
-        targetInfo.setNew(false);
-        return targetToReturn;
+        return targetRepository.save(target);
     }
 
     @Override
@@ -666,6 +604,14 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public List<Target> findTargetAllById(final Collection<Long> ids) {
         return Collections.unmodifiableList(targetRepository.findAll(ids));
+    }
+
+    @Override
+    public Map<String, String> getControllerAttributes(final String controllerId) {
+        final JpaTarget target = (JpaTarget) findTargetByControllerID(controllerId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+
+        return target.getControllerAttributes();
     }
 
 }

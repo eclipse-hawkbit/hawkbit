@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdateEvent;
@@ -79,9 +80,10 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     private final SpPermissionChecker permissionChecker;
     private final ManagementUIState managementUIState;
     private final ManagementViewClientCriterion managementViewClientCriterion;
-    private final transient TargetManagement targetService;
+    private final transient TargetManagement targetManagement;
     private final DsMetadataPopupLayout dsMetadataPopupLayout;
     private final transient DistributionSetManagement distributionSetManagement;
+    private final transient DeploymentManagement deploymentManagement;
 
     private final String notAllowedMsg;
     private boolean isDistPinned;
@@ -89,16 +91,18 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     DistributionTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final SpPermissionChecker permissionChecker,
             final UINotification notification, final ManagementUIState managementUIState,
-            final ManagementViewClientCriterion managementViewClientCriterion, final TargetManagement targetService,
+            final ManagementViewClientCriterion managementViewClientCriterion, final TargetManagement targetManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout,
-            final DistributionSetManagement distributionSetManagement) {
+            final DistributionSetManagement distributionSetManagement,
+            final DeploymentManagement deploymentManagement) {
         super(eventBus, i18n, notification);
         this.permissionChecker = permissionChecker;
         this.managementUIState = managementUIState;
         this.managementViewClientCriterion = managementViewClientCriterion;
-        this.targetService = targetService;
+        this.targetManagement = targetManagement;
         this.dsMetadataPopupLayout = dsMetadataPopupLayout;
         this.distributionSetManagement = distributionSetManagement;
+        this.deploymentManagement = deploymentManagement;
         notAllowedMsg = i18n.getMessage("message.action.not.allowed");
 
         addNewContainerDS();
@@ -391,7 +395,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
                 event.getTransferable().getSourceComponent().getId(), SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
         // get all the targets assigned to the tag
         // assign dist to those targets
-        final List<Target> assignedTargets = targetService.findTargetsByTag(targetTagName);
+        final List<Target> assignedTargets = targetManagement.findTargetsByTag(targetTagName);
         if (!assignedTargets.isEmpty()) {
             assignTargetToDs(getItem(distItemId), assignedTargets);
         } else {
@@ -407,7 +411,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
 
         final Object distItemId = dropData.getItemIdOver();
-        assignTargetToDs(getItem(distItemId), targetService.findTargetAllById(targetIdSet));
+        assignTargetToDs(getItem(distItemId), targetManagement.findTargetAllById(targetIdSet));
 
     }
 
@@ -522,22 +526,15 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     private void styleDistributionTableOnPinning() {
 
         managementUIState.getDistributionTableFilters().getPinnedTarget().map(TargetIdName::getControllerId)
-                .map(targetService::findTargetByControllerIDWithDetails)
-                .ifPresent(pinnedTarget -> pinnedTarget.ifPresent(target -> {
+                .ifPresent(controllerId -> {
 
-                    final DistributionSet assignedDistribution = target.getAssignedDistributionSet();
-                    final DistributionSet installedDistribution = target.getTargetInfo().getInstalledDistributionSet();
-                    Long installedDistId = null;
-                    Long assignedDistId = null;
-                    if (null != installedDistribution) {
-                        installedDistId = installedDistribution.getId();
-                    }
-                    if (null != assignedDistribution) {
-                        assignedDistId = assignedDistribution.getId();
-                    }
+                    final Long installedDistId = deploymentManagement.getAssignedDistributionSet(controllerId)
+                            .map(DistributionSet::getId).orElse(null);
+                    final Long assignedDistId = deploymentManagement.getAssignedDistributionSet(controllerId)
+                            .map(DistributionSet::getId).orElse(null);
+
                     styleDistributionSetTable(installedDistId, assignedDistId);
-                }));
-
+                });
     }
 
     private static String getPinnedDistributionStyle(final Long installedDistItemIds,

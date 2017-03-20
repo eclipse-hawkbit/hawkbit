@@ -12,7 +12,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
@@ -245,12 +244,10 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     /*
      * display Attributes details in Target details.
      */
-
-    protected void updateAttributesLayout(final Target target) {
-        if (null != target && null != target.getTargetInfo()
-                && null != target.getTargetInfo().getControllerAttributes()) {
+    protected void updateAttributesLayout(final Map<String, String> attributes) {
+        if (null != attributes) {
             attributesLayout.removeAllComponents();
-            for (final Map.Entry<String, String> entry : target.getTargetInfo().getControllerAttributes().entrySet()) {
+            for (final Map.Entry<String, String> entry : attributes.entrySet()) {
                 final Label conAttributeLabel = SPUIComponentProvider.createNameValueLabel(
                         entry.getKey().concat("  :  "),
                         HawkbitCommonUtil.trimAndNullIfEmpty(entry.getValue()) == null ? "" : entry.getValue());

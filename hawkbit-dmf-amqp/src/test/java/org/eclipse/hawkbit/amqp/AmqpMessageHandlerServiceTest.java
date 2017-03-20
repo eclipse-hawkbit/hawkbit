@@ -52,7 +52,6 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.junit.Before;
 import org.junit.Test;
@@ -470,7 +469,6 @@ public class AmqpMessageHandlerServiceTest {
         // Mock
         final Action actionMock = mock(Action.class);
         final Target targetMock = mock(Target.class);
-        final TargetInfo targetInfoMock = mock(TargetInfo.class);
         final DistributionSet distributionSetMock = mock(DistributionSet.class);
 
         when(distributionSetMock.getId()).thenReturn(1L);
@@ -481,8 +479,7 @@ public class AmqpMessageHandlerServiceTest {
         when(actionMock.getTarget()).thenReturn(targetMock);
         when(targetMock.getControllerId()).thenReturn("target1");
         when(targetMock.getSecurityToken()).thenReturn("securityToken");
-        when(targetMock.getTargetInfo()).thenReturn(targetInfoMock);
-        when(targetInfoMock.getAddress()).thenReturn(null);
+        when(targetMock.getAddress()).thenReturn(null);
         return actionMock;
     }
 

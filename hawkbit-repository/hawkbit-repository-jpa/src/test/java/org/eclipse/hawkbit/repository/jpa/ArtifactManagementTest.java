@@ -65,20 +65,20 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         assertThatThrownBy(() -> artifactManagement.deleteArtifact(1234L)).isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("1234").hasMessageContaining("Artifact");
 
-        assertThat(artifactManagement.findArtifact(1234L).isPresent()).isFalse();
+        assertThat(artifactManagement.findArtifact(1234L)).isNotPresent();
         assertThatThrownBy(() -> artifactManagement.findArtifactBySoftwareModule(pageReq, 1234L))
                 .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
                 .hasMessageContaining("SoftwareModule");
-        assertThat(artifactManagement.findArtifactByFilename("1234").isPresent()).isFalse();
+        assertThat(artifactManagement.findArtifactByFilename("1234")).isNotPresent();
 
         assertThatThrownBy(() -> artifactManagement.findByFilenameAndSoftwareModule("xxx", 1234L))
                 .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
                 .hasMessageContaining("SoftwareModule");
 
-        assertThat(artifactManagement.findByFilenameAndSoftwareModule("1234", module.getId()).isPresent()).isFalse();
+        assertThat(artifactManagement.findByFilenameAndSoftwareModule("1234", module.getId())).isNotPresent();
 
-        assertThat(artifactManagement.findFirstArtifactBySHA1("1234").isPresent()).isFalse();
-        assertThat(artifactManagement.loadArtifactBinary("1234").isPresent()).isFalse();
+        assertThat(artifactManagement.findFirstArtifactBySHA1("1234")).isNotPresent();
+        assertThat(artifactManagement.loadArtifactBinary("1234")).isNotPresent();
 
     }
 
@@ -271,12 +271,12 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     public void findByFilenameAndSoftwareModule() {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        assertThat(artifactManagement.findByFilenameAndSoftwareModule("file1", sm.getId()).isPresent()).isFalse();
+        assertThat(artifactManagement.findByFilenameAndSoftwareModule("file1", sm.getId())).isNotPresent();
 
         artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024), sm.getId(), "file1", false);
         artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024), sm.getId(), "file2", false);
 
-        assertThat(artifactManagement.findByFilenameAndSoftwareModule("file1", sm.getId()).isPresent()).isTrue();
+        assertThat(artifactManagement.findByFilenameAndSoftwareModule("file1", sm.getId())).isPresent();
 
     }
 }

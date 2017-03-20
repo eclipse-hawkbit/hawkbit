@@ -18,12 +18,14 @@ import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Version;
 
+import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * Holder of the base attributes common to all entities.
@@ -72,26 +74,26 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     @Override
     @Access(AccessType.PROPERTY)
-    @Column(name = "last_modified_at", insertable = false, updatable = true)
+    @Column(name = "last_modified_at", insertable = true, updatable = true)
     public Long getLastModifiedAt() {
         return lastModifiedAt;
     }
 
     @Override
     @Access(AccessType.PROPERTY)
-    @Column(name = "last_modified_by", insertable = false, updatable = true, length = 40)
+    @Column(name = "last_modified_by", insertable = true, updatable = true, length = 40)
     public String getLastModifiedBy() {
         return lastModifiedBy;
     }
 
     @CreatedBy
     public void setCreatedBy(final String createdBy) {
-        this.createdBy = createdBy;
-    }
+        if (isController()) {
+            this.createdBy = "CONTROLLER_PLUG_AND_PLAY";
+            return;
+        }
 
-    @LastModifiedBy
-    public void setLastModifiedBy(final String lastModifiedBy) {
-        this.lastModifiedBy = lastModifiedBy;
+        this.createdBy = createdBy;
     }
 
     @CreatedDate
@@ -101,7 +103,28 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     @LastModifiedDate
     public void setLastModifiedAt(final Long lastModifiedAt) {
+
+        if (isController()) {
+            return;
+        }
+
         this.lastModifiedAt = lastModifiedAt;
+    }
+
+    @LastModifiedBy
+    public void setLastModifiedBy(final String lastModifiedBy) {
+        if (isController()) {
+            return;
+        }
+
+        this.lastModifiedBy = lastModifiedBy;
+    }
+
+    private boolean isController() {
+        return SecurityContextHolder.getContext().getAuthentication()
+                .getDetails() instanceof TenantAwareAuthenticationDetails
+                && ((TenantAwareAuthenticationDetails) SecurityContextHolder.getContext().getAuthentication()
+                        .getDetails()).isController();
     }
 
     @Override

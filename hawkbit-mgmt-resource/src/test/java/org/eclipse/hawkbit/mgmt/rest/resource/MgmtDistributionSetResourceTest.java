@@ -833,8 +833,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         mvc.perform(delete("/rest/v1/distributionsets/{dsId}/metadata/{key}", testDS.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        assertThat(distributionSetManagement.findDistributionSetMetadata(testDS.getId(), knownKey).isPresent())
-                .isFalse();
+        assertThat(distributionSetManagement.findDistributionSetMetadata(testDS.getId(), knownKey)).isNotPresent();
     }
 
     @Test
@@ -853,8 +852,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         mvc.perform(delete("/rest/v1/distributionsets/1234/metadata/{key}", knownKey))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
 
-        assertThat(distributionSetManagement.findDistributionSetMetadata(testDS.getId(), knownKey).isPresent())
-                .isTrue();
+        assertThat(distributionSetManagement.findDistributionSetMetadata(testDS.getId(), knownKey)).isPresent();
     }
 
     @Test

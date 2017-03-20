@@ -11,7 +11,7 @@
 echo $CI_PULL_REQUEST pull request
 # regular sonar on master
 if [ "$CIRCLE_BRANCH" = "master" ]; then
-  mvn verify license:check sonar:sonar -Dsonar.login=$SONAR_SERVER_TOKEN -Dsonar.exclusions=**/target/generated-sources/apt/**,**/src/test/**,**/src/main/java/org/eclipse/hawkbit/repository/test/** -Dsonar.coverage.exclusions=**/src/main/java/org/eclipse/hawkbit/ui/**,**/target/generated-sources/apt/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**
+  mvn verify license:check sonar:sonar -Dsonar.login=$SONAR_SERVER_TOKEN
 # preview in case of pull request - disabled as circle does not fill those with pull reuqests from different directories
 else
   #if [ -n "$CI_PULL_REQUEST" ]; then

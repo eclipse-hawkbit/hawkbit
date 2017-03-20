@@ -27,7 +27,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.RemoteEntityEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -145,9 +144,9 @@ public class TargetTable extends AbstractTable<Target, Long> {
         if (isFilterEnabled()) {
             refreshTargets();
         } else {
-            eventContainer.getEvents().stream().filter(event -> visibleItemIds.contains(event.getEntityId())).filter(
-                    event -> !Objects.isNull(event.getEntity()) && !Objects.isNull(event.getEntity().getTargetInfo()))
-                    .forEach(event -> updateVisibleItemOnEvent(event.getEntity().getTargetInfo()));
+            eventContainer.getEvents().stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
+                    .filter(event -> !Objects.isNull(event.getEntity()))
+                    .forEach(event -> updateVisibleItemOnEvent(event.getEntity()));
         }
         publishTargetSelectedEntityForRefresh(eventContainer.getEvents().stream());
     }
@@ -668,15 +667,13 @@ public class TargetTable extends AbstractTable<Target, Long> {
              * registered for the target update status. That listener will
              * update the new status icon showing for this target in the table.
              */
-            item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS)
-                    .setValue(updatedTarget.getTargetInfo().getUpdateStatus());
+            item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).setValue(updatedTarget.getUpdateStatus());
             /*
              * Update the last query which will trigger the value change lister
              * registered for the target last query column. That listener will
              * update the latest query date for this target in the tooltip.
              */
-            item.getItemProperty(SPUILabelDefinitions.LAST_QUERY_DATE)
-                    .setValue(updatedTarget.getTargetInfo().getLastTargetQuery());
+            item.getItemProperty(SPUILabelDefinitions.LAST_QUERY_DATE).setValue(updatedTarget.getLastTargetQuery());
 
             item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY)
                     .setValue(UserDetailsFormatter.loadAndFormatLastModifiedBy(updatedTarget));
@@ -784,17 +781,16 @@ public class TargetTable extends AbstractTable<Target, Long> {
     }
 
     @SuppressWarnings("unchecked")
-    private void updateVisibleItemOnEvent(final TargetInfo targetInfo) {
-        final Target target = targetInfo.getTarget();
+    private void updateVisibleItemOnEvent(final Target target) {
         final Long targetId = target.getId();
 
         final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
         final Item item = targetContainer.getItem(targetId);
 
-        item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).setValue(targetInfo.getUpdateStatus());
+        item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).setValue(target.getUpdateStatus());
         item.getItemProperty(SPUILabelDefinitions.VAR_NAME).setValue(target.getName());
         item.getItemProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP)
-                .setValue(HawkbitCommonUtil.getPollStatusToolTip(targetInfo.getPollStatus(), i18n));
+                .setValue(HawkbitCommonUtil.getPollStatusToolTip(target.getPollStatus(), i18n));
     }
 
     private boolean isLastSelectedTarget(final Long targetId) {

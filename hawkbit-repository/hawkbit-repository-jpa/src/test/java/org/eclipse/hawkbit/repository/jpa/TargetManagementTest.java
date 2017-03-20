@@ -13,6 +13,7 @@ import static com.google.common.collect.Iterables.toArray;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
@@ -62,6 +63,40 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Target Management")
 public class TargetManagementTest extends AbstractJpaIntegrationTest {
+
+    @Test
+    @Description("Ensures that an anonymous target update is not monitored by auditing.")
+    @WithUser(principal = "knownPrincipal", authorities = { SpPermission.READ_TARGET, SpPermission.UPDATE_TARGET,
+            SpPermission.CREATE_TARGET }, allSpPermissions = false)
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2) })
+    public void controllerAccessDoesNotChangeAuditData() throws Exception {
+        // create target first with "knownPrincipal" user and audit data
+        final String knownTargetControllerId = "target1";
+        final String knownCreatedBy = "knownPrincipal";
+        testdataFactory.createTarget(knownTargetControllerId);
+        targetManagement.updateTarget(entityFactory.target().update(knownTargetControllerId).description("updated1"));
+        final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownTargetControllerId)
+                .get();
+        assertThat(findTargetByControllerID.getCreatedBy()).isEqualTo(knownCreatedBy);
+        assertThat(findTargetByControllerID.getCreatedAt()).isNotNull();
+        assertThat(findTargetByControllerID.getLastModifiedBy()).isEqualTo(knownCreatedBy);
+        assertThat(findTargetByControllerID.getLastModifiedAt()).isNotNull();
+
+        // make an update, audit information should not be changed, run as
+        // controller principal!
+        securityRule.runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+            targetManagement.updateTarget(entityFactory.target().update("target1").description("updated2"));
+            return null;
+        });
+
+        // verify that audit information has not changed
+        final Target targetVerify = targetManagement.findTargetByControllerID(knownTargetControllerId).get();
+        assertThat(targetVerify.getCreatedBy()).isEqualTo(findTargetByControllerID.getCreatedBy());
+        assertThat(targetVerify.getCreatedAt()).isEqualTo(findTargetByControllerID.getCreatedAt());
+        assertThat(targetVerify.getLastModifiedBy()).isEqualTo(findTargetByControllerID.getLastModifiedBy());
+        assertThat(targetVerify.getLastModifiedAt()).isEqualTo(findTargetByControllerID.getLastModifiedAt());
+    }
 
     @Test
     @Description("Ensures that retrieving the target security is only permitted with the necessary permissions.")
@@ -195,7 +230,8 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         final List<Target> assignedTargets = targetManagement.assignTag(assignTarget, targetTag.getId());
         assertThat(assignedTargets.size()).as("Assigned targets are wrong").isEqualTo(4);
-        assignedTargets.forEach(target -> assertThat(target.getTags().size()).isEqualTo(1));
+        assignedTargets.forEach(target -> assertThat(
+                tagManagement.findAllTargetTags(pageReq, target.getControllerId()).getNumberOfElements()).isEqualTo(1));
 
         TargetTag findTargetTag = tagManagement.findTargetTag("Tag1").get();
         assertThat(assignedTargets.size()).as("Assigned targets are wrong")
@@ -206,7 +242,8 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         final Target unAssignTarget = targetManagement.unAssignTag("targetId123", findTargetTag.getId());
         assertThat(unAssignTarget.getControllerId()).as("Controller id is wrong").isEqualTo("targetId123");
-        assertThat(unAssignTarget.getTags()).as("Tag size is wrong").isEmpty();
+        assertThat(tagManagement.findAllTargetTags(pageReq, unAssignTarget.getControllerId())).as("Tag size is wrong")
+                .isEmpty();
         findTargetTag = tagManagement.findTargetTag("Tag1").get();
         assertThat(findTargetTag.getAssignedToTargets()).as("Assigned targets are wrong").hasSize(3);
 
@@ -214,7 +251,9 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         findTargetTag = tagManagement.findTargetTag("Tag1").get();
         assertThat(findTargetTag.getAssignedToTargets()).as("Unassigned targets are wrong").isEmpty();
         assertThat(unAssignTargets).as("Unassigned targets are wrong").hasSize(3);
-        unAssignTargets.forEach(target -> assertThat(target.getTags().size()).isEqualTo(0));
+        unAssignTargets.forEach(target -> assertThat(
+                tagManagement.findAllTargetTags(pageReq, unAssignTarget.getControllerId()).getNumberOfElements())
+                        .isEqualTo(0));
     }
 
     @Test
@@ -248,10 +287,9 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         testData.put("test1", "testdata1");
 
         targetManagement.createTarget(entityFactory.target().create().controllerId(controllerId));
-        controllerManagement.updateControllerAttributes(controllerId, testData);
+        final Target target = controllerManagement.updateControllerAttributes(controllerId, testData);
 
-        final Target target = targetManagement.findTargetByControllerIDWithDetails(controllerId).get();
-        assertThat(target.getTargetInfo().getControllerAttributes()).as("Controller Attributes are wrong")
+        assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong")
                 .isEqualTo(testData);
         return target;
     }
@@ -287,7 +325,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
                 entityFactory.actionStatus().create(result.getActions().get(0)).status(Status.FINISHED));
         assignDistributionSet(set2.getId(), "4711");
 
-        target = targetManagement.findTargetByControllerIDWithDetails("4711").get();
+        target = targetManagement.findTargetByControllerID("4711").get();
         // read data
 
         assertThat(targetManagement.countTargetByAssignedDistributionSet(set.getId())).as("Target count is wrong")
@@ -298,17 +336,11 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
                 .isEqualTo(1);
         assertThat(targetManagement.countTargetByInstalledDistributionSet(set2.getId())).as("Target count is wrong")
                 .isEqualTo(0);
-        assertThat(target.getTargetInfo().getLastTargetQuery()).as("Target query is not work")
-                .isGreaterThanOrEqualTo(current);
-        assertThat(target.getAssignedDistributionSet()).as("Assigned ds size is wrong").isEqualTo(set2);
-        assertThat(target.getTargetInfo().getInstalledDistributionSet().getId()).as("Installed ds is wrong")
-                .isEqualTo(set.getId());
-    }
-
-    @Test
-    @Description("Ensures that repositoy returns null if given controller ID does not exist without exception.")
-    public void findTargetByControllerIDWithDetailsReturnsNullForNonexisting() {
-        assertThat(targetManagement.findTargetByControllerIDWithDetails("dsfsdfsdfsd").isPresent()).isFalse();
+        assertThat(target.getLastTargetQuery()).as("Target query is not work").isGreaterThanOrEqualTo(current);
+        assertThat(deploymentManagement.getAssignedDistributionSet("4711").get()).as("Assigned ds size is wrong")
+                .isEqualTo(set2);
+        assertThat(deploymentManagement.getInstalledDistributionSet("4711").get()).as("Installed ds is wrong")
+                .isEqualTo(set);
     }
 
     @Test
@@ -356,7 +388,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         _target: for (final Target tl : targets) {
             final Target t = targetManagement.findTargetByControllerID(tl.getControllerId()).get();
 
-            for (final Tag tt : t.getTags()) {
+            for (final Tag tt : tagManagement.findAllTargetTags(pageReq, tl.getControllerId())) {
                 for (final Tag tag : tags) {
                     if (tag.getName().equals(tt.getName())) {
                         continue _target;
@@ -375,7 +407,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
             final Target t = targetManagement.findTargetByControllerID(tl.getControllerId()).get();
 
             for (final Tag tag : tags) {
-                for (final Tag tt : t.getTags()) {
+                for (final Tag tt : tagManagement.findAllTargetTags(pageReq, tl.getControllerId())) {
                     if (tag.getName().equals(tt.getName())) {
                         fail("Target should have no tags");
                     }
@@ -507,14 +539,16 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         t2Tags.forEach(tag -> targetManagement.assignTag(Lists.newArrayList(t2.getControllerId()), tag.getId()));
 
         final Target t11 = targetManagement.findTargetByControllerID(t1.getControllerId()).get();
-        assertThat(t11.getTags()).as("Tag size is wrong").hasSize(noT1Tags).containsAll(t1Tags);
-        assertThat(t11.getTags()).as("Tag size is wrong").hasSize(noT1Tags)
-                .doesNotContain(Iterables.toArray(t2Tags, TargetTag.class));
+        assertThat(tagManagement.findAllTargetTags(pageReq, t11.getControllerId()).getContent()).as("Tag size is wrong")
+                .hasSize(noT1Tags).containsAll(t1Tags);
+        assertThat(tagManagement.findAllTargetTags(pageReq, t11.getControllerId()).getContent()).as("Tag size is wrong")
+                .hasSize(noT1Tags).doesNotContain(Iterables.toArray(t2Tags, TargetTag.class));
 
         final Target t21 = targetManagement.findTargetByControllerID(t2.getControllerId()).get();
-        assertThat(t21.getTags()).as("Tag size is wrong").hasSize(noT2Tags).containsAll(t2Tags);
-        assertThat(t21.getTags()).as("Tag size is wrong").hasSize(noT2Tags)
-                .doesNotContain(Iterables.toArray(t1Tags, TargetTag.class));
+        assertThat(tagManagement.findAllTargetTags(pageReq, t21.getControllerId()).getContent()).as("Tag size is wrong")
+                .hasSize(noT2Tags).containsAll(t2Tags);
+        assertThat(tagManagement.findAllTargetTags(pageReq, t21.getControllerId()).getContent()).as("Tag size is wrong")
+                .hasSize(noT2Tags).doesNotContain(Iterables.toArray(t1Tags, TargetTag.class));
     }
 
     @Test
@@ -645,29 +679,6 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Retrieves targets by ID with lazy loading of the tags. Checks the successfull load.")
-    @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 1),
-            @Expect(type = TargetCreatedEvent.class, count = 25),
-            @Expect(type = TargetUpdatedEvent.class, count = 25) })
-    public void findTargetsByControllerIDsWithTags() {
-        final TargetTag targTagA = tagManagement.createTargetTag(entityFactory.tag().create().name("Targ-A-Tag"));
-
-        final List<Target> targAs = testdataFactory.createTargets(25, "target-id-A", "first description");
-
-        toggleTagAssignment(targAs, targTagA);
-
-        assertThat(targetManagement
-                .findTargetsByControllerIDsWithTags(targAs.stream().map(Target::getControllerId).collect(toList())))
-                        .as("Target count is wrong").hasSize(25);
-
-        // no lazy loading exception and tag correctly assigned
-        assertThat(targetManagement
-                .findTargetsByControllerIDsWithTags(targAs.stream().map(Target::getControllerId).collect(toList()))
-                .stream().map(target -> target.getTags().contains(targTagA)).collect(toList()))
-                        .as("Tags not correctly assigned").containsOnly(true);
-    }
-
-    @Test
     @Description("Test that NO TAG functionality which gives all targets with no tag assigned.")
     @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 50),
@@ -700,8 +711,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
             final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownTargetControllerId)
                     .get();
             assertThat(findTargetByControllerID).isNotNull();
-            assertThat(findTargetByControllerID.getTargetInfo()).isNotNull();
-            assertThat(findTargetByControllerID.getTargetInfo().getPollStatus()).isNotNull();
+            assertThat(findTargetByControllerID.getPollStatus()).isNotNull();
             return null;
         });
 

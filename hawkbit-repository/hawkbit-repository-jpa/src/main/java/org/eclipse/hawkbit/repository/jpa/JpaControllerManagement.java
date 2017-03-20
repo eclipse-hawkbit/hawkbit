@@ -27,7 +27,6 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ToManyAttributeEntriesException;
@@ -40,7 +39,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -48,7 +46,6 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -93,9 +90,6 @@ public class JpaControllerManagement implements ControllerManagement {
     private TargetManagement targetManagement;
 
     @Autowired
-    private TargetInfoRepository targetInfoRepository;
-
-    @Autowired
     private ActionStatusRepository actionStatusRepository;
 
     @Autowired
@@ -135,10 +129,10 @@ public class JpaControllerManagement implements ControllerManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public Target updateLastTargetQuery(final String controllerId, final URI address) {
-        final Target target = targetRepository.findByControllerId(controllerId)
+        final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
-        return updateTargetStatus(target.getTargetInfo(), null, System.currentTimeMillis(), address).getTarget();
+        return updateTargetStatus(target, null, System.currentTimeMillis(), address);
     }
 
     @Override
@@ -222,32 +216,29 @@ public class JpaControllerManagement implements ControllerManagement {
             return result;
         }
 
-        return updateTargetStatus(target.getTargetInfo(), null, System.currentTimeMillis(), address).getTarget();
+        return updateTargetStatus(target, null, System.currentTimeMillis(), address);
     }
 
-    private TargetInfo updateTargetStatus(final TargetInfo targetInfo, final TargetUpdateStatus status,
+    private Target updateTargetStatus(final JpaTarget toUpdate, final TargetUpdateStatus status,
             final Long lastTargetQuery, final URI address) {
-        final JpaTargetInfo mtargetInfo = (JpaTargetInfo) entityManager.merge(targetInfo);
         if (status != null) {
-            mtargetInfo.setUpdateStatus(status);
+            toUpdate.setUpdateStatus(status);
         }
         if (lastTargetQuery != null) {
-            mtargetInfo.setLastTargetQuery(lastTargetQuery);
+            toUpdate.setLastTargetQuery(lastTargetQuery);
         }
 
-        if (mtargetInfo.getUpdateStatus() == TargetUpdateStatus.UNKNOWN) {
-            mtargetInfo.setUpdateStatus(TargetUpdateStatus.REGISTERED);
-            afterCommit.afterCommit(() -> eventPublisher
-                    .publishEvent(new TargetUpdatedEvent(mtargetInfo.getTarget(), applicationContext.getId())));
+        if (TargetUpdateStatus.UNKNOWN.equals(toUpdate.getUpdateStatus())) {
+            toUpdate.setUpdateStatus(TargetUpdateStatus.REGISTERED);
         }
 
         if (address != null) {
-            mtargetInfo.setAddress(address.toString());
-            afterCommit.afterCommit(() -> eventPublisher
-                    .publishEvent(new TargetPollEvent(mtargetInfo.getTarget(), applicationContext.getId())));
+            toUpdate.setAddress(address.toString());
+            afterCommit.afterCommit(
+                    () -> eventPublisher.publishEvent(new TargetPollEvent(toUpdate, applicationContext.getId())));
         }
 
-        return targetInfoRepository.save(mtargetInfo);
+        return targetRepository.save(toUpdate);
     }
 
     @Override
@@ -291,8 +282,7 @@ public class JpaControllerManagement implements ControllerManagement {
         // the canceled action itself.
         actionStatus.addMessage(
                 RepositoryConstants.SERVER_MESSAGE_PREFIX + "Cancellation completion is finished sucessfully.");
-        DeploymentHelper.successCancellation(action, actionRepository, targetRepository, targetInfoRepository,
-                entityManager);
+        DeploymentHelper.successCancellation(action, actionRepository, targetRepository);
     }
 
     @Override
@@ -332,8 +322,7 @@ public class JpaControllerManagement implements ControllerManagement {
 
         switch (actionStatus.getStatus()) {
         case ERROR:
-            target = DeploymentHelper.updateTargetInfo(target, TargetUpdateStatus.ERROR, false, targetInfoRepository,
-                    entityManager);
+            target = DeploymentHelper.updateTargetInfo(target, TargetUpdateStatus.ERROR, false);
             handleErrorOnAction(action, target);
             break;
         case FINISHED:
@@ -358,7 +347,6 @@ public class JpaControllerManagement implements ControllerManagement {
         mergedAction.setStatus(Status.ERROR);
         mergedTarget.setAssignedDistributionSet(null);
 
-        mergedTarget.setNew(false);
         targetRepository.save(mergedTarget);
     }
 
@@ -380,23 +368,19 @@ public class JpaControllerManagement implements ControllerManagement {
     private void handleFinishedAndStoreInTargetStatus(final JpaTarget target, final JpaAction action) {
         action.setActive(false);
         action.setStatus(Status.FINISHED);
-        final JpaTargetInfo targetInfo = (JpaTargetInfo) target.getTargetInfo();
         final JpaDistributionSet ds = (JpaDistributionSet) entityManager.merge(action.getDistributionSet());
 
-        targetInfo.setInstalledDistributionSet(ds);
-        targetInfo.setInstallationDate(System.currentTimeMillis());
+        target.setInstalledDistributionSet(ds);
+        target.setInstallationDate(System.currentTimeMillis());
 
         // check if the assigned set is equal to the installed set (not
         // necessarily the case as another update might be pending already).
-        if (target.getAssignedDistributionSet() != null && target.getAssignedDistributionSet().getId()
-                .equals(targetInfo.getInstalledDistributionSet().getId())) {
-            targetInfo.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
+        if (target.getAssignedDistributionSet() != null
+                && target.getAssignedDistributionSet().getId().equals(target.getInstalledDistributionSet().getId())) {
+            target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
         }
 
-        targetInfoRepository.save(targetInfo);
-
-        afterCommit.afterCommit(
-                () -> eventPublisher.publishEvent(new TargetUpdatedEvent(target, applicationContext.getId())));
+        targetRepository.save(target);
 
         entityManager.detach(ds);
     }
@@ -408,26 +392,19 @@ public class JpaControllerManagement implements ControllerManagement {
         final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
-        final JpaTargetInfo targetInfo = (JpaTargetInfo) target.getTargetInfo();
-        targetInfo.getControllerAttributes().putAll(data);
+        target.getControllerAttributes().putAll(data);
 
-        if (targetInfo.getControllerAttributes().size() > securityProperties.getDos()
-                .getMaxAttributeEntriesPerTarget()) {
+        if (target.getControllerAttributes().size() > securityProperties.getDos().getMaxAttributeEntriesPerTarget()) {
             LOG_DOS.info("Target tries to insert more than the allowed number of entries ({}). DOS attack anticipated!",
                     securityProperties.getDos().getMaxAttributeEntriesPerTarget());
             throw new ToManyAttributeEntriesException(
                     String.valueOf(securityProperties.getDos().getMaxAttributeEntriesPerTarget()));
         }
 
-        targetInfo.setLastTargetQuery(System.currentTimeMillis());
-        targetInfo.setRequestControllerAttributes(false);
+        target.setLastTargetQuery(System.currentTimeMillis());
+        target.setRequestControllerAttributes(false);
 
-        final Target result = targetInfoRepository.save(targetInfo).getTarget();
-
-        afterCommit.afterCommit(
-                () -> eventPublisher.publishEvent(new TargetUpdatedEvent(result, applicationContext.getId())));
-
-        return result;
+        return targetRepository.save(target);
     }
 
     @Override
