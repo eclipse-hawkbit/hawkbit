@@ -115,8 +115,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 pageReq);
         final Long count = deploymentManagement.countActionsByTarget(testTarget.get(0).getControllerId());
 
+        assertThat(count).as("One Action for target").isEqualTo(1L).isEqualTo(actions.getContent().size());
         assertThat(actions.getContent().get(0).getId()).as("Action of target").isEqualTo(actionId);
-        assertThat(count).as("One Action for target").isEqualTo(1L);
     }
 
     @Test
@@ -134,6 +134,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // act
         final Page<ActionStatus> actionStates = deploymentManagement.findActionStatusByAction(pageReq, actionId);
 
+        assertThat(actionStates.getContent()).hasSize(1);
         assertThat(actionStates.getContent().get(0)).as("Action-status of action").isEqualTo(expectedActionStatus);
     }
 

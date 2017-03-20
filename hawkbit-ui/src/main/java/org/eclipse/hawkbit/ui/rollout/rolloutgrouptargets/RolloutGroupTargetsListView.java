@@ -10,8 +10,8 @@ package org.eclipse.hawkbit.ui.rollout.rolloutgrouptargets;
 
 import org.eclipse.hawkbit.ui.common.grid.AbstractGridComponentLayout;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.AbstractOrderedLayout;
@@ -48,9 +48,8 @@ public class RolloutGroupTargetsListView extends AbstractGridComponentLayout {
 
         @Override
         protected Label getFooterMessageLabel() {
-            RolloutGroupTargetsCountLabelMessage countMessageLabel = new RolloutGroupTargetsCountLabelMessage(
-                    rolloutUIState, (RolloutGroupTargetsListGrid) grid, i18n,
-                    eventBus);
+            final RolloutGroupTargetsCountLabelMessage countMessageLabel = new RolloutGroupTargetsCountLabelMessage(
+                    rolloutUIState, (RolloutGroupTargetsListGrid) getGrid(), i18n, eventBus);
             countMessageLabel.setId(UIComponentIdProvider.ROLLOUT_GROUP_TARGET_LABEL);
             return countMessageLabel;
         }

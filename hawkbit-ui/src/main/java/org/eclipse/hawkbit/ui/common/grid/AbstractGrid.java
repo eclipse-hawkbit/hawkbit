@@ -8,9 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.common.grid;
 
-import java.util.Arrays;
 import java.util.Locale;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
@@ -33,16 +33,16 @@ import com.vaadin.ui.Grid;
  *            The container-type used by the grid
  */
 public abstract class AbstractGrid<T extends Indexed> extends Grid implements RefreshableContainer {
-    private static final long serialVersionUID = 4856562746502217630L;
+    private static final long serialVersionUID = 1L;
 
     protected final VaadinMessageSource i18n;
     protected final transient EventBus.UIEventBus eventBus;
     protected final SpPermissionChecker permissionChecker;
 
-    protected transient AbstractMaximizeSupport maximizeSupport;
-    protected transient AbstractGeneratedPropertySupport generatedPropertySupport;
-    protected transient SingleSelectionSupport singleSelectionSupport;
-    protected transient DetailsSupport detailsSupport;
+    private transient AbstractMaximizeSupport maximizeSupport;
+    private transient AbstractGeneratedPropertySupport generatedPropertySupport;
+    private transient SingleSelectionSupport singleSelectionSupport;
+    private transient DetailsSupport detailsSupport;
 
     /**
      * Constructor.
@@ -386,11 +386,15 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
          *
          */
         public void populateSelection() {
-            if (master != null && hasSingleSelectionSupport()) {
-                getSingleSelectionSupport().selectFirstRow();
-            } else if (master == null && hasSingleSelectionSupport()) {
-                getSingleSelectionSupport().clearSelection();
+            if (!hasSingleSelectionSupport()) {
+                return;
             }
+
+            if (master == null) {
+                getSingleSelectionSupport().clearSelection();
+                return;
+            }
+            getSingleSelectionSupport().selectFirstRow();
         }
 
         /**
@@ -522,23 +526,16 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
      * Support for single selection on the grid.
      */
     protected class SingleSelectionSupport {
-        private boolean enabled;
 
-        public SingleSelectionSupport(final boolean enabled) {
-            if (enabled) {
-                enable();
-            } else {
-                disable();
-            }
+        public SingleSelectionSupport() {
+            enable();
         }
 
-        public void enable() {
-            enabled = true;
+        public final void enable() {
             setSelectionMode(SelectionMode.SINGLE);
         }
 
-        public void disable() {
-            enabled = false;
+        public final void disable() {
             setSelectionMode(SelectionMode.NONE);
         }
 
@@ -546,7 +543,7 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
          * Selects the first row if available and enabled.
          */
         public void selectFirstRow() {
-            if (!enabled) {
+            if (getSelectionModel() instanceof SelectionModel.None) {
                 return;
             }
 
@@ -605,11 +602,11 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
 
         @Override
         public String getStyle(final CellReference cellReference) {
-            if (center != null && Arrays.asList(center).contains(cellReference.getPropertyId())) {
+            if (ArrayUtils.contains(center, cellReference.getPropertyId())) {
                 return "centeralign";
-            } else if (right != null && Arrays.asList(right).contains(cellReference.getPropertyId())) {
+            } else if (ArrayUtils.contains(right, cellReference.getPropertyId())) {
                 return "rightalign";
-            } else if (left != null && Arrays.asList(left).contains(cellReference.getPropertyId())) {
+            } else if (ArrayUtils.contains(left, cellReference.getPropertyId())) {
                 return "leftalign";
             }
             return null;
@@ -635,12 +632,11 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
 
         @Override
         public String getDescription(final CellReference cell) {
-            String tooltip = null;
-            if (datePropertyId.equals(cell.getPropertyId())) {
-                final Long timestamp = (Long) cell.getItem().getItemProperty(datePropertyId).getValue();
-                tooltip = SPDateTimeUtil.getFormattedDate(timestamp);
+            if (!datePropertyId.equals(cell.getPropertyId())) {
+                return null;
             }
-            return tooltip;
+            final Long timestamp = (Long) cell.getItem().getItemProperty(datePropertyId).getValue();
+            return SPDateTimeUtil.getFormattedDate(timestamp);
         }
     }
 

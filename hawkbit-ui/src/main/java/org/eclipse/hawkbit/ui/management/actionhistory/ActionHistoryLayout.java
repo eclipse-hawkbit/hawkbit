@@ -34,12 +34,12 @@ import com.vaadin.ui.UI;
 public class ActionHistoryLayout extends AbstractGridComponentLayout {
     private static final long serialVersionUID = -3766179797384539821L;
 
-    protected final transient DeploymentManagement deploymentManagement;
-    protected final UINotification notification;
-    protected final ManagementUIState managementUIState;
+    private final transient DeploymentManagement deploymentManagement;
+    private final UINotification notification;
+    private final ManagementUIState managementUIState;
 
-    protected transient AbstractGrid<?>.DetailsSupport details;
-    protected Long masterForDetails;
+    private transient AbstractGrid<?>.DetailsSupport details;
+    private Long masterForDetails;
 
     /**
      * Constructor.
@@ -92,7 +92,7 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
     @Override
     public void registerDetails(final AbstractGrid<?>.DetailsSupport details) {
         this.details = details;
-        grid.addSelectionListener(event -> {
+        getGrid().addSelectionListener(event -> {
             masterForDetails = (Long) event.getSelected().stream().findFirst().orElse(null);
             if (managementUIState.isActionHistoryMaximized()) {
                 details.populateMasterDataAndRecalculateContainer(masterForDetails);

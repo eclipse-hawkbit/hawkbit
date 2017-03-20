@@ -31,10 +31,10 @@ public abstract class AbstractGridComponentLayout extends VerticalLayout {
     protected final transient EventBus.UIEventBus eventBus;
     protected final VaadinMessageSource i18n;
 
-    protected AbstractOrderedLayout gridHeader;
-    protected Grid grid;
+    private AbstractOrderedLayout gridHeader;
+    private Grid grid;
 
-    protected transient AbstractFooterSupport footerSupport;
+    private transient AbstractFooterSupport footerSupport;
 
     /**
      * Constructor.

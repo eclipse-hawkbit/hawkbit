@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.ui.management.actionhistory.ProxyAction.IsActiveDecoration;
@@ -60,14 +61,15 @@ public class ActionBeanQuery extends AbstractBeanQuery<ProxyAction> {
             currentSelectedConrollerId = (String) queryConfig.get(SPUIDefinitions.ACTIONS_BY_TARGET);
         }
 
-        if (sortStates.length > 0) {
-            // Initialize sort
-            sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortPropertyIds[0]);
-            // Add sort
-            for (int distId = 1; distId < sortPropertyIds.length; distId++) {
-                sort.and(new Sort(sortStates[distId] ? Direction.ASC : Direction.DESC,
-                        (String) sortPropertyIds[distId]));
-            }
+        if (ArrayUtils.isEmpty(sortStates)) {
+            return;
+        }
+
+        // Initialize sort
+        sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortPropertyIds[0]);
+        // Add sort
+        for (int distId = 1; distId < sortPropertyIds.length; distId++) {
+            sort.and(new Sort(sortStates[distId] ? Direction.ASC : Direction.DESC, (String) sortPropertyIds[distId]));
         }
     }
 
@@ -104,7 +106,7 @@ public class ActionBeanQuery extends AbstractBeanQuery<ProxyAction> {
         final List<ProxyAction> proxyActions = new ArrayList<>();
         for (final Action action : actionBeans) {
             final ProxyAction proxyAction = new ProxyAction();
-            String dsNameVersion = action.getDistributionSet().getName() + ":"
+            final String dsNameVersion = action.getDistributionSet().getName() + ":"
                     + action.getDistributionSet().getVersion();
             proxyAction.setActive(action.isActive());
             proxyAction.setIsActiveDecoration(buildIsActiveDecoration(action));
@@ -131,30 +133,20 @@ public class ActionBeanQuery extends AbstractBeanQuery<ProxyAction> {
      *         layer.
      */
     private static IsActiveDecoration buildIsActiveDecoration(final Action action) {
-        IsActiveDecoration combinedState;
         final Action.Status status = action.getStatus();
 
         if (status == Action.Status.SCHEDULED) {
-            combinedState = IsActiveDecoration.SCHEDULED;
+            return IsActiveDecoration.SCHEDULED;
         } else if (status == Action.Status.ERROR) {
-            combinedState = IsActiveDecoration.IN_ACTIVE_ERROR;
-        } else {
-            combinedState = action.isActive() ? IsActiveDecoration.ACTIVE : IsActiveDecoration.IN_ACTIVE;
+            return IsActiveDecoration.IN_ACTIVE_ERROR;
         }
 
-        return combinedState;
+        return action.isActive() ? IsActiveDecoration.ACTIVE : IsActiveDecoration.IN_ACTIVE;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery#saveBeans(java
-     * .util.List, java.util.List, java.util.List)
-     */
     @Override
-    protected void saveBeans(List<ProxyAction> addedBeans, List<ProxyAction> modifiedBeans,
-            List<ProxyAction> removedBeans) {
+    protected void saveBeans(final List<ProxyAction> addedBeans, final List<ProxyAction> modifiedBeans,
+            final List<ProxyAction> removedBeans) {
         // CRUD operations on Target will be done through repository methods
     }
 

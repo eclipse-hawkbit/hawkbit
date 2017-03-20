@@ -125,7 +125,12 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         this.managementUIState = managementUIState;
 
         setMaximizeSupport(new ActionHistoryMaximizeSupport());
-        setSingleSelectionSupport(new SingleSelectionSupport(managementUIState.isActionHistoryMaximized()));
+        setSingleSelectionSupport(new SingleSelectionSupport());
+
+        if (!managementUIState.isActionHistoryMaximized()) {
+            getSingleSelectionSupport().disable();
+        }
+
         setGeneratedPropertySupport(new ActionHistoryGeneratedPropertySupport());
         setDetailsSupport(new DetailsSupport());
 
