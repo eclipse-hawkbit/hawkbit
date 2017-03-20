@@ -33,7 +33,7 @@
          <url>https://repo.eclipse.org/content/repositories/hawkbit-snapshots</url>
       </snapshotRepository>
    </distributionManagement>
-
+   
    <modules>
       <module>hawkbit-device-simulator</module>
       <module>hawkbit-example-core-feign-client</module>
@@ -41,4 +41,33 @@
       <module>hawkbit-example-mgmt-feign-client</module>
       <module>hawkbit-example-mgmt-simulator</module>
    </modules>
+   
+   <properties>
+      <feign.extension.version>9.3.1</feign.extension.version>
+   </properties>
+   
+   <dependencyManagement>
+   <dependencies>
+      <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-jackson</artifactId>
+            <version>${feign.extension.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-gson</artifactId>
+            <version>${feign.extension.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-jaxrs</artifactId>
+            <version>${feign.extension.version}</version>
+         </dependency>
+         <dependency>
+         <groupId>com.vaadin</groupId>
+         <artifactId>vaadin-spring-boot-starter</artifactId>
+         <version>${vaadin.spring.version}</version>
+      </dependency>
+      </dependencies>
+   </dependencyManagement>
 </project>

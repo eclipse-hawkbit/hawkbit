@@ -16,7 +16,7 @@
       <version>0.2.0-SNAPSHOT</version>
    </parent>
    <artifactId>hawkbit-ui</artifactId>
-   <name>hawkBit :: UI</name>
+   <name>hawkBit :: Mgmt UI</name>
    <description>Bosch IoT Software Provisioning server web application</description>
    <build>
       <plugins>
@@ -161,11 +161,6 @@
    </build>
 
    <dependencies>
-      <!-- Log4j API and Core implementation required for binding -->
-      <dependency>
-         <groupId>org.apache.logging.log4j</groupId>
-         <artifactId>log4j-api</artifactId>
-      </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-repository-api</artifactId>
@@ -212,20 +207,6 @@
       <dependency>
          <groupId>org.vaadin.addons.lazyquerycontainer</groupId>
          <artifactId>vaadin-lazyquerycontainer</artifactId>
-         <exclusions>
-            <exclusion>
-               <groupId>org.eclipse.persistence</groupId>
-               <artifactId>javax.persistence</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>com.vaadin</groupId>
-               <artifactId>vaadin-client-compiled</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>com.vaadin</groupId>
-               <artifactId>vaadin-themes</artifactId>
-            </exclusion>
-         </exclusions>
       </dependency>
       <dependency>
          <groupId>org.vaadin.addons</groupId>
@@ -244,11 +225,6 @@
          <artifactId>contextmenu</artifactId>
       </dependency>
 
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-configuration-processor</artifactId>
-         <optional>true</optional>
-      </dependency>
       <dependency>
          <groupId>com.github.gwtd3</groupId>
          <artifactId>gwt-d3-api</artifactId>
