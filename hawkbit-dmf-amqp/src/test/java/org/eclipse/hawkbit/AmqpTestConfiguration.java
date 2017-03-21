@@ -10,11 +10,9 @@ package org.eclipse.hawkbit;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.RabbitMqSetupService.AlivenessException;
@@ -46,7 +44,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 
 import com.google.common.base.Throwables;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 /**
  *
@@ -71,25 +68,9 @@ public class AmqpTestConfiguration {
         return SystemSecurityContextHolder.getInstance();
     }
 
-    /**
-     * @return ExecutorService with security context availability in thread
-     *         execution..
-     */
-    @Bean(destroyMethod = "shutdown")
-    public Executor asyncExecutor() {
-        return new DelegatingSecurityContextExecutorService(threadPoolExecutor());
-    }
-
-    /**
-     * @return central ThreadPoolExecutor for general purpose multi threaded
-     *         operations. Tries an orderly shutdown when destroyed.
-     */
-    private ThreadPoolExecutor threadPoolExecutor() {
-        final BlockingQueue<Runnable> blockingQueue = new ArrayBlockingQueue<>(10);
-        final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 10, 1000, TimeUnit.MILLISECONDS,
-                blockingQueue, new ThreadFactoryBuilder().setNameFormat("central-executor-pool-%d").build());
-
-        return threadPoolExecutor;
+    @Bean
+    Executor asyncExecutor() {
+        return new DelegatingSecurityContextExecutorService(Executors.newSingleThreadExecutor());
     }
 
     /**
@@ -170,9 +151,7 @@ public class AmqpTestConfiguration {
         factory.setUsername(rabbitmqSetupService.getUsername());
         factory.setPassword(rabbitmqSetupService.getPassword());
         try {
-            rabbitmqSetupService.createVirtualHost();
-            factory.setVirtualHost(rabbitmqSetupService.getVirtualHost());
-
+            factory.setVirtualHost(rabbitmqSetupService.createVirtualHost());
         } catch (final Exception e) {
             Throwables.propagateIfInstanceOf(e, AlivenessException.class);
             LOG.error("Cannot create virtual host {}", e.getMessage());

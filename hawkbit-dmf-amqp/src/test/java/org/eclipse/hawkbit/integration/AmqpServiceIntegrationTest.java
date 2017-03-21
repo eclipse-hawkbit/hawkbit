@@ -17,7 +17,6 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import org.eclipse.hawkbit.AmqpTestConfiguration;
-import org.eclipse.hawkbit.RabbitMqSetupService;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
@@ -37,6 +36,7 @@ import org.junit.Before;
 import org.mockito.Mockito;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.test.RabbitListenerTestHarness;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -59,7 +59,7 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
     private RabbitListenerTestHarness harness;
 
     @Autowired
-    private RabbitMqSetupService rabbitMqSetupService;
+    private ConnectionFactory connectionFactory;
 
     @Before
     public void initListener() {
@@ -219,7 +219,7 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         assertThat(target.getCreatedBy()).isEqualTo(createdBy);
         assertThat(target.getUpdateStatus()).isEqualTo(updateStatus);
         assertThat(target.getAddress()).isEqualTo(
-                IpUtil.createAmqpUri(rabbitMqSetupService.getVirtualHost(), AmqpTestConfiguration.REPLY_TO_EXCHANGE));
+                IpUtil.createAmqpUri(connectionFactory.getVirtualHost(), AmqpTestConfiguration.REPLY_TO_EXCHANGE));
     }
 
     protected Message createTargetMessage(final String target, final String tenant) {

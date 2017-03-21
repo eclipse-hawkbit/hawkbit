@@ -42,7 +42,14 @@ public class RabbitMqSetupService {
     public RabbitMqSetupService(RabbitProperties properties) {
         hostname = properties.getHost();
         username = properties.getUsername();
+        if (StringUtils.isEmpty(username)) {
+            username = "guest";
+        }
+
         password = properties.getPassword();
+        if (StringUtils.isEmpty(password)) {
+            password = "guest";
+        }
     }
 
     private Client getRabbitmqHttpClient() {
@@ -57,7 +64,7 @@ public class RabbitMqSetupService {
         return rabbitmqHttpClient;
     }
 
-    void createVirtualHost() throws JsonProcessingException, AlivenessException {
+    String createVirtualHost() throws JsonProcessingException, AlivenessException {
         if (!getRabbitmqHttpClient().alivenessTest("/")) {
             throw new AlivenessException(getHostname());
 
@@ -65,6 +72,7 @@ public class RabbitMqSetupService {
         virtualHost = UUID.randomUUID().toString();
         getRabbitmqHttpClient().createVhost(virtualHost);
         getRabbitmqHttpClient().updatePermissions(virtualHost, getUsername(), createUserPermissionsFullAccess());
+        return virtualHost;
 
     }
 
@@ -76,28 +84,15 @@ public class RabbitMqSetupService {
         getRabbitmqHttpClient().deleteVhost(virtualHost);
     }
 
-    public String getVirtualHost() {
-        if (StringUtils.isEmpty(virtualHost)) {
-            return "/";
-        }
-        return virtualHost;
-    }
-
     public String getHostname() {
         return hostname;
     }
 
     public String getPassword() {
-        if (StringUtils.isEmpty(password)) {
-            password = "guest";
-        }
         return password;
     }
 
     public String getUsername() {
-        if (StringUtils.isEmpty(username)) {
-            username = "guest";
-        }
         return username;
     }
 
