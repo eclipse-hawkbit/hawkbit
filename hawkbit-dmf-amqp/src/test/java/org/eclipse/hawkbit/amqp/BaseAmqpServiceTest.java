@@ -91,7 +91,7 @@ public class BaseAmqpServiceTest {
 
     private MessageProperties createJsonProperties() {
         final MessageProperties messageProperties = new MessageProperties();
-        messageProperties.setContentType("json");
+        messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON);
         return messageProperties;
     }
 

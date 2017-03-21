@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 
-public class ReplyToListener extends AbstractTestRabbitListener {
+public class ReplyToListener implements TestRabbitListener {
 
     public static final String LISTENER_ID = "replyto";
 
@@ -26,7 +26,6 @@ public class ReplyToListener extends AbstractTestRabbitListener {
     @Override
     @RabbitListener(id = LISTENER_ID, queues = AmqpTestConfiguration.REPLY_TO_QUEUE)
     public void handleMessage(Message message) {
-        setMessage(message);
         final EventTopic eventTopic = EventTopic
                 .valueOf(message.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC).toString());
         messages.put(eventTopic, message);

@@ -12,17 +12,13 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.UUID;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.eclipse.hawkbit.amqp.AmqpAuthenticationMessageHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.base.Throwables;
 import com.rabbitmq.http.client.Client;
 import com.rabbitmq.http.client.domain.UserPermissions;
 
@@ -33,8 +29,6 @@ import com.rabbitmq.http.client.domain.UserPermissions;
  *
  */
 public class RabbitMqSetupService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(AmqpAuthenticationMessageHandler.class);
 
     private static Client rabbitmqHttpClient;
     private String virtualHost;
@@ -51,39 +45,26 @@ public class RabbitMqSetupService {
         password = properties.getPassword();
     }
 
-    protected Client getRabbitmqHttpClient() {
+    private Client getRabbitmqHttpClient() {
         if (rabbitmqHttpClient == null) {
             try {
                 rabbitmqHttpClient = new Client("http://" + getHostname() + ":15672/api/", getUsername(),
                         getPassword());
             } catch (MalformedURLException | URISyntaxException e) {
-                ReflectionUtils.rethrowRuntimeException(e);
+                throw Throwables.propagate(e);
             }
         }
         return rabbitmqHttpClient;
     }
 
-    @PostConstruct
-    void createVirtualHost() {
-        try {
-            if (!getRabbitmqHttpClient().alivenessTest("/")) {
-                throw new AlivenessException(getHostname());
+    void createVirtualHost() throws JsonProcessingException, AlivenessException {
+        if (!getRabbitmqHttpClient().alivenessTest("/")) {
+            throw new AlivenessException(getHostname());
 
-            }
-        } catch (final AlivenessException e) {
-            ReflectionUtils.rethrowRuntimeException(e);
-        } catch (final Exception e) {
-            LOG.error("Connection to management rejected. Maybe no broker is avaiable at host {}", hostname);
-            return;
         }
-
         virtualHost = UUID.randomUUID().toString();
-        try {
-            getRabbitmqHttpClient().createVhost(virtualHost);
-            getRabbitmqHttpClient().updatePermissions(virtualHost, getUsername(), createUserPermissionsFullAccess());
-        } catch (final JsonProcessingException e) {
-            ReflectionUtils.rethrowRuntimeException(e);
-        }
+        getRabbitmqHttpClient().createVhost(virtualHost);
+        getRabbitmqHttpClient().updatePermissions(virtualHost, getUsername(), createUserPermissionsFullAccess());
 
     }
 
@@ -129,7 +110,9 @@ public class RabbitMqSetupService {
         return permissions;
     }
 
-    private static class AlivenessException extends RuntimeException {
+    static class AlivenessException extends Exception {
+        private static final long serialVersionUID = 1L;
+
         public AlivenessException(String hostname) {
             super("Aliveness test failed for " + hostname
                     + ":15672 guest/quest; rabbit mq management api not available");

@@ -17,12 +17,15 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.hawkbit.RabbitMqSetupService.AlivenessException;
 import org.eclipse.hawkbit.amqp.AmqpProperties;
 import org.eclipse.hawkbit.api.HostnameResolver;
 import org.eclipse.hawkbit.integration.listener.DeadletterListener;
 import org.eclipse.hawkbit.integration.listener.ReplyToListener;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.FanoutExchange;
@@ -52,6 +55,8 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 @EnableConfigurationProperties({ AmqpProperties.class })
 @RabbitListenerTest
 public class AmqpTestConfiguration {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AmqpTestConfiguration.class);
 
     public static final String REPLY_TO_EXCHANGE = "reply.queue";
     public static final String REPLY_TO_QUEUE = "reply_queue";
@@ -142,7 +147,7 @@ public class AmqpTestConfiguration {
     }
 
     @Bean
-    public Binding bindReplyToQueueToReplyTorExchange() {
+    public Binding bindQueueToReplyToExchange() {
         return BindingBuilder.bind(replyToQueue()).to(replyToExchange());
     }
 
@@ -157,13 +162,21 @@ public class AmqpTestConfiguration {
     }
 
     @Bean
-    public ConnectionFactory rabbitConnectionFactory(final RabbitMqSetupService rabbitmqSetupService) {
+    public ConnectionFactory rabbitConnectionFactory(final RabbitMqSetupService rabbitmqSetupService)
+            throws AlivenessException {
         final CachingConnectionFactory factory = new CachingConnectionFactory();
         factory.setHost(rabbitmqSetupService.getHostname());
         factory.setPort(5672);
         factory.setUsername(rabbitmqSetupService.getUsername());
         factory.setPassword(rabbitmqSetupService.getPassword());
-        factory.setVirtualHost(rabbitmqSetupService.getVirtualHost());
+        try {
+            rabbitmqSetupService.createVirtualHost();
+            factory.setVirtualHost(rabbitmqSetupService.getVirtualHost());
+
+        } catch (final Exception e) {
+            Throwables.propagateIfInstanceOf(e, AlivenessException.class);
+            LOG.error("Cannot create virtual host {}", e.getMessage());
+        }
         return factory;
     }
 

@@ -26,7 +26,7 @@ import org.eclipse.hawkbit.dmf.json.model.AttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
 import org.eclipse.hawkbit.integration.listener.DeadletterListener;
 import org.eclipse.hawkbit.integration.listener.ReplyToListener;
-import org.eclipse.hawkbit.matcher.SoftwareMouleJsonMatcher;
+import org.eclipse.hawkbit.matcher.SoftwareModuleJsonMatcher;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -128,10 +128,9 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
 
         final DownloadAndUpdateRequest downloadAndUpdateRequest = (DownloadAndUpdateRequest) getDmfClient()
                 .getMessageConverter().fromMessage(replyMessage);
-        assertThat(downloadAndUpdateRequest).isNotNull();
 
         Assert.assertThat(dsModules,
-                SoftwareMouleJsonMatcher.containsExactly(downloadAndUpdateRequest.getSoftwareModules()));
+                SoftwareModuleJsonMatcher.containsExactly(downloadAndUpdateRequest.getSoftwareModules()));
 
         final Target updatedTarget = waitUntilIsPresent(
                 () -> targetManagement.findTargetByControllerID(REGISTER_TARGET));

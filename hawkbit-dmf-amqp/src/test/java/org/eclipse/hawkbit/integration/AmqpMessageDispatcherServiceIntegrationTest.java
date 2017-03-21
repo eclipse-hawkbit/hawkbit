@@ -49,12 +49,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
         registerTargetAndAssignDistributionSet();
 
         createAndSendTarget(TENANT_EXIST);
-        waitUntil(() -> {
-            final Optional<Target> findTargetByControllerID = targetManagement
-                    .findTargetByControllerID(REGISTER_TARGET);
-            return findTargetByControllerID.isPresent() && TargetUpdateStatus.PENDING
-                    .equals(findTargetByControllerID.get().getUpdateStatus());
-        });
+        waitUntilTargetStatusIsPending();
         assertDownloadAndInstallMessage(getDistributionSet().getModules());
     }
 
@@ -76,12 +71,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
         assertCancelActionMessage(assignmentResult.getActions().get(0));
 
         createAndSendTarget(TENANT_EXIST);
-        waitUntil(() -> {
-            final Optional<Target> findTargetByControllerID = targetManagement
-                    .findTargetByControllerID(REGISTER_TARGET);
-            return findTargetByControllerID.isPresent() && TargetUpdateStatus.PENDING
-                    .equals(findTargetByControllerID.get().getUpdateStatus());
-        });
+        waitUntilTargetStatusIsPending();
         assertCancelActionMessage(assignmentResult.getActions().get(0));
 
     }
@@ -99,14 +89,18 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
         final Long actionId = registerTargetAndCancelActionId();
 
         createAndSendTarget(TENANT_EXIST);
+        waitUntilTargetStatusIsPending();
+        assertCancelActionMessage(actionId);
+
+    }
+
+    private void waitUntilTargetStatusIsPending() {
         waitUntil(() -> {
             final Optional<Target> findTargetByControllerID = targetManagement
                     .findTargetByControllerID(REGISTER_TARGET);
             return findTargetByControllerID.isPresent() && TargetUpdateStatus.PENDING
                     .equals(findTargetByControllerID.get().getUpdateStatus());
         });
-        assertCancelActionMessage(actionId);
-
     }
 
     private void waitUntil(final Callable<Boolean> callable) {

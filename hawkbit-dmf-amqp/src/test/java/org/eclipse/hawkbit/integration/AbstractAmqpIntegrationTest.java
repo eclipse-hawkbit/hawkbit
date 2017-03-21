@@ -61,7 +61,7 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
 
     protected Message createMessage(final Object payload, final MessageProperties messageProperties) {
         if (payload == null) {
-            messageProperties.setContentType("json");
+            messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON);
             return new Message(null, messageProperties);
         }
         return getDmfClient().getMessageConverter().toMessage(payload, messageProperties);

@@ -65,7 +65,7 @@ public class BaseAmqpService {
         return (T) rabbitTemplate.getMessageConverter().fromMessage(message);
     }
 
-    public MessageConverter getMessageConverter() {
+    protected MessageConverter getMessageConverter() {
         return rabbitTemplate.getMessageConverter();
     }
 

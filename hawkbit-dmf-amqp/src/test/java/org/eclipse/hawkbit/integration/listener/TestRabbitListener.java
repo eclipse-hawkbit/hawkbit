@@ -13,6 +13,4 @@ import org.springframework.amqp.core.Message;
 public interface TestRabbitListener {
 
     void handleMessage(Message message);
-
-    Message getMessage();
 }

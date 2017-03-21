@@ -35,9 +35,6 @@ import org.springframework.util.StringUtils;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
-/**
- *
- */
 @Features("Component Tests - Device Management Federation API")
 @Stories("Amqp Authentication Message Handler")
 public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmqpIntegrationTest {
@@ -53,7 +50,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     }
 
     @Test
-    @Description("Tests wrong content type. This message is invalid and should not requeued. Additional the receive message is null")
+    @Description("Tests wrong content type. This message is invalid and should not be requeued. Additional the receive message is null")
     public void wrongContentType() {
         final Message createAndSendMessage = getDmfClient()
                 .sendAndReceive(new Message("".getBytes(), new MessageProperties()));
@@ -61,14 +58,14 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     }
 
     @Test
-    @Description("Tests a null message. This message is invalid and should not requeued. Additional the receive message is null")
+    @Description("Tests a null message. This message is invalid and should not be requeued. Additional the receive message is null")
     public void securityTokenIsNull() {
         final Message createAndSendMessage = sendAndReceiveAuthenticationMessage(null);
         assertThat(createAndSendMessage).isNull();
     }
 
     @Test
-    @Description("Tenant in the message is null. This message is invalid and should not requeued. Additional the receive message is null")
+    @Description("Tenant in the message is null. This message is invalid and should not be requeued. Additional the receive message is null")
     public void securityTokenTenantIsNull() {
         final TenantSecurityToken securityToken = createTenantSecurityToken(null, TARGET,
                 FileResource.createFileResourceBySha1(TARGET_SECRUITY_TOKEN));
@@ -99,7 +96,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     }
 
     @Test
-    @Description("Verfiy that the receive message contains a 404 code,if the artifact could not found")
+    @Description("Verify that the receive message contains a 404 code,if the artifact could not found")
     public void fileResourceGetSha1InSecurityTokenIsNull() {
         enableAnonymousAuthentification();
         final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
@@ -112,7 +109,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     }
 
     @Test
-    @Description("Verfiy that the receive message contains a 404 code , if the distributionSet is not assigned to the target")
+    @Description("Verify that the receive message contains a 404 code , if the distributionSet is not assigned to the target")
     public void artifactForFileResourceSHA1FoundByTargetIdTargetExistsButIsNotAssigned() {
         final Target target = createTarget(TARGET);
 
@@ -128,7 +125,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     }
 
     @Test
-    @Description("Verfiy that the receive message contains a 404 code, if there is no artifact for the given sha1")
+    @Description("Verify that the receive message contains a 404 code, if there is no artifact for the given sha1")
     public void artifactForFileResourceSHA1NotFound() {
         enableAnonymousAuthentification();
         final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
@@ -141,7 +138,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     }
 
     @Test
-    @Description("Verfiy that the receive message contains a 404 code, if there is no existing target for the given controller id")
+    @Description("Verify that the receive message contains a 404 code, if there is no existing target for the given controller id")
     public void artifactForFileResourceSHA1FoundTargetNotExists() {
         enableAnonymousAuthentification();
         final DistributionSet distributionSet = createDistributionSet();
@@ -157,7 +154,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     }
 
     @Test
-    @Description("Verfiy that the receive message contains a 404 code, if there is no existing artifact for the target")
+    @Description("Verify that the receive message contains a 404 code, if there is no existing artifact for the target")
     public void artifactForFileResourceSHA1FoundTargetExistsButNotAssigned() {
         createTarget(TARGET);
 
@@ -173,7 +170,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     }
 
     @Test
-    @Description("Verfiy that the receive message contains a 200 code and a artfiact for the existing controller id ")
+    @Description("Verify that the receive message contains a 200 code and a artifact for the existing controller id ")
     public void artifactForFileResourceSHA1FoundTargetExistsIsAssigned() {
         createTarget(TARGET);
 
@@ -192,7 +189,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     }
 
     @Test
-    @Description("Verfiy that the receive message contains a 200 code and a artfiact for the existing target id ")
+    @Description("Verify that the receive message contains a 200 code and a artifact for the existing target id ")
     public void artifactForFileResourceSHA1FoundByTargetIdTargetExistsIsAssigned() {
         final Target target = createTarget(TARGET);
 
@@ -211,7 +208,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     }
 
     @Test
-    @Description("Verfiy that the receive message contains a 200 code and a artfiact without a controller id (anonymous enabled)")
+    @Description("Verify that the receive message contains a 200 code and a artifact without a controller id (anonymous enabled)")
     public void anonymousAuthentification() {
         enableAnonymousAuthentification();
         final DistributionSet distributionSet = createDistributionSet();
@@ -245,7 +242,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     }
 
     @Test
-    @Description("Verfiy that the receive message contains a 404, if there is no artifact to the given filename")
+    @Description("Verify that the receive message contains a 404, if there is no artifact to the given filename")
     public void artifactForFileResourceFileNameNotFound() {
         enableAnonymousAuthentification();
         final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
@@ -258,7 +255,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     }
 
     @Test
-    @Description("Verfiy that the receive message contains a 404, if there is no no distribution set assigned to the target")
+    @Description("Verify that the receive message contains a 404, if there is no distribution set assigned to the target")
     public void artifactForFileResourceFileNameFoundTargetExistsButNotAssigned() {
         createTarget(TARGET);
 
@@ -274,7 +271,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     }
 
     @Test
-    @Description("Verfiy that the receive message contains a 404, if there is no exisiting target")
+    @Description("Verify that the receive message contains a 404, if there is no exisiting target")
     public void artifactForFileResourceArtifactIdFoundTargetNotExists() {
         enableAnonymousAuthentification();
         final DistributionSet distributionSet = createDistributionSet();
@@ -289,7 +286,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     }
 
     @Test
-    @Description("Verfiy that the receive message contains a 200 and a artifact for the given artifact id")
+    @Description("Verify that the receive message contains a 200 and a artifact for the given artifact id")
     public void artifactForFileResourceArtifactIdFoundTargetExistsIsAssigned() {
         createTarget(TARGET);
 
@@ -308,7 +305,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     }
 
     @Test
-    @Description("Verfiy that the receive message contains a 404, if there is no artifact to the given softwareModuleFilename")
+    @Description("Verify that the receive message contains a 404, if there is no artifact to the given softwareModuleFilename")
     public void artifactForFileResourceSoftwareModuleFilenameNotFound() {
         enableAnonymousAuthentification();
         final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
@@ -321,7 +318,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     }
 
     @Test
-    @Description("Verfiy that the receive message contains a 404, if there is no existing target for the file resource")
+    @Description("Verify that the receive message contains a 404, if there is no existing target for the file resource")
     public void artifactForFileResourceSoftwareModuleFilenameFoundTargetNotExists() {
         enableAnonymousAuthentification();
         final DistributionSet distributionSet = createDistributionSet();
@@ -341,7 +338,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     }
 
     @Test
-    @Description("Verfiy that the receive message contains a 200 and a artifact, if there is a existing artifct fpt the for the given softwareModuleFilename")
+    @Description("Verify that the receive message contains a 200 and a artifact, if there is a existing artifct fpt the for the given softwareModuleFilename")
     public void artifactForFileResourceSoftwareModuleFilenameFoundTargetExistsIsAssigned() {
         createTarget(TARGET);
 

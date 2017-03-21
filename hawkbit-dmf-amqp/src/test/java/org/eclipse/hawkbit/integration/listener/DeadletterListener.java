@@ -11,14 +11,14 @@ package org.eclipse.hawkbit.integration.listener;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 
-public class DeadletterListener extends AbstractTestRabbitListener {
+public class DeadletterListener implements TestRabbitListener {
 
     public static final String LISTENER_ID = "deadletter";
 
     @Override
     @RabbitListener(id = "deadletter", queues = "dmf_connector_deadletter_ttl")
     public void handleMessage(Message message) {
-        setMessage(message);
+        // currently the message is not needed
     }
 
 }
