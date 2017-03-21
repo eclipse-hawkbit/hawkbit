@@ -428,13 +428,15 @@ public class UploadConfirmationWindow implements Button.ClickListener {
         hideErrorIcon(warningLabel, errorLabelCount, duplicateCount, errorLabel, oldFileName, currentSwId);
     }
 
-    @SuppressWarnings("squid:S2259")
     private void hideErrorIcon(final Label warningLabel, final int errorLabelCount, final int duplicateCount,
             final Label errorLabel, final String oldFileName, final Long currentSwId) {
         if (warningLabel == null && (errorLabelCount > 1 || (duplicateCount == 1 && errorLabelCount == 1))) {
 
             final Optional<Artifact> artifactList = artifactManagement.findByFilenameAndSoftwareModule(oldFileName,
                     currentSwId);
+            if (errorLabel == null) {
+                return;
+            }
             errorLabel.removeStyleName(SPUIStyleDefinitions.ERROR_LABEL);
             errorLabel.setDescription(i18n.getMessage(ALREADY_EXISTS_MSG));
             if (!artifactList.isPresent()) {
