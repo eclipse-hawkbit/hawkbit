@@ -15,7 +15,8 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractSoftwareModuleDetails;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -29,7 +30,7 @@ public class SwModuleDetails extends AbstractSoftwareModuleDetails {
 
     private final ManageDistUIState manageDistUIState;
 
-    SwModuleDetails(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
+    SwModuleDetails(final VaadinMessageSource i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
             final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow,
             final ManageDistUIState manageDistUIState, final SoftwareManagement softwareManagement,
             final SwMetadataPopupLayout swMetadataPopupLayout, final EntityFactory entityFactory) {
@@ -40,12 +41,12 @@ public class SwModuleDetails extends AbstractSoftwareModuleDetails {
     }
 
     @Override
-    protected Boolean onLoadIsTableRowSelected() {
+    protected boolean onLoadIsTableRowSelected() {
         return !manageDistUIState.getSelectedSoftwareModules().isEmpty();
     }
 
     @Override
-    protected Boolean onLoadIsTableMaximized() {
+    protected boolean onLoadIsTableMaximized() {
         return manageDistUIState.isSwModuleTableMaximized();
     }
 

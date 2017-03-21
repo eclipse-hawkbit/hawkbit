@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.ui.distributions.dstable;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,7 +25,6 @@ import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModule
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractDistributionSetDetails;
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsTable;
 import org.eclipse.hawkbit.ui.common.detailslayout.TargetFilterQueryDetailsTable;
-import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.entity.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -35,8 +33,8 @@ import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionAddUpdateWindowLayout;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -69,8 +67,9 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
 
     private Map<String, StringBuilder> assignedSWModule;
 
-    DistributionSetDetails(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
-            final ManageDistUIState manageDistUIState, final ManagementUIState managementUIState,
+    DistributionSetDetails(final VaadinMessageSource i18n, final UIEventBus eventBus,
+            final SpPermissionChecker permissionChecker, final ManageDistUIState manageDistUIState,
+            final ManagementUIState managementUIState,
             final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout,
             final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
             final TargetManagement targetManagement, final EntityFactory entityFactory,
@@ -90,7 +89,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
         restoreState();
     }
 
-    private static final SoftwareModuleDetailsTable createSoftwareModuleDetailsTable(final I18N i18n,
+    private static final SoftwareModuleDetailsTable createSoftwareModuleDetailsTable(final VaadinMessageSource i18n,
             final SpPermissionChecker permissionChecker, final DistributionSetManagement distributionSetManagement,
             final UIEventBus eventBus, final ManageDistUIState manageDistUIState, final UINotification uiNotification) {
         return new SoftwareModuleDetailsTable(i18n, true, permissionChecker, distributionSetManagement, eventBus,
@@ -114,42 +113,39 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
 
     @SuppressWarnings("unchecked")
     private void showUnsavedAssignment() {
-        Item item;
-        final Map<DistributionSetIdName, HashSet<SoftwareModuleIdName>> assignedList = manageDistUIState
-                .getAssignedList();
-        final Long selectedDistId = manageDistUIState.getLastSelectedDistribution().isPresent()
-                ? manageDistUIState.getLastSelectedDistribution().get() : null;
-        Set<SoftwareModuleIdName> softwareModuleIdNameList = null;
+        final Set<SoftwareModuleIdName> softwareModuleIdNameList = manageDistUIState.getLastSelectedDistribution()
+                .map(selectedDistId -> manageDistUIState.getAssignedList().entrySet().stream()
+                        .filter(entry -> entry.getKey().getId().equals(selectedDistId)).findAny()
+                        .map(Map.Entry::getValue).orElse(null))
+                .orElse(null);
 
-        for (final Map.Entry<DistributionSetIdName, HashSet<SoftwareModuleIdName>> entry : assignedList.entrySet()) {
-            if (entry.getKey().getId().equals(selectedDistId)) {
-                softwareModuleIdNameList = entry.getValue();
-                break;
-            }
-        }
-
-        if (null != softwareModuleIdNameList) {
+        if (softwareModuleIdNameList != null) {
             if (assignedSWModule == null) {
                 assignedSWModule = new HashMap<>();
             }
 
-            for (final SoftwareModuleIdName swIdName : softwareModuleIdNameList) {
-                final SoftwareModule softwareModule = softwareManagement.findSoftwareModuleById(swIdName.getId()).get();
-                if (assignedSWModule.containsKey(softwareModule.getType().getName())) {
-                    assignedSWModule.get(softwareModule.getType().getName()).append("</br>").append("<I>")
-                            .append(getUnsavedAssigedSwModule(softwareModule.getName(), softwareModule.getVersion()))
-                            .append("<I>");
+            softwareModuleIdNameList.stream().map(SoftwareModuleIdName::getId)
+                    .map(softwareManagement::findSoftwareModuleById)
+                    .forEach(found -> found.ifPresent(softwareModule -> {
 
-                } else {
-                    assignedSWModule.put(softwareModule.getType().getName(),
-                            new StringBuilder().append("<I>").append(
-                                    getUnsavedAssigedSwModule(softwareModule.getName(), softwareModule.getVersion()))
-                                    .append("<I>"));
-                }
+                        if (assignedSWModule.containsKey(softwareModule.getType().getName())) {
+                            assignedSWModule.get(softwareModule.getType().getName()).append("</br>").append("<I>")
+                                    .append(HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(),
+                                            softwareModule.getVersion()))
+                                    .append("<I>");
 
-            }
+                        } else {
+                            assignedSWModule
+                                    .put(softwareModule.getType().getName(),
+                                            new StringBuilder().append("<I>")
+                                                    .append(HawkbitCommonUtil.getFormattedNameVersion(
+                                                            softwareModule.getName(), softwareModule.getVersion()))
+                                                    .append("<I>"));
+                        }
+
+                    }));
             for (final Map.Entry<String, StringBuilder> entry : assignedSWModule.entrySet()) {
-                item = getSoftwareModuleTable().getContainerDataSource().getItem(entry.getKey());
+                final Item item = getSoftwareModuleTable().getContainerDataSource().getItem(entry.getKey());
                 if (item != null) {
                     item.getItemProperty(SOFT_MODULE).setValue(createSoftModuleLayout(entry.getValue().toString()));
                 }
@@ -158,10 +154,9 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
     }
 
     private Button assignSoftModuleButton(final String softwareModuleName) {
-        if (getPermissionChecker().hasUpdateDistributionPermission()
-                && manageDistUIState.getLastSelectedDistribution().isPresent()
-                && targetManagement.countTargetByAssignedDistributionSet(
-                        manageDistUIState.getLastSelectedDistribution().get()) <= 0) {
+        if (getPermissionChecker().hasUpdateDistributionPermission() && manageDistUIState.getLastSelectedDistribution()
+                .map(selected -> targetManagement.countTargetByAssignedDistributionSet(selected) <= 0).orElse(false)) {
+
             final Button reassignSoftModule = SPUIComponentProvider.getButton(softwareModuleName, "", "", "", true,
                     FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
             reassignSoftModule.setEnabled(false);
@@ -237,13 +232,12 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
     }
 
     @Override
-    protected Boolean onLoadIsTableRowSelected() {
-        return manageDistUIState.getSelectedDistributions().isPresent()
-                && !manageDistUIState.getSelectedDistributions().get().isEmpty();
+    protected boolean onLoadIsTableRowSelected() {
+        return manageDistUIState.getSelectedDistributions().map(selected -> !selected.isEmpty()).orElse(false);
     }
 
     @Override
-    protected Boolean onLoadIsTableMaximized() {
+    protected boolean onLoadIsTableMaximized() {
         return manageDistUIState.isDsTableMaximized();
     }
 
@@ -286,7 +280,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
     @Override
     protected void addTabs(final TabSheet detailsTab) {
         super.addTabs(detailsTab);
-        detailsTab.addTab(tfqDetailsTable, getI18n().get("caption.auto.assignment.ds"), null);
+        detailsTab.addTab(tfqDetailsTable, getI18n().getMessage("caption.auto.assignment.ds"), null);
     }
 
 }

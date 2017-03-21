@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.ui.common.table.AbstractSoftwareModuleTableHeader;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -29,8 +29,8 @@ public class SwModuleTableHeader extends AbstractSoftwareModuleTableHeader {
 
     private static final long serialVersionUID = 1L;
 
-    SwModuleTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
-            final ManageDistUIState manageDistUIstate,
+    SwModuleTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
+            final UIEventBus eventbus, final ManageDistUIState manageDistUIstate,
             final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow) {
         super(i18n, permChecker, eventbus, null, manageDistUIstate, null, softwareModuleAddUpdateWindow);
     }

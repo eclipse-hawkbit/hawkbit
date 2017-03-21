@@ -30,7 +30,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorderWithIcon;
 import org.eclipse.hawkbit.ui.filtermanagement.TargetFilterBeanQuery;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -68,7 +68,7 @@ public class DefineGroupsLayout extends GridLayout {
 
     private static final long serialVersionUID = 2939193468001472916L;
 
-    private I18N i18n;
+    private VaadinMessageSource i18n;
 
     private transient EntityFactory entityFactory;
 
@@ -98,7 +98,7 @@ public class DefineGroupsLayout extends GridLayout {
 
     private boolean validationRequested;
 
-    DefineGroupsLayout(I18N i18n, EntityFactory entityFactory, RolloutManagement rolloutManagement,
+    DefineGroupsLayout(VaadinMessageSource i18n, EntityFactory entityFactory, RolloutManagement rolloutManagement,
             TargetFilterQueryManagement targetFilterQueryManagement) {
         this.i18n = i18n;
         this.entityFactory = entityFactory;
@@ -148,12 +148,12 @@ public class DefineGroupsLayout extends GridLayout {
     }
 
     private Label getLabel(final String key) {
-        return new LabelBuilder().name(i18n.get(key)).buildLabel();
+        return new LabelBuilder().name(i18n.getMessage(key)).buildLabel();
     }
 
     private Button createAddButton() {
         Button button = SPUIComponentProvider.getButton(UIComponentIdProvider.ROLLOUT_GROUP_ADD_ID,
-                i18n.get("button.rollout.add.group"), "", "", true, FontAwesome.PLUS,
+                i18n.getMessage("button.rollout.add.group"), "", "", true, FontAwesome.PLUS,
                 SPUIButtonStyleNoBorderWithIcon.class);
         button.setSizeUndefined();
         button.addStyleName("default-color");
@@ -362,7 +362,7 @@ public class DefineGroupsLayout extends GridLayout {
         private void init() {
             groupsCount += 1;
             groupName = createTextField("textfield.name", UIComponentIdProvider.ROLLOUT_GROUP_LIST_GRID_ID);
-            groupName.setValue(i18n.get("textfield.rollout.group.default.name", groupsCount));
+            groupName.setValue(i18n.getMessage("textfield.rollout.group.default.name", groupsCount));
             groupName.setStyleName("rollout-group-name");
 
             targetFilterQueryCombo = createTargetFilterQueryCombo();
@@ -389,17 +389,17 @@ public class DefineGroupsLayout extends GridLayout {
         }
 
         private TextField createTextField(final String in18Key, final String id) {
-            final TextField textField = new TextFieldBuilder().prompt(i18n.get(in18Key)).immediate(true).id(id)
+            final TextField textField = new TextFieldBuilder().prompt(i18n.getMessage(in18Key)).immediate(true).id(id)
                     .buildTextComponent();
             textField.setSizeUndefined();
             textField.addValidator(
-                    new StringLengthValidator(i18n.get("message.rollout.group.name.invalid"), 1, 64, false));
+                    new StringLengthValidator(i18n.getMessage("message.rollout.group.name.invalid"), 1, 64, false));
             textField.addValueChangeListener(event -> valueChanged());
             return textField;
         }
 
         private TextField createPercentageField(final String in18Key, final String id) {
-            final TextField textField = new TextFieldBuilder().prompt(i18n.get(in18Key)).immediate(true).id(id)
+            final TextField textField = new TextFieldBuilder().prompt(i18n.getMessage(in18Key)).immediate(true).id(id)
                     .buildTextComponent();
             textField.setWidth(80, Unit.PIXELS);
             textField.setNullRepresentation("");
@@ -422,7 +422,7 @@ public class DefineGroupsLayout extends GridLayout {
 
         private void validateMandatoryPercentage(final Object value) {
             if (value != null) {
-                final String message = i18n.get("message.rollout.field.value.range", 0, 100);
+                final String message = i18n.getMessage("message.rollout.field.value.range", 0, 100);
                 if (value instanceof Float) {
                     new FloatRangeValidator(message, 0F, 100F).validate(value);
                 }
@@ -430,7 +430,7 @@ public class DefineGroupsLayout extends GridLayout {
                     new IntegerRangeValidator(message, 0, 100).validate(value);
                 }
             } else {
-                throw new Validator.EmptyValueException(i18n.get("message.enter.number"));
+                throw new Validator.EmptyValueException(i18n.getMessage("message.enter.number"));
             }
         }
 
@@ -442,7 +442,7 @@ public class DefineGroupsLayout extends GridLayout {
 
         private ComboBox createTargetFilterQueryCombo() {
             return new ComboBoxBuilder().setId(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_COMBO_ID)
-                    .setPrompt(i18n.get("prompt.target.filter")).setValueChangeListener(event -> valueChanged())
+                    .setPrompt(i18n.getMessage("prompt.target.filter")).setValueChangeListener(event -> valueChanged())
                     .buildCombBox();
         }
 
@@ -599,7 +599,7 @@ public class DefineGroupsLayout extends GridLayout {
          * Displays an error for the row
          */
         public void markWithLastGroupError() {
-            targetPercentage.setComponentError(new UserError(i18n.get("message.rollout.remaining.targets.error")));
+            targetPercentage.setComponentError(new UserError(i18n.getMessage("message.rollout.remaining.targets.error")));
         }
 
         /**

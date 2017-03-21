@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.push.TargetTagCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetTagDeletedEventContainer;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
@@ -37,7 +37,7 @@ public abstract class AbstractTargetTagToken<T extends BaseEntity> extends Abstr
 
     protected final transient TagManagement tagManagement;
 
-    protected AbstractTargetTagToken(final SpPermissionChecker checker, final I18N i18n,
+    protected AbstractTargetTagToken(final SpPermissionChecker checker, final VaadinMessageSource i18n,
             final UINotification uinotification, final UIEventBus eventBus, final ManagementUIState managementUIState,
             final TagManagement tagManagement) {
         super(checker, i18n, uinotification, eventBus, managementUIState);

@@ -12,7 +12,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
@@ -22,10 +21,10 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.server.FontAwesome;
@@ -46,7 +45,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     private static final long serialVersionUID = 4862529368471627190L;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final SpPermissionChecker permissionChecker;
 
@@ -72,7 +71,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     protected final ManagementUIState managementUIState;
 
-    protected AbstractTableDetailsLayout(final I18N i18n, final UIEventBus eventBus,
+    protected AbstractTableDetailsLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState) {
         this.i18n = i18n;
         this.permissionChecker = permissionChecker;
@@ -91,7 +90,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         return permissionChecker;
     }
 
-    protected I18N getI18n() {
+    protected VaadinMessageSource getI18n() {
         return i18n;
     }
 
@@ -135,7 +134,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         manageMetadataBtn = SPUIComponentProvider.getButton("", "", "", null, false, FontAwesome.LIST_ALT,
                 SPUIButtonStyleSmallNoBorder.class);
         manageMetadataBtn.setId(getEditButtonId());
-        manageMetadataBtn.setDescription(i18n.get("tooltip.metadata.icon"));
+        manageMetadataBtn.setDescription(i18n.getMessage("tooltip.metadata.icon"));
         manageMetadataBtn.addClickListener(this::showMetadata);
         manageMetadataBtn.setEnabled(false);
 
@@ -226,7 +225,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     protected void populateLog() {
         logLayout.removeAllComponents();
 
-        logLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.get("label.created.at"),
+        logLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.getMessage("label.created.at"),
                 SPDateTimeUtil.formatCreatedAt(selectedBaseEntity)));
 
         logLayout.addComponent(SPUIComponentProvider.createCreatedByLabel(i18n, selectedBaseEntity));
@@ -235,7 +234,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
             return;
         }
 
-        logLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.get("label.modified.date"),
+        logLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.getMessage("label.modified.date"),
                 SPDateTimeUtil.formatLastModifiedAt(selectedBaseEntity)));
 
         logLayout.addComponent(SPUIComponentProvider.createLastModifiedByLabel(i18n, selectedBaseEntity));
@@ -257,12 +256,10 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     /*
      * display Attributes details in Target details.
      */
-
-    protected void updateAttributesLayout(final Target target) {
-        if (null != target && null != target.getTargetInfo()
-                && null != target.getTargetInfo().getControllerAttributes()) {
+    protected void updateAttributesLayout(final Map<String, String> attributes) {
+        if (null != attributes) {
             attributesLayout.removeAllComponents();
-            for (final Map.Entry<String, String> entry : target.getTargetInfo().getControllerAttributes().entrySet()) {
+            for (final Map.Entry<String, String> entry : attributes.entrySet()) {
                 final Label conAttributeLabel = SPUIComponentProvider.createNameValueLabel(
                         entry.getKey().concat("  :  "),
                         HawkbitCommonUtil.trimAndNullIfEmpty(entry.getValue()) == null ? "" : entry.getValue());
@@ -318,19 +315,19 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     protected abstract String getEditButtonId();
 
-    protected abstract Boolean onLoadIsTableRowSelected();
+    protected abstract boolean onLoadIsTableRowSelected();
 
-    protected abstract Boolean onLoadIsTableMaximized();
+    protected abstract boolean onLoadIsTableMaximized();
 
     protected abstract String getTabSheetId();
 
-    protected abstract Boolean hasEditPermission();
+    protected abstract boolean hasEditPermission();
 
     private void populateDescription() {
         if (selectedBaseEntity != null) {
-            updateDescriptionLayout(i18n.get("label.description"), selectedBaseEntity.getDescription());
+            updateDescriptionLayout(i18n.getMessage("label.description"), selectedBaseEntity.getDescription());
         } else {
-            updateDescriptionLayout(i18n.get("label.description"), null);
+            updateDescriptionLayout(i18n.getMessage("label.description"), null);
         }
     }
 
@@ -346,7 +343,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     protected abstract String getName();
 
-    protected abstract Boolean isMetadataIconToBeDisplayed();
+    protected abstract boolean isMetadataIconToBeDisplayed();
 
     protected abstract void showMetadata(Button.ClickEvent event);
 

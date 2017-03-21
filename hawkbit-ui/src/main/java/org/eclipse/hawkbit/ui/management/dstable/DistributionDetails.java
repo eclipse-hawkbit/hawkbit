@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.management.dstable;
 
+import java.util.Set;
+
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
@@ -16,8 +18,8 @@ import org.eclipse.hawkbit.ui.common.detailslayout.AbstractDistributionSetDetail
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsTable;
 import org.eclipse.hawkbit.ui.distributions.dstable.DsMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
@@ -27,8 +29,9 @@ public class DistributionDetails extends AbstractDistributionSetDetails {
 
     private static final long serialVersionUID = 1L;
 
-    DistributionDetails(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
-            final ManagementUIState managementUIState, final DistributionSetManagement distributionSetManagement,
+    DistributionDetails(final VaadinMessageSource i18n, final UIEventBus eventBus,
+            final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState,
+            final DistributionSetManagement distributionSetManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout, final EntityFactory entityFactory,
             final UINotification uiNotification, final TagManagement tagManagement,
             final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout) {
@@ -40,19 +43,18 @@ public class DistributionDetails extends AbstractDistributionSetDetails {
         restoreState();
     }
 
-    private static final SoftwareModuleDetailsTable createSoftwareModuleDetailsTable(final I18N i18n,
+    private static final SoftwareModuleDetailsTable createSoftwareModuleDetailsTable(final VaadinMessageSource i18n,
             final SpPermissionChecker permissionChecker, final UINotification uiNotification) {
         return new SoftwareModuleDetailsTable(i18n, false, permissionChecker, null, null, null, uiNotification);
     }
 
     @Override
-    protected Boolean onLoadIsTableRowSelected() {
-        return !(managementUIState.getSelectedDsIdName().isPresent()
-                && managementUIState.getSelectedDsIdName().get().isEmpty());
+    protected boolean onLoadIsTableRowSelected() {
+        return managementUIState.getSelectedDsIdName().map(Set::isEmpty).orElse(true);
     }
 
     @Override
-    protected Boolean onLoadIsTableMaximized() {
+    protected boolean onLoadIsTableMaximized() {
         return managementUIState.isDsTableMaximized();
     }
 

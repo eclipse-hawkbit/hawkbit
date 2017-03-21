@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
 import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.data.domain.PageRequest;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -54,7 +54,7 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
      * @param uiNotification
      *            UINotification
      */
-    public CreateUpdateTargetTagLayoutWindow(final I18N i18n, final TagManagement tagManagement,
+    public CreateUpdateTargetTagLayoutWindow(final VaadinMessageSource i18n, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
             final UINotification uiNotification) {
         super(i18n, tagManagement, entityFactory, eventBus, permChecker, uiNotification);
@@ -132,7 +132,7 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
             eventBus.publish(this, new TargetTagTableEvent(BaseEntityEventType.ADD_ENTITY, newTargetTag));
             displaySuccess(newTargetTag.getName());
         } else {
-            displayValidationError(i18n.get(MESSAGE_ERROR_MISSING_TAGNAME));
+            displayValidationError(i18n.getMessage(MESSAGE_ERROR_MISSING_TAGNAME));
         }
     }
 
@@ -151,7 +151,7 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
 
     @Override
     protected String getWindowCaption() {
-        return i18n.get("caption.add.tag");
+        return i18n.getMessage("caption.add.tag");
     }
 
     @Override

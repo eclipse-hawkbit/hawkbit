@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
@@ -31,7 +31,7 @@ public class TargetTagFilterLayout extends AbstractTargetTagFilterLayout impleme
     private static final long serialVersionUID = 2153612878428575009L;
     private final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout;
 
-    public TargetTagFilterLayout(final I18N i18n, final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout,
+    public TargetTagFilterLayout(final VaadinMessageSource i18n, final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout,
             final ManagementUIState managementUIState,
             final ManagementViewClientCriterion managementViewClientCriterion, final SpPermissionChecker permChecker,
             final UIEventBus eventBus, final UINotification notification, final EntityFactory entityFactory,

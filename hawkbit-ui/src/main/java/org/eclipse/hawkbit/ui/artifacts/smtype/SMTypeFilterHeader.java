@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -36,7 +36,7 @@ public class SMTypeFilterHeader extends AbstractFilterHeader {
     private final ArtifactUploadState artifactUploadState;
     private final CreateUpdateSoftwareTypeLayout createUpdateSWTypeLayout;
 
-    SMTypeFilterHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
+    SMTypeFilterHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final ArtifactUploadState artifactUploadState, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UINotification uiNotification,
             final SoftwareManagement softwareManagement) {

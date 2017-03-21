@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.components;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 
 import com.vaadin.ui.Label;
@@ -55,10 +55,10 @@ public class DistributionSetInfoPanel extends Panel {
      */
     private void decorate(final DistributionSet distributionSet, final String caption, final String style1,
             final String style2) {
-        final I18N i18n = SpringContextHelper.getBean(I18N.class);
+        final VaadinMessageSource i18n = SpringContextHelper.getBean(VaadinMessageSource.class);
         final VerticalLayout layout = new VerticalLayout();
         // Display distribution set name
-        layout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.get("label.dist.details.name"),
+        layout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.getMessage("label.dist.details.name"),
                 distributionSet.getName(), distributionSet.getVersion()));
 
         /* Module info */

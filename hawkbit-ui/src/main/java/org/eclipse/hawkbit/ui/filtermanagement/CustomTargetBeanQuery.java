@@ -24,7 +24,7 @@ import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.ProxyTarget;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
@@ -48,7 +48,7 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
     private Sort sort = new Sort(Direction.ASC, "id");
     private transient TargetManagement targetManagement;
     private FilterManagementUIState filterManagementUIState;
-    private transient I18N i18N;
+    private transient VaadinMessageSource i18N;
     private String filterQuery;
 
     /**
@@ -104,21 +104,19 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             prxyTarget.setName(targ.getName());
             prxyTarget.setDescription(targ.getDescription());
             prxyTarget.setControllerId(targ.getControllerId());
-            prxyTarget.setInstallationDate(targ.getTargetInfo().getInstallationDate());
-            prxyTarget.setAddress(targ.getTargetInfo().getAddress());
-            prxyTarget.setLastTargetQuery(targ.getTargetInfo().getLastTargetQuery());
-            prxyTarget.setUpdateStatus(targ.getTargetInfo().getUpdateStatus());
+            prxyTarget.setInstallationDate(targ.getInstallationDate());
+            prxyTarget.setAddress(targ.getAddress());
+            prxyTarget.setLastTargetQuery(targ.getLastTargetQuery());
+            prxyTarget.setUpdateStatus(targ.getUpdateStatus());
             prxyTarget.setLastModifiedDate(SPDateTimeUtil.getFormattedDate(targ.getLastModifiedAt()));
             prxyTarget.setCreatedDate(SPDateTimeUtil.getFormattedDate(targ.getCreatedAt()));
             prxyTarget.setCreatedAt(targ.getCreatedAt());
             prxyTarget.setCreatedByUser(UserDetailsFormatter.loadAndFormatCreatedBy(targ));
             prxyTarget.setModifiedByUser(UserDetailsFormatter.loadAndFormatLastModifiedBy(targ));
 
-            prxyTarget.setUpdateStatus(targ.getTargetInfo().getUpdateStatus());
-            prxyTarget.setLastTargetQuery(targ.getTargetInfo().getLastTargetQuery());
-            prxyTarget.setTargetInfo(targ.getTargetInfo());
-            prxyTarget.setPollStatusToolTip(
-                    HawkbitCommonUtil.getPollStatusToolTip(prxyTarget.getTargetInfo().getPollStatus(), getI18N()));
+            prxyTarget.setUpdateStatus(targ.getUpdateStatus());
+            prxyTarget.setLastTargetQuery(targ.getLastTargetQuery());
+            prxyTarget.setPollStatusToolTip(HawkbitCommonUtil.getPollStatusToolTip(targ.getPollStatus(), getI18N()));
             proxyTargetBeans.add(prxyTarget);
         }
         return proxyTargetBeans;
@@ -159,9 +157,9 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         return filterManagementUIState;
     }
 
-    private I18N getI18N() {
+    private VaadinMessageSource getI18N() {
         if (i18N == null) {
-            i18N = SpringContextHelper.getBean(I18N.class);
+            i18N = SpringContextHelper.getBean(VaadinMessageSource.class);
         }
         return i18N;
     }

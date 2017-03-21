@@ -274,7 +274,7 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
                 .map(field -> field.toString().toLowerCase()).collect(Collectors.toSet());
 
         private static final Map<String, List<String>> SUB_NAMES = Arrays.stream(TargetFields.values()).collect(
-                Collectors.toMap(field -> field.toString().toLowerCase(), field -> field.getSubEntityAttributes()));
+                Collectors.toMap(field -> field.toString().toLowerCase(), TargetFields::getSubEntityAttributes));
 
         private FieldNameDescription() {
 
@@ -292,8 +292,7 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
             final String finalTmpTokenName = tmpTokenName;
             return Arrays.stream(TargetFields.values())
                     .filter(field -> field.toString().equalsIgnoreCase(finalTmpTokenName))
-                    .map(field -> field.getSubEntityAttributes()).flatMap(subentities -> subentities.stream())
-                    .count() > 0;
+                    .map(TargetFields::getSubEntityAttributes).flatMap(List::stream).count() > 0;
         }
 
         private static List<SuggestToken> toTopSuggestToken(final int beginToken, final int endToken,
@@ -306,7 +305,7 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
         private static List<SuggestToken> toSubSuggestToken(final int beginToken, final int endToken,
                 final String topToken, final String tokenImageName) {
             return Arrays.stream(TargetFields.values()).filter(field -> field.toString().equalsIgnoreCase(topToken))
-                    .map(field -> field.getSubEntityAttributes()).flatMap(list -> list.stream())
+                    .map(TargetFields::getSubEntityAttributes).flatMap(List::stream)
                     .map(subentity -> new SuggestToken(beginToken, endToken, tokenImageName, subentity))
                     .collect(Collectors.toList());
         }
@@ -318,8 +317,7 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
             final String[] split = imageName.split("\\.");
             if (split.length > 1 && FIELD_NAMES.contains(split[0].toLowerCase())) {
                 return SUB_NAMES.get(split[0].toLowerCase()).stream()
-                        .filter(subname -> new String(split[0] + "." + subname).equalsIgnoreCase(imageName))
-                        .count() > 0;
+                        .filter(subname -> (split[0] + "." + subname).equalsIgnoreCase(imageName)).count() > 0;
             }
             return FIELD_NAMES.stream().filter(value -> value.equalsIgnoreCase(imageName)).count() > 0;
         }

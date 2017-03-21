@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -30,8 +30,8 @@ public class DistributionTableHeader extends AbstractDistributionSetTableHeader 
 
     private static final long serialVersionUID = 1L;
 
-    DistributionTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
-            final ManagementUIState managementUIState) {
+    DistributionTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
+            final UIEventBus eventbus, final ManagementUIState managementUIState) {
         super(i18n, permChecker, eventbus, managementUIState, null, null);
     }
 
@@ -46,10 +46,7 @@ public class DistributionTableHeader extends AbstractDistributionSetTableHeader 
 
     @Override
     protected String onLoadSearchBoxValue() {
-        if (managementUIState.getDistributionTableFilters().getSearchText().isPresent()) {
-            return managementUIState.getDistributionTableFilters().getSearchText().get();
-        }
-        return null;
+        return managementUIState.getDistributionTableFilters().getSearchText().orElse(null);
     }
 
     @Override

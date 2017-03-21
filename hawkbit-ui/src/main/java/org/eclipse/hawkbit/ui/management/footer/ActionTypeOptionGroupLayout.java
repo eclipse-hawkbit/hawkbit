@@ -13,7 +13,8 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroup;
@@ -38,13 +39,13 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
     private static final long serialVersionUID = -5624576558669213864L;
     private static final String STYLE_DIST_WINDOW_ACTIONTYPE = "dist-window-actiontype";
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private FlexibleOptionGroup actionTypeOptionGroup;
 
     private DateField forcedTimeDateField;
 
-    public ActionTypeOptionGroupLayout(final I18N i18n) {
+    public ActionTypeOptionGroupLayout(final VaadinMessageSource i18n) {
         this.i18n = i18n;
 
         createOptionGroup();
@@ -87,7 +88,7 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         forceLabel.setStyleName("statusIconPending");
         forceLabel.setIcon(FontAwesome.BOLT);
         forceLabel.setCaption("Forced");
-        forceLabel.setDescription(i18n.get("tooltip.forced.item"));
+        forceLabel.setDescription(i18n.getMessage("tooltip.forced.item"));
         forceLabel.setStyleName("padding-right-style");
         addComponent(forceLabel);
 
@@ -98,7 +99,7 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         final Label softLabel = new Label();
         softLabel.setSizeFull();
         softLabel.setCaption("Soft");
-        softLabel.setDescription(i18n.get("tooltip.soft.item"));
+        softLabel.setDescription(i18n.getMessage("tooltip.soft.item"));
         softLabel.setStyleName("padding-right-style");
         addComponent(softLabel);
 
@@ -112,7 +113,7 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         autoForceLabel.setStyleName("statusIconPending");
         autoForceLabel.setIcon(FontAwesome.HISTORY);
         autoForceLabel.setCaption("Time Forced");
-        autoForceLabel.setDescription(i18n.get("tooltip.timeforced.item"));
+        autoForceLabel.setDescription(i18n.getMessage("tooltip.timeforced.item"));
         autoForceLabel.setStyleName(STYLE_DIST_WINDOW_ACTIONTYPE);
         addComponent(autoForceLabel);
 
@@ -127,7 +128,7 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
                 Date.from(LocalDateTime.now().plusWeeks(2).atZone(SPDateTimeUtil.getTimeZoneId(tz)).toInstant()));
         forcedTimeDateField.setImmediate(true);
         forcedTimeDateField.setTimeZone(tz);
-        forcedTimeDateField.setLocale(i18n.getLocale());
+        forcedTimeDateField.setLocale(HawkbitCommonUtil.getLocale());
         forcedTimeDateField.setResolution(Resolution.MINUTE);
         forcedTimeDateField.addStyleName(ValoTheme.DATEFIELD_SMALL);
         addComponent(forcedTimeDateField);

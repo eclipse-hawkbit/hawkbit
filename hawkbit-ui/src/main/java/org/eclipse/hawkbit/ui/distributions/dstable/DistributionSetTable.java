@@ -40,7 +40,7 @@ import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
 import org.eclipse.hawkbit.ui.push.DistributionSetUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -90,7 +90,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     private final DsMetadataPopupLayout dsMetadataPopupLayout;
 
-    DistributionSetTable(final UIEventBus eventBus, final I18N i18n, final UINotification notification,
+    DistributionSetTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification notification,
             final SpPermissionChecker permissionChecker, final ManageDistUIState manageDistUIState,
             final DistributionSetManagement distributionSetManagement, final SoftwareManagement softwareManagement,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
@@ -172,16 +172,12 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     @Override
     protected boolean isFirstRowSelectedOnLoad() {
-        return !manageDistUIState.getSelectedDistributions().isPresent()
-                || manageDistUIState.getSelectedDistributions().get().isEmpty();
+        return manageDistUIState.getSelectedDistributions().map(Set::isEmpty).orElse(true);
     }
 
     @Override
     protected Object getItemIdToSelect() {
-        if (manageDistUIState.getSelectedDistributions().isPresent()) {
-            return manageDistUIState.getSelectedDistributions().get();
-        }
-        return null;
+        return manageDistUIState.getSelectedDistributions().orElse(null);
     }
 
     @Override
@@ -236,7 +232,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     protected boolean isDropValid(final DragAndDropEvent dragEvent) {
         final Component compsource = dragEvent.getTransferable().getSourceComponent();
         if (!(compsource instanceof Table)) {
-            notification.displayValidationError(i18n.get(ACTION_NOT_ALLOWED_MSG));
+            notification.displayValidationError(i18n.getMessage(ACTION_NOT_ALLOWED_MSG));
             return false;
         }
         return super.isDropValid(dragEvent);
@@ -247,7 +243,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
                 .findDistributionSetById((Long) distId);
 
         if (!distributionSet.isPresent()) {
-            notification.displayWarning(i18n.get("distributionset.not.exists"));
+            notification.displayWarning(i18n.getMessage("distributionset.not.exists"));
             return;
         }
 
@@ -287,8 +283,8 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     private void publishAssignEvent(final Long distId, final SoftwareModule softwareModule) {
-        if (manageDistUIState.getLastSelectedDistribution().isPresent()
-                && manageDistUIState.getLastSelectedDistribution().get().equals(distId)) {
+        if (manageDistUIState.getLastSelectedDistribution().map(distId::equals).orElse(false)) {
+
             eventBus.publish(this,
                     new SoftwareModuleEvent(SoftwareModuleEventType.ASSIGN_SOFTWARE_MODULE, softwareModule));
         }
@@ -335,7 +331,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         }
 
         if (distributionSetManagement.isDistributionSetInUse(ds.get().getId())) {
-            notification.displayValidationError(i18n.get("message.error.notification.ds.target.assigned",
+            notification.displayValidationError(i18n.getMessage("message.error.notification.ds.target.assigned",
                     ds.get().getName(), ds.get().getVersion()));
             return false;
         }
@@ -345,14 +341,14 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     private boolean validateSoftwareModule(final SoftwareModule sm, final DistributionSet ds) {
         if (targetManagement.countTargetByFilters(null, null, null, ds.getId(), Boolean.FALSE, new String[] {}) > 0) {
             /* Distribution is already assigned */
-            notification.displayValidationError(i18n.get("message.dist.inuse",
+            notification.displayValidationError(i18n.getMessage("message.dist.inuse",
                     HawkbitCommonUtil.concatStrings(":", ds.getName(), ds.getVersion())));
             return false;
         }
 
         if (ds.getModules().contains(sm)) {
             /* Already has software module */
-            notification.displayValidationError(i18n.get("message.software.dist.already.assigned",
+            notification.displayValidationError(i18n.getMessage("message.software.dist.already.assigned",
                     HawkbitCommonUtil.concatStrings(":", ds.getName(), ds.getVersion()),
                     HawkbitCommonUtil.concatStrings(":", sm.getName(), sm.getVersion())));
             return false;
@@ -360,7 +356,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
         if (!ds.getType().containsModuleType(sm.getType())) {
             /* Invalid type of the software module */
-            notification.displayValidationError(i18n.get("message.software.dist.type.notallowed",
+            notification.displayValidationError(i18n.getMessage("message.software.dist.type.notallowed",
                     HawkbitCommonUtil.concatStrings(":", sm.getName(), sm.getVersion()),
                     HawkbitCommonUtil.concatStrings(":", ds.getName(), ds.getVersion())));
             return false;
@@ -377,7 +373,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             final Set<SoftwareModuleIdName> swModuleIdNames = entry.getValue();
             for (final SoftwareModuleIdName swModuleIdName : swModuleIdNames) {
                 if ((sm.getName().concat(":" + sm.getVersion())).equals(swModuleIdName.getName())) {
-                    notification.displayValidationError(i18n.get("message.software.already.dragged",
+                    notification.displayValidationError(i18n.getMessage("message.software.already.dragged",
                             HawkbitCommonUtil.concatStrings(":", sm.getName(), sm.getVersion())));
                     return false;
                 }
@@ -488,7 +484,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
                 UIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
                 FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
         manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
-        manageMetadataBtn.setDescription(i18n.get("tooltip.metadata.icon"));
+        manageMetadataBtn.setDescription(i18n.getMessage("tooltip.metadata.icon"));
         return manageMetadataBtn;
     }
 

@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -17,12 +18,9 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -38,19 +36,43 @@ import org.springframework.transaction.annotation.Transactional;
 public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>, JpaSpecificationExecutor<JpaTarget> {
 
     /**
-     * Loads {@link Target} including details {@link EntityGraph} by given ID.
+     * Sets {@link JpaTarget#getAssignedDistributionSet()}.
+     *
+     * @param set
+     *            to use
+     * @param status
+     *            to set
+     * @param modifiedAt
+     *            current time
+     * @param modifiedBy
+     *            current auditor
+     * @param targets
+     *            to update
+     */
+    @Modifying
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Query("UPDATE JpaTarget t  SET t.assignedDistributionSet = :set, t.lastModifiedAt = :lastModifiedAt, t.lastModifiedBy = :lastModifiedBy, t.updateStatus = :status WHERE t.id IN :targets")
+    void setAssignedDistributionSetAndUpdateStatus(@Param("status") TargetUpdateStatus status,
+            @Param("set") JpaDistributionSet set, @Param("lastModifiedAt") Long modifiedAt,
+            @Param("lastModifiedBy") String modifiedBy, @Param("targets") Collection<Long> targets);
+
+    /**
+     * Loads {@link Target} by given ID.
      *
      * @param controllerID
      *            to search for
      * @return found {@link Target} or <code>null</code> if not found.
      */
-    @EntityGraph(value = "Target.detail", type = EntityGraphType.LOAD)
     Optional<Target> findByControllerId(String controllerID);
+
+    @Query("SELECT t.controllerAttributes FROM JpaTarget t WHERE t.controllerId=:controllerId")
+    Map<String, String> getControllerAttributes(@Param("controllerId") String controllerId);
 
     /**
      * Checks if target with given id exists.
      * 
-     * @param controllerId to check 
+     * @param controllerId
+     *            to check
      * @return <code>true</code> if target with given id exists
      */
     @Query("SELECT CASE WHEN COUNT(t)>0 THEN 'true' ELSE 'false' END FROM JpaTarget t WHERE t.controllerId=:controllerId")
@@ -102,7 +124,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      *
      * @return found targets
      */
-    Page<Target> findByTargetInfoUpdateStatus(final Pageable pageable, final TargetUpdateStatus status);
+    Page<Target> findByUpdateStatus(final Pageable pageable, final TargetUpdateStatus status);
 
     /**
      * retrieves the {@link Target}s which has the {@link DistributionSet}
@@ -114,7 +136,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      *            the ID of the {@link DistributionSet}
      * @return the found {@link Target}s
      */
-    Page<Target> findByTargetInfoInstalledDistributionSetId(final Pageable pageable, final Long setID);
+    Page<Target> findByInstalledDistributionSetId(final Pageable pageable, final Long setID);
 
     /**
      * Finds all targets that have defined {@link DistributionSet} assigned.
@@ -141,13 +163,13 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
 
     /**
      * Counts number of targets with given
-     * {@link TargetInfo#getInstalledDistributionSet()}.
+     * {@link Target#getInstalledDistributionSet()}.
      *
      * @param distId
      *            to search for
      * @return number of found {@link Target}s.
      */
-    Long countByTargetInfoInstalledDistributionSetId(final Long distId);
+    Long countByInstalledDistributionSetId(final Long distId);
 
     /**
      * Finds all {@link Target}s in the repository.
@@ -163,24 +185,6 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("SELECT t FROM JpaTarget t WHERE t.id IN ?1")
     List<JpaTarget> findAll(Iterable<Long> ids);
-
-    /**
-     * Sets {@link Target#getAssignedDistributionSet()}.
-     *
-     * @param set
-     *            to use
-     * @param modifiedAt
-     *            current time
-     * @param modifiedBy
-     *            current auditor
-     * @param targets
-     *            to update
-     */
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @Query("UPDATE JpaTarget t  SET t.assignedDistributionSet = :set, t.lastModifiedAt = :lastModifiedAt, t.lastModifiedBy = :lastModifiedBy WHERE t.id IN :targets")
-    void setAssignedDistributionSet(@Param("set") JpaDistributionSet set, @Param("lastModifiedAt") Long modifiedAt,
-            @Param("lastModifiedBy") String modifiedBy, @Param("targets") Collection<Long> targets);
 
     /**
      * 

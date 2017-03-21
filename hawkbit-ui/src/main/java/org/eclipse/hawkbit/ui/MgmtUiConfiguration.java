@@ -9,8 +9,10 @@
 package org.eclipse.hawkbit.ui;
 
 import org.eclipse.hawkbit.im.authentication.PermissionService;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -26,15 +28,16 @@ import org.springframework.context.annotation.Import;
 @EnableConfigurationProperties(UiProperties.class)
 public class MgmtUiConfiguration {
 
-    /**
-     * @param permissionService
-     *            to use in the checker
-     * @return {@link SpPermissionChecker} bean
-     */
     @Bean
     @ConditionalOnMissingBean
-    public SpPermissionChecker spPermissionChecker(final PermissionService permissionService) {
+    SpPermissionChecker spPermissionChecker(final PermissionService permissionService) {
         return new SpPermissionChecker(permissionService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    VaadinMessageSource messageSourceVaadin(final MessageSource source) {
+        return new VaadinMessageSource(source);
     }
 
 }

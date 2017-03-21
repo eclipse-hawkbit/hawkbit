@@ -20,6 +20,10 @@
    <name>hawkBit :: Extensions</name>
    <description>Parent pom for hawkBit extensions</description>
 
+   <properties>
+      <jacoco.outputDir>${project.basedir}/../../target/</jacoco.outputDir>
+   </properties>
+
    <modules>
       <module>hawkbit-extension-uaa</module>
       <module>hawkbit-extension-artifact-repository-mongo</module>

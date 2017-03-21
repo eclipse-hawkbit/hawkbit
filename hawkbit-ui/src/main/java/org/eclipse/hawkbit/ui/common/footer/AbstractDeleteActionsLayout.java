@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -43,7 +43,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
 
     private static final long serialVersionUID = -6047975388519155509L;
 
-    protected I18N i18n;
+    protected VaadinMessageSource i18n;
 
     protected SpPermissionChecker permChecker;
 
@@ -59,7 +59,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
 
     private Button bulkUploadStatusButton;
 
-    protected AbstractDeleteActionsLayout(final I18N i18n, final SpPermissionChecker permChecker,
+    protected AbstractDeleteActionsLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final UIEventBus eventBus, final UINotification notification) {
         this.i18n = i18n;
         this.permChecker = permChecker;
@@ -338,7 +338,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
      * @return the no actions label.
      */
     protected String getNoActionsButtonLabel() {
-        return i18n.get("button.no.actions");
+        return i18n.getMessage("button.no.actions");
     }
 
     /**
@@ -347,7 +347,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
      * @return the actions label.
      */
     protected String getActionsButtonLabel() {
-        return i18n.get("button.actions");
+        return i18n.getMessage("button.actions");
     }
 
     /**
@@ -356,7 +356,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
      * @return caption of the window.
      */
     protected String getUnsavedActionsWindowCaption() {
-        return i18n.get("caption.save.window");
+        return i18n.getMessage("caption.save.window");
     }
 
     /**

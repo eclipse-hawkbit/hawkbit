@@ -70,15 +70,15 @@ public abstract class AbstractNotificationView extends VerticalLayout implements
             return;
         }
 
-        eventContainer.getEvents().stream().filter(event -> !anyEventMatch(event)).forEach(event -> {
+        eventContainer.getEvents().stream().filter(this::noEventMatch).forEach(event -> {
             notificationUnreadButton.incrementUnreadNotification(this, eventContainer);
             viewUnreadNotifcations.incrementAndGet();
         });
         getDashboardMenuItem().setNotificationUnreadValue(viewUnreadNotifcations);
     }
 
-    private boolean anyEventMatch(final TenantAwareEvent tenantAwareEvent) {
-        return skipUiEventsCache.asMap().keySet().stream()
+    private boolean noEventMatch(final TenantAwareEvent tenantAwareEvent) {
+        return !skipUiEventsCache.asMap().keySet().stream()
                 .anyMatch(uiEvent -> uiEvent.matchRemoteEvent(tenantAwareEvent));
     }
 

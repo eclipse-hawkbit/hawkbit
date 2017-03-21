@@ -169,6 +169,21 @@ public interface TagManagement {
     Page<TargetTag> findAllTargetTags(@NotNull Pageable pageable);
 
     /**
+     * Returns all {@link TargetTag}s assigned to {@link Target} with given ID.
+     * 
+     * @param pageable
+     *            page parameter
+     * @param controllerId
+     *
+     * @return {@link TargetTag}s assigned to {@link Target} with given ID
+     * 
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Page<TargetTag> findAllTargetTags(@NotNull Pageable pageable, @NotEmpty String controllerId);
+
+    /**
      * Retrieves all target tags based on the given specification.
      *
      * @param rsqlParam

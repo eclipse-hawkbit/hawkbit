@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.AbstractSoftwareModuleTableHeader;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -27,8 +27,8 @@ public class SoftwareModuleTableHeader extends AbstractSoftwareModuleTableHeader
 
     private static final long serialVersionUID = 1L;
 
-    SoftwareModuleTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
-            final ArtifactUploadState artifactUploadState,
+    SoftwareModuleTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
+            final UIEventBus eventbus, final ArtifactUploadState artifactUploadState,
             final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow) {
         super(i18n, permChecker, eventbus, null, null, artifactUploadState, softwareModuleAddUpdateWindow);
     }

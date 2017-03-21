@@ -12,8 +12,8 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.event.dd.DropHandler;
@@ -28,7 +28,7 @@ public abstract class AbstractDistributionSetTableHeader extends AbstractTableHe
 
     private static final long serialVersionUID = 1L;
 
-    protected AbstractDistributionSetTableHeader(final I18N i18n, final SpPermissionChecker permChecker,
+    protected AbstractDistributionSetTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final UIEventBus eventbus, final ManagementUIState managementUIState,
             final ManageDistUIState manageDistUIstate, final ArtifactUploadState artifactUploadState) {
         super(i18n, permChecker, eventbus, managementUIState, manageDistUIstate, artifactUploadState);
@@ -36,7 +36,7 @@ public abstract class AbstractDistributionSetTableHeader extends AbstractTableHe
 
     @Override
     protected String getHeaderCaption() {
-        return i18n.get("header.dist.table");
+        return i18n.getMessage("header.dist.table");
     }
 
     @Override

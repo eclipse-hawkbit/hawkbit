@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -41,7 +41,7 @@ public class TargetTableLayout extends AbstractTableLayout<TargetTable> {
     private final TargetTableHeader targetTableHeader;
 
     public TargetTableLayout(final UIEventBus eventBus, final TargetTable targetTable,
-            final TargetManagement targetManagement, final EntityFactory entityFactory, final I18N i18n,
+            final TargetManagement targetManagement, final EntityFactory entityFactory, final VaadinMessageSource i18n,
             final UIEventBus eventbus, final UINotification notification, final ManagementUIState managementUIState,
             final ManagementViewClientCriterion managementViewClientCriterion,
             final DeploymentManagement deploymentManagement, final UiProperties uiproperties,
@@ -50,7 +50,7 @@ public class TargetTableLayout extends AbstractTableLayout<TargetTable> {
             final Executor uiExecutor) {
         this.eventBus = eventBus;
         this.targetDetails = new TargetDetails(i18n, eventbus, permissionChecker, managementUIState, uinotification,
-                tagManagement, targetManagement, entityFactory);
+                tagManagement, targetManagement, deploymentManagement, entityFactory);
         this.targetTableHeader = new TargetTableHeader(i18n, permissionChecker, eventBus, notification,
                 managementUIState, managementViewClientCriterion, targetManagement, deploymentManagement, uiproperties,
                 eventbus, entityFactory, uinotification, tagManagement, distributionSetManagement, uiExecutor);

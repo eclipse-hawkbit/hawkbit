@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractSoftwareModuleDetails;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
@@ -27,7 +27,8 @@ public class SoftwareModuleDetails extends AbstractSoftwareModuleDetails {
 
     private final ArtifactUploadState artifactUploadState;
 
-    SoftwareModuleDetails(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
+    SoftwareModuleDetails(final VaadinMessageSource i18n, final UIEventBus eventBus,
+            final SpPermissionChecker permissionChecker,
             final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow,
             final ArtifactUploadState artifactUploadState, final SoftwareManagement softwareManagement,
             final SwMetadataPopupLayout swMetadataPopupLayout, final EntityFactory entityFactory) {
@@ -38,12 +39,12 @@ public class SoftwareModuleDetails extends AbstractSoftwareModuleDetails {
     }
 
     @Override
-    protected Boolean onLoadIsTableRowSelected() {
+    protected boolean onLoadIsTableRowSelected() {
         return artifactUploadState.getSelectedBaseSoftwareModule().isPresent();
     }
 
     @Override
-    protected Boolean onLoadIsTableMaximized() {
+    protected boolean onLoadIsTableMaximized() {
         return artifactUploadState.isSwModuleTableMaximized();
     }
 

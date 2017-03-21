@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.vaadin.spring.events.EventBus;
@@ -42,7 +42,7 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
     private static final long serialVersionUID = 4881626370291837175L;
 
-    protected I18N i18n;
+    protected VaadinMessageSource i18n;
 
     protected SpPermissionChecker permChecker;
 
@@ -68,7 +68,7 @@ public abstract class AbstractTableHeader extends VerticalLayout {
     protected final ManageDistUIState manageDistUIstate;
     protected final ArtifactUploadState artifactUploadState;
 
-    protected AbstractTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
+    protected AbstractTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
             final ManagementUIState managementUIState, final ManageDistUIState manageDistUIstate,
             final ArtifactUploadState artifactUploadState) {
         this.i18n = i18n;

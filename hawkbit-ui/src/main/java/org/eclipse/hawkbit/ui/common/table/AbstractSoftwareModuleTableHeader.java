@@ -13,8 +13,8 @@ import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.event.dd.DropHandler;
@@ -33,7 +33,7 @@ public abstract class AbstractSoftwareModuleTableHeader extends AbstractTableHea
 
     private final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow;
 
-    protected AbstractSoftwareModuleTableHeader(final I18N i18n, final SpPermissionChecker permChecker,
+    protected AbstractSoftwareModuleTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final UIEventBus eventbus, final ManagementUIState managementUIState,
             final ManageDistUIState manageDistUIstate, final ArtifactUploadState artifactUploadState,
             final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow) {
@@ -43,7 +43,7 @@ public abstract class AbstractSoftwareModuleTableHeader extends AbstractTableHea
 
     @Override
     protected String getHeaderCaption() {
-        return i18n.get("upload.swModuleTable.header");
+        return i18n.getMessage("upload.swModuleTable.header");
     }
 
     @Override
@@ -79,7 +79,7 @@ public abstract class AbstractSoftwareModuleTableHeader extends AbstractTableHea
     @Override
     protected void addNewItem(final ClickEvent event) {
         final Window addSoftwareModule = softwareModuleAddUpdateWindow.createAddSoftwareModuleWindow();
-        addSoftwareModule.setCaption(i18n.get("upload.caption.add.new.swmodule"));
+        addSoftwareModule.setCaption(i18n.getMessage("upload.caption.add.new.swmodule"));
         UI.getCurrent().addWindow(addSoftwareModule);
         addSoftwareModule.setVisible(Boolean.TRUE);
     }

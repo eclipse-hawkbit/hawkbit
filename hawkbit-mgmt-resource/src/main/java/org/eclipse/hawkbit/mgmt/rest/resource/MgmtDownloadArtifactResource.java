@@ -61,13 +61,11 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
     @ResponseBody
     public ResponseEntity<InputStream> downloadArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("artifactId") final Long artifactId) {
-        final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, artifactId);
+        final SoftwareModule module = softwareManagement.findSoftwareModuleById(softwareModuleId)
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
+        final Artifact artifact = module.getArtifact(artifactId)
+                .orElseThrow(() -> new EntityNotFoundException(Artifact.class, artifactId));
 
-        if (null == module || !module.getArtifact(artifactId).isPresent()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        final Artifact artifact = module.getArtifact(artifactId).get();
         final DbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash())
                 .orElseThrow(() -> new ArtifactBinaryNotFoundException(artifact.getSha1Hash()));
         final HttpServletRequest request = requestResponseContextHolder.getHttpServletRequest();
@@ -79,16 +77,6 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
         return RestResourceConversionHelper.writeFileResponse(artifact,
                 requestResponseContextHolder.getHttpServletResponse(), request, file);
 
-    }
-
-    private SoftwareModule findSoftwareModuleWithExceptionIfNotFound(final Long softwareModuleId,
-            final Long artifactId) {
-        final SoftwareModule module = softwareManagement.findSoftwareModuleById(softwareModuleId)
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
-        if (artifactId != null && !module.getArtifact(artifactId).isPresent()) {
-            throw new EntityNotFoundException(Artifact.class, artifactId);
-        }
-        return module;
     }
 
 }

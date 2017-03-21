@@ -14,7 +14,7 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.ui.VerticalLayout;
 
@@ -26,7 +26,7 @@ abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLay
 
     private static final long serialVersionUID = 1L;
 
-    private final I18N i18n;
+    private final VaadinMessageSource i18n;
 
     private final String configurationKey;
     private final transient TenantConfigurationManagement tenantConfigurationManagement;
@@ -41,7 +41,7 @@ abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLay
      *            configuration value
      */
     public AbstractAuthenticationTenantConfigurationItem(final String configurationKey,
-            final TenantConfigurationManagement tenantConfigurationManagement, final I18N i18n) {
+            final TenantConfigurationManagement tenantConfigurationManagement, final VaadinMessageSource i18n) {
         this.configurationKey = configurationKey;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.i18n = i18n;
@@ -52,7 +52,7 @@ abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLay
      */
     protected void init(final String labelText) {
         setImmediate(true);
-        addComponent(new LabelBuilder().name(i18n.get(labelText)).buildLabel());
+        addComponent(new LabelBuilder().name(i18n.getMessage(labelText)).buildLabel());
     }
 
     @Override

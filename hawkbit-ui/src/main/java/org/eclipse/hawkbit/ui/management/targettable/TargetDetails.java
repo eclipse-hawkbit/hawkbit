@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.management.targettable;
 import java.net.URI;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -24,11 +25,11 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -56,36 +57,43 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
     private final TargetAddUpdateWindowLayout targetAddUpdateWindowLayout;
 
+    private final transient TargetManagement targetManagement;
+
+    private final transient DeploymentManagement deploymentManagement;
+
     private VerticalLayout assignedDistLayout;
     private VerticalLayout installedDistLayout;
 
-    TargetDetails(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
-            final ManagementUIState managementUIState, final UINotification uiNotification,
-            final TagManagement tagManagement, final TargetManagement targetManagement,
+    TargetDetails(final VaadinMessageSource i18n, final UIEventBus eventBus,
+            final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState,
+            final UINotification uiNotification, final TagManagement tagManagement,
+            final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
             final EntityFactory entityFactory) {
         super(i18n, eventBus, permissionChecker, managementUIState);
         this.targetTagToken = new TargetTagToken(permissionChecker, i18n, uiNotification, eventBus, managementUIState,
                 tagManagement, targetManagement);
         targetAddUpdateWindowLayout = new TargetAddUpdateWindowLayout(i18n, targetManagement, eventBus, uiNotification,
                 entityFactory);
+        this.targetManagement = targetManagement;
+        this.deploymentManagement = deploymentManagement;
         addTabs(detailsTab);
         restoreState();
     }
 
     @Override
     protected String getDefaultCaption() {
-        return getI18n().get("target.details.header");
+        return getI18n().getMessage("target.details.header");
     }
 
     @Override
     protected void addTabs(final TabSheet detailsTab) {
-        detailsTab.addTab(getDetailsLayout(), getI18n().get("caption.tab.details"), null);
-        detailsTab.addTab(getDescriptionLayout(), getI18n().get("caption.tab.description"), null);
-        detailsTab.addTab(getAttributesLayout(), getI18n().get("caption.attributes.tab"), null);
-        detailsTab.addTab(createAssignedDistLayout(), getI18n().get("header.target.assigned"), null);
-        detailsTab.addTab(createInstalledDistLayout(), getI18n().get("header.target.installed"), null);
-        detailsTab.addTab(getTagsLayout(), getI18n().get("caption.tags.tab"), null);
-        detailsTab.addTab(getLogLayout(), getI18n().get("caption.logs.tab"), null);
+        detailsTab.addTab(getDetailsLayout(), getI18n().getMessage("caption.tab.details"), null);
+        detailsTab.addTab(getDescriptionLayout(), getI18n().getMessage("caption.tab.description"), null);
+        detailsTab.addTab(getAttributesLayout(), getI18n().getMessage("caption.attributes.tab"), null);
+        detailsTab.addTab(createAssignedDistLayout(), getI18n().getMessage("header.target.assigned"), null);
+        detailsTab.addTab(createInstalledDistLayout(), getI18n().getMessage("header.target.installed"), null);
+        detailsTab.addTab(getTagsLayout(), getI18n().getMessage("caption.tags.tab"), null);
+        detailsTab.addTab(getLogLayout(), getI18n().getMessage("caption.logs.tab"), null);
 
     }
 
@@ -112,7 +120,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         if (targetWindow == null) {
             return;
         }
-        targetWindow.setCaption(getI18n().get(UIComponentIdProvider.TARGET_UPDATE_CAPTION));
+        targetWindow.setCaption(getI18n().getMessage(UIComponentIdProvider.TARGET_UPDATE_CAPTION));
         UI.getCurrent().addWindow(targetWindow);
         targetWindow.setVisible(Boolean.TRUE);
     }
@@ -123,31 +131,34 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
     }
 
     @Override
-    protected Boolean onLoadIsTableRowSelected() {
+    protected boolean onLoadIsTableRowSelected() {
         return managementUIState.getLastSelectedTargetId() != null;
     }
 
     @Override
-    protected Boolean onLoadIsTableMaximized() {
+    protected boolean onLoadIsTableMaximized() {
         return managementUIState.isTargetTableMaximized();
     }
 
     @Override
     protected void populateDetailsWidget() {
         if (getSelectedBaseEntity() != null) {
-            updateDetailsLayout(getSelectedBaseEntity().getControllerId(),
-                    getSelectedBaseEntity().getTargetInfo().getAddress(), getSelectedBaseEntity().getSecurityToken(),
-                    SPDateTimeUtil.getFormattedDate(getSelectedBaseEntity().getTargetInfo().getLastTargetQuery()));
-            populateDistributionDtls(installedDistLayout,
-                    getSelectedBaseEntity().getTargetInfo().getInstalledDistributionSet());
-            populateDistributionDtls(assignedDistLayout, getSelectedBaseEntity().getAssignedDistributionSet());
+            updateAttributesLayout(targetManagement.getControllerAttributes(getSelectedBaseEntity().getControllerId()));
+
+            updateDetailsLayout(getSelectedBaseEntity().getControllerId(), getSelectedBaseEntity().getAddress(),
+                    getSelectedBaseEntity().getSecurityToken(),
+                    SPDateTimeUtil.getFormattedDate(getSelectedBaseEntity().getLastTargetQuery()));
+
+            populateDistributionDtls(installedDistLayout, deploymentManagement
+                    .getAssignedDistributionSet(getSelectedBaseEntity().getControllerId()).orElse(null));
+            populateDistributionDtls(assignedDistLayout, deploymentManagement
+                    .getInstalledDistributionSet(getSelectedBaseEntity().getControllerId()).orElse(null));
         } else {
             updateDetailsLayout(null, null, null, null);
             populateDistributionDtls(installedDistLayout, null);
             populateDistributionDtls(assignedDistLayout, null);
         }
         populateTags(targetTagToken);
-        updateAttributesLayout(getSelectedBaseEntity());
     }
 
     @Override
@@ -160,18 +171,19 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         final VerticalLayout detailsTabLayout = getDetailsLayout();
         detailsTabLayout.removeAllComponents();
 
-        final Label controllerLabel = SPUIComponentProvider.createNameValueLabel(getI18n().get("label.target.id"),
+        final Label controllerLabel = SPUIComponentProvider.createNameValueLabel(
+                getI18n().getMessage("label.target.id"),
                 HawkbitCommonUtil.trimAndNullIfEmpty(controllerId) == null ? "" : controllerId);
         controllerLabel.setId(UIComponentIdProvider.TARGET_CONTROLLER_ID);
         detailsTabLayout.addComponent(controllerLabel);
 
         final Label lastPollDtLabel = SPUIComponentProvider.createNameValueLabel(
-                getI18n().get("label.target.lastpolldate"),
+                getI18n().getMessage("label.target.lastpolldate"),
                 HawkbitCommonUtil.trimAndNullIfEmpty(lastQueryDate) == null ? "" : lastQueryDate);
         lastPollDtLabel.setId(UIComponentIdProvider.TARGET_LAST_QUERY_DT);
         detailsTabLayout.addComponent(lastPollDtLabel);
 
-        final Label typeLabel = SPUIComponentProvider.createNameValueLabel(getI18n().get("label.ip"),
+        final Label typeLabel = SPUIComponentProvider.createNameValueLabel(getI18n().getMessage("label.ip"),
                 address == null ? StringUtils.EMPTY : address.toString());
         typeLabel.setId(UIComponentIdProvider.TARGET_IP_ADDRESS);
         detailsTabLayout.addComponent(typeLabel);
@@ -187,7 +199,8 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         final HorizontalLayout securityTokenLayout = new HorizontalLayout();
 
         final Label securityTableLbl = new Label(
-                SPUIComponentProvider.getBoldHTMLText(getI18n().get("label.target.security.token")), ContentMode.HTML);
+                SPUIComponentProvider.getBoldHTMLText(getI18n().getMessage("label.target.security.token")),
+                ContentMode.HTML);
         securityTableLbl.addStyleName(SPUIDefinitions.TEXT_STYLE);
         securityTableLbl.addStyleName("label-style");
 
@@ -210,11 +223,11 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         if (distributionSet == null) {
             return;
         }
-        layout.addComponent(SPUIComponentProvider.createNameValueLabel(getI18n().get("label.dist.details.name"),
+        layout.addComponent(SPUIComponentProvider.createNameValueLabel(getI18n().getMessage("label.dist.details.name"),
                 distributionSet.getName()));
 
-        layout.addComponent(SPUIComponentProvider.createNameValueLabel(getI18n().get("label.dist.details.version"),
-                distributionSet.getVersion()));
+        layout.addComponent(SPUIComponentProvider.createNameValueLabel(
+                getI18n().getMessage("label.dist.details.version"), distributionSet.getVersion()));
 
         distributionSet.getModules()
                 .forEach(module -> layout.addComponent(getSWModlabel(module.getType().getName(), module)));
@@ -234,7 +247,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
     }
 
     @Override
-    protected Boolean hasEditPermission() {
+    protected boolean hasEditPermission() {
         return getPermissionChecker().hasUpdateTargetPermission();
     }
 
@@ -254,7 +267,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
     }
 
     @Override
-    protected Boolean isMetadataIconToBeDisplayed() {
+    protected boolean isMetadataIconToBeDisplayed() {
         return false;
     }
 

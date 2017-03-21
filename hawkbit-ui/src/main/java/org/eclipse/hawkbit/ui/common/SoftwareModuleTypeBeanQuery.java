@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.common;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -30,9 +29,8 @@ import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
 public class SoftwareModuleTypeBeanQuery extends AbstractBeanQuery<SoftwareModuleType> {
     private static final long serialVersionUID = 7824925429198339644L;
     private final Sort sort = new Sort(Direction.ASC, "name");
-    private transient Page<SoftwareModuleType> firstPageSwModuleType = null;
+    private transient Page<SoftwareModuleType> firstPageSwModuleType;
     private transient SoftwareManagement softwareManagement;
-    private transient EntityFactory entityFactory;
 
     /**
      * Parametric constructor.
@@ -50,13 +48,6 @@ public class SoftwareModuleTypeBeanQuery extends AbstractBeanQuery<SoftwareModul
     @Override
     protected SoftwareModuleType constructBean() {
         return null;
-    }
-
-    private EntityFactory getEntityFactory() {
-        if (entityFactory == null) {
-            entityFactory = SpringContextHelper.getBean(EntityFactory.class);
-        }
-        return entityFactory;
     }
 
     @Override

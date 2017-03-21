@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.utils;
 
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -31,6 +32,7 @@ import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.UI;
 
 /**
  * Common util class.
@@ -184,7 +186,7 @@ public final class HawkbitCommonUtil {
      * @param i18N
      * @return PollStatusToolTip
      */
-    public static String getPollStatusToolTip(final PollStatus pollStatus, final I18N i18N) {
+    public static String getPollStatusToolTip(final PollStatus pollStatus, final VaadinMessageSource i18N) {
         if (pollStatus != null && pollStatus.getLastPollDate() != null && pollStatus.isOverdue()) {
             final TimeZone tz = SPDateTimeUtil.getBrowserTimeZone();
             return "Overdue for " + SPDateTimeUtil.getDurationFormattedString(
@@ -306,29 +308,29 @@ public final class HawkbitCommonUtil {
      * @return message
      */
     public static String createAssignmentMessage(final String tagName,
-            final AssignmentResult<? extends NamedEntity> result, final I18N i18n) {
+            final AssignmentResult<? extends NamedEntity> result, final VaadinMessageSource i18n) {
         final StringBuilder formMsg = new StringBuilder();
         final int assignedCount = result.getAssigned();
         final int alreadyAssignedCount = result.getAlreadyAssigned();
         final int unassignedCount = result.getUnassigned();
         if (assignedCount == 1) {
-            formMsg.append(i18n.get("message.target.assigned.one",
+            formMsg.append(i18n.getMessage("message.target.assigned.one",
                     new Object[] { result.getAssignedEntity().get(0).getName(), tagName })).append("<br>");
         } else if (assignedCount > 1) {
-            formMsg.append(i18n.get("message.target.assigned.many", new Object[] { assignedCount, tagName }))
+            formMsg.append(i18n.getMessage("message.target.assigned.many", new Object[] { assignedCount, tagName }))
                     .append("<br>");
 
             if (alreadyAssignedCount > 0) {
-                final String alreadyAssigned = i18n.get("message.target.alreadyAssigned",
+                final String alreadyAssigned = i18n.getMessage("message.target.alreadyAssigned",
                         new Object[] { alreadyAssignedCount });
                 formMsg.append(alreadyAssigned).append("<br>");
             }
         }
         if (unassignedCount == 1) {
-            formMsg.append(i18n.get("message.target.unassigned.one",
+            formMsg.append(i18n.getMessage("message.target.unassigned.one",
                     new Object[] { result.getUnassignedEntity().get(0).getName(), tagName })).append("<br>");
         } else if (unassignedCount > 1) {
-            formMsg.append(i18n.get("message.target.unassigned.many", new Object[] { unassignedCount, tagName }))
+            formMsg.append(i18n.getMessage("message.target.unassigned.many", new Object[] { unassignedCount, tagName }))
                     .append("<br>");
         }
         return formMsg.toString();
@@ -506,7 +508,7 @@ public final class HawkbitCommonUtil {
      *            label style
      * @param id
      *            label id
-     * @return
+     * @return formatted string
      */
     public static String getStatusLabelDetailsInString(final String value, final String style, final String id) {
         final StringBuilder val = new StringBuilder();
@@ -532,5 +534,18 @@ public final class HawkbitCommonUtil {
         }
         return statusFontIcon.getFontIcon() != null ? Integer.toString(statusFontIcon.getFontIcon().getCodepoint())
                 : null;
+    }
+
+    /**
+     * Gets the locale of the current Vaadin UI. If the locale can not be
+     * determined, the default locale is returned instead.
+     *
+     * @return the current locale, never {@code null}.
+     * @see com.vaadin.ui.UI#getLocale()
+     * @see java.util.Locale#getDefault()
+     */
+    public static Locale getLocale() {
+        final UI currentUI = UI.getCurrent();
+        return currentUI == null ? Locale.getDefault() : currentUI.getLocale();
     }
 }

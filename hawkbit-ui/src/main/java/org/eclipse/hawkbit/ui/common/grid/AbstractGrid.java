@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.common.grid;
 
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
-import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus;
@@ -28,13 +28,13 @@ public abstract class AbstractGrid extends Grid implements RefreshableContainer 
 
     private static final long serialVersionUID = 4856562746502217630L;
 
-    protected final I18N i18n;
+    protected final VaadinMessageSource i18n;
 
     protected final transient EventBus.UIEventBus eventBus;
 
     protected final SpPermissionChecker permissionChecker;
 
-    protected AbstractGrid(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker) {
+    protected AbstractGrid(final VaadinMessageSource i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker) {
         this.i18n = i18n;
         this.eventBus = eventBus;
         this.permissionChecker = permissionChecker;

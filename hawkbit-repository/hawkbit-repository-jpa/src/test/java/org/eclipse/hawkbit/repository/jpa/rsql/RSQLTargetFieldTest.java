@@ -170,18 +170,12 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test filter target by lastTargetQuery")
     public void testFilterByLastTargetQuery() throws InterruptedException {
-        assertRSQLQuery(
-                TargetFields.LASTCONTROLLERREQUESTAT.name() + "==" + target.getTargetInfo().getLastTargetQuery(), 1);
-        assertRSQLQuery(
-                TargetFields.LASTCONTROLLERREQUESTAT.name() + "!=" + target.getTargetInfo().getLastTargetQuery(), 1);
-        assertRSQLQuery(
-                TargetFields.LASTCONTROLLERREQUESTAT.name() + "=lt=" + target.getTargetInfo().getLastTargetQuery(), 0);
-        assertRSQLQuery(
-                TargetFields.LASTCONTROLLERREQUESTAT.name() + "=lt=" + target2.getTargetInfo().getLastTargetQuery(), 1);
-        assertRSQLQuery(
-                TargetFields.LASTCONTROLLERREQUESTAT.name() + "=gt=" + target.getTargetInfo().getLastTargetQuery(), 1);
-        assertRSQLQuery(
-                TargetFields.LASTCONTROLLERREQUESTAT.name() + "=gt=" + target2.getTargetInfo().getLastTargetQuery(), 0);
+        assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "==" + target.getLastTargetQuery(), 1);
+        assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "!=" + target.getLastTargetQuery(), 1);
+        assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "=lt=" + target.getLastTargetQuery(), 0);
+        assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "=lt=" + target2.getLastTargetQuery(), 1);
+        assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "=gt=" + target.getLastTargetQuery(), 1);
+        assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "=gt=" + target2.getLastTargetQuery(), 0);
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long expcetedTargets) {
