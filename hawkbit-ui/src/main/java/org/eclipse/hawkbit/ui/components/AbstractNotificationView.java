@@ -77,6 +77,7 @@ public abstract class AbstractNotificationView extends VerticalLayout implements
         getDashboardMenuItem().setNotificationUnreadValue(viewUnreadNotifcations);
     }
 
+    @SuppressWarnings("squid:UnusedPrivateMethod")
     private boolean noEventMatch(final TenantAwareEvent tenantAwareEvent) {
         return !skipUiEventsCache.asMap().keySet().stream()
                 .anyMatch(uiEvent -> uiEvent.matchRemoteEvent(tenantAwareEvent));
