@@ -248,12 +248,12 @@ public final class SPUIDefinitions {
     /**
      * Style to highlight row in orange color.
      */
-    public static final String HIGHTLIGHT_ORANGE = "highlight-orange";
+    public static final String HIGHLIGHT_ORANGE = "highlight-orange";
 
     /**
      * Style to highlight row in green color.
      */
-    public static final String HIGHTLIGHT_GREEN = "highlight-green";
+    public static final String HIGHLIGHT_GREEN = "highlight-green";
 
     /**
      * The Combo box specific style for Distribution set.

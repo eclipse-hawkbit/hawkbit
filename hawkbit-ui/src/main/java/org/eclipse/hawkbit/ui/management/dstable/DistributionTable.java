@@ -546,10 +546,10 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         }
 
         if (distId.equals(installedDistItemIds)) {
-            return SPUIDefinitions.HIGHTLIGHT_GREEN;
+            return SPUIDefinitions.HIGHLIGHT_GREEN;
         }
         if (distId.equals(assignedDistTableItemIds)) {
-            return SPUIDefinitions.HIGHTLIGHT_ORANGE;
+            return SPUIDefinitions.HIGHLIGHT_ORANGE;
         }
 
         return null;
