@@ -221,11 +221,6 @@
          <artifactId>dbar-addon</artifactId>
       </dependency>
       <dependency>
-         <groupId>org.vaadin.addons</groupId>
-         <artifactId>contextmenu</artifactId>
-      </dependency>
-
-      <dependency>
          <groupId>com.github.gwtd3</groupId>
          <artifactId>gwt-d3-api</artifactId>
       </dependency>

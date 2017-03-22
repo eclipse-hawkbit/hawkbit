@@ -58,8 +58,8 @@
    org.slf4j:jul-to-slf4j:jar:1.7.22:compile
    org.slf4j:log4j-over-slf4j:jar:1.7.22:compile
    org.slf4j:slf4j-api:jar:1.7.22:compile
-   org.springframework.amqp:spring-amqp:jar:1.6.7.RELEASE:compile
-   org.springframework.amqp:spring-rabbit:jar:1.6.7.RELEASE:compile
+   org.springframework.amqp:spring-amqp:jar:1.6.8.RELEASE:compile
+   org.springframework.amqp:spring-rabbit:jar:1.6.8.RELEASE:compile
    org.springframework.boot:spring-boot-actuator:jar:1.4.5.RELEASE:compile
    org.springframework.boot:spring-boot-autoconfigure:jar:1.4.5.RELEASE:compile
    org.springframework.boot:spring-boot-starter-actuator:jar:1.4.5.RELEASE:compile
@@ -103,7 +103,6 @@
    org.springframework:spring-web:jar:4.3.7.RELEASE:compile
    org.springframework:spring-webmvc:jar:4.3.7.RELEASE:compile
    org.vaadin.addons.lazyquerycontainer:vaadin-lazyquerycontainer:jar:7.6.1.3:compile
-   org.vaadin.addons:contextmenu:jar:4.5:compile
    org.vaadin.addons:flexibleoptiongroup:jar:2.2.0:compile
    org.vaadin.addons:tokenfield:jar:7.0.1:compile
    org.vaadin.alump.distributionbar:dbar-addon:jar:2.0.0:compile
