@@ -29,11 +29,11 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleTiny;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -423,7 +423,6 @@ public class UploadConfirmationWindow implements Button.ClickListener {
                     errorLabel = icon;
                     errorLabelCount++;
                 }
-
             }
         }
         hideErrorIcon(warningLabel, errorLabelCount, duplicateCount, errorLabel, oldFileName, currentSwId);
@@ -435,6 +434,9 @@ public class UploadConfirmationWindow implements Button.ClickListener {
 
             final Optional<Artifact> artifactList = artifactManagement.findByFilenameAndSoftwareModule(oldFileName,
                     currentSwId);
+            if (errorLabel == null) {
+                return;
+            }
             errorLabel.removeStyleName(SPUIStyleDefinitions.ERROR_LABEL);
             errorLabel.setDescription(i18n.getMessage(ALREADY_EXISTS_MSG));
             if (!artifactList.isPresent()) {
