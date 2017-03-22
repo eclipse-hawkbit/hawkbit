@@ -25,7 +25,7 @@ https://hawkbit.eu-gb.mybluemix.net/UI/
 
 # Compile, Run and Getting Started
 
-We are not providing an off the shelf installation ready hawkBit update server. However, we recommend to check out the [Example Application](examples/hawkbit-example-app) for a runtime ready Spring Boot based update server that is empowered by hawkBit. In addition we have [guide](https://github.com/eclipse/hawkbit/wiki/Run-hawkBit) for setting up a complete landscape.
+We are not providing an off the shelf installation ready hawkBit update server. However, we recommend to check out the [Example Application](examples/hawkbit-example-app) for a runtime ready Spring Boot based update server that is empowered by hawkBit. In addition we have [guide](http://www.eclipse.org/hawkbit/documentation/guide/runhawkbit.html) for setting up a complete landscape.
 
 # API stability
 
@@ -43,10 +43,10 @@ $ git clone https://github.com/eclipse/hawkbit.git
 $ cd hawkbit
 $ mvn clean install
 ```
-#### Start hawkBit example app
-[Example Application](examples/hawkbit-example-app)
+#### Start hawkBit Update Server
+[Update Server](hawkbit-runtime/hawkbit-update-server)
 ```
-$ java -jar ./examples/hawkbit-example-app/target/hawkbit-example-app-#version#.jar
+$ java -jar ./hawkbit-runtime/hawkbit-update-server/target/hawkbit-update-server-#version#.jar
 ```
 #### Start hawkBit device simulator
 [Device Simulator](examples/hawkbit-device-simulator)
@@ -61,9 +61,17 @@ $ java -jar ./examples/hawkbit-example-mgmt-simulator/target/hawkbit-example-mgm
 
 # Releases and Roadmap
 
-* We are currently working on the first formal release under the Eclipse banner: 0.1 (see [Release 0.1 branch](https://github.com/eclipse/hawkbit/tree/release-train-0.1)).
-* The master branch contains future development towards 0.2. We are currently focusing on:
-  * Rollout Management for large scale rollouts.
+* In the upcoming release 0.2:
+  * Rollout management for large scale update campaigns.
   * Clustering capabilities for the update server.
-  * Upgrade of Spring Boot and Vaadin dependencies.
+  * Upgrade of Spring Boot and Vaadin dependencies (Boot 1.4, Vaadin 7.7).
+  * Improvements on modularization and customizability based on Spring's auto-configuration mechanism.
+  * Provide Spring Boot Starters for custom apps based on hawkBit.
+  * Provide standard runtime by means of Spring Boot based hawkBit update server (and hopefully a docker image).
   * And of course tons of usability improvements and bug fixes.
+* Future releases
+  * Complete repository refactoring.
+  * Integrate with Eclipse hono as DMF provider.
+  * Flexible DMF messaging infrastructure (e.g. with Spring Cloud Stream).
+  * Migrate to Spring Framework 5, Spring Boot 2 and Vaadin 8
+  * Re-evaluate JPA as persistence provider (e.g. look into jOOQ)
