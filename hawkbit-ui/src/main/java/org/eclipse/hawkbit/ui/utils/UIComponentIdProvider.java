@@ -66,28 +66,50 @@ public final class UIComponentIdProvider {
      */
     public static final String TARGET_FILTER_ADD_ICON_ID = "target.filter.add.id";
 
+    /**
+     * ID-Dist.
+     */
     public static final String DIST_TABLE_ID = "dist.tableId";
 
     public static final String DIST_ADD_CAPTION = "caption.add.dist";
 
     public static final String DIST_UPDATE_CAPTION = "caption.update.dist";
 
+    /**
+     * ID-Dist.Name.
+     */
     public static final String DIST_ADD_NAME = "dist.add.name";
-
+    /**
+     * ID-Dist.Version.
+     */
     public static final String DIST_ADD_VERSION = "dist.add.version";
-
+    /**
+     * ID-Dist.DistSetType.
+     */
     public static final String DIST_ADD_DISTSETTYPE = "dist.add.distsettype";
-
+    /**
+     * ID-Dist.desc.
+     */
     public static final String DIST_ADD_DESC = "dist.add.desc";
-
+    /**
+     * /** ID-Dist.DELETE.
+     */
     public static final String DIST_DELETE_ALL = "dist.delete.all";
-
+    /**
+     * ID-Dist.MigCheck.
+     */
     public static final String DIST_ADD_MIGRATION_CHECK = "dist.add.required.migration";
-
+    /**
+     * ID-Dist.Search.icon.
+     */
     public static final String DIST_SEARCH_ICON = "dist.search.rest.icon";
-
+    /**
+     * ID-Dist.Search.txt.
+     */
     public static final String DIST_SEARCH_TEXTFIELD = "dist.search.textfield";
-
+    /**
+     * ID - Dist.Add.
+     */
     public static final String DIST_ADD_ICON = "dist.add.icon";
     /**
      * ID for Distribution Tag ComboBox
@@ -973,12 +995,25 @@ public final class UIComponentIdProvider {
     public static final String DIST_SET_SELECT_CONS_WINDOW_ID = "distribution.set.select.consequences.window";
 
     public static final String DIST_SET_SELECT_ENABLE_ID = "distribution.set.select.enable";
-
+    /**
+     * Id of the unread notification button
+     */
     public static final String NOTIFICATION_UNREAD_ID = "notification.unread";
 
+    /**
+     * Id of the unread notification popup
+     */
     public static final String NOTIFICATION_UNREAD_POPUP_ID = "notification.unread.popup";
 
+    /**
+     * Id of the unread notification icon in the menu
+     */
     public static final String NOTIFICATION_MENU_ID = "notification.menu.";
+
+    /**
+     * Id of the rollout deletion confirmation window
+     */
+    public static final String ROLLOUT_DELETE_CONFIRMATION_DIALOG = "rollout.delete.confirmation.window";
 
     /**
      * /* Private Constructor.

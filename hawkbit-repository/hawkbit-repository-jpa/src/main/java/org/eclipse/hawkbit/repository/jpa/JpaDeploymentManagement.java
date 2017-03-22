@@ -560,33 +560,33 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     public List<Action> findActiveActionsByTarget(final String controllerId) {
-        throwExceptionIfTargetFoesNotExist(controllerId);
+        throwExceptionIfTargetDoesNotExist(controllerId);
 
         return actionRepository.findByActiveAndTarget(controllerId, true);
     }
 
     @Override
     public List<Action> findInActiveActionsByTarget(final String controllerId) {
-        throwExceptionIfTargetFoesNotExist(controllerId);
+        throwExceptionIfTargetDoesNotExist(controllerId);
 
         return actionRepository.findByActiveAndTarget(controllerId, false);
     }
 
     @Override
     public Long countActionsByTarget(final String controllerId) {
-        throwExceptionIfTargetFoesNotExist(controllerId);
+        throwExceptionIfTargetDoesNotExist(controllerId);
 
         return actionRepository.countByTargetControllerId(controllerId);
     }
 
     @Override
     public Long countActionsByTarget(final String rsqlParam, final String controllerId) {
-        throwExceptionIfTargetFoesNotExist(controllerId);
+        throwExceptionIfTargetDoesNotExist(controllerId);
 
         return actionRepository.count(createSpecificationFor(controllerId, rsqlParam));
     }
 
-    private void throwExceptionIfTargetFoesNotExist(final String controllerId) {
+    private void throwExceptionIfTargetDoesNotExist(final String controllerId) {
         if (!targetRepository.existsByControllerId(controllerId)) {
             throw new EntityNotFoundException(Target.class, controllerId);
         }
@@ -678,14 +678,14 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     public Optional<DistributionSet> getAssignedDistributionSet(final String controllerId) {
-        throwExceptionIfTargetFoesNotExist(controllerId);
+        throwExceptionIfTargetDoesNotExist(controllerId);
 
         return distributoinSetRepository.findAssignedToTarget(controllerId);
     }
 
     @Override
     public Optional<DistributionSet> getInstalledDistributionSet(final String controllerId) {
-        throwExceptionIfTargetFoesNotExist(controllerId);
+        throwExceptionIfTargetDoesNotExist(controllerId);
 
         return distributoinSetRepository.findInstalledAtTarget(controllerId);
     }
