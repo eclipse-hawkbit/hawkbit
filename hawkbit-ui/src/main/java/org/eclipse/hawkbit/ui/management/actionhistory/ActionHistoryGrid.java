@@ -392,13 +392,13 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
      * Pinning.
      */
     private void updateDistributionTableStyle() {
+        managementUIState.getDistributionTableFilters().getPinnedTarget().ifPresent((pinnedTarget) -> {
+            if (pinnedTarget.getTargetId().equals(selectedTarget.getId())) {
+                eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
+            }
+        });
         if (!managementUIState.getDistributionTableFilters().getPinnedTarget().isPresent()) {
             return;
-        }
-        final Long alreadyPinnedControllerId = managementUIState.getDistributionTableFilters().getPinnedTarget().get()
-                .getTargetId();
-        if (alreadyPinnedControllerId.equals(selectedTarget.getId())) {
-            eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
         }
     }
 
@@ -624,7 +624,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
          *            <code>String</code>
          */
         public HtmlIsActiveLabelConverter(final LabelAdapter<IsActiveDecoration> adapter) {
-            this.addAdapter(adapter);
+            addAdapter(adapter);
         }
 
         @Override
@@ -660,7 +660,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
          *            adapts <code>Action</code> to <code>String</code>
          */
         public HtmlVirtPropLabelConverter(final LabelAdapter<Action> adapter) {
-            this.addAdapter(adapter);
+            addAdapter(adapter);
         }
 
         @Override
@@ -682,7 +682,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
          *            adapts <code>Action</code> to <code>StatusFontIcon</code>
          */
         public ActionGridButtonConverter(final GridButtonAdapter<Action> adapter) {
-            this.addAdapter(adapter);
+            addAdapter(adapter);
         }
 
         @Override
