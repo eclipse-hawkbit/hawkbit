@@ -46,12 +46,12 @@ import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -121,10 +121,10 @@ public class RolloutListGrid extends AbstractGrid {
         statusIconMap.put(RolloutStatus.DELETING, new StatusFontIcon(null, SPUIStyleDefinitions.STATUS_SPINNER_RED));
     }
 
-    RolloutListGrid(final VaadinMessageSource i18n, final UIEventBus eventBus, final RolloutManagement rolloutManagement,
-            final UINotification uiNotification, final RolloutUIState rolloutUIState,
-            final SpPermissionChecker permissionChecker, final TargetManagement targetManagement,
-            final EntityFactory entityFactory, final UiProperties uiProperties,
+    RolloutListGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
+            final RolloutManagement rolloutManagement, final UINotification uiNotification,
+            final RolloutUIState rolloutUIState, final SpPermissionChecker permissionChecker,
+            final TargetManagement targetManagement, final EntityFactory entityFactory, final UiProperties uiProperties,
             final TargetFilterQueryManagement targetFilterQueryManagement) {
         super(i18n, eventBus, permissionChecker);
         this.rolloutManagement = rolloutManagement;
@@ -308,7 +308,8 @@ public class RolloutListGrid extends AbstractGrid {
         getColumn(DS_TYPE).setHeaderCaption(i18n.getMessage("header.type"));
         getColumn(SW_MODULES).setHeaderCaption(i18n.getMessage("header.swmodules"));
         getColumn(IS_REQUIRED_MIGRATION_STEP).setHeaderCaption(i18n.getMessage("header.migrations.step"));
-        getColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION).setHeaderCaption(i18n.getMessage("header.distributionset"));
+        getColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION)
+                .setHeaderCaption(i18n.getMessage("header.distributionset"));
         getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setHeaderCaption(i18n.getMessage("header.numberofgroups"));
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS).setHeaderCaption(i18n.getMessage("header.total.targets"));
         getColumn(SPUILabelDefinitions.VAR_CREATED_DATE).setHeaderCaption(i18n.getMessage("header.createdDate"));
@@ -515,8 +516,9 @@ public class RolloutListGrid extends AbstractGrid {
         }
 
         final String formattedConfirmationQuestion = getConfirmationQuestion(rollout.get());
-        final ConfirmationDialog confirmationDialog = new ConfirmationDialog(i18n.getMessage("caption.confirm.delete.rollout"),
-                formattedConfirmationQuestion, i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
+        final ConfirmationDialog confirmationDialog = new ConfirmationDialog(
+                i18n.getMessage("caption.confirm.delete.rollout"), formattedConfirmationQuestion,
+                i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
                     if (!ok) {
                         return;
                     }
@@ -524,7 +526,7 @@ public class RolloutListGrid extends AbstractGrid {
                     final String rolloutName = (String) row.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
                     rolloutManagement.deleteRollout(rolloutId);
                     uiNotification.displaySuccess(i18n.getMessage("message.rollout.deleted", rolloutName));
-                });
+                }, UIComponentIdProvider.ROLLOUT_DELETE_CONFIRMATION_DIALOG);
         UI.getCurrent().addWindow(confirmationDialog.getWindow());
         confirmationDialog.getWindow().bringToFront();
     }
