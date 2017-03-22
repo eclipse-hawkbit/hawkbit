@@ -43,6 +43,8 @@
       <module>hawkbit-test-report</module>
       <module>hawkbit-runtime</module>
       <module>hawkbit-starters</module>
+      <module>examples</module>
+      <module>extensions</module>
    </modules>
 
    <scm>
