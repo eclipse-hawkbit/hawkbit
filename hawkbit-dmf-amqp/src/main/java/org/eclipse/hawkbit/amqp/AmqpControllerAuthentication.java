@@ -117,19 +117,18 @@ public class AmqpControllerAuthentication {
     /**
      * Performs authentication with the security token.
      *
-     * @param secruityToken
+     * @param securityToken
      *            the authentication request object
      * @return the authentication object
      */
-    public Authentication doAuthenticate(final TenantSecurityToken secruityToken) {
-        resolveTenant(secruityToken);
-
+    public Authentication doAuthenticate(final TenantSecurityToken securityToken) {
+        resolveTenant(securityToken);
         PreAuthenticatedAuthenticationToken authentication = new PreAuthenticatedAuthenticationToken(null, null);
         for (final PreAuthentificationFilter filter : filterChain) {
-            final PreAuthenticatedAuthenticationToken authenticationRest = createAuthentication(filter, secruityToken);
+            final PreAuthenticatedAuthenticationToken authenticationRest = createAuthentication(filter, securityToken);
             if (authenticationRest != null) {
                 authentication = authenticationRest;
-                authentication.setDetails(new TenantAwareAuthenticationDetails(secruityToken.getTenant(), true));
+                authentication.setDetails(new TenantAwareAuthenticationDetails(securityToken.getTenant(), true));
                 break;
             }
         }

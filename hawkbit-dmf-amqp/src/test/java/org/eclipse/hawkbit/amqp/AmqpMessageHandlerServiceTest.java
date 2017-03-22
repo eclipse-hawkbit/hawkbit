@@ -277,10 +277,10 @@ public class AmqpMessageHandlerServiceTest {
     @Test
     @Description("Tests the update of an action of a target without a exist action id")
     public void updateActionStatusWithoutActionId() {
+        when(controllerManagementMock.findActionWithDetails(any())).thenReturn(Optional.empty());
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
-        final ActionUpdateStatus actionUpdateStatus = new ActionUpdateStatus();
-        actionUpdateStatus.setActionStatus(ActionStatus.DOWNLOAD);
+        final ActionUpdateStatus actionUpdateStatus = new ActionUpdateStatus(1L, ActionStatus.DOWNLOAD);
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(actionUpdateStatus,
                 messageProperties);
 
@@ -442,10 +442,8 @@ public class AmqpMessageHandlerServiceTest {
     }
 
     private ActionUpdateStatus createActionUpdateStatus(final ActionStatus status, final Long id) {
-        final ActionUpdateStatus actionUpdateStatus = new ActionUpdateStatus();
-        actionUpdateStatus.setActionId(id);
+        final ActionUpdateStatus actionUpdateStatus = new ActionUpdateStatus(id, status);
         actionUpdateStatus.setSoftwareModuleId(Long.valueOf(2));
-        actionUpdateStatus.setActionStatus(status);
         return actionUpdateStatus;
     }
 

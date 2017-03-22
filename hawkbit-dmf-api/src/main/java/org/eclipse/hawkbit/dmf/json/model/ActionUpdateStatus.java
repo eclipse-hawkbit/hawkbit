@@ -24,21 +24,24 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ActionUpdateStatus {
-    @JsonProperty(required = true)
-    private Long actionId;
+
+    private final Long actionId;
+    private final ActionStatus actionStatus;
+
     @JsonProperty
     private Long softwareModuleId;
-    @JsonProperty(required = true)
-    private ActionStatus actionStatus;
+
     @JsonProperty
     private List<String> message;
 
-    public Long getActionId() {
-        return actionId;
+    public ActionUpdateStatus(@JsonProperty(value = "actionId", required = true) Long actionId,
+            @JsonProperty(value = "actionStatus", required = true) ActionStatus actionStatus) {
+        this.actionId = actionId;
+        this.actionStatus = actionStatus;
     }
 
-    public void setActionId(final Long actionId) {
-        this.actionId = actionId;
+    public Long getActionId() {
+        return actionId;
     }
 
     public Long getSoftwareModuleId() {
@@ -51,10 +54,6 @@ public class ActionUpdateStatus {
 
     public ActionStatus getActionStatus() {
         return actionStatus;
-    }
-
-    public void setActionStatus(final ActionStatus actionStatus) {
-        this.actionStatus = actionStatus;
     }
 
     public List<String> getMessage() {
@@ -78,12 +77,12 @@ public class ActionUpdateStatus {
             return false;
         }
 
-        if (this.message == null) {
-            this.message = new ArrayList<>(messages);
+        if (message == null) {
+            message = new ArrayList<>(messages);
             return true;
         }
 
-        return this.message.addAll(messages);
+        return message.addAll(messages);
     }
 
 }

@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.HttpStatus;
@@ -96,7 +95,7 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
      *            the amqp message
      * @return the rpc message back to supplier.
      */
-    @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.authenticationReceiverQueue}", containerFactory = "listenerContainerFactory")
+    @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.authenticationReceiverQueue:authentication_receiver}", containerFactory = "listenerContainerFactory")
     public Message onAuthenticationRequest(final Message message) {
         checkContentTypeJson(message);
         final SecurityContext oldContext = SecurityContextHolder.getContext();
@@ -157,6 +156,11 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
 
     private Optional<org.eclipse.hawkbit.repository.model.Artifact> findArtifactByFileResource(
             final FileResource fileResource) {
+
+        if (fileResource == null) {
+            return Optional.empty();
+        }
+
         if (fileResource.getSha1() != null) {
             return artifactManagement.findFirstArtifactBySHA1(fileResource.getSha1());
         }
@@ -188,9 +192,7 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
 
     private Message handleAuthenticationMessage(final Message message) {
         final DownloadResponse authentificationResponse = new DownloadResponse();
-        final MessageProperties messageProperties = message.getMessageProperties();
         final TenantSecurityToken secruityToken = convertMessage(message, TenantSecurityToken.class);
-
         final FileResource fileResource = secruityToken.getFileResource();
         try {
             SecurityContextHolder.getContext().setAuthentication(authenticationManager.doAuthenticate(secruityToken));
@@ -228,7 +230,7 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
             authentificationResponse.setMessage(errorMessage);
         }
 
-        return getMessageConverter().toMessage(authentificationResponse, messageProperties);
+        return getMessageConverter().toMessage(authentificationResponse, message.getMessageProperties());
     }
 
 }

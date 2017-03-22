@@ -109,10 +109,10 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         LOG.debug("targetAssignDistributionSet retrieved for controller {}. I will forward it to DMF broker.",
                 assignedEvent.getControllerId());
 
-        targetManagement.findTargetByControllerID(assignedEvent.getControllerId()).ifPresent(target -> sendUpdateMessageToTarget(assignedEvent.getTenant(),
-                target,
-                assignedEvent.getActionId(), assignedEvent.getModules()));
-        
+        targetManagement.findTargetByControllerID(assignedEvent.getControllerId())
+                .ifPresent(target -> sendUpdateMessageToTarget(assignedEvent.getTenant(), target,
+                        assignedEvent.getActionId(), assignedEvent.getModules()));
+
     }
 
     void sendUpdateMessageToTarget(final String tenant, final Target target, final Long actionId,
@@ -165,7 +165,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         if (!IpUtil.isAmqpUri(address)) {
             return;
         }
-
         final Message message = getMessageConverter().toMessage(actionId,
                 createConnectorMessageProperties(tenant, controllerId, EventTopic.CANCEL_DOWNLOAD));
 
