@@ -43,13 +43,13 @@ import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.push.DistributionSetUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -89,8 +89,9 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     private boolean isDistPinned;
     private Button distributinPinnedBtn;
 
-    DistributionTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final SpPermissionChecker permissionChecker,
-            final UINotification notification, final ManagementUIState managementUIState,
+    DistributionTable(final UIEventBus eventBus, final VaadinMessageSource i18n,
+            final SpPermissionChecker permissionChecker, final UINotification notification,
+            final ManagementUIState managementUIState,
             final ManagementViewClientCriterion managementViewClientCriterion, final TargetManagement targetManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout,
             final DistributionSetManagement distributionSetManagement,
@@ -399,7 +400,8 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         if (!assignedTargets.isEmpty()) {
             assignTargetToDs(getItem(distItemId), assignedTargets);
         } else {
-            notification.displaySuccess(i18n.getMessage("message.no.targets.assiged.fortag", new Object[] { targetTagName }));
+            notification.displaySuccess(
+                    i18n.getMessage("message.no.targets.assiged.fortag", new Object[] { targetTagName }));
         }
     }
 
@@ -460,8 +462,8 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     private Boolean isNoTagButton(final String tagData, final String targetNoTagData) {
         if (tagData.equals(targetNoTagData)) {
-            notification.displayValidationError(
-                    i18n.getMessage("message.tag.cannot.be.assigned", new Object[] { i18n.getMessage("label.no.tag.assigned") }));
+            notification.displayValidationError(i18n.getMessage("message.tag.cannot.be.assigned",
+                    new Object[] { i18n.getMessage("label.no.tag.assigned") }));
             return true;
         }
         return false;
@@ -489,7 +491,8 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             final String distNameVersion) {
         String pendActionMsg = i18n.getMessage("message.target.assigned.pending");
         if (null == message) {
-            pendActionMsg = i18n.getMessage("message.dist.pending.action", new Object[] { controllerId, distNameVersion });
+            pendActionMsg = i18n.getMessage("message.dist.pending.action",
+                    new Object[] { controllerId, distNameVersion });
         }
         return pendActionMsg;
     }
@@ -528,7 +531,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         managementUIState.getDistributionTableFilters().getPinnedTarget().map(TargetIdName::getControllerId)
                 .ifPresent(controllerId -> {
 
-                    final Long installedDistId = deploymentManagement.getAssignedDistributionSet(controllerId)
+                    final Long installedDistId = deploymentManagement.getInstalledDistributionSet(controllerId)
                             .map(DistributionSet::getId).orElse(null);
                     final Long assignedDistId = deploymentManagement.getAssignedDistributionSet(controllerId)
                             .map(DistributionSet::getId).orElse(null);
