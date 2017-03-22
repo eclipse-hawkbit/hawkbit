@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.common.detailslayout;
 
-import java.util.Optional;
-
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
@@ -180,12 +178,12 @@ public abstract class AbstractSoftwareModuleDetails
     }
 
     protected boolean compareSoftwareModulesById(final SoftwareModule softwareModule,
-            final Optional<Long> selectedBaseSwModuleId) {
-        if (softwareModule == null || !selectedBaseSwModuleId.isPresent()) {
+            final Long selectedBaseSwModuleId) {
+        if (softwareModule == null) {
             return false;
         }
 
-        return softwareModule.getId().equals(selectedBaseSwModuleId.get());
+        return softwareModule.getId().equals(selectedBaseSwModuleId);
     }
 
     protected abstract boolean isSoftwareModuleSelected(SoftwareModule softwareModule);

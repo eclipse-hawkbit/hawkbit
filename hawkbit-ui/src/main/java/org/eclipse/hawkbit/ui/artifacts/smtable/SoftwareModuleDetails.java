@@ -55,7 +55,7 @@ public class SoftwareModuleDetails extends AbstractSoftwareModuleDetails {
 
     @Override
     protected boolean isSoftwareModuleSelected(final SoftwareModule softwareModule) {
-        return compareSoftwareModulesById(softwareModule, artifactUploadState.getSelectedBaseSwModuleId());
+        return compareSoftwareModulesById(softwareModule, artifactUploadState.getSelectedBaseSwModuleId().orElse(null));
     }
 
 }
