@@ -712,11 +712,11 @@ public class TargetTable extends AbstractTable<Target, Long> {
     private String getTargetTableStyle(final Long assignedDistributionSetId, final Long installedDistributionSetId) {
         return managementUIState.getTargetTableFilters().getPinnedDistId().map(distPinned -> {
             if (distPinned.equals(installedDistributionSetId)) {
-                return SPUIDefinitions.HIGHTLIGHT_GREEN;
+                return SPUIDefinitions.HIGHLIGHT_GREEN;
             }
 
             if (distPinned.equals(assignedDistributionSetId)) {
-                return SPUIDefinitions.HIGHTLIGHT_ORANGE;
+                return SPUIDefinitions.HIGHLIGHT_ORANGE;
             }
 
             return null;
