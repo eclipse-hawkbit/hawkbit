@@ -1,4 +1,4 @@
-# 3rd party dependencies for Release X.X.X
+# 3rd party dependencies for Release 0.2.0
 
 ## Eclipse CQs - Provided/compile
 
@@ -117,7 +117,7 @@
 
 ## Test and build dependencies
 
-Works with CQ:
+Works with CQ: [CQ13040](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13040)
 
 | Group ID  | Artifact ID  | Version  |
 |---|---|---|
