@@ -61,7 +61,7 @@ $ java -jar ./examples/hawkbit-example-mgmt-simulator/target/hawkbit-example-mgm
 
 # Releases and Roadmap
 
-* In the upcoming release 0.2:
+* In the upcoming release [0.2](https://github.com/eclipse/hawkbit/issues/390):
   * Rollout management for large scale update campaigns.
   * Clustering capabilities for the update server.
   * Upgrade of Spring Boot and Vaadin dependencies (Boot 1.4, Vaadin 7.7).
