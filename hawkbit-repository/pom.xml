@@ -27,7 +27,7 @@
    <modules>
       <module>hawkbit-repository-jpa</module>
       <module>hawkbit-repository-api</module>
-<!--       <module>hawkbit-repository-test</module> -->
+      <module>hawkbit-repository-test</module>
       <module>hawkbit-repository-core</module>
    </modules>
 
