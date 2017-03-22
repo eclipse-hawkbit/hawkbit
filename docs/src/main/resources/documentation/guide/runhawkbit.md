@@ -7,27 +7,25 @@ title: Run hawkBit
 
 # Run hawkBit
 
-In this guide we describe how to run a full featured hawkBit setup based on a production ready infrastructure. It is based on the _hawkBit_ example modules. We call these _examples_ as we expect that developers who intend to create a _hawkBit_ based IoT application on their own will create a custom [Spring Boot](http://projects.spring.io/spring-boot/) app based on _hawkBit_ as demonstrated with the [hawkBit example app](https://github.com/eclipse/hawkbit/tree/master/examples/hawkbit-example-app).
+In this guide we describe how to run a full featured hawkBit setup based on a production ready infrastructure. It is based on the _hawkBit_ example modules and update server.
 
-Note: the example app can in fact be run [stand alone](https://github.com/eclipse/hawkbit/tree/master/examples/hawkbit-example-app). However, only with an embedded H2, no [Device Management Federation API](../interfaces/dmf-api.html) and no artifact storage.
+Note: the update server can in fact be run [stand alone](https://github.com/eclipse/hawkbit/tree/master/hawkbit-runtime/hawkbit-update-server). However, only with an embedded H2, no [Device Management Federation API](../interfaces/dmf-api.html) and no artifact storage.
 
 This guide will focus on a complete setup that includes all _hawkBit_ features.
 
 # System Architecture
 This guide describes a target architecture that is more like one that you will expect in a production system.
 
-- hawkBit Update Server [example app](https://github.com/eclipse/hawkbit/tree/master/examples/hawkbit-example-app).
+- hawkBit [Update Server](https://github.com/eclipse/hawkbit/tree/master/hawkbit-runtime/hawkbit-update-server).
 - [MariaDB](https://mariadb.org) for the repository.
-- [MongoDB](https://www.mongodb.org) for artifact storage.
 - [RabbitMQ](https://www.rabbitmq.com) for DMF communication.
 - For testing and demonstration purposes we will also use:
  - [hawkBit Device Simulator](https://github.com/eclipse/hawkbit/tree/master/examples/hawkbit-device-simulator).
  - [hawkBit Management API example client](https://github.com/eclipse/hawkbit/tree/master/examples/hawkbit-mgmt-api-client).
 
 # Prerequisites
-
-- You have a MongoDB (>= 3.0), RabbitMQ and MariaDB/MySQL installed and running in your environment.
-- You have a working [hawkBit build](https://github.com/eclipse/hawkbit).
+- You have a working [hawkBit core build](https://github.com/eclipse/hawkbit).
+- You have a working [hawkBit examples build](https://github.com/eclipse/hawkbit/examples).
 
 # Steps
 
@@ -35,7 +33,7 @@ This guide describes a target architecture that is more like one that you will e
 
 As mentioned you can create your own application with _hawkBit_ inside or adapt the existing example app. The second option will be shown here.
 
-### Set MariaDB dependency to compile in the [example App POM](https://github.com/eclipse/hawkbit/blob/master/examples/hawkbit-example-app/pom.xml)
+### Set MariaDB dependency to compile in the [example App POM](https://github.com/eclipse/hawkbit/blob/master/hawkbit-runtime/hawkbit-update-server/pom.xml)
 {% highlight plaintext %}
 <dependency>
   <groupId>org.mariadb.jdbc</groupId>
@@ -44,7 +42,7 @@ As mentioned you can create your own application with _hawkBit_ inside or adapt 
 </dependency>
 {% endhighlight %}
 
-### Configure MariaDB/MySQL and MongoDB connection settings.
+### Configure MariaDB/MySQL connection settings.
 
 For this you can either edit the existing *application.properties* or create a [new profile](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-external-config-profile-specific-properties).
 
@@ -54,7 +52,6 @@ spring.datasource.url=jdbc:mysql://localhost:3306/YOUR_SCHEMA
 spring.datasource.username=YOUR_USER
 spring.datasource.password=YOUR_PWD
 spring.datasource.driverClassName=org.mariadb.jdbc.Driver
-spring.data.mongodb.uri=mongodb://localhost/hawkbitArtifactRepository
 {% endhighlight %}
 
 ### Configure RabbitMQ connection settings for update server and device simulator (optional).
@@ -87,7 +84,7 @@ hawkbit-example-mgmt-simulator-##VERSION##.jar --hawkbit.url=YOUR_HOST:PORT
 
 ### Compile & Run your _"production ready"_ app.
 
-see [example app](https://github.com/eclipse/hawkbit/tree/master/examples/hawkbit-example-app)
+see [update server](https://github.com/eclipse/hawkbit/tree/master/hawkbit-runtime/hawkbit-update-server)
 
 ### Compile & Run example scenario [creation script](https://github.com/eclipse/hawkbit/tree/master/examples/hawkbit-mgmt-api-client) (optional).
 

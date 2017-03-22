@@ -2,4 +2,4 @@ This is a set of [Spring Boot Starters](http://docs.spring.io/spring-boot/docs/c
 
 The [all in one](hawkbit-boot-starter) starter contains the complete feature set in addition we provide four starters for the hawkBit interfaces. They can be combined in any order.
 
-Check out the hawkBit [example application](../examples/hawkbit-example-app) as a reference.
+Check out the hawkBit [update server](../hawkbit-runtime/hawkbit-update-server) as a reference.
