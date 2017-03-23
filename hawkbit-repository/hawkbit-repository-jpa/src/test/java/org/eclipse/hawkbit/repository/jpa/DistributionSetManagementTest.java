@@ -65,153 +65,137 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     private static final String NOT_EXIST_ID = "1234";
 
     @Test
-    @Description("Verifies that management queries react as specfied on calls for non existing entities.")
+    @Description("Verifies that management get access react as specfied on calls for non existing entities by means "
+            + "of Optional not present.")
     @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 4) })
-    public void nonExistingEntityQueries() {
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void nonExistingEntityAccessReturnsNotPresent() {
         final DistributionSet set = testdataFactory.createDistributionSet();
-        final DistributionSetTag dsTag = testdataFactory.createDistributionSetTags(1).get(0);
-        final SoftwareModule module = testdataFactory.createSoftwareModuleApp();
-
-        assertThatThrownBy(() -> distributionSetManagement.assignMandatorySoftwareModuleTypes(NOT_EXIST_IDL,
-                Lists.newArrayList(osType.getId()))).isInstanceOf(EntityNotFoundException.class)
-                        .hasMessageContaining(NOT_EXIST_ID).hasMessageContaining("DistributionSetType");
-        assertThatThrownBy(() -> distributionSetManagement.assignMandatorySoftwareModuleTypes(
-                testdataFactory.findOrCreateDistributionSetType("xxx", "xxx").getId(),
-                Lists.newArrayList(NOT_EXIST_IDL))).isInstanceOf(EntityNotFoundException.class)
-                        .hasMessageContaining(NOT_EXIST_ID).hasMessageContaining("SoftwareModuleType");
-
-        assertThatThrownBy(() -> distributionSetManagement.assignOptionalSoftwareModuleTypes(1234L,
-                Lists.newArrayList(osType.getId()))).isInstanceOf(EntityNotFoundException.class)
-                        .hasMessageContaining(NOT_EXIST_ID).hasMessageContaining("DistributionSetType");
-        assertThatThrownBy(() -> distributionSetManagement.assignOptionalSoftwareModuleTypes(
-                testdataFactory.findOrCreateDistributionSetType("xxx", "xxx").getId(),
-                Lists.newArrayList(NOT_EXIST_IDL))).isInstanceOf(EntityNotFoundException.class)
-                        .hasMessageContaining(NOT_EXIST_ID).hasMessageContaining("SoftwareModuleType");
-
-        assertThatThrownBy(() -> distributionSetManagement.assignSoftwareModules(NOT_EXIST_IDL,
-                Lists.newArrayList(module.getId()))).isInstanceOf(EntityNotFoundException.class)
-                        .hasMessageContaining(NOT_EXIST_ID).hasMessageContaining("DistributionSet");
-        assertThatThrownBy(
-                () -> distributionSetManagement.assignSoftwareModules(set.getId(), Lists.newArrayList(NOT_EXIST_IDL)))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                        .hasMessageContaining("SoftwareModule");
-
-        assertThatThrownBy(() -> distributionSetManagement.unassignSoftwareModule(NOT_EXIST_IDL, module.getId()))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("DistributionSet");
-        assertThatThrownBy(() -> distributionSetManagement.unassignSoftwareModule(set.getId(), NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("SoftwareModule");
-
-        assertThatThrownBy(() -> distributionSetManagement.assignTag(Lists.newArrayList(set.getId()), NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("DistributionSetTag");
-
-        assertThatThrownBy(() -> distributionSetManagement.assignTag(Lists.newArrayList(NOT_EXIST_IDL), dsTag.getId()))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("DistributionSet");
-
-        assertThatThrownBy(
-                () -> distributionSetManagement.toggleTagAssignment(Lists.newArrayList(NOT_EXIST_IDL), dsTag.getName()))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                        .hasMessageContaining("DistributionSet");
-        assertThatThrownBy(
-                () -> distributionSetManagement.toggleTagAssignment(Lists.newArrayList(set.getId()), NOT_EXIST_ID))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                        .hasMessageContaining("DistributionSetTag");
-
-        assertThatThrownBy(() -> distributionSetManagement.unAssignAllDistributionSetsByTag(NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("DistributionSetTag");
-
-        assertThatThrownBy(() -> distributionSetManagement.unAssignTag(set.getId(), NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("DistributionSetTag");
-
-        assertThatThrownBy(() -> distributionSetManagement.unAssignTag(NOT_EXIST_IDL, dsTag.getId()))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("DistributionSet");
-
-        assertThatThrownBy(() -> distributionSetManagement.countDistributionSetsByType(NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("DistributionSet");
-
-        assertThatThrownBy(() -> distributionSetManagement
-                .createDistributionSet(entityFactory.distributionSet().create().name("xxx").type(NOT_EXIST_ID)))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                        .hasMessageContaining("DistributionSetType");
-
-        assertThatThrownBy(() -> distributionSetManagement.createDistributionSetMetadata(NOT_EXIST_IDL,
-                Lists.newArrayList(entityFactory.generateMetadata("123", "123"))))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                        .hasMessageContaining("DistributionSet");
-
-        assertThatThrownBy(() -> distributionSetManagement.deleteDistributionSet(Lists.newArrayList(NOT_EXIST_IDL)))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("DistributionSet");
-        assertThatThrownBy(() -> distributionSetManagement.deleteDistributionSet(NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("DistributionSet");
-        assertThatThrownBy(() -> distributionSetManagement.deleteDistributionSetMetadata(NOT_EXIST_IDL, "xxx"))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("DistributionSet");
-        assertThatThrownBy(() -> distributionSetManagement.deleteDistributionSetMetadata(set.getId(), NOT_EXIST_ID))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("DistributionSetMetadata");
-
-        assertThatThrownBy(() -> distributionSetManagement.deleteDistributionSetType(NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("DistributionSetType");
-
-        assertThatThrownBy(() -> distributionSetManagement.findDistributionSetByAction(NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("Action");
         assertThat(distributionSetManagement.findDistributionSetById(NOT_EXIST_IDL)).isNotPresent();
         assertThat(distributionSetManagement.findDistributionSetByIdWithDetails(NOT_EXIST_IDL)).isNotPresent();
         assertThat(distributionSetManagement.findDistributionSetByNameAndVersion(NOT_EXIST_ID, NOT_EXIST_ID))
                 .isNotPresent();
-
-        assertThatThrownBy(() -> distributionSetManagement.findDistributionSetMetadata(NOT_EXIST_IDL, "xxx"))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("DistributionSet");
         assertThat(distributionSetManagement.findDistributionSetMetadata(set.getId(), NOT_EXIST_ID)).isNotPresent();
-
-        assertThatThrownBy(
-                () -> distributionSetManagement.findDistributionSetMetadataByDistributionSetId(NOT_EXIST_IDL, pageReq))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                        .hasMessageContaining("DistributionSet");
-
-        assertThatThrownBy(() -> distributionSetManagement.findDistributionSetMetadataByDistributionSetId(NOT_EXIST_IDL,
-                "name==*", pageReq)).isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                        .hasMessageContaining("DistributionSet");
 
         assertThat(distributionSetManagement.findDistributionSetTypeById(NOT_EXIST_IDL)).isNotPresent();
         assertThat(distributionSetManagement.findDistributionSetTypeByKey(NOT_EXIST_ID)).isNotPresent();
         assertThat(distributionSetManagement.findDistributionSetTypeByName(NOT_EXIST_ID)).isNotPresent();
+    }
+
+    @Test
+    @Description("Verifies that management queries react as specfied on calls for non existing entities "
+            + " by means of throwing EntityNotFoundException.")
+    @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 4) })
+    public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
+        final DistributionSet set = testdataFactory.createDistributionSet();
+        final DistributionSetTag dsTag = testdataFactory.createDistributionSetTags(1).get(0);
+        final SoftwareModule module = testdataFactory.createSoftwareModuleApp();
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.assignMandatorySoftwareModuleTypes(NOT_EXIST_IDL,
+                Lists.newArrayList(osType.getId())), "DistributionSetType");
+        verifyThrownExceptionBy(() -> distributionSetManagement.assignMandatorySoftwareModuleTypes(
+                testdataFactory.findOrCreateDistributionSetType("xxx", "xxx").getId(),
+                Lists.newArrayList(NOT_EXIST_IDL)), "SoftwareModuleType");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.assignOptionalSoftwareModuleTypes(1234L,
+                Lists.newArrayList(osType.getId())), "DistributionSetType");
+        verifyThrownExceptionBy(() -> distributionSetManagement.assignOptionalSoftwareModuleTypes(
+                testdataFactory.findOrCreateDistributionSetType("xxx", "xxx").getId(),
+                Lists.newArrayList(NOT_EXIST_IDL)), "SoftwareModuleType");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.assignSoftwareModules(NOT_EXIST_IDL,
+                Lists.newArrayList(module.getId())), "DistributionSet");
+        verifyThrownExceptionBy(
+                () -> distributionSetManagement.assignSoftwareModules(set.getId(), Lists.newArrayList(NOT_EXIST_IDL)),
+                "SoftwareModule");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.unassignSoftwareModule(NOT_EXIST_IDL, module.getId()),
+                "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetManagement.unassignSoftwareModule(set.getId(), NOT_EXIST_IDL),
+                "SoftwareModule");
+
+        verifyThrownExceptionBy(
+                () -> distributionSetManagement.assignTag(Lists.newArrayList(set.getId()), NOT_EXIST_IDL),
+                "DistributionSetTag");
+
+        verifyThrownExceptionBy(
+                () -> distributionSetManagement.assignTag(Lists.newArrayList(NOT_EXIST_IDL), dsTag.getId()),
+                "DistributionSet");
+
+        verifyThrownExceptionBy(
+                () -> distributionSetManagement.toggleTagAssignment(Lists.newArrayList(NOT_EXIST_IDL), dsTag.getName()),
+                "DistributionSet");
+        verifyThrownExceptionBy(
+                () -> distributionSetManagement.toggleTagAssignment(Lists.newArrayList(set.getId()), NOT_EXIST_ID),
+                "DistributionSetTag");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.unAssignAllDistributionSetsByTag(NOT_EXIST_IDL),
+                "DistributionSetTag");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.unAssignTag(set.getId(), NOT_EXIST_IDL),
+                "DistributionSetTag");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.unAssignTag(NOT_EXIST_IDL, dsTag.getId()),
+                "DistributionSet");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.countDistributionSetsByType(NOT_EXIST_IDL),
+                "DistributionSet");
+
+        verifyThrownExceptionBy(
+                () -> distributionSetManagement
+                        .createDistributionSet(entityFactory.distributionSet().create().name("xxx").type(NOT_EXIST_ID)),
+                "DistributionSetType");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.createDistributionSetMetadata(NOT_EXIST_IDL,
+                Lists.newArrayList(entityFactory.generateMetadata("123", "123"))), "DistributionSet");
+
+        verifyThrownExceptionBy(
+                () -> distributionSetManagement.deleteDistributionSet(Lists.newArrayList(NOT_EXIST_IDL)),
+                "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetManagement.deleteDistributionSet(NOT_EXIST_IDL),
+                "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetManagement.deleteDistributionSetMetadata(NOT_EXIST_IDL, "xxx"),
+                "DistributionSet");
+        verifyThrownExceptionBy(
+                () -> distributionSetManagement.deleteDistributionSetMetadata(set.getId(), NOT_EXIST_ID),
+                "DistributionSetMetadata");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.deleteDistributionSetType(NOT_EXIST_IDL),
+                "DistributionSetType");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.findDistributionSetByAction(NOT_EXIST_IDL), "Action");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.findDistributionSetMetadata(NOT_EXIST_IDL, "xxx"),
+                "DistributionSet");
+
+        verifyThrownExceptionBy(
+                () -> distributionSetManagement.findDistributionSetMetadataByDistributionSetId(NOT_EXIST_IDL, pageReq),
+                "DistributionSet");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement
+                .findDistributionSetMetadataByDistributionSetId(NOT_EXIST_IDL, "name==*", pageReq), "DistributionSet");
 
         assertThatThrownBy(() -> distributionSetManagement.isDistributionSetInUse(NOT_EXIST_IDL))
                 .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("DistributionSet");
 
-        assertThatThrownBy(() -> distributionSetManagement
-                .updateDistributionSet(entityFactory.distributionSet().update(NOT_EXIST_IDL)))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                        .hasMessageContaining("DistributionSet");
+        verifyThrownExceptionBy(
+                () -> distributionSetManagement
+                        .updateDistributionSet(entityFactory.distributionSet().update(NOT_EXIST_IDL)),
+                "DistributionSet");
 
-        assertThatThrownBy(() -> distributionSetManagement.updateDistributionSetMetadata(NOT_EXIST_IDL,
-                entityFactory.generateMetadata("xxx", "xxx"))).isInstanceOf(EntityNotFoundException.class)
-                        .hasMessageContaining(NOT_EXIST_ID).hasMessageContaining("DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetManagement.updateDistributionSetMetadata(NOT_EXIST_IDL,
+                entityFactory.generateMetadata("xxx", "xxx")), "DistributionSet");
 
-        assertThatThrownBy(() -> distributionSetManagement.updateDistributionSetMetadata(set.getId(),
-                entityFactory.generateMetadata(NOT_EXIST_ID, "xxx"))).isInstanceOf(EntityNotFoundException.class)
-                        .hasMessageContaining(NOT_EXIST_ID).hasMessageContaining("DistributionSetMetadata");
+        verifyThrownExceptionBy(() -> distributionSetManagement.updateDistributionSetMetadata(set.getId(),
+                entityFactory.generateMetadata(NOT_EXIST_ID, "xxx")), "DistributionSetMetadata");
 
-        assertThatThrownBy(() -> distributionSetManagement
-                .updateDistributionSetType(entityFactory.distributionSetType().update(NOT_EXIST_IDL)))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                        .hasMessageContaining("DistributionSet");
+        verifyThrownExceptionBy(
+                () -> distributionSetManagement
+                        .updateDistributionSetType(entityFactory.distributionSetType().update(NOT_EXIST_IDL)),
+                "DistributionSet");
     }
 
     @Test

@@ -15,7 +15,10 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.assertj.core.api.Assertions;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
@@ -97,6 +100,11 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     protected List<Action> findActionsByRolloutAndStatus(final Rollout rollout, final Action.Status actionStatus) {
         return Lists.newArrayList(actionRepository.findByRolloutIdAndStatus(pageReq, rollout.getId(), actionStatus));
+    }
+
+    protected static void verifyThrownExceptionBy(final ThrowingCallable tc, final String objectType) {
+        Assertions.assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(tc)
+                .withMessageContaining(NOT_EXIST_ID).withMessageContaining(objectType);
     }
 
     protected TargetTagAssignmentResult toggleTagAssignment(final Collection<Target> targets, final TargetTag tag) {

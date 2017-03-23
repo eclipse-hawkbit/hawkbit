@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -23,8 +22,8 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -47,41 +46,42 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Target Filter Query Management")
 public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
 
-    private static final String NOT_EXIST_ID = "1234";
+    @Test
+    @Description("Verifies that management get access reacts as specfied on calls for non existing entities by means "
+            + "of Optional not present.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    public void nonExistingEntityAccessReturnsNotPresent() {
+        assertThat(targetFilterQueryManagement.findTargetFilterQueryById(NOT_EXIST_IDL)).isNotPresent();
+        assertThat(targetFilterQueryManagement.findTargetFilterQueryByName(NOT_EXIST_ID)).isNotPresent();
+    }
 
     @Test
-    @Description("Verifies that management queries react as specfied on calls for non existing entities.")
+    @Description("Verifies that management queries react as specfied on calls for non existing entities "
+            + " by means of throwing EntityNotFoundException.")
     @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
-    public void nonExistingEntityQueries() {
+    public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         final DistributionSet set = testdataFactory.createDistributionSet();
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.createTargetFilterQuery(
                 entityFactory.targetFilterQuery().create().name("test filter").query("name==PendingTargets001"));
 
-        assertThatThrownBy(() -> targetFilterQueryManagement.deleteTargetFilterQuery(NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("TargetFilterQuery");
+        verifyThrownExceptionBy(() -> targetFilterQueryManagement.deleteTargetFilterQuery(NOT_EXIST_IDL),
+                "TargetFilterQuery");
 
-        assertThatThrownBy(() -> targetFilterQueryManagement.findTargetFilterQueryByAutoAssignDS(pageReq, NOT_EXIST_IDL,
-                "name==*")).isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                        .hasMessageContaining("DistributionSet");
-        assertThat(targetFilterQueryManagement.findTargetFilterQueryById(NOT_EXIST_IDL)).isNotPresent();
-        assertThat(targetFilterQueryManagement.findTargetFilterQueryByName(NOT_EXIST_ID)).isNotPresent();
-        assertThatThrownBy(() -> targetFilterQueryManagement
-                .updateTargetFilterQuery(entityFactory.targetFilterQuery().update(NOT_EXIST_IDL)))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                        .hasMessageContaining("TargetFilterQuery");
-        assertThatThrownBy(() -> targetFilterQueryManagement
-                .updateTargetFilterQueryAutoAssignDS(targetFilterQuery.getId(), NOT_EXIST_IDL))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                        .hasMessageContaining("DistributionSet");
-        assertThatThrownBy(() -> targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(1234L, set.getId()))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("TargetFilterQuery");
-        assertThatThrownBy(() -> targetFilterQueryManagement
-                .updateTargetFilterQueryAutoAssignDS(targetFilterQuery.getId(), NOT_EXIST_IDL))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                        .hasMessageContaining("DistributionSet");
+        verifyThrownExceptionBy(() -> targetFilterQueryManagement.findTargetFilterQueryByAutoAssignDS(pageReq,
+                NOT_EXIST_IDL, "name==*"), "DistributionSet");
+
+        verifyThrownExceptionBy(
+                () -> targetFilterQueryManagement
+                        .updateTargetFilterQuery(entityFactory.targetFilterQuery().update(NOT_EXIST_IDL)),
+                "TargetFilterQuery");
+        verifyThrownExceptionBy(() -> targetFilterQueryManagement
+                .updateTargetFilterQueryAutoAssignDS(targetFilterQuery.getId(), NOT_EXIST_IDL), "DistributionSet");
+        verifyThrownExceptionBy(
+                () -> targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(1234L, set.getId()),
+                "TargetFilterQuery");
+        verifyThrownExceptionBy(() -> targetFilterQueryManagement
+                .updateTargetFilterQueryAutoAssignDS(targetFilterQuery.getId(), NOT_EXIST_IDL), "DistributionSet");
     }
 
     @Test

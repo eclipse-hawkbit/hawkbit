@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
 
 import java.util.ArrayList;
@@ -83,39 +82,42 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     private static final String NOT_EXIST_ID = "1234";
 
     @Test
-    @Description("Verifies that management queries react as specfied on calls for non existing entities.")
-    public void nonExistingEntityQueries() {
-        final Rollout createdRollout = testdataFactory.createRollout("xxx");
-
-        assertThatThrownBy(() -> rolloutManagement.deleteRollout(NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("Rollout");
-
+    @Description("Verifies that management get access reacts as specfied on calls for non existing entities by means "
+            + "of Optional not present.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    public void nonExistingEntityAccessReturnsNotPresent() {
         assertThat(rolloutManagement.findRolloutById(NOT_EXIST_IDL)).isNotPresent();
         assertThat(rolloutManagement.findRolloutByName(NOT_EXIST_ID)).isNotPresent();
         assertThat(rolloutManagement.findRolloutWithDetailedStatus(NOT_EXIST_IDL)).isNotPresent();
+    }
 
-        assertThatThrownBy(() -> rolloutManagement.getFinishedPercentForRunningGroup(NOT_EXIST_IDL, NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("Rollout");
-        assertThatThrownBy(
-                () -> rolloutManagement.getFinishedPercentForRunningGroup(createdRollout.getId(), NOT_EXIST_IDL))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                        .hasMessageContaining("RolloutGroup");
+    @Test
+    @Description("Verifies that management queries react as specfied on calls for non existing entities "
+            + " by means of throwing EntityNotFoundException.")
+    @ExpectEvents({ @Expect(type = RolloutDeletedEvent.class, count = 0),
+            @Expect(type = RolloutGroupCreatedEvent.class, count = 10),
+            @Expect(type = RolloutGroupUpdatedEvent.class, count = 20),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = RolloutUpdatedEvent.class, count = 1),
+            @Expect(type = TargetCreatedEvent.class, count = 10) })
+    public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
+        final Rollout createdRollout = testdataFactory.createRollout("xxx");
 
-        assertThatThrownBy(() -> rolloutManagement.pauseRollout(NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("Rollout");
-        assertThatThrownBy(() -> rolloutManagement.resumeRollout(NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("Rollout");
-        assertThatThrownBy(() -> rolloutManagement.startRollout(NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("Rollout");
+        verifyThrownExceptionBy(() -> rolloutManagement.deleteRollout(NOT_EXIST_IDL), "Rollout");
 
-        assertThatThrownBy(() -> rolloutManagement.updateRollout(entityFactory.rollout().update(NOT_EXIST_IDL)))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("Rollout");
+        verifyThrownExceptionBy(() -> rolloutManagement.getFinishedPercentForRunningGroup(NOT_EXIST_IDL, NOT_EXIST_IDL),
+                "Rollout");
+        verifyThrownExceptionBy(
+                () -> rolloutManagement.getFinishedPercentForRunningGroup(createdRollout.getId(), NOT_EXIST_IDL),
+                "RolloutGroup");
+
+        verifyThrownExceptionBy(() -> rolloutManagement.pauseRollout(NOT_EXIST_IDL), "Rollout");
+        verifyThrownExceptionBy(() -> rolloutManagement.resumeRollout(NOT_EXIST_IDL), "Rollout");
+        verifyThrownExceptionBy(() -> rolloutManagement.startRollout(NOT_EXIST_IDL), "Rollout");
+
+        verifyThrownExceptionBy(() -> rolloutManagement.updateRollout(entityFactory.rollout().update(NOT_EXIST_IDL)),
+                "Rollout");
     }
 
     @Test

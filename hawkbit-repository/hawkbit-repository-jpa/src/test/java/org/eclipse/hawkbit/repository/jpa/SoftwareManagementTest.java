@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -25,7 +24,6 @@ import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
@@ -59,93 +57,84 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Software Management")
 public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
 
-    private static final String NOT_EXIST_ID = "1234";
-
     @Test
-    @Description("Verifies that management queries react as specfied on calls for non existing entities.")
+    @Description("Verifies that management get access reacts as specfied on calls for non existing entities by means "
+            + "of Optional not present.")
     @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 1) })
-    public void nonExistingEntityQueries() {
+    public void nonExistingEntityAccessReturnsNotPresent() {
         final SoftwareModule module = testdataFactory.createSoftwareModuleApp();
 
-        assertThatThrownBy(() -> softwareManagement.createSoftwareModule(
-                Lists.newArrayList(entityFactory.softwareModule().create().name("xxx").type(NOT_EXIST_ID))))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                        .hasMessageContaining("SoftwareModuleType");
-        assertThatThrownBy(() -> softwareManagement
-                .createSoftwareModule(entityFactory.softwareModule().create().name("xxx").type(NOT_EXIST_ID)))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                        .hasMessageContaining("SoftwareModuleType");
-
-        assertThatThrownBy(() -> softwareManagement.createSoftwareModuleMetadata(NOT_EXIST_IDL,
-                entityFactory.generateMetadata("xxx", "xxx"))).isInstanceOf(EntityNotFoundException.class)
-                        .hasMessageContaining(NOT_EXIST_ID).hasMessageContaining("SoftwareModule");
-        assertThatThrownBy(() -> softwareManagement.createSoftwareModuleMetadata(NOT_EXIST_IDL,
-                Lists.newArrayList(entityFactory.generateMetadata("xxx", "xxx"))))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                        .hasMessageContaining("SoftwareModule");
-
-        assertThatThrownBy(() -> softwareManagement.deleteSoftwareModule(NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("SoftwareModule");
-        assertThatThrownBy(() -> softwareManagement.deleteSoftwareModules(Lists.newArrayList(NOT_EXIST_IDL)))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("SoftwareModule");
-        assertThatThrownBy(() -> softwareManagement.deleteSoftwareModuleMetadata(NOT_EXIST_IDL, "xxx"))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("SoftwareModule");
-        assertThatThrownBy(() -> softwareManagement.deleteSoftwareModuleMetadata(module.getId(), NOT_EXIST_ID))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("SoftwareModuleMetadata");
-
-        assertThatThrownBy(() -> softwareManagement.updateSoftwareModuleMetadata(NOT_EXIST_IDL,
-                entityFactory.generateMetadata("xxx", "xxx"))).isInstanceOf(EntityNotFoundException.class)
-                        .hasMessageContaining(NOT_EXIST_ID).hasMessageContaining("SoftwareModule");
-        assertThatThrownBy(() -> softwareManagement.updateSoftwareModuleMetadata(module.getId(),
-                entityFactory.generateMetadata(NOT_EXIST_ID, "xxx"))).isInstanceOf(EntityNotFoundException.class)
-                        .hasMessageContaining(NOT_EXIST_ID).hasMessageContaining("SoftwareModuleMetadata");
-
-        assertThatThrownBy(() -> softwareManagement.deleteSoftwareModuleType(NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("SoftwareModuleType");
-
-        assertThatThrownBy(() -> softwareManagement.findSoftwareModuleByAssignedTo(pageReq, NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("DistributionSet");
-
         assertThat(softwareManagement.findSoftwareModuleById(1234L)).isNotPresent();
-
-        assertThatThrownBy(() -> softwareManagement.findSoftwareModuleByNameAndVersion("xxx", "xxx", NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("SoftwareModuleType");
-        assertThat(softwareManagement.findSoftwareModuleByNameAndVersion(NOT_EXIST_ID, NOT_EXIST_ID, osType.getId()))
-                .isNotPresent();
-
-        assertThat(softwareManagement.findSoftwareModuleMetadata(module.getId(), NOT_EXIST_ID)).isNotPresent();
-        assertThatThrownBy(() -> softwareManagement.findSoftwareModuleMetadata(NOT_EXIST_IDL, NOT_EXIST_ID))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("SoftwareModule");
-
-        assertThatThrownBy(() -> softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("SoftwareModule");
-        assertThatThrownBy(() -> softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(NOT_EXIST_IDL,
-                "name==*", pageReq)).isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                        .hasMessageContaining("SoftwareModule");
-        assertThatThrownBy(() -> softwareManagement.findSoftwareModulesByType(pageReq, NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("SoftwareModule");
 
         assertThat(softwareManagement.findSoftwareModuleTypeById(NOT_EXIST_IDL)).isNotPresent();
         assertThat(softwareManagement.findSoftwareModuleTypeByKey(NOT_EXIST_ID)).isNotPresent();
         assertThat(softwareManagement.findSoftwareModuleTypeByName(NOT_EXIST_ID)).isNotPresent();
-        assertThatThrownBy(
-                () -> softwareManagement.updateSoftwareModule(entityFactory.softwareModule().update(NOT_EXIST_IDL)))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                        .hasMessageContaining("SoftwareModule");
-        assertThatThrownBy(
-                () -> softwareManagement.updateSoftwareModuleType(entityFactory.softwareModuleType().update(1234L)))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                        .hasMessageContaining("SoftwareModuleType");
+
+        assertThat(softwareManagement.findSoftwareModuleByNameAndVersion(NOT_EXIST_ID, NOT_EXIST_ID, osType.getId()))
+                .isNotPresent();
+
+        assertThat(softwareManagement.findSoftwareModuleMetadata(module.getId(), NOT_EXIST_ID)).isNotPresent();
+    }
+
+    @Test
+    @Description("Verifies that management queries react as specfied on calls for non existing entities "
+            + " by means of throwing EntityNotFoundException.")
+    @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 1) })
+    public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
+        final SoftwareModule module = testdataFactory.createSoftwareModuleApp();
+
+        verifyThrownExceptionBy(
+                () -> softwareManagement.createSoftwareModule(
+                        Lists.newArrayList(entityFactory.softwareModule().create().name("xxx").type(NOT_EXIST_ID))),
+                "SoftwareModuleType");
+        verifyThrownExceptionBy(
+                () -> softwareManagement
+                        .createSoftwareModule(entityFactory.softwareModule().create().name("xxx").type(NOT_EXIST_ID)),
+                "SoftwareModuleType");
+
+        verifyThrownExceptionBy(() -> softwareManagement.createSoftwareModuleMetadata(NOT_EXIST_IDL,
+                entityFactory.generateMetadata("xxx", "xxx")), "SoftwareModule");
+        verifyThrownExceptionBy(() -> softwareManagement.createSoftwareModuleMetadata(NOT_EXIST_IDL,
+                Lists.newArrayList(entityFactory.generateMetadata("xxx", "xxx"))), "SoftwareModule");
+
+        verifyThrownExceptionBy(() -> softwareManagement.deleteSoftwareModule(NOT_EXIST_IDL), "SoftwareModule");
+        verifyThrownExceptionBy(() -> softwareManagement.deleteSoftwareModules(Lists.newArrayList(NOT_EXIST_IDL)),
+                "SoftwareModule");
+        verifyThrownExceptionBy(() -> softwareManagement.deleteSoftwareModuleMetadata(NOT_EXIST_IDL, "xxx"),
+                "SoftwareModule");
+        verifyThrownExceptionBy(() -> softwareManagement.deleteSoftwareModuleMetadata(module.getId(), NOT_EXIST_ID),
+                "SoftwareModuleMetadata");
+
+        verifyThrownExceptionBy(() -> softwareManagement.updateSoftwareModuleMetadata(NOT_EXIST_IDL,
+                entityFactory.generateMetadata("xxx", "xxx")), "SoftwareModule");
+        verifyThrownExceptionBy(() -> softwareManagement.updateSoftwareModuleMetadata(module.getId(),
+                entityFactory.generateMetadata(NOT_EXIST_ID, "xxx")), "SoftwareModuleMetadata");
+
+        verifyThrownExceptionBy(() -> softwareManagement.deleteSoftwareModuleType(NOT_EXIST_IDL), "SoftwareModuleType");
+
+        verifyThrownExceptionBy(() -> softwareManagement.findSoftwareModuleByAssignedTo(pageReq, NOT_EXIST_IDL),
+                "DistributionSet");
+
+        verifyThrownExceptionBy(
+                () -> softwareManagement.findSoftwareModuleByNameAndVersion("xxx", "xxx", NOT_EXIST_IDL),
+                "SoftwareModuleType");
+
+        verifyThrownExceptionBy(() -> softwareManagement.findSoftwareModuleMetadata(NOT_EXIST_IDL, NOT_EXIST_ID),
+                "SoftwareModule");
+
+        verifyThrownExceptionBy(() -> softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(NOT_EXIST_IDL),
+                "SoftwareModule");
+        verifyThrownExceptionBy(() -> softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(NOT_EXIST_IDL,
+                "name==*", pageReq), "SoftwareModule");
+        verifyThrownExceptionBy(() -> softwareManagement.findSoftwareModulesByType(pageReq, NOT_EXIST_IDL),
+                "SoftwareModule");
+
+        verifyThrownExceptionBy(
+                () -> softwareManagement.updateSoftwareModule(entityFactory.softwareModule().update(NOT_EXIST_IDL)),
+                "SoftwareModule");
+        verifyThrownExceptionBy(
+                () -> softwareManagement.updateSoftwareModuleType(entityFactory.softwareModuleType().update(1234L)),
+                "SoftwareModuleType");
     }
 
     @Test

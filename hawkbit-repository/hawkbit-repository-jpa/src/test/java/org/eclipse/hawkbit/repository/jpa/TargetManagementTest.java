@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
@@ -33,7 +32,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -64,87 +62,73 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     private static final String NOT_EXIST_ID = "1234";
 
     @Test
-    @Description("Verifies that management queries react as specfied on calls for non existing entities.")
+    @Description("Verifies that management get access react as specfied on calls for non existing entities by means "
+            + "of Optional not present.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    public void nonExistingEntityAccessReturnsNotPresent() {
+        assertThat(targetManagement.findTargetByControllerID(NOT_EXIST_ID)).isNotPresent();
+        assertThat(targetManagement.findTargetById(NOT_EXIST_IDL)).isNotPresent();
+    }
+
+    @Test
+    @Description("Verifies that management queries react as specfied on calls for non existing entities "
+            + " by means of throwing EntityNotFoundException.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetTagCreatedEvent.class, count = 1) })
-    public void nonExistingEntityQueries() {
+    public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         final TargetTag tag = tagManagement.createTargetTag(entityFactory.tag().create().name("A"));
         final Target target = testdataFactory.createTarget();
 
-        assertThatThrownBy(
-                () -> targetManagement.assignTag(Lists.newArrayList(target.getControllerId()), NOT_EXIST_IDL))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                        .hasMessageContaining("TargetTag");
-        assertThatThrownBy(() -> targetManagement.assignTag(Lists.newArrayList(NOT_EXIST_ID), tag.getId()))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("Target");
+        verifyThrownExceptionBy(
+                () -> targetManagement.assignTag(Lists.newArrayList(target.getControllerId()), NOT_EXIST_IDL),
+                "TargetTag");
+        verifyThrownExceptionBy(() -> targetManagement.assignTag(Lists.newArrayList(NOT_EXIST_ID), tag.getId()),
+                "Target");
 
-        assertThatThrownBy(() -> targetManagement.countTargetByAssignedDistributionSet(NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("DistributionSet");
-        assertThatThrownBy(() -> targetManagement.countTargetByInstalledDistributionSet(NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("DistributionSet");
+        verifyThrownExceptionBy(() -> targetManagement.countTargetByAssignedDistributionSet(NOT_EXIST_IDL),
+                "DistributionSet");
+        verifyThrownExceptionBy(() -> targetManagement.countTargetByInstalledDistributionSet(NOT_EXIST_IDL),
+                "DistributionSet");
 
-        assertThatThrownBy(() -> targetManagement.countTargetByTargetFilterQuery(NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("TargetFilterQuery");
-        assertThatThrownBy(() -> targetManagement.countTargetsByTargetFilterQueryAndNonDS(NOT_EXIST_IDL, "name==*"))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("DistributionSet");
+        verifyThrownExceptionBy(() -> targetManagement.countTargetByTargetFilterQuery(NOT_EXIST_IDL),
+                "TargetFilterQuery");
+        verifyThrownExceptionBy(
+                () -> targetManagement.countTargetsByTargetFilterQueryAndNonDS(NOT_EXIST_IDL, "name==*"),
+                "DistributionSet");
 
-        assertThatThrownBy(() -> targetManagement.deleteTarget(NOT_EXIST_ID))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("Target");
-        assertThatThrownBy(() -> targetManagement.deleteTargets(Lists.newArrayList(NOT_EXIST_IDL)))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("Target");
+        verifyThrownExceptionBy(() -> targetManagement.deleteTarget(NOT_EXIST_ID), "Target");
+        verifyThrownExceptionBy(() -> targetManagement.deleteTargets(Lists.newArrayList(NOT_EXIST_IDL)), "Target");
 
-        assertThatThrownBy(
-                () -> targetManagement.findAllTargetsByTargetFilterQueryAndNonDS(pageReq, NOT_EXIST_IDL, "name==*"))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                        .hasMessageContaining("DistributionSet");
-        assertThatThrownBy(() -> targetManagement.findAllTargetsInRolloutGroupWithoutAction(pageReq, NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("RolloutGroup");
-        assertThatThrownBy(() -> targetManagement.findTargetByAssignedDistributionSet(NOT_EXIST_IDL, pageReq))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("DistributionSet");
-        assertThatThrownBy(
-                () -> targetManagement.findTargetByAssignedDistributionSet(NOT_EXIST_IDL, "name==*", pageReq))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                        .hasMessageContaining("DistributionSet");
-        assertThat(targetManagement.findTargetByControllerID(NOT_EXIST_ID)).isNotPresent();
-        assertThat(targetManagement.findTargetById(NOT_EXIST_IDL)).isNotPresent();
-        assertThatThrownBy(() -> targetManagement.findTargetByInstalledDistributionSet(NOT_EXIST_IDL, pageReq))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("DistributionSet");
-        assertThatThrownBy(
-                () -> targetManagement.findTargetByInstalledDistributionSet(NOT_EXIST_IDL, "name==*", pageReq))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                        .hasMessageContaining("DistributionSet");
+        verifyThrownExceptionBy(
+                () -> targetManagement.findAllTargetsByTargetFilterQueryAndNonDS(pageReq, NOT_EXIST_IDL, "name==*"),
+                "DistributionSet");
+        verifyThrownExceptionBy(
+                () -> targetManagement.findAllTargetsInRolloutGroupWithoutAction(pageReq, NOT_EXIST_IDL),
+                "RolloutGroup");
+        verifyThrownExceptionBy(() -> targetManagement.findTargetByAssignedDistributionSet(NOT_EXIST_IDL, pageReq),
+                "DistributionSet");
+        verifyThrownExceptionBy(
+                () -> targetManagement.findTargetByAssignedDistributionSet(NOT_EXIST_IDL, "name==*", pageReq),
+                "DistributionSet");
 
-        assertThatThrownBy(
-                () -> targetManagement.toggleTagAssignment(Lists.newArrayList(target.getControllerId()), NOT_EXIST_ID))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                        .hasMessageContaining("TargetTag");
-        assertThatThrownBy(() -> targetManagement.toggleTagAssignment(Lists.newArrayList(NOT_EXIST_ID), tag.getName()))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("Target");
+        verifyThrownExceptionBy(() -> targetManagement.findTargetByInstalledDistributionSet(NOT_EXIST_IDL, pageReq),
+                "DistributionSet");
+        verifyThrownExceptionBy(
+                () -> targetManagement.findTargetByInstalledDistributionSet(NOT_EXIST_IDL, "name==*", pageReq),
+                "DistributionSet");
 
-        assertThatThrownBy(() -> targetManagement.unAssignAllTargetsByTag(NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("TargetTag");
-        assertThatThrownBy(() -> targetManagement.unAssignTag(NOT_EXIST_ID, tag.getId()))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("Target");
-        assertThatThrownBy(() -> targetManagement.unAssignTag(target.getControllerId(), NOT_EXIST_IDL))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("TargetTag");
-        assertThatThrownBy(() -> targetManagement.updateTarget(entityFactory.target().update(NOT_EXIST_ID)))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
-                .hasMessageContaining("Target");
+        verifyThrownExceptionBy(
+                () -> targetManagement.toggleTagAssignment(Lists.newArrayList(target.getControllerId()), NOT_EXIST_ID),
+                "TargetTag");
+        verifyThrownExceptionBy(
+                () -> targetManagement.toggleTagAssignment(Lists.newArrayList(NOT_EXIST_ID), tag.getName()), "Target");
 
+        verifyThrownExceptionBy(() -> targetManagement.unAssignAllTargetsByTag(NOT_EXIST_IDL), "TargetTag");
+        verifyThrownExceptionBy(() -> targetManagement.unAssignTag(NOT_EXIST_ID, tag.getId()), "Target");
+        verifyThrownExceptionBy(() -> targetManagement.unAssignTag(target.getControllerId(), NOT_EXIST_IDL),
+                "TargetTag");
+        verifyThrownExceptionBy(() -> targetManagement.updateTarget(entityFactory.target().update(NOT_EXIST_ID)),
+                "Target");
     }
 
     @Test
