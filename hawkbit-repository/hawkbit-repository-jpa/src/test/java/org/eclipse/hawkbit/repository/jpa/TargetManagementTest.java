@@ -765,9 +765,8 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verify that the find all targets by ids method contains the entities that we are looking for")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 12) })
     public void verifyFindTargetAllById() {
-        final List<Long> searchIds = org.assertj.core.util.Lists.newArrayList(
-                testdataFactory.createTarget("target-4").getId(), testdataFactory.createTarget("target-5").getId(),
-                testdataFactory.createTarget("target-6").getId());
+        final List<Long> searchIds = Lists.newArrayList(testdataFactory.createTarget("target-4").getId(),
+                testdataFactory.createTarget("target-5").getId(), testdataFactory.createTarget("target-6").getId());
         for (int i = 0; i < 9; i++) {
             testdataFactory.createTarget("test" + i);
         }
