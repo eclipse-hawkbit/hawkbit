@@ -20,11 +20,16 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.repository.test.matcher.Expect;
+import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -40,6 +45,44 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Target Filter Query Management")
 public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
+
+    @Test
+    @Description("Verifies that management get access reacts as specfied on calls for non existing entities by means "
+            + "of Optional not present.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    public void nonExistingEntityAccessReturnsNotPresent() {
+        assertThat(targetFilterQueryManagement.findTargetFilterQueryById(NOT_EXIST_IDL)).isNotPresent();
+        assertThat(targetFilterQueryManagement.findTargetFilterQueryByName(NOT_EXIST_ID)).isNotPresent();
+    }
+
+    @Test
+    @Description("Verifies that management queries react as specfied on calls for non existing entities "
+            + " by means of throwing EntityNotFoundException.")
+    @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
+        final DistributionSet set = testdataFactory.createDistributionSet();
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.createTargetFilterQuery(
+                entityFactory.targetFilterQuery().create().name("test filter").query("name==PendingTargets001"));
+
+        verifyThrownExceptionBy(() -> targetFilterQueryManagement.deleteTargetFilterQuery(NOT_EXIST_IDL),
+                "TargetFilterQuery");
+
+        verifyThrownExceptionBy(() -> targetFilterQueryManagement.findTargetFilterQueryByAutoAssignDS(pageReq,
+                NOT_EXIST_IDL, "name==*"), "DistributionSet");
+
+        verifyThrownExceptionBy(
+                () -> targetFilterQueryManagement
+                        .updateTargetFilterQuery(entityFactory.targetFilterQuery().update(NOT_EXIST_IDL)),
+                "TargetFilterQuery");
+        verifyThrownExceptionBy(() -> targetFilterQueryManagement
+                .updateTargetFilterQueryAutoAssignDS(targetFilterQuery.getId(), NOT_EXIST_IDL), "DistributionSet");
+        verifyThrownExceptionBy(
+                () -> targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(1234L, set.getId()),
+                "TargetFilterQuery");
+        verifyThrownExceptionBy(() -> targetFilterQueryManagement
+                .updateTargetFilterQueryAutoAssignDS(targetFilterQuery.getId(), NOT_EXIST_IDL), "DistributionSet");
+    }
 
     @Test
     @Description("Test creation of target filter query.")
