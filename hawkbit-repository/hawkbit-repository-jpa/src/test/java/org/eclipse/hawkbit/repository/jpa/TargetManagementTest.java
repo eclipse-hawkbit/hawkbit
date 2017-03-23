@@ -59,8 +59,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Target Management")
 public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
-    private static final String NOT_EXIST_ID = "1234";
-
     @Test
     @Description("Verifies that management get access react as specfied on calls for non existing entities by means "
             + "of Optional not present.")

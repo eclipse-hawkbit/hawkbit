@@ -77,10 +77,6 @@ import ru.yandex.qatools.allure.annotations.Title;
 @Features("Component Tests - Repository")
 @Stories("Rollout Management")
 public class RolloutManagementTest extends AbstractJpaIntegrationTest {
-
-    private static final long NOT_EXIST_IDL = 1234L;
-    private static final String NOT_EXIST_ID = "1234";
-
     @Test
     @Description("Verifies that management get access reacts as specfied on calls for non existing entities by means "
             + "of Optional not present.")

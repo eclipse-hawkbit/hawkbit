@@ -60,10 +60,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("DistributionSet Management")
 public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
-
-    private static final long NOT_EXIST_IDL = 1234L;
-    private static final String NOT_EXIST_ID = "1234";
-
     @Test
     @Description("Verifies that management get access react as specfied on calls for non existing entities by means "
             + "of Optional not present.")

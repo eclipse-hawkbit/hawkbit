@@ -82,7 +82,6 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
         verifyThrownExceptionBy(() -> artifactManagement.findByFilenameAndSoftwareModule("xxx", NOT_EXIST_IDL),
                 "SoftwareModule");
-
     }
 
     @Test
