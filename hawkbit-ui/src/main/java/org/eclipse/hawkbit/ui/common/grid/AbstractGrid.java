@@ -543,7 +543,7 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
          * Selects the first row if available and enabled.
          */
         public void selectFirstRow() {
-            if (getSelectionModel() instanceof SelectionModel.None) {
+            if (!isSingleSelectionModel()) {
                 return;
             }
 
@@ -557,19 +557,21 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
             }
         }
 
+        private boolean isSingleSelectionModel() {
+            return getSelectionModel() instanceof SelectionModel.Single;
+        }
+
         /**
          * Clears the selection.
          */
         public void clearSelection() {
+            if (!isSingleSelectionModel()) {
+                return;
+            }
             getSingleSelectionModel().select(null);
         }
 
-        /**
-         * Offers type-save access to the single selection model.
-         *
-         * @return SelectionModel.Single of the grid.
-         */
-        protected SelectionModel.Single getSingleSelectionModel() {
+        private SelectionModel.Single getSingleSelectionModel() {
             return (SelectionModel.Single) getSelectionModel();
         }
     }
