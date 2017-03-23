@@ -111,6 +111,7 @@
       <!-- Incompatible changes in 2.2 -->
       <json-path.version>2.0.0</json-path.version>
       <jetty.version>9.3.14.v20161028</jetty.version>
+      <spring-amqp.version>1.7.1.RELEASE</spring-amqp.version>
       <!-- Spring boot version overrides - END -->
 
       <!-- Vaadin versions - START -->
@@ -713,8 +714,20 @@
             <artifactId>mariadb-java-client</artifactId>
             <version>${mariadb-java-client.version}</version>
             <scope>test</scope>
-         </dependency>
-         <dependency>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.amqp</groupId>
+            <artifactId>spring-rabbit-junit</artifactId>
+            <version>${spring-amqp.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.amqp</groupId>
+            <artifactId>spring-rabbit-test</artifactId>
+            <version>${spring-amqp.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>${guava.version}</version>

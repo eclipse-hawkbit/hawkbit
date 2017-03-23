@@ -9,12 +9,14 @@
 package org.eclipse.hawkbit.amqp;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import org.eclipse.hawkbit.dmf.json.model.ActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.ActionUpdateStatus;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.test.matcher.Expect;
+import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,6 +26,7 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConversionException;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -49,57 +52,68 @@ public class BaseAmqpServiceTest {
     @Test
     @Description("Verify that the message conversion works")
     public void convertMessageTest() {
-        final ActionUpdateStatus actionUpdateStatus = new ActionUpdateStatus();
-        actionUpdateStatus.setActionId(1L);
-        actionUpdateStatus.setSoftwareModuleId(2L);
-        actionUpdateStatus.addMessage("Message 1");
-        actionUpdateStatus.addMessage("Message 2");
+        final ActionUpdateStatus actionUpdateStatus = createActionStatus();
 
         final Message message = rabbitTemplate.getMessageConverter().toMessage(actionUpdateStatus,
-                new MessageProperties());
-        ActionUpdateStatus convertedActionUpdateStatus = baseAmqpService.convertMessage(message,
+                createJsonProperties());
+        final ActionUpdateStatus convertedActionUpdateStatus = baseAmqpService.convertMessage(message,
                 ActionUpdateStatus.class);
 
-        assertThat(convertedActionUpdateStatus).as("Converted Action Status is wrong")
-                .isEqualToComparingFieldByField(actionUpdateStatus);
+        assertThat(convertedActionUpdateStatus).isEqualToComparingFieldByField(actionUpdateStatus);
 
-        convertedActionUpdateStatus = baseAmqpService.convertMessage(null, ActionUpdateStatus.class);
-        assertThat(convertedActionUpdateStatus).as("Converted Object should be null when message is null").isNull();
-
-        convertedActionUpdateStatus = baseAmqpService.convertMessage(new Message(null, new MessageProperties()),
-                ActionUpdateStatus.class);
-        assertThat(convertedActionUpdateStatus).as("Converted Object should be null when message body is null")
-                .isNull();
     }
 
     @Test
-    @Description("Verify that a conversion of a list from a message works")
-    public void convertMessageListTest() {
-        final List<ActionUpdateStatus> actionUpdateStatusList = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            final ActionUpdateStatus actionUpdateStatus = new ActionUpdateStatus();
-            actionUpdateStatus.setActionId(Long.valueOf(i));
-            actionUpdateStatus.setSoftwareModuleId(Long.valueOf(i));
-            actionUpdateStatusList.add(actionUpdateStatus);
+    @Description("Tests invalid null message content")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    public void convertMessageWithNullContent() {
+        try {
+            baseAmqpService.convertMessage(new Message(null, createJsonProperties()), ActionUpdateStatus.class);
+            fail("Expected MessageConversionException for inavlid JSON");
+        } catch (final MessageConversionException e) {
+            // expected
         }
 
-        final Message message = rabbitTemplate.getMessageConverter().toMessage(actionUpdateStatusList,
-                new MessageProperties());
-        List<ActionUpdateStatus> convertedActionUpdateStatus = baseAmqpService.convertMessageList(message,
-                ActionUpdateStatus.class);
+    }
 
-        assertThat(convertedActionUpdateStatus).as("Converted Action Status list is wrong")
-                .hasSameClassAs(actionUpdateStatusList);
-        assertThat(convertedActionUpdateStatus).as("Converted Action Status list is wrong")
-                .hasSameSizeAs(actionUpdateStatusList);
+    @Test
+    @Description("Tests invalid empty message content")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    public void updateActionStatusWithEmptyContent() {
+        try {
+            baseAmqpService.convertMessage(new Message("".getBytes(), createJsonProperties()),
+                    ActionUpdateStatus.class);
+            fail("Expected MessageConversionException for inavlid JSON");
+        } catch (final MessageConversionException e) {
+            // expected
+        }
+    }
 
-        convertedActionUpdateStatus = baseAmqpService.convertMessageList(null, ActionUpdateStatus.class);
-        assertThat(convertedActionUpdateStatus).as("Converted list should be empty when message is null").isEmpty();
+    private MessageProperties createJsonProperties() {
+        final MessageProperties messageProperties = new MessageProperties();
+        messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON);
+        return messageProperties;
+    }
 
-        convertedActionUpdateStatus = baseAmqpService.convertMessageList(new Message(null, new MessageProperties()),
-                ActionUpdateStatus.class);
-        assertThat(convertedActionUpdateStatus).as("Converted list should be empty when message body is null")
-                .isEmpty();
+    @Test
+    @Description("Tests invalid json message content")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    public void updateActionStatusWithInvalidJsonContent() {
+        try {
+            baseAmqpService.convertMessage(new Message("Invalid Json".getBytes(), createJsonProperties()),
+                    ActionUpdateStatus.class);
+            fail("Expected MessageConversionException for inavlid JSON");
+        } catch (final MessageConversionException e) {
+            // expected
+        }
+    }
+
+    private ActionUpdateStatus createActionStatus() {
+        final ActionUpdateStatus actionUpdateStatus = new ActionUpdateStatus(1L, ActionStatus.RUNNING);
+        actionUpdateStatus.setSoftwareModuleId(2L);
+        actionUpdateStatus.addMessage("Message 1");
+        actionUpdateStatus.addMessage("Message 2");
+        return actionUpdateStatus;
     }
 
 }
