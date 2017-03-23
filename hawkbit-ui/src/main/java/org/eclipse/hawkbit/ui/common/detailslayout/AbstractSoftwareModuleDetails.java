@@ -77,13 +77,13 @@ public abstract class AbstractSoftwareModuleDetails
     void onEvent(final MetadataEvent event) {
         UI.getCurrent().access(() -> {
             final MetaData softwareModuleMetadata = event.getMetaData();
-            if (softwareModuleMetadata != null && isSoftwareModuleSelected(event.getModule())) {
-                if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.CREATE_SOFTWARE_MODULE_METADATA) {
-                    swmMetadataTable.createMetadata(event.getMetaData().getKey());
-                } else if (event
-                        .getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.DELETE_SOFTWARE_MODULE_METADATA) {
-                    swmMetadataTable.deleteMetadata(event.getMetaData().getKey());
-                }
+            if (softwareModuleMetadata == null || !isSoftwareModuleSelected(event.getModule())) {
+                return;
+            }
+            if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.CREATE_SOFTWARE_MODULE_METADATA) {
+                swmMetadataTable.createMetadata(event.getMetaData().getKey());
+            } else if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.DELETE_SOFTWARE_MODULE_METADATA) {
+                swmMetadataTable.deleteMetadata(event.getMetaData().getKey());
             }
         });
     }

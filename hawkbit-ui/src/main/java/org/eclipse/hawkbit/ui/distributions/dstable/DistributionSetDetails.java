@@ -189,7 +189,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
             }
 
             /*
-             * If software mocule type is firmware, means single software can be
+             * If software module type is firmware, means single software can be
              * assigned to that type. Hence if multiple softwares belongs to
              * same type is dropped, then override with previous one.
              */
@@ -278,7 +278,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
     }
 
     @Override
-    protected void addTabs(final TabSheet detailsTab) {
+    protected final void addTabs(final TabSheet detailsTab) {
         super.addTabs(detailsTab);
         detailsTab.addTab(tfqDetailsTable, getI18n().getMessage("caption.auto.assignment.ds"), null);
     }

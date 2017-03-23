@@ -86,7 +86,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
     }
 
     @Override
-    protected void addTabs(final TabSheet detailsTab) {
+    protected final void addTabs(final TabSheet detailsTab) {
         detailsTab.addTab(getDetailsLayout(), getI18n().getMessage("caption.tab.details"), null);
         detailsTab.addTab(getDescriptionLayout(), getI18n().getMessage("caption.tab.description"), null);
         detailsTab.addTab(getAttributesLayout(), getI18n().getMessage("caption.attributes.tab"), null);
@@ -94,7 +94,6 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         detailsTab.addTab(createInstalledDistLayout(), getI18n().getMessage("header.target.installed"), null);
         detailsTab.addTab(getTagsLayout(), getI18n().getMessage("caption.tags.tab"), null);
         detailsTab.addTab(getLogLayout(), getI18n().getMessage("caption.logs.tab"), null);
-
     }
 
     private Component createInstalledDistLayout() {
