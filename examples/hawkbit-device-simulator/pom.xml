@@ -104,6 +104,14 @@
          <artifactId>guava</artifactId>
       </dependency>
       <dependency>
+         <groupId>io.github.openfeign</groupId>
+         <artifactId>feign-jackson</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>io.github.openfeign</groupId>
+         <artifactId>feign-core</artifactId>
+      </dependency>
+      <dependency>
          <groupId>com.jayway.jsonpath</groupId>
          <artifactId>json-path</artifactId>
       </dependency>
