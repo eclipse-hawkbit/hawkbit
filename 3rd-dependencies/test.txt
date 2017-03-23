@@ -25,7 +25,6 @@
    org.mariadb.jdbc:mariadb-java-client:jar:1.5.7:test
    org.mockito:mockito-core:jar:1.10.19:test
    org.objenesis:objenesis:jar:2.1:test
-   org.objenesis:objenesis:jar:2.5.1:test
    org.ow2.asm:asm-commons:jar:5.0.3:test
    org.ow2.asm:asm-tree:jar:5.0.3:test
    org.ow2.asm:asm-util:jar:5.0.3:test

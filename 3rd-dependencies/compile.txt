@@ -10,8 +10,8 @@
    com.github.gwtd3:gwt-d3-js:jar:sources:3.5.11:compile
    com.google.guava:guava:jar:19.0:compile
    com.h2database:h2:jar:1.4.186:compile
-   com.rabbitmq:amqp-client:jar:3.6.5:compile
-   com.rabbitmq:http-client:jar:1.0.0.RELEASE:compile
+   com.rabbitmq:amqp-client:jar:4.0.2:compile
+   com.rabbitmq:http-client:jar:1.1.1.RELEASE:compile
    com.vaadin.external.atmosphere:atmosphere-runtime:jar:2.2.9.vaadin2:compile
    com.vaadin.external.flute:flute:jar:1.3.0.gg2:compile
    com.vaadin.external.gwt:gwt-elemental:jar:2.7.0.vaadin4:compile
@@ -58,8 +58,8 @@
    org.slf4j:jul-to-slf4j:jar:1.7.22:compile
    org.slf4j:log4j-over-slf4j:jar:1.7.22:compile
    org.slf4j:slf4j-api:jar:1.7.22:compile
-   org.springframework.amqp:spring-amqp:jar:1.6.8.RELEASE:compile
-   org.springframework.amqp:spring-rabbit:jar:1.6.8.RELEASE:compile
+   org.springframework.amqp:spring-amqp:jar:1.7.1.RELEASE:compile
+   org.springframework.amqp:spring-rabbit:jar:1.7.1.RELEASE:compile
    org.springframework.boot:spring-boot-actuator:jar:1.4.5.RELEASE:compile
    org.springframework.boot:spring-boot-autoconfigure:jar:1.4.5.RELEASE:compile
    org.springframework.boot:spring-boot-starter-actuator:jar:1.4.5.RELEASE:compile
