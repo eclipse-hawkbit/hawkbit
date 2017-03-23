@@ -27,6 +27,5 @@ ALTER TABLE sp_target
 
 ALTER TABLE sp_target_info DROP CONSTRAINT fk_targ_stat_targ;
 ALTER TABLE sp_target_info DROP INDEX sp_idx_target_info_02;
-CREATE INDEX sp_idx_target_05 ON sp_target (tenant,address);
 
 DROP TABLE sp_target_info;

@@ -12,7 +12,6 @@ SET t.install_date = i.install_date, t.address = i.address,t.last_target_query =
 	t.installed_distribution_set = i.installed_distribution_set;
 
 ALTER TABLE sp_target_info DROP INDEX sp_idx_target_info_02;
-CREATE INDEX sp_idx_target_05 ON sp_target (tenant,address);
 
 ALTER TABLE sp_target_attributes DROP FOREIGN KEY fk_targ_attrib_target;
 ALTER TABLE sp_target_attributes 
