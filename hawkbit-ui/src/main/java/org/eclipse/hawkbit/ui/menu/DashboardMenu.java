@@ -25,15 +25,14 @@ import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.menu.DashboardEvent.PostViewChangeEvent;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
 import com.vaadin.server.ThemeResource;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
@@ -43,7 +42,6 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.MenuBar;
@@ -82,8 +80,9 @@ public final class DashboardMenu extends CustomComponent {
     private boolean accessibleViewsEmpty;
 
     @Autowired
-    DashboardMenu(final VaadinMessageSource i18n, final UiProperties uiProperties, final HawkbitServerProperties serverProperties,
-            final PermissionService permissionService, final List<DashboardMenuItem> dashboardVaadinViews) {
+    DashboardMenu(final VaadinMessageSource i18n, final UiProperties uiProperties,
+            final HawkbitServerProperties serverProperties, final PermissionService permissionService,
+            final List<DashboardMenuItem> dashboardVaadinViews) {
         this.i18n = i18n;
         this.uiProperties = uiProperties;
         this.serverProperties = serverProperties;
@@ -109,7 +108,6 @@ public final class DashboardMenu extends CustomComponent {
         final VerticalLayout dashboardMenuLayout = new VerticalLayout();
         dashboardMenuLayout.setSizeFull();
         final VerticalLayout menuContent = getMenuLayout();
-        menuContent.addComponent(buildTitle());
         menuContent.addComponent(buildUserMenu());
         menuContent.addComponent(buildToggleButton());
 
@@ -135,15 +133,6 @@ public final class DashboardMenu extends CustomComponent {
         menuContent.setWidth(null);
         menuContent.setHeight("100%");
         return menuContent;
-    }
-
-    private Component buildTitle() {
-        final Label logo = new Label("<strong>" + i18n.getMessage("menu.title") + "</strong>", ContentMode.HTML);
-        logo.setSizeUndefined();
-        final HorizontalLayout logoWrapper = new HorizontalLayout(logo);
-        logoWrapper.setComponentAlignment(logo, Alignment.TOP_CENTER);
-        logoWrapper.addStyleName("valo-menu-title");
-        return logoWrapper;
     }
 
     private VerticalLayout buildLinksAndVersion() {
@@ -174,8 +163,8 @@ public final class DashboardMenu extends CustomComponent {
 
         if (!uiProperties.getLinks().getSupport().isEmpty()) {
             final Link supportLink = SPUIComponentProvider.getLink(UIComponentIdProvider.LINK_SUPPORT,
-                    i18n.getMessage("link.support.name"), uiProperties.getLinks().getSupport(), FontAwesome.ENVELOPE_O, "",
-                    linkStyle);
+                    i18n.getMessage("link.support.name"), uiProperties.getLinks().getSupport(), FontAwesome.ENVELOPE_O,
+                    "", linkStyle);
             supportLink.setDescription(i18n.getMessage("link.support.name"));
             supportLink.setSizeFull();
             links.addComponent(supportLink);

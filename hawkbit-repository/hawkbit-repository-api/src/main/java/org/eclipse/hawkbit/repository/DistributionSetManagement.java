@@ -255,7 +255,7 @@ public interface DistributionSetManagement {
      *             if given set does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    void deleteDistributionSetMetadata(@NotNull final Long dsId, @NotNull final String key);
+    void deleteDistributionSetMetadata(@NotNull final Long dsId, @NotEmpty final String key);
 
     /**
      * Deletes or mark as delete in case the type is in use.
@@ -517,7 +517,10 @@ public interface DistributionSetManagement {
      *            of the {@link DistributionSet}
      * @param key
      *            of the meta data element
-     * @return the found DistributionSetMetadata or {@code null} if not exits
+     * @return the found DistributionSetMetadata
+     * 
+     * @throws EntityNotFoundException
+     *             is set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Optional<DistributionSetMetadata> findDistributionSetMetadata(@NotNull Long setId, @NotEmpty String key);

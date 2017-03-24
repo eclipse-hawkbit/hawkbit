@@ -14,43 +14,61 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
-import org.eclipse.hawkbit.ui.common.grid.AbstractGridLayout;
+import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
+import org.eclipse.hawkbit.ui.common.grid.AbstractGridComponentLayout;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.ui.Label;
+import com.vaadin.ui.AbstractOrderedLayout;
 
 /**
  * Rollout list view.
  */
-public class RolloutListView extends AbstractGridLayout {
-
+public class RolloutListView extends AbstractGridComponentLayout {
     private static final long serialVersionUID = -2703552177439393208L;
+
+    private final transient RolloutManagement rolloutManagement;
+    private final transient TargetManagement targetManagement;
+    private final transient EntityFactory entityFactory;
+    private final transient TargetFilterQueryManagement targetFilterQueryManagement;
+
+    private final SpPermissionChecker permissionChecker;
+    private final RolloutUIState rolloutUIState;
+    private final UINotification uiNotification;
+    private final UiProperties uiProperties;
+
 
     public RolloutListView(final SpPermissionChecker permissionChecker, final RolloutUIState rolloutUIState,
             final UIEventBus eventBus, final RolloutManagement rolloutManagement,
             final TargetManagement targetManagement, final UINotification uiNotification,
             final UiProperties uiProperties, final EntityFactory entityFactory, final VaadinMessageSource i18n,
             final TargetFilterQueryManagement targetFilterQueryManagement) {
-        super(new RolloutListHeader(permissionChecker, rolloutUIState, eventBus, rolloutManagement, targetManagement,
-                uiNotification, uiProperties, entityFactory, i18n, targetFilterQueryManagement),
-                new RolloutListGrid(i18n, eventBus, rolloutManagement, uiNotification, rolloutUIState,
-                        permissionChecker, targetManagement, entityFactory, uiProperties, targetFilterQueryManagement));
+        super(i18n, eventBus);
+        this.permissionChecker = permissionChecker;
+        this.rolloutUIState = rolloutUIState;
+        this.rolloutManagement = rolloutManagement;
+        this.targetManagement = targetManagement;
+        this.uiNotification = uiNotification;
+        this.uiProperties = uiProperties;
+        this.entityFactory = entityFactory;
+        this.targetFilterQueryManagement = targetFilterQueryManagement;
 
-        buildLayout();
+        init();
     }
 
     @Override
-    protected boolean hasCountMessage() {
-        return false;
+    public AbstractOrderedLayout createGridHeader() {
+        return new RolloutListHeader(permissionChecker, rolloutUIState, eventBus, rolloutManagement, targetManagement,
+                uiNotification, uiProperties, entityFactory, i18n, targetFilterQueryManagement);
     }
 
     @Override
-    protected Label getCountMessageLabel() {
-
-        return null;
+    public AbstractGrid<LazyQueryContainer> createGrid() {
+        return new RolloutListGrid(i18n, eventBus, rolloutManagement, uiNotification, rolloutUIState, permissionChecker,
+                targetManagement, entityFactory, uiProperties, targetFilterQueryManagement);
     }
 
 }

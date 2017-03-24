@@ -645,7 +645,7 @@
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>org.eclipse.persistence.jpa</artifactId>
             <version>${eclipselink.version}</version>
-         </dependency>         
+         </dependency>
 
         <!-- Protostuff Io -->
       <dependency>

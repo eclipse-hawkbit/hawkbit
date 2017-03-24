@@ -96,7 +96,7 @@ public final class MgmtRestConstants {
     /**
      * The tag URL mapping rest resource.
      */
-    public static final String TARGET_TAG_TAGERTS_REQUEST_MAPPING = "/{targetTagId}/targets";
+    public static final String TARGET_TAG_TARGETS_REQUEST_MAPPING = "/{targetTagId}/targets";
 
     /**
      * The tag URL mapping rest resource.

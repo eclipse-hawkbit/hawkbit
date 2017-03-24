@@ -286,6 +286,9 @@ public interface SoftwareManagement {
      * @param key
      *            of the meta data element
      * @return the found SoftwareModuleMetadata or {@code null} if not exits
+     * 
+     * @throws EntityNotFoundException
+     *             is module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Optional<SoftwareModuleMetadata> findSoftwareModuleMetadata(@NotNull Long moduleId, @NotEmpty String key);
@@ -441,7 +444,7 @@ public interface SoftwareManagement {
      *         {@link SoftwareModuleType#getName()}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Optional<SoftwareModuleType> findSoftwareModuleTypeByName(@NotNull String name);
+    Optional<SoftwareModuleType> findSoftwareModuleTypeByName(@NotEmpty String name);
 
     /**
      * @param pageable

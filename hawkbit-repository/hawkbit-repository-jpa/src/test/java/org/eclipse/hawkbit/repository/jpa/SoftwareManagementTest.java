@@ -22,6 +22,7 @@ import javax.validation.ConstraintViolationException;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -38,6 +39,8 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.test.matcher.Expect;
+import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
@@ -53,6 +56,86 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Software Management")
 public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
+
+    @Test
+    @Description("Verifies that management get access reacts as specfied on calls for non existing entities by means "
+            + "of Optional not present.")
+    @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 1) })
+    public void nonExistingEntityAccessReturnsNotPresent() {
+        final SoftwareModule module = testdataFactory.createSoftwareModuleApp();
+
+        assertThat(softwareManagement.findSoftwareModuleById(1234L)).isNotPresent();
+
+        assertThat(softwareManagement.findSoftwareModuleTypeById(NOT_EXIST_IDL)).isNotPresent();
+        assertThat(softwareManagement.findSoftwareModuleTypeByKey(NOT_EXIST_ID)).isNotPresent();
+        assertThat(softwareManagement.findSoftwareModuleTypeByName(NOT_EXIST_ID)).isNotPresent();
+
+        assertThat(softwareManagement.findSoftwareModuleByNameAndVersion(NOT_EXIST_ID, NOT_EXIST_ID, osType.getId()))
+                .isNotPresent();
+
+        assertThat(softwareManagement.findSoftwareModuleMetadata(module.getId(), NOT_EXIST_ID)).isNotPresent();
+    }
+
+    @Test
+    @Description("Verifies that management queries react as specfied on calls for non existing entities "
+            + " by means of throwing EntityNotFoundException.")
+    @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 1) })
+    public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
+        final SoftwareModule module = testdataFactory.createSoftwareModuleApp();
+
+        verifyThrownExceptionBy(
+                () -> softwareManagement.createSoftwareModule(
+                        Lists.newArrayList(entityFactory.softwareModule().create().name("xxx").type(NOT_EXIST_ID))),
+                "SoftwareModuleType");
+        verifyThrownExceptionBy(
+                () -> softwareManagement
+                        .createSoftwareModule(entityFactory.softwareModule().create().name("xxx").type(NOT_EXIST_ID)),
+                "SoftwareModuleType");
+
+        verifyThrownExceptionBy(() -> softwareManagement.createSoftwareModuleMetadata(NOT_EXIST_IDL,
+                entityFactory.generateMetadata("xxx", "xxx")), "SoftwareModule");
+        verifyThrownExceptionBy(() -> softwareManagement.createSoftwareModuleMetadata(NOT_EXIST_IDL,
+                Lists.newArrayList(entityFactory.generateMetadata("xxx", "xxx"))), "SoftwareModule");
+
+        verifyThrownExceptionBy(() -> softwareManagement.deleteSoftwareModule(NOT_EXIST_IDL), "SoftwareModule");
+        verifyThrownExceptionBy(() -> softwareManagement.deleteSoftwareModules(Lists.newArrayList(NOT_EXIST_IDL)),
+                "SoftwareModule");
+        verifyThrownExceptionBy(() -> softwareManagement.deleteSoftwareModuleMetadata(NOT_EXIST_IDL, "xxx"),
+                "SoftwareModule");
+        verifyThrownExceptionBy(() -> softwareManagement.deleteSoftwareModuleMetadata(module.getId(), NOT_EXIST_ID),
+                "SoftwareModuleMetadata");
+
+        verifyThrownExceptionBy(() -> softwareManagement.updateSoftwareModuleMetadata(NOT_EXIST_IDL,
+                entityFactory.generateMetadata("xxx", "xxx")), "SoftwareModule");
+        verifyThrownExceptionBy(() -> softwareManagement.updateSoftwareModuleMetadata(module.getId(),
+                entityFactory.generateMetadata(NOT_EXIST_ID, "xxx")), "SoftwareModuleMetadata");
+
+        verifyThrownExceptionBy(() -> softwareManagement.deleteSoftwareModuleType(NOT_EXIST_IDL), "SoftwareModuleType");
+
+        verifyThrownExceptionBy(() -> softwareManagement.findSoftwareModuleByAssignedTo(pageReq, NOT_EXIST_IDL),
+                "DistributionSet");
+
+        verifyThrownExceptionBy(
+                () -> softwareManagement.findSoftwareModuleByNameAndVersion("xxx", "xxx", NOT_EXIST_IDL),
+                "SoftwareModuleType");
+
+        verifyThrownExceptionBy(() -> softwareManagement.findSoftwareModuleMetadata(NOT_EXIST_IDL, NOT_EXIST_ID),
+                "SoftwareModule");
+
+        verifyThrownExceptionBy(() -> softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(NOT_EXIST_IDL),
+                "SoftwareModule");
+        verifyThrownExceptionBy(() -> softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(NOT_EXIST_IDL,
+                "name==*", pageReq), "SoftwareModule");
+        verifyThrownExceptionBy(() -> softwareManagement.findSoftwareModulesByType(pageReq, NOT_EXIST_IDL),
+                "SoftwareModule");
+
+        verifyThrownExceptionBy(
+                () -> softwareManagement.updateSoftwareModule(entityFactory.softwareModule().update(NOT_EXIST_IDL)),
+                "SoftwareModule");
+        verifyThrownExceptionBy(
+                () -> softwareManagement.updateSoftwareModuleType(entityFactory.softwareModuleType().update(1234L)),
+                "SoftwareModuleType");
+    }
 
     @Test
     @Description("Calling update without changing fields results in no recorded change in the repository including unchanged audit fields.")

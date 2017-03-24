@@ -17,6 +17,7 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -58,12 +59,13 @@ public interface DeploymentManagement {
      *            the IDs of the target to assign the distribution set
      * @return the assignment result
      *
-     * @throw IncompleteDistributionSetException if mandatory
-     *        {@link SoftwareModuleType} are not assigned as define by the
-     *        {@link DistributionSetType}.
-     * 
-     * @throw {@link EntityNotFoundException} if either provided
-     *        {@link DistributionSet} or {@link Target}s do not exist
+     * @throws IncompleteDistributionSetException
+     *             if mandatory {@link SoftwareModuleType} are not assigned as
+     *             define by the {@link DistributionSetType}.
+     *
+     * @throws EntityNotFoundException
+     *             if either provided {@link DistributionSet} or {@link Target}s
+     *             do not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     DistributionSetAssignmentResult assignDistributionSet(@NotNull Long dsID, @NotNull ActionType actionType,
@@ -79,12 +81,13 @@ public interface DeploymentManagement {
      *            a list of all targets and their action type
      * @return the assignment result
      *
-     * @throw IncompleteDistributionSetException if mandatory
-     *        {@link SoftwareModuleType} are not assigned as define by the
-     *        {@link DistributionSetType}.
-     * 
-     * @throw {@link EntityNotFoundException} if either provided
-     *        {@link DistributionSet} or {@link Target}s do not exist
+     * @throws IncompleteDistributionSetException
+     *             if mandatory {@link SoftwareModuleType} are not assigned as
+     *             define by the {@link DistributionSetType}.
+     *
+     * @throws EntityNotFoundException
+     *             if either provided {@link DistributionSet} or {@link Target}s
+     *             do not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     DistributionSetAssignmentResult assignDistributionSet(@NotNull Long dsID,
@@ -102,12 +105,13 @@ public interface DeploymentManagement {
      *            an optional message for the action status
      * @return the assignment result
      *
-     * @throw IncompleteDistributionSetException if mandatory
-     *        {@link SoftwareModuleType} are not assigned as define by the
-     *        {@link DistributionSetType}.
-     * 
-     * @throw {@link EntityNotFoundException} if either provided
-     *        {@link DistributionSet} or {@link Target}s do not exist
+     * @throws IncompleteDistributionSetException
+     *             if mandatory {@link SoftwareModuleType} are not assigned as
+     *             define by the {@link DistributionSetType}.
+     *
+     * @throws EntityNotFoundException
+     *             if either provided {@link DistributionSet} or {@link Target}s
+     *             do not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     DistributionSetAssignmentResult assignDistributionSet(@NotNull Long dsID,
@@ -141,7 +145,7 @@ public interface DeploymentManagement {
      * @param controllerId
      *            the target associated to the actions to count
      * @return the count value of found actions associated to the target
-     * 
+     *
      * @throws RSQLParameterUnsupportedFieldException
      *             if a field in the RSQL string is used but not provided by the
      *             given {@code fieldNameProvider}
@@ -210,6 +214,9 @@ public interface DeploymentManagement {
      *            in the result
      * @return a list of {@link Action} which are assigned to a specific
      *         {@link DistributionSet}
+     * 
+     * @throws EntityNotFoundException
+     *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Slice<Action> findActionsByDistributionSet(@NotNull Pageable pageable, @NotNull Long distributionSetId);
@@ -284,12 +291,28 @@ public interface DeploymentManagement {
     Page<ActionStatus> findActionStatusByActionWithMessages(@NotNull Pageable pageable, @NotNull Long actionId);
 
     /**
+     * Retrieves all messages for an {@link ActionStatus}.
+     *
+     *
+     * @param pageable
+     *            the page request parameter for paging and sorting the result
+     * @param actionStatusId
+     *            the id of {@link ActionStatus} to retrieve the messages from
+     * @return a page of messages by a specific {@link ActionStatus} id
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Page<String> findMessagesByActionStatusId(@NotNull Pageable pageable, @NotNull Long actionStatusId);
+
+    /**
      * Retrieves all {@link Action}s of a specific target ordered by action ID.
      *
      * @param controllerId
      *            the target associated with the actions
      * @return a list of actions associated with the given target ordered by
      *         action ID
+     *
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     List<ActionWithStatusCount> findActionsWithStatusCountByTargetOrderByIdDesc(@NotNull String controllerId);
@@ -382,7 +405,7 @@ public interface DeploymentManagement {
 
     /**
      * All {@link ActionStatus} entries in the repository.
-     * 
+     *
      * @param pageable
      *            the pagination parameter
      * @return {@link Page} of {@link ActionStatus} entries

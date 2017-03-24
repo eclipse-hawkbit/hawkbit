@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -29,7 +32,8 @@ import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
-import org.junit.Before;
+import org.eclipse.hawkbit.repository.test.matcher.Expect;
+import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.Test;
 
 import com.google.common.collect.Lists;
@@ -46,9 +50,30 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Tag Management")
 public class TagManagementTest extends AbstractJpaIntegrationTest {
 
-    @Before
-    public void setup() {
-        assertThat(targetTagRepository.findAll()).as("Not tags should be available").isEmpty();
+    @Test
+    @Description("Verifies that management get access reacts as specfied on calls for non existing entities by means "
+            + "of Optional not present.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    public void nonExistingEntityAccessReturnsNotPresent() {
+        assertThat(tagManagement.findDistributionSetTag(NOT_EXIST_ID)).isNotPresent();
+        assertThat(tagManagement.findDistributionSetTagById(NOT_EXIST_IDL)).isNotPresent();
+        assertThat(tagManagement.findTargetTag(NOT_EXIST_ID)).isNotPresent();
+        assertThat(tagManagement.findTargetTagById(NOT_EXIST_IDL)).isNotPresent();
+    }
+
+    @Test
+    @Description("Verifies that management queries react as specfied on calls for non existing entities "
+            + " by means of throwing EntityNotFoundException.")
+    @ExpectEvents({ @Expect(type = DistributionSetTagUpdateEvent.class, count = 0),
+            @Expect(type = TargetTagUpdateEvent.class, count = 0) })
+    public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
+        verifyThrownExceptionBy(() -> tagManagement.deleteDistributionSetTag(NOT_EXIST_ID), "DistributionSetTag");
+        verifyThrownExceptionBy(() -> tagManagement.deleteTargetTag(NOT_EXIST_ID), "TargetTag");
+
+        verifyThrownExceptionBy(() -> tagManagement.updateDistributionSetTag(entityFactory.tag().update(NOT_EXIST_IDL)),
+                "DistributionSetTag");
+        verifyThrownExceptionBy(() -> tagManagement.updateTargetTag(entityFactory.tag().update(NOT_EXIST_IDL)),
+                "TargetTag");
     }
 
     @Test

@@ -24,24 +24,27 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
-import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.model.ActionWithStatusCount;
+import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.model.TargetWithActionType;
+import org.eclipse.hawkbit.repository.test.matcher.Expect;
+import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +52,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort.Direction;
 
 import com.google.common.collect.Iterables;
@@ -67,7 +71,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Deployment Management")
 public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
-
     private EventHandlerStub eventHandlerStub;
 
     private CancelEventHandlerStub cancelEventHandlerStub;
@@ -82,6 +85,49 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         cancelEventHandlerStub = new CancelEventHandlerStub();
         applicationContext.addApplicationListener(cancelEventHandlerStub);
+    }
+
+    @Test
+    @Description("Verifies that management get access react as specfied on calls for non existing entities by means "
+            + "of Optional not present.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    public void nonExistingEntityAccessReturnsNotPresent() {
+        assertThat(deploymentManagement.findAction(1234L)).isNotPresent();
+        assertThat(deploymentManagement.findActionWithDetails(NOT_EXIST_IDL)).isNotPresent();
+    }
+
+    @Test
+    @Description("Verifies that management queries react as specfied on calls for non existing entities "
+            + " by means of throwing EntityNotFoundException.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
+    public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
+        final Target target = testdataFactory.createTarget();
+
+        verifyThrownExceptionBy(() -> deploymentManagement.assignDistributionSet(NOT_EXIST_IDL,
+                Lists.newArrayList(new TargetWithActionType(target.getControllerId()))), "DistributionSet");
+        verifyThrownExceptionBy(
+                () -> deploymentManagement.assignDistributionSet(NOT_EXIST_IDL,
+                        Lists.newArrayList(new TargetWithActionType(target.getControllerId())), "xxx"),
+                "DistributionSet");
+        verifyThrownExceptionBy(() -> deploymentManagement.assignDistributionSet(NOT_EXIST_IDL, ActionType.FORCED,
+                System.currentTimeMillis(), Lists.newArrayList(target.getControllerId())), "DistributionSet");
+
+        verifyThrownExceptionBy(() -> deploymentManagement.cancelAction(NOT_EXIST_IDL), "Action");
+        verifyThrownExceptionBy(() -> deploymentManagement.countActionsByTarget(NOT_EXIST_ID), "Target");
+        verifyThrownExceptionBy(() -> deploymentManagement.countActionsByTarget("xxx", NOT_EXIST_ID), "Target");
+
+        verifyThrownExceptionBy(() -> deploymentManagement.findActionsByDistributionSet(pageReq, NOT_EXIST_IDL),
+                "DistributionSet");
+        verifyThrownExceptionBy(() -> deploymentManagement.findActionsByTarget(NOT_EXIST_ID, pageReq), "Target");
+        verifyThrownExceptionBy(() -> deploymentManagement.findActionsByTarget("id==*", NOT_EXIST_ID, pageReq),
+                "Target");
+        verifyThrownExceptionBy(
+                () -> deploymentManagement.findActionsWithStatusCountByTargetOrderByIdDesc(NOT_EXIST_ID), "Target");
+
+        verifyThrownExceptionBy(() -> deploymentManagement.findActiveActionsByTarget(NOT_EXIST_ID), "Target");
+        verifyThrownExceptionBy(() -> deploymentManagement.findInActiveActionsByTarget(NOT_EXIST_ID), "Target");
+        verifyThrownExceptionBy(() -> deploymentManagement.forceQuitAction(NOT_EXIST_IDL), "Action");
+        verifyThrownExceptionBy(() -> deploymentManagement.forceTargetAction(NOT_EXIST_IDL), "Action");
     }
 
     @Test
@@ -102,24 +148,65 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Test verifies that the custom query to find all actions include the count of action status is working correctly")
-    public void findActionsWithStatusCountByTarget() {
+    @Description("Test verifies that actions of a target are found by using id-based search.")
+    public void findActionByTargetId() {
         final DistributionSet testDs = testdataFactory.createDistributionSet("TestDs", "1.0",
                 new ArrayList<DistributionSetTag>());
         final List<Target> testTarget = testdataFactory.createTargets(1);
         // one action with one action status is generated
-        final Action action = deploymentManagement
-                .findActionWithDetails(assignDistributionSet(testDs, testTarget).getActions().get(0)).get();
-        // save 2 action status
-        actionStatusRepository.save(new JpaActionStatus(action, Status.RETRIEVED, System.currentTimeMillis()));
-        actionStatusRepository.save(new JpaActionStatus(action, Status.RUNNING, System.currentTimeMillis()));
+        final Long actionId = assignDistributionSet(testDs, testTarget).getActions().get(0);
 
-        final List<ActionWithStatusCount> findActionsWithStatusCountByTarget = deploymentManagement
-                .findActionsWithStatusCountByTargetOrderByIdDesc(testTarget.get(0).getControllerId());
+        // act
+        final Slice<Action> actions = deploymentManagement.findActionsByTarget(testTarget.get(0).getControllerId(),
+                pageReq);
+        final Long count = deploymentManagement.countActionsByTarget(testTarget.get(0).getControllerId());
 
-        assertThat(findActionsWithStatusCountByTarget).as("wrong action size").hasSize(1);
-        assertThat(findActionsWithStatusCountByTarget.get(0).getActionStatusCount()).as("wrong action status size")
-                .isEqualTo(3);
+        assertThat(count).as("One Action for target").isEqualTo(1L).isEqualTo(actions.getContent().size());
+        assertThat(actions.getContent().get(0).getId()).as("Action of target").isEqualTo(actionId);
+    }
+
+    @Test
+    @Description("Test verifies that action-states of an action are found by using id-based search.")
+    public void findActionStatusByActionId() {
+        final DistributionSet testDs = testdataFactory.createDistributionSet("TestDs", "1.0",
+                new ArrayList<DistributionSetTag>());
+        final List<Target> testTarget = testdataFactory.createTargets(1);
+        // one action with one action status is generated
+        final Long actionId = assignDistributionSet(testDs, testTarget).getActions().get(0);
+        final Slice<Action> actions = deploymentManagement.findActionsByTarget(testTarget.get(0).getControllerId(),
+                pageReq);
+        final ActionStatus expectedActionStatus = actions.getContent().get(0).getActionStatus().get(0);
+
+        // act
+        final Page<ActionStatus> actionStates = deploymentManagement.findActionStatusByAction(pageReq, actionId);
+
+        assertThat(actionStates.getContent()).hasSize(1);
+        assertThat(actionStates.getContent().get(0)).as("Action-status of action").isEqualTo(expectedActionStatus);
+    }
+
+    @Test
+    @Description("Test verifies that messages of an action-status are found by using id-based search.")
+    public void findMessagesByActionStatusId() {
+        final DistributionSet testDs = testdataFactory.createDistributionSet("TestDs", "1.0",
+                new ArrayList<DistributionSetTag>());
+        final List<Target> testTarget = testdataFactory.createTargets(1);
+        // one action with one action status is generated
+        final Long actionId = assignDistributionSet(testDs, testTarget).getActions().get(0);
+        // create action-status entry with one message
+        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
+                .status(Action.Status.FINISHED).messages(Lists.newArrayList("finished message")));
+        final Page<ActionStatus> actionStates = deploymentManagement.findActionStatusByAction(pageReq, actionId);
+        // find newly created action-status entry with message
+        final ActionStatus actionStatusWithMessage = actionStates.getContent().stream()
+                .filter(entry -> entry.getMessages() != null && entry.getMessages().size() > 0).findFirst().get();
+        final String expectedMsg = actionStatusWithMessage.getMessages().get(0);
+
+        // act
+        final Page<String> messages = deploymentManagement.findMessagesByActionStatusId(pageReq,
+                actionStatusWithMessage.getId());
+
+        assertThat(actionStates.getTotalElements()).as("Two action-states in total").isEqualTo(2L);
+        assertThat(messages.getContent().get(0)).as("Message of action-status").isEqualTo(expectedMsg);
     }
 
     @Test
@@ -130,7 +217,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             assignDS.add(testdataFactory.createDistributionSet("DS" + i, "1.0", Collections.emptyList()).getId());
         }
         // not exists
-        assignDS.add(Long.valueOf(100));
+        assignDS.add(100L);
 
         final DistributionSetTag tag = tagManagement
                 .createDistributionSetTag(entityFactory.tag().create().name("Tag1"));

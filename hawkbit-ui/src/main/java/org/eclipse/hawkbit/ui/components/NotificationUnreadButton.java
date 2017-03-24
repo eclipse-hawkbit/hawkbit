@@ -93,7 +93,7 @@ public class NotificationUnreadButton extends Button {
         notificationsWindow.setClosable(true);
         notificationsWindow.setResizable(false);
         notificationsWindow.setDraggable(false);
-        notificationsWindow.setId(UIComponentIdProvider.NOTIFICATION_UNREAD_POPUP_id);
+        notificationsWindow.setId(UIComponentIdProvider.NOTIFICATION_UNREAD_POPUP_ID);
         notificationsWindow.addCloseListener(event -> refreshCaption());
         notificationsWindow.addBlurListener(this::closeWindow);
     }

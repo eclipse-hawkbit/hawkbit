@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.customrenderers.renderers;
 import com.vaadin.ui.Grid.AbstractRenderer;
 
 /**
- * 
+ *
  * Renders label with provided value and style.
  *
  */

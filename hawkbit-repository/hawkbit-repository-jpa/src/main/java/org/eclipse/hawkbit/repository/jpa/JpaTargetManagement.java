@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -327,21 +326,25 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public TargetTagAssignmentResult toggleTagAssignment(final Collection<String> targetIds, final String tagName) {
+    public TargetTagAssignmentResult toggleTagAssignment(final Collection<String> controllerIds, final String tagName) {
         final TargetTag tag = targetTagRepository.findByNameEquals(tagName)
                 .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, tagName));
-        final List<JpaTarget> alreadyAssignedTargets = targetRepository.findByTagNameAndControllerIdIn(tagName,
-                targetIds);
         final List<JpaTarget> allTargets = targetRepository
-                .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(targetIds));
+                .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(controllerIds));
+
+        if (allTargets.size() < controllerIds.size()) {
+            throw new EntityNotFoundException(Target.class, controllerIds,
+                    allTargets.stream().map(Target::getControllerId).collect(Collectors.toList()));
+        }
+
+        final List<JpaTarget> alreadyAssignedTargets = targetRepository.findByTagNameAndControllerIdIn(tagName,
+                controllerIds);
 
         // all are already assigned -> unassign
         if (alreadyAssignedTargets.size() == allTargets.size()) {
             alreadyAssignedTargets.forEach(target -> target.removeTag(tag));
-            final TargetTagAssignmentResult result = new TargetTagAssignmentResult(0, 0, alreadyAssignedTargets.size(),
-                    Collections.emptyList(), Collections.unmodifiableList(alreadyAssignedTargets), tag);
-
-            return result;
+            return new TargetTagAssignmentResult(0, 0, alreadyAssignedTargets.size(), Collections.emptyList(),
+                    Collections.unmodifiableList(alreadyAssignedTargets), tag);
         }
 
         allTargets.removeAll(alreadyAssignedTargets);
@@ -364,6 +367,11 @@ public class JpaTargetManagement implements TargetManagement {
     public List<Target> assignTag(final Collection<String> controllerIds, final Long tagId) {
         final List<JpaTarget> allTargets = targetRepository
                 .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(controllerIds));
+
+        if (allTargets.size() < controllerIds.size()) {
+            throw new EntityNotFoundException(Target.class, controllerIds,
+                    allTargets.stream().map(Target::getControllerId).collect(Collectors.toList()));
+        }
 
         final JpaTargetTag tag = targetTagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, tagId));
@@ -402,13 +410,13 @@ public class JpaTargetManagement implements TargetManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public Target unAssignTag(final String controllerID, final Long targetTagId) {
-        final List<Target> allTargets = Collections.unmodifiableList(targetRepository
-                .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(Arrays.asList(controllerID))));
+        final Target target = targetRepository.findByControllerId(controllerID)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerID));
 
         final TargetTag tag = targetTagRepository.findById(targetTagId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagId));
 
-        final List<Target> unAssignTag = unAssignTag(allTargets, tag);
+        final List<Target> unAssignTag = unAssignTag(Lists.newArrayList(target), tag);
         return unAssignTag.isEmpty() ? null : unAssignTag.get(0);
     }
 
