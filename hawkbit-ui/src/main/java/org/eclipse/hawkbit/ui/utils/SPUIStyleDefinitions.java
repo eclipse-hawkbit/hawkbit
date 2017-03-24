@@ -26,6 +26,11 @@ public final class SPUIStyleDefinitions {
     public static final String SP_TEXTFIELD_LAYOUT_ERROR_HIGHTLIGHT = "v-textfield-error";
 
     /**
+     * Action history message grid style.
+     */
+    public static final String ACTION_HISTORY_MESSAGE_GRID = "action-history-message-grid";
+
+    /**
      * Style for accordion tab button.
      */
     public static final String SP_ACCORDION_TAB_BTN = "accordion-tab-button-style";

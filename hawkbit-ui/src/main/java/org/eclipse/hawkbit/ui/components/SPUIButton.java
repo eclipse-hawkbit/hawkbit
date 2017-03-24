@@ -27,12 +27,12 @@ public class SPUIButton extends Button {
     }
 
     /**
-     * Toogle Icon on action.
-     * 
+     * Toggle Icon on action.
+     *
      * @param icon
      *            as Resource
      */
-    public void togleIcon(final Resource icon) {
+    public void toggleIcon(final Resource icon) {
         setIcon(icon);
     }
 }

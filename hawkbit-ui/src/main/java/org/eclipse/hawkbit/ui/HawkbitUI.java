@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Locale;
 import java.util.Set;
 
@@ -28,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.io.Resource;
 import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.annotations.Title;
@@ -44,7 +41,6 @@ import com.vaadin.spring.navigator.SpringViewProvider;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.CustomLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
@@ -84,6 +80,8 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
     @Autowired
     private NotificationUnreadButton notificationUnreadButton;
 
+    private Label viewTitle;
+
     /**
      * Constructor taking the push strategy.
      *
@@ -120,47 +118,22 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
         rootLayout.setSizeFull();
 
         dashboardMenu.init();
-        dashboardMenu.setResponsive(Boolean.TRUE);
+        dashboardMenu.setResponsive(true);
 
         final VerticalLayout contentVerticalLayout = new VerticalLayout();
-        contentVerticalLayout.addComponent(buildHeader());
         contentVerticalLayout.setSizeFull();
+        contentVerticalLayout.setStyleName("main-content");
+        contentVerticalLayout.addComponent(buildHeader());
+        contentVerticalLayout.addComponent(buildViewTitle());
+
+        final Panel content = buildContent();
+        contentVerticalLayout.addComponent(content);
+        contentVerticalLayout.setExpandRatio(content, 1);
 
         rootLayout.addComponent(dashboardMenu);
         rootLayout.addComponent(contentVerticalLayout);
-
-        final HorizontalLayout viewHeadercontent = new HorizontalLayout();
-        contentVerticalLayout.addComponent(viewHeadercontent);
-        viewHeadercontent.setWidth("100%");
-        viewHeadercontent.setHeight("43px");
-        viewHeadercontent.addStyleName("view-header-layout");
-
-        final Label viewHeader = new Label();
-        viewHeader.setWidth("100%");
-        viewHeader.setStyleName("header-content");
-        viewHeadercontent.addComponent(viewHeader);
-
-        viewHeadercontent.addComponent(notificationUnreadButton);
-        viewHeadercontent.setComponentAlignment(notificationUnreadButton, Alignment.MIDDLE_RIGHT);
-
-        final Panel content = new Panel();
-        content.setSizeFull();
-        content.setStyleName("view-content");
-        contentVerticalLayout.addComponent(content);
-
-        rootLayout.setExpandRatio(contentVerticalLayout, 1.0F);
-        contentVerticalLayout.setStyleName("main-content");
-        contentVerticalLayout.setExpandRatio(content, 1.0F);
+        rootLayout.setExpandRatio(contentVerticalLayout, 1);
         setContent(rootLayout);
-        final Resource resource = context
-                .getResource("classpath:/VAADIN/themes/" + UI.getCurrent().getTheme() + "/layouts/footer.html");
-        try (InputStream resourceStream = resource.getInputStream()) {
-            final CustomLayout customLayout = new CustomLayout(resourceStream);
-            customLayout.setSizeUndefined();
-            contentVerticalLayout.addComponent(customLayout);
-        } catch (final IOException ex) {
-            LOG.error("Footer file cannot be loaded", ex);
-        }
 
         final Navigator navigator = new Navigator(this, content);
         navigator.addViewChangeListener(new ViewChangeListener() {
@@ -176,10 +149,10 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
                 final DashboardMenuItem view = dashboardMenu.getByViewName(event.getViewName());
                 dashboardMenu.postViewChange(new PostViewChangeEvent(view));
                 if (view == null) {
-                    viewHeader.setCaption(null);
+                    viewTitle.setCaption(null);
                     return;
                 }
-                viewHeader.setCaption(view.getDashboardCaptionLong());
+                viewTitle.setCaption(view.getDashboardCaptionLong());
                 notificationUnreadButton.setCurrentView(event.getNewView());
             }
         });
@@ -198,6 +171,28 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
         }
 
         LOG.info("Current locale of the application is : {}", HawkbitCommonUtil.getLocale());
+    }
+
+    private Panel buildContent() {
+        final Panel content = new Panel();
+        content.setSizeFull();
+        content.setStyleName("view-content");
+        return content;
+    }
+
+    private HorizontalLayout buildViewTitle() {
+        final HorizontalLayout viewHeadercontent = new HorizontalLayout();
+        viewHeadercontent.setWidth("100%");
+        viewHeadercontent.addStyleName("view-header-layout");
+
+        viewTitle = new Label();
+        viewTitle.setWidth("100%");
+        viewTitle.setStyleName("header-content");
+        viewHeadercontent.addComponent(viewTitle);
+
+        viewHeadercontent.addComponent(notificationUnreadButton);
+        viewHeadercontent.setComponentAlignment(notificationUnreadButton, Alignment.MIDDLE_RIGHT);
+        return viewHeadercontent;
     }
 
     private Component buildHeader() {

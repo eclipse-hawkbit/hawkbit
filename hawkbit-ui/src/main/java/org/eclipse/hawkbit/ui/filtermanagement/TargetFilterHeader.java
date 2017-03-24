@@ -154,7 +154,7 @@ public class TargetFilterHeader extends VerticalLayout {
 
     private void openSearchTextField() {
         searchResetIcon.addStyleName(SPUIDefinitions.FILTER_RESET_ICON);
-        searchResetIcon.togleIcon(FontAwesome.TIMES);
+        searchResetIcon.toggleIcon(FontAwesome.TIMES);
         searchResetIcon.setData(Boolean.TRUE);
         searchField.removeStyleName(SPUIDefinitions.FILTER_BOX_HIDE);
         searchField.setVisible(true);
@@ -165,7 +165,7 @@ public class TargetFilterHeader extends VerticalLayout {
         searchField.setValue("");
         searchField.addStyleName(SPUIDefinitions.FILTER_BOX_HIDE);
         searchResetIcon.removeStyleName(SPUIDefinitions.FILTER_RESET_ICON);
-        searchResetIcon.togleIcon(FontAwesome.SEARCH);
+        searchResetIcon.toggleIcon(FontAwesome.SEARCH);
         searchResetIcon.setData(Boolean.FALSE);
         resetSearchText();
 

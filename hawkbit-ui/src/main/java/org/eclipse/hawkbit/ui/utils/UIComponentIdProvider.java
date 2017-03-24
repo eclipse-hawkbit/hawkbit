@@ -6,6 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
+
 package org.eclipse.hawkbit.ui.utils;
 
 /**
@@ -52,17 +53,14 @@ public final class UIComponentIdProvider {
      * ID-Targ.PIN.
      */
     public static final String TARGET_PIN_ICON = "target.pin.icon.";
-
     /**
      * Target search text id.
      */
     public static final String TARGET_TEXT_FIELD = "target.search.textfield";
-
     /**
      * ID for target filter search
      */
     public static final String TARGET_FILTER_SEARCH_TEXT = "target.filter.search.text.Id";
-
     /**
      * ID for add target filter icon
      */
@@ -121,7 +119,6 @@ public final class UIComponentIdProvider {
      * ID-Dist.PIN.
      */
     public static final String DIST_PIN_BUTTON = "dist.pin.button";
-
     /**
      * ID for distribution set tag icon
      */
@@ -134,27 +131,22 @@ public final class UIComponentIdProvider {
      * ID - soft.module.version.
      */
     public static final String SOFT_MODULE_VERSION = "soft.module.version";
-
     /**
      * ID - soft.module.vendor.
      */
     public static final String SOFT_MODULE_VENDOR = "soft.module.vendor";
-
     /**
      * ID - Save Assign.
      */
     public static final String SAVE_ASSIGNMENT = "save.actions.popup.assign";
-
     /**
      * ID - Discard Assign.
      */
     public static final String DISCARD_ASSIGNMENT = "discard.actions.popup.assign";
-
     /**
      * ID - Delete Distribution SetType Save.
      */
     public static final String SAVE_DELETE_DIST_SET_TYPE = "save.actions.popup.delete.dist.set.type";
-
     /**
      * ID - Discard Distribution SetType.
      */
@@ -163,17 +155,14 @@ public final class UIComponentIdProvider {
      * ID Delete Software Module Type save.
      */
     public static final String SAVE_DELETE_SW_MODULE_TYPE = "save.actions.popup.delete.sw.module.type";
-
     /**
      * ID - Discard SW Module Type.
      */
     public static final String DISCARD_SW_MODULE_TYPE = "save.actions.popup.discard.sw.module.type";
-
     /**
      * Action history table cancel Id.
      */
     public static final String ACTION_DETAILS_SOFT_ID = "action.details.soft.group";
-
     /**
      * Start type of rollout manual radio button
      */
@@ -231,24 +220,53 @@ public final class UIComponentIdProvider {
      */
     public static final String PENDING_ACTION_BUTTON = "pending.action.button";
     /**
-     * Action history table Id.
+     * Action history grid Id.
      */
-    public static final String ACTION_HISTORY_TABLE_ID = "action.history.tableId";
-
+    public static final String ACTION_HISTORY_GRID_ID = "action.history.gridId";
     /**
-     * Action history table cancel Id.
+     * Action history details grid Id.
+     */
+    public static final String ACTION_HISTORY_DETAILS_GRID_ID = "action.history.details.gridId";
+    /**
+     * Action history message grid Id.
+     */
+    public static final String ACTION_HISTORY_MESSAGE_GRID_ID = "action.history.message.gridId";
+    /**
+     * Action history table cancel button Id.
      */
     public static final String ACTION_HISTORY_TABLE_CANCEL_ID = "action.history.table.action.cancel";
-
     /**
-     * Action history table force Id.
+     * Action history table force button Id.
      */
     public static final String ACTION_HISTORY_TABLE_FORCE_ID = "action.history.table.action.force";
-
     /**
-     * Action history table force quit Id.
+     * Action history table force quit button Id.
      */
     public static final String ACTION_HISTORY_TABLE_FORCE_QUIT_ID = "action.history.table.action.force.quit";
+    /**
+     * Action history table forced label Id.
+     */
+    public static final String ACTION_HISTORY_TABLE_FORCED_LABEL_ID = "action.history.table.forcedId";
+
+    /**
+     * Action history table time-forced label Id.
+     */
+    public static final String ACTION_HISTORY_TABLE_TIMEFORCED_LABEL_ID = "action.history.table.timedforceId";
+
+    /**
+     * Action history table status label Id.
+     */
+    public static final String ACTION_HISTORY_TABLE_STATUS_LABEL_ID = "action.history.table.statusId";
+
+    /**
+     * Action history table active-state label Id.
+     */
+    public static final String ACTION_HISTORY_TABLE_ACTIVESTATE_LABEL_ID = "action.history.table.activeStateId";
+
+    /**
+     * Action status grid status label Id.
+     */
+    public static final String ACTION_STATUS_GRID_STATUS_LABEL_ID = "action.status.grid.statusId";
 
     /**
      * ID for option group save timeforced
@@ -985,7 +1003,7 @@ public final class UIComponentIdProvider {
     /**
      * Id of the unread notification popup
      */
-    public static final String NOTIFICATION_UNREAD_POPUP_id = "notification.unread.popup";
+    public static final String NOTIFICATION_UNREAD_POPUP_ID = "notification.unread.popup";
 
     /**
      * Id of the unread notification icon in the menu

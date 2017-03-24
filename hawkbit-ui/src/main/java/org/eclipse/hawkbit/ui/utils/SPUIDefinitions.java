@@ -53,7 +53,7 @@ public final class SPUIDefinitions {
 
     /**
      * Action history active hidden column. This is using to generate active
-     * icons under active coloumn.
+     * icons under active column.
      */
     public static final String ACTION_HIS_TBL_ACTIVE_HIDDEN = "Active_Hidden";
 
@@ -107,6 +107,11 @@ public final class SPUIDefinitions {
      * Action history action type column.
      */
     public static final String ACTION_HIS_TBL_FORCED = "Forced";
+
+    /**
+     * Action history action type column.
+     */
+    public static final String ACTION_HIS_TBL_TIMEFORCED = "Time-Forced";
 
     /**
      * Action history helping constant.
@@ -244,6 +249,22 @@ public final class SPUIDefinitions {
      * Text field style.
      */
     public static final String TEXT_STYLE = "text-style";
+    /**
+     * Show actions for a target.
+     */
+    public static final String ACTIONS_BY_TARGET = "ActionsByTarget";
+    /**
+     * Show action-states for a action.
+     */
+    public static final String ACTIONSTATES_BY_ACTION = "ActionStatesByAction";
+    /**
+     * Show messages for a action-status.
+     */
+    public static final String MESSAGES_BY_ACTIONSTATUS = "MessagesByActionStatus";
+    /**
+     * Key for no-message MessageProxy.
+     */
+    public static final String NO_MSG_PROXY = "NoMessageProxy";
 
     /**
      * Style to highlight row in orange color.
@@ -353,6 +374,10 @@ public final class SPUIDefinitions {
      * Target last query date format .
      */
     public static final String LAST_QUERY_DATE_FORMAT = "EEE MMM d HH:mm:ss z yyyy";
+    /**
+     * Target last query date format .
+     */
+    public static final String LAST_QUERY_DATE_FORMAT_SHORT = "MMM d HH:mm z ''yy";
     /**
      * Item Id used in drop comparisons.
      */

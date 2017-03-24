@@ -1,0 +1,33 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+@mixin grid {
+   .v-grid-cell.centeralign {
+       text-align: center;
+   }
+   
+   .v-grid-cell.leftalign {
+       text-align: left;
+   }
+   
+   .v-grid-cell.rightalign {
+       text-align: right;
+   }
+   
+   .v-grid-cell {
+       font-size: $v-font-size--small !important
+   }
+   
+   .v-grid-cell.frozen{
+   	   box-shadow: none !important;
+   }
+   
+   .v-grid-cell.frozen + th {
+   	   border-left: $v-grid-border-size solid $widget-border-color ;
+   }
+}
