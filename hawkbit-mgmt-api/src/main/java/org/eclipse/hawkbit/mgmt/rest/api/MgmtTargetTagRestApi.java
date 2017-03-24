@@ -121,7 +121,7 @@ public interface MgmtTargetTagRestApi {
      *
      * @return the list of assigned targets.
      */
-    @RequestMapping(method = RequestMethod.GET, value = MgmtRestConstants.TARGET_TAG_TAGERTS_REQUEST_MAPPING, produces = {
+    @RequestMapping(method = RequestMethod.GET, value = MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING, produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtTarget>> getAssignedTargets(@PathVariable("targetTagId") final Long targetTagId);
 
@@ -136,7 +136,7 @@ public interface MgmtTargetTagRestApi {
      *
      * @return the list of assigned targets and unassigned targets.
      */
-    @RequestMapping(method = RequestMethod.POST, value = MgmtRestConstants.TARGET_TAG_TAGERTS_REQUEST_MAPPING
+    @RequestMapping(method = RequestMethod.POST, value = MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING
             + "/toggleTagAssignment", consumes = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                             MediaType.APPLICATION_JSON_VALUE })
@@ -154,7 +154,7 @@ public interface MgmtTargetTagRestApi {
      *
      * @return the list of assigned targets.
      */
-    @RequestMapping(method = RequestMethod.POST, value = MgmtRestConstants.TARGET_TAG_TAGERTS_REQUEST_MAPPING, consumes = {
+    @RequestMapping(method = RequestMethod.POST, value = MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING, consumes = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtTarget>> assignTargets(@PathVariable("targetTagId") final Long targetTagId,
@@ -167,7 +167,7 @@ public interface MgmtTargetTagRestApi {
      *            the ID of the target tag to retrieve
      * @return http status code
      */
-    @RequestMapping(method = RequestMethod.DELETE, value = MgmtRestConstants.TARGET_TAG_TAGERTS_REQUEST_MAPPING)
+    @RequestMapping(method = RequestMethod.DELETE, value = MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING)
     ResponseEntity<Void> unassignTargets(@PathVariable("targetTagId") final Long targetTagId);
 
     /**
@@ -179,7 +179,7 @@ public interface MgmtTargetTagRestApi {
      *            the ID of the target to unassign
      * @return http status code
      */
-    @RequestMapping(method = RequestMethod.DELETE, value = MgmtRestConstants.TARGET_TAG_TAGERTS_REQUEST_MAPPING
+    @RequestMapping(method = RequestMethod.DELETE, value = MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING
             + "/{controllerId}")
     ResponseEntity<Void> unassignTarget(@PathVariable("targetTagId") final Long targetTagId,
             @PathVariable("controllerId") final String controllerId);
