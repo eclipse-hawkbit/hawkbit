@@ -84,8 +84,12 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
 
         tfqDetailsTable = new TargetFilterQueryDetailsTable(i18n);
 
-        getDetailsTab().addTab(tfqDetailsTable, getI18n().getMessage("caption.auto.assignment.ds"), null);
+        addAdditionalTab();
         restoreState();
+    }
+
+    private void addAdditionalTab() {
+        getDetailsTab().addTab(tfqDetailsTable, getI18n().getMessage("caption.auto.assignment.ds"), null);
     }
 
     private static final SoftwareModuleDetailsTable createSoftwareModuleDetailsTable(final VaadinMessageSource i18n,
