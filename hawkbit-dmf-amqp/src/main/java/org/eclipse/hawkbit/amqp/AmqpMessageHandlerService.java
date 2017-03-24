@@ -96,7 +96,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      * 
      * @return a message if <null> no message is send back to sender
      */
-    @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.receiverQueue}", containerFactory = "listenerContainerFactory")
+    @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.receiverQueue:dmf_receiver}", containerFactory = "listenerContainerFactory")
     public Message onMessage(final Message message, @Header(MessageHeaderKey.TYPE) final String type,
             @Header(MessageHeaderKey.TENANT) final String tenant) {
         return onMessage(message, type, tenant, getRabbitTemplate().getConnectionFactory().getVirtualHost());
@@ -169,7 +169,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final String replyTo = message.getMessageProperties().getReplyTo();
 
         if (StringUtils.isEmpty(replyTo)) {
-            logAndThrowMessageError(message, "No ReplyTo was set for the createThing TenantAwareEvent.");
+            logAndThrowMessageError(message, "No ReplyTo was set for the createThing message.");
         }
 
         final URI amqpUri = IpUtil.createAmqpUri(virtualHost, replyTo);
@@ -180,8 +180,10 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private void lookIfUpdateAvailable(final Target target) {
+
         final Optional<Action> actionOptional = controllerManagement
                 .findOldestActiveActionByTarget(target.getControllerId());
+
         if (!actionOptional.isPresent()) {
             return;
         }
@@ -206,7 +208,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      *            the topic of the event.
      */
     private void handleIncomingEvent(final Message message, final EventTopic topic) {
-
         switch (topic) {
         case UPDATE_ACTION_STATUS:
             updateActionStatus(message);
@@ -294,11 +295,11 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     private Status hanldeCancelRejectedState(final Message message, final Action action) {
         if (action.isCancelingOrCanceled()) {
             return Status.CANCEL_REJECTED;
-        } else {
-            logAndThrowMessageError(message,
-                    "Cancel recjected message is not allowed, if action is on state: " + action.getStatus());
-            return null;
         }
+        logAndThrowMessageError(message,
+                "Cancel rejected message is not allowed, if action is on state: " + action.getStatus());
+        return null;
+
     }
 
     private void updateLastPollTime(final Target target) {
@@ -321,12 +322,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     @SuppressWarnings("squid:S3655")
     private Action checkActionExist(final Message message, final ActionUpdateStatus actionUpdateStatus) {
         final Long actionId = actionUpdateStatus.getActionId();
+
         LOG.debug("Target notifies intermediate about action {} with status {}.", actionId,
                 actionUpdateStatus.getActionStatus());
-
-        if (actionId == null) {
-            logAndThrowMessageError(message, "Invalid message no action id");
-        }
 
         final Optional<Action> findActionWithDetails = controllerManagement.findActionWithDetails(actionId);
         if (!findActionWithDetails.isPresent()) {

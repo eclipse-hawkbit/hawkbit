@@ -43,12 +43,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.MetaData;
-import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorAction;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
-import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
-import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
@@ -271,24 +265,6 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
         return controllerManagement.addUpdateActionStatus(
                 entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.FINISHED));
-    }
-
-    protected Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
-            final int groupSize, final String filterQuery, final DistributionSet distributionSet,
-            final String successCondition, final String errorCondition) {
-        final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults()
-                .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
-                .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
-                .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
-
-        final Rollout rollout = rolloutManagement.createRollout(entityFactory.rollout().create().name(rolloutName)
-                .description(rolloutDescription).targetFilterQuery(filterQuery).set(distributionSet), groupSize,
-                conditions);
-
-        // Run here, because Scheduler is disabled during tests
-        rolloutManagement.handleRollouts();
-
-        return rolloutManagement.findRolloutById(rollout.getId()).get();
     }
 
     @Before

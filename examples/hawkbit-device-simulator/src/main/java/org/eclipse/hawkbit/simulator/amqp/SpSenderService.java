@@ -53,7 +53,7 @@ public class SpSenderService extends SenderService {
     public SpSenderService(final RabbitTemplate rabbitTemplate, final AmqpProperties amqpProperties,
             final SimulationProperties simulationProperties) {
         super(rabbitTemplate, amqpProperties);
-        this.spExchange = AmqpSettings.DMF_EXCHANGE;
+        spExchange = AmqpSettings.DMF_EXCHANGE;
         this.simulationProperties = simulationProperties;
     }
 
@@ -226,15 +226,13 @@ public class SpSenderService extends SenderService {
             final List<String> updateResultMessages, final Long actionId) {
         final MessageProperties messageProperties = new MessageProperties();
         final Map<String, Object> headers = messageProperties.getHeaders();
-        final ActionUpdateStatus actionUpdateStatus = new ActionUpdateStatus();
-        actionUpdateStatus.setActionStatus(actionStatus);
+        final ActionUpdateStatus actionUpdateStatus = new ActionUpdateStatus(actionId, actionStatus);
         headers.put(MessageHeaderKey.TYPE, MessageType.EVENT.name());
         headers.put(MessageHeaderKey.TENANT, tenant);
         headers.put(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
         headers.put(MessageHeaderKey.CONTENT_TYPE, MessageProperties.CONTENT_TYPE_JSON);
         actionUpdateStatus.addMessage(updateResultMessages);
 
-        actionUpdateStatus.setActionId(actionId);
         return convertMessage(actionUpdateStatus, messageProperties);
     }
 
@@ -242,14 +240,12 @@ public class SpSenderService extends SenderService {
             final List<String> updateResultMessages) {
         final MessageProperties messageProperties = new MessageProperties();
         final Map<String, Object> headers = messageProperties.getHeaders();
-        final ActionUpdateStatus actionUpdateStatus = new ActionUpdateStatus();
-        actionUpdateStatus.setActionStatus(actionStatus);
+        final ActionUpdateStatus actionUpdateStatus = new ActionUpdateStatus(cacheValue.getActionId(), actionStatus);
         headers.put(MessageHeaderKey.TYPE, MessageType.EVENT.name());
         headers.put(MessageHeaderKey.TENANT, cacheValue.getTenant());
         headers.put(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
         headers.put(MessageHeaderKey.CONTENT_TYPE, MessageProperties.CONTENT_TYPE_JSON);
         actionUpdateStatus.addMessage(updateResultMessages);
-        actionUpdateStatus.setActionId(cacheValue.getActionId());
         return convertMessage(actionUpdateStatus, messageProperties);
     }
 

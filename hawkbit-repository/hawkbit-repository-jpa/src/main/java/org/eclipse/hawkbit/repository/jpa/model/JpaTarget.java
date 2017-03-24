@@ -79,7 +79,6 @@ import com.google.common.collect.Lists;
         @Index(name = "sp_idx_target_02", columnList = "tenant,name"),
         @Index(name = "sp_idx_target_03", columnList = "tenant,controller_id,assigned_distribution_set"),
         @Index(name = "sp_idx_target_04", columnList = "tenant,created_at"),
-        @Index(name = "sp_idx_target_05", columnList = "tenant,address"),
         @Index(name = "sp_idx_target_prim", columnList = "tenant,id") }, uniqueConstraints = @UniqueConstraint(columnNames = {
                 "controller_id", "tenant" }, name = "uk_tenant_controller_id"))
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for

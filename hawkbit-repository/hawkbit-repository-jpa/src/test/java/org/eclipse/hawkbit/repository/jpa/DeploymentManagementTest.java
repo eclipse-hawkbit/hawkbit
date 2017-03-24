@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
@@ -42,6 +43,9 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.model.TargetWithActionType;
+import org.eclipse.hawkbit.repository.test.matcher.Expect;
+import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +71,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Deployment Management")
 public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
-
     private EventHandlerStub eventHandlerStub;
 
     private CancelEventHandlerStub cancelEventHandlerStub;
@@ -82,6 +85,49 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         cancelEventHandlerStub = new CancelEventHandlerStub();
         applicationContext.addApplicationListener(cancelEventHandlerStub);
+    }
+
+    @Test
+    @Description("Verifies that management get access react as specfied on calls for non existing entities by means "
+            + "of Optional not present.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    public void nonExistingEntityAccessReturnsNotPresent() {
+        assertThat(deploymentManagement.findAction(1234L)).isNotPresent();
+        assertThat(deploymentManagement.findActionWithDetails(NOT_EXIST_IDL)).isNotPresent();
+    }
+
+    @Test
+    @Description("Verifies that management queries react as specfied on calls for non existing entities "
+            + " by means of throwing EntityNotFoundException.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
+    public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
+        final Target target = testdataFactory.createTarget();
+
+        verifyThrownExceptionBy(() -> deploymentManagement.assignDistributionSet(NOT_EXIST_IDL,
+                Lists.newArrayList(new TargetWithActionType(target.getControllerId()))), "DistributionSet");
+        verifyThrownExceptionBy(
+                () -> deploymentManagement.assignDistributionSet(NOT_EXIST_IDL,
+                        Lists.newArrayList(new TargetWithActionType(target.getControllerId())), "xxx"),
+                "DistributionSet");
+        verifyThrownExceptionBy(() -> deploymentManagement.assignDistributionSet(NOT_EXIST_IDL, ActionType.FORCED,
+                System.currentTimeMillis(), Lists.newArrayList(target.getControllerId())), "DistributionSet");
+
+        verifyThrownExceptionBy(() -> deploymentManagement.cancelAction(NOT_EXIST_IDL), "Action");
+        verifyThrownExceptionBy(() -> deploymentManagement.countActionsByTarget(NOT_EXIST_ID), "Target");
+        verifyThrownExceptionBy(() -> deploymentManagement.countActionsByTarget("xxx", NOT_EXIST_ID), "Target");
+
+        verifyThrownExceptionBy(() -> deploymentManagement.findActionsByDistributionSet(pageReq, NOT_EXIST_IDL),
+                "DistributionSet");
+        verifyThrownExceptionBy(() -> deploymentManagement.findActionsByTarget(NOT_EXIST_ID, pageReq), "Target");
+        verifyThrownExceptionBy(() -> deploymentManagement.findActionsByTarget("id==*", NOT_EXIST_ID, pageReq),
+                "Target");
+        verifyThrownExceptionBy(
+                () -> deploymentManagement.findActionsWithStatusCountByTargetOrderByIdDesc(NOT_EXIST_ID), "Target");
+
+        verifyThrownExceptionBy(() -> deploymentManagement.findActiveActionsByTarget(NOT_EXIST_ID), "Target");
+        verifyThrownExceptionBy(() -> deploymentManagement.findInActiveActionsByTarget(NOT_EXIST_ID), "Target");
+        verifyThrownExceptionBy(() -> deploymentManagement.forceQuitAction(NOT_EXIST_IDL), "Action");
+        verifyThrownExceptionBy(() -> deploymentManagement.forceTargetAction(NOT_EXIST_IDL), "Action");
     }
 
     @Test

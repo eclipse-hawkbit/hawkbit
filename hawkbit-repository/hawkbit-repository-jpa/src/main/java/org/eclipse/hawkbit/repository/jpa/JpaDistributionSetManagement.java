@@ -693,9 +693,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     public Page<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(final Long distributionSetId,
             final Pageable pageable) {
-        if (!distributionSetRepository.exists(distributionSetId)) {
-            throw new EntityNotFoundException(DistributionSet.class, distributionSetId);
-        }
+        throwExceptionIfDistributionSetDoesNotExist(distributionSetId);
 
         return convertMdPage(distributionSetMetadataRepository
                 .findAll((Specification<JpaDistributionSetMetadata>) (root, query, cb) -> cb.equal(
@@ -708,9 +706,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public Page<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(final Long distributionSetId,
             final String rsqlParam, final Pageable pageable) {
 
-        if (!distributionSetRepository.exists(distributionSetId)) {
-            throw new EntityNotFoundException(DistributionSet.class, distributionSetId);
-        }
+        throwExceptionIfDistributionSetDoesNotExist(distributionSetId);
 
         final Specification<JpaDistributionSetMetadata> spec = RSQLUtility.parse(rsqlParam,
                 DistributionSetMetadataFields.class, virtualPropertyReplacer);
@@ -730,9 +726,10 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    public Optional<DistributionSetMetadata> findDistributionSetMetadata(final Long distributionSet, final String key) {
-        return Optional.ofNullable(
-                distributionSetMetadataRepository.findOne(new DsMetadataCompositeKey(distributionSet, key)));
+    public Optional<DistributionSetMetadata> findDistributionSetMetadata(final Long setId, final String key) {
+        throwExceptionIfDistributionSetDoesNotExist(setId);
+
+        return Optional.ofNullable(distributionSetMetadataRepository.findOne(new DsMetadataCompositeKey(setId, key)));
     }
 
     @Override
@@ -746,6 +743,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public boolean isDistributionSetInUse(final Long setId) {
+        throwExceptionIfDistributionSetDoesNotExist(setId);
+
         return actionRepository.countByDistributionSetId(setId) > 0;
     }
 
@@ -903,11 +902,15 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteDistributionSet(final Long setId) {
+        throwExceptionIfDistributionSetDoesNotExist(setId);
+
+        deleteDistributionSet(Lists.newArrayList(setId));
+    }
+
+    private void throwExceptionIfDistributionSetDoesNotExist(final Long setId) {
         if (!distributionSetRepository.exists(setId)) {
             throw new EntityNotFoundException(DistributionSet.class, setId);
         }
-
-        deleteDistributionSet(Lists.newArrayList(setId));
     }
 
     @Override

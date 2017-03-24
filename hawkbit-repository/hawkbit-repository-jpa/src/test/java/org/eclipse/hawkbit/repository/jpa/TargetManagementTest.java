@@ -8,12 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static com.google.common.collect.Iterables.limit;
-import static com.google.common.collect.Iterables.toArray;
-import static com.google.common.collect.Lists.newArrayList;
-import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
@@ -65,37 +60,73 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
-    @Description("Ensures that an anonymous target update is not monitored by auditing.")
-    @WithUser(principal = "knownPrincipal", authorities = { SpPermission.READ_TARGET, SpPermission.UPDATE_TARGET,
-            SpPermission.CREATE_TARGET }, allSpPermissions = false)
+    @Description("Verifies that management get access react as specfied on calls for non existing entities by means "
+            + "of Optional not present.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    public void nonExistingEntityAccessReturnsNotPresent() {
+        assertThat(targetManagement.findTargetByControllerID(NOT_EXIST_ID)).isNotPresent();
+        assertThat(targetManagement.findTargetById(NOT_EXIST_IDL)).isNotPresent();
+    }
+
+    @Test
+    @Description("Verifies that management queries react as specfied on calls for non existing entities "
+            + " by means of throwing EntityNotFoundException.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 2) })
-    public void controllerAccessDoesNotChangeAuditData() throws Exception {
-        // create target first with "knownPrincipal" user and audit data
-        final String knownTargetControllerId = "target1";
-        final String knownCreatedBy = "knownPrincipal";
-        testdataFactory.createTarget(knownTargetControllerId);
-        targetManagement.updateTarget(entityFactory.target().update(knownTargetControllerId).description("updated1"));
-        final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownTargetControllerId)
-                .get();
-        assertThat(findTargetByControllerID.getCreatedBy()).isEqualTo(knownCreatedBy);
-        assertThat(findTargetByControllerID.getCreatedAt()).isNotNull();
-        assertThat(findTargetByControllerID.getLastModifiedBy()).isEqualTo(knownCreatedBy);
-        assertThat(findTargetByControllerID.getLastModifiedAt()).isNotNull();
+            @Expect(type = TargetTagCreatedEvent.class, count = 1) })
+    public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
+        final TargetTag tag = tagManagement.createTargetTag(entityFactory.tag().create().name("A"));
+        final Target target = testdataFactory.createTarget();
 
-        // make an update, audit information should not be changed, run as
-        // controller principal!
-        securityRule.runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
-            targetManagement.updateTarget(entityFactory.target().update("target1").description("updated2"));
-            return null;
-        });
+        verifyThrownExceptionBy(
+                () -> targetManagement.assignTag(Lists.newArrayList(target.getControllerId()), NOT_EXIST_IDL),
+                "TargetTag");
+        verifyThrownExceptionBy(() -> targetManagement.assignTag(Lists.newArrayList(NOT_EXIST_ID), tag.getId()),
+                "Target");
 
-        // verify that audit information has not changed
-        final Target targetVerify = targetManagement.findTargetByControllerID(knownTargetControllerId).get();
-        assertThat(targetVerify.getCreatedBy()).isEqualTo(findTargetByControllerID.getCreatedBy());
-        assertThat(targetVerify.getCreatedAt()).isEqualTo(findTargetByControllerID.getCreatedAt());
-        assertThat(targetVerify.getLastModifiedBy()).isEqualTo(findTargetByControllerID.getLastModifiedBy());
-        assertThat(targetVerify.getLastModifiedAt()).isEqualTo(findTargetByControllerID.getLastModifiedAt());
+        verifyThrownExceptionBy(() -> targetManagement.countTargetByAssignedDistributionSet(NOT_EXIST_IDL),
+                "DistributionSet");
+        verifyThrownExceptionBy(() -> targetManagement.countTargetByInstalledDistributionSet(NOT_EXIST_IDL),
+                "DistributionSet");
+
+        verifyThrownExceptionBy(() -> targetManagement.countTargetByTargetFilterQuery(NOT_EXIST_IDL),
+                "TargetFilterQuery");
+        verifyThrownExceptionBy(
+                () -> targetManagement.countTargetsByTargetFilterQueryAndNonDS(NOT_EXIST_IDL, "name==*"),
+                "DistributionSet");
+
+        verifyThrownExceptionBy(() -> targetManagement.deleteTarget(NOT_EXIST_ID), "Target");
+        verifyThrownExceptionBy(() -> targetManagement.deleteTargets(Lists.newArrayList(NOT_EXIST_IDL)), "Target");
+
+        verifyThrownExceptionBy(
+                () -> targetManagement.findAllTargetsByTargetFilterQueryAndNonDS(pageReq, NOT_EXIST_IDL, "name==*"),
+                "DistributionSet");
+        verifyThrownExceptionBy(
+                () -> targetManagement.findAllTargetsInRolloutGroupWithoutAction(pageReq, NOT_EXIST_IDL),
+                "RolloutGroup");
+        verifyThrownExceptionBy(() -> targetManagement.findTargetByAssignedDistributionSet(NOT_EXIST_IDL, pageReq),
+                "DistributionSet");
+        verifyThrownExceptionBy(
+                () -> targetManagement.findTargetByAssignedDistributionSet(NOT_EXIST_IDL, "name==*", pageReq),
+                "DistributionSet");
+
+        verifyThrownExceptionBy(() -> targetManagement.findTargetByInstalledDistributionSet(NOT_EXIST_IDL, pageReq),
+                "DistributionSet");
+        verifyThrownExceptionBy(
+                () -> targetManagement.findTargetByInstalledDistributionSet(NOT_EXIST_IDL, "name==*", pageReq),
+                "DistributionSet");
+
+        verifyThrownExceptionBy(
+                () -> targetManagement.toggleTagAssignment(Lists.newArrayList(target.getControllerId()), NOT_EXIST_ID),
+                "TargetTag");
+        verifyThrownExceptionBy(
+                () -> targetManagement.toggleTagAssignment(Lists.newArrayList(NOT_EXIST_ID), tag.getName()), "Target");
+
+        verifyThrownExceptionBy(() -> targetManagement.unAssignAllTargetsByTag(NOT_EXIST_IDL), "TargetTag");
+        verifyThrownExceptionBy(() -> targetManagement.unAssignTag(NOT_EXIST_ID, tag.getId()), "Target");
+        verifyThrownExceptionBy(() -> targetManagement.unAssignTag(target.getControllerId(), NOT_EXIST_IDL),
+                "TargetTag");
+        verifyThrownExceptionBy(() -> targetManagement.updateTarget(entityFactory.target().update(NOT_EXIST_ID)),
+                "Target");
     }
 
     @Test
@@ -224,7 +255,6 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
                 .getControllerId());
         assignTarget.add(targetManagement.createTarget(entityFactory.target().create().controllerId("targetId1236"))
                 .getControllerId());
-        assignTarget.add("NotExist");
 
         final TargetTag targetTag = tagManagement.createTargetTag(entityFactory.tag().create().name("Tag1"));
 
@@ -236,9 +266,6 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         TargetTag findTargetTag = tagManagement.findTargetTag("Tag1").get();
         assertThat(assignedTargets.size()).as("Assigned targets are wrong")
                 .isEqualTo(findTargetTag.getAssignedToTargets().size());
-
-        assertThat(targetManagement.unAssignTag("NotExist", findTargetTag.getId())).as("Unassign target does not work")
-                .isNull();
 
         final Target unAssignTarget = targetManagement.unAssignTag("targetId123", findTargetTag.getId());
         assertThat(unAssignTarget.getControllerId()).as("Controller id is wrong").isEqualTo("targetId123");
@@ -478,7 +505,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         firstList = firstList.stream()
                 .map(t -> targetManagement.updateTarget(
                         entityFactory.target().update(t.getControllerId()).name(t.getName().concat("\tchanged"))))
-                .collect(toList());
+                .collect(Collectors.toList());
 
         // verify that all entries are found
         _founds: for (final Target foundTarget : allFound) {
@@ -507,10 +534,10 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         targetManagement.deleteTarget(extra.getControllerId());
 
         final int numberToDelete = 50;
-        final Iterable<Target> targetsToDelete = limit(firstList, numberToDelete);
-        final Target[] deletedTargets = toArray(targetsToDelete, Target.class);
-        final List<Long> targetsIdsToDelete = newArrayList(targetsToDelete.iterator()).stream().map(Target::getId)
-                .collect(toList());
+        final Iterable<Target> targetsToDelete = Iterables.limit(firstList, numberToDelete);
+        final Target[] deletedTargets = Iterables.toArray(targetsToDelete, Target.class);
+        final List<Long> targetsIdsToDelete = Lists.newArrayList(targetsToDelete.iterator()).stream().map(Target::getId)
+                .collect(Collectors.toList());
 
         targetManagement.deleteTargets(targetsIdsToDelete);
 
@@ -723,27 +750,23 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final String rsqlFilter = "tag==Targ-A-Tag,id==target-id-B-00001,id==target-id-B-00008";
         final TargetTag targTagA = tagManagement.createTargetTag(entityFactory.tag().create().name("Targ-A-Tag"));
         final List<String> targAs = testdataFactory.createTargets(25, "target-id-A", "first description").stream()
-                .map(Target::getControllerId).collect(toList());
+                .map(Target::getControllerId).collect(Collectors.toList());
         targetManagement.toggleTagAssignment(targAs, targTagA.getName());
 
         testdataFactory.createTargets(25, "target-id-B", "first description");
 
-        final Page<Target> foundTargets = targetManagement.findTargetsAll(rsqlFilter, new PageRequest(0, 100));
+        final Page<Target> foundTargets = targetManagement.findTargetsAll(rsqlFilter, pageReq);
 
-        assertThat(targetManagement.findTargetsAll(new PageRequest(0, 100)).getNumberOfElements()).as("Total targets")
-                .isEqualTo(50);
+        assertThat(targetManagement.countTargetsAll()).as("Total targets").isEqualTo(50L);
         assertThat(foundTargets.getTotalElements()).as("Targets in RSQL filter").isEqualTo(27L);
-
     }
 
     @Test
     @Description("Verify that the find all targets by ids method contains the entities that we are looking for")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 12) })
     public void verifyFindTargetAllById() {
-        final List<Long> searchIds = new ArrayList<>();
-        searchIds.add(testdataFactory.createTarget("target-4").getId());
-        searchIds.add(testdataFactory.createTarget("target-5").getId());
-        searchIds.add(testdataFactory.createTarget("target-6").getId());
+        final List<Long> searchIds = Lists.newArrayList(testdataFactory.createTarget("target-4").getId(),
+                testdataFactory.createTarget("target-5").getId(), testdataFactory.createTarget("target-6").getId());
         for (int i = 0; i < 9; i++) {
             testdataFactory.createTarget("test" + i);
         }

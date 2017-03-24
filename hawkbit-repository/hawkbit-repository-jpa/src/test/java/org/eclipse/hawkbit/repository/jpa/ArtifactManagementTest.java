@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -23,8 +22,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
@@ -48,38 +47,41 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
-    @Description("Verifies that management queries react as specfied on calls for non existing entities.")
+    @Description("Verifies that management get access react as specfied on calls for non existing entities by means "
+            + "of Optional not present.")
     @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 1) })
-    public void nonExistingEntityQueries() throws URISyntaxException {
+    public void nonExistingEntityAccessReturnsNotPresent() {
         final SoftwareModule module = testdataFactory.createSoftwareModuleOs();
 
-        assertThatThrownBy(() -> artifactManagement.createArtifact(IOUtils.toInputStream("test", "UTF-8"), 1234L, "xxx",
-                null, null, false, null)).isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
-                        .hasMessageContaining("SoftwareModule");
+        assertThat(artifactManagement.findArtifact(NOT_EXIST_IDL)).isNotPresent();
+        assertThat(artifactManagement.findByFilenameAndSoftwareModule(NOT_EXIST_ID, module.getId()).isPresent())
+                .isFalse();
 
-        assertThatThrownBy(
-                () -> artifactManagement.createArtifact(IOUtils.toInputStream("test", "UTF-8"), 1234L, "xxx", false))
-                        .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
-                        .hasMessageContaining("SoftwareModule");
+        assertThat(artifactManagement.findFirstArtifactBySHA1(NOT_EXIST_ID)).isNotPresent();
+        assertThat(artifactManagement.loadArtifactBinary(NOT_EXIST_ID)).isNotPresent();
+    }
 
-        assertThatThrownBy(() -> artifactManagement.deleteArtifact(1234L)).isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("1234").hasMessageContaining("Artifact");
+    @Test
+    @Description("Verifies that management queries react as specfied on calls for non existing entities "
+            + " by means of throwing EntityNotFoundException.")
+    @ExpectEvents({ @Expect(type = SoftwareModuleDeletedEvent.class, count = 0) })
+    public void entityQueriesReferringToNotExistingEntitiesThrowsException() throws URISyntaxException {
 
-        assertThat(artifactManagement.findArtifact(1234L)).isNotPresent();
-        assertThatThrownBy(() -> artifactManagement.findArtifactBySoftwareModule(pageReq, 1234L))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
-                .hasMessageContaining("SoftwareModule");
-        assertThat(artifactManagement.findArtifactByFilename("1234")).isNotPresent();
+        verifyThrownExceptionBy(() -> artifactManagement.createArtifact(IOUtils.toInputStream("test", "UTF-8"),
+                NOT_EXIST_IDL, "xxx", null, null, false, null), "SoftwareModule");
 
-        assertThatThrownBy(() -> artifactManagement.findByFilenameAndSoftwareModule("xxx", 1234L))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("1234")
-                .hasMessageContaining("SoftwareModule");
+        verifyThrownExceptionBy(
+                () -> artifactManagement.createArtifact(IOUtils.toInputStream("test", "UTF-8"), 1234L, "xxx", false),
+                "SoftwareModule");
 
-        assertThat(artifactManagement.findByFilenameAndSoftwareModule("1234", module.getId())).isNotPresent();
+        verifyThrownExceptionBy(() -> artifactManagement.deleteArtifact(NOT_EXIST_IDL), "Artifact");
 
-        assertThat(artifactManagement.findFirstArtifactBySHA1("1234")).isNotPresent();
-        assertThat(artifactManagement.loadArtifactBinary("1234")).isNotPresent();
+        verifyThrownExceptionBy(() -> artifactManagement.findArtifactBySoftwareModule(pageReq, NOT_EXIST_IDL),
+                "SoftwareModule");
+        assertThat(artifactManagement.findArtifactByFilename(NOT_EXIST_ID).isPresent()).isFalse();
 
+        verifyThrownExceptionBy(() -> artifactManagement.findByFilenameAndSoftwareModule("xxx", NOT_EXIST_IDL),
+                "SoftwareModule");
     }
 
     @Test
