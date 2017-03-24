@@ -30,7 +30,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -79,6 +78,7 @@ public abstract class AbstractDistributionSetDetails
         dsMetadataTable = new DistributionSetMetadatadetailsLayout(i18n, permissionChecker, distributionSetManagement,
                 dsMetadataPopupLayout, entityFactory, uiNotification);
         createSoftwareModuleTab();
+        addDetailsTab();
     }
 
     @Override
@@ -140,14 +140,13 @@ public abstract class AbstractDistributionSetDetails
         UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds.get(), null));
     }
 
-    @Override
-    protected void addTabs(final TabSheet detailsTab) {
-        detailsTab.addTab(getDetailsLayout(), getI18n().getMessage("caption.tab.details"), null);
-        detailsTab.addTab(getDescriptionLayout(), getI18n().getMessage("caption.tab.description"), null);
-        detailsTab.addTab(softwareModuleTab, getI18n().getMessage("caption.softwares.distdetail.tab"), null);
-        detailsTab.addTab(getTagsLayout(), getI18n().getMessage("caption.tags.tab"), null);
-        detailsTab.addTab(getLogLayout(), getI18n().getMessage("caption.logs.tab"), null);
-        detailsTab.addTab(dsMetadataTable, getI18n().getMessage("caption.metadata"), null);
+    private final void addDetailsTab() {
+        getDetailsTab().addTab(getDetailsLayout(), getI18n().getMessage("caption.tab.details"), null);
+        getDetailsTab().addTab(getDescriptionLayout(), getI18n().getMessage("caption.tab.description"), null);
+        getDetailsTab().addTab(softwareModuleTab, getI18n().getMessage("caption.softwares.distdetail.tab"), null);
+        getDetailsTab().addTab(getTagsLayout(), getI18n().getMessage("caption.tags.tab"), null);
+        getDetailsTab().addTab(getLogLayout(), getI18n().getMessage("caption.logs.tab"), null);
+        getDetailsTab().addTab(dsMetadataTable, getI18n().getMessage("caption.metadata"), null);
     }
 
     protected void populateDetails() {

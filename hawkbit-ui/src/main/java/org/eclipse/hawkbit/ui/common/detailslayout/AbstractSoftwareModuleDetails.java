@@ -29,7 +29,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -64,7 +63,7 @@ public abstract class AbstractSoftwareModuleDetails
         swmMetadataTable.init(getI18n(), getPermissionChecker(), softwareManagement, swMetadataPopupLayout,
                 entityFactory);
 
-        addTabs(detailsTab);
+        addDetailsTab();
     }
 
     /**
@@ -93,12 +92,11 @@ public abstract class AbstractSoftwareModuleDetails
         onBaseEntityEvent(softwareModuleEvent);
     }
 
-    @Override
-    protected final void addTabs(final TabSheet detailsTab) {
-        detailsTab.addTab(getDetailsLayout(), getI18n().getMessage("caption.tab.details"), null);
-        detailsTab.addTab(getDescriptionLayout(), getI18n().getMessage("caption.tab.description"), null);
-        detailsTab.addTab(getLogLayout(), getI18n().getMessage("caption.logs.tab"), null);
-        detailsTab.addTab(swmMetadataTable, getI18n().getMessage("caption.metadata"), null);
+    private final void addDetailsTab() {
+        getDetailsTab().addTab(getDetailsLayout(), getI18n().getMessage("caption.tab.details"), null);
+        getDetailsTab().addTab(getDescriptionLayout(), getI18n().getMessage("caption.tab.description"), null);
+        getDetailsTab().addTab(getLogLayout(), getI18n().getMessage("caption.logs.tab"), null);
+        getDetailsTab().addTab(swmMetadataTable, getI18n().getMessage("caption.metadata"), null);
     }
 
     @Override

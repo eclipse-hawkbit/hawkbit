@@ -76,7 +76,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
                 entityFactory);
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
-        addTabs(detailsTab);
+        addDetailsTab();
         restoreState();
     }
 
@@ -85,15 +85,14 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         return getI18n().getMessage("target.details.header");
     }
 
-    @Override
-    protected final void addTabs(final TabSheet detailsTab) {
-        detailsTab.addTab(getDetailsLayout(), getI18n().getMessage("caption.tab.details"), null);
-        detailsTab.addTab(getDescriptionLayout(), getI18n().getMessage("caption.tab.description"), null);
-        detailsTab.addTab(getAttributesLayout(), getI18n().getMessage("caption.attributes.tab"), null);
-        detailsTab.addTab(createAssignedDistLayout(), getI18n().getMessage("header.target.assigned"), null);
-        detailsTab.addTab(createInstalledDistLayout(), getI18n().getMessage("header.target.installed"), null);
-        detailsTab.addTab(getTagsLayout(), getI18n().getMessage("caption.tags.tab"), null);
-        detailsTab.addTab(getLogLayout(), getI18n().getMessage("caption.logs.tab"), null);
+    private final void addDetailsTab() {
+        getDetailsTab().addTab(getDetailsLayout(), getI18n().getMessage("caption.tab.details"), null);
+        getDetailsTab().addTab(getDescriptionLayout(), getI18n().getMessage("caption.tab.description"), null);
+        getDetailsTab().addTab(getAttributesLayout(), getI18n().getMessage("caption.attributes.tab"), null);
+        getDetailsTab().addTab(createAssignedDistLayout(), getI18n().getMessage("header.target.assigned"), null);
+        getDetailsTab().addTab(createInstalledDistLayout(), getI18n().getMessage("header.target.installed"), null);
+        getDetailsTab().addTab(getTagsLayout(), getI18n().getMessage("caption.tags.tab"), null);
+        getDetailsTab().addTab(getLogLayout(), getI18n().getMessage("caption.logs.tab"), null);
     }
 
     private Component createInstalledDistLayout() {
@@ -131,12 +130,12 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
     @Override
     protected boolean onLoadIsTableRowSelected() {
-        return managementUIState.getLastSelectedTargetId() != null;
+        return getManagementUIState().getLastSelectedTargetId() != null;
     }
 
     @Override
     protected boolean onLoadIsTableMaximized() {
-        return managementUIState.isTargetTableMaximized();
+        return getManagementUIState().isTargetTableMaximized();
     }
 
     @Override

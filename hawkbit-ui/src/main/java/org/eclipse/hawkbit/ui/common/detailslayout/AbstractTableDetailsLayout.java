@@ -57,7 +57,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     private Button manageMetadataBtn;
 
-    protected TabSheet detailsTab;
+    private TabSheet detailsTab;
 
     private final VerticalLayout detailsLayout;
 
@@ -69,7 +69,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     private final VerticalLayout tagsLayout;
 
-    protected final ManagementUIState managementUIState;
+    private final ManagementUIState managementUIState;
 
     protected AbstractTableDetailsLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState) {
@@ -86,6 +86,16 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         eventBus.subscribe(this);
     }
 
+    public void setSelectedBaseEntity(final T selectedBaseEntity) {
+        this.selectedBaseEntity = selectedBaseEntity;
+    }
+
+    protected final VerticalLayout createTabLayout() {
+        final VerticalLayout tabLayout = SPUIComponentProvider.getDetailTabLayout();
+        tabLayout.addStyleName("details-layout");
+        return tabLayout;
+    }
+
     protected SpPermissionChecker getPermissionChecker() {
         return permissionChecker;
     }
@@ -96,10 +106,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     protected T getSelectedBaseEntity() {
         return selectedBaseEntity;
-    }
-
-    public void setSelectedBaseEntity(final T selectedBaseEntity) {
-        this.selectedBaseEntity = selectedBaseEntity;
     }
 
     /**
@@ -119,69 +125,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         }
     }
 
-    private void createComponents() {
-        caption = createHeaderCaption();
-        caption.setImmediate(true);
-        caption.setContentMode(ContentMode.HTML);
-        caption.setId(getDetailsHeaderCaptionId());
-
-        editButton = SPUIComponentProvider.getButton("", "", "", null, false, FontAwesome.PENCIL_SQUARE_O,
-                SPUIButtonStyleSmallNoBorder.class);
-        editButton.setId(getEditButtonId());
-        editButton.addClickListener(this::onEdit);
-        editButton.setEnabled(false);
-
-        manageMetadataBtn = SPUIComponentProvider.getButton("", "", "", null, false, FontAwesome.LIST_ALT,
-                SPUIButtonStyleSmallNoBorder.class);
-        manageMetadataBtn.setId(getEditButtonId());
-        manageMetadataBtn.setDescription(i18n.getMessage("tooltip.metadata.icon"));
-        manageMetadataBtn.addClickListener(this::showMetadata);
-        manageMetadataBtn.setEnabled(false);
-
-        detailsTab = SPUIComponentProvider.getDetailsTabSheet();
-        detailsTab.setImmediate(true);
-        detailsTab.setWidth(98, Unit.PERCENTAGE);
-        detailsTab.setHeight(90, Unit.PERCENTAGE);
-        detailsTab.addStyleName(SPUIStyleDefinitions.DETAILS_LAYOUT_STYLE);
-        detailsTab.setId(getTabSheetId());
-    }
-
-    private void buildLayout() {
-        final HorizontalLayout nameEditLayout = new HorizontalLayout();
-        nameEditLayout.setWidth(100.0F, Unit.PERCENTAGE);
-        nameEditLayout.addComponent(caption);
-        nameEditLayout.setComponentAlignment(caption, Alignment.TOP_LEFT);
-        if (hasEditPermission()) {
-            nameEditLayout.addComponent(editButton);
-            nameEditLayout.setComponentAlignment(editButton, Alignment.TOP_RIGHT);
-            if (isMetadataIconToBeDisplayed()) {
-                nameEditLayout.addComponent(manageMetadataBtn);
-                nameEditLayout.setComponentAlignment(manageMetadataBtn, Alignment.TOP_RIGHT);
-            }
-        }
-        nameEditLayout.setExpandRatio(caption, 1.0F);
-        nameEditLayout.addStyleName(SPUIStyleDefinitions.WIDGET_TITLE);
-
-        addComponent(nameEditLayout);
-        setComponentAlignment(nameEditLayout, Alignment.TOP_CENTER);
-        addComponent(detailsTab);
-        setComponentAlignment(nameEditLayout, Alignment.TOP_CENTER);
-
-        setSizeFull();
-        setHeightUndefined();
-        addStyleName(SPUIStyleDefinitions.WIDGET_STYLE);
-    }
-
-    private Label createHeaderCaption() {
-        return new LabelBuilder().name(getDefaultCaption()).buildCaptionLabel();
-    }
-
-    protected final VerticalLayout createTabLayout() {
-        final VerticalLayout tabLayout = SPUIComponentProvider.getDetailTabLayout();
-        tabLayout.addStyleName("details-layout");
-        return tabLayout;
-    }
-
     protected void setName(final String headerCaption, final String value) {
         caption.setValue(HawkbitCommonUtil.getSoftwareModuleName(headerCaption, value));
     }
@@ -194,24 +137,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         if (onLoadIsTableMaximized()) {
             setVisible(false);
         }
-    }
-
-    /**
-     * If no data in table (i,e no row selected),then disable the edit button.
-     * If row is selected ,enable edit button.
-     */
-    private void populateData(final T selectedBaseEntity) {
-        this.selectedBaseEntity = selectedBaseEntity;
-        editButton.setEnabled(selectedBaseEntity != null);
-        manageMetadataBtn.setEnabled(selectedBaseEntity != null);
-        if (selectedBaseEntity == null) {
-            setName(getDefaultCaption(), StringUtils.EMPTY);
-        } else {
-            setName(getDefaultCaption(), getName());
-        }
-        populateLog();
-        populateDescription();
-        populateDetailsWidget();
     }
 
     protected void populateTags(final AbstractTagToken<?> tagToken) {
@@ -291,6 +216,105 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         return tagsLayout;
     }
 
+    protected TabSheet getDetailsTab() {
+        return detailsTab;
+    }
+
+    protected ManagementUIState getManagementUIState() {
+        return managementUIState;
+    }
+
+    private void createComponents() {
+        caption = createHeaderCaption();
+        caption.setImmediate(true);
+        caption.setContentMode(ContentMode.HTML);
+        caption.setId(getDetailsHeaderCaptionId());
+
+        editButton = SPUIComponentProvider.getButton("", "", "", null, false, FontAwesome.PENCIL_SQUARE_O,
+                SPUIButtonStyleSmallNoBorder.class);
+        editButton.setId(getEditButtonId());
+        editButton.addClickListener(this::onEdit);
+        editButton.setEnabled(false);
+
+        manageMetadataBtn = SPUIComponentProvider.getButton("", "", "", null, false, FontAwesome.LIST_ALT,
+                SPUIButtonStyleSmallNoBorder.class);
+        manageMetadataBtn.setId(getEditButtonId());
+        manageMetadataBtn.setDescription(i18n.getMessage("tooltip.metadata.icon"));
+        manageMetadataBtn.addClickListener(this::showMetadata);
+        manageMetadataBtn.setEnabled(false);
+
+        detailsTab = SPUIComponentProvider.getDetailsTabSheet();
+        detailsTab.setImmediate(true);
+        detailsTab.setWidth(98, Unit.PERCENTAGE);
+        detailsTab.setHeight(90, Unit.PERCENTAGE);
+        detailsTab.addStyleName(SPUIStyleDefinitions.DETAILS_LAYOUT_STYLE);
+        detailsTab.setId(getTabSheetId());
+    }
+
+    private void buildLayout() {
+        final HorizontalLayout nameEditLayout = new HorizontalLayout();
+        nameEditLayout.setWidth(100.0F, Unit.PERCENTAGE);
+        nameEditLayout.addComponent(caption);
+        nameEditLayout.setComponentAlignment(caption, Alignment.TOP_LEFT);
+        if (hasEditPermission()) {
+            nameEditLayout.addComponent(editButton);
+            nameEditLayout.setComponentAlignment(editButton, Alignment.TOP_RIGHT);
+            if (isMetadataIconToBeDisplayed()) {
+                nameEditLayout.addComponent(manageMetadataBtn);
+                nameEditLayout.setComponentAlignment(manageMetadataBtn, Alignment.TOP_RIGHT);
+            }
+        }
+        nameEditLayout.setExpandRatio(caption, 1.0F);
+        nameEditLayout.addStyleName(SPUIStyleDefinitions.WIDGET_TITLE);
+
+        addComponent(nameEditLayout);
+        setComponentAlignment(nameEditLayout, Alignment.TOP_CENTER);
+        addComponent(detailsTab);
+        setComponentAlignment(nameEditLayout, Alignment.TOP_CENTER);
+
+        setSizeFull();
+        setHeightUndefined();
+        addStyleName(SPUIStyleDefinitions.WIDGET_STYLE);
+    }
+
+    private Label createHeaderCaption() {
+        return new LabelBuilder().name(getDefaultCaption()).buildCaptionLabel();
+    }
+
+    /**
+     * If no data in table (i,e no row selected),then disable the edit button.
+     * If row is selected ,enable edit button.
+     */
+    private void populateData(final T selectedBaseEntity) {
+        this.selectedBaseEntity = selectedBaseEntity;
+        editButton.setEnabled(selectedBaseEntity != null);
+        manageMetadataBtn.setEnabled(selectedBaseEntity != null);
+        if (selectedBaseEntity == null) {
+            setName(getDefaultCaption(), StringUtils.EMPTY);
+        } else {
+            setName(getDefaultCaption(), getName());
+        }
+        populateLog();
+        populateDescription();
+        populateDetailsWidget();
+    }
+
+    private void populateDescription() {
+        if (selectedBaseEntity != null) {
+            updateDescriptionLayout(i18n.getMessage("label.description"), selectedBaseEntity.getDescription());
+        } else {
+            updateDescriptionLayout(i18n.getMessage("label.description"), null);
+        }
+    }
+
+    protected Long getSelectedBaseEntityId() {
+        return selectedBaseEntity == null ? null : selectedBaseEntity.getId();
+    }
+
+    protected abstract void populateDetailsWidget();
+
+    protected abstract void populateMetadataDetails();
+
     /**
      * Default caption of header to be displayed when no data row selected in
      * table.
@@ -298,13 +322,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
      * @return String
      */
     protected abstract String getDefaultCaption();
-
-    /**
-     * Add tabs.
-     * 
-     * @param detailsTab
-     */
-    protected abstract void addTabs(final TabSheet detailsTab);
 
     /**
      * Click listener for edit button.
@@ -322,22 +339,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     protected abstract String getTabSheetId();
 
     protected abstract boolean hasEditPermission();
-
-    private void populateDescription() {
-        if (selectedBaseEntity != null) {
-            updateDescriptionLayout(i18n.getMessage("label.description"), selectedBaseEntity.getDescription());
-        } else {
-            updateDescriptionLayout(i18n.getMessage("label.description"), null);
-        }
-    }
-
-    protected abstract void populateDetailsWidget();
-
-    protected abstract void populateMetadataDetails();
-
-    protected Long getSelectedBaseEntityId() {
-        return selectedBaseEntity == null ? null : selectedBaseEntity.getId();
-    }
 
     protected abstract String getDetailsHeaderCaptionId();
 

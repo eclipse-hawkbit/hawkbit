@@ -38,8 +38,6 @@ public class DistributionDetails extends AbstractDistributionSetDetails {
         super(i18n, eventBus, permissionChecker, managementUIState, distributionAddUpdateWindowLayout,
                 distributionSetManagement, dsMetadataPopupLayout, entityFactory, uiNotification, tagManagement,
                 createSoftwareModuleDetailsTable(i18n, permissionChecker, uiNotification));
-
-        addTabs(detailsTab);
         restoreState();
     }
 
@@ -50,12 +48,12 @@ public class DistributionDetails extends AbstractDistributionSetDetails {
 
     @Override
     protected boolean onLoadIsTableRowSelected() {
-        return managementUIState.getSelectedDsIdName().map(Set::isEmpty).orElse(true);
+        return getManagementUIState().getSelectedDsIdName().map(Set::isEmpty).orElse(true);
     }
 
     @Override
     protected boolean onLoadIsTableMaximized() {
-        return managementUIState.isDsTableMaximized();
+        return getManagementUIState().isDsTableMaximized();
     }
 
     @Override
