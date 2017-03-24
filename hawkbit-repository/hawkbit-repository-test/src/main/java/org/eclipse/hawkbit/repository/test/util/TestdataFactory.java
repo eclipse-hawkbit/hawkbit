@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -42,6 +43,12 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
+import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorAction;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
+import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
+import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -126,6 +133,9 @@ public class TestdataFactory {
 
     @Autowired
     private ArtifactManagement artifactManagement;
+
+    @Autowired
+    private RolloutManagement rolloutManagement;
 
     /**
      * Creates {@link DistributionSet} in repository including three
@@ -901,5 +911,57 @@ public class TestdataFactory {
             }
         }
         return result;
+    }
+
+    /**
+     * Creates rollout based on given parameters.
+     * 
+     * @param rolloutName
+     *            of the {@link Rollout}
+     * @param rolloutDescription
+     *            of the {@link Rollout}
+     * @param groupSize
+     *            of the {@link Rollout}
+     * @param filterQuery
+     *            to identify the {@link Target}s
+     * @param distributionSet
+     *            to assign
+     * @param successCondition
+     *            to switch to next group
+     * @param errorCondition
+     *            to switch to next group
+     * @return created {@link Rollout}
+     */
+    public Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
+            final int groupSize, final String filterQuery, final DistributionSet distributionSet,
+            final String successCondition, final String errorCondition) {
+        final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults()
+                .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
+                .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
+                .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
+
+        final Rollout rollout = rolloutManagement.createRollout(entityFactory.rollout().create().name(rolloutName)
+                .description(rolloutDescription).targetFilterQuery(filterQuery).set(distributionSet), groupSize,
+                conditions);
+
+        // Run here, because Scheduler is disabled during tests
+        rolloutManagement.handleRollouts();
+
+        return rolloutManagement.findRolloutById(rollout.getId()).get();
+    }
+
+    /**
+     * Create {@link Rollout} with a new {@link DistributionSet} and
+     * {@link Target}s.
+     * 
+     * @param prefix
+     *            for rollouts name, description,
+     *            {@link Target#getControllerId()} filter
+     * @return created {@link Rollout}
+     */
+    public Rollout createRollout(final String prefix) {
+        createTargets(10, prefix);
+        return createRolloutByVariables(prefix, prefix + " description", 10, "controllerId==" + prefix + "*",
+                createDistributionSet(prefix), "50", "5");
     }
 }

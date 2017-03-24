@@ -310,7 +310,7 @@ public interface RolloutManagement {
      * sufficient due the {@link #checkRunningRollouts(long)} will not check
      * this rollout anymore.
      *
-     * @param rollout
+     * @param rolloutId
      *            the rollout to be paused.
      *
      * @throws EntityNotFoundException
@@ -321,14 +321,14 @@ public interface RolloutManagement {
      * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    void pauseRollout(@NotNull Long rollout);
+    void pauseRollout(@NotNull Long rolloutId);
 
     /**
      * Resumes a paused rollout. The rollout switches back to
      * {@link RolloutStatus#RUNNING} state which is then picked up again by the
      * {@link #checkRunningRollouts(long)}.
      *
-     * @param rollout
+     * @param rolloutId
      *            the rollout to be resumed
      * 
      * @throws EntityNotFoundException
@@ -338,7 +338,7 @@ public interface RolloutManagement {
      *             paused rollouts can be resumed.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    void resumeRollout(@NotNull Long rollout);
+    void resumeRollout(@NotNull Long rolloutId);
 
     /**
      * Starts a rollout which has been created. The rollout must be in

@@ -112,7 +112,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private ActionRepository actionRepository;
 
     @Autowired
-    private DistributionSetRepository distributoinSetRepository;
+    private DistributionSetRepository distributionSetRepository;
 
     @Autowired
     private TargetRepository targetRepository;
@@ -166,7 +166,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
             final Collection<TargetWithActionType> targets, final String actionMessage) {
-        final JpaDistributionSet set = distributoinSetRepository.findOne(dsID);
+        final JpaDistributionSet set = distributionSetRepository.findOne(dsID);
         if (set == null) {
             throw new EntityNotFoundException(DistributionSet.class, dsID);
         }
@@ -536,12 +536,39 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     public Slice<Action> findActionsByTarget(final String controllerId, final Pageable pageable) {
+        throwExceptionIfTargetDoesNotExist(controllerId);
         return actionRepository.findByTargetControllerId(pageable, controllerId);
+    }
+
+    @Override
+    public List<ActionWithStatusCount> findActionsWithStatusCountByTargetOrderByIdDesc(final String controllerId) {
+        throwExceptionIfTargetDoesNotExist(controllerId);
+
+        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        final CriteriaQuery<JpaActionWithStatusCount> query = cb.createQuery(JpaActionWithStatusCount.class);
+        final Root<JpaAction> actionRoot = query.from(JpaAction.class);
+        final ListJoin<JpaAction, JpaActionStatus> actionStatusJoin = actionRoot.join(JpaAction_.actionStatus,
+                JoinType.LEFT);
+        final Join<JpaAction, JpaDistributionSet> actionDsJoin = actionRoot.join(JpaAction_.distributionSet);
+        final Join<JpaAction, JpaRollout> actionRolloutJoin = actionRoot.join(JpaAction_.rollout, JoinType.LEFT);
+
+        final CriteriaQuery<JpaActionWithStatusCount> multiselect = query.distinct(true).multiselect(
+                actionRoot.get(JpaAction_.id), actionRoot.get(JpaAction_.actionType), actionRoot.get(JpaAction_.active),
+                actionRoot.get(JpaAction_.forcedTime), actionRoot.get(JpaAction_.status),
+                actionRoot.get(JpaAction_.createdAt), actionRoot.get(JpaAction_.lastModifiedAt),
+                actionDsJoin.get(JpaDistributionSet_.id), actionDsJoin.get(JpaDistributionSet_.name),
+                actionDsJoin.get(JpaDistributionSet_.version), cb.count(actionStatusJoin),
+                actionRolloutJoin.get(JpaRollout_.name));
+        multiselect.where(cb.equal(actionRoot.get(JpaAction_.target).get(JpaTarget_.controllerId), controllerId));
+        multiselect.orderBy(cb.desc(actionRoot.get(JpaAction_.id)));
+        multiselect.groupBy(actionRoot.get(JpaAction_.id));
+        return Collections.unmodifiableList(entityManager.createQuery(multiselect).getResultList());
     }
 
     @Override
     public Page<Action> findActionsByTarget(final String rsqlParam, final String controllerId,
             final Pageable pageable) {
+        throwExceptionIfTargetDoesNotExist(controllerId);
 
         final Specification<JpaAction> byTargetSpec = createSpecificationFor(controllerId, rsqlParam);
         final Page<JpaAction> actions = actionRepository.findAll(byTargetSpec, pageable);
@@ -592,6 +619,12 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         }
     }
 
+    private void throwExceptionIfDistributionSetDoesNotExist(final Long dsId) {
+        if (!distributionSetRepository.exists(dsId)) {
+            throw new EntityNotFoundException(DistributionSet.class, dsId);
+        }
+    }
+
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
@@ -636,7 +669,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         final Long totalCount = entityManager.createQuery(countMsgQuery).getSingleResult();
 
         final CriteriaQuery<String> msgQuery = cb.createQuery(String.class);
-        final Root<JpaActionStatus> as = msgQuery.from(JpaActionStatus.class);
+        final Root<JpaActionStatus>as = msgQuery.from(JpaActionStatus.class);
         final ListJoin<JpaActionStatus, String> join = as.joinList("messages", JoinType.LEFT);
         final CriteriaQuery<String> selMsgQuery = msgQuery.select(join);
         selMsgQuery.where(cb.equal(as.get(JpaActionStatus_.id), actionStatusId));
@@ -668,6 +701,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     public Slice<Action> findActionsByDistributionSet(final Pageable pageable, final Long dsId) {
+        throwExceptionIfDistributionSetDoesNotExist(dsId);
+
         return actionRepository.findByDistributionSetId(pageable, dsId);
     }
 
@@ -680,13 +715,13 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     public Optional<DistributionSet> getAssignedDistributionSet(final String controllerId) {
         throwExceptionIfTargetDoesNotExist(controllerId);
 
-        return distributoinSetRepository.findAssignedToTarget(controllerId);
+        return distributionSetRepository.findAssignedToTarget(controllerId);
     }
 
     @Override
     public Optional<DistributionSet> getInstalledDistributionSet(final String controllerId) {
         throwExceptionIfTargetDoesNotExist(controllerId);
 
-        return distributoinSetRepository.findInstalledAtTarget(controllerId);
+        return distributionSetRepository.findInstalledAtTarget(controllerId);
     }
 }

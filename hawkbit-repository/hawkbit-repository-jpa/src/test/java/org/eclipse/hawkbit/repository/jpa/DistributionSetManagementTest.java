@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,8 +22,10 @@ import org.assertj.core.api.Condition;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
@@ -58,32 +60,165 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("DistributionSet Management")
 public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
+    @Test
+    @Description("Verifies that management get access react as specfied on calls for non existing entities by means "
+            + "of Optional not present.")
+    @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void nonExistingEntityAccessReturnsNotPresent() {
+        final DistributionSet set = testdataFactory.createDistributionSet();
+        assertThat(distributionSetManagement.findDistributionSetById(NOT_EXIST_IDL)).isNotPresent();
+        assertThat(distributionSetManagement.findDistributionSetByIdWithDetails(NOT_EXIST_IDL)).isNotPresent();
+        assertThat(distributionSetManagement.findDistributionSetByNameAndVersion(NOT_EXIST_ID, NOT_EXIST_ID))
+                .isNotPresent();
+        assertThat(distributionSetManagement.findDistributionSetMetadata(set.getId(), NOT_EXIST_ID)).isNotPresent();
+
+        assertThat(distributionSetManagement.findDistributionSetTypeById(NOT_EXIST_IDL)).isNotPresent();
+        assertThat(distributionSetManagement.findDistributionSetTypeByKey(NOT_EXIST_ID)).isNotPresent();
+        assertThat(distributionSetManagement.findDistributionSetTypeByName(NOT_EXIST_ID)).isNotPresent();
+    }
+
+    @Test
+    @Description("Verifies that management queries react as specfied on calls for non existing entities "
+            + " by means of throwing EntityNotFoundException.")
+    @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 4) })
+    public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
+        final DistributionSet set = testdataFactory.createDistributionSet();
+        final DistributionSetTag dsTag = testdataFactory.createDistributionSetTags(1).get(0);
+        final SoftwareModule module = testdataFactory.createSoftwareModuleApp();
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.assignMandatorySoftwareModuleTypes(NOT_EXIST_IDL,
+                Lists.newArrayList(osType.getId())), "DistributionSetType");
+        verifyThrownExceptionBy(() -> distributionSetManagement.assignMandatorySoftwareModuleTypes(
+                testdataFactory.findOrCreateDistributionSetType("xxx", "xxx").getId(),
+                Lists.newArrayList(NOT_EXIST_IDL)), "SoftwareModuleType");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.assignOptionalSoftwareModuleTypes(1234L,
+                Lists.newArrayList(osType.getId())), "DistributionSetType");
+        verifyThrownExceptionBy(() -> distributionSetManagement.assignOptionalSoftwareModuleTypes(
+                testdataFactory.findOrCreateDistributionSetType("xxx", "xxx").getId(),
+                Lists.newArrayList(NOT_EXIST_IDL)), "SoftwareModuleType");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.assignSoftwareModules(NOT_EXIST_IDL,
+                Lists.newArrayList(module.getId())), "DistributionSet");
+        verifyThrownExceptionBy(
+                () -> distributionSetManagement.assignSoftwareModules(set.getId(), Lists.newArrayList(NOT_EXIST_IDL)),
+                "SoftwareModule");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.unassignSoftwareModule(NOT_EXIST_IDL, module.getId()),
+                "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetManagement.unassignSoftwareModule(set.getId(), NOT_EXIST_IDL),
+                "SoftwareModule");
+
+        verifyThrownExceptionBy(
+                () -> distributionSetManagement.assignTag(Lists.newArrayList(set.getId()), NOT_EXIST_IDL),
+                "DistributionSetTag");
+
+        verifyThrownExceptionBy(
+                () -> distributionSetManagement.assignTag(Lists.newArrayList(NOT_EXIST_IDL), dsTag.getId()),
+                "DistributionSet");
+
+        verifyThrownExceptionBy(
+                () -> distributionSetManagement.toggleTagAssignment(Lists.newArrayList(NOT_EXIST_IDL), dsTag.getName()),
+                "DistributionSet");
+        verifyThrownExceptionBy(
+                () -> distributionSetManagement.toggleTagAssignment(Lists.newArrayList(set.getId()), NOT_EXIST_ID),
+                "DistributionSetTag");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.unAssignAllDistributionSetsByTag(NOT_EXIST_IDL),
+                "DistributionSetTag");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.unAssignTag(set.getId(), NOT_EXIST_IDL),
+                "DistributionSetTag");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.unAssignTag(NOT_EXIST_IDL, dsTag.getId()),
+                "DistributionSet");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.countDistributionSetsByType(NOT_EXIST_IDL),
+                "DistributionSet");
+
+        verifyThrownExceptionBy(
+                () -> distributionSetManagement
+                        .createDistributionSet(entityFactory.distributionSet().create().name("xxx").type(NOT_EXIST_ID)),
+                "DistributionSetType");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.createDistributionSetMetadata(NOT_EXIST_IDL,
+                Lists.newArrayList(entityFactory.generateMetadata("123", "123"))), "DistributionSet");
+
+        verifyThrownExceptionBy(
+                () -> distributionSetManagement.deleteDistributionSet(Lists.newArrayList(NOT_EXIST_IDL)),
+                "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetManagement.deleteDistributionSet(NOT_EXIST_IDL),
+                "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetManagement.deleteDistributionSetMetadata(NOT_EXIST_IDL, "xxx"),
+                "DistributionSet");
+        verifyThrownExceptionBy(
+                () -> distributionSetManagement.deleteDistributionSetMetadata(set.getId(), NOT_EXIST_ID),
+                "DistributionSetMetadata");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.deleteDistributionSetType(NOT_EXIST_IDL),
+                "DistributionSetType");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.findDistributionSetByAction(NOT_EXIST_IDL), "Action");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.findDistributionSetMetadata(NOT_EXIST_IDL, "xxx"),
+                "DistributionSet");
+
+        verifyThrownExceptionBy(
+                () -> distributionSetManagement.findDistributionSetMetadataByDistributionSetId(NOT_EXIST_IDL, pageReq),
+                "DistributionSet");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement
+                .findDistributionSetMetadataByDistributionSetId(NOT_EXIST_IDL, "name==*", pageReq), "DistributionSet");
+
+        assertThatThrownBy(() -> distributionSetManagement.isDistributionSetInUse(NOT_EXIST_IDL))
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
+                .hasMessageContaining("DistributionSet");
+
+        verifyThrownExceptionBy(
+                () -> distributionSetManagement
+                        .updateDistributionSet(entityFactory.distributionSet().update(NOT_EXIST_IDL)),
+                "DistributionSet");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.updateDistributionSetMetadata(NOT_EXIST_IDL,
+                entityFactory.generateMetadata("xxx", "xxx")), "DistributionSet");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.updateDistributionSetMetadata(set.getId(),
+                entityFactory.generateMetadata(NOT_EXIST_ID, "xxx")), "DistributionSetMetadata");
+
+        verifyThrownExceptionBy(
+                () -> distributionSetManagement
+                        .updateDistributionSetType(entityFactory.distributionSetType().update(NOT_EXIST_IDL)),
+                "DistributionSet");
+    }
 
     @Test
     @Description("Tests the successfull module update of unused distribution set type which is in fact allowed.")
     public void updateUnassignedDistributionSetTypeModules() {
-        DistributionSetType updatableType = distributionSetManagement.createDistributionSetType(
+        final DistributionSetType updatableType = distributionSetManagement.createDistributionSetType(
                 entityFactory.distributionSetType().create().key("updatableType").name("to be deleted"));
         assertThat(
                 distributionSetManagement.findDistributionSetTypeByKey("updatableType").get().getMandatoryModuleTypes())
                         .isEmpty();
 
         // add OS
-        updatableType = distributionSetManagement.assignMandatorySoftwareModuleTypes(updatableType.getId(),
+        distributionSetManagement.assignMandatorySoftwareModuleTypes(updatableType.getId(),
                 Sets.newHashSet(osType.getId()));
         assertThat(
                 distributionSetManagement.findDistributionSetTypeByKey("updatableType").get().getMandatoryModuleTypes())
                         .containsOnly(osType);
 
         // add JVM
-        updatableType = distributionSetManagement.assignMandatorySoftwareModuleTypes(updatableType.getId(),
+        distributionSetManagement.assignMandatorySoftwareModuleTypes(updatableType.getId(),
                 Sets.newHashSet(runtimeType.getId()));
         assertThat(
                 distributionSetManagement.findDistributionSetTypeByKey("updatableType").get().getMandatoryModuleTypes())
                         .containsOnly(osType, runtimeType);
 
         // remove OS
-        updatableType = distributionSetManagement.unassignSoftwareModuleType(updatableType.getId(), osType.getId());
+        distributionSetManagement.unassignSoftwareModuleType(updatableType.getId(), osType.getId());
         assertThat(
                 distributionSetManagement.findDistributionSetTypeByKey("updatableType").get().getMandatoryModuleTypes())
                         .containsOnly(runtimeType);
@@ -120,14 +255,8 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         distributionSetManagement.createDistributionSet(entityFactory.distributionSet().create().name("newtypesoft")
                 .version("1").type(nonUpdatableType.getKey()));
 
-        try {
-            distributionSetManagement.assignMandatorySoftwareModuleTypes(nonUpdatableType.getId(),
-                    Sets.newHashSet(osType.getId()));
-            fail("Should not have worked as DS is in use.");
-        } catch (final EntityReadOnlyException e) {
-
-        }
-
+        assertThatThrownBy(() -> distributionSetManagement.assignMandatorySoftwareModuleTypes(nonUpdatableType.getId(),
+                Sets.newHashSet(osType.getId()))).isInstanceOf(EntityReadOnlyException.class);
     }
 
     @Test
@@ -144,12 +273,9 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         distributionSetManagement.createDistributionSet(entityFactory.distributionSet().create().name("newtypesoft")
                 .version("1").type(nonUpdatableType.getKey()));
 
-        try {
-            distributionSetManagement.unassignSoftwareModuleType(nonUpdatableType.getId(), osType.getId());
-            fail("Should not have worked as DS is in use.");
-        } catch (final EntityReadOnlyException e) {
-
-        }
+        final Long typeId = nonUpdatableType.getId();
+        assertThatThrownBy(() -> distributionSetManagement.unassignSoftwareModuleType(typeId, osType.getId()))
+                .isInstanceOf(EntityReadOnlyException.class);
     }
 
     @Test
@@ -186,12 +312,8 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     public void createDuplicateDistributionSetsFailsWithException() {
         testdataFactory.createDistributionSet("a");
 
-        try {
-            testdataFactory.createDistributionSet("a");
-            fail("Should not have worked as DS with same UK already exists.");
-        } catch (final EntityAlreadyExistsException e) {
-
-        }
+        assertThatThrownBy(() -> testdataFactory.createDistributionSet("a"))
+                .isInstanceOf(EntityAlreadyExistsException.class);
     }
 
     @Test
@@ -261,22 +383,15 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(ds.getId(), target.getControllerId());
         ds = distributionSetManagement.findDistributionSetByIdWithDetails(ds.getId()).get();
 
+        final Long dsId = ds.getId();
         // not allowed as it is assigned now
-        try {
-            ds = distributionSetManagement.assignSoftwareModules(ds.getId(), Sets.newHashSet(os2.getId()));
-            fail("Expected EntityReadOnlyException");
-        } catch (final EntityReadOnlyException e) {
-
-        }
+        assertThatThrownBy(() -> distributionSetManagement.assignSoftwareModules(dsId, Sets.newHashSet(os2.getId())))
+                .isInstanceOf(EntityReadOnlyException.class);
 
         // not allowed as it is assigned now
-        try {
-            ds = distributionSetManagement.unassignSoftwareModule(ds.getId(),
-                    ds.findFirstModuleByType(appType).get().getId());
-            fail("Expected EntityReadOnlyException");
-        } catch (final EntityReadOnlyException e) {
-
-        }
+        final Long appId = ds.findFirstModuleByType(appType).get().getId();
+        assertThatThrownBy(() -> distributionSetManagement.unassignSoftwareModule(dsId, appId))
+                .isInstanceOf(EntityReadOnlyException.class);
     }
 
     @Test
@@ -292,19 +407,15 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 entityFactory.softwareModule().create().name("agent-hub2").version("1.0.5").type(appType.getKey()));
 
         // update data
-        try {
-            distributionSetManagement.assignSoftwareModules(set.getId(), Sets.newHashSet(module.getId()));
-            fail("Should not have worked as module type is not in DS type.");
-        } catch (final UnsupportedSoftwareModuleForThisDistributionSetException e) {
-
-        }
+        assertThatThrownBy(
+                () -> distributionSetManagement.assignSoftwareModules(set.getId(), Sets.newHashSet(module.getId())))
+                        .isInstanceOf(UnsupportedSoftwareModuleForThisDistributionSetException.class);
     }
 
     @Test
     @Description("Legal updates of a DS, e.g. name or description and module addition, removal while still unassigned.")
     public void updateDistributionSet() {
         // prepare data
-        final Target target = testdataFactory.createTarget();
         DistributionSet ds = testdataFactory.createDistributionSet("");
         final SoftwareModule os = testdataFactory.createSoftwareModuleOs();
 
@@ -722,7 +833,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(dsToTargetAssigned.getId(), savedTarget.getControllerId());
 
         // create assigned rollout
-        createRolloutByVariables("test", "test", 5, "name==*", dsToRolloutAssigned, "50", "5");
+        testdataFactory.createRolloutByVariables("test", "test", 5, "name==*", dsToRolloutAssigned, "50", "5");
 
         // delete assigned ds
         assertThat(distributionSetRepository.findAll()).hasSize(4);

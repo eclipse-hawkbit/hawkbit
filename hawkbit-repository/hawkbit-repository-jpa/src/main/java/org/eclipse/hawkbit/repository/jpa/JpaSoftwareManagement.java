@@ -655,6 +655,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     public Optional<SoftwareModuleMetadata> findSoftwareModuleMetadata(final Long moduleId, final String key) {
+        throwExceptionIfSoftwareModuleDoesNotExist(moduleId);
+
         return Optional.ofNullable(softwareModuleMetadataRepository.findOne(new SwMetadataCompositeKey(moduleId, key)));
     }
 
