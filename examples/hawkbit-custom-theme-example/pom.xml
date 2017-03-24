@@ -17,7 +17,7 @@
       <version>0.2.0-SNAPSHOT</version>
    </parent>
    <artifactId>hawkbit-custom-theme-example</artifactId>
-   <name>hawkBit :: Examples :: Custom Theme Example App</name>
+   <name>hawkBit :: Custom Theme Example App</name>
 
    <build>
       <plugins>

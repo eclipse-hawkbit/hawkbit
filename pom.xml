@@ -41,7 +41,8 @@
       <module>hawkbit-artifact-repository-filesystem</module>
       <module>hawkbit-autoconfigure</module>
       <module>hawkbit-test-report</module>
-      <module>hawkbit-runtime</module>
+      <module>examples</module>
+      <module>extensions</module>
       <module>hawkbit-starters</module>
    </modules>
 

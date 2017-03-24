@@ -18,7 +18,7 @@
    </parent>
 
    <artifactId>hawkbit-example-core-feign-client</artifactId>
-   <name>hawkBit :: Examples :: Feign Core Client</name>
+   <name>hawkBit-example :: Feign Core Client</name>
 
    <dependencies>
       <dependency>

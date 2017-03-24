@@ -18,7 +18,7 @@
    </parent>
    <packaging>jar</packaging>
    <artifactId>hawkbit-example-mgmt-simulator</artifactId>
-   <name>hawkBit :: Examples :: Management feign client simulator</name>
+   <name>hawkBit-example :: Management feign client simulator</name>
 
    <build>
       <plugins>
