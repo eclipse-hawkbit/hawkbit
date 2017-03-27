@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit;
+package org.eclipse.hawkbit.rabbitmq.test;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -15,11 +15,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.hawkbit.RabbitMqSetupService.AlivenessException;
-import org.eclipse.hawkbit.amqp.AmqpProperties;
+import org.eclipse.hawkbit.HawkbitServerProperties;
 import org.eclipse.hawkbit.api.HostnameResolver;
-import org.eclipse.hawkbit.integration.listener.DeadletterListener;
-import org.eclipse.hawkbit.integration.listener.ReplyToListener;
+import org.eclipse.hawkbit.rabbitmq.test.RabbitMqSetupService.AlivenessException;
+import org.eclipse.hawkbit.rabbitmq.test.listener.DeadletterListener;
+import org.eclipse.hawkbit.rabbitmq.test.listener.ReplyToListener;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.slf4j.Logger;
@@ -35,7 +35,6 @@ import org.springframework.amqp.rabbit.junit.BrokerRunning;
 import org.springframework.amqp.rabbit.test.RabbitListenerTest;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
@@ -49,7 +48,6 @@ import com.google.common.base.Throwables;
  *
  */
 @Configuration
-@EnableConfigurationProperties({ AmqpProperties.class })
 @RabbitListenerTest
 public class AmqpTestConfiguration {
 
