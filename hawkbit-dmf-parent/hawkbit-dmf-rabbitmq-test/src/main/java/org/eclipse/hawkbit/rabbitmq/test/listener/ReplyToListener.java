@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.rabbitmq.test.listener;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
@@ -21,7 +21,7 @@ public class ReplyToListener implements TestRabbitListener {
 
     public static final String LISTENER_ID = "replyto";
 
-    private final Map<EventTopic, Message> messages = new HashMap<>();
+    private final EnumMap<EventTopic, Message> messages = new EnumMap<>(EventTopic.class);
 
     @Override
     @RabbitListener(id = LISTENER_ID, queues = AmqpTestConfiguration.REPLY_TO_QUEUE)

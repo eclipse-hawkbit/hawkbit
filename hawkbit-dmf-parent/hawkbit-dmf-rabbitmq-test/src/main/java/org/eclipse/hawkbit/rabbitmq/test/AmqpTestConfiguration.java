@@ -21,7 +21,6 @@ import org.eclipse.hawkbit.rabbitmq.test.RabbitMqSetupService.AlivenessException
 import org.eclipse.hawkbit.rabbitmq.test.listener.DeadletterListener;
 import org.eclipse.hawkbit.rabbitmq.test.listener.ReplyToListener;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Binding;
@@ -56,13 +55,8 @@ public class AmqpTestConfiguration {
     public static final String REPLY_TO_EXCHANGE = "reply.queue";
     public static final String REPLY_TO_QUEUE = "reply_queue";
 
-    /**
-     * @return the {@link SystemSecurityContext} singleton bean which make it
-     *         accessible in beans which cannot access the service directly,
-     *         e.g. JPA entities.
-     */
     @Bean
-    public SystemSecurityContextHolder systemSecurityContextHolder() {
+    SystemSecurityContextHolder systemSecurityContextHolder() {
         return SystemSecurityContextHolder.getInstance();
     }
 
@@ -71,33 +65,23 @@ public class AmqpTestConfiguration {
         return new DelegatingSecurityContextExecutorService(Executors.newSingleThreadExecutor());
     }
 
-    /**
-     * @return {@link TaskExecutor} for task execution
-     */
     @Bean
-    public TaskExecutor taskExecutor() {
+    TaskExecutor taskExecutor() {
         return new ConcurrentTaskExecutor(asyncExecutor());
     }
 
-    /**
-     * @return {@link ScheduledExecutorService} based on
-     *         {@link #threadPoolTaskScheduler()}.
-     */
     @Bean
-    public ScheduledExecutorService scheduledExecutorService() {
+    ScheduledExecutorService scheduledExecutorService() {
         return threadPoolTaskScheduler().getScheduledExecutor();
     }
 
-    /**
-     * @return {@link ThreadPoolTaskScheduler} for scheduled operations.
-     */
     @Bean
-    public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
+    ThreadPoolTaskScheduler threadPoolTaskScheduler() {
         return new ThreadPoolTaskScheduler();
     }
 
     @Bean
-    public HostnameResolver hostnameResolver(final HawkbitServerProperties serverProperties) {
+    HostnameResolver hostnameResolver(final HawkbitServerProperties serverProperties) {
         return () -> {
             try {
                 return new URL(serverProperties.getUrl());
@@ -108,7 +92,7 @@ public class AmqpTestConfiguration {
     }
 
     @Bean(name = "dmfClient")
-    public RabbitTemplate dmfClient(ConnectionFactory connectionFactory) {
+    RabbitTemplate dmfClient(ConnectionFactory connectionFactory) {
         final RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(new Jackson2JsonMessageConverter());
         template.setReceiveTimeout(TimeUnit.SECONDS.toMillis(5));
@@ -116,32 +100,32 @@ public class AmqpTestConfiguration {
     }
 
     @Bean
-    public Queue replyToQueue() {
+    Queue replyToQueue() {
         return new Queue(REPLY_TO_QUEUE, false, false, true);
     }
 
     @Bean
-    public FanoutExchange replyToExchange() {
+    FanoutExchange replyToExchange() {
         return new FanoutExchange(REPLY_TO_EXCHANGE, false, true);
     }
 
     @Bean
-    public Binding bindQueueToReplyToExchange() {
+    Binding bindQueueToReplyToExchange() {
         return BindingBuilder.bind(replyToQueue()).to(replyToExchange());
     }
 
     @Bean
-    public DeadletterListener deadletterListener() {
+    DeadletterListener deadletterListener() {
         return new DeadletterListener();
     }
 
     @Bean
-    public ReplyToListener replyToListener() {
+    ReplyToListener replyToListener() {
         return new ReplyToListener();
     }
 
     @Bean
-    public ConnectionFactory rabbitConnectionFactory(final RabbitMqSetupService rabbitmqSetupService)
+    ConnectionFactory rabbitConnectionFactory(final RabbitMqSetupService rabbitmqSetupService)
             throws AlivenessException {
         final CachingConnectionFactory factory = new CachingConnectionFactory();
         factory.setHost(rabbitmqSetupService.getHostname());
@@ -150,7 +134,9 @@ public class AmqpTestConfiguration {
         factory.setPassword(rabbitmqSetupService.getPassword());
         try {
             factory.setVirtualHost(rabbitmqSetupService.createVirtualHost());
-        } catch (final Exception e) {
+            // all exception should be catch the BrokerRunning decide if the
+            // test should break or not
+        } catch (@SuppressWarnings("squid:S2221") final Exception e) {
             Throwables.propagateIfInstanceOf(e, AlivenessException.class);
             LOG.error("Cannot create virtual host {}", e.getMessage());
         }
@@ -158,12 +144,12 @@ public class AmqpTestConfiguration {
     }
 
     @Bean
-    public RabbitMqSetupService rabbitmqSetupService(RabbitProperties properties) {
+    RabbitMqSetupService rabbitmqSetupService(RabbitProperties properties) {
         return new RabbitMqSetupService(properties);
     }
 
     @Bean
-    public BrokerRunning brokerRunning(RabbitMqSetupService rabbitmqSetupService) {
+    BrokerRunning brokerRunning(RabbitMqSetupService rabbitmqSetupService) {
         final BrokerRunning brokerRunning = BrokerRunning.isRunning();
         brokerRunning.setHostName(rabbitmqSetupService.getHostname());
         brokerRunning.getConnectionFactory().setUsername(rabbitmqSetupService.getUsername());

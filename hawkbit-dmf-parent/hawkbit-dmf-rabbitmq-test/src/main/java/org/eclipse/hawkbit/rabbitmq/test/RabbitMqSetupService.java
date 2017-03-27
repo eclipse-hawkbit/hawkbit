@@ -30,7 +30,8 @@ import com.rabbitmq.http.client.domain.UserPermissions;
  */
 public class RabbitMqSetupService {
 
-    private static Client rabbitmqHttpClient;
+    private static final String GUEST = "guest";
+    private Client rabbitmqHttpClient;
     private String virtualHost;
 
     private final String hostname;
@@ -43,16 +44,16 @@ public class RabbitMqSetupService {
         hostname = properties.getHost();
         username = properties.getUsername();
         if (StringUtils.isEmpty(username)) {
-            username = "guest";
+            username = GUEST;
         }
 
         password = properties.getPassword();
         if (StringUtils.isEmpty(password)) {
-            password = "guest";
+            password = GUEST;
         }
     }
 
-    private Client getRabbitmqHttpClient() {
+    private synchronized Client getRabbitmqHttpClient() {
         if (rabbitmqHttpClient == null) {
             try {
                 rabbitmqHttpClient = new Client("http://" + getHostname() + ":15672/api/", getUsername(),
@@ -64,6 +65,9 @@ public class RabbitMqSetupService {
         return rabbitmqHttpClient;
     }
 
+    // would to throw a checked exception, because without the management api
+    // the test cannot be run.
+    @SuppressWarnings("squid:S1162")
     String createVirtualHost() throws JsonProcessingException, AlivenessException {
         if (!getRabbitmqHttpClient().alivenessTest("/")) {
             throw new AlivenessException(getHostname());

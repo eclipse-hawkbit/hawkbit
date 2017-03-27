@@ -10,7 +10,14 @@ package org.eclipse.hawkbit.rabbitmq.test.listener;
 
 import org.springframework.amqp.core.Message;
 
+@FunctionalInterface
 public interface TestRabbitListener {
 
+    /**
+     * handle incoming message
+     * 
+     * @param message
+     *            the message
+     */
     void handleMessage(Message message);
 }
