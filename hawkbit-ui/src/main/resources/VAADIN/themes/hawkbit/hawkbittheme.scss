@@ -38,10 +38,13 @@ $v-grid-cell-horizontal-border: 0px ;
 $v-grid-cell-focused-border: 0px ;
 $v-grid-cell-padding-horizontal:6px;
 
+$v-table-row-height: 31px;
+
 $v-animations-enabled: true;
 
 @import '../valo/valo';
 @import 'customstyles/table';
+@import 'customstyles/grid';
 @import 'customstyles/filter-status';
 @import 'customstyles/colorpicker';
 @import 'customstyles/tags';
@@ -79,6 +82,7 @@ $v-included-components: remove($v-included-components, form);
   @include valo;
   @include generic-styles;
   @include table;
+  @include grid;
   @include filter-status;
   @include colorpicker;
   @include tags;

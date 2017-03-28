@@ -105,7 +105,7 @@
       <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
 
       <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->
-      <!-- Newer versions needed than defined in Boot -->      
+      <!-- Newer versions needed than defined in Boot -->
       <spring-hateoas.version>0.23.0.RELEASE</spring-hateoas.version>
       <assertj.version>3.6.2</assertj.version>
       <!-- Older versions needed than defined in Boot -->
@@ -152,7 +152,7 @@
       <feign.extension.version>9.3.1</feign.extension.version>
       <jayway.awaitility.version>1.7.0</jayway.awaitility.version>
       <io-protostuff.version>1.5.2</io-protostuff.version>
-     
+
       <!-- Misc libraries versions - END -->
 
       <!-- Release - START -->
@@ -218,7 +218,7 @@
             <version>1.4.1</version>
             <executions>
                <execution>
-                  <!-- Make sure that only non-snapshot versions are used for the dependencies. Only active when property 'snapshotDependencyAllowed' is 
+                  <!-- Make sure that only non-snapshot versions are used for the dependencies. Only active when property 'snapshotDependencyAllowed' is
                      false. -->
                   <id>enforce-no-snapshots</id>
                   <goals>
@@ -415,10 +415,10 @@
          <build>
             <plugins>
                <plugin>
-                  <!-- Use the Nexus Staging plugin as a full replacement for the standard Maven Deploy plugin. See https://github.com/sonatype/nexus-maven-plugins/tree/master/staging/maven-plugin 
-                     why this makes sense :-) We can control whether we want to deploy to the Eclipse repo or Maven Central by a combination of the version being a SNAPSHOT 
-                     or RELEASE version and property skipStaging=true/false. In any case we can take advantage of the plugin's "deferred deploy" feature which makes sure that 
-                     all artifacts of a multi-module project are deployed as a whole at the end of the build process instead of deploying each module's artifacts individually 
+                  <!-- Use the Nexus Staging plugin as a full replacement for the standard Maven Deploy plugin. See https://github.com/sonatype/nexus-maven-plugins/tree/master/staging/maven-plugin
+                     why this makes sense :-) We can control whether we want to deploy to the Eclipse repo or Maven Central by a combination of the version being a SNAPSHOT
+                     or RELEASE version and property skipStaging=true/false. In any case we can take advantage of the plugin's "deferred deploy" feature which makes sure that
+                     all artifacts of a multi-module project are deployed as a whole at the end of the build process instead of deploying each module's artifacts individually
                      as part of building the module. -->
                   <groupId>org.sonatype.plugins</groupId>
                   <artifactId>nexus-staging-maven-plugin</artifactId>
@@ -629,7 +629,7 @@
             <artifactId>feign-jaxrs</artifactId>
             <version>${feign.extension.version}</version>
          </dependency>
-        
+
         <!-- Protostuff Io -->
       <dependency>
          <groupId>io.protostuff</groupId>
@@ -641,7 +641,7 @@
          <artifactId>protostuff-runtime</artifactId>
          <version>${io-protostuff.version}</version>
       </dependency>
-         
+
          <!-- RSQL / FIQL parser -->
          <dependency>
             <groupId>cz.jirutka.rsql</groupId>

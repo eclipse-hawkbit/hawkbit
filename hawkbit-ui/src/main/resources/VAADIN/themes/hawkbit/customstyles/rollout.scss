@@ -7,97 +7,76 @@
  * http://www.eclipse.org/legal/epl-v10.html
  */
 @mixin rollout {
-  .rollout-option-group {
-    font-size: 12px;
-    font-weight: 400;
-    margin-left: 8px;
-  }
-
-  .rollout-action-type-layout {
-    .v-caption-padding-right-style {
-      padding-right: 0px !important;
-    }
-  }
-
-  .v-context-menu .v-context-menu-item-basic-icon-container {
-    height: 0px !important;
-    width: 0px !important;
-  }
-
-  .v-context-menu .v-context-menu-item-basic {
-    background-color: #feffff !important;
-    border-radius: 4px;
-    font-family: $app-font-family;
-    font-size: $app-text-font-size;
-    font-weight: normal;
-    font-style: normal;
-  }
-
-  .v-context-menu {
-    background-color: #feffff !important;
-    border-radius: 4px;
-  }
-
-  .v-context-menu .v-context-menu-item-basic:focus, .v-context-menu .v-context-menu-item-basic-submenu:focus, .v-context-menu .v-context-menu-item-basic-open {
-    @include valo-gradient($color: $hawkbit-primary-color);
-    background-color: $hawkbit-primary-color !important;
-    color: #e8eef3;
-    height: 30px;
-    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.05);
-  }
-
-  .disable-action-type-layout {
-    opacity: 0.5;
-  }
-
-  .action-type-padding {
-    padding: 0 0px !important;
-  }
-
-  .rollout-caption-links {
-    font-weight: 400;
-    height: 25px;
-    padding: 0px 4px;
-  }
-
-  .rollout-target-count-message {
-    color: $info-message-color-grey;
-  }
-
-  .rollout-table {
-    .v-table-cell-wrapper {
-      cursor: default;
-    }
-  }
-
-  .v-grid-cell.centeralign {
-    text-align: center;
-  }
-
-  .v-grid-cell {
-    font-size: $v-font-size--small !important;
-    height: 34px !important;
-  }
-
-  .v-grid-row {
-    height: 34px !important;
-  }
-
-  .v-grid-cell.frozen {
-    box-shadow: none !important;
-  }
-
-  .v-grid-cell.frozen + th {
-    border-left: $v-grid-border-size solid $widget-border-color;
-  }
-
-  .v-button-boldhide {
-    text-decoration: none;
-  }
-
-
-
-  .groups-pie-chart {
+	.rollout-option-group{
+  		font-size:12px;
+  		font-weight:400;
+  		margin-left:8px;
+  	}
+  
+  	.rollout-action-type-layout {
+  		.v-caption-padding-right-style{
+  			padding-right:0px !important;
+  		}
+  	}
+  	
+  		
+  	.v-context-menu .v-context-menu-item-basic-icon-container{
+  		height:0px !important;
+  		width:0px !important;
+  	}
+  	
+  	.v-context-menu .v-context-menu-item-basic{
+  		background-color: #feffff !important;
+  		border-radius: 4px;
+  		font-family : $app-font-family;
+  		font-size : $app-text-font-size;
+  		font-weight : normal;
+  		font-style : normal; 
+  	}
+  	
+  	
+  	.v-context-menu{
+   		background-color: #feffff !important;
+   		border-radius: 4px;
+   	}
+  	
+  	.v-context-menu .v-context-menu-item-basic:focus, .v-context-menu .v-context-menu-item-basic-submenu:focus, .v-context-menu .v-context-menu-item-basic-open {
+  	 	@include valo-gradient($color: $hawkbit-primary-color);
+		background-color: $hawkbit-primary-color !important;
+		color: #e8eef3;
+		height: 30px;
+		text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.05);
+	}
+	
+	.disable-action-type-layout{
+		opacity: 0.5;
+	}
+	
+	.action-type-padding{
+		padding: 0 0px !important;
+	}
+	
+	.rollout-caption-links{
+		font-weight: 400;
+  		height: 25px ;
+  		padding: 0px 4px ;
+        }
+	
+	.rollout-target-count-message{
+  		color: $info-message-color-grey;
+	}
+	
+	.rollout-table{
+		.v-table-cell-wrapper {
+      		cursor: default;
+      }
+	}
+   
+   .v-button-boldhide{
+  	  text-decoration:none;
+  	}
+  	
+  	.groups-pie-chart {
     float: right;
 
     svg {
@@ -209,5 +188,6 @@
     .v-slot:nth-child(16n+15) .rollout-group-count { border-left-color: #BBDE8F }
     .v-slot:nth-child(16n+16) .rollout-group-count { border-left-color: #7FB0A4 }
   }
-
+   
 }
+   

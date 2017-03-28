@@ -43,6 +43,7 @@ import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
+import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionWithStatusCount;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -654,6 +655,29 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         }
 
         return actionStatusRepository.getByActionId(pageReq, actionId);
+    }
+
+    @Override
+    public Page<String> findMessagesByActionStatusId(final Pageable pageable, final Long actionStatusId) {
+        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+        final CriteriaQuery<Long> countMsgQuery = cb.createQuery(Long.class);
+        final Root<JpaActionStatus> countMsgQueryFrom = countMsgQuery.distinct(true).from(JpaActionStatus.class);
+        final ListJoin<JpaActionStatus, String> cJoin = countMsgQueryFrom.joinList("messages", JoinType.LEFT);
+        countMsgQuery.select(cb.count(cJoin))
+                .where(cb.equal(countMsgQueryFrom.get(JpaActionStatus_.id), actionStatusId));
+        final Long totalCount = entityManager.createQuery(countMsgQuery).getSingleResult();
+
+        final CriteriaQuery<String> msgQuery = cb.createQuery(String.class);
+        final Root<JpaActionStatus>as = msgQuery.from(JpaActionStatus.class);
+        final ListJoin<JpaActionStatus, String> join = as.joinList("messages", JoinType.LEFT);
+        final CriteriaQuery<String> selMsgQuery = msgQuery.select(join);
+        selMsgQuery.where(cb.equal(as.get(JpaActionStatus_.id), actionStatusId));
+
+        final List<String> result = entityManager.createQuery(selMsgQuery).setFirstResult(pageable.getOffset())
+                .setMaxResults(pageable.getPageSize()).getResultList().stream().collect(Collectors.toList());
+
+        return new PageImpl<>(result, pageable, totalCount);
     }
 
     @Override

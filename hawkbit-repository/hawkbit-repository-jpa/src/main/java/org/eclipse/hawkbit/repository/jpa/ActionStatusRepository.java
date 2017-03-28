@@ -40,8 +40,8 @@ public interface ActionStatusRepository
 
     /**
      * Retrieves all {@link ActionStatus} entries from repository of given
-     * {@link Action}.
-     * 
+     * ActionId.
+     *
      * @param pageReq
      *            parameters
      * @param actionId
@@ -64,5 +64,4 @@ public interface ActionStatusRepository
      */
     @EntityGraph(value = "ActionStatus.withMessages", type = EntityGraphType.LOAD)
     Page<ActionStatus> getByActionId(Pageable pageReq, Long actionId);
-
 }
