@@ -21,19 +21,6 @@
    <name>hawkBit :: Runtime</name>
    <packaging>pom</packaging>
 
-   <distributionManagement>
-      <repository>
-         <id>repo.eclipse.org</id>
-         <name>hawkBit Repository - Release</name>
-         <url>https://repo.eclipse.org/content/repositories/hawkbit-releases</url>
-      </repository>
-      <snapshotRepository>
-         <id>repo.eclipse.org</id>
-         <name>hawkBit Repository - Release</name>
-         <url>https://repo.eclipse.org/content/repositories/hawkbit-snapshots</url>
-      </snapshotRepository>
-   </distributionManagement>
-
    <modules>
       <module>hawkbit-update-server</module>
    </modules>
