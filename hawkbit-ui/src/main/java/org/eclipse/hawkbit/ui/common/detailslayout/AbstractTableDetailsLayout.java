@@ -129,10 +129,12 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         caption.setValue(HawkbitCommonUtil.getSoftwareModuleName(headerCaption, value));
     }
 
-    protected void restoreState() {
+    public void restoreState() {
         if (onLoadIsTableRowSelected()) {
             populateData(null);
             editButton.setEnabled(true);
+        } else {
+            populateData(getSelectedBaseEntity());
         }
         if (onLoadIsTableMaximized()) {
             setVisible(false);

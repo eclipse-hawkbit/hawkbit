@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
@@ -47,6 +48,8 @@ public abstract class AbstractNotificationView extends VerticalLayout implements
 
     private transient Map<Class<?>, RefreshableContainer> supportedEvents;
 
+    private final DistributionSetManagement distributionSetManagement;
+
     /**
      * Constructor.
      * 
@@ -56,9 +59,11 @@ public abstract class AbstractNotificationView extends VerticalLayout implements
      *            the notificationUnreadButton
      */
     public AbstractNotificationView(final EventBus.UIEventBus eventBus,
-            final NotificationUnreadButton notificationUnreadButton) {
+            final NotificationUnreadButton notificationUnreadButton,
+            final DistributionSetManagement distributionSetManagement) {
         this.eventBus = eventBus;
         this.notificationUnreadButton = notificationUnreadButton;
+        this.distributionSetManagement = distributionSetManagement;
         this.viewUnreadNotifcations = new AtomicInteger(0);
         skipUiEventsCache = CacheBuilder.newBuilder().expireAfterAccess(10, SECONDS).build();
         eventBus.subscribe(this);
@@ -154,6 +159,10 @@ public abstract class AbstractNotificationView extends VerticalLayout implements
     @Override
     public void enter(final ViewChangeEvent event) {
         // intended to override
+    }
+
+    public DistributionSetManagement getDistributionSetManagement() {
+        return distributionSetManagement;
     }
 
     /**

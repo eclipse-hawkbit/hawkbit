@@ -9,6 +9,8 @@
 package org.eclipse.hawkbit.ui.management;
 
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 import javax.annotation.PostConstruct;
@@ -20,9 +22,11 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.AbstractNotificationView;
 import org.eclipse.hawkbit.ui.components.NotificationUnreadButton;
@@ -56,16 +60,18 @@ import org.eclipse.hawkbit.ui.push.TargetDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetTagCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetTagDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetTagUpdatedEventContainer;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
@@ -124,7 +130,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
             final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement,
             final NotificationUnreadButton notificationUnreadButton,
             final DeploymentViewMenuItem deploymentViewMenuItem, @Qualifier("uiExecutor") final Executor uiExecutor) {
-        super(eventBus, notificationUnreadButton);
+        super(eventBus, notificationUnreadButton, distributionSetManagement);
         this.permChecker = permChecker;
         this.i18n = i18n;
         this.uiNotification = uiNotification;
@@ -170,6 +176,20 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
         Page.getCurrent().addBrowserWindowResizeListener(this);
         showOrHideFilterButtons(Page.getCurrent().getBrowserWindowWidth());
         getEventBus().publish(this, ManagementUIEvent.SHOW_COUNT_MESSAGE);
+    }
+
+    @Override
+    public void enter(final ViewChangeEvent event) {
+
+        final Set<Long> values = AbstractTable.getTableValue(distributionTableLayout.getDistributionTable());
+        if (values != null && values.iterator().hasNext()) {
+            managementUIState.setSelectedEnitities(values);
+            final Long lastId = Iterables.getLast(values);
+            final Optional<DistributionSet> distributionSet = getDistributionSetManagement()
+                    .findDistributionSetById(lastId);
+            distributionTableLayout.getDistributionDetails().setSelectedBaseEntity(distributionSet.orElse(null));
+        }
+        distributionTableLayout.getDistributionDetails().restoreState();
     }
 
     @Override

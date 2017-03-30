@@ -108,6 +108,7 @@ public class ManageDistUIState implements ManagmentEntityState<Long>, Serializab
      * @return the slectedDistributions
      */
     public Optional<Set<Long>> getSelectedDistributions() {
+        selectedDistributions.forEach(a -> System.out.println("*********************** " + a.longValue()));
         return Optional.ofNullable(selectedDistributions);
     }
 

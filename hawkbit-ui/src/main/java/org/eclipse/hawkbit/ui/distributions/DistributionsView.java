@@ -9,6 +9,8 @@
 package org.eclipse.hawkbit.ui.distributions;
 
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -19,10 +21,12 @@ import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
+import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.AbstractNotificationView;
 import org.eclipse.hawkbit.ui.components.NotificationUnreadButton;
@@ -40,15 +44,17 @@ import org.eclipse.hawkbit.ui.push.DistributionCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.SoftwareModuleCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.SoftwareModuleDeletedEventContainer;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
@@ -98,7 +104,7 @@ public class DistributionsView extends AbstractNotificationView implements Brows
             final ArtifactUploadState artifactUploadState, final SystemManagement systemManagement,
             final ArtifactManagement artifactManagement, final NotificationUnreadButton notificationUnreadButton,
             final DistributionsViewMenuItem distributionsViewMenuItem) {
-        super(eventBus, notificationUnreadButton);
+        super(eventBus, notificationUnreadButton, distributionSetManagement);
         this.permChecker = permChecker;
         this.i18n = i18n;
         this.uiNotification = uiNotification;
@@ -128,6 +134,20 @@ public class DistributionsView extends AbstractNotificationView implements Brows
         checkNoDataAvaialble();
         Page.getCurrent().addBrowserWindowResizeListener(this);
         showOrHideFilterButtons(Page.getCurrent().getBrowserWindowWidth());
+    }
+
+    @Override
+    public void enter(final ViewChangeEvent event) {
+
+        final Set<Long> values = AbstractTable.getTableValue(distributionTableLayout.getDistributionSetTable());
+        if (values != null && values.iterator().hasNext()) {
+            manageDistUIState.setSelectedEnitities(values);
+            final Long lastId = Iterables.getLast(values);
+            final Optional<DistributionSet> distributionSet = getDistributionSetManagement()
+                    .findDistributionSetById(lastId);
+            distributionTableLayout.getDistributionSetDetails().setSelectedBaseEntity(distributionSet.orElse(null));
+        }
+        distributionTableLayout.getDistributionSetDetails().restoreState();
     }
 
     @Override

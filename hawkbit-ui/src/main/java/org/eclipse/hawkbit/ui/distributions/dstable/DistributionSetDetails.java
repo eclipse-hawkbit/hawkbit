@@ -236,6 +236,8 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
 
     @Override
     protected boolean onLoadIsTableRowSelected() {
+        manageDistUIState.getSelectedDistributions().get()
+                .forEach(a -> System.out.println("*********************** " + a.longValue()));
         return manageDistUIState.getSelectedDistributions().map(selected -> !selected.isEmpty()).orElse(false);
     }
 
