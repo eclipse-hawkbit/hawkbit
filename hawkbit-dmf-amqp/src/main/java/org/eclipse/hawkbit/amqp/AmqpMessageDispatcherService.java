@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.dmf.json.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -156,6 +157,32 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 cancelEvent.getActionId(), cancelEvent.getEntity().getAddress());
     }
 
+    /**
+     * Method to send a message to a RabbitMQ Exchange after a Target was
+     * deleted.
+     *
+     * @param deleteEvent
+     *            the TargetDeletedEvent which holds the necessary data for
+     *            sending a target delete message.
+     */
+    @EventListener(classes = TargetDeletedEvent.class)
+    public void targetDelete(final TargetDeletedEvent deleteEvent) {
+        if (isFromSelf(deleteEvent)) {
+            return;
+        }
+
+        sendDeleteMessageToTarget(deleteEvent.getTenant(), deleteEvent.getControllerId(),
+                deleteEvent.getTargetAdress());
+    }
+
+    void sendDeleteMessageToTarget(final String tenant, final String controllerId, final URI address) {
+        if (!IpUtil.isAmqpUri(address)) {
+            return;
+        }
+        final Message message = new Message(null, createConnectorMessagePropertiesDeleteThing(tenant, controllerId));
+        amqpSenderService.sendMessage(message, address);
+    }
+
     private boolean isFromSelf(final RemoteApplicationEvent event) {
         return serviceMatcher != null && !serviceMatcher.isFromSelf(event);
     }
@@ -186,6 +213,15 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         final MessageProperties messageProperties = new MessageProperties();
         messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON);
         messageProperties.setHeader(MessageHeaderKey.CONTENT_TYPE, MessageProperties.CONTENT_TYPE_JSON);
+        return messageProperties;
+    }
+
+    private static MessageProperties createConnectorMessagePropertiesDeleteThing(final String tenant,
+            final String controllerId) {
+        final MessageProperties messageProperties = createMessageProperties();
+        messageProperties.setHeader(MessageHeaderKey.THING_ID, controllerId);
+        messageProperties.setHeader(MessageHeaderKey.TENANT, tenant);
+        messageProperties.setHeader(MessageHeaderKey.TYPE, MessageType.THING_DELETED);
         return messageProperties;
     }
 

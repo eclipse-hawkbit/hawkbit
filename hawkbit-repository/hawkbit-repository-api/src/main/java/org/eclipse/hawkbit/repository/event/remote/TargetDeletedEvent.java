@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import java.net.URI;
+
 import org.eclipse.hawkbit.repository.model.Target;
 
 /**
@@ -17,6 +19,8 @@ import org.eclipse.hawkbit.repository.model.Target;
 public class TargetDeletedEvent extends RemoteIdEvent {
 
     private static final long serialVersionUID = 1L;
+    private String controllerId;
+    private URI targetAdress;
 
     /**
      * Default constructor.
@@ -27,7 +31,7 @@ public class TargetDeletedEvent extends RemoteIdEvent {
 
     /**
      * Constructor for json serialization.
-     * 
+     *
      * @param tenant
      *            the tenant
      * @param entityId
@@ -37,9 +41,19 @@ public class TargetDeletedEvent extends RemoteIdEvent {
      * @param applicationId
      *            the origin application id
      */
-    public TargetDeletedEvent(final String tenant, final Long entityId, final String entityClass,
-            final String applicationId) {
+    public TargetDeletedEvent(final String tenant, final Long entityId, final String controllerId,
+            final URI targetAdress, final String entityClass, final String applicationId) {
         super(entityId, tenant, entityClass, applicationId);
+        this.controllerId = controllerId;
+        this.targetAdress = targetAdress;
+    }
+
+    public String getControllerId() {
+        return controllerId;
+    }
+
+    public URI getTargetAdress() {
+        return targetAdress;
     }
 
 }

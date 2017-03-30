@@ -10,8 +10,6 @@ package org.eclipse.hawkbit.dmf.amqp.api;
 
 /**
  * The amqp message types which can be handled.
- * 
- *
  *
  */
 public enum MessageType {
@@ -22,8 +20,13 @@ public enum MessageType {
     EVENT,
 
     /**
-     * the thing created type.
+     * The thing created type.
      */
     THING_CREATED,
+
+    /**
+     * The thing deleted type.
+     */
+    THING_DELETED,
 
 }

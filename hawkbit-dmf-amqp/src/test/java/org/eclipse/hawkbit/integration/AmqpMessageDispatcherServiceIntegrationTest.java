@@ -13,6 +13,7 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
@@ -91,15 +92,25 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
         createAndSendTarget(TENANT_EXIST);
         waitUntilTargetStatusIsPending();
         assertCancelActionMessage(actionId);
+    }
 
+    @Test
+    @Description("Verify that when a target is deleted a target delete message is send.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 1), @Expect(type = TargetDeletedEvent.class, count = 1) })
+    public void sendDeleteMessage() {
+
+        registerAndAssertTargetWithExistingTenant(REGISTER_TARGET, 1);
+        targetManagement.deleteTarget(REGISTER_TARGET);
+        assertDeleteMessage(REGISTER_TARGET);
     }
 
     private void waitUntilTargetStatusIsPending() {
         waitUntil(() -> {
             final Optional<Target> findTargetByControllerID = targetManagement
                     .findTargetByControllerID(REGISTER_TARGET);
-            return findTargetByControllerID.isPresent() && TargetUpdateStatus.PENDING
-                    .equals(findTargetByControllerID.get().getUpdateStatus());
+            return findTargetByControllerID.isPresent()
+                    && TargetUpdateStatus.PENDING.equals(findTargetByControllerID.get().getUpdateStatus());
         });
     }
 

@@ -41,7 +41,7 @@ import org.springframework.amqp.rabbit.test.RabbitListenerTestHarness;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * 
+ *
  * Common class for {@link AmqpMessageHandlerServiceIntegrationTest} and
  * {@link AmqpMessageDispatcherServiceIntegrationTest}.
  */
@@ -121,6 +121,17 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         assertThat(actionUpdateStatus).isEqualTo(actionId);
     }
 
+    protected void assertDeleteMessage(final String target) {
+
+        verifyReplyToListener();
+        final Message replyMessage = replyToListener.getDeleteMessages().get(target);
+        assertAllTargetsCount(0);
+        final Map<String, Object> headers = replyMessage.getMessageProperties().getHeaders();
+        assertThat(headers.get(MessageHeaderKey.THING_ID)).isEqualTo(target);
+        assertThat(headers.get(MessageHeaderKey.TENANT)).isEqualTo(TENANT_EXIST);
+        assertThat(headers.get(MessageHeaderKey.TYPE)).isEqualTo(MessageType.THING_DELETED.toString());
+    }
+
     protected void assertDownloadAndInstallMessage(
             final Set<org.eclipse.hawkbit.repository.model.SoftwareModule> dsModules) {
         final Message replyMessage = assertReplyMessageHeader(EventTopic.DOWNLOAD_AND_INSTALL);
@@ -166,7 +177,7 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
 
     private Message assertReplyMessageHeader(final EventTopic eventTopic) {
         verifyReplyToListener();
-        final Message replyMessage = replyToListener.getMessages().get(eventTopic);
+        final Message replyMessage = replyToListener.getEventTopicMessages().get(eventTopic);
         assertAllTargetsCount(1);
         final Map<String, Object> headers = replyMessage.getMessageProperties().getHeaders();
         assertThat(headers.get(MessageHeaderKey.TOPIC)).isEqualTo(eventTopic.toString());

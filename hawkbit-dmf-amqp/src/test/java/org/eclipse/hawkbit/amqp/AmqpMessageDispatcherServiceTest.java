@@ -32,8 +32,10 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -228,13 +230,54 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     }
 
+    @Test
+    @Description("Verfies that sending a delete message when receiving a delete event works.")
+    public void sendDeleteRequest() {
+
+        // setup
+        final TargetDeletedEvent targetDeletedEvent = new TargetDeletedEvent(TENANT, 1L, CONTROLLER_ID, AMQP_URI,
+                JpaTarget.class.getName(), serviceMatcher.getServiceId());
+
+        // test
+        amqpMessageDispatcherService.targetDelete(targetDeletedEvent);
+
+        // verify
+        final Message sendMessage = createArgumentCapture(AMQP_URI);
+        assertDeleteMessage(sendMessage);
+    }
+
+    @Test
+    @Description("Verfies that a delete message is no send if the adress is not an amqp adress.")
+    public void sendDeleteRequestWithNoAmqpAdress() {
+
+        // setup
+        final URI NO_AMQP_URI = IpUtil.createHttpUri("anyhost");
+        final TargetDeletedEvent targetDeletedEvent = new TargetDeletedEvent(TENANT, 1L, CONTROLLER_ID, NO_AMQP_URI,
+                JpaTarget.class.getName(), serviceMatcher.getServiceId());
+
+        // test
+        amqpMessageDispatcherService.targetDelete(targetDeletedEvent);
+
+        // verify
+        Mockito.verifyZeroInteractions(senderService);
+    }
+
     private void assertCancelMessage(final Message sendMessage) {
         assertEventMessage(sendMessage);
         final Long actionId = convertMessage(sendMessage, Long.class);
         assertEquals("Action ID should be 1", actionId, Long.valueOf(1));
         assertEquals("The topc in the message should be a CANCEL_DOWNLOAD value", EventTopic.CANCEL_DOWNLOAD,
                 sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC));
+    }
 
+    private void assertDeleteMessage(final Message sendMessage) {
+
+        assertNotNull(sendMessage);
+        assertThat(sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID))
+                .isEqualTo(CONTROLLER_ID);
+        assertThat(sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TENANT)).isEqualTo(TENANT);
+        assertThat(sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TYPE))
+                .isEqualTo(MessageType.THING_DELETED);
     }
 
     private DownloadAndUpdateRequest assertDownloadAndInstallMessage(final Message sendMessage, final Long action) {
