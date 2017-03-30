@@ -16,14 +16,15 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
+import org.eclipse.hawkbit.ui.common.tagdetails.AbstractTagToken;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.server.FontAwesome;
@@ -56,7 +57,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     private Button manageMetadataBtn;
 
-    protected TabSheet detailsTab;
+    private TabSheet detailsTab;
 
     private final VerticalLayout detailsLayout;
 
@@ -66,20 +67,33 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     private final VerticalLayout attributesLayout;
 
-    protected final ManagementUIState managementUIState;
+    private final VerticalLayout tagsLayout;
+
+    private final ManagementUIState managementUIState;
 
     protected AbstractTableDetailsLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState) {
         this.i18n = i18n;
         this.permissionChecker = permissionChecker;
         this.managementUIState = managementUIState;
-        detailsLayout = getTabLayout();
-        descriptionLayout = getTabLayout();
-        logLayout = getTabLayout();
-        attributesLayout = getTabLayout();
+        detailsLayout = createTabLayout();
+        descriptionLayout = createTabLayout();
+        logLayout = createTabLayout();
+        attributesLayout = createTabLayout();
+        tagsLayout = createTabLayout();
         createComponents();
         buildLayout();
         eventBus.subscribe(this);
+    }
+
+    public void setSelectedBaseEntity(final T selectedBaseEntity) {
+        this.selectedBaseEntity = selectedBaseEntity;
+    }
+
+    protected final VerticalLayout createTabLayout() {
+        final VerticalLayout tabLayout = SPUIComponentProvider.getDetailTabLayout();
+        tabLayout.addStyleName("details-layout");
+        return tabLayout;
     }
 
     protected SpPermissionChecker getPermissionChecker() {
@@ -92,10 +106,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     protected T getSelectedBaseEntity() {
         return selectedBaseEntity;
-    }
-
-    public void setSelectedBaseEntity(final T selectedBaseEntity) {
-        this.selectedBaseEntity = selectedBaseEntity;
     }
 
     /**
@@ -113,6 +123,105 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         } else if (BaseEntityEventType.MAXIMIZED == eventType) {
             UI.getCurrent().access(() -> setVisible(false));
         }
+    }
+
+    protected void setName(final String headerCaption, final String value) {
+        caption.setValue(HawkbitCommonUtil.getSoftwareModuleName(headerCaption, value));
+    }
+
+    protected void restoreState() {
+        if (onLoadIsTableRowSelected()) {
+            populateData(null);
+            editButton.setEnabled(true);
+        }
+        if (onLoadIsTableMaximized()) {
+            setVisible(false);
+        }
+    }
+
+    protected void populateTags(final AbstractTagToken<?> tagToken) {
+        getTagsLayout().removeAllComponents();
+        if (getSelectedBaseEntity() == null) {
+            return;
+        }
+        getTagsLayout().addComponent(tagToken.getTokenField());
+    }
+
+    protected void populateLog() {
+        logLayout.removeAllComponents();
+
+        logLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.getMessage("label.created.at"),
+                SPDateTimeUtil.formatCreatedAt(selectedBaseEntity)));
+
+        logLayout.addComponent(SPUIComponentProvider.createCreatedByLabel(i18n, selectedBaseEntity));
+
+        if (selectedBaseEntity == null || selectedBaseEntity.getLastModifiedAt() == null) {
+            return;
+        }
+
+        logLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.getMessage("label.modified.date"),
+                SPDateTimeUtil.formatLastModifiedAt(selectedBaseEntity)));
+
+        logLayout.addComponent(SPUIComponentProvider.createLastModifiedByLabel(i18n, selectedBaseEntity));
+    }
+
+    protected void updateDescriptionLayout(final String descriptionLabel, final String description) {
+        descriptionLayout.removeAllComponents();
+        final Label descLabel = SPUIComponentProvider.createNameValueLabel(descriptionLabel,
+                HawkbitCommonUtil.trimAndNullIfEmpty(description) == null ? "" : description);
+        /**
+         * By default text will be truncated based on layout width .so removing
+         * it as we need full description.
+         */
+        descLabel.removeStyleName("label-style");
+        descLabel.setId(UIComponentIdProvider.DETAILS_DESCRIPTION_LABEL_ID);
+        descriptionLayout.addComponent(descLabel);
+    }
+
+    /*
+     * display Attributes details in Target details.
+     */
+    protected void updateAttributesLayout(final Map<String, String> attributes) {
+        if (null != attributes) {
+            attributesLayout.removeAllComponents();
+            for (final Map.Entry<String, String> entry : attributes.entrySet()) {
+                final Label conAttributeLabel = SPUIComponentProvider.createNameValueLabel(
+                        entry.getKey().concat("  :  "),
+                        HawkbitCommonUtil.trimAndNullIfEmpty(entry.getValue()) == null ? "" : entry.getValue());
+                conAttributeLabel.setDescription(entry.getKey().concat("  :  ") + entry.getValue());
+                conAttributeLabel.addStyleName("label-style");
+                attributesLayout.addComponent(conAttributeLabel);
+
+            }
+        }
+    }
+
+    protected VerticalLayout getLogLayout() {
+        return logLayout;
+    }
+
+    protected VerticalLayout getAttributesLayout() {
+        return attributesLayout;
+    }
+
+    protected VerticalLayout getDescriptionLayout() {
+        return descriptionLayout;
+    }
+
+    protected VerticalLayout getDetailsLayout() {
+        return detailsLayout;
+    }
+
+    protected VerticalLayout getTagsLayout() {
+        return tagsLayout;
+    }
+
+    protected TabSheet getDetailsTab() {
+        return detailsTab;
+    }
+
+    protected ManagementUIState getManagementUIState() {
+        return managementUIState;
     }
 
     private void createComponents() {
@@ -172,26 +281,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         return new LabelBuilder().name(getDefaultCaption()).buildCaptionLabel();
     }
 
-    protected VerticalLayout getTabLayout() {
-        final VerticalLayout tabLayout = SPUIComponentProvider.getDetailTabLayout();
-        tabLayout.addStyleName("details-layout");
-        return tabLayout;
-    }
-
-    protected void setName(final String headerCaption, final String value) {
-        caption.setValue(HawkbitCommonUtil.getSoftwareModuleName(headerCaption, value));
-    }
-
-    protected void restoreState() {
-        if (onLoadIsTableRowSelected()) {
-            populateData(null);
-            editButton.setEnabled(true);
-        }
-        if (onLoadIsTableMaximized()) {
-            setVisible(false);
-        }
-    }
-
     /**
      * If no data in table (i,e no row selected),then disable the edit button.
      * If row is selected ,enable edit button.
@@ -210,70 +299,21 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         populateDetailsWidget();
     }
 
-    protected void populateLog() {
-        logLayout.removeAllComponents();
-
-        logLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.getMessage("label.created.at"),
-                SPDateTimeUtil.formatCreatedAt(selectedBaseEntity)));
-
-        logLayout.addComponent(SPUIComponentProvider.createCreatedByLabel(i18n, selectedBaseEntity));
-
-        if (selectedBaseEntity == null || selectedBaseEntity.getLastModifiedAt() == null) {
-            return;
-        }
-
-        logLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.getMessage("label.modified.date"),
-                SPDateTimeUtil.formatLastModifiedAt(selectedBaseEntity)));
-
-        logLayout.addComponent(SPUIComponentProvider.createLastModifiedByLabel(i18n, selectedBaseEntity));
-    }
-
-    protected void updateDescriptionLayout(final String descriptionLabel, final String description) {
-        descriptionLayout.removeAllComponents();
-        final Label descLabel = SPUIComponentProvider.createNameValueLabel(descriptionLabel,
-                HawkbitCommonUtil.trimAndNullIfEmpty(description) == null ? "" : description);
-        /**
-         * By default text will be truncated based on layout width .so removing
-         * it as we need full description.
-         */
-        descLabel.removeStyleName("label-style");
-        descLabel.setId(UIComponentIdProvider.DETAILS_DESCRIPTION_LABEL_ID);
-        descriptionLayout.addComponent(descLabel);
-    }
-
-    /*
-     * display Attributes details in Target details.
-     */
-    protected void updateAttributesLayout(final Map<String, String> attributes) {
-        if (null != attributes) {
-            attributesLayout.removeAllComponents();
-            for (final Map.Entry<String, String> entry : attributes.entrySet()) {
-                final Label conAttributeLabel = SPUIComponentProvider.createNameValueLabel(
-                        entry.getKey().concat("  :  "),
-                        HawkbitCommonUtil.trimAndNullIfEmpty(entry.getValue()) == null ? "" : entry.getValue());
-                conAttributeLabel.setDescription(entry.getKey().concat("  :  ") + entry.getValue());
-                conAttributeLabel.addStyleName("label-style");
-                attributesLayout.addComponent(conAttributeLabel);
-
-            }
+    private void populateDescription() {
+        if (selectedBaseEntity != null) {
+            updateDescriptionLayout(i18n.getMessage("label.description"), selectedBaseEntity.getDescription());
+        } else {
+            updateDescriptionLayout(i18n.getMessage("label.description"), null);
         }
     }
 
-    protected VerticalLayout createLogLayout() {
-        return logLayout;
+    protected Long getSelectedBaseEntityId() {
+        return selectedBaseEntity == null ? null : selectedBaseEntity.getId();
     }
 
-    protected VerticalLayout createAttributesLayout() {
-        return attributesLayout;
-    }
+    protected abstract void populateDetailsWidget();
 
-    protected VerticalLayout createDetailsLayout() {
-        return detailsLayout;
-    }
-
-    protected VerticalLayout createDescriptionLayout() {
-        return descriptionLayout;
-    }
+    protected abstract void populateMetadataDetails();
 
     /**
      * Default caption of header to be displayed when no data row selected in
@@ -282,13 +322,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
      * @return String
      */
     protected abstract String getDefaultCaption();
-
-    /**
-     * Add tabs.
-     * 
-     * @param detailsTab
-     */
-    protected abstract void addTabs(final TabSheet detailsTab);
 
     /**
      * Click listener for edit button.
@@ -306,26 +339,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     protected abstract String getTabSheetId();
 
     protected abstract boolean hasEditPermission();
-
-    public VerticalLayout getDetailsLayout() {
-        return detailsLayout;
-    }
-
-    private void populateDescription() {
-        if (selectedBaseEntity != null) {
-            updateDescriptionLayout(i18n.getMessage("label.description"), selectedBaseEntity.getDescription());
-        } else {
-            updateDescriptionLayout(i18n.getMessage("label.description"), null);
-        }
-    }
-
-    protected abstract void populateDetailsWidget();
-
-    protected abstract void populateMetadataDetails();
-
-    protected Long getSelectedBaseEntityId() {
-        return selectedBaseEntity == null ? null : selectedBaseEntity.getId();
-    }
 
     protected abstract String getDetailsHeaderCaptionId();
 
