@@ -4,7 +4,7 @@
 
 Eclipse [hawkBit](https://projects.eclipse.org/projects/iot.hawkbit) is an domain independent back end solution for rolling out software updates to constrained edge devices as well as more powerful controllers and gateways connected to IP based networking infrastructure.
 
-Build: [![Circle CI](https://circleci.com/gh/eclipse/hawkbit.svg?style=shield)](https://circleci.com/gh/eclipse/hawkbit) 
+Build: [![Circle CI](https://circleci.com/gh/eclipse/hawkbit.svg?style=shield)](https://circleci.com/gh/eclipse/hawkbit)
  [![Codacy Badge](https://api.codacy.com/project/badge/Grade/83b1ace1fba94ea2aec93b202b52f39a)](https://www.codacy.com/app/kai-zimmermann/hawkbit?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=eclipse/hawkbit&amp;utm_campaign=Badge_Grade) [![SonarQuality](https://sonar.ops.bosch-iot-rollouts.com/api/badges/gate?key=org.eclipse.hawkbit:hawkbit-parent)](https://sonar.ops.bosch-iot-rollouts.com) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent)
 
 # Documentation
@@ -25,7 +25,9 @@ https://hawkbit.eu-gb.mybluemix.net/UI/
 
 # Compile, Run and Getting Started
 
-We are not providing an off the shelf installation ready hawkBit update server. However, we recommend to check out the [Example Application](examples/hawkbit-example-app) for a runtime ready Spring Boot based update server that is empowered by hawkBit. In addition we have [guide](http://www.eclipse.org/hawkbit/documentation/guide/runhawkbit.html) for setting up a complete landscape.
+We are not providing an off the shelf installation ready hawkBit update server. In addition we have [guide](http://www.eclipse.org/hawkbit/documentation/guide/runhawkbit.html) for setting up a complete landscape.
+
+Docker support by means of ready to go images is currently missing but we will look into this as soon as we can.
 
 # API stability
 

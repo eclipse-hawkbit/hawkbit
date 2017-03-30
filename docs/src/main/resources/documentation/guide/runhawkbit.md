@@ -33,7 +33,7 @@ This guide describes a target architecture that is more like one that you will e
 
 As mentioned you can create your own application with _hawkBit_ inside or adapt the existing example app. The second option will be shown here.
 
-### Set MariaDB dependency to compile in the [example App POM](https://github.com/eclipse/hawkbit/blob/master/hawkbit-runtime/hawkbit-update-server/pom.xml)
+### Set MariaDB dependency to compile in the [update server POM](https://github.com/eclipse/hawkbit/blob/master/hawkbit-runtime/hawkbit-update-server/pom.xml)
 {% highlight plaintext %}
 <dependency>
   <groupId>org.mariadb.jdbc</groupId>
