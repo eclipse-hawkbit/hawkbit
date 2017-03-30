@@ -13,8 +13,6 @@ We offer a sandbox installation that is free for everyone to try out hawkBit. Ho
 
 # Compile, Run and Getting Started
 
-We are not providing an off the shelf installation ready hawkBit update server. However, we recommend to check out the [Example Application](examples/hawkbit-example-app) for a runtime ready Spring Boot based update server that is empowered by hawkBit. In addition we have [guide](../guide/runhawkbit.html) for setting up a complete landscape.
-
 #### Clone and build hawkBit
 {% highlight bash %}
 $ git clone https://github.com/eclipse/hawkbit.git
@@ -22,11 +20,18 @@ $ cd hawkbit
 $ mvn clean install
 {% endhighlight %}
 
-#### Start hawkBit example app
+#### Start hawkBit update server
 [Example Application](https://github.com/eclipse/hawkbit/tree/master/examples/hawkbit-example-app)
 
 {% highlight bash %}
-$ java -jar ./examples/hawkbit-example-app/target/hawkbit-example-app-#version#.jar
+$ java -jar ./hawkbit-runtime/hawkbit-update-server/target/hawkbit-update-server-#version#-SNAPSHOT.jar
+{% endhighlight %}
+
+#### Build hawkBit examples
+{% highlight bash %}
+$ git clone https://github.com/eclipse/hawkbit.git
+$ cd hawkbit/examples
+$ mvn clean install
 {% endhighlight %}
 
 #### Start hawkBit device simulator

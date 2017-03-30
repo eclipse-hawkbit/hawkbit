@@ -20,6 +20,19 @@
    <name>hawkBit :: Extensions</name>
    <description>Parent pom for hawkBit extensions</description>
 
+   <distributionManagement>
+      <repository>
+         <id>eclipserel</id>
+         <name>hawkBit Repository - Release</name>
+         <url>https://repo.eclipse.org/content/repositories/hawkbit-releases</url>
+      </repository>
+      <snapshotRepository>
+         <id>eclipsesnap</id>
+         <name>hawkBit Repository - Snapshots</name>
+         <url>https://repo.eclipse.org/content/repositories/hawkbit-snapshots</url>
+      </snapshotRepository>
+   </distributionManagement>
+
    <properties>
       <jacoco.outputDir>${project.basedir}/../../target/</jacoco.outputDir>
    </properties>
