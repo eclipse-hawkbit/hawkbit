@@ -15,7 +15,7 @@
 
     <inherits name="org.eclipse.hawkbit.ui.AppWidgetSet" />
 
-    <inherits name="org.vaadin.peter.contextmenu.ContextmenuWidgetset" />
+    
 
     <inherits name="org.vaadin.tokenfield.TokenfieldWidgetset" />
 

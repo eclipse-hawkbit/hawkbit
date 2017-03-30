@@ -25,7 +25,7 @@
 
 
 
-   <inherits name="org.vaadin.peter.contextmenu.ContextmenuWidgetset" />
+   
 
    <inherits name="org.vaadin.hene.flexibleoptiongroup.widgetset.FlexibleOptionGroupWidgetset" />
 

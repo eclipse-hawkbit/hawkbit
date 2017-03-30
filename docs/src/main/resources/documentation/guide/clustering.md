@@ -7,7 +7,7 @@ title: Clustering
 
 # Cluster
 
-_hawkBit_ is able to run in a cluster with some constraints. This guide provides insights in the basic concepts and how to setup your own cluster. You can find additional information in the [hawkbit example app's README](https://github.com/eclipse/hawkbit/blob/master/examples/hawkbit-example-app/README.md).
+_hawkBit_ is able to run in a cluster with some constraints. This guide provides insights in the basic concepts and how to setup your own cluster. You can find additional information in the [hawkbit runtimes's README](https://github.com/eclipse/hawkbit/blob/master/hawkbit-runtime/hawkbit-update-server/README.md).
 
 # Big picture
 
@@ -15,7 +15,7 @@ _hawkBit_ is able to run in a cluster with some constraints. This guide provides
 
 # Events
 
-Event communication between nodes is based on [Spring Cloud Bus](https://cloud.spring.io/spring-cloud-bus/) and [Spring Cloud Stream](http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/). There are different [binder implementations](http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#_binders) available. The _hawkbit example app_ uses RabbitMQ binder. Every node gets his own queue to receive cluster events, the default payload is JSON.
+Event communication between nodes is based on [Spring Cloud Bus](https://cloud.spring.io/spring-cloud-bus/) and [Spring Cloud Stream](http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/). There are different [binder implementations](http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#_binders) available. The _hawkbit Update Server_ uses RabbitMQ binder. Every node gets his own queue to receive cluster events, the default payload is JSON.
 If an event is thrown locally at one node, it will be automatically delivered to all other available nodes via the Spring Cloud Bus's topic exchange:
 
 ![](../images/eventing-within-cluster.png){:width="100%"}

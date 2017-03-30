@@ -8,23 +8,20 @@
     http://www.eclipse.org/legal/epl-v10.html
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <modelVersion>4.0.0</modelVersion>
+
    <parent>
       <groupId>org.eclipse.hawkbit</groupId>
       <artifactId>hawkbit-parent</artifactId>
       <version>0.2.0-SNAPSHOT</version>
    </parent>
-   <artifactId>hawkbit-starters</artifactId>
-   <name>hawkBit :: Spring Boot Starters</name>
-   <packaging>pom</packaging>
-   <modules>
-      <module>hawkbit-boot-starter</module>
-      <module>hawkbit-boot-starter-mgmt-ui</module>
-      <module>hawkbit-boot-starter-mgmt-api</module>
-      <module>hawkbit-boot-starter-ddi-api</module>
-      <module>hawkbit-boot-starter-dmf-api</module>
-   </modules>
 
+   <artifactId>hawkbit-runtime-parent</artifactId>
+   <name>hawkBit :: Runtime</name>
+   <packaging>pom</packaging>
+
+   <modules>
+      <module>hawkbit-update-server</module>
+   </modules>
 </project>

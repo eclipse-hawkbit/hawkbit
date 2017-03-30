@@ -14,7 +14,7 @@
    <parent>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-parent</artifactId>
-      <version>1.4.4.RELEASE</version>
+      <version>1.4.5.RELEASE</version>
    </parent>
 
    <groupId>org.eclipse.hawkbit</groupId>
@@ -22,6 +22,13 @@
    <version>0.2.0-SNAPSHOT</version>
    <packaging>pom</packaging>
    <name>hawkBit :: Parent</name>
+
+   <licenses>
+      <license>
+         <name>Eclipse Public License - Version 1.0</name>
+         <url>http://www.eclipse.org/org/documents/epl-v10.php</url>
+      </license>
+   </licenses>
 
    <modules>
       <module>hawkbit-core</module>
@@ -40,9 +47,10 @@
       <module>hawkbit-artifact-repository-filesystem</module>
       <module>hawkbit-autoconfigure</module>
       <module>hawkbit-test-report</module>
+      <module>hawkbit-runtime</module>
+      <module>hawkbit-starters</module>
       <module>examples</module>
       <module>extensions</module>
-      <module>hawkbit-starters</module>
    </modules>
 
    <scm>
@@ -100,30 +108,44 @@
 
    <properties>
       <java.version>1.8</java.version>
-      <spring.boot.version>1.4.4.RELEASE</spring.boot.version>
+      <spring.boot.version>1.4.5.RELEASE</spring.boot.version>
+      <spring.cloud.version>Camden.SR6</spring.cloud.version>      
       <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
 
       <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->
       <!-- Newer versions needed than defined in Boot -->
-      <spring-hateoas.version>0.23.0.RELEASE</spring-hateoas.version>
+      <!-- Performance fixes -->
+      <spring-hateoas.version>0.23.0.RELEASE</spring-hateoas.version>      
+      <!-- Java 8 support -->
       <assertj.version>3.6.2</assertj.version>
+      <!-- Repeatable migrations, Disabling clean etc. -->
+      <flyway.version>4.0.3</flyway.version>
+      <!-- Improved integration test capabilities -->
+      <spring-amqp.version>1.7.1.RELEASE</spring-amqp.version>
       <!-- Older versions needed than defined in Boot -->
       <!-- Incompatible changes in 2.2 -->
       <json-path.version>2.0.0</json-path.version>
-      <jetty.version>9.3.14.v20161028</jetty.version>
-      <spring-amqp.version>1.7.1.RELEASE</spring-amqp.version>
+      <!-- Avoid extra CQs through transitive dependencies -->
+      <logback.version>1.1.3</logback.version>
+      <jackson.version>2.8.2</jackson.version>
+      <classmate.version>1.3.0</classmate.version>
+      <h2.version>1.4.186</h2.version>
+      <hibernate-validator.version>5.2.2.Final</hibernate-validator.version>
+      <jboss-logging.version>3.2.1.Final</jboss-logging.version>
+      <spring-retry.version>1.1.2.RELEASE</spring-retry.version>
+      <tomcat.version>8.0.28</tomcat.version>
+      <slf4j.version>1.7.22</slf4j.version> 
       <!-- Spring boot version overrides - END -->
 
       <!-- Vaadin versions - START -->
       <vaadin.spring.version>1.1.1</vaadin.spring.version>
       <vaadin.spring.addon.version>0.0.6.RELEASE</vaadin.spring.addon.version>
-      <vaadin.version>7.7.6</vaadin.version>
+      <vaadin.version>7.7.7</vaadin.version>
       <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
       <vaadin.addon.vaadin-lazyquerycontainer.version>7.6.1.3</vaadin.addon.vaadin-lazyquerycontainer.version>
-      <vaadin.addon.flexibleoptiongroup.version>2.3.0</vaadin.addon.flexibleoptiongroup.version>
+      <vaadin.addon.flexibleoptiongroup.version>2.2.0</vaadin.addon.flexibleoptiongroup.version>
       <vaadin.addon.tokenfield.version>7.0.1</vaadin.addon.tokenfield.version>
       <vaadin.addon.dbar-addon.version>2.0.0</vaadin.addon.dbar-addon.version>
-      <vaadin.addon.contextmenu.version>4.5</vaadin.addon.contextmenu.version>
       <!-- Vaadin versions - END -->
 
       <maven.processor.plugin.version>3.1.0</maven.processor.plugin.version>
@@ -147,11 +169,8 @@
       <commons-lang3.version>3.4</commons-lang3.version>
       <json.version>20141113</json.version>
       <rsql-parser.version>2.1.0</rsql-parser.version>
-      <spring.cloud.version>Camden.SR1</spring.cloud.version>
-      <feign.extension.version>9.3.1</feign.extension.version>
       <jayway.awaitility.version>1.7.0</jayway.awaitility.version>
-      <io-protostuff.version>1.5.2</io-protostuff.version>
-
+      <io-protostuff.version>1.5.3</io-protostuff.version>
       <!-- Misc libraries versions - END -->
 
       <!-- Release - START -->
@@ -481,16 +500,42 @@
             <groupId>org.vaadin.spring.addons</groupId>
             <artifactId>vaadin-spring-addon-eventbus</artifactId>
             <version>${vaadin.spring.addon.version}</version>
+            <exclusions>
+               <exclusion>
+                  <groupId>com.vaadin</groupId>
+                  <artifactId>vaadin-spring</artifactId>
+               </exclusion>
+            </exclusions>
          </dependency>
          <dependency>
             <groupId>org.vaadin.spring.extensions</groupId>
             <artifactId>vaadin-spring-ext-security</artifactId>
             <version>${vaadin.spring.addon.version}</version>
+            <exclusions>
+               <exclusion>
+                  <groupId>com.vaadin</groupId>
+                  <artifactId>vaadin-spring</artifactId>
+               </exclusion>
+            </exclusions>
          </dependency>
          <dependency>
             <groupId>org.vaadin.addons.lazyquerycontainer</groupId>
             <artifactId>vaadin-lazyquerycontainer</artifactId>
             <version>${vaadin.addon.vaadin-lazyquerycontainer.version}</version>
+            <exclusions>
+               <exclusion>
+                  <groupId>org.eclipse.persistence</groupId>
+                  <artifactId>javax.persistence</artifactId>
+               </exclusion>
+               <exclusion>
+                  <groupId>com.vaadin</groupId>
+                  <artifactId>vaadin-client-compiled</artifactId>
+               </exclusion>
+               <exclusion>
+                  <groupId>com.vaadin</groupId>
+                  <artifactId>vaadin-themes</artifactId>
+               </exclusion>
+            </exclusions>
          </dependency>
          <dependency>
             <groupId>org.vaadin.addons</groupId>
@@ -506,11 +551,6 @@
             <groupId>org.vaadin.alump.distributionbar</groupId>
             <artifactId>dbar-addon</artifactId>
             <version>${vaadin.addon.dbar-addon.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>org.vaadin.addons</groupId>
-            <artifactId>contextmenu</artifactId>
-            <version>${vaadin.addon.contextmenu.version}</version>
          </dependency>
 
          <!-- Misc -->
@@ -543,6 +583,10 @@
                   <groupId>com.google.gwt</groupId>
                   <artifactId>gwt-user</artifactId>
                </exclusion>
+               <exclusion>
+                  <groupId>junit</groupId>
+                  <artifactId>junit</artifactId>
+               </exclusion>
             </exclusions>
          </dependency>
          <!-- Spring -->
@@ -553,11 +597,6 @@
             <type>pom</type>
             <scope>import</scope>
         </dependency>
-         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-            <version>${spring.boot.version}</version>
-         </dependency>
          <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -612,21 +651,6 @@
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>org.eclipse.persistence.jpa</artifactId>
             <version>${eclipselink.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>io.github.openfeign</groupId>
-            <artifactId>feign-jackson</artifactId>
-            <version>${feign.extension.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>io.github.openfeign</groupId>
-            <artifactId>feign-gson</artifactId>
-            <version>${feign.extension.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>io.github.openfeign</groupId>
-            <artifactId>feign-jaxrs</artifactId>
-            <version>${feign.extension.version}</version>
          </dependency>
 
         <!-- Protostuff Io -->
