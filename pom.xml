@@ -23,6 +23,13 @@
    <packaging>pom</packaging>
    <name>hawkBit :: Parent</name>
 
+   <licenses>
+      <license>
+         <name>Eclipse Public License - Version 1.0</name>
+         <url>http://www.eclipse.org/org/documents/epl-v10.php</url>
+      </license>
+   </licenses>
+
    <modules>
       <module>hawkbit-core</module>
       <module>hawkbit-security-core</module>
