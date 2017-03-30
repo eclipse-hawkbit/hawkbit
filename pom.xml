@@ -126,6 +126,8 @@
       <!-- Older versions needed than defined in Boot -->
       <!-- Incompatible changes in 2.2 -->
       <json-path.version>2.0.0</json-path.version>
+      <!-- Otherwise breaks management UI -->
+      <jetty.version>9.3.14.v20161028</jetty.version>
       <!-- Avoid extra CQs through transitive dependencies -->
       <logback.version>1.1.3</logback.version>
       <jackson.version>2.8.2</jackson.version>
