@@ -533,13 +533,18 @@ public interface TargetManagement {
 
     /**
      * Find targets by tag name.
-     *
+     * 
+     * @param pageable
+     *            the page request parameter for paging and sorting the result
      * @param tagName
      *            tag name
      * @return list of matching targets
+     * 
+     * @throws EntityNotFoundException
+     *             if target tag with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<Target> findTargetsByTag(@NotEmpty String tagName);
+    Page<Target> findTargetsByTag(@NotNull Pageable pageable, @NotEmpty String tagName);
 
     /**
      * Toggles {@link TargetTag} assignment to given {@link Target}s by means
@@ -558,19 +563,6 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     TargetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<String> controllerIds, @NotEmpty String tagName);
-
-    /**
-     * Un-assign all {@link Target} from a given {@link TargetTag} .
-     *
-     * @param targetTagId
-     *            to un-assign all targets
-     * @return list of unassigned targets
-     * 
-     * @throws EntityNotFoundException
-     *             if TAG with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    List<Target> unAssignAllTargetsByTag(@NotNull Long targetTagId);
 
     /**
      * Un-assign a {@link TargetTag} assignment to given {@link Target}.

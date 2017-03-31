@@ -92,11 +92,12 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         final String controllerAnotherTenant = "anotherController";
         createTargetForTenant(controllerAnotherTenant, anotherTenant);
 
-        assertThat(systemManagement.findTenants()).as("Expected number if tenants before deletion is").hasSize(3);
+        assertThat(systemManagement.findTenants(pageReq)).as("Expected number if tenants before deletion is")
+                .hasSize(3);
 
         systemManagement.deleteTenant(anotherTenant);
 
-        assertThat(systemManagement.findTenants()).as("Expected number if tenants after deletion is").hasSize(2);
+        assertThat(systemManagement.findTenants(pageReq)).as("Expected number if tenants after deletion is").hasSize(2);
     }
 
     @Test

@@ -308,7 +308,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
                 .getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
 
-        return deploymentManagement.findActiveActionsByTarget(TestdataFactory.DEFAULT_CONTROLLER_ID).get(0).getId();
+        return deploymentManagement.findActiveActionsByTarget(pageReq, TestdataFactory.DEFAULT_CONTROLLER_ID)
+                .getContent().get(0).getId();
     }
 
     @Step

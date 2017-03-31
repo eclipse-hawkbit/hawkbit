@@ -174,7 +174,6 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         this(name, version, description, type, moduleList, false);
     }
 
-    @Override
     public Set<DistributionSetTag> getTags() {
         if (tags == null) {
             return Collections.emptySet();

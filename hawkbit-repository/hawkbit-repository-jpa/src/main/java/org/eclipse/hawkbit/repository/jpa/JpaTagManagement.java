@@ -96,17 +96,11 @@ public class JpaTagManagement implements TagManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteTargetTag(final String targetTagName) {
-        final TargetTag tag = targetTagRepository.findByNameEquals(targetTagName)
+        targetTagRepository.findByNameEquals(targetTagName)
                 .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagName));
-
-        targetRepository.findByTag(tag.getId()).forEach(set -> {
-            set.removeTag(tag);
-            targetRepository.save(set);
-        });
 
         // finally delete the tag itself
         targetTagRepository.deleteByName(targetTagName);
-
     }
 
     @Override
@@ -199,20 +193,10 @@ public class JpaTagManagement implements TagManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteDistributionSetTag(final String tagName) {
-        final DistributionSetTag tag = distributionSetTagRepository.findByNameEquals(tagName)
+        distributionSetTagRepository.findByNameEquals(tagName)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, tagName));
 
-        distributionSetRepository.findByTag(tag).forEach(set -> {
-            set.removeTag(tag);
-            distributionSetRepository.save(set);
-        });
-
         distributionSetTagRepository.deleteByName(tagName);
-    }
-
-    @Override
-    public List<DistributionSetTag> findAllDistributionSetTags() {
-        return Collections.unmodifiableList(distributionSetTagRepository.findAll());
     }
 
     @Override

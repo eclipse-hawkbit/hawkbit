@@ -258,7 +258,8 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
         Target savedTarget = testdataFactory.createTarget(controllerId);
         savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
                 .next();
-        Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId()).get(0);
+        Action savedAction = deploymentManagement.findActiveActionsByTarget(pageReq, savedTarget.getControllerId())
+                .getContent().get(0);
 
         savedAction = controllerManagement.addUpdateActionStatus(
                 entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.RUNNING));

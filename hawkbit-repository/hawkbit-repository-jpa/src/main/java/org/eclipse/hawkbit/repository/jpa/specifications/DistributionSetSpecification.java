@@ -78,7 +78,6 @@ public final class DistributionSetSpecification {
         return (targetRoot, query, cb) -> {
             final Predicate predicate = cb.equal(targetRoot.<Long> get(JpaDistributionSet_.id), distid);
             targetRoot.fetch(JpaDistributionSet_.modules, JoinType.LEFT);
-            targetRoot.fetch(JpaDistributionSet_.tags, JoinType.LEFT);
             targetRoot.fetch(JpaDistributionSet_.type, JoinType.LEFT);
             query.distinct(true);
 

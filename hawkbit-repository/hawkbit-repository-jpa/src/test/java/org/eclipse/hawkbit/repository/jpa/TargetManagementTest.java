@@ -83,6 +83,8 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> targetManagement.assignTag(Lists.newArrayList(NOT_EXIST_ID), tag.getId()),
                 "Target");
 
+        verifyThrownExceptionBy(() -> targetManagement.findTargetsByTag(pageReq, NOT_EXIST_ID), "TargetTag");
+
         verifyThrownExceptionBy(() -> targetManagement.countTargetByAssignedDistributionSet(NOT_EXIST_IDL),
                 "DistributionSet");
         verifyThrownExceptionBy(() -> targetManagement.countTargetByInstalledDistributionSet(NOT_EXIST_IDL),
@@ -121,7 +123,6 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(
                 () -> targetManagement.toggleTagAssignment(Lists.newArrayList(NOT_EXIST_ID), tag.getName()), "Target");
 
-        verifyThrownExceptionBy(() -> targetManagement.unAssignAllTargetsByTag(NOT_EXIST_IDL), "TargetTag");
         verifyThrownExceptionBy(() -> targetManagement.unAssignTag(NOT_EXIST_ID, tag.getId()), "Target");
         verifyThrownExceptionBy(() -> targetManagement.unAssignTag(target.getControllerId(), NOT_EXIST_IDL),
                 "TargetTag");
@@ -265,22 +266,14 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         TargetTag findTargetTag = tagManagement.findTargetTag("Tag1").get();
         assertThat(assignedTargets.size()).as("Assigned targets are wrong")
-                .isEqualTo(findTargetTag.getAssignedToTargets().size());
+                .isEqualTo(targetManagement.findTargetsByTag(pageReq, "Tag1").getTotalElements());
 
         final Target unAssignTarget = targetManagement.unAssignTag("targetId123", findTargetTag.getId());
         assertThat(unAssignTarget.getControllerId()).as("Controller id is wrong").isEqualTo("targetId123");
         assertThat(tagManagement.findAllTargetTags(pageReq, unAssignTarget.getControllerId())).as("Tag size is wrong")
                 .isEmpty();
         findTargetTag = tagManagement.findTargetTag("Tag1").get();
-        assertThat(findTargetTag.getAssignedToTargets()).as("Assigned targets are wrong").hasSize(3);
-
-        final List<Target> unAssignTargets = targetManagement.unAssignAllTargetsByTag(findTargetTag.getId());
-        findTargetTag = tagManagement.findTargetTag("Tag1").get();
-        assertThat(findTargetTag.getAssignedToTargets()).as("Unassigned targets are wrong").isEmpty();
-        assertThat(unAssignTargets).as("Unassigned targets are wrong").hasSize(3);
-        unAssignTargets.forEach(target -> assertThat(
-                tagManagement.findAllTargetTags(pageReq, unAssignTarget.getControllerId()).getNumberOfElements())
-                        .isEqualTo(0));
+        assertThat(targetManagement.findTargetsByTag(pageReq, "Tag1")).as("Assigned targets are wrong").hasSize(3);
     }
 
     @Test

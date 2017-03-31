@@ -122,7 +122,8 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> softwareManagement.findSoftwareModuleMetadata(NOT_EXIST_IDL, NOT_EXIST_ID),
                 "SoftwareModule");
 
-        verifyThrownExceptionBy(() -> softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(NOT_EXIST_IDL),
+        verifyThrownExceptionBy(
+                () -> softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(pageReq, NOT_EXIST_IDL),
                 "SoftwareModule");
         verifyThrownExceptionBy(() -> softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(NOT_EXIST_IDL,
                 "name==*", pageReq), "SoftwareModule");
@@ -882,12 +883,12 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
                 .createSoftwareModuleMetadata(ah.getId(), entityFactory.generateMetadata(knownKey1, knownValue1))
                 .getSoftwareModule();
 
-        assertThat(softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(ah.getId()))
+        assertThat(softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(pageReq, ah.getId()).getContent())
                 .as("Contains the created metadata element")
                 .containsExactly(new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue1));
 
         softwareManagement.deleteSoftwareModuleMetadata(ah.getId(), knownKey1);
-        assertThat(softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(ah.getId()))
+        assertThat(softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(pageReq, ah.getId()).getContent())
                 .as("Metadata elemenets are").isEmpty();
     }
 

@@ -127,9 +127,6 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 () -> distributionSetManagement.toggleTagAssignment(Lists.newArrayList(set.getId()), NOT_EXIST_ID),
                 "DistributionSetTag");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement.unAssignAllDistributionSetsByTag(NOT_EXIST_IDL),
-                "DistributionSetTag");
-
         verifyThrownExceptionBy(() -> distributionSetManagement.unAssignTag(set.getId(), NOT_EXIST_IDL),
                 "DistributionSetTag");
 

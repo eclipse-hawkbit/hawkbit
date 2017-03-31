@@ -19,6 +19,8 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Tag;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -36,13 +38,29 @@ public interface DistributionSetRepository
 
     /**
      * Finds {@link DistributionSet}s by assigned {@link Tag}.
+     * 
+     * @param pageable
+     *            paging and sorting information
      *
      * @param tag
      *            to be found
      * @return list of found {@link DistributionSet}s
      */
     @Query(value = "Select Distinct ds from JpaDistributionSet ds join ds.tags dst where dst = :tag")
-    List<JpaDistributionSet> findByTag(@Param("tag") final DistributionSetTag tag);
+    Page<JpaDistributionSet> findByTag(Pageable pageable, @Param("tag") final DistributionSetTag tag);
+
+    /**
+     * Finds {@link DistributionSet}s by assigned {@link Tag}.
+     * 
+     * @param pageable
+     *            paging and sorting information
+     *
+     * @param tagId
+     *            to be found
+     * @return page of found {@link DistributionSet}s
+     */
+    @Query(value = "Select Distinct ds from JpaDistributionSet ds join ds.tags dst where dst.id = :tagId")
+    Page<JpaDistributionSet> findByTagId(Pageable pageable, @Param("tagId") final Long tagId);
 
     /**
      * deletes the {@link DistributionSet}s with the given IDs.

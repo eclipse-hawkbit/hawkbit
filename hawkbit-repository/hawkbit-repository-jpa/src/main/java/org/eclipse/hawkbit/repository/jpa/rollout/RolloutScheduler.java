@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rollout;
 
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorCompletionService;
@@ -19,6 +18,9 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import com.google.common.base.Throwables;
@@ -33,6 +35,8 @@ public class RolloutScheduler {
     private static final Logger LOGGER = LoggerFactory.getLogger(RolloutScheduler.class);
 
     private static final String PROP_SCHEDULER_DELAY_PLACEHOLDER = "${hawkbit.rollout.scheduler.fixedDelay:2000}";
+
+    private static final int MAX_TENANTS_QUERY = 500;
 
     private final TenantAware tenantAware;
 
@@ -80,28 +84,35 @@ public class RolloutScheduler {
 
         // run this code in system code privileged to have the necessary
         // permission to query and create entities.
-        final int tasks = systemSecurityContext.runAsSystem(() -> {
+        final long tasks = systemSecurityContext.runAsSystem(() -> {
             // workaround eclipselink that is currently not possible to
             // execute a query without multitenancy if MultiTenant
             // annotation is used.
             // https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So
             // iterate through all tenants and execute the rollout check for
             // each tenant seperately.
-            final List<String> tenants = systemManagement.findTenants();
-            LOGGER.info("Checking rollouts for {} tenants", tenants.size());
-            for (final String tenant : tenants) {
-                completionService.submit(() -> tenantAware.runAsTenant(tenant, () -> {
-                    rolloutManagement.handleRollouts();
-                    return null;
-                }));
-            }
-            return tenants.size();
+            Page<String> tenants;
+            Pageable query = new PageRequest(0, MAX_TENANTS_QUERY);
+            do {
+
+                tenants = systemManagement.findTenants(query);
+                LOGGER.info("Checking rollouts for {} tenants", tenants.getSize());
+                for (final String tenant : tenants) {
+                    completionService.submit(() -> tenantAware.runAsTenant(tenant, () -> {
+                        rolloutManagement.handleRollouts();
+                        return null;
+                    }));
+                }
+
+            } while (tenants.hasNext() && (query = tenants.nextPageable()) != null);
+
+            return tenants.getTotalElements();
         });
 
         waitUntilHandlersAreComplete(tasks);
     }
 
-    private void waitUntilHandlersAreComplete(final int tasks) {
+    private void waitUntilHandlersAreComplete(final long tasks) {
         try {
             for (int i = 0; i < tasks; i++) {
                 completionService.take().get();

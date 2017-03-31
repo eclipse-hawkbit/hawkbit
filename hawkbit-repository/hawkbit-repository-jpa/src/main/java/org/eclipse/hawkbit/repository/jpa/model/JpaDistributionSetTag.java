@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpda
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
+import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
@@ -38,6 +39,7 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
 public class JpaDistributionSetTag extends JpaTag implements DistributionSetTag, EventAwareEntity {
     private static final long serialVersionUID = 1L;
 
+    @CascadeOnDelete
     @ManyToMany(mappedBy = "tags", targetEntity = JpaDistributionSet.class, fetch = FetchType.LAZY)
     private List<DistributionSet> assignedToDistributionSet;
 
@@ -62,7 +64,6 @@ public class JpaDistributionSetTag extends JpaTag implements DistributionSetTag,
         // Default constructor for JPA.
     }
 
-    @Override
     public List<DistributionSet> getAssignedToDistributionSet() {
         if (assignedToDistributionSet == null) {
             return Collections.emptyList();

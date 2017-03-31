@@ -365,8 +365,8 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSetTag toDelete = tags.iterator().next();
 
         for (final DistributionSet set : distributionSetRepository.findAll()) {
-            assertThat(distributionSetManagement.findDistributionSetByIdWithDetails(set.getId()).get().getTags())
-                    .as("Wrong tag found").contains(toDelete);
+            assertThat(distributionSetRepository.findOne(set.getId()).getTags()).as("Wrong tag found")
+                    .contains(toDelete);
         }
 
         // delete
@@ -374,10 +374,12 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
 
         // check
         assertThat(distributionSetTagRepository.findOne(toDelete.getId())).as("Deleted tag should be null").isNull();
-        assertThat(tagManagement.findAllDistributionSetTags()).as("Wrong size of tags after deletion").hasSize(19);
+        assertThat(tagManagement.findAllDistributionSetTags(pageReq).getContent())
+                .as("Wrong size of tags after deletion").hasSize(19);
+
         for (final DistributionSet set : distributionSetRepository.findAll()) {
-            assertThat(distributionSetManagement.findDistributionSetByIdWithDetails(set.getId()).get().getTags())
-                    .as("Wrong found tags").doesNotContain(toDelete);
+            assertThat(distributionSetRepository.findOne(set.getId()).getTags()).as("Wrong found tags")
+                    .doesNotContain(toDelete);
         }
     }
 
@@ -448,7 +450,8 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         tagManagement.updateDistributionSetTag(entityFactory.tag().update(savedAssigned.getId()).name("test123"));
 
         // check data
-        assertThat(tagManagement.findAllDistributionSetTags()).as("Wrong size of ds tags").hasSize(tags.size());
+        assertThat(tagManagement.findAllDistributionSetTags(pageReq).getContent()).as("Wrong size of ds tags")
+                .hasSize(tags.size());
         assertThat(distributionSetTagRepository.findOne(savedAssigned.getId()).getName()).as("Wrong ds tag found")
                 .isEqualTo("test123");
     }
@@ -459,7 +462,8 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         final List<DistributionSetTag> tags = createDsSetsWithTags();
 
         // test
-        assertThat(tagManagement.findAllDistributionSetTags()).as("Wrong size of tags").hasSize(tags.size());
+        assertThat(tagManagement.findAllDistributionSetTags(pageReq).getContent()).as("Wrong size of tags")
+                .hasSize(tags.size());
         assertThat(distributionSetTagRepository.findAll()).as("Wrong size of tags").hasSize(20);
     }
 
@@ -479,6 +483,6 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
 
         tags.forEach(tag -> toggleTagAssignment(sets, tag));
 
-        return tagManagement.findAllDistributionSetTags();
+        return tagManagement.findAllDistributionSetTags(pageReq).getContent();
     }
 }

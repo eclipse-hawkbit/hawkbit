@@ -25,11 +25,6 @@ import java.util.Set;
 public interface DistributionSet extends NamedVersionedEntity {
 
     /**
-     * @return immutable {@link Set} of assigned {@link DistributionSetTag}s.
-     */
-    Set<DistributionSetTag> getTags();
-
-    /**
      * @return <code>true</code> if the set is deleted and only kept for history
      *         purposes.
      */
@@ -42,11 +37,14 @@ public interface DistributionSet extends NamedVersionedEntity {
      */
     boolean isRequiredMigrationStep();
 
+    // FIXME
+
     /**
      * @return the auto assign target filters
      */
     List<TargetFilterQuery> getAutoAssignFilters();
 
+    // FIXME
     /**
      *
      * @return unmodifiableSet of {@link SoftwareModule}.

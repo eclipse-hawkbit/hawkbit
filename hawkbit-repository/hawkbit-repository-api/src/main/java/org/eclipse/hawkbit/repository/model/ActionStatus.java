@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -27,12 +26,6 @@ public interface ActionStatus extends TenantAwareBaseEntity {
      *         reported.
      */
     Long getOccurredAt();
-
-    /**
-     * @return immutable list of message entries that in the
-     *         {@link ActionStatus}.
-     */
-    List<String> getMessages();
 
     /**
      * @return {@link Action} this {@link ActionStatus} belongs to.

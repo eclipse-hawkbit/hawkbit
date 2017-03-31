@@ -36,6 +36,7 @@ public interface SoftwareModule extends NamedVersionedEntity {
                 .findAny();
     }
 
+    // FIXME
     /**
      * @return immutable list of all artifacts
      */
@@ -57,6 +58,7 @@ public interface SoftwareModule extends NamedVersionedEntity {
      */
     boolean isDeleted();
 
+    // FIXME
     /**
      * @return immutable list of {@link DistributionSet}s the module is assigned
      *         to

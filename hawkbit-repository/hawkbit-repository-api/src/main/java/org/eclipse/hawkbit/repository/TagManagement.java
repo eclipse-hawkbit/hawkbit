@@ -123,13 +123,6 @@ public interface TagManagement {
     void deleteTargetTag(@NotEmpty String targetTagName);
 
     /**
-     * 
-     * @return all {@link DistributionSetTag}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    List<DistributionSetTag> findAllDistributionSetTags();
-
-    /**
      * returns all {@link DistributionSetTag}s.
      *
      * @param pageReq

@@ -855,21 +855,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public List<DistributionSet> unAssignAllDistributionSetsByTag(final Long dsTagId) {
-
-        final DistributionSetTag distributionSetTag = tagManagement.findDistributionSetTagById(dsTagId)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, dsTagId));
-
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        final Collection<JpaDistributionSet> distributionSets = (Collection) distributionSetTag
-                .getAssignedToDistributionSet();
-
-        return Collections.unmodifiableList(unAssignTag(distributionSets, distributionSetTag));
-    }
-
-    @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public DistributionSet unAssignTag(final Long dsId, final Long dsTagId) {
         final List<JpaDistributionSet> allDs = findDistributionSetListWithDetails(Arrays.asList(dsId));
 
@@ -925,6 +910,12 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     public List<DistributionSet> findDistributionSetAllById(final Collection<Long> ids) {
         return Collections.unmodifiableList(distributionSetRepository.findAll(ids));
+    }
+
+    @Override
+    public Page<DistributionSet> findDistributionSetsByTag(final Pageable pageable, final String tagName) {
+        return findDistributionSetsByFilters(pageable,
+                new DistributionSetFilterBuilder().setTagNames(Arrays.asList(tagName)).build());
     }
 
 }

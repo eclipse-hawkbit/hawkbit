@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import java.util.List;
-
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -18,6 +16,8 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.repository.report.model.SystemUsageReport;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -47,7 +47,7 @@ public interface SystemManagement {
      * @return list of all tenant names in the system.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
-    List<String> findTenants();
+    Page<String> findTenants(@NotNull Pageable pageable);
 
     /**
      * Calculated system usage statistics, both overall for the entire system

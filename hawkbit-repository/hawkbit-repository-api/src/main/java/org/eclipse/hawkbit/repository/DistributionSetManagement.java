@@ -459,6 +459,18 @@ public interface DistributionSetManagement {
             @NotNull DistributionSetFilter distributionSetFilter);
 
     /**
+     * retrieves {@link DistributionSet}s by filtering on the given parameters.
+     *
+     * @param pageable
+     *            page parameter
+     * @param tagName
+     *            has details of filters to be applied.
+     * @return the page of found {@link DistributionSet}
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Page<DistributionSet> findDistributionSetsByTag(@NotNull final Pageable pageable, @NotNull final String tagName);
+
+    /**
      * @param id
      *            as {@link DistributionSetType#getId()}
      * @return {@link DistributionSetType}
@@ -555,20 +567,6 @@ public interface DistributionSetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     DistributionSetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<Long> dsIds, @NotNull String tagName);
-
-    /**
-     * Unassign all {@link DistributionSet} from a given
-     * {@link DistributionSetTag} .
-     *
-     * @param tagId
-     *            to unassign all ds
-     * @return list of unassigned ds
-     * 
-     * @throws EntityNotFoundException
-     *             if tag with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    List<DistributionSet> unAssignAllDistributionSetsByTag(@NotNull Long tagId);
 
     /**
      * Unassigns a {@link SoftwareModule} form an existing

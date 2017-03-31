@@ -394,21 +394,6 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public List<Target> unAssignAllTargetsByTag(final Long targetTagId) {
-
-        final TargetTag tag = targetTagRepository.findById(targetTagId)
-                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagId));
-
-        if (tag.getAssignedToTargets().isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return unAssignTag(tag.getAssignedToTargets(), tag);
-    }
-
-    @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public Target unAssignTag(final String controllerID, final Long targetTagId) {
         final Target target = targetRepository.findByControllerId(controllerID)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerID));
@@ -575,13 +560,11 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public List<Target> findTargetsByTag(final String tagName) {
-        final Optional<TargetTag> tag = targetTagRepository.findByNameEquals(tagName);
-        if (!tag.isPresent()) {
-            return Collections.emptyList();
-        }
+    public Page<Target> findTargetsByTag(final Pageable pageable, final String tagName) {
+        final TargetTag tag = targetTagRepository.findByNameEquals(tagName)
+                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, tagName));
 
-        return Collections.unmodifiableList(targetRepository.findByTag(tag.get().getId()));
+        return convertPage(targetRepository.findByTag(pageable, tag.getId()), pageable);
     }
 
     @Override

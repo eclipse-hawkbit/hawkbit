@@ -48,13 +48,13 @@ public interface Target extends NamedEntity {
      *         polled the server the last time or <code>null</code> if target
      *         has never queried yet.
      */
-    Long getLastTargetQuery();
+    long getLastTargetQuery();
 
     /**
      * @return time in {@link TimeUnit#MILLISECONDS} GMT when
      *         {@link #getInstalledDistributionSet()} was applied.
      */
-    Long getInstallationDate();
+    long getInstallationDate();
 
     /**
      * @return current status of the {@link Target}.

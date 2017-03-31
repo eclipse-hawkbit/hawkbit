@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.autoassign;
 
-import java.util.List;
 import java.util.concurrent.locks.Lock;
 
 import org.eclipse.hawkbit.repository.SystemManagement;
@@ -16,6 +15,9 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -26,6 +28,8 @@ public class AutoAssignScheduler {
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoAssignScheduler.class);
 
     private static final String PROP_SCHEDULER_DELAY_PLACEHOLDER = "${hawkbit.autoassign.scheduler.fixedDelay:2000}";
+
+    private static final int MAX_TENANTS_QUERY = 500;
 
     private final TenantAware tenantAware;
 
@@ -82,23 +86,30 @@ public class AutoAssignScheduler {
         // https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So
         // iterate through all tenants and execute the rollout check for
         // each tenant separately.
-        final List<String> tenants = systemManagement.findTenants();
-        LOGGER.info("Checking target filter queries for tenants: {}", tenants.size());
-        for (final String tenant : tenants) {
+        Page<String> tenants;
+        Pageable query = new PageRequest(0, MAX_TENANTS_QUERY);
+        do {
 
-            final Lock lock = lockRegistry.obtain(tenant + "-autoassign");
-            if (!lock.tryLock()) {
-                return null;
-            }
-            try {
-                tenantAware.runAsTenant(tenant, () -> {
-                    autoAssignChecker.check();
+            tenants = systemManagement.findTenants(query);
+
+            LOGGER.info("Checking target filter queries for tenants: {}", tenants.getSize());
+            for (final String tenant : tenants) {
+
+                final Lock lock = lockRegistry.obtain(tenant + "-autoassign");
+                if (!lock.tryLock()) {
                     return null;
-                });
-            } finally {
-                lock.unlock();
+                }
+                try {
+                    tenantAware.runAsTenant(tenant, () -> {
+                        autoAssignChecker.check();
+                        return null;
+                    });
+                } finally {
+                    lock.unlock();
+                }
             }
-        }
-        return null;
+
+            return null;
+        } while (tenants.hasNext() && (query = tenants.nextPageable()) != null);
     }
 }

@@ -541,6 +541,7 @@ public interface SoftwareManagement {
      *             of software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    List<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(@NotNull Long moduleId);
+    Page<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(@NotNull Pageable pageable,
+            @NotNull Long moduleId);
 
 }

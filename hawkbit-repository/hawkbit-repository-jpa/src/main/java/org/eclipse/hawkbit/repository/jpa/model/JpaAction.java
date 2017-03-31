@@ -131,7 +131,6 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
         return actionType;
     }
 
-    @Override
     public List<ActionStatus> getActionStatus() {
         if (actionStatus == null) {
             return Collections.emptyList();

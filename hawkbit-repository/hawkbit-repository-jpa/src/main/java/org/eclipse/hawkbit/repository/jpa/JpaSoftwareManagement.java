@@ -644,13 +644,16 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-    public List<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(final Long softwareModuleId) {
+    public Page<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(final Pageable pageable,
+            final Long softwareModuleId) {
         throwExceptionIfSoftwareModuleDoesNotExist(softwareModuleId);
 
-        return Collections.unmodifiableList(softwareModuleMetadataRepository
+        return convertSmMdPage(softwareModuleMetadataRepository
                 .findAll((Specification<JpaSoftwareModuleMetadata>) (root, query, cb) -> cb
                         .and(cb.equal(root.get(JpaSoftwareModuleMetadata_.softwareModule).get(JpaSoftwareModule_.id),
-                                softwareModuleId))));
+                                softwareModuleId)),
+                        pageable),
+                pageable);
     }
 
     @Override

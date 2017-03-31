@@ -8,17 +8,10 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import java.util.List;
-
 /**
  * Target tag element.
  *
  */
 public interface TargetTag extends Tag {
-
-    /**
-     * @return immutable {@link List} of targets assigned to this {@link Tag}.
-     */
-    List<Target> getAssignedToTargets();
 
 }
