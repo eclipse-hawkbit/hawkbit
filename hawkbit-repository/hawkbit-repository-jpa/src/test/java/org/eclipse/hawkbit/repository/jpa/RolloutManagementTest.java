@@ -12,6 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,8 +42,10 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.utils.MultipleInvokeHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.SuccessCondition;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -58,7 +61,6 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.Test;
-import org.springframework.context.annotation.Description;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -66,6 +68,7 @@ import org.springframework.data.domain.Sort.Direction;
 
 import com.google.common.collect.Lists;
 
+import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Step;
 import ru.yandex.qatools.allure.annotations.Stories;
@@ -77,6 +80,42 @@ import ru.yandex.qatools.allure.annotations.Title;
 @Features("Component Tests - Repository")
 @Stories("Rollout Management")
 public class RolloutManagementTest extends AbstractJpaIntegrationTest {
+
+    @Test
+    @Description("Verifies that a running action with distribution-set (A) is not canceled by a rollout which tries to also assign a distribution-set (A)")
+    public void rolloutShouldNotCancelRunningActionWithTheSameDistributionSet() {
+        // manually assign distribution set to target
+        final String knownControllerId = "controller12345";
+        final DistributionSet knownDistributionSet = testdataFactory.createDistributionSet();
+        testdataFactory.createTarget(knownControllerId);
+        final DistributionSetAssignmentResult assignmentResult = deploymentManagement.assignDistributionSet(
+                knownDistributionSet.getId(), ActionType.FORCED, 0, Collections.singleton(knownControllerId));
+        final Long manuallyAssignedActionId = assignmentResult.getActions().get(0);
+
+        // create rollout with the same distribution set already assigned
+        // start rollout
+        final Rollout rollout = testdataFactory.createRolloutByVariables("rolloutNotCancelRunningAction", "description",
+                1, "name==*", knownDistributionSet, "50", "5");
+        rolloutManagement.startRollout(rollout.getId());
+        rolloutManagement.handleRollouts();
+
+        // verify that manually created action is still running and action
+        // created from rollout is finished
+        final List<Action> actionsByKnownTarget = deploymentManagement.findActionsByTarget(knownControllerId, pageReq)
+                .getContent();
+        // should be 2 actions, one manually and one from the rollout
+        assertThat(actionsByKnownTarget).hasSize(2);
+        // verify that manually assigned action is still running
+        assertThat(deploymentManagement.findAction(manuallyAssignedActionId).get().getStatus())
+                .isEqualTo(Status.RUNNING);
+        // verify that rollout management created action is finished because is
+        // duplicate assignment
+        final Action rolloutCreatedAction = actionsByKnownTarget.stream()
+                .filter(action -> !action.getId().equals(manuallyAssignedActionId)).findAny().get();
+        assertThat(rolloutCreatedAction.getStatus()).isEqualTo(Status.FINISHED);
+
+    }
+
     @Test
     @Description("Verifies that management get access reacts as specfied on calls for non existing entities by means "
             + "of Optional not present.")
