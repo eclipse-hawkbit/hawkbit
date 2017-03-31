@@ -615,7 +615,7 @@ public class UploadLayout extends VerticalLayout {
             } else {
                 currentUploadConfirmationwindow = new UploadConfirmationWindow(this, artifactUploadState, eventBus,
                         artifactManagement);
-                UI.getCurrent().addWindow(currentUploadConfirmationwindow.getUploadConfrimationWindow());
+                UI.getCurrent().addWindow(currentUploadConfirmationwindow.getUploadConfirmationWindow());
                 setConfirmationPopupHeightWidth(Page.getCurrent().getBrowserWindowWidth(),
                         Page.getCurrent().getBrowserWindowHeight());
             }

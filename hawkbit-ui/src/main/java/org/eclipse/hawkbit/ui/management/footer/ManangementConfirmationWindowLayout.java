@@ -37,10 +37,10 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.footer.ActionTypeOptionGroupLayout.ActionTypeOption;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.google.common.collect.Maps;
@@ -51,9 +51,8 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Table.Align;
 
 /**
- * Confirmation window for target/ds delete and assignment.
- * 
- *
+ * Confirmation window for target/distributionSet delete and assignment
+ * operations on the Deployment View.
  */
 public class ManangementConfirmationWindowLayout extends AbstractConfirmationWindowLayout {
 
@@ -388,7 +387,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
         managementUIState.getTargetTableFilters().getPinnedDistId()
                 .ifPresent(distId -> unPinDeletedDS(deletedIds, distId));
-
+        eventBus.publish(this, SaveActionWindowEvent.DELETED_DISTRIBUTIONS);
         managementUIState.getDeletedDistributionList().clear();
 
     }
@@ -454,7 +453,6 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         } else {
             eventBus.publish(this, SaveActionWindowEvent.DISCARD_DELETE_TARGET);
         }
-
     }
 
     private void discardAllTargets(final ConfirmationTab tab) {
@@ -481,8 +479,8 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
         managementUIState.getDistributionTableFilters().getPinnedTarget().ifPresent(this::unPinDeletedTarget);
         eventBus.publish(this, SaveActionWindowEvent.SHOW_HIDE_TAB);
+        eventBus.publish(this, SaveActionWindowEvent.DELETED_TARGETS);
         managementUIState.getDeletedTargetList().clear();
-
     }
 
     private void removeDeletedTargetsFromAssignmentTab() {

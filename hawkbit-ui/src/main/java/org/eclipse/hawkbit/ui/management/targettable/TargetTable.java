@@ -51,7 +51,6 @@ import org.eclipse.hawkbit.ui.push.CancelTargetAssignmentEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.AssignInstalledDSTooltipGenerator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -59,6 +58,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -203,6 +203,10 @@ public class TargetTable extends AbstractTable<Target, Long> {
     void onEvent(final SaveActionWindowEvent event) {
         if (event == SaveActionWindowEvent.SAVED_ASSIGNMENTS) {
             refreshContainer();
+        }
+
+        if (event == SaveActionWindowEvent.DELETED_TARGETS) {
+            refreshFilter();
         }
     }
 
@@ -485,8 +489,8 @@ public class TargetTable extends AbstractTable<Target, Long> {
         final String tagName = ((DragAndDropWrapper) (event.getTransferable().getSourceComponent())).getData()
                 .toString();
         if (tagName.equals(SPUIDefinitions.TARGET_TAG_BUTTON)) {
-            notification.displayValidationError(
-                    i18n.getMessage("message.tag.cannot.be.assigned", new Object[] { i18n.getMessage("label.no.tag.assigned") }));
+            notification.displayValidationError(i18n.getMessage("message.tag.cannot.be.assigned",
+                    new Object[] { i18n.getMessage("label.no.tag.assigned") }));
             return false;
         }
         return true;

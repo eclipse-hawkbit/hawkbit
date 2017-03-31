@@ -22,12 +22,12 @@ import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -68,7 +68,8 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
 
     protected UINotification notification;
 
-    protected AbstractTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification notification) {
+    protected AbstractTable(final UIEventBus eventBus, final VaadinMessageSource i18n,
+            final UINotification notification) {
         this.eventBus = eventBus;
         this.i18n = i18n;
         this.notification = notification;
@@ -326,10 +327,12 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
         }
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.getMessage("header.name"), 0.2F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.getMessage("header.createdBy"), 0.1F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.getMessage("header.createdDate"), 0.1F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.getMessage("header.modifiedBy"), 0.1F));
         columnList.add(
-                new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.getMessage("header.modifiedDate"), 0.1F));
+                new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.getMessage("header.createdDate"), 0.1F));
+        columnList.add(
+                new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.getMessage("header.modifiedBy"), 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE,
+                i18n.getMessage("header.modifiedDate"), 0.1F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.getMessage("header.description"), 0.2F));
         setItemDescriptionGenerator((source, itemId, propertyId) -> {
 

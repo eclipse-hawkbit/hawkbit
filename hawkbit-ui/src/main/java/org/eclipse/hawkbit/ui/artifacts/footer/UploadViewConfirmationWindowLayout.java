@@ -15,16 +15,18 @@ import java.util.Set;
 
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.state.CustomFile;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.AbstractConfirmationWindowLayout;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.google.common.collect.Maps;
@@ -69,7 +71,8 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
             tabs.put(i18n.getMessage("caption.delete.swmodule.accordion.tab"), createSMDeleteConfirmationTab());
         }
         if (!artifactUploadState.getSelectedDeleteSWModuleTypes().isEmpty()) {
-            tabs.put(i18n.getMessage("caption.delete.sw.module.type.accordion.tab"), createSMtypeDeleteConfirmationTab());
+            tabs.put(i18n.getMessage("caption.delete.sw.module.type.accordion.tab"),
+                    createSMtypeDeleteConfirmationTab());
         }
         return tabs;
     }
@@ -144,6 +147,8 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
     private void deleteSMAll(final ConfirmationTab tab) {
         final Set<Long> swmoduleIds = artifactUploadState.getDeleteSofwareModules().keySet();
         softwareManagement.deleteSoftwareModules(swmoduleIds);
+        eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.REMOVE_ENTITY, swmoduleIds));
+
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.getMessage("message.swModule.deleted", artifactUploadState.getDeleteSofwareModules().size()));
         /*

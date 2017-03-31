@@ -116,7 +116,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
      */
     protected void onBaseEntityEvent(final BaseUIEntityEvent<T> baseEntityEvent) {
         final BaseEntityEventType eventType = baseEntityEvent.getEventType();
-        if (BaseEntityEventType.SELECTED_ENTITY == eventType || BaseEntityEventType.UPDATED_ENTITY == eventType) {
+        if (BaseEntityEventType.SELECTED_ENTITY == eventType || BaseEntityEventType.UPDATED_ENTITY == eventType
+                || BaseEntityEventType.REMOVE_ENTITY == eventType) {
             UI.getCurrent().access(() -> populateData(baseEntityEvent.getEntity()));
         } else if (BaseEntityEventType.MINIMIZED == eventType) {
             UI.getCurrent().access(() -> setVisible(true));

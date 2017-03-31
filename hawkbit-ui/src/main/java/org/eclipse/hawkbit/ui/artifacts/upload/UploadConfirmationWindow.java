@@ -532,7 +532,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
         return footer;
     }
 
-    public Window getUploadConfrimationWindow() {
+    public Window getUploadConfirmationWindow() {
         return window;
     }
 
@@ -568,9 +568,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
                 window.close();
                 uploadLayout.clearUploadedFileDetails();
             }
-
         }
-
     }
 
     // Exception squid:S3655 - Optional access is checked in
@@ -612,7 +610,6 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             uploadLayout.getUINotification()
                     .displayValidationError(uploadLayout.getI18n().getMessage("message.error.noProvidedName"));
         }
-
     }
 
     private void onResultDetailsPopupClose() {
