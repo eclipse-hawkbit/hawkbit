@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -181,7 +182,8 @@ public class JpaTargetManagement implements TargetManagement {
 
         targets.forEach(target -> eventPublisher.publishEvent(
                 new TargetDeletedEvent(tenantAware.getCurrentTenant(), target.getId(), target.getControllerId(),
-                        target.getAddress(), JpaTarget.class.getName(), applicationContext.getId())));
+                        Optional.ofNullable(target.getAddress()).map(URI::toString).orElse(null),
+                        JpaTarget.class.getName(), applicationContext.getId())));
     }
 
     @Override

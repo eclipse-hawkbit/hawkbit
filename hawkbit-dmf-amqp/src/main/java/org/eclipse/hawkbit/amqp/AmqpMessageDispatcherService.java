@@ -103,7 +103,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      */
     @EventListener(classes = TargetAssignDistributionSetEvent.class)
     public void targetAssignDistributionSet(final TargetAssignDistributionSetEvent assignedEvent) {
-        if (isFromSelf(assignedEvent)) {
+        if (isNotFromSelf(assignedEvent)) {
             return;
         }
 
@@ -149,7 +149,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      */
     @EventListener(classes = CancelTargetAssignmentEvent.class)
     public void targetCancelAssignmentToDistributionSet(final CancelTargetAssignmentEvent cancelEvent) {
-        if (isFromSelf(cancelEvent)) {
+        if (isNotFromSelf(cancelEvent)) {
             return;
         }
 
@@ -167,23 +167,29 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      */
     @EventListener(classes = TargetDeletedEvent.class)
     public void targetDelete(final TargetDeletedEvent deleteEvent) {
-        if (isFromSelf(deleteEvent)) {
+        if (isNotFromSelf(deleteEvent)) {
             return;
         }
 
-        sendDeleteMessageToTarget(deleteEvent.getTenant(), deleteEvent.getControllerId(),
-                deleteEvent.getTargetAdress());
+        sendDeleteMessageToTarget(deleteEvent);
     }
 
-    void sendDeleteMessageToTarget(final String tenant, final String controllerId, final URI address) {
+    void sendDeleteMessageToTarget(final TargetDeletedEvent deleteEvent) {
+
+        if (deleteEvent.getTargetAddress() == null) {
+            return;
+        }
+
+        final URI address = URI.create(deleteEvent.getTargetAddress());
         if (!IpUtil.isAmqpUri(address)) {
             return;
         }
-        final Message message = new Message(null, createConnectorMessagePropertiesDeleteThing(tenant, controllerId));
+        final Message message = new Message(null,
+                createConnectorMessagePropertiesDeleteThing(deleteEvent.getTenant(), deleteEvent.getControllerId()));
         amqpSenderService.sendMessage(message, address);
     }
 
-    private boolean isFromSelf(final RemoteApplicationEvent event) {
+    private boolean isNotFromSelf(final RemoteApplicationEvent event) {
         return serviceMatcher != null && !serviceMatcher.isFromSelf(event);
     }
 

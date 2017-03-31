@@ -397,7 +397,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     @Override
     public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new TargetDeletedEvent(getTenant(), getId(), getControllerId(), getAddress(),
+                .publishEvent(new TargetDeletedEvent(getTenant(), getId(), getControllerId(), address,
                         getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
     }
 }

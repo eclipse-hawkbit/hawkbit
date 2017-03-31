@@ -235,24 +235,41 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     public void sendDeleteRequest() {
 
         // setup
-        final TargetDeletedEvent targetDeletedEvent = new TargetDeletedEvent(TENANT, 1L, CONTROLLER_ID, AMQP_URI,
+        final String amqpUri = "amqp://anyhost";
+        final TargetDeletedEvent targetDeletedEvent = new TargetDeletedEvent(TENANT, 1L, CONTROLLER_ID, amqpUri,
                 JpaTarget.class.getName(), serviceMatcher.getServiceId());
 
         // test
         amqpMessageDispatcherService.targetDelete(targetDeletedEvent);
 
         // verify
-        final Message sendMessage = createArgumentCapture(AMQP_URI);
+        final Message sendMessage = createArgumentCapture(URI.create(amqpUri));
         assertDeleteMessage(sendMessage);
     }
 
     @Test
-    @Description("Verfies that a delete message is no send if the adress is not an amqp adress.")
+    @Description("Verfies that a delete message is no send if the address is not an amqp adress.")
     public void sendDeleteRequestWithNoAmqpAdress() {
 
         // setup
-        final URI NO_AMQP_URI = IpUtil.createHttpUri("anyhost");
-        final TargetDeletedEvent targetDeletedEvent = new TargetDeletedEvent(TENANT, 1L, CONTROLLER_ID, NO_AMQP_URI,
+        final String noAmqpUri = "http://anyhost";
+        final TargetDeletedEvent targetDeletedEvent = new TargetDeletedEvent(TENANT, 1L, CONTROLLER_ID, noAmqpUri,
+                JpaTarget.class.getName(), serviceMatcher.getServiceId());
+
+        // test
+        amqpMessageDispatcherService.targetDelete(targetDeletedEvent);
+
+        // verify
+        Mockito.verifyZeroInteractions(senderService);
+    }
+
+    @Test
+    @Description("Verfies that a delete message is no send if the address is null.")
+    public void sendDeleteRequestWithNullAdress() {
+
+        // setup
+        final String noAmqpUri = null;
+        final TargetDeletedEvent targetDeletedEvent = new TargetDeletedEvent(TENANT, 1L, CONTROLLER_ID, noAmqpUri,
                 JpaTarget.class.getName(), serviceMatcher.getServiceId());
 
         // test
