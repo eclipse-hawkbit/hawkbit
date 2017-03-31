@@ -48,7 +48,7 @@ public abstract class AbstractNotificationView extends VerticalLayout implements
 
     private transient Map<Class<?>, RefreshableContainer> supportedEvents;
 
-    private final DistributionSetManagement distributionSetManagement;
+    private final transient DistributionSetManagement distributionSetManagement;
 
     /**
      * Constructor.
