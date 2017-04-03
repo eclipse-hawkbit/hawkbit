@@ -70,6 +70,7 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     @NotNull
     private JpaSoftwareModuleType type;
 
+    @CascadeOnDelete
     @ManyToMany(mappedBy = "modules", targetEntity = JpaDistributionSet.class, fetch = FetchType.LAZY)
     private List<DistributionSet> assignedTo;
 

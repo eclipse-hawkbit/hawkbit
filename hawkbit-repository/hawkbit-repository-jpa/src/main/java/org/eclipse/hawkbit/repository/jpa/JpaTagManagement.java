@@ -98,8 +98,9 @@ public class JpaTagManagement implements TagManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteTargetTag(final String targetTagName) {
-        targetTagRepository.findByNameEquals(targetTagName)
-                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagName));
+        if (!targetTagRepository.existsByName(targetTagName)) {
+            throw new EntityNotFoundException(TargetTag.class, targetTagName);
+        }
 
         // finally delete the tag itself
         targetTagRepository.deleteByName(targetTagName);
@@ -195,8 +196,9 @@ public class JpaTagManagement implements TagManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteDistributionSetTag(final String tagName) {
-        distributionSetTagRepository.findByNameEquals(tagName)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, tagName));
+        if (!distributionSetTagRepository.existsByName(tagName)) {
+            throw new EntityNotFoundException(DistributionSetTag.class, tagName);
+        }
 
         distributionSetTagRepository.deleteByName(tagName);
     }
