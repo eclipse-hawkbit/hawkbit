@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.integration.listener;
 
+import static org.junit.Assert.fail;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,20 +38,15 @@ public class ReplyToListener implements TestRabbitListener {
         case EVENT:
             final EventTopic eventTopic = EventTopic
                     .valueOf(message.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC).toString());
-            System.out.println("eventTopic=" + eventTopic);
             eventTopicMessages.put(eventTopic, message);
             break;
         case THING_DELETED:
             final String targetName = message.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID)
                     .toString();
-            System.out.println("target deleted=" + targetName);
             deleteMessages.put(targetName, message);
             break;
-
         default:
-            // TODO
-            // fail("Unexpected message");
-            break;
+            fail("Unexpected message type");
         }
     }
 

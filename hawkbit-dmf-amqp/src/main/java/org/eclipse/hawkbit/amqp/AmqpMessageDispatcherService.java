@@ -170,23 +170,21 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         if (isNotFromSelf(deleteEvent)) {
             return;
         }
-
-        sendDeleteMessageToTarget(deleteEvent);
+        sendDeleteMessage(deleteEvent.getTenant(), deleteEvent.getControllerId(), deleteEvent.getTargetAddress());
     }
 
-    void sendDeleteMessageToTarget(final TargetDeletedEvent deleteEvent) {
+    void sendDeleteMessage(final String tenant, final String controllerId, final String targetAddress) {
 
-        if (deleteEvent.getTargetAddress() == null) {
+        if (!hasValidAddress(targetAddress)) {
             return;
         }
 
-        final URI address = URI.create(deleteEvent.getTargetAddress());
-        if (!IpUtil.isAmqpUri(address)) {
-            return;
-        }
-        final Message message = new Message(null,
-                createConnectorMessagePropertiesDeleteThing(deleteEvent.getTenant(), deleteEvent.getControllerId()));
-        amqpSenderService.sendMessage(message, address);
+        final Message message = new Message(null, createConnectorMessagePropertiesDeleteThing(tenant, controllerId));
+        amqpSenderService.sendMessage(message, URI.create(targetAddress));
+    }
+
+    private boolean hasValidAddress(final String targetAddress) {
+        return targetAddress != null && IpUtil.isAmqpUri(URI.create(targetAddress));
     }
 
     private boolean isNotFromSelf(final RemoteApplicationEvent event) {

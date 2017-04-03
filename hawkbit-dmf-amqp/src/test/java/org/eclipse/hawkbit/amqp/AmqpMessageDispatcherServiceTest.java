@@ -248,7 +248,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that a delete message is no send if the address is not an amqp adress.")
+    @Description("Verfies that a delete message is no send if the address is not an amqp address.")
     public void sendDeleteRequestWithNoAmqpAdress() {
 
         // setup
