@@ -37,14 +37,11 @@ public interface DistributionSet extends NamedVersionedEntity {
      */
     boolean isRequiredMigrationStep();
 
-    // FIXME
-
     /**
      * @return the auto assign target filters
      */
     List<TargetFilterQuery> getAutoAssignFilters();
 
-    // FIXME
     /**
      *
      * @return unmodifiableSet of {@link SoftwareModule}.
