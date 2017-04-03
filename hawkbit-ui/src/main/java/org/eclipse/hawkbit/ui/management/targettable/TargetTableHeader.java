@@ -63,7 +63,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public class TargetTableHeader extends AbstractTableHeader {
 
-    private static final long serialVersionUID = -8647521126666320022L;
+    private static final long serialVersionUID = 1L;
 
     private final UINotification notification;
 
@@ -297,11 +297,6 @@ public class TargetTableHeader extends AbstractTableHeader {
     }
 
     @Override
-    protected Boolean isAddNewItemAllowed() {
-        return Boolean.TRUE;
-    }
-
-    @Override
     protected Boolean isBulkUploadAllowed() {
         return Boolean.TRUE;
     }
@@ -426,13 +421,18 @@ public class TargetTableHeader extends AbstractTableHeader {
     }
 
     @Override
+    protected boolean isBulkUploadInProgress() {
+        return managementUIState.getTargetTableFilters().getBulkUpload().getSucessfulUploadCount() != 0
+                || managementUIState.getTargetTableFilters().getBulkUpload().getFailedUploadCount() != 0;
+    }
+
+    @Override
     protected String getFilterIconStyle() {
         return null;
     }
 
     @Override
-    protected boolean isBulkUploadInProgress() {
-        return managementUIState.getTargetTableFilters().getBulkUpload().getSucessfulUploadCount() != 0
-                || managementUIState.getTargetTableFilters().getBulkUpload().getFailedUploadCount() != 0;
+    protected Boolean isAddNewItemAllowed() {
+        return Boolean.TRUE;
     }
 }

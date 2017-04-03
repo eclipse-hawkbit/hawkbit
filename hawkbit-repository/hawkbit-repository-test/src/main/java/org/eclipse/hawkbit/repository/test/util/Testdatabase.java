@@ -20,6 +20,4 @@ public interface Testdatabase {
 
     public String getUri();
 
-    String getDriverClassName();
-
 }

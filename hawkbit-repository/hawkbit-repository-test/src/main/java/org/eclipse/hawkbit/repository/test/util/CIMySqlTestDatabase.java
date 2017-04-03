@@ -37,12 +37,6 @@ public class CIMySqlTestDatabase implements Testdatabase {
         this.password = System.getProperty("spring.datasource.password");
         this.uri = System.getProperty("spring.datasource.url");
         createSchemaUri();
-        initSystemProperties();
-    }
-
-    private final void initSystemProperties() {
-        System.setProperty("spring.datasource.driverClassName", getDriverClassName());
-        System.setProperty("spring.jpa.database", "MYSQL");
     }
 
     private void createSchemaUri() {
@@ -83,12 +77,6 @@ public class CIMySqlTestDatabase implements Testdatabase {
         } catch (final SQLException e) {
             LOG.error("Schema drop failed!", e);
         }
-    }
-
-    @Override
-    public String getDriverClassName() {
-        return "org.mariadb.jdbc.Driver";
-
     }
 
     @Override

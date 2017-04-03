@@ -249,8 +249,9 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         targetIds.forEach(tIds -> targetRepository.setAssignedDistributionSetAndUpdateStatus(TargetUpdateStatus.PENDING,
                 set, System.currentTimeMillis(), currentUser, tIds));
-        final Map<String, JpaAction> targetIdsToActions = targets.stream().map(
-                t -> actionRepository.save(createTargetAction(targetsWithActionMap, t, set, rollout, rolloutGroup)))
+        final Map<String, JpaAction> targetIdsToActions = targets.stream()
+                .map(t -> actionRepository
+                        .save(createTargetAction(targetsWithActionMap, t, set, rollout, rolloutGroup)))
                 .collect(Collectors.toMap(a -> a.getTarget().getControllerId(), Function.identity()));
 
         // create initial action status when action is created so we remember
@@ -460,10 +461,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private void startScheduledAction(final JpaAction action) {
-        // check if we need to override running update actions
-        final Set<Long> overrideObsoleteUpdateActions = overrideObsoleteUpdateActions(
-                Collections.singletonList(action.getTarget().getId()));
-
         JpaTarget target = (JpaTarget) action.getTarget();
 
         if (target.getAssignedDistributionSet() != null
@@ -476,6 +473,10 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             actionRepository.save(action);
             return;
         }
+
+        // check if we need to override running update actions
+        final Set<Long> overrideObsoleteUpdateActions = overrideObsoleteUpdateActions(
+                Collections.singletonList(action.getTarget().getId()));
 
         action.setActive(true);
         action.setStatus(Status.RUNNING);
