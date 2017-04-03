@@ -293,9 +293,11 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
     }
 
     /**
-     * Check if first row should be selected by default on load.
+     * Check if the first row should be selected by default on load. (if there
+     * is no other item selected)
      * 
-     * @return true if it should be selected otherwise return false.
+     * @return true if it should be selected otherwise return false, if there is
+     *         a different item already selected.
      */
     protected abstract boolean isFirstRowSelectedOnLoad();
 

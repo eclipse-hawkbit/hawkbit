@@ -91,13 +91,18 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public class TargetTable extends AbstractTable<Target, Long> {
 
+    private static final long serialVersionUID = 1L;
+
     private static final Logger LOG = LoggerFactory.getLogger(TargetTable.class);
+
     private static final String TARGET_PINNED = "targetPinned";
-    private static final long serialVersionUID = -2300392868806614568L;
+
     private static final int PROPERTY_DEPT = 3;
 
     private final transient TargetManagement targetManagement;
+
     private final transient DistributionSetManagement distributionSetManagement;
+
     private final transient TagManagement tagManagement;
 
     private final SpPermissionChecker permChecker;
@@ -107,7 +112,8 @@ public class TargetTable extends AbstractTable<Target, Long> {
     private final ManagementUIState managementUIState;
 
     private Button targetPinnedBtn;
-    private boolean isTargetPinned;
+
+    private boolean targetPinned;
 
     public TargetTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification notification,
             final TargetManagement targetManagement, final ManagementUIState managementUIState,
@@ -277,7 +283,7 @@ public class TargetTable extends AbstractTable<Target, Long> {
 
     @Override
     protected boolean isFirstRowSelectedOnLoad() {
-        return managementUIState.getSelectedTargetId().map(Set::isEmpty).orElse(true);
+        return !managementUIState.getSelectedTargetId().isPresent();
     }
 
     @Override
@@ -387,7 +393,7 @@ public class TargetTable extends AbstractTable<Target, Long> {
         pinBtn.addClickListener(this::addPinClickListener);
         if (isPinned(pinnedTarget)) {
             pinBtn.addStyleName(TARGET_PINNED);
-            isTargetPinned = Boolean.TRUE;
+            targetPinned = Boolean.TRUE;
             targetPinnedBtn = pinBtn;
             eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
         }
@@ -409,7 +415,7 @@ public class TargetTable extends AbstractTable<Target, Long> {
      */
     private void addPinClickListener(final ClickEvent event) {
         checkifAlreadyPinned(event.getButton());
-        if (isTargetPinned) {
+        if (targetPinned) {
             pinTarget(event.getButton());
         } else {
             unPinTarget(event.getButton());
@@ -427,12 +433,12 @@ public class TargetTable extends AbstractTable<Target, Long> {
         final TargetIdName targetId = managementUIState.getDistributionTableFilters().getPinnedTarget().orElse(null);
 
         if (targetId == null) {
-            isTargetPinned = !isTargetPinned;
+            targetPinned = !targetPinned;
             managementUIState.getDistributionTableFilters().setPinnedTarget(newPinnedTargetItemId);
         } else if (targetId.equals(newPinnedTargetItemId)) {
-            isTargetPinned = Boolean.FALSE;
+            targetPinned = Boolean.FALSE;
         } else {
-            isTargetPinned = true;
+            targetPinned = true;
             managementUIState.getDistributionTableFilters().setPinnedTarget(newPinnedTargetItemId);
             if (null != targetPinnedBtn) {
                 resetPinStyle(targetPinnedBtn);
@@ -449,7 +455,7 @@ public class TargetTable extends AbstractTable<Target, Long> {
         /* change target table styling */
         styleTargetTable();
         eventBtn.addStyleName(TARGET_PINNED);
-        isTargetPinned = Boolean.FALSE;
+        targetPinned = Boolean.FALSE;
     }
 
     private void unPinTarget(final Button eventBtn) {

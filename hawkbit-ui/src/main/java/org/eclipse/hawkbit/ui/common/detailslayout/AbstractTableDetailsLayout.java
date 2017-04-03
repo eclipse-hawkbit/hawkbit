@@ -132,10 +132,10 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     public void restoreState() {
         if (onLoadIsTableRowSelected()) {
+            populateData(getSelectedBaseEntity());
+        } else {
             populateData(null);
             editButton.setEnabled(true);
-        } else {
-            populateData(getSelectedBaseEntity());
         }
         if (onLoadIsTableMaximized()) {
             setVisible(false);

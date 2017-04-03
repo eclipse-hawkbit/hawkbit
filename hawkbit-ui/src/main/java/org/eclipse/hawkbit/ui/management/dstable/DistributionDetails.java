@@ -48,7 +48,7 @@ public class DistributionDetails extends AbstractDistributionSetDetails {
 
     @Override
     protected boolean onLoadIsTableRowSelected() {
-        return getManagementUIState().getSelectedDsIdName().map(Set::isEmpty).orElse(true);
+        return !getManagementUIState().getSelectedDsIdName().map(Set::isEmpty).orElse(true);
     }
 
     @Override

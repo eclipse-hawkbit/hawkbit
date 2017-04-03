@@ -36,7 +36,7 @@ import com.vaadin.spring.annotation.VaadinSessionScope;
 @SpringComponent
 public class ArtifactUploadState implements ManagmentEntityState<Long>, Serializable {
 
-    private static final long serialVersionUID = 8273440375917450859L;
+    private static final long serialVersionUID = 1L;
 
     private final SoftwareModuleFilters softwareModuleFilters;
 
@@ -115,11 +115,6 @@ public class ArtifactUploadState implements ManagmentEntityState<Long>, Serializ
         return statusPopupMinimized;
     }
 
-    /**
-     * Set software.
-     *
-     * @return
-     */
     public SoftwareModuleFilters getSoftwareModuleFilters() {
         return softwareModuleFilters;
     }
@@ -193,8 +188,8 @@ public class ArtifactUploadState implements ManagmentEntityState<Long>, Serializ
     }
 
     /**
-     * @param isSwModuleTableMaximized
-     *            the isSwModuleTableMaximized to set
+     * @param swModuleTableMaximized
+     *            the swModuleTableMaximized to set
      */
     public void setSwModuleTableMaximized(final boolean swModuleTableMaximized) {
         this.swModuleTableMaximized = swModuleTableMaximized;
@@ -212,8 +207,8 @@ public class ArtifactUploadState implements ManagmentEntityState<Long>, Serializ
     }
 
     /**
-     * @param isArtifactDetailsMaximized
-     *            the isArtifactDetailsMaximized to set
+     * @param artifactDetailsMaximized
+     *            the artifactDetailsMaximized to set
      */
     public void setArtifactDetailsMaximized(final boolean artifactDetailsMaximized) {
         this.artifactDetailsMaximized = artifactDetailsMaximized;

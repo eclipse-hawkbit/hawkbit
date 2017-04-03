@@ -40,13 +40,13 @@ import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
 import org.eclipse.hawkbit.ui.push.DistributionSetUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -72,7 +72,7 @@ import com.vaadin.ui.UI;
  */
 public class DistributionSetTable extends AbstractNamedVersionTable<DistributionSet, Long> {
 
-    private static final long serialVersionUID = -7731776093470487988L;
+    private static final long serialVersionUID = 1L;
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributionSetTable.class);
 
@@ -172,7 +172,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     @Override
     protected boolean isFirstRowSelectedOnLoad() {
-        return manageDistUIState.getSelectedDistributions().map(Set::isEmpty).orElse(true);
+        return !manageDistUIState.getSelectedDistributions().isPresent();
     }
 
     @Override

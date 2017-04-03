@@ -32,13 +32,13 @@ import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.push.SoftwareModuleUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -63,11 +63,11 @@ import com.vaadin.ui.Window;
 
 /**
  * Implementation of software module table using generic abstract table styles .
- *
+ * Used on the Distribution view.
  */
 public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Long> {
 
-    private static final long serialVersionUID = 6785314784507424750L;
+    private static final long serialVersionUID = 1L;
 
     private final ManageDistUIState manageDistUIState;
 
@@ -230,7 +230,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     @Override
     protected boolean isFirstRowSelectedOnLoad() {
-        return manageDistUIState.getSelectedSoftwareModules().isEmpty();
+        return !manageDistUIState.getSelectedSoftwareModules().isPresent();
     }
 
     @Override

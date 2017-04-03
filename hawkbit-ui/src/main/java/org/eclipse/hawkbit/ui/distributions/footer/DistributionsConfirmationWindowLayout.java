@@ -94,7 +94,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     }
 
     @Override
-    protected Map<String, ConfirmationTab> getConfimrationTabs() {
+    protected Map<String, ConfirmationTab> getConfirmationTabs() {
         final Map<String, ConfirmationTab> tabs = Maps.newHashMapWithExpectedSize(5);
         /* Create tab for SW Modules delete */
         if (!manageDistUIState.getDeleteSofwareModulesList().isEmpty()) {

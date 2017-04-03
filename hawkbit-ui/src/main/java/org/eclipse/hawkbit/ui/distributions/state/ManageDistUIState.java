@@ -138,8 +138,8 @@ public class ManageDistUIState implements ManagmentEntityState<Long>, Serializab
     /**
      * @return the selectedSoftwareModules
      */
-    public Set<Long> getSelectedSoftwareModules() {
-        return selectedSoftwareModules;
+    public Optional<Set<Long>> getSelectedSoftwareModules() {
+        return Optional.ofNullable(selectedSoftwareModules);
     }
 
     /**

@@ -76,7 +76,7 @@ public abstract class AbstractConfirmationWindowLayout extends VerticalLayout {
     }
 
     private void buildLayout() {
-        final Map<String, ConfirmationTab> confimrationTabs = getConfimrationTabs();
+        final Map<String, ConfirmationTab> confimrationTabs = getConfirmationTabs();
         for (final Entry<String, ConfirmationTab> captionConfirmationTab : confimrationTabs.entrySet()) {
             accordion.addTab(captionConfirmationTab.getValue(), captionConfirmationTab.getKey(), null);
         }
@@ -129,7 +129,7 @@ public abstract class AbstractConfirmationWindowLayout extends VerticalLayout {
      * 
      * @return map of caption and content for each tab.
      */
-    protected abstract Map<String, ConfirmationTab> getConfimrationTabs();
+    protected abstract Map<String, ConfirmationTab> getConfirmationTabs();
 
     /**
      * @return the consolidatedMessage

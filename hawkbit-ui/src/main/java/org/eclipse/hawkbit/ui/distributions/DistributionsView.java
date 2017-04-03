@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -70,8 +71,9 @@ import com.vaadin.ui.GridLayout;
 @SpringView(name = DistributionsView.VIEW_NAME, ui = HawkbitUI.class)
 public class DistributionsView extends AbstractNotificationView implements BrowserWindowResizeListener {
 
+    private static final long serialVersionUID = 1L;
+
     public static final String VIEW_NAME = "distributions";
-    private static final long serialVersionUID = 3887435076372276300L;
 
     private final SpPermissionChecker permChecker;
 
@@ -95,6 +97,8 @@ public class DistributionsView extends AbstractNotificationView implements Brows
 
     private GridLayout mainLayout;
 
+    private final SoftwareManagement softwareManagement;
+
     @Autowired
     DistributionsView(final SpPermissionChecker permChecker, final UIEventBus eventBus, final VaadinMessageSource i18n,
             final UINotification uiNotification, final ManageDistUIState manageDistUIState,
@@ -108,6 +112,7 @@ public class DistributionsView extends AbstractNotificationView implements Brows
         this.permChecker = permChecker;
         this.i18n = i18n;
         this.uiNotification = uiNotification;
+        this.softwareManagement = softwareManagement;
         this.filterByDSTypeLayout = new DSTypeFilterLayout(manageDistUIState, i18n, permChecker, eventBus,
                 tagManagement, entityFactory, uiNotification, softwareManagement, distributionSetManagement,
                 distributionsViewClientCriterion);
@@ -138,7 +143,6 @@ public class DistributionsView extends AbstractNotificationView implements Brows
 
     @Override
     public void enter(final ViewChangeEvent event) {
-
         final Set<Long> values = AbstractTable.getTableValue(distributionTableLayout.getDistributionSetTable());
         if (values != null && values.iterator().hasNext()) {
             manageDistUIState.setSelectedEnitities(values);
@@ -148,6 +152,16 @@ public class DistributionsView extends AbstractNotificationView implements Brows
             distributionTableLayout.getDistributionSetDetails().setSelectedBaseEntity(distributionSet.orElse(null));
         }
         distributionTableLayout.getDistributionSetDetails().restoreState();
+
+        final Set<Long> softwareModuleValues = AbstractTable
+                .getTableValue(softwareModuleTableLayout.getSwModuleTable());
+        if (softwareModuleValues != null && softwareModuleValues.iterator().hasNext()) {
+            manageDistUIState.setSelectedSoftwareModules(softwareModuleValues);
+            final Long lastId = Iterables.getLast(softwareModuleValues);
+            final Optional<SoftwareModule> softwareModule = softwareManagement.findSoftwareModuleById(lastId);
+            softwareModuleTableLayout.getSwModuleDetails().setSelectedBaseEntity(softwareModule.orElse(null));
+        }
+        softwareModuleTableLayout.getSwModuleDetails().restoreState();
     }
 
     @Override

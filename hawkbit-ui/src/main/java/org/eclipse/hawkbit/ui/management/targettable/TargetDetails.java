@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.net.URI;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -39,7 +40,6 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -130,7 +130,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
     @Override
     protected boolean onLoadIsTableRowSelected() {
-        return getManagementUIState().getLastSelectedTargetId() != null;
+        return !getManagementUIState().getSelectedTargetId().map(Set::isEmpty).orElse(true);
     }
 
     @Override

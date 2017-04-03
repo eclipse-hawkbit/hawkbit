@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.artifacts;
 
+import java.util.Optional;
+import java.util.Set;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.servlet.MultipartConfigElement;
@@ -16,6 +19,7 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsLayout;
@@ -26,17 +30,19 @@ import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleTableLayout;
 import org.eclipse.hawkbit.ui.artifacts.smtype.SMTypeFilterLayout;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.upload.UploadLayout;
+import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
+import com.google.common.collect.Iterables;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
@@ -85,7 +91,10 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
     private HorizontalLayout uplaodButtonsLayout;
 
     private GridLayout mainLayout;
+
     private DragAndDropWrapper dadw;
+
+    private final SoftwareManagement softwareManagement;
 
     @Autowired
     UploadArtifactView(final UIEventBus eventBus, final SpPermissionChecker permChecker, final VaadinMessageSource i18n,
@@ -98,6 +107,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         this.i18n = i18n;
         this.uiNotification = uiNotification;
         this.artifactUploadState = artifactUploadState;
+        this.softwareManagement = softwareManagement;
         this.filterByTypeLayout = new SMTypeFilterLayout(artifactUploadState, i18n, permChecker, eventBus,
                 tagManagement, entityFactory, uiNotification, softwareManagement, uploadViewClientCriterion);
         this.smTableLayout = new SoftwareModuleTableLayout(i18n, permChecker, artifactUploadState, uiNotification,
@@ -278,7 +288,14 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
 
     @Override
     public void enter(final ViewChangeEvent event) {
-        // This view is constructed in the init() method()
+        final Set<Long> values = AbstractTable.getTableValue(smTableLayout.getSoftwareModuleTable());
+        if (values != null && values.iterator().hasNext()) {
+            artifactUploadState.setSelectedEnitities(values);
+            final Long lastId = Iterables.getLast(values);
+            final Optional<SoftwareModule> softwareModule = softwareManagement.findSoftwareModuleById(lastId);
+            smTableLayout.getSoftwareModuleDetails().setSelectedBaseEntity(softwareModule.orElse(null));
+        }
+        smTableLayout.getSoftwareModuleDetails().restoreState();
     }
 
 }

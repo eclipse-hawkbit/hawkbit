@@ -236,7 +236,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
 
     @Override
     protected boolean onLoadIsTableRowSelected() {
-        return manageDistUIState.getSelectedDistributions().map(Set::isEmpty).orElse(true);
+        return !manageDistUIState.getSelectedDistributions().map(Set::isEmpty).orElse(true);
     }
 
     @Override

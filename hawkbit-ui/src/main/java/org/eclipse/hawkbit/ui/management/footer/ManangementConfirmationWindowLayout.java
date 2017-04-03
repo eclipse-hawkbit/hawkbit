@@ -93,7 +93,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
     }
 
     @Override
-    protected Map<String, ConfirmationTab> getConfimrationTabs() {
+    protected Map<String, ConfirmationTab> getConfirmationTabs() {
         final Map<String, ConfirmationTab> tabs = Maps.newHashMapWithExpectedSize(3);
         if (!managementUIState.getDeletedDistributionList().isEmpty()) {
             tabs.put(i18n.getMessage("caption.delete.dist.accordion.tab"), createDeletedDistributionTab());
@@ -371,7 +371,6 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
     }
 
     private void deleteAllDistributions(final ConfirmationTab tab) {
-
         final Collection<Long> deletedIds = managementUIState.getDeletedDistributionList().stream()
                 .map(DistributionSetIdName::getId).collect(Collectors.toList());
 
@@ -389,7 +388,6 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
                 .ifPresent(distId -> unPinDeletedDS(deletedIds, distId));
         eventBus.publish(this, SaveActionWindowEvent.DELETED_DISTRIBUTIONS);
         managementUIState.getDeletedDistributionList().clear();
-
     }
 
     private void unPinDeletedTarget(final TargetIdName pinnedTarget) {

@@ -65,7 +65,7 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
     }
 
     @Override
-    protected Map<String, ConfirmationTab> getConfimrationTabs() {
+    protected Map<String, ConfirmationTab> getConfirmationTabs() {
         final Map<String, ConfirmationTab> tabs = Maps.newHashMapWithExpectedSize(2);
         if (!artifactUploadState.getDeleteSofwareModules().isEmpty()) {
             tabs.put(i18n.getMessage("caption.delete.swmodule.accordion.tab"), createSMDeleteConfirmationTab());

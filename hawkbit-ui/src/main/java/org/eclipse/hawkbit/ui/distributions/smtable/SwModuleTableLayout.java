@@ -17,8 +17,8 @@ import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
 import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
@@ -26,10 +26,14 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
  */
 public class SwModuleTableLayout extends AbstractTableLayout<SwModuleTable> {
 
-    private static final long serialVersionUID = 6464291374980641235L;
+    private static final long serialVersionUID = 1L;
 
-    public SwModuleTableLayout(final VaadinMessageSource i18n, final UINotification uiNotification, final UIEventBus eventBus,
-            final SoftwareManagement softwareManagement, final EntityFactory entityFactory,
+    private final SwModuleTable swModuleTable;
+
+    private final SwModuleDetails swModuleDetails;
+
+    public SwModuleTableLayout(final VaadinMessageSource i18n, final UINotification uiNotification,
+            final UIEventBus eventBus, final SoftwareManagement softwareManagement, final EntityFactory entityFactory,
             final ManageDistUIState manageDistUIState, final SpPermissionChecker permChecker,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final ArtifactUploadState artifactUploadState, final ArtifactManagement artifactManagement) {
@@ -40,12 +44,22 @@ public class SwModuleTableLayout extends AbstractTableLayout<SwModuleTable> {
         final SwMetadataPopupLayout swMetadataPopupLayout = new SwMetadataPopupLayout(i18n, uiNotification, eventBus,
                 softwareManagement, entityFactory, permChecker);
 
+        this.swModuleTable = new SwModuleTable(eventBus, i18n, uiNotification, manageDistUIState, softwareManagement,
+                distributionsViewClientCriterion, artifactManagement, swMetadataPopupLayout, artifactUploadState);
+
+        this.swModuleDetails = new SwModuleDetails(i18n, eventBus, permChecker, softwareModuleAddUpdateWindow,
+                manageDistUIState, softwareManagement, swMetadataPopupLayout, entityFactory);
         super.init(
                 new SwModuleTableHeader(i18n, permChecker, eventBus, manageDistUIState, softwareModuleAddUpdateWindow),
-                new SwModuleTable(eventBus, i18n, uiNotification, manageDistUIState, softwareManagement,
-                        distributionsViewClientCriterion, artifactManagement, swMetadataPopupLayout,
-                        artifactUploadState),
-                new SwModuleDetails(i18n, eventBus, permChecker, softwareModuleAddUpdateWindow, manageDistUIState,
-                        softwareManagement, swMetadataPopupLayout, entityFactory));
+                swModuleTable, swModuleDetails);
     }
+
+    public SwModuleTable getSwModuleTable() {
+        return swModuleTable;
+    }
+
+    public SwModuleDetails getSwModuleDetails() {
+        return swModuleDetails;
+    }
+
 }
