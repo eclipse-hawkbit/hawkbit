@@ -381,28 +381,19 @@ public class JpaTargetManagement implements TargetManagement {
                 .unmodifiableList(allTargets.stream().map(targetRepository::save).collect(Collectors.toList()));
     }
 
-    private List<Target> unAssignTag(final Collection<Target> targets, final TargetTag tag) {
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        final Collection<JpaTarget> toUnassign = (Collection) targets;
-
-        toUnassign.forEach(target -> target.removeTag(tag));
-
-        return Collections
-                .unmodifiableList(toUnassign.stream().map(targetRepository::save).collect(Collectors.toList()));
-    }
-
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public Target unAssignTag(final String controllerID, final Long targetTagId) {
-        final Target target = targetRepository.findByControllerId(controllerID)
+        final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerID)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerID));
 
         final TargetTag tag = targetTagRepository.findById(targetTagId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagId));
 
-        final List<Target> unAssignTag = unAssignTag(Lists.newArrayList(target), tag);
-        return unAssignTag.isEmpty() ? null : unAssignTag.get(0);
+        target.removeTag(tag);
+
+        return targetRepository.save(target);
     }
 
     @Override
