@@ -48,9 +48,9 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
     // To Be Done : have to set this value based on view???
     private static final Boolean NOTAGS_SELECTED = Boolean.FALSE;
 
-    public DistributionTagToken(final SpPermissionChecker checker, final VaadinMessageSource i18n, final UINotification uinotification,
-            final UIEventBus eventBus, final ManagementUIState managementUIState, final TagManagement tagManagement,
-            final DistributionSetManagement distributionSetManagement) {
+    public DistributionTagToken(final SpPermissionChecker checker, final VaadinMessageSource i18n,
+            final UINotification uinotification, final UIEventBus eventBus, final ManagementUIState managementUIState,
+            final TagManagement tagManagement, final DistributionSetManagement distributionSetManagement) {
         super(checker, i18n, uinotification, eventBus, managementUIState);
         this.tagManagement = tagManagement;
         this.distributionSetManagement = distributionSetManagement;
@@ -103,7 +103,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
     public void displayAlreadyAssignedTags() {
         removePreviouslyAddedTokens();
         if (selectedEntity != null) {
-            for (final DistributionSetTag tag : selectedEntity.getTags()) {
+            for (final DistributionSetTag tag : tagManagement.find  selectedEntity.getTags()) {
                 addNewToken(tag.getId());
             }
         }

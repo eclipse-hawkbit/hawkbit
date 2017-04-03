@@ -161,16 +161,6 @@ public interface MgmtTargetTagRestApi {
             final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies);
 
     /**
-     * Handles the DELETE request to unassign all targets from the given tag id.
-     *
-     * @param targetTagId
-     *            the ID of the target tag to retrieve
-     * @return http status code
-     */
-    @RequestMapping(method = RequestMethod.DELETE, value = MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING)
-    ResponseEntity<Void> unassignTargets(@PathVariable("targetTagId") final Long targetTagId);
-
-    /**
      * Handles the DELETE request to unassign one target from the given tag id.
      *
      * @param targetTagId

@@ -29,7 +29,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreated
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
-import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
@@ -194,7 +193,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         getDmfClient().send(createTargetMessage);
 
         verifyDeadLetterMessages(1);
-        assertThat(systemManagement.findTenants()).hasSize(1);
+        assertThat(systemManagement.findTenants(pageReq)).hasSize(1);
     }
 
     @Test
@@ -595,9 +594,8 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     }
 
     private void assertAction(final Long actionId, final Status... expectedActionStates) {
-        final Action action = waitUntilIsPresent(() -> controllerManagement.findActionWithDetails(actionId));
-        final List<Status> status = action.getActionStatus().stream().map(actionStatus -> actionStatus.getStatus())
-                .collect(Collectors.toList());
+        final List<Status> status = deploymentManagement.findActionStatusByAction(pageReq, actionId).getContent()
+                .stream().map(actionStatus -> actionStatus.getStatus()).collect(Collectors.toList());
         assertThat(status).containsOnly(expectedActionStates);
     }
 

@@ -235,6 +235,32 @@ public interface TagManagement {
     Optional<TargetTag> findTargetTagById(@NotNull Long id);
 
     /**
+     * Finds all {@link TargetTag} assigned to given {@link Target}.
+     *
+     * @param controllerId
+     *            of the target
+     * @return page of the found {@link TargetTag}s
+     * 
+     * @throws EntityNotFoundException
+     *             if {@link Target} with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Page<TargetTag> findTargetTagsByTarget(@NotEmpty String controllerId);
+
+    /**
+     * Finds all {@link TargetTag} assigned to given {@link Target}.
+     *
+     * @param controllerId
+     *            of the target
+     * @return page of the found {@link TargetTag}s
+     * 
+     * @throws EntityNotFoundException
+     *             if {@link Target} with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Page<TargetTag> findDistributionSetTagsBySetId(@NotNull Long setId);
+
+    /**
      * Updates an existing {@link DistributionSetTag}.
      *
      * @param update

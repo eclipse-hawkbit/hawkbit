@@ -318,15 +318,14 @@ public class JpaControllerManagement implements ControllerManagement {
     private Action handleAddUpdateActionStatus(final JpaActionStatus actionStatus, final JpaAction action) {
         LOG.debug("addUpdateActionStatus for action {}", action.getId());
 
-        JpaTarget target = (JpaTarget) action.getTarget();
-
         switch (actionStatus.getStatus()) {
         case ERROR:
-            target = DeploymentHelper.updateTargetInfo(target, TargetUpdateStatus.ERROR, false);
+            final JpaTarget target = DeploymentHelper.updateTargetInfo((JpaTarget) action.getTarget(),
+                    TargetUpdateStatus.ERROR, false);
             handleErrorOnAction(action, target);
             break;
         case FINISHED:
-            handleFinishedAndStoreInTargetStatus(target, action);
+            handleFinishedAndStoreInTargetStatus(action);
             break;
         default:
             // information status entry - check for a potential DOS attack
@@ -337,7 +336,7 @@ public class JpaControllerManagement implements ControllerManagement {
         actionStatus.setAction(action);
         actionStatusRepository.save(actionStatus);
 
-        LOG.debug("addUpdateActionStatus {} for target {} is finished.", action, target.getId());
+        LOG.debug("addUpdateActionStatus for action {} isfinished.", action.getId());
 
         return actionRepository.save(action);
     }
@@ -365,7 +364,8 @@ public class JpaControllerManagement implements ControllerManagement {
         }
     }
 
-    private void handleFinishedAndStoreInTargetStatus(final JpaTarget target, final JpaAction action) {
+    private void handleFinishedAndStoreInTargetStatus(final JpaAction action) {
+        final JpaTarget target = (JpaTarget) action.getTarget();
         action.setActive(false);
         action.setStatus(Status.FINISHED);
         final JpaDistributionSet ds = (JpaDistributionSet) entityManager.merge(action.getDistributionSet());

@@ -464,7 +464,7 @@ public interface DistributionSetManagement {
      * @param pageable
      *            page parameter
      * @param tagName
-     *            has details of filters to be applied.
+     *            of the tag the DS are assigned to
      * @return the page of found {@link DistributionSet}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)

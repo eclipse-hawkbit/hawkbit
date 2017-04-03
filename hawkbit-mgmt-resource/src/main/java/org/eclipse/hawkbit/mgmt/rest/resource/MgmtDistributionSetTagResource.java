@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -133,8 +134,12 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     public ResponseEntity<List<MgmtDistributionSet>> getAssignedDistributionSets(
             @PathVariable("distributionsetTagId") final Long distributionsetTagId) {
         final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);
+
         return new ResponseEntity<>(
-                MgmtDistributionSetMapper.toResponseDistributionSets(tag.getAssignedToDistributionSet()),
+                MgmtDistributionSetMapper.toResponseDistributionSets(distributionSetManagement
+                        .findDistributionSetsByTag(
+                                new PageRequest(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT), tag.getName())
+                        .getContent()),
                 HttpStatus.OK);
     }
 
@@ -171,17 +176,6 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
                 .assignTag(findDistributionSetIds(assignedDSRequestBodies), distributionsetTagId);
         LOG.debug("Assignd DistributionSet {}", assignedDs.size());
         return new ResponseEntity<>(MgmtDistributionSetMapper.toResponseDistributionSets(assignedDs), HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<Void> unassignDistributionSets(
-            @PathVariable("distributionsetTagId") final Long distributionsetTagId) {
-        LOG.debug("Unassign all DS for ds tag {}", distributionsetTagId);
-
-        final List<DistributionSet> distributionSets = this.distributionSetManagement
-                .unAssignAllDistributionSetsByTag(distributionsetTagId);
-        LOG.debug("Unassigned ds {}", distributionSets.size());
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override

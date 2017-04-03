@@ -384,7 +384,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
                 .get(0);
 
         // one status - download
-        assertThat(action.getActionStatus()).hasSize(2);
+        assertThat(deploymentManagement.findActionStatusByAction(pageReq, action.getId())).hasSize(2);
         assertThat(deploymentManagement
                 .findActionStatusByAction(new PageRequest(0, 400, Direction.DESC, "id"), action.getId()).getContent()
                 .get(0).getStatus()).isEqualTo(Status.DOWNLOAD);

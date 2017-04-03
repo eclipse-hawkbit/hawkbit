@@ -166,18 +166,6 @@ public interface MgmtDistributionSetTagRestApi {
             final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies);
 
     /**
-     * Handles the DELETE request to unassign all distribution set from the
-     * given tag id.
-     *
-     * @param distributionsetTagId
-     *            the ID of the distribution set tag to retrieve
-     * @return http status code
-     */
-    @RequestMapping(method = RequestMethod.DELETE, value = MgmtRestConstants.DISTRIBUTIONSET_REQUEST_MAPPING)
-    ResponseEntity<Void> unassignDistributionSets(
-            @PathVariable("distributionsetTagId") final Long distributionsetTagId);
-
-    /**
      * Handles the DELETE request to unassign one distribution set from the
      * given tag id.
      *

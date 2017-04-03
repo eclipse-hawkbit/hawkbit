@@ -110,9 +110,10 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 entityFactory.actionStatus().create(actions.get(0).getId()).status(Status.FINISHED).message("test"));
 
         final PageRequest pageRequest = new PageRequest(0, 1000, Direction.ASC, ActionFields.ID.getFieldName());
-        final ActionStatus status = deploymentManagement.findActionsByTarget(knownTargetId, pageRequest).getContent()
-                .get(0).getActionStatus().stream().sorted((e1, e2) -> Long.compare(e2.getId(), e1.getId()))
-                .collect(Collectors.toList()).get(0);
+        final Action action = deploymentManagement.findActionsByTarget(knownTargetId, pageRequest).getContent().get(0);
+
+        final ActionStatus status = deploymentManagement.findActionStatusByAction(pageReq, action.getId()).getContent()
+                .stream().sorted((e1, e2) -> Long.compare(e2.getId(), e1.getId())).collect(Collectors.toList()).get(0);
 
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
                 + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actions.get(0).getId() + "/status")
@@ -876,8 +877,9 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final String knownTargetId = "targetId";
         final Action action = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId).get(0);
         // retrieve list in default descending order for actionstaus entries
-        final List<ActionStatus> actionStatus = action.getActionStatus().stream()
-                .sorted((e1, e2) -> Long.compare(e2.getId(), e1.getId())).collect(Collectors.toList());
+        final List<ActionStatus> actionStatus = deploymentManagement.findActionStatusByAction(pageReq, action.getId())
+                .getContent().stream().sorted((e1, e2) -> Long.compare(e2.getId(), e1.getId()))
+                .collect(Collectors.toList());
 
         // sort is default descending order, latest status first
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
@@ -901,8 +903,9 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     public void getMultipleActionStatusSortedByReportedAt() throws Exception {
         final String knownTargetId = "targetId";
         final Action action = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId).get(0);
-        final List<ActionStatus> actionStatus = action.getActionStatus().stream()
-                .sorted((e1, e2) -> Long.compare(e1.getId(), e2.getId())).collect(Collectors.toList());
+        final List<ActionStatus> actionStatus = deploymentManagement.findActionStatusByAction(pageReq, action.getId())
+                .getContent().stream().sorted((e1, e2) -> Long.compare(e1.getId(), e2.getId()))
+                .collect(Collectors.toList());
 
         // descending order
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
@@ -945,8 +948,9 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final String knownTargetId = "targetId";
 
         final Action action = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId).get(0);
-        final List<ActionStatus> actionStatus = action.getActionStatus().stream()
-                .sorted((e1, e2) -> Long.compare(e1.getId(), e2.getId())).collect(Collectors.toList());
+        final List<ActionStatus> actionStatus = deploymentManagement.findActionStatusByAction(pageReq, action.getId())
+                .getContent().stream().sorted((e1, e2) -> Long.compare(e1.getId(), e2.getId()))
+                .collect(Collectors.toList());
 
         // Page 1
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
@@ -1103,7 +1107,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(status().isOk());
 
         final List<Action> findActiveActionsByTarget = deploymentManagement
-                .findActiveActionsByTarget(target.getControllerId());
+                .findActiveActionsByTarget(pageReq, target.getControllerId()).getContent();
         assertThat(findActiveActionsByTarget).hasSize(1);
         assertThat(findActiveActionsByTarget.get(0).getActionType()).isEqualTo(ActionType.TIMEFORCED);
         assertThat(findActiveActionsByTarget.get(0).getForcedTime()).isEqualTo(forceTime);

@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -128,7 +129,11 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     @Override
     public ResponseEntity<List<MgmtTarget>> getAssignedTargets(@PathVariable("targetTagId") final Long targetTagId) {
         final TargetTag targetTag = findTargetTagById(targetTagId);
-        return new ResponseEntity<>(MgmtTargetMapper.toResponse(targetTag.getAssignedToTargets()), HttpStatus.OK);
+
+        return new ResponseEntity<>(MgmtTargetMapper.toResponse(targetManagement
+                .findTargetsByTag(new PageRequest(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT),
+                        targetTag.getName())
+                .getContent()), HttpStatus.OK);
     }
 
     @Override
@@ -154,14 +159,6 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
         final List<Target> assignedTarget = this.targetManagement
                 .assignTag(findTargetControllerIds(assignedTargetRequestBodies), targetTagId);
         return new ResponseEntity<>(MgmtTargetMapper.toResponse(assignedTarget), HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<Void> unassignTargets(@PathVariable("targetTagId") final Long targetTagId) {
-        LOG.debug("Unassign all Targets for target tag {}", targetTagId);
-
-        this.targetManagement.unAssignAllTargetsByTag(targetTagId);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override

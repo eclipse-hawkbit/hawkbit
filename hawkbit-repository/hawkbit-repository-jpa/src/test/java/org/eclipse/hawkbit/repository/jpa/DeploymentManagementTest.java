@@ -175,7 +175,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = assignDistributionSet(testDs, testTarget).getActions().get(0);
         final Slice<Action> actions = deploymentManagement.findActionsByTarget(testTarget.get(0).getControllerId(),
                 pageReq);
-        final ActionStatus expectedActionStatus = actions.getContent().get(0).getActionStatus().get(0);
+        final ActionStatus expectedActionStatus = ((JpaAction) actions.getContent().get(0)).getActionStatus().get(0);
 
         // act
         final Page<ActionStatus> actionStates = deploymentManagement.findActionStatusByAction(pageReq, actionId);
