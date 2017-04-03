@@ -16,10 +16,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.junit.BrokerRunning;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -38,8 +38,10 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
     public BrokerRunning brokerRunning;
 
     @Autowired
-    @Qualifier("dmfClient")
     private RabbitTemplate dmfClient;
+
+    @Autowired
+    private RabbitAdmin rabbitAdmin;
 
     @Before
     public void setup() {
@@ -62,6 +64,15 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
             return new Message(null, messageProperties);
         }
         return getDmfClient().getMessageConverter().toMessage(payload, messageProperties);
+    }
+
+    protected int getQueueMessageCount(String queueName) {
+        return Integer
+                .parseInt(rabbitAdmin.getQueueProperties(queueName).get(RabbitAdmin.QUEUE_MESSAGE_COUNT).toString());
+    }
+
+    protected RabbitAdmin getRabbitAdmin() {
+        return rabbitAdmin;
     }
 
 }

@@ -23,11 +23,11 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.AttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
+import org.eclipse.hawkbit.integration.listener.DeadletterListener;
+import org.eclipse.hawkbit.integration.listener.ReplyToListener;
 import org.eclipse.hawkbit.matcher.SoftwareModuleJsonMatcher;
 import org.eclipse.hawkbit.rabbitmq.test.AbstractAmqpIntegrationTest;
 import org.eclipse.hawkbit.rabbitmq.test.AmqpTestConfiguration;
-import org.eclipse.hawkbit.rabbitmq.test.listener.DeadletterListener;
-import org.eclipse.hawkbit.rabbitmq.test.listener.ReplyToListener;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
@@ -50,7 +50,7 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
  * {@link AmqpMessageDispatcherServiceIntegrationTest}.
  */
 @SpringApplicationConfiguration(classes = { RepositoryApplicationConfiguration.class, AmqpTestConfiguration.class,
-        DmfApiConfiguration.class })
+        DmfApiConfiguration.class, DmfTestConfiguration.class })
 public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
 
     protected static final String TENANT_EXIST = "DEFAULT";
@@ -88,12 +88,6 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         } catch (final Exception e) {
             return null;
         }
-    }
-
-    protected void verifyDeadLetterMessages(final int expectedMessages) {
-        createConditionFactory().until(() -> {
-            Mockito.verify(getDeadletterListener(), Mockito.times(expectedMessages)).handleMessage(Mockito.any());
-        });
     }
 
     protected DeadletterListener getDeadletterListener() {
@@ -225,14 +219,14 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         assertThat(target.getCreatedBy()).isEqualTo(createdBy);
         assertThat(target.getUpdateStatus()).isEqualTo(updateStatus);
         assertThat(target.getAddress()).isEqualTo(
-                IpUtil.createAmqpUri(connectionFactory.getVirtualHost(), AmqpTestConfiguration.REPLY_TO_EXCHANGE));
+                IpUtil.createAmqpUri(connectionFactory.getVirtualHost(), DmfTestConfiguration.REPLY_TO_EXCHANGE));
     }
 
     protected Message createTargetMessage(final String target, final String tenant) {
         final MessageProperties messageProperties = createMessagePropertiesWithTenant(tenant);
         messageProperties.getHeaders().put(MessageHeaderKey.THING_ID, target);
         messageProperties.getHeaders().put(MessageHeaderKey.TYPE, MessageType.THING_CREATED.toString());
-        messageProperties.setReplyTo(AmqpTestConfiguration.REPLY_TO_EXCHANGE);
+        messageProperties.setReplyTo(DmfTestConfiguration.REPLY_TO_EXCHANGE);
 
         return createMessage("", messageProperties);
     }

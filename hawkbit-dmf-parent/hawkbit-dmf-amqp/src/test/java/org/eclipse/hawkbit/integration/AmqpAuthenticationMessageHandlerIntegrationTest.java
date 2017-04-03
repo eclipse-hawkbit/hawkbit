@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.hawkbit.amqp.AmqpProperties;
 import org.eclipse.hawkbit.amqp.DmfApiConfiguration;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.eclipse.hawkbit.dmf.json.model.DownloadResponse;
@@ -32,6 +33,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.context.annotation.Description;
 import org.springframework.http.HttpStatus;
@@ -51,6 +54,9 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     private static final String TENANT_EXIST = "DEFAULT";
     private static final String TARGET = "NewDmfTarget";
 
+    @Autowired
+    private AmqpProperties amqpProperties;
+
     @Before
     public void testSetup() {
         enableTargetTokenAuthentification();
@@ -62,6 +68,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
         final Message createAndSendMessage = getDmfClient()
                 .sendAndReceive(new Message("".getBytes(), new MessageProperties()));
         assertThat(createAndSendMessage).isNull();
+        assertEmptyAuthenticationMessageCount();
     }
 
     @Test
@@ -69,6 +76,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     public void securityTokenIsNull() {
         final Message createAndSendMessage = sendAndReceiveAuthenticationMessage(null);
         assertThat(createAndSendMessage).isNull();
+        assertEmptyAuthenticationMessageCount();
     }
 
     @Test
@@ -78,6 +86,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
                 FileResource.createFileResourceBySha1(TARGET_SECRUITY_TOKEN));
         final Message createAndSendMessage = sendAndReceiveAuthenticationMessage(securityToken);
         assertThat(createAndSendMessage).isNull();
+        assertEmptyAuthenticationMessageCount();
     }
 
     @Test
@@ -445,6 +454,15 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     @Override
     protected String getExchange() {
         return AmqpSettings.AUTHENTICATION_EXCHANGE;
+    }
+
+    private int getAuthenticationMessageCount() {
+        return Integer.parseInt(getRabbitAdmin().getQueueProperties(amqpProperties.getAuthenticationReceiverQueue())
+                .get(RabbitAdmin.QUEUE_MESSAGE_COUNT).toString());
+    }
+
+    private void assertEmptyAuthenticationMessageCount() {
+        assertThat(getAuthenticationMessageCount()).isEqualTo(0);
     }
 
 }

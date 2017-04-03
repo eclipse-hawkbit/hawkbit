@@ -6,8 +6,9 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.rabbitmq.test.listener;
+package org.eclipse.hawkbit.integration.listener;
 
+import org.eclipse.hawkbit.rabbitmq.test.listener.TestRabbitListener;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.amqp.AmqpProperties;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -40,6 +41,8 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -48,6 +51,9 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Device Management Federation API")
 @Stories("Amqp Message Handler Service")
 public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegrationTest {
+
+    @Autowired
+    private AmqpProperties amqpProperties;
 
     @Test
     @Description("Tests register target")
@@ -69,7 +75,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     public void registerEmptyTarget() {
         createAndSendTarget("", TENANT_EXIST);
         assertAllTargetsCount(0);
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
 
     }
 
@@ -79,7 +85,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     public void registerWhitespaceTarget() {
         createAndSendTarget("Invalid Invalid", TENANT_EXIST);
         assertAllTargetsCount(0);
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
 
     }
 
@@ -89,7 +95,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     public void registerInvalidNullTargets() {
         createAndSendTarget(null, TENANT_EXIST);
         assertAllTargetsCount(0);
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
 
     }
 
@@ -101,7 +107,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         createTargetMessage.getMessageProperties().setContentType("WrongContentType");
         getDmfClient().send(createTargetMessage);
 
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
         assertAllTargetsCount(0);
     }
 
@@ -113,7 +119,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         createTargetMessage.getMessageProperties().setReplyTo(null);
         getDmfClient().send(createTargetMessage);
 
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
         assertAllTargetsCount(0);
     }
 
@@ -125,7 +131,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         createTargetMessage.getMessageProperties().setReplyTo("");
         getDmfClient().send(createTargetMessage);
 
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
         assertAllTargetsCount(0);
     }
 
@@ -137,7 +143,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         createTargetMessage.getMessageProperties().getHeaders().remove(MessageHeaderKey.THING_ID);
         getDmfClient().send(createTargetMessage);
 
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
         assertAllTargetsCount(0);
     }
 
@@ -148,7 +154,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         final Message createTargetMessage = createTargetMessage(null, TENANT_EXIST);
         getDmfClient().send(createTargetMessage);
 
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
         assertAllTargetsCount(0);
     }
 
@@ -160,7 +166,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         createTargetMessage.getMessageProperties().getHeaders().remove(MessageHeaderKey.TENANT);
         getDmfClient().send(createTargetMessage);
 
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
         assertAllTargetsCount(0);
     }
 
@@ -171,7 +177,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         final Message createTargetMessage = createTargetMessage(REGISTER_TARGET, null);
         getDmfClient().send(createTargetMessage);
 
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
         assertAllTargetsCount(0);
     }
 
@@ -182,7 +188,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         final Message createTargetMessage = createTargetMessage(REGISTER_TARGET, "");
         getDmfClient().send(createTargetMessage);
 
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
         assertAllTargetsCount(0);
     }
 
@@ -193,7 +199,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         final Message createTargetMessage = createTargetMessage(REGISTER_TARGET, "TenantNotExist");
         getDmfClient().send(createTargetMessage);
 
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
         assertThat(systemManagement.findTenants()).hasSize(1);
     }
 
@@ -205,7 +211,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         createTargetMessage.getMessageProperties().getHeaders().remove(MessageHeaderKey.TYPE);
         getDmfClient().send(createTargetMessage);
 
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
         assertAllTargetsCount(0);
     }
 
@@ -217,7 +223,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         createTargetMessage.getMessageProperties().getHeaders().put(MessageHeaderKey.TYPE, null);
         getDmfClient().send(createTargetMessage);
 
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
         assertAllTargetsCount(0);
     }
 
@@ -229,7 +235,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         createTargetMessage.getMessageProperties().getHeaders().put(MessageHeaderKey.TYPE, "");
         getDmfClient().send(createTargetMessage);
 
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
         assertAllTargetsCount(0);
     }
 
@@ -241,7 +247,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         createTargetMessage.getMessageProperties().getHeaders().put(MessageHeaderKey.TYPE, "NotExist");
         getDmfClient().send(createTargetMessage);
 
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
         assertAllTargetsCount(0);
     }
 
@@ -253,7 +259,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         eventMessage.getMessageProperties().getHeaders().put(MessageHeaderKey.TOPIC, null);
         getDmfClient().send(eventMessage);
 
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
     }
 
     @Test
@@ -264,7 +270,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         eventMessage.getMessageProperties().getHeaders().put(MessageHeaderKey.TOPIC, "");
         getDmfClient().send(eventMessage);
 
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
     }
 
     @Test
@@ -275,7 +281,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         eventMessage.getMessageProperties().getHeaders().put(MessageHeaderKey.TOPIC, "NotExist");
         getDmfClient().send(eventMessage);
 
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
     }
 
     @Test
@@ -286,7 +292,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         eventMessage.getMessageProperties().getHeaders().remove(MessageHeaderKey.TOPIC);
         getDmfClient().send(eventMessage);
 
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
     }
 
     @Test
@@ -295,7 +301,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     public void updateActionStatusWithNullContent() {
         final Message eventMessage = createEventMessage(TENANT_EXIST, EventTopic.UPDATE_ACTION_STATUS, null);
         getDmfClient().send(eventMessage);
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
     }
 
     @Test
@@ -304,7 +310,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     public void updateActionStatusWithEmptyContent() {
         final Message eventMessage = createEventMessage(TENANT_EXIST, EventTopic.UPDATE_ACTION_STATUS, "");
         getDmfClient().send(eventMessage);
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
     }
 
     @Test
@@ -314,7 +320,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         final Message eventMessage = createEventMessage(TENANT_EXIST, EventTopic.UPDATE_ACTION_STATUS,
                 "Invalid Content");
         getDmfClient().send(eventMessage);
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
     }
 
     @Test
@@ -325,7 +331,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         final Message eventMessage = createEventMessage(TENANT_EXIST, EventTopic.UPDATE_ACTION_STATUS,
                 actionUpdateStatus);
         getDmfClient().send(eventMessage);
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
     }
 
     @Test
@@ -410,7 +416,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
     public void cancelNotAllowActionStatus() {
         registerTargetAndSendActionStatus(ActionStatus.CANCELED);
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
     }
 
     @Test
@@ -477,7 +483,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         final Long actionNotExist = actionId + 1;
 
         sendActionUpdateStatus(new ActionUpdateStatus(actionNotExist, ActionStatus.CANCELED));
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
     }
 
     @Test
@@ -490,7 +496,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
     public void canceledRejectedNotAllowActionStatus() {
         registerTargetAndSendActionStatus(ActionStatus.CANCEL_REJECTED);
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
     }
 
     @Test
@@ -549,7 +555,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         getDmfClient().send(createUpdateAttributesMessage);
 
         // verify
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
         final AttributeUpdate controllerAttributeEmpty = new AttributeUpdate();
         assertUpdateAttributes(target, controllerAttributeEmpty.getAttributes());
     }
@@ -573,7 +579,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         getDmfClient().send(createUpdateAttributesMessageWrongBody);
 
         // verify
-        verifyDeadLetterMessages(1);
+        verifyDeadLetterMessages();
     }
 
     private Long registerTargetAndSendActionStatus(final ActionStatus sendActionStatus) {
@@ -615,4 +621,19 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         getDmfClient().send(updateMessage);
     }
 
+    private int getAuthenticationMessageCount() {
+        return Integer.parseInt(getRabbitAdmin().getQueueProperties(amqpProperties.getReceiverQueue())
+                .get(RabbitAdmin.QUEUE_MESSAGE_COUNT).toString());
+    }
+
+    private void assertEmptyReceiverQueueCount() {
+        assertThat(getAuthenticationMessageCount()).isEqualTo(0);
+    }
+
+    protected void verifyDeadLetterMessages() {
+        assertEmptyReceiverQueueCount();
+        createConditionFactory().until(() -> {
+            Mockito.verify(getDeadletterListener(), Mockito.times(1)).handleMessage(Mockito.any());
+        });
+    }
 }

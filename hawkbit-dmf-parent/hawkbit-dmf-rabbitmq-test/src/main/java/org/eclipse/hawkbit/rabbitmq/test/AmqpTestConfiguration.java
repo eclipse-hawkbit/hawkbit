@@ -18,24 +18,18 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.hawkbit.HawkbitServerProperties;
 import org.eclipse.hawkbit.api.HostnameResolver;
 import org.eclipse.hawkbit.rabbitmq.test.RabbitMqSetupService.AlivenessException;
-import org.eclipse.hawkbit.rabbitmq.test.listener.DeadletterListener;
-import org.eclipse.hawkbit.rabbitmq.test.listener.ReplyToListener;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.FanoutExchange;
-import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.junit.BrokerRunning;
-import org.springframework.amqp.rabbit.test.RabbitListenerTest;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -47,13 +41,9 @@ import com.google.common.base.Throwables;
  *
  */
 @Configuration
-@RabbitListenerTest
 public class AmqpTestConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(AmqpTestConfiguration.class);
-
-    public static final String REPLY_TO_EXCHANGE = "reply.queue";
-    public static final String REPLY_TO_QUEUE = "reply_queue";
 
     @Bean
     SystemSecurityContextHolder systemSecurityContextHolder() {
@@ -91,37 +81,12 @@ public class AmqpTestConfiguration {
         };
     }
 
-    @Bean(name = "dmfClient")
-    RabbitTemplate dmfClient(ConnectionFactory connectionFactory) {
+    @Primary
+    RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
         final RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(new Jackson2JsonMessageConverter());
         template.setReceiveTimeout(TimeUnit.SECONDS.toMillis(5));
         return template;
-    }
-
-    @Bean
-    Queue replyToQueue() {
-        return new Queue(REPLY_TO_QUEUE, false, false, true);
-    }
-
-    @Bean
-    FanoutExchange replyToExchange() {
-        return new FanoutExchange(REPLY_TO_EXCHANGE, false, true);
-    }
-
-    @Bean
-    Binding bindQueueToReplyToExchange() {
-        return BindingBuilder.bind(replyToQueue()).to(replyToExchange());
-    }
-
-    @Bean
-    DeadletterListener deadletterListener() {
-        return new DeadletterListener();
-    }
-
-    @Bean
-    ReplyToListener replyToListener() {
-        return new ReplyToListener();
     }
 
     @Bean
