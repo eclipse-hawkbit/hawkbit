@@ -250,14 +250,14 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         DistributionSetTag findDistributionSetTag = tagManagement.findDistributionSetTag("Tag1").get();
 
         assertThat(assignedDS.size()).as("assigned ds has wrong size")
-                .isEqualTo(distributionSetManagement.findDistributionSetsByTag(pageReq, "Tag1").getTotalElements());
+                .isEqualTo(distributionSetManagement.findDistributionSetsByTag(pageReq, "Tag1").getNumberOfElements());
 
         final JpaDistributionSet unAssignDS = (JpaDistributionSet) distributionSetManagement
                 .unAssignTag(assignDS.get(0), findDistributionSetTag.getId());
         assertThat(unAssignDS.getId()).as("unassigned ds is wrong").isEqualTo(assignDS.get(0));
         assertThat(unAssignDS.getTags().size()).as("unassigned ds has wrong tag size").isEqualTo(0);
         findDistributionSetTag = tagManagement.findDistributionSetTag("Tag1").get();
-        assertThat(distributionSetManagement.findDistributionSetsByTag(pageReq, "Tag1").getTotalElements())
+        assertThat(distributionSetManagement.findDistributionSetsByTag(pageReq, "Tag1").getNumberOfElements())
                 .as("ds tag ds has wrong ds size").isEqualTo(3);
     }
 

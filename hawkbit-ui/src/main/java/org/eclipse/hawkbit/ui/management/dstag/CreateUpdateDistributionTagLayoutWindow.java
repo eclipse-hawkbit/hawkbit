@@ -25,10 +25,11 @@ import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.data.domain.PageRequest;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.UI;
@@ -53,7 +54,8 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     @Override
     protected void populateTagNameCombo() {
         tagNameComboBox.removeAllItems();
-        final List<DistributionSetTag> distTagNameList = tagManagement.findAllDistributionSetTags();
+        final List<DistributionSetTag> distTagNameList = tagManagement
+                .findAllDistributionSetTags(new PageRequest(0, MAX_TAGS)).getContent();
         distTagNameList.forEach(value -> tagNameComboBox.addItem(value.getName()));
     }
 

@@ -266,7 +266,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         TargetTag findTargetTag = tagManagement.findTargetTag("Tag1").get();
         assertThat(assignedTargets.size()).as("Assigned targets are wrong")
-                .isEqualTo(targetManagement.findTargetsByTag(pageReq, "Tag1").getTotalElements());
+                .isEqualTo(targetManagement.findTargetsByTag(pageReq, "Tag1").getNumberOfElements());
 
         final Target unAssignTarget = targetManagement.unAssignTag("targetId123", findTargetTag.getId());
         assertThat(unAssignTarget.getControllerId()).as("Controller id is wrong").isEqualTo("targetId123");

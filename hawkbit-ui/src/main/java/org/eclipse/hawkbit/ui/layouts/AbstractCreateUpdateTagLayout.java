@@ -34,10 +34,10 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -76,6 +76,8 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     private static final String TAG_DESC_DYNAMIC_STYLE = "new-tag-desc";
     protected static final String TAG_DYNAMIC_STYLE = "tag-color-preview";
     protected static final String MESSAGE_ERROR_MISSING_TAGNAME = "message.error.missing.tagname";
+
+    protected static final int MAX_TAGS = 500;
 
     protected VaadinMessageSource i18n;
 
@@ -209,8 +211,8 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
 
         tagDesc = new TextAreaBuilder().caption(i18n.getMessage("textfield.description"))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_DESC)
-                .prompt(i18n.getMessage("textfield.description")).immediate(true).id(SPUIDefinitions.NEW_TARGET_TAG_DESC)
-                .buildTextComponent();
+                .prompt(i18n.getMessage("textfield.description")).immediate(true)
+                .id(SPUIDefinitions.NEW_TARGET_TAG_DESC).buildTextComponent();
 
         tagDesc.setNullRepresentation(StringUtils.EMPTY);
 
@@ -609,8 +611,8 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
 
     private boolean isDuplicateByName() {
         final Optional<E> existingType = findEntityByName();
-        existingType.ifPresent(type -> uiNotification
-                .displayValidationError(i18n.getMessage("message.tag.duplicate.check", new Object[] { type.getName() })));
+        existingType.ifPresent(type -> uiNotification.displayValidationError(
+                i18n.getMessage("message.tag.duplicate.check", new Object[] { type.getName() })));
 
         return existingType.isPresent();
     }

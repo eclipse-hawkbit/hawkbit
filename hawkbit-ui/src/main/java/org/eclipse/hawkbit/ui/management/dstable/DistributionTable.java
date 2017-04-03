@@ -50,6 +50,9 @@ import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -396,10 +399,20 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
                 event.getTransferable().getSourceComponent().getId(), SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
         // get all the targets assigned to the tag
         // assign dist to those targets
-        final List<Target> assignedTargets = targetManagement.findTargetsByTag(targetTagName);
-        if (!assignedTargets.isEmpty()) {
-            assignTargetToDs(getItem(distItemId), assignedTargets);
-        } else {
+
+        Pageable query = new PageRequest(0, 500);
+        Page<Target> assignedTargets;
+        boolean assigned = false;
+        do {
+            assignedTargets = targetManagement.findTargetsByTag(query, targetTagName);
+
+            if (assignedTargets.hasContent()) {
+                assignTargetToDs(getItem(distItemId), assignedTargets.getContent());
+                assigned = true;
+            }
+        } while (assignedTargets.hasNext() && (query = assignedTargets.nextPageable()) != null);
+
+        if (assigned) {
             notification.displaySuccess(
                     i18n.getMessage("message.no.targets.assiged.fortag", new Object[] { targetTagName }));
         }

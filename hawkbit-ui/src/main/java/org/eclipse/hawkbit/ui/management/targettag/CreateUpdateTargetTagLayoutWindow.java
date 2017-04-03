@@ -23,8 +23,8 @@ import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
 import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.PageRequest;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -35,8 +35,6 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
         implements RefreshableContainer {
 
     private static final long serialVersionUID = 2446682350481560235L;
-
-    private static final int MAX_TAGS = 500;
 
     /**
      * Constructor for CreateUpdateTargetTagLayoutWindow

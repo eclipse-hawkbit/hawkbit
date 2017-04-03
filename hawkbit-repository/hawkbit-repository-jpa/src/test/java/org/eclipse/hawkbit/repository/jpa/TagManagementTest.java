@@ -70,10 +70,15 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> tagManagement.deleteDistributionSetTag(NOT_EXIST_ID), "DistributionSetTag");
         verifyThrownExceptionBy(() -> tagManagement.deleteTargetTag(NOT_EXIST_ID), "TargetTag");
 
+        verifyThrownExceptionBy(() -> tagManagement.findDistributionSetTagsByDistributionSet(pageReq, NOT_EXIST_IDL),
+                "DistributionSet");
+
         verifyThrownExceptionBy(() -> tagManagement.updateDistributionSetTag(entityFactory.tag().update(NOT_EXIST_IDL)),
                 "DistributionSetTag");
         verifyThrownExceptionBy(() -> tagManagement.updateTargetTag(entityFactory.tag().update(NOT_EXIST_IDL)),
                 "TargetTag");
+
+        verifyThrownExceptionBy(() -> tagManagement.findAllTargetTags(pageReq, NOT_EXIST_ID), "Target");
     }
 
     @Test

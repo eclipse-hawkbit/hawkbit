@@ -24,8 +24,9 @@ import org.eclipse.hawkbit.ui.push.DistributionSetTagCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionSetTagDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionSetTagUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.data.domain.PageRequest;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -103,9 +104,9 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
     public void displayAlreadyAssignedTags() {
         removePreviouslyAddedTokens();
         if (selectedEntity != null) {
-            for (final DistributionSetTag tag : tagManagement.find  selectedEntity.getTags()) {
-                addNewToken(tag.getId());
-            }
+            tagManagement
+                    .findDistributionSetTagsByDistributionSet(new PageRequest(0, MAX_TAG_QUERY), selectedEntity.getId())
+                    .getContent().stream().forEach(tag -> addNewToken(tag.getId()));
         }
     }
 
@@ -113,9 +114,9 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
     protected void populateContainer() {
         container.removeAllItems();
         tagDetails.clear();
-        for (final DistributionSetTag tag : tagManagement.findAllDistributionSetTags()) {
-            setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour());
-        }
+        tagManagement.findAllDistributionSetTags(new PageRequest(0, MAX_TAG_QUERY)).getContent().stream()
+                .forEach(tag -> setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour()));
+
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)

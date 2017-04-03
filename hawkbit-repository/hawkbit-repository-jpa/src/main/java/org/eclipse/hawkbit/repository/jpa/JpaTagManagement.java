@@ -26,7 +26,9 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.TagSpecification;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -229,7 +231,21 @@ public class JpaTagManagement implements TagManagement {
 
     @Override
     public Page<TargetTag> findAllTargetTags(final Pageable pageable, final String controllerId) {
+        if (!targetRepository.existsByControllerId(controllerId)) {
+            throw new EntityNotFoundException(Target.class, controllerId);
+        }
+
         return convertTPage(targetTagRepository.findAll(TagSpecification.ofTarget(controllerId), pageable), pageable);
     }
 
+    @Override
+    public Page<DistributionSetTag> findDistributionSetTagsByDistributionSet(final Pageable pageable,
+            final Long setId) {
+        if (!distributionSetRepository.exists(setId)) {
+            throw new EntityNotFoundException(DistributionSet.class, setId);
+        }
+
+        return convertDsPage(distributionSetTagRepository.findAll(TagSpecification.ofDistributionSet(setId), pageable),
+                pageable);
+    }
 }
