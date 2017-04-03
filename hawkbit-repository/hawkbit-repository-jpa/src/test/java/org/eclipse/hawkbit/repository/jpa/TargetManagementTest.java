@@ -245,7 +245,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Description("Ensures that targets can assigned and unassigned to a target tag. Not exists target will be ignored for the assignment.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 4),
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 8) })
+            @Expect(type = TargetUpdatedEvent.class, count = 5) })
     public void assignAndUnassignTargetsToTag() {
         final List<String> assignTarget = new ArrayList<>();
         assignTarget.add(targetManagement.createTarget(entityFactory.target().create().controllerId("targetId123"))

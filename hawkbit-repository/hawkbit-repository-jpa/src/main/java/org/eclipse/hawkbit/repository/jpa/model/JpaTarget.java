@@ -128,10 +128,10 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     private String address;
 
     @Column(name = "last_target_query")
-    private long lastTargetQuery;
+    private Long lastTargetQuery;
 
     @Column(name = "install_date")
-    private long installationDate;
+    private Long installationDate;
 
     @Column(name = "update_status", nullable = false, length = 16)
     @Enumerated(EnumType.STRING)
@@ -299,7 +299,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
      */
     @Override
     public PollStatus getPollStatus() {
-        if (lastTargetQuery <= 0) {
+        if (lastTargetQuery == null) {
             return null;
         }
         return SystemSecurityContextHolder.getInstance().getSystemSecurityContext().runAsSystem(() -> {
@@ -320,12 +320,12 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     }
 
     @Override
-    public long getLastTargetQuery() {
+    public Long getLastTargetQuery() {
         return lastTargetQuery;
     }
 
     @Override
-    public long getInstallationDate() {
+    public Long getInstallationDate() {
         return installationDate;
     }
 
@@ -357,11 +357,11 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
         this.address = address;
     }
 
-    public void setLastTargetQuery(final long lastTargetQuery) {
+    public void setLastTargetQuery(final Long lastTargetQuery) {
         this.lastTargetQuery = lastTargetQuery;
     }
 
-    public void setInstallationDate(final long installationDate) {
+    public void setInstallationDate(final Long installationDate) {
         this.installationDate = installationDate;
     }
 

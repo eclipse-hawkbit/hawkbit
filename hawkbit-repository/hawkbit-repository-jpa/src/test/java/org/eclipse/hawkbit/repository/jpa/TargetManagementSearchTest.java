@@ -594,7 +594,7 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         targInstalled = assignDistributionSet(ds, targInstalled).getAssignedEntity();
         targInstalled = testdataFactory
                 .sendUpdateActionStatusToTargets(targInstalled, Status.FINISHED, Collections.singletonList("installed"))
-                .stream().map(action -> action.getTarget()).collect(Collectors.toList());
+                .stream().map(Action::getTarget).collect(Collectors.toList());
 
         final Slice<Target> result = targetManagement.findTargetsAllOrderByLinkedDistributionSet(pageReq, ds.getId(),
                 new FilterParams(null, null, Boolean.TRUE, null, Boolean.FALSE, new String[0]));

@@ -635,7 +635,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
         return convertSmMdPage(
                 softwareModuleMetadataRepository
                         .findAll(
-                                (Specification<JpaSoftwareModuleMetadata>) (root, query, cb) -> cb.and(
+                                (root, query, cb) -> cb.and(
                                         cb.equal(root.get(JpaSoftwareModuleMetadata_.softwareModule)
                                                 .get(JpaSoftwareModule_.id), softwareModuleId),
                                         spec.toPredicate(root, query, cb)),
@@ -648,12 +648,9 @@ public class JpaSoftwareManagement implements SoftwareManagement {
             final Long softwareModuleId) {
         throwExceptionIfSoftwareModuleDoesNotExist(softwareModuleId);
 
-        return convertSmMdPage(softwareModuleMetadataRepository
-                .findAll((Specification<JpaSoftwareModuleMetadata>) (root, query, cb) -> cb
-                        .and(cb.equal(root.get(JpaSoftwareModuleMetadata_.softwareModule).get(JpaSoftwareModule_.id),
-                                softwareModuleId)),
-                        pageable),
-                pageable);
+        return convertSmMdPage(softwareModuleMetadataRepository.findAll((root, query, cb) -> cb.equal(
+                root.get(JpaSoftwareModuleMetadata_.softwareModule).get(JpaSoftwareModule_.id), softwareModuleId),
+                pageable), pageable);
     }
 
     @Override

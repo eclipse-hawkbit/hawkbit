@@ -883,13 +883,13 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
                 .createSoftwareModuleMetadata(ah.getId(), entityFactory.generateMetadata(knownKey1, knownValue1))
                 .getSoftwareModule();
 
-        assertThat(softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(pageReq, ah.getId()).getContent())
-                .as("Contains the created metadata element")
-                .containsExactly(new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue1));
+        assertThat(softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(new PageRequest(0, 100), ah.getId())
+                .getContent()).as("Contains the created metadata element")
+                        .containsExactly(new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue1));
 
         softwareManagement.deleteSoftwareModuleMetadata(ah.getId(), knownKey1);
-        assertThat(softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(pageReq, ah.getId()).getContent())
-                .as("Metadata elemenets are").isEmpty();
+        assertThat(softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(new PageRequest(0, 100), ah.getId())
+                .getContent()).as("Metadata elemenets are").isEmpty();
     }
 
     @Test
