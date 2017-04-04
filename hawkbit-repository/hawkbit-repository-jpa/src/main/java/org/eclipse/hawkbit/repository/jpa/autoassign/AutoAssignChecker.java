@@ -89,7 +89,7 @@ public class AutoAssignChecker {
         def.setName("autoAssignDSToTargets");
         def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         def.setReadOnly(false);
-        def.setIsolationLevel(Isolation.READ_UNCOMMITTED.value());
+        def.setIsolationLevel(Isolation.READ_COMMITTED.value());
         transactionTemplate = new TransactionTemplate(transactionManager, def);
     }
 
