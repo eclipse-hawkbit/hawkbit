@@ -33,6 +33,7 @@ import org.eclipse.hawkbit.ui.artifacts.upload.UploadLayout;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -294,6 +295,10 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
             final Long lastId = Iterables.getLast(values);
             final Optional<SoftwareModule> softwareModule = softwareManagement.findSoftwareModuleById(lastId);
             smTableLayout.getSoftwareModuleDetails().setSelectedBaseEntity(softwareModule.orElse(null));
+            if (softwareModule.isPresent()) {
+                artifactDetailsLayout.populateArtifactDetails(softwareModule.get().getId(), HawkbitCommonUtil
+                        .getFormattedNameVersion(softwareModule.get().getName(), softwareModule.get().getVersion()));
+            }
         }
         smTableLayout.getSoftwareModuleDetails().restoreState();
     }

@@ -183,6 +183,7 @@ public class UploadLayout extends VerticalLayout {
         upload.addProgressListener(uploadHandler);
         upload.addStartedListener(uploadHandler);
         upload.addStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
+        upload.addStyleName("no-border");
 
         fileUploadLayout = new HorizontalLayout();
         fileUploadLayout.setSpacing(true);
