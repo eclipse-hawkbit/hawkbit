@@ -25,17 +25,17 @@ https://hawkbit.eu-gb.mybluemix.net/UI/
 
 # Device Integration
 
-hawkBit does not offer off the shelf clients for devices as part of the project. The long term goal is to provide an [Eclipse hono](https://github.com/eclipse/hono) integration which will provide connectivity through various IoT protocols and as a result allow a wide range of clients to connect to hawkBit. However, the hawkBit [Direct Device Integration (API) API](http://www.eclipse.org/hawkbit/documentation/interfaces/ddi-api.html) is HTTP/JSon based which should allow any client to integrate quite easily.
+hawkBit does not provide off the shelf clients for devices as part of the project. The long term goal is to provide an [Eclipse hono](https://github.com/eclipse/hono) integration which will provide connectivity through various IoT protocols and as a result allows a wide range of clients to connect to hawkBit. However, the hawkBit [Direct Device Integration (API) API](http://www.eclipse.org/hawkbit/documentation/interfaces/ddi-api.html) is HTTP/JSon based which should allow any update client to integrate quite easily.
 
-However, there are clients outside of the Eclipse IoT eco system as well, e.g.:
+There are clients outside of the Eclipse IoT eco system as well, e.g.:
 
 * [SWupdate](https://github.com/sbabic/swupdate) which is a Linux Update agent with focus on a efficient and safe way to update embedded systems.
 
 # Getting Started
 
-We are providing a [Spring Boot](https://projects.spring.io/spring-boot/) based reference [Update Server](hawkbit-runtime/hawkbit-update-server) including embedded H2 DB for test and evaluation purposes. See below for how to run build and run the update server. In addition we have [guide](http://www.eclipse.org/hawkbit/documentation/guide/runhawkbit.html) for setting up a complete landscape.
+We are providing a [Spring Boot](https://projects.spring.io/spring-boot/) based reference [Update Server](hawkbit-runtime/hawkbit-update-server) including embedded H2 DB for test and evaluation purposes. See below for how to build and run the update server on your own. In addition we have [guide](http://www.eclipse.org/hawkbit/documentation/guide/runhawkbit.html) for setting up a complete landscape.
 
-Docker support by means of ready to go images is currently missing but we will look into this as soon as we can.
+Docker support by means of ready to go image is currently missing but we will look into this as soon as we can.
 
 # hawkBit (Spring boot) starters
 
@@ -63,7 +63,7 @@ $ java -jar ./hawkbit-runtime/hawkbit-update-server/target/hawkbit-update-server
 $ java -jar ./examples/hawkbit-device-simulator/target/hawkbit-device-simulator-#version#.jar
 ```
 
-## Generate Getting Started data with the [Management API example](examples/hawkbit-example-mgmt-simulator) (optional)
+## Generate getting started data with the [Management API example](examples/hawkbit-example-mgmt-simulator) (optional)
 
 ```
 $ java -jar ./examples/hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulator-#version#.jar
