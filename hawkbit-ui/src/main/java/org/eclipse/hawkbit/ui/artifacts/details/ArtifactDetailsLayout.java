@@ -26,12 +26,12 @@ import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -113,12 +113,15 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         createComponents();
         buildLayout();
         eventBus.subscribe(this);
-        artifactUploadState.getSelectedBaseSoftwareModule()
-                .ifPresent(selectedSoftwareModule -> populateArtifactDetails(selectedSoftwareModule.getId(),
+        artifactUploadState.getSelectedBaseSoftwareModule().ifPresent(
+
+                selectedSoftwareModule -> populateArtifactDetails(selectedSoftwareModule.getId(),
                         HawkbitCommonUtil.getFormattedNameVersion(selectedSoftwareModule.getName(),
                                 selectedSoftwareModule.getVersion())));
 
-        if (isMaximized()) {
+        if (
+
+        isMaximized()) {
             maximizedArtifactDetailsView();
         }
     }
@@ -152,8 +155,11 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     private SPUIButton createMaxMinButton() {
         final SPUIButton button = (SPUIButton) SPUIComponentProvider.getButton(SPUIDefinitions.EXPAND_ACTION_HISTORY,
                 "", "", null, true, FontAwesome.EXPAND, SPUIButtonStyleSmallNoBorder.class);
-        button.addClickListener(event -> maxArtifactDetails());
+        button.addClickListener(
+
+                event -> maxArtifactDetails());
         return button;
+
     }
 
     private void buildLayout() {
@@ -246,11 +252,13 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                 return deleteIcon;
             }
         });
+
     }
 
     private void confirmAndDeleteArtifact(final Long id, final String fileName) {
 
-        final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.getMessage("caption.delete.artifact.confirmbox"),
+        final ConfirmationDialog confirmDialog = new ConfirmationDialog(
+                i18n.getMessage("caption.delete.artifact.confirmbox"),
                 i18n.getMessage("message.delete.artifact", new Object[] { fileName }), i18n.getMessage("button.ok"),
                 i18n.getMessage("button.cancel"), ok -> {
                     if (ok) {
@@ -430,7 +438,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SoftwareModuleEvent softwareModuleEvent) {
-        if (BaseEntityEventType.SELECTED_ENTITY == softwareModuleEvent.getEventType()) {
+        if (softwareModuleEvent.getEventType() == BaseEntityEventType.SELECTED_ENTITY) {
             UI.getCurrent().access(() -> {
                 if (softwareModuleEvent.getEntity() != null) {
                     populateArtifactDetails(softwareModuleEvent.getEntity().getId(),
@@ -441,7 +449,8 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                 }
             });
         }
-        if (softwareModuleEvent.getSoftwareModuleEventType() == SoftwareModuleEventType.ARTIFACTS_CHANGED) {
+        if (softwareModuleEvent.getSoftwareModuleEventType() == SoftwareModuleEventType.ARTIFACTS_CHANGED
+                || softwareModuleEvent.getEventType() == BaseEntityEventType.REMOVE_ENTITY) {
             UI.getCurrent().access(() -> {
                 if (softwareModuleEvent.getEntity() != null) {
                     populateArtifactDetails(softwareModuleEvent.getEntity().getId(),
