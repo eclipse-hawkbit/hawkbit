@@ -29,6 +29,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
@@ -87,6 +88,8 @@ public class AutoAssignChecker {
         final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         def.setName("autoAssignDSToTargets");
         def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        def.setReadOnly(false);
+        def.setIsolationLevel(Isolation.READ_UNCOMMITTED.value());
         transactionTemplate = new TransactionTemplate(transactionManager, def);
     }
 
