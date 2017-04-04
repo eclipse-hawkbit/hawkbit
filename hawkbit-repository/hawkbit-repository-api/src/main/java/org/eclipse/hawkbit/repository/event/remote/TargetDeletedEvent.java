@@ -28,12 +28,15 @@ public class TargetDeletedEvent extends RemoteIdEvent {
     }
 
     /**
-     * Constructor for json serialization.
      *
      * @param tenant
      *            the tenant
      * @param entityId
      *            the entity id
+     * @param controllerId
+     *            the controllerId of the target
+     * @param targetAddress
+     *            the target address
      * @param entityClass
      *            the entity class
      * @param applicationId

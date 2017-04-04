@@ -40,7 +40,7 @@ public class RemoteIdEventTest extends AbstractRemoteEventTest {
     private static String ADDRESS = "amqp://anyhost";
 
     @Test
-    @Description("Verifies that the is ds id correct reloaded")
+    @Description("Verifies that the ds id is correct reloaded")
     public void testDistributionSetDeletedEvent() {
         assertAndCreateRemoteEvent(DistributionSetDeletedEvent.class);
     }
