@@ -48,7 +48,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 /**
- * Distribution set details layout.
+ * Distribution set details layout which is used on the Deployment View
  */
 public class DistributionSetDetails extends AbstractDistributionSetDetails {
 
@@ -160,8 +160,8 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
         if (getPermissionChecker().hasUpdateDistributionPermission() && manageDistUIState.getLastSelectedDistribution()
                 .map(selected -> targetManagement.countTargetByAssignedDistributionSet(selected) <= 0).orElse(false)) {
 
-            final Button reassignSoftModule = SPUIComponentProvider.getButton(softwareModuleName, "", "", "", true,
-                    FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
+            final Button reassignSoftModule = SPUIComponentProvider.getButton(softwareModuleName, StringUtils.EMPTY,
+                    StringUtils.EMPTY, StringUtils.EMPTY, true, FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
             reassignSoftModule.setEnabled(false);
             return reassignSoftModule;
         }

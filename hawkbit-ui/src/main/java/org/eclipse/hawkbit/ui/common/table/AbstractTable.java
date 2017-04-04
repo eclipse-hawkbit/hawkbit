@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
-import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
+import org.eclipse.hawkbit.ui.common.ManagementEntityState;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
@@ -56,9 +56,9 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public abstract class AbstractTable<E extends NamedEntity, I> extends Table implements RefreshableContainer {
 
-    private static final float DEFAULT_COLUMN_NAME_MIN_SIZE = 0.8F;
+    private static final long serialVersionUID = 1L;
 
-    private static final long serialVersionUID = 4856562746502217630L;
+    private static final float DEFAULT_COLUMN_NAME_MIN_SIZE = 0.8F;
 
     protected static final String ACTION_NOT_ALLOWED_MSG = "message.action.not.allowed";
 
@@ -85,7 +85,6 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
         setDefault();
         addValueChangeListener(event -> onValueChange());
         setPageLength(SPUIDefinitions.PAGE_SIZE);
-
         eventBus.subscribe(this);
     }
 
@@ -115,14 +114,14 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
             lastId = Iterables.getLast(values);
         }
         setManagementEntitiyStateValues(values, lastId);
-
         if (lastId != null) {
-            findEntityByTableValue(lastId).ifPresent(this::publishEntityAfterValueChange);
+            selectEntity(lastId);
+            publishAdditionalEvent();
         }
     }
 
     protected void setManagementEntitiyStateValues(final Set<I> values, final I lastId) {
-        final ManagmentEntityState<I> managmentEntityState = getManagmentEntityState();
+        final ManagementEntityState<I> managmentEntityState = getManagementEntityState();
         if (managmentEntityState == null) {
             return;
         }
@@ -259,11 +258,36 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
         return ids;
     }
 
+    /**
+     * Finds the entity object of the given entity ID by performing a database
+     * search
+     * 
+     * @param lastSelectedId
+     *            ID of the entity
+     * @return entity object as Optional
+     */
     protected abstract Optional<E> findEntityByTableValue(I lastSelectedId);
 
-    protected abstract void publishEntityAfterValueChange(E selectedLastEntity);
+    /**
+     * Is called inside the onValueChange()-method and is performed after
+     * selecting the current entity in the table. If it is necessary to throw
+     * one or more events after selecting the entity, this method can be
+     * overridden
+     */
+    protected void publishAdditionalEvent() {
+        // can be overridden by subclass
+    }
 
-    protected abstract ManagmentEntityState<I> getManagmentEntityState();
+    /**
+     * Publish the BaseEntityEventType.SELECTED_ENTITY Event with the given
+     * entity.
+     * 
+     * @param selectedLastEntity
+     *            entity
+     */
+    protected abstract void publishSelectedEntityEvent(E selectedLastEntity);
+
+    protected abstract ManagementEntityState<I> getManagementEntityState();
 
     /**
      * Get Id of the table.
@@ -302,7 +326,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
     protected abstract boolean isFirstRowSelectedOnLoad();
 
     /**
-     * Get Item Id should be displayed as selected.
+     * Get Item Id which should be displayed as selected.
      * 
      * @return reference of Item Id of the Row.
      */
@@ -437,9 +461,6 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
         return true;
     }
 
-    /**
-     * Refresh the container.
-     */
     @Override
     public void refreshContainer() {
         final Container container = getContainerDataSource();
@@ -451,6 +472,21 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
 
     protected UINotification getNotification() {
         return notification;
+    }
+
+    /**
+     * Finds the entity object of the given entity ID and performs the
+     * publishing of the BaseEntityEventType.SELECTED_ENTITY event
+     * 
+     * @param entityId
+     *            ID of the current entity
+     */
+    public void selectEntity(final I entityId) {
+        if (entityId == null) {
+            publishSelectedEntityEvent(null);
+            return;
+        }
+        publishSelectedEntityEvent(findEntityByTableValue(entityId).orElse(null));
     }
 
     protected abstract boolean hasDropPermission();

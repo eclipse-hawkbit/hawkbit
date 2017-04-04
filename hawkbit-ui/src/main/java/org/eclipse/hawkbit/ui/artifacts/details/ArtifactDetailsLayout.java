@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.ui.artifacts.event.ArtifactDetailsEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -61,7 +62,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public class ArtifactDetailsLayout extends VerticalLayout {
 
-    private static final long serialVersionUID = -5189069028037133891L;
+    private static final long serialVersionUID = 1L;
 
     private static final String PROVIDED_FILE_NAME = "filename";
 
@@ -113,24 +114,20 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         createComponents();
         buildLayout();
         eventBus.subscribe(this);
-        artifactUploadState.getSelectedBaseSoftwareModule().ifPresent(
-
-                selectedSoftwareModule -> populateArtifactDetails(selectedSoftwareModule.getId(),
+        artifactUploadState.getSelectedBaseSoftwareModule()
+                .ifPresent(selectedSoftwareModule -> populateArtifactDetails(selectedSoftwareModule.getId(),
                         HawkbitCommonUtil.getFormattedNameVersion(selectedSoftwareModule.getName(),
                                 selectedSoftwareModule.getVersion())));
-
-        if (
-
-        isMaximized()) {
+        if (isMaximized()) {
             maximizedArtifactDetailsView();
         }
     }
 
     private void createComponents() {
-        final String labelStr = artifactUploadState.getSelectedBaseSoftwareModule()
-                .map(softwareModule -> HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(),
-                        softwareModule.getVersion()))
-                .orElse("");
+        final String labelStr = artifactUploadState
+                .getSelectedBaseSoftwareModule().map(softwareModule -> HawkbitCommonUtil
+                        .getFormattedNameVersion(softwareModule.getName(), softwareModule.getVersion()))
+                .orElse(StringUtils.EMPTY);
         titleOfArtifactDetails = new LabelBuilder().name(HawkbitCommonUtil.getArtifactoryDetailsLabelId(labelStr))
                 .buildCaptionLabel();
         titleOfArtifactDetails.setContentMode(ContentMode.HTML);
@@ -146,24 +143,17 @@ public class ArtifactDetailsLayout extends VerticalLayout {
             addGeneratedColumnButton(artifactDetailsTable);
         }
         setTableColumnDetails(artifactDetailsTable);
-
     }
 
-    /**
-     * @return
-     */
     private SPUIButton createMaxMinButton() {
         final SPUIButton button = (SPUIButton) SPUIComponentProvider.getButton(SPUIDefinitions.EXPAND_ACTION_HISTORY,
-                "", "", null, true, FontAwesome.EXPAND, SPUIButtonStyleSmallNoBorder.class);
-        button.addClickListener(
-
-                event -> maxArtifactDetails());
+                StringUtils.EMPTY, StringUtils.EMPTY, null, true, FontAwesome.EXPAND,
+                SPUIButtonStyleSmallNoBorder.class);
+        button.addClickListener(event -> maxArtifactDetails());
         return button;
-
     }
 
     private void buildLayout() {
-
         final HorizontalLayout header = new HorizontalLayout();
         header.addStyleName("artifact-details-header");
         header.addStyleName("bordered-layout");
@@ -187,7 +177,6 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         addComponent(artifactDetailsTable);
         setComponentAlignment(artifactDetailsTable, Alignment.MIDDLE_CENTER);
         setExpandRatio(artifactDetailsTable, 1.0F);
-
     }
 
     private Container createArtifactLazyQueryContainer() {
@@ -205,7 +194,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     }
 
     private void addArtifactTableProperties(final LazyQueryContainer artifactCont) {
-        artifactCont.addContainerProperty(PROVIDED_FILE_NAME, Label.class, "", false, false);
+        artifactCont.addContainerProperty(PROVIDED_FILE_NAME, Label.class, StringUtils.EMPTY, false, false);
         artifactCont.addContainerProperty(SIZE, Long.class, null, false, false);
         artifactCont.addContainerProperty(SHA1HASH, String.class, null, false, false);
         artifactCont.addContainerProperty(MD5HASH, String.class, null, false, false);
@@ -216,9 +205,9 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         }
     }
 
-    private void addGeneratedColumn(final Table table) {
+    private static void addGeneratedColumn(final Table table) {
         table.addGeneratedColumn(CREATE_MODIFIED_DATE_UPLOAD, new ColumnGenerator() {
-            private static final long serialVersionUID = -866800417175863258L;
+            private static final long serialVersionUID = 1L;
 
             @Override
             public String generateCell(final Table source, final Object itemId, final Object columnId) {
@@ -232,19 +221,18 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                 return SPDateTimeUtil.getFormattedDate(createdDate);
             }
         });
-
     }
 
     private void addGeneratedColumnButton(final Table table) {
         table.addGeneratedColumn(ACTION, new ColumnGenerator() {
-            private static final long serialVersionUID = -866800417175863258L;
+            private static final long serialVersionUID = 1L;
 
             @Override
             public Button generateCell(final Table source, final Object itemId, final Object columnId) {
                 final String fileName = (String) table.getContainerDataSource().getItem(itemId)
                         .getItemProperty(PROVIDED_FILE_NAME).getValue();
                 final Button deleteIcon = SPUIComponentProvider.getButton(
-                        fileName + "-" + UIComponentIdProvider.UPLOAD_FILE_DELETE_ICON, "",
+                        fileName + "-" + UIComponentIdProvider.UPLOAD_FILE_DELETE_ICON, StringUtils.EMPTY,
                         SPUILabelDefinitions.DISCARD, ValoTheme.BUTTON_TINY + " " + "blueicon", true,
                         FontAwesome.TRASH_O, SPUIButtonStyleSmallNoBorder.class);
                 deleteIcon.setData(itemId);
@@ -252,11 +240,9 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                 return deleteIcon;
             }
         });
-
     }
 
     private void confirmAndDeleteArtifact(final Long id, final String fileName) {
-
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
                 i18n.getMessage("caption.delete.artifact.confirmbox"),
                 i18n.getMessage("message.delete.artifact", new Object[] { fileName }), i18n.getMessage("button.ok"),
@@ -276,7 +262,6 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                 });
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
-
     }
 
     private void setTableColumnDetails(final Table table) {
@@ -293,7 +278,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         }
 
         table.setColumnExpandRatio(PROVIDED_FILE_NAME, 3.5F);
-        table.setColumnExpandRatio(SIZE, 2f);
+        table.setColumnExpandRatio(SIZE, 2F);
         if (fullWindowMode) {
             table.setColumnExpandRatio(SHA1HASH, 2.8F);
             table.setColumnExpandRatio(MD5HASH, 2.4F);
@@ -321,7 +306,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         return visibileColumn;
     }
 
-    private Table createArtifactDetailsTable() {
+    private static Table createArtifactDetailsTable() {
         final Table detailsTable = new Table();
         detailsTable.addStyleName("sp-table");
 
@@ -425,14 +410,13 @@ public class ArtifactDetailsLayout extends VerticalLayout {
             maxArtifactDetailsTable.setContainerDataSource(artifactContainer);
         }
         setTableColumnDetails(artifactDetailsTable);
-
     }
 
     /**
      * Set title of artifact details header layout.
      */
     private void setTitleOfLayoutHeader() {
-        titleOfArtifactDetails.setValue(HawkbitCommonUtil.getArtifactoryDetailsLabelId(""));
+        titleOfArtifactDetails.setValue(HawkbitCommonUtil.getArtifactoryDetailsLabelId(StringUtils.EMPTY));
         titleOfArtifactDetails.setContentMode(ContentMode.HTML);
     }
 

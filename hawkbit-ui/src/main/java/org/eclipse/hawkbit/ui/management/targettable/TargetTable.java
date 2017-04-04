@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.TagManagement;
@@ -31,7 +32,7 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
+import org.eclipse.hawkbit.ui.common.ManagementEntityState;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.entity.TargetIdName;
@@ -87,7 +88,8 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * Concrete implementation of Target table.
+ * Concrete implementation of Target table which is displayed on the Deployment
+ * View.
  */
 public class TargetTable extends AbstractTable<Target, Long> {
 
@@ -128,7 +130,6 @@ public class TargetTable extends AbstractTable<Target, Long> {
         this.tagManagement = tagManagement;
 
         setItemDescriptionGenerator(new AssignInstalledDSTooltipGenerator());
-
         addNewContainerDS();
         setColumnProperties();
         setDataAvailable(getContainerDataSource().size() != 0);
@@ -243,18 +244,20 @@ public class TargetTable extends AbstractTable<Target, Long> {
     @Override
     protected void addContainerProperties(final Container container) {
         final LazyQueryContainer targetTableContainer = (LazyQueryContainer) container;
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CONT_ID, String.class, "", false, false);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", false, true);
+        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CONT_ID, String.class, StringUtils.EMPTY,
+                false, false);
+        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, StringUtils.EMPTY, false,
+                true);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_TARGET_STATUS, TargetUpdateStatus.class,
                 TargetUpdateStatus.UNKNOWN, false, false);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_ID, Long.class, null,
                 false, false);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_ID, Long.class, null,
                 false, false);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER, String.class, "",
-                false, true);
+        targetTableContainer.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER, String.class,
+                StringUtils.EMPTY, false, true);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_NAME_VER, String.class,
-                "", false, true);
+                StringUtils.EMPTY, false, true);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.LAST_QUERY_DATE, Date.class, null, false, false);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_BY, String.class, null, false, true);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, String.class, null, false,
@@ -265,8 +268,8 @@ public class TargetTable extends AbstractTable<Target, Long> {
                 false, true);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP, String.class, null,
                 false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, "", false, true);
-
+        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, StringUtils.EMPTY, false,
+                true);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.ASSIGN_DIST_SET, DistributionSet.class, null,
                 false, true);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.INSTALL_DIST_SET, DistributionSet.class, null,
@@ -283,7 +286,7 @@ public class TargetTable extends AbstractTable<Target, Long> {
 
     @Override
     protected boolean isFirstRowSelectedOnLoad() {
-        return !managementUIState.getSelectedTargetId().isPresent();
+        return managementUIState.getSelectedTargetId().map(Set::isEmpty).orElse(true);
     }
 
     @Override
@@ -292,7 +295,7 @@ public class TargetTable extends AbstractTable<Target, Long> {
     }
 
     @Override
-    protected void publishEntityAfterValueChange(final Target selectedLastEntity) {
+    protected void publishSelectedEntityEvent(final Target selectedLastEntity) {
         eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, selectedLastEntity));
     }
 
@@ -308,7 +311,7 @@ public class TargetTable extends AbstractTable<Target, Long> {
     }
 
     @Override
-    protected ManagmentEntityState<Long> getManagmentEntityState() {
+    protected ManagementEntityState<Long> getManagementEntityState() {
         return null;
     }
 
@@ -321,8 +324,8 @@ public class TargetTable extends AbstractTable<Target, Long> {
     protected List<TableColumn> getTableVisibleColumns() {
         final List<TableColumn> columnList = super.getTableVisibleColumns();
         if (!isMaximized()) {
-            columnList.add(new TableColumn(SPUIDefinitions.TARGET_STATUS_POLL_TIME, "", 0.0F));
-            columnList.add(new TableColumn(SPUIDefinitions.TARGET_STATUS_PIN_TOGGLE_ICON, "", 0.0F));
+            columnList.add(new TableColumn(SPUIDefinitions.TARGET_STATUS_POLL_TIME, StringUtils.EMPTY, 0.0F));
+            columnList.add(new TableColumn(SPUIDefinitions.TARGET_STATUS_PIN_TOGGLE_ICON, StringUtils.EMPTY, 0.0F));
         }
         return columnList;
     }
@@ -407,12 +410,6 @@ public class TargetTable extends AbstractTable<Target, Long> {
                 .map(pinnedTarget -> pinnedTarget.equals(target)).orElse(false);
     }
 
-    /**
-     * Add listener to pin.
-     *
-     * @param event
-     *            as event
-     */
     private void addPinClickListener(final ClickEvent event) {
         checkifAlreadyPinned(event.getButton());
         if (targetPinned) {
@@ -422,12 +419,6 @@ public class TargetTable extends AbstractTable<Target, Long> {
         }
     }
 
-    /**
-     * Check already pinned.
-     *
-     * @param eventBtn
-     *            as button
-     */
     private void checkifAlreadyPinned(final Button eventBtn) {
         final TargetIdName newPinnedTargetItemId = (TargetIdName) eventBtn.getData();
         final TargetIdName targetId = managementUIState.getDistributionTableFilters().getPinnedTarget().orElse(null);
@@ -468,13 +459,9 @@ public class TargetTable extends AbstractTable<Target, Long> {
         pinBtn.removeStyleName(TARGET_PINNED);
         pinBtn.addStyleName(SPUIStyleDefinitions.TARGET_STATUS_PIN_TOGGLE);
         final TargetIdName targetIdname = (TargetIdName) pinBtn.getData();
-
         HawkbitCommonUtil.applyStatusLblStyle(this, pinBtn, targetIdname.getTargetId());
     }
 
-    /**
-     * Set style of target table.
-     */
     private void styleTargetTable() {
         setCellStyleGenerator((source, itemId, propertyId) -> null);
     }
@@ -592,13 +579,13 @@ public class TargetTable extends AbstractTable<Target, Long> {
         final Object targetItemId = dropData.getItemIdOver();
         LOG.debug("Adding a log to check if targetItemId is null : {} ", targetItemId);
         if (targetItemId == null) {
-            getNotification().displayWarning(i18n.getMessage("target.not.exists", new Object[] { "" }));
+            getNotification().displayWarning(i18n.getMessage("target.not.exists", new Object[] { StringUtils.EMPTY }));
             return;
         }
         final Long targetId = (Long) targetItemId;
         final Optional<Target> target = targetManagement.findTargetById(targetId);
         if (!target.isPresent()) {
-            getNotification().displayWarning(i18n.getMessage("target.not.exists", new Object[] { "" }));
+            getNotification().displayWarning(i18n.getMessage("target.not.exists", new Object[] { StringUtils.EMPTY }));
             return;
         }
         final TargetIdName createTargetIdName = new TargetIdName(target.get());

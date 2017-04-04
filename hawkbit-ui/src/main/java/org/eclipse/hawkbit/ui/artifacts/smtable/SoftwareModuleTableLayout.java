@@ -27,7 +27,6 @@ public class SoftwareModuleTableLayout extends AbstractTableLayout<SoftwareModul
     private static final long serialVersionUID = 1L;
 
     private final SoftwareModuleTable softwareModuleTable;
-    private final SoftwareModuleDetails softwareModuleDetails;
 
     public SoftwareModuleTableLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final ArtifactUploadState artifactUploadState, final UINotification uiNotification,
@@ -42,16 +41,12 @@ public class SoftwareModuleTableLayout extends AbstractTableLayout<SoftwareModul
         final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow = new SoftwareModuleAddUpdateWindow(i18n,
                 uiNotification, eventBus, softwareManagement, entityFactory);
 
-        this.softwareModuleDetails = new SoftwareModuleDetails(i18n, eventBus, permChecker,
-                softwareModuleAddUpdateWindow, artifactUploadState, softwareManagement, swMetadataPopupLayout,
-                entityFactory);
-
-        super.init(new SoftwareModuleTableHeader(i18n, permChecker, eventBus, artifactUploadState,
-                softwareModuleAddUpdateWindow), softwareModuleTable, softwareModuleDetails);
-    }
-
-    public SoftwareModuleDetails getSoftwareModuleDetails() {
-        return softwareModuleDetails;
+        super.init(
+                new SoftwareModuleTableHeader(i18n, permChecker, eventBus, artifactUploadState,
+                        softwareModuleAddUpdateWindow),
+                softwareModuleTable,
+                new SoftwareModuleDetails(i18n, eventBus, permChecker, softwareModuleAddUpdateWindow,
+                        artifactUploadState, softwareManagement, swMetadataPopupLayout, entityFactory));
     }
 
     public SoftwareModuleTable getSoftwareModuleTable() {

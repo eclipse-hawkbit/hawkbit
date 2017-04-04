@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -68,7 +69,7 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 
 /**
- * Distribution set table.
+ * Distribution set table used on the Distribution View.
  */
 public class DistributionSetTable extends AbstractNamedVersionTable<DistributionSet, Long> {
 
@@ -104,7 +105,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         this.targetManagement = targetManagement;
         this.dsMetadataPopupLayout = dsMetadataPopupLayout;
         addTableStyleGenerator();
-
         addNewContainerDS();
         setColumnProperties();
         setDataAvailable(getContainerDataSource().size() != 0);
@@ -112,11 +112,9 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onDistributionSetUpdateEvents(final DistributionSetUpdatedEventContainer eventContainer) {
-
         final List<Long> visibleItemIds = (List<Long>) getVisibleItemIds();
         updateVisableTableEntries(eventContainer.getEvents(), visibleItemIds);
         handleSelectedAndUpdatedDs(eventContainer.getEvents());
-
     }
 
     private void handleSelectedAndUpdatedDs(final List<DistributionSetUpdateEvent> events) {
@@ -141,7 +139,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     @Override
     protected Container createContainer() {
-
         final Map<String, Object> queryConfiguration = prepareQueryConfigFilters();
         final BeanQueryFactory<ManageDistBeanQuery> distributionQF = new BeanQueryFactory<>(ManageDistBeanQuery.class);
 
@@ -155,7 +152,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         manageDistUIState.getManageDistFilters().getSearchText()
                 .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
 
-        if (null != manageDistUIState.getManageDistFilters().getClickedDistSetType()) {
+        if (manageDistUIState.getManageDistFilters().getClickedDistSetType() != null) {
             queryConfig.put(SPUIDefinitions.FILTER_BY_DISTRIBUTION_SET_TYPE,
                     manageDistUIState.getManageDistFilters().getClickedDistSetType());
         }
@@ -172,7 +169,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     @Override
     protected boolean isFirstRowSelectedOnLoad() {
-        return !manageDistUIState.getSelectedDistributions().isPresent();
+        return manageDistUIState.getSelectedDistributions().map(Set::isEmpty).orElse(true);
     }
 
     @Override
@@ -186,17 +183,23 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     @Override
-    protected ManageDistUIState getManagmentEntityState() {
+    protected ManageDistUIState getManagementEntityState() {
         return manageDistUIState;
     }
 
     @Override
-    protected void publishEntityAfterValueChange(final DistributionSet distributionSet) {
-        eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, distributionSet));
+    protected void publishAdditionalEvent() {
         eventBus.publish(this, DistributionsUIEvent.ORDER_BY_DISTRIBUTION);
-        if (distributionSet != null) {
-            manageDistUIState.setLastSelectedEntity(distributionSet.getId());
+    }
+
+    @Override
+    protected void publishSelectedEntityEvent(final DistributionSet distributionSet) {
+        eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, distributionSet));
+        if (distributionSet == null) {
+            manageDistUIState.setLastSelectedEntity(null);
+            return;
         }
+        manageDistUIState.setLastSelectedEntity(distributionSet.getId());
     }
 
     @Override
@@ -220,7 +223,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
         final Object distItemId = dropData.getItemIdOver();
         handleDropEvent(source, softwareModulesIdList, distItemId);
-
     }
 
     @Override
@@ -284,26 +286,23 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     private void publishAssignEvent(final Long distId, final SoftwareModule softwareModule) {
         if (manageDistUIState.getLastSelectedDistribution().map(distId::equals).orElse(false)) {
-
             eventBus.publish(this,
                     new SoftwareModuleEvent(SoftwareModuleEventType.ASSIGN_SOFTWARE_MODULE, softwareModule));
         }
     }
 
-    private void handleFirmwareCase(final Map<Long, HashSet<SoftwareModuleIdName>> map,
+    private static void handleFirmwareCase(final Map<Long, HashSet<SoftwareModuleIdName>> map,
             final SoftwareModule softwareModule, final SoftwareModuleIdName softwareModuleIdName) {
         if (softwareModule.getType().getMaxAssignments() == 1) {
             if (!map.containsKey(softwareModule.getType().getId())) {
                 map.put(softwareModule.getType().getId(), new HashSet<SoftwareModuleIdName>());
-
             }
             map.get(softwareModule.getType().getId()).clear();
             map.get(softwareModule.getType().getId()).add(softwareModuleIdName);
-
         }
     }
 
-    private void handleSoftwareCase(final Map<Long, HashSet<SoftwareModuleIdName>> map,
+    private static void handleSoftwareCase(final Map<Long, HashSet<SoftwareModuleIdName>> map,
             final SoftwareModule softwareModule, final SoftwareModuleIdName softwareModuleIdName) {
         if (softwareModule.getType().getMaxAssignments() > 1) {
             if (!map.containsKey(softwareModule.getType().getId())) {
@@ -317,7 +316,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             final HashSet<SoftwareModuleIdName> softwareModules) {
         LOG.debug("Adding a log to check if distributionSetIdName is null : {} ", distributionSetIdName);
         manageDistUIState.getAssignedList().put(distributionSetIdName, softwareModules);
-
         eventBus.publish(this, DistributionsUIEvent.UPDATE_COUNT);
     }
 
@@ -378,7 +376,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
                     return false;
                 }
             }
-
         }
         return true;
     }
@@ -458,7 +455,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     @Override
     protected void addCustomGeneratedColumns() {
         addGeneratedColumn(SPUILabelDefinitions.METADATA_ICON, new ColumnGenerator() {
-            private static final long serialVersionUID = 117186282275065399L;
+            private static final long serialVersionUID = 1L;
 
             @Override
             public Object generateCell(final Table source, final Object itemId, final Object columnId) {
@@ -474,15 +471,15 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     protected List<TableColumn> getTableVisibleColumns() {
         final List<TableColumn> columnList = super.getTableVisibleColumns();
         if (!isMaximized()) {
-            columnList.add(new TableColumn(SPUILabelDefinitions.METADATA_ICON, "", 0.1F));
+            columnList.add(new TableColumn(SPUILabelDefinitions.METADATA_ICON, StringUtils.EMPTY, 0.1F));
         }
         return columnList;
     }
 
     private Button createManageMetadataButton(final String nameVersionStr) {
         final Button manageMetadataBtn = SPUIComponentProvider.getButton(
-                UIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
-                FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
+                UIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, StringUtils.EMPTY,
+                StringUtils.EMPTY, null, false, FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
         manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
         manageMetadataBtn.setDescription(i18n.getMessage("tooltip.metadata.icon"));
         return manageMetadataBtn;

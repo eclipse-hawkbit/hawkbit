@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -56,7 +57,7 @@ import com.vaadin.ui.Table.Align;
  */
 public class ManangementConfirmationWindowLayout extends AbstractConfirmationWindowLayout {
 
-    private static final long serialVersionUID = 2114943830055679554L;
+    private static final long serialVersionUID = 1L;
 
     private static final String DISCARD_CHANGES = "DiscardChanges";
 
@@ -78,7 +79,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
     private final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout;
 
-    private ConfirmationTab assignmnetTab;
+    private ConfirmationTab assignmentTab;
 
     public ManangementConfirmationWindowLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final ManagementUIState managementUIState, final TargetManagement targetManagement,
@@ -104,42 +105,41 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         if (!managementUIState.getAssignedList().isEmpty()) {
             tabs.put(i18n.getMessage("caption.assign.dist.accordion.tab"), createAssignmentTab());
         }
-
         return tabs;
     }
 
     private ConfirmationTab createAssignmentTab() {
 
-        assignmnetTab = new ConfirmationTab();
-        assignmnetTab.getConfirmAll().setId(UIComponentIdProvider.SAVE_ASSIGNMENT);
-        assignmnetTab.getConfirmAll().setIcon(FontAwesome.SAVE);
-        assignmnetTab.getConfirmAll().setCaption(i18n.getMessage("button.assign.all"));
-        assignmnetTab.getConfirmAll().addClickListener(event -> saveAllAssignments(assignmnetTab));
+        assignmentTab = new ConfirmationTab();
+        assignmentTab.getConfirmAll().setId(UIComponentIdProvider.SAVE_ASSIGNMENT);
+        assignmentTab.getConfirmAll().setIcon(FontAwesome.SAVE);
+        assignmentTab.getConfirmAll().setCaption(i18n.getMessage("button.assign.all"));
+        assignmentTab.getConfirmAll().addClickListener(event -> saveAllAssignments(assignmentTab));
 
-        assignmnetTab.getDiscardAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
-        assignmnetTab.getDiscardAll().setId(UIComponentIdProvider.DISCARD_ASSIGNMENT);
-        assignmnetTab.getDiscardAll().addClickListener(event -> discardAllAssignments(assignmnetTab));
+        assignmentTab.getDiscardAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
+        assignmentTab.getDiscardAll().setId(UIComponentIdProvider.DISCARD_ASSIGNMENT);
+        assignmentTab.getDiscardAll().addClickListener(event -> discardAllAssignments(assignmentTab));
 
         // Add items container to the table.
-        assignmnetTab.getTable().setContainerDataSource(getAssignmentsTableContainer());
+        assignmentTab.getTable().setContainerDataSource(getAssignmentsTableContainer());
 
         // Add the discard action column
-        assignmnetTab.getTable().addGeneratedColumn(DISCARD_CHANGES, (source, itemId, columnId) -> {
-            final ClickListener clickListener = event -> discardAssignment((TargetIdName) itemId, assignmnetTab);
+        assignmentTab.getTable().addGeneratedColumn(DISCARD_CHANGES, (source, itemId, columnId) -> {
+            final ClickListener clickListener = event -> discardAssignment((TargetIdName) itemId, assignmentTab);
             return createDiscardButton(itemId, clickListener);
         });
 
-        assignmnetTab.getTable().setColumnExpandRatio(TARGET_NAME, 2);
-        assignmnetTab.getTable().setColumnExpandRatio(DISTRIBUTION_NAME, 2);
-        assignmnetTab.getTable().setColumnExpandRatio(DISCARD_CHANGES, 1);
-        assignmnetTab.getTable().setVisibleColumns(TARGET_NAME, DISTRIBUTION_NAME, DISCARD_CHANGES);
-        assignmnetTab.getTable().setColumnHeaders(i18n.getMessage("header.first.assignment.table"),
+        assignmentTab.getTable().setColumnExpandRatio(TARGET_NAME, 2);
+        assignmentTab.getTable().setColumnExpandRatio(DISTRIBUTION_NAME, 2);
+        assignmentTab.getTable().setColumnExpandRatio(DISCARD_CHANGES, 1);
+        assignmentTab.getTable().setVisibleColumns(TARGET_NAME, DISTRIBUTION_NAME, DISCARD_CHANGES);
+        assignmentTab.getTable().setColumnHeaders(i18n.getMessage("header.first.assignment.table"),
                 i18n.getMessage("header.second.assignment.table"), i18n.getMessage("header.third.assignment.table"));
-        assignmnetTab.getTable().setColumnAlignment(DISCARD_CHANGES, Align.CENTER);
+        assignmentTab.getTable().setColumnAlignment(DISCARD_CHANGES, Align.CENTER);
 
         actionTypeOptionGroupLayout.selectDefaultOption();
-        assignmnetTab.addComponent(actionTypeOptionGroupLayout, 1);
-        return assignmnetTab;
+        assignmentTab.addComponent(actionTypeOptionGroupLayout, 1);
+        return assignmentTab;
 
     }
 
@@ -252,10 +252,10 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
     private IndexedContainer getAssignmentsTableContainer() {
         final IndexedContainer contactContainer = new IndexedContainer();
-        contactContainer.addContainerProperty(TARGET_NAME, String.class, "");
-        contactContainer.addContainerProperty(DISTRIBUTION_NAME, String.class, "");
-        contactContainer.addContainerProperty(TARGET_ID, Long.class, "");
-        contactContainer.addContainerProperty(DIST_ID, Long.class, "");
+        contactContainer.addContainerProperty(TARGET_NAME, String.class, StringUtils.EMPTY);
+        contactContainer.addContainerProperty(DISTRIBUTION_NAME, String.class, StringUtils.EMPTY);
+        contactContainer.addContainerProperty(TARGET_ID, Long.class, StringUtils.EMPTY);
+        contactContainer.addContainerProperty(DIST_ID, Long.class, StringUtils.EMPTY);
         final Map<TargetIdName, DistributionSetIdName> assignedList = managementUIState.getAssignedList();
 
         for (final Map.Entry<TargetIdName, DistributionSetIdName> entry : assignedList.entrySet()) {
@@ -349,8 +349,8 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
     private IndexedContainer getDSModuleTableContainer() {
         final IndexedContainer contactContainer = new IndexedContainer();
-        contactContainer.addContainerProperty(DIST_ID, Long.class, "");
-        contactContainer.addContainerProperty(DISTRIBUTION_NAME, String.class, "");
+        contactContainer.addContainerProperty(DIST_ID, Long.class, StringUtils.EMPTY);
+        contactContainer.addContainerProperty(DISTRIBUTION_NAME, String.class, StringUtils.EMPTY);
         Item item;
         for (final DistributionSetIdName distIdName : managementUIState.getDeletedDistributionList()) {
             item = contactContainer.addItem(distIdName);
@@ -423,14 +423,14 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
     private void removeFromAssignmentTab(final Entry<TargetIdName, DistributionSetIdName> entry,
             final DistributionSetIdName value) {
         if (Objects.equals(entry.getValue(), value)) {
-            assignmnetTab.getTable().removeItem(entry.getKey().getTargetId());
+            assignmentTab.getTable().removeItem(entry.getKey().getTargetId());
         }
     }
 
     private IndexedContainer getTargetModuleTableContainer() {
         final IndexedContainer contactContainer = new IndexedContainer();
-        contactContainer.addContainerProperty(TARGET_ID, Long.class, "");
-        contactContainer.addContainerProperty(TARGET_NAME, String.class, "");
+        contactContainer.addContainerProperty(TARGET_ID, Long.class, StringUtils.EMPTY);
+        contactContainer.addContainerProperty(TARGET_NAME, String.class, StringUtils.EMPTY);
         Item item;
         for (final TargetIdName targteId : managementUIState.getDeletedTargetList()) {
             item = contactContainer.addItem(targteId);
@@ -485,7 +485,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         for (final TargetIdName targetNameId : managementUIState.getDeletedTargetList()) {
             if (managementUIState.getAssignedList().containsKey(targetNameId)) {
                 managementUIState.getAssignedList().remove(targetNameId);
-                assignmnetTab.getTable().removeItem(targetNameId.getTargetId());
+                assignmentTab.getTable().removeItem(targetNameId.getTargetId());
             }
         }
     }

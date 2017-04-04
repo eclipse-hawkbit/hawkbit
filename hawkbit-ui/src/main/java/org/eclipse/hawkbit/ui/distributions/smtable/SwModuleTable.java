@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
@@ -21,7 +22,7 @@ import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsLayout;
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
-import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
+import org.eclipse.hawkbit.ui.common.ManagementEntityState;
 import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -135,7 +136,6 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onSoftwareModuleUpdateEvents(final SoftwareModuleUpdatedEventContainer eventContainer) {
-
         @SuppressWarnings("unchecked")
         final List<Long> visibleItemIds = (List<Long>) getVisibleItemIds();
 
@@ -143,7 +143,6 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
         eventContainer.getEvents().stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
                 .forEach(event -> updateSoftwareModuleInTable(event.getEntity()));
-
     }
 
     private void handleSelectedAndUpdatedSoftwareModules(final List<SoftwareModuleUpdatedEvent> events) {
@@ -208,9 +207,9 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     @Override
     protected void addCustomGeneratedColumns() {
-
         addGeneratedColumn(SPUILabelDefinitions.ARTIFACT_ICON, new ColumnGenerator() {
-            private static final long serialVersionUID = -5982361782989980277L;
+
+            private static final long serialVersionUID = 1L;
 
             @Override
             public Object generateCell(final Table source, final Object itemId, final Object columnId) {
@@ -230,7 +229,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     @Override
     protected boolean isFirstRowSelectedOnLoad() {
-        return !manageDistUIState.getSelectedSoftwareModules().isPresent();
+        return manageDistUIState.getSelectedSoftwareModules().map(Set::isEmpty).orElse(true);
     }
 
     @Override
@@ -244,11 +243,13 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     }
 
     @Override
-    protected void publishEntityAfterValueChange(final SoftwareModule selectedLastEntity) {
+    protected void publishSelectedEntityEvent(final SoftwareModule selectedLastEntity) {
         eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, selectedLastEntity));
-        if (selectedLastEntity != null) {
-            manageDistUIState.setSelectedBaseSwModuleId(selectedLastEntity.getId());
+        if (selectedLastEntity == null) {
+            manageDistUIState.setSelectedBaseSwModuleId(null);
+            return;
         }
+        manageDistUIState.setSelectedBaseSwModuleId(selectedLastEntity.getId());
     }
 
     @Override
@@ -263,7 +264,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     }
 
     @Override
-    protected ManagmentEntityState<Long> getManagmentEntityState() {
+    protected ManagementEntityState<Long> getManagementEntityState() {
         return null;
     }
 
@@ -273,7 +274,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
         if (isMaximized()) {
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VENDOR, i18n.getMessage("header.vendor"), 0.1F));
         } else {
-            columnList.add(new TableColumn(SPUILabelDefinitions.ARTIFACT_ICON, "", 0.1F));
+            columnList.add(new TableColumn(SPUILabelDefinitions.ARTIFACT_ICON, StringUtils.EMPTY, 0.1F));
         }
         return columnList;
     }
@@ -293,8 +294,6 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
         return false;
     }
 
-    /* All Private Methods */
-
     private void styleTableOnDistSelection() {
         Page.getCurrent().getJavaScript().execute(HawkbitCommonUtil.getScriptSMHighlightReset());
         setCellStyleGenerator(new Table.CellStyleGenerator() {
@@ -305,7 +304,6 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
                 return createTableStyle(itemId, propertyId);
             }
         });
-
     }
 
     private static String getTableStyle(final Long typeId, final boolean isAssigned, final String color) {

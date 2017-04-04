@@ -74,9 +74,10 @@ import com.vaadin.ui.VerticalLayout;
  * Upload files layout.
  */
 public class UploadLayout extends VerticalLayout {
-    private static final String HTML_DIV = "</div>";
 
-    private static final long serialVersionUID = -566164756606779220L;
+    private static final long serialVersionUID = 1L;
+
+    private static final String HTML_DIV = "</div>";
 
     private static final Logger LOG = LoggerFactory.getLogger(UploadLayout.class);
 
@@ -322,7 +323,7 @@ public class UploadLayout extends VerticalLayout {
         }
     }
 
-    private VerticalLayout createDropAreaLayout() {
+    private static VerticalLayout createDropAreaLayout() {
         final VerticalLayout dropAreaLayout = new VerticalLayout();
         final Label dropHereLabel = new Label("Drop files to upload");
         dropHereLabel.setWidth(null);
@@ -414,7 +415,6 @@ public class UploadLayout extends VerticalLayout {
             LOG.error("Upload failed {}", e);
             throw new ArtifactUploadFailedException(i18n.getMessage("message.upload.failed"));
         }
-
     }
 
     boolean checkIfSoftwareModuleIsSelected() {
@@ -426,13 +426,13 @@ public class UploadLayout extends VerticalLayout {
     }
 
     /**
-     * Check if file selected is duplicate.i,e already selected for upload for
-     * same software module.
+     * Check if the selected file is duplicate. i.e. already selected for upload
+     * for same software module.
      *
      * @param name
      *            file name
      * @param selectedSoftwareModule
-     *            the current selected sm module
+     *            the current selected software module
      * @return Boolean
      */
     Boolean checkIfFileIsDuplicate(final String name, final SoftwareModule selectedSoftwareModule) {
@@ -623,9 +623,6 @@ public class UploadLayout extends VerticalLayout {
         }
     }
 
-    /**
-     * @return
-     */
     VaadinMessageSource getI18n() {
         return i18n;
     }
@@ -655,7 +652,7 @@ public class UploadLayout extends VerticalLayout {
 
     private void onUploadStreamingFailure(final UploadStatusEvent event) {
         /**
-         * If upload interrupted because of duplicate file,do not remove the
+         * If upload interrupted because of duplicate file, do not remove the
          * file already in upload list
          **/
         if (getDuplicateFileNamesList().isEmpty()
@@ -708,7 +705,7 @@ public class UploadLayout extends VerticalLayout {
 
     private void onUploadFailure(final UploadStatusEvent event) {
         /**
-         * If upload interrupted because of duplicate file,do not remove the
+         * If upload interrupted because of duplicate file, do not remove the
          * file already in upload list
          **/
         if (getDuplicateFileNamesList().isEmpty()
@@ -727,17 +724,11 @@ public class UploadLayout extends VerticalLayout {
         }
     }
 
-    /**
-     * @param selectedBaseSoftwareModule
-     */
     void refreshArtifactDetailsLayout(final SoftwareModule selectedBaseSoftwareModule) {
         eventBus.publish(this,
                 new SoftwareModuleEvent(SoftwareModuleEventType.ARTIFACTS_CHANGED, selectedBaseSoftwareModule));
     }
 
-    /**
-     * @return the fileUploadLayout
-     */
     public HorizontalLayout getFileUploadLayout() {
         return fileUploadLayout;
     }

@@ -11,13 +11,14 @@ package org.eclipse.hawkbit.ui.common.confirmwindow.layout;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -36,7 +37,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public abstract class AbstractConfirmationWindowLayout extends VerticalLayout {
 
-    private static final long serialVersionUID = -4042317361561298155L;
+    private static final long serialVersionUID = 1L;
 
     private Label actionMessage;
 
@@ -53,6 +54,9 @@ public abstract class AbstractConfirmationWindowLayout extends VerticalLayout {
         this.eventBus = eventBus;
     }
 
+    /**
+     * Initialize the confirmation window layout
+     */
     public void initialize() {
         removeAllComponents();
         consolidatedMessage = "";
@@ -66,7 +70,8 @@ public abstract class AbstractConfirmationWindowLayout extends VerticalLayout {
     }
 
     private void createActionMessgaeLabel() {
-        actionMessage = new LabelBuilder().name("").id(UIComponentIdProvider.ACTION_LABEL).visible(false).buildLabel();
+        actionMessage = new LabelBuilder().name(StringUtils.EMPTY).id(UIComponentIdProvider.ACTION_LABEL).visible(false)
+                .buildLabel();
         actionMessage.addStyleName(SPUIStyleDefinitions.CONFIRM_WINDOW_INFO_BOX);
     }
 
@@ -139,9 +144,9 @@ public abstract class AbstractConfirmationWindowLayout extends VerticalLayout {
     }
 
     protected Button createDiscardButton(final Object itemId, final ClickListener clickListener) {
-        final Button deletesDsIcon = SPUIComponentProvider.getButton("", "", SPUILabelDefinitions.DISCARD,
-                ValoTheme.BUTTON_TINY + " " + SPUIStyleDefinitions.REDICON, true, FontAwesome.REPLY,
-                SPUIButtonStyleSmallNoBorder.class);
+        final Button deletesDsIcon = SPUIComponentProvider.getButton(StringUtils.EMPTY, StringUtils.EMPTY,
+                SPUILabelDefinitions.DISCARD, ValoTheme.BUTTON_TINY + " " + SPUIStyleDefinitions.REDICON, true,
+                FontAwesome.REPLY, SPUIButtonStyleSmallNoBorder.class);
         deletesDsIcon.setData(itemId);
         deletesDsIcon.setImmediate(true);
         deletesDsIcon.addClickListener(clickListener);

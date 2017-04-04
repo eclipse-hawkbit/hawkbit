@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -39,11 +40,11 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Table.Align;
 
 /**
- * Abstract layout of confirm actions window.
+ * Layout of confirm actions window on the Upload View.
  */
 public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWindowLayout {
 
-    private static final long serialVersionUID = 1804036019105286988L;
+    private static final long serialVersionUID = 1L;
 
     private static final String SW_MODULE_NAME_MSG = "SW MOdule Name";
 
@@ -115,8 +116,8 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
     @SuppressWarnings("unchecked")
     private IndexedContainer getSWModuleTableContainer() {
         final IndexedContainer swcontactContainer = new IndexedContainer();
-        swcontactContainer.addContainerProperty("SWModuleId", String.class, "");
-        swcontactContainer.addContainerProperty(SW_MODULE_NAME_MSG, String.class, "");
+        swcontactContainer.addContainerProperty("SWModuleId", String.class, StringUtils.EMPTY);
+        swcontactContainer.addContainerProperty(SW_MODULE_NAME_MSG, String.class, StringUtils.EMPTY);
         for (final Long swModuleID : artifactUploadState.getDeleteSofwareModules().keySet()) {
             final Item item = swcontactContainer.addItem(swModuleID);
             item.getItemProperty("SWModuleId").setValue(swModuleID.toString());
@@ -216,7 +217,7 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
 
     private Container getSWModuleTypeTableContainer() {
         final IndexedContainer contactContainer = new IndexedContainer();
-        contactContainer.addContainerProperty(SW_MODULE_TYPE_NAME, String.class, "");
+        contactContainer.addContainerProperty(SW_MODULE_TYPE_NAME, String.class, StringUtils.EMPTY);
         for (final String swModuleTypeName : artifactUploadState.getSelectedDeleteSWModuleTypes()) {
             final Item saveTblitem = contactContainer.addItem(swModuleTypeName);
             saveTblitem.getItemProperty(SW_MODULE_TYPE_NAME).setValue(swModuleTypeName);

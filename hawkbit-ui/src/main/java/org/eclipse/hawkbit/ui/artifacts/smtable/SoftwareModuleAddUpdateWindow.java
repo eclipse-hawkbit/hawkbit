@@ -27,11 +27,11 @@ import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -49,7 +49,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
-    private static final long serialVersionUID = -5217675246477211483L;
+    private static final long serialVersionUID = 1L;
 
     private final VaadinMessageSource i18n;
 
@@ -91,8 +91,8 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
      * @param entityFactory
      *            EntityFactory
      */
-    public SoftwareModuleAddUpdateWindow(final VaadinMessageSource i18n, final UINotification uiNotifcation, final UIEventBus eventBus,
-            final SoftwareManagement softwareManagement, final EntityFactory entityFactory) {
+    public SoftwareModuleAddUpdateWindow(final VaadinMessageSource i18n, final UINotification uiNotifcation,
+            final UIEventBus eventBus, final SoftwareManagement softwareManagement, final EntityFactory entityFactory) {
         this.i18n = i18n;
         this.uiNotifcation = uiNotifcation;
         this.eventBus = eventBus;
@@ -173,7 +173,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
     }
 
     /**
-     * Create window for new software module.
+     * Creates window for new software module.
      * 
      * @return reference of {@link com.vaadin.ui.Window} to add new software
      *         module.
@@ -183,10 +183,10 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
     }
 
     /**
-     * Create window for update software module.
+     * Creates window for update software module.
      * 
      * @param baseSwModuleId
-     *            is id of the software module to edit.
+     *            id of the software module to edit.
      * @return reference of {@link com.vaadin.ui.Window} to update software
      *         module.
      */
@@ -213,10 +213,11 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
                 .buildTextComponent();
         descTextArea.setNullRepresentation(StringUtils.EMPTY);
 
-        typeComboBox = SPUIComponentProvider.getComboBox(i18n.getMessage("upload.swmodule.type"), "", null, null, true, null,
-                i18n.getMessage("upload.swmodule.type"));
+        typeComboBox = SPUIComponentProvider.getComboBox(i18n.getMessage("upload.swmodule.type"), StringUtils.EMPTY,
+                null, null, true, null, i18n.getMessage("upload.swmodule.type"));
         typeComboBox.setId(UIComponentIdProvider.SW_MODULE_TYPE);
-        typeComboBox.setStyleName(SPUIDefinitions.COMBO_BOX_SPECIFIC_STYLE + " " + ValoTheme.COMBOBOX_TINY);
+        typeComboBox
+                .setStyleName(SPUIDefinitions.COMBO_BOX_SPECIFIC_STYLE + StringUtils.SPACE + ValoTheme.COMBOBOX_TINY);
         typeComboBox.setNewItemsAllowed(Boolean.FALSE);
         typeComboBox.setImmediate(Boolean.TRUE);
     }
@@ -233,7 +234,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
     }
 
     private void resetComponents() {
-
         vendorTextField.clear();
         nameTextField.clear();
         versionTextField.clear();
@@ -265,7 +265,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         nameTextField.setEnabled(!editSwModule);
         versionTextField.setEnabled(!editSwModule);
         typeComboBox.setEnabled(!editSwModule);
-
         typeComboBox.focus();
 
         return window;

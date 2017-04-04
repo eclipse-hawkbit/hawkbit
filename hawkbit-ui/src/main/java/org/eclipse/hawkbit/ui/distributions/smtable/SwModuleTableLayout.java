@@ -22,15 +22,13 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
- * Implementation of software module Layout
+ * Implementation of software module Layout on the Distribution View
  */
 public class SwModuleTableLayout extends AbstractTableLayout<SwModuleTable> {
 
     private static final long serialVersionUID = 1L;
 
     private final SwModuleTable swModuleTable;
-
-    private final SwModuleDetails swModuleDetails;
 
     public SwModuleTableLayout(final VaadinMessageSource i18n, final UINotification uiNotification,
             final UIEventBus eventBus, final SoftwareManagement softwareManagement, final EntityFactory entityFactory,
@@ -47,19 +45,14 @@ public class SwModuleTableLayout extends AbstractTableLayout<SwModuleTable> {
         this.swModuleTable = new SwModuleTable(eventBus, i18n, uiNotification, manageDistUIState, softwareManagement,
                 distributionsViewClientCriterion, artifactManagement, swMetadataPopupLayout, artifactUploadState);
 
-        this.swModuleDetails = new SwModuleDetails(i18n, eventBus, permChecker, softwareModuleAddUpdateWindow,
-                manageDistUIState, softwareManagement, swMetadataPopupLayout, entityFactory);
         super.init(
                 new SwModuleTableHeader(i18n, permChecker, eventBus, manageDistUIState, softwareModuleAddUpdateWindow),
-                swModuleTable, swModuleDetails);
+                swModuleTable, new SwModuleDetails(i18n, eventBus, permChecker, softwareModuleAddUpdateWindow,
+                        manageDistUIState, softwareManagement, swMetadataPopupLayout, entityFactory));
     }
 
     public SwModuleTable getSwModuleTable() {
         return swModuleTable;
-    }
-
-    public SwModuleDetails getSwModuleDetails() {
-        return swModuleDetails;
     }
 
 }

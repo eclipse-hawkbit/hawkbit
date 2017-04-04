@@ -8,9 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.artifacts;
 
-import java.util.Optional;
-import java.util.Set;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.servlet.MultipartConfigElement;
@@ -19,7 +16,6 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsLayout;
@@ -30,10 +26,8 @@ import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleTableLayout;
 import org.eclipse.hawkbit.ui.artifacts.smtype.SMTypeFilterLayout;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.upload.UploadLayout;
-import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -43,7 +37,6 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.google.common.collect.Iterables;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
@@ -64,8 +57,9 @@ import com.vaadin.ui.VerticalLayout;
 @SpringView(name = UploadArtifactView.VIEW_NAME, ui = HawkbitUI.class)
 public class UploadArtifactView extends VerticalLayout implements View, BrowserWindowResizeListener {
 
+    private static final long serialVersionUID = 1L;
+
     public static final String VIEW_NAME = "spUpload";
-    private static final long serialVersionUID = 8754632011301553682L;
 
     private final transient EventBus.UIEventBus eventBus;
 
@@ -95,8 +89,6 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
 
     private DragAndDropWrapper dadw;
 
-    private final SoftwareManagement softwareManagement;
-
     @Autowired
     UploadArtifactView(final UIEventBus eventBus, final SpPermissionChecker permChecker, final VaadinMessageSource i18n,
             final UINotification uiNotification, final ArtifactUploadState artifactUploadState,
@@ -108,7 +100,6 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         this.i18n = i18n;
         this.uiNotification = uiNotification;
         this.artifactUploadState = artifactUploadState;
-        this.softwareManagement = softwareManagement;
         this.filterByTypeLayout = new SMTypeFilterLayout(artifactUploadState, i18n, permChecker, eventBus,
                 tagManagement, entityFactory, uiNotification, softwareManagement, uploadViewClientCriterion);
         this.smTableLayout = new SoftwareModuleTableLayout(i18n, permChecker, artifactUploadState, uiNotification,
@@ -174,7 +165,6 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
 
     private VerticalLayout createDetailsAndUploadLayout() {
         detailAndUploadLayout = new VerticalLayout();
-
         detailAndUploadLayout.addComponent(artifactDetailsLayout);
         detailAndUploadLayout.setComponentAlignment(artifactDetailsLayout, Alignment.MIDDLE_CENTER);
 
@@ -189,7 +179,6 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         detailAndUploadLayout.addStyleName("group");
         detailAndUploadLayout.setSpacing(true);
         return detailAndUploadLayout;
-
     }
 
     private GridLayout createMainLayout() {
@@ -216,7 +205,6 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         if (permChecker.hasCreateDistributionPermission()) {
             uplaodButtonsLayout = uploadLayout.getFileUploadLayout();
         }
-
     }
 
     private void minimizeSwTable() {
@@ -261,12 +249,10 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
     private void removeOtherComponents() {
         mainLayout.removeComponent(deleteActionsLayout);
         mainLayout.removeComponent(uplaodButtonsLayout);
-
     }
 
     private void checkNoDataAvaialble() {
         if (artifactUploadState.isNoDataAvilableSoftwareModule()) {
-
             uiNotification.displayValidationError(i18n.getMessage("message.no.data"));
         }
     }
@@ -278,7 +264,6 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
 
     private void showOrHideFilterButtons(final int browserWidth) {
         if (browserWidth < SPUIDefinitions.REQ_MIN_BROWSER_WIDTH) {
-
             filterByTypeLayout.setVisible(false);
             smTableLayout.setShowFilterButtonVisible(true);
         } else if (!artifactUploadState.isSwTypeFilterClosed()) {
@@ -289,18 +274,8 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
 
     @Override
     public void enter(final ViewChangeEvent event) {
-        final Set<Long> values = AbstractTable.getTableValue(smTableLayout.getSoftwareModuleTable());
-        if (values != null && values.iterator().hasNext()) {
-            artifactUploadState.setSelectedEnitities(values);
-            final Long lastId = Iterables.getLast(values);
-            final Optional<SoftwareModule> softwareModule = softwareManagement.findSoftwareModuleById(lastId);
-            smTableLayout.getSoftwareModuleDetails().setSelectedBaseEntity(softwareModule.orElse(null));
-            if (softwareModule.isPresent()) {
-                artifactDetailsLayout.populateArtifactDetails(softwareModule.get().getId(), HawkbitCommonUtil
-                        .getFormattedNameVersion(softwareModule.get().getName(), softwareModule.get().getVersion()));
-            }
-        }
-        smTableLayout.getSoftwareModuleDetails().restoreState();
+        smTableLayout.getSoftwareModuleTable()
+                .selectEntity(artifactUploadState.getSelectedBaseSwModuleId().orElse(null));
     }
 
 }

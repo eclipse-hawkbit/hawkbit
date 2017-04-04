@@ -16,7 +16,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PreDestroy;
 
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
@@ -38,6 +37,7 @@ import com.vaadin.ui.VerticalLayout;
 public abstract class AbstractNotificationView extends VerticalLayout implements View {
 
     private static final long serialVersionUID = 1L;
+
     private final transient Cache<BaseUIEntityEvent<?>, Object> skipUiEventsCache;
 
     private final transient EventBus.UIEventBus eventBus;
@@ -48,8 +48,6 @@ public abstract class AbstractNotificationView extends VerticalLayout implements
 
     private transient Map<Class<?>, RefreshableContainer> supportedEvents;
 
-    private final transient DistributionSetManagement distributionSetManagement;
-
     /**
      * Constructor.
      * 
@@ -59,11 +57,9 @@ public abstract class AbstractNotificationView extends VerticalLayout implements
      *            the notificationUnreadButton
      */
     public AbstractNotificationView(final EventBus.UIEventBus eventBus,
-            final NotificationUnreadButton notificationUnreadButton,
-            final DistributionSetManagement distributionSetManagement) {
+            final NotificationUnreadButton notificationUnreadButton) {
         this.eventBus = eventBus;
         this.notificationUnreadButton = notificationUnreadButton;
-        this.distributionSetManagement = distributionSetManagement;
         this.viewUnreadNotifcations = new AtomicInteger(0);
         skipUiEventsCache = CacheBuilder.newBuilder().expireAfterAccess(10, SECONDS).build();
         eventBus.subscribe(this);
@@ -121,8 +117,6 @@ public abstract class AbstractNotificationView extends VerticalLayout implements
 
     /**
      * Refresh the view by event container changes.
-     * 
-     * 
      */
     public void refreshView() {
         if (viewUnreadNotifcations.get() <= 0) {
@@ -161,10 +155,6 @@ public abstract class AbstractNotificationView extends VerticalLayout implements
         // intended to override
     }
 
-    public DistributionSetManagement getDistributionSetManagement() {
-        return distributionSetManagement;
-    }
-
     /**
      * @return a map with all supported events and this related component which
      *         should be refreshed after a change.
@@ -172,7 +162,6 @@ public abstract class AbstractNotificationView extends VerticalLayout implements
     protected abstract Map<Class<?>, RefreshableContainer> getSupportedPushEvents();
 
     /**
-     * 
      * @return the related dashboard menu item for this view.
      */
     protected abstract DashboardMenuItem getDashboardMenuItem();

@@ -40,10 +40,11 @@ import com.vaadin.ui.VerticalLayout;
 /**
  * Abstract Layout to show the entity details.
  *
+ * @param <T>
  */
 public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends VerticalLayout {
 
-    private static final long serialVersionUID = 4862529368471627190L;
+    private static final long serialVersionUID = 1L;
 
     private final VaadinMessageSource i18n;
 
@@ -130,6 +131,10 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         caption.setValue(HawkbitCommonUtil.getSoftwareModuleName(headerCaption, value));
     }
 
+    /**
+     * Restores the tables and tabs displayed on the view based on the selected
+     * entity.
+     */
     public void restoreState() {
         if (onLoadIsTableRowSelected()) {
             populateData(getSelectedBaseEntity());
@@ -152,10 +157,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     protected void populateLog() {
         logLayout.removeAllComponents();
-
         logLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.getMessage("label.created.at"),
                 SPDateTimeUtil.formatCreatedAt(selectedBaseEntity)));
-
         logLayout.addComponent(SPUIComponentProvider.createCreatedByLabel(i18n, selectedBaseEntity));
 
         if (selectedBaseEntity == null || selectedBaseEntity.getLastModifiedAt() == null) {
@@ -164,7 +167,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
         logLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.getMessage("label.modified.date"),
                 SPDateTimeUtil.formatLastModifiedAt(selectedBaseEntity)));
-
         logLayout.addComponent(SPUIComponentProvider.createLastModifiedByLabel(i18n, selectedBaseEntity));
     }
 
@@ -173,7 +175,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         final Label descLabel = SPUIComponentProvider.createNameValueLabel(descriptionLabel,
                 HawkbitCommonUtil.trimAndNullIfEmpty(description) == null ? "" : description);
         /**
-         * By default text will be truncated based on layout width .so removing
+         * By default text will be truncated based on layout width. So removing
          * it as we need full description.
          */
         descLabel.removeStyleName("label-style");
@@ -189,12 +191,11 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
             attributesLayout.removeAllComponents();
             for (final Map.Entry<String, String> entry : attributes.entrySet()) {
                 final Label conAttributeLabel = SPUIComponentProvider.createNameValueLabel(
-                        entry.getKey().concat("  :  "),
-                        HawkbitCommonUtil.trimAndNullIfEmpty(entry.getValue()) == null ? "" : entry.getValue());
+                        entry.getKey().concat("  :  "), HawkbitCommonUtil.trimAndNullIfEmpty(entry.getValue()) == null
+                                ? StringUtils.EMPTY : entry.getValue());
                 conAttributeLabel.setDescription(entry.getKey().concat("  :  ") + entry.getValue());
                 conAttributeLabel.addStyleName("label-style");
                 attributesLayout.addComponent(conAttributeLabel);
-
             }
         }
     }
@@ -233,14 +234,14 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         caption.setContentMode(ContentMode.HTML);
         caption.setId(getDetailsHeaderCaptionId());
 
-        editButton = SPUIComponentProvider.getButton("", "", "", null, false, FontAwesome.PENCIL_SQUARE_O,
-                SPUIButtonStyleSmallNoBorder.class);
+        editButton = SPUIComponentProvider.getButton(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, null,
+                false, FontAwesome.PENCIL_SQUARE_O, SPUIButtonStyleSmallNoBorder.class);
         editButton.setId(getEditButtonId());
         editButton.addClickListener(this::onEdit);
         editButton.setEnabled(false);
 
-        manageMetadataBtn = SPUIComponentProvider.getButton("", "", "", null, false, FontAwesome.LIST_ALT,
-                SPUIButtonStyleSmallNoBorder.class);
+        manageMetadataBtn = SPUIComponentProvider.getButton(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
+                null, false, FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
         manageMetadataBtn.setId(getEditButtonId());
         manageMetadataBtn.setDescription(i18n.getMessage("tooltip.metadata.icon"));
         manageMetadataBtn.addClickListener(this::showMetadata);
@@ -285,8 +286,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     }
 
     /**
-     * If no data in table (i,e no row selected),then disable the edit button.
-     * If row is selected ,enable edit button.
+     * If there is no data in table (i.e. no row selected), then disable the
+     * edit button. If row is selected, enable edit button.
      */
     private void populateData(final T selectedBaseEntity) {
         this.selectedBaseEntity = selectedBaseEntity;

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
@@ -83,7 +84,6 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SMFilterEvent filterEvent) {
         UI.getCurrent().access(() -> {
-
             if (filterEvent == SMFilterEvent.FILTER_BY_TYPE || filterEvent == SMFilterEvent.FILTER_BY_TEXT
                     || filterEvent == SMFilterEvent.REMOVER_FILTER_BY_TYPE
                     || filterEvent == SMFilterEvent.REMOVER_FILTER_BY_TEXT) {
@@ -154,14 +154,18 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     }
 
     @Override
-    protected ArtifactUploadState getManagmentEntityState() {
+    protected ArtifactUploadState getManagementEntityState() {
         return artifactUploadState;
     }
 
     @Override
-    protected void publishEntityAfterValueChange(final SoftwareModule lastSoftwareModule) {
-        artifactUploadState.setSelectedBaseSoftwareModule(lastSoftwareModule);
+    protected void publishSelectedEntityEvent(final SoftwareModule lastSoftwareModule) {
         eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, lastSoftwareModule));
+        if (lastSoftwareModule == null) {
+            artifactUploadState.setSelectedBaseSoftwareModule(null);
+            return;
+        }
+        artifactUploadState.setSelectedBaseSoftwareModule(lastSoftwareModule);
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -178,12 +182,9 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onSoftwareModuleUpdateEvents(final SoftwareModuleUpdatedEventContainer eventContainer) {
-
         final List<Long> visibleItemIds = (List<Long>) getVisibleItemIds();
-
         eventContainer.getEvents().stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
                 .forEach(event -> updateSoftwareModuleInTable(event.getEntity()));
-
     }
 
     private void updateSoftwareModuleInTable(final SoftwareModule editedSm) {
@@ -205,7 +206,8 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     @Override
     protected void addCustomGeneratedColumns() {
         addGeneratedColumn(SPUILabelDefinitions.METADATA_ICON, new ColumnGenerator() {
-            private static final long serialVersionUID = 117186282275044399L;
+
+            private static final long serialVersionUID = 1L;
 
             @Override
             public Object generateCell(final Table source, final Object itemId, final Object columnId) {
@@ -221,7 +223,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     protected List<TableColumn> getTableVisibleColumns() {
         final List<TableColumn> columnList = super.getTableVisibleColumns();
         if (!isMaximized()) {
-            columnList.add(new TableColumn(SPUILabelDefinitions.METADATA_ICON, "", 0.1F));
+            columnList.add(new TableColumn(SPUILabelDefinitions.METADATA_ICON, StringUtils.EMPTY, 0.1F));
             return columnList;
         }
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VENDOR, i18n.getMessage("header.vendor"), 0.1F));
@@ -245,8 +247,8 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     private Button createManageMetadataButton(final String nameVersionStr) {
         final Button manageMetadataBtn = SPUIComponentProvider.getButton(
-                UIComponentIdProvider.SW_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
-                FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
+                UIComponentIdProvider.SW_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, StringUtils.EMPTY,
+                StringUtils.EMPTY, null, false, FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
         manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
         manageMetadataBtn.setDescription(i18n.getMessage("tooltip.metadata.icon"));
         return manageMetadataBtn;

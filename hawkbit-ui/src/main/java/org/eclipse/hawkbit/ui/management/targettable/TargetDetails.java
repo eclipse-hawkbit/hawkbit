@@ -47,11 +47,11 @@ import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * Target details layout.
+ * Target details layout which is shown on the Deployment View.
  */
 public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
-    private static final long serialVersionUID = 4571732743399605843L;
+    private static final long serialVersionUID = 1L;
 
     private final TargetTagToken targetTagToken;
 
@@ -62,6 +62,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
     private final transient DeploymentManagement deploymentManagement;
 
     private VerticalLayout assignedDistLayout;
+
     private VerticalLayout installedDistLayout;
 
     TargetDetails(final VaadinMessageSource i18n, final UIEventBus eventBus,
@@ -171,13 +172,13 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
         final Label controllerLabel = SPUIComponentProvider.createNameValueLabel(
                 getI18n().getMessage("label.target.id"),
-                HawkbitCommonUtil.trimAndNullIfEmpty(controllerId) == null ? "" : controllerId);
+                HawkbitCommonUtil.trimAndNullIfEmpty(controllerId) == null ? StringUtils.EMPTY : controllerId);
         controllerLabel.setId(UIComponentIdProvider.TARGET_CONTROLLER_ID);
         detailsTabLayout.addComponent(controllerLabel);
 
         final Label lastPollDtLabel = SPUIComponentProvider.createNameValueLabel(
                 getI18n().getMessage("label.target.lastpolldate"),
-                HawkbitCommonUtil.trimAndNullIfEmpty(lastQueryDate) == null ? "" : lastQueryDate);
+                HawkbitCommonUtil.trimAndNullIfEmpty(lastQueryDate) == null ? StringUtils.EMPTY : lastQueryDate);
         lastPollDtLabel.setId(UIComponentIdProvider.TARGET_LAST_QUERY_DT);
         detailsTabLayout.addComponent(lastPollDtLabel);
 

@@ -24,13 +24,11 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
- * DistributionSet table layout
+ * DistributionSet table layout which is used on the Deployment View
  */
 public class DistributionSetTableLayout extends AbstractTableLayout<DistributionSetTable> {
 
     private static final long serialVersionUID = 1L;
-
-    private final DistributionSetDetails distributionSetDetails;
 
     private final DistributionSetTable distributionSetTable;
 
@@ -53,16 +51,13 @@ public class DistributionSetTableLayout extends AbstractTableLayout<Distribution
                 i18n, uiNotification, eventBus, distributionSetManagement, systemManagement, entityFactory,
                 distributionSetTable);
 
-        this.distributionSetDetails = new DistributionSetDetails(i18n, eventBus, permissionChecker, manageDistUIState,
-                null, distributionAddUpdateWindowLayout, softwareManagement, distributionSetManagement,
-                targetManagement, entityFactory, uiNotification, tagManagement, popupLayout);
-
-        super.init(new DistributionSetTableHeader(i18n, permissionChecker, eventBus, manageDistUIState,
-                distributionAddUpdateWindowLayout), distributionSetTable, distributionSetDetails);
-    }
-
-    public DistributionSetDetails getDistributionSetDetails() {
-        return distributionSetDetails;
+        super.init(
+                new DistributionSetTableHeader(i18n, permissionChecker, eventBus, manageDistUIState,
+                        distributionAddUpdateWindowLayout),
+                distributionSetTable,
+                new DistributionSetDetails(i18n, eventBus, permissionChecker, manageDistUIState, null,
+                        distributionAddUpdateWindowLayout, softwareManagement, distributionSetManagement,
+                        targetManagement, entityFactory, uiNotification, tagManagement, popupLayout));
     }
 
     public DistributionSetTable getDistributionSetTable() {

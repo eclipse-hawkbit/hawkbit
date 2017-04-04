@@ -9,8 +9,6 @@
 package org.eclipse.hawkbit.ui.distributions;
 
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -21,13 +19,10 @@ import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
-import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.AbstractNotificationView;
 import org.eclipse.hawkbit.ui.components.NotificationUnreadButton;
@@ -53,7 +48,6 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
@@ -97,8 +91,6 @@ public class DistributionsView extends AbstractNotificationView implements Brows
 
     private GridLayout mainLayout;
 
-    private final SoftwareManagement softwareManagement;
-
     @Autowired
     DistributionsView(final SpPermissionChecker permChecker, final UIEventBus eventBus, final VaadinMessageSource i18n,
             final UINotification uiNotification, final ManageDistUIState manageDistUIState,
@@ -108,11 +100,10 @@ public class DistributionsView extends AbstractNotificationView implements Brows
             final ArtifactUploadState artifactUploadState, final SystemManagement systemManagement,
             final ArtifactManagement artifactManagement, final NotificationUnreadButton notificationUnreadButton,
             final DistributionsViewMenuItem distributionsViewMenuItem) {
-        super(eventBus, notificationUnreadButton, distributionSetManagement);
+        super(eventBus, notificationUnreadButton);
         this.permChecker = permChecker;
         this.i18n = i18n;
         this.uiNotification = uiNotification;
-        this.softwareManagement = softwareManagement;
         this.filterByDSTypeLayout = new DSTypeFilterLayout(manageDistUIState, i18n, permChecker, eventBus,
                 tagManagement, entityFactory, uiNotification, softwareManagement, distributionSetManagement,
                 distributionsViewClientCriterion);
@@ -133,7 +124,6 @@ public class DistributionsView extends AbstractNotificationView implements Brows
 
     @PostConstruct
     void init() {
-        // Build the Distributions view layout with all the required components.
         buildLayout();
         restoreState();
         checkNoDataAvaialble();
@@ -143,25 +133,11 @@ public class DistributionsView extends AbstractNotificationView implements Brows
 
     @Override
     public void enter(final ViewChangeEvent event) {
-        final Set<Long> values = AbstractTable.getTableValue(distributionTableLayout.getDistributionSetTable());
-        if (values != null && values.iterator().hasNext()) {
-            manageDistUIState.setSelectedEnitities(values);
-            final Long lastId = Iterables.getLast(values);
-            final Optional<DistributionSet> distributionSet = getDistributionSetManagement()
-                    .findDistributionSetById(lastId);
-            distributionTableLayout.getDistributionSetDetails().setSelectedBaseEntity(distributionSet.orElse(null));
-        }
-        distributionTableLayout.getDistributionSetDetails().restoreState();
+        softwareModuleTableLayout.getSwModuleTable()
+                .selectEntity(manageDistUIState.getSelectedBaseSwModuleId().orElse(null));
 
-        final Set<Long> softwareModuleValues = AbstractTable
-                .getTableValue(softwareModuleTableLayout.getSwModuleTable());
-        if (softwareModuleValues != null && softwareModuleValues.iterator().hasNext()) {
-            manageDistUIState.setSelectedSoftwareModules(softwareModuleValues);
-            final Long lastId = Iterables.getLast(softwareModuleValues);
-            final Optional<SoftwareModule> softwareModule = softwareManagement.findSoftwareModuleById(lastId);
-            softwareModuleTableLayout.getSwModuleDetails().setSelectedBaseEntity(softwareModule.orElse(null));
-        }
-        softwareModuleTableLayout.getSwModuleDetails().restoreState();
+        distributionTableLayout.getDistributionSetTable()
+                .selectEntity(manageDistUIState.getLastSelectedDistribution().orElse(null));
     }
 
     @Override
@@ -261,7 +237,6 @@ public class DistributionsView extends AbstractNotificationView implements Brows
 
     private void checkNoDataAvaialble() {
         if (manageDistUIState.isNoDataAvilableSwModule() && manageDistUIState.isNoDataAvailableDist()) {
-
             uiNotification.displayValidationError(i18n.getMessage("message.no.data"));
         }
     }
@@ -273,7 +248,6 @@ public class DistributionsView extends AbstractNotificationView implements Brows
 
     private void showOrHideFilterButtons(final int browserWidth) {
         if (browserWidth < SPUIDefinitions.REQ_MIN_BROWSER_WIDTH) {
-
             filterByDSTypeLayout.setVisible(false);
             distributionTableLayout.setShowFilterButtonVisible(true);
             filterBySMTypeLayout.setVisible(false);
@@ -282,7 +256,6 @@ public class DistributionsView extends AbstractNotificationView implements Brows
             if (!manageDistUIState.isDistTypeFilterClosed()) {
                 filterByDSTypeLayout.setVisible(true);
                 distributionTableLayout.setShowFilterButtonVisible(false);
-
             }
             if (!manageDistUIState.isSwTypeFilterClosed()) {
                 filterBySMTypeLayout.setVisible(true);

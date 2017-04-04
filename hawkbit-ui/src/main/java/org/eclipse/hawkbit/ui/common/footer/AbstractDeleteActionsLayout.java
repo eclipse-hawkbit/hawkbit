@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.common.footer;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -37,7 +38,6 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Parent class for footer layout.
- * 
  */
 public abstract class AbstractDeleteActionsLayout extends VerticalLayout implements DropHandler {
 
@@ -146,7 +146,8 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
 
     private Button createActionsButton() {
         final Button button = SPUIComponentProvider.getButton(UIComponentIdProvider.PENDING_ACTION_BUTTON,
-                getNoActionsButtonLabel(), "", "", false, FontAwesome.BELL, SPUIButtonStyleSmall.class);
+                getNoActionsButtonLabel(), StringUtils.EMPTY, StringUtils.EMPTY, false, FontAwesome.BELL,
+                SPUIButtonStyleSmall.class);
         button.setStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
         button.addStyleName(SPUIStyleDefinitions.DEL_ACTION_BUTTON);
 
@@ -156,8 +157,8 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
     }
 
     private Button createBulkUploadStatusButton() {
-        final Button button = SPUIComponentProvider.getButton(UIComponentIdProvider.BULK_UPLOAD_STATUS_BUTTON, "", "",
-                "", false, null, SPUIButtonStyleSmall.class);
+        final Button button = SPUIComponentProvider.getButton(UIComponentIdProvider.BULK_UPLOAD_STATUS_BUTTON,
+                StringUtils.EMPTY, StringUtils.EMPTY, "", false, null, SPUIButtonStyleSmall.class);
         button.setStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
         button.addStyleName(SPUIStyleDefinitions.UPLOAD_PROGRESS_INDICATOR_STYLE);
         button.setWidth("100px");
@@ -255,7 +256,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
 
     /**
      * 
-     * @return true if the count label is displayed false is not displayed
+     * @return true if the count label is displayed; false is not displayed
      */
     protected boolean hasCountMessage() {
         return false;
@@ -290,7 +291,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
     }
 
     /**
-     * Check user has delete permission.
+     * Check if user has delete permission.
      * 
      * @return true if user has permission, otherwise return false.
      */
@@ -379,7 +380,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
     /**
      * Check if any unsaved actions done by the user.
      * 
-     * @return 'true' if any unsaved actions available, otherwise retrun
+     * @return 'true' if any unsaved actions available, otherwise return
      *         'false'.
      */
     protected abstract boolean hasUnsavedActions();

@@ -9,9 +9,8 @@
 package org.eclipse.hawkbit.ui.management.event;
 
 /**
- *
- *
- *
+ * Enum for events of type SaveAction which are thrown when pending actions are
+ * performed
  */
 public enum SaveActionWindowEvent {
 

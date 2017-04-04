@@ -24,9 +24,9 @@ import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vaadin.spring.events.EventBus;
@@ -196,7 +196,6 @@ public class SoftwareModuleDetailsTable extends Table {
             eventBus.publish(this, DistributionsUIEvent.ORDER_BY_DISTRIBUTION);
             uiNotification.displaySuccess(i18n.getMessage("message.sw.unassigned", unAssignedSw.getName()));
         }
-
     }
 
     private static boolean isSoftModAvaiableForSoftType(final Set<SoftwareModule> swModulesSet,

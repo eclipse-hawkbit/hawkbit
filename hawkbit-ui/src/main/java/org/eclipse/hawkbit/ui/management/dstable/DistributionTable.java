@@ -71,7 +71,7 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 
 /**
- * Distribution set table.
+ * Distribution set table which is shown on the Deployment View.
  */
 public class DistributionTable extends AbstractNamedVersionTable<DistributionSet, Long> {
 
@@ -192,7 +192,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             return;
         }
         UI.getCurrent().access(() -> updateDistributionInTable(event.getEntity()));
-
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -281,7 +280,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
                 iconLayout.addComponent(manageMetaDataBtn);
                 return iconLayout;
             }
-
         });
     }
 
@@ -294,8 +292,8 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     private Button createManageMetadataButton(final String nameVersionStr) {
         final Button manageMetadataBtn = SPUIComponentProvider.getButton(
-                UIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
-                FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
+                UIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, StringUtils.EMPTY,
+                StringUtils.EMPTY, null, false, FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
         manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
         manageMetadataBtn.addStyleName(SPUIStyleDefinitions.DS_METADATA_ICON);
         manageMetadataBtn.setDescription(i18n.getMessage("tooltip.metadata.icon"));
@@ -304,7 +302,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     @Override
     protected boolean isFirstRowSelectedOnLoad() {
-        return !managementUIState.getSelectedDsIdName().isPresent();
+        return managementUIState.getSelectedDsIdName().map(Set::isEmpty).orElse(true);
     }
 
     @Override
@@ -318,15 +316,17 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     @Override
-    protected void publishEntityAfterValueChange(final DistributionSet selectedLastEntity) {
+    protected void publishSelectedEntityEvent(final DistributionSet selectedLastEntity) {
         eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, selectedLastEntity));
-        if (selectedLastEntity != null) {
-            managementUIState.setLastSelectedEntity(selectedLastEntity.getId());
+        if (selectedLastEntity == null) {
+            managementUIState.setLastSelectedEntity(null);
+            return;
         }
+        managementUIState.setLastSelectedEntity(selectedLastEntity.getId());
     }
 
     @Override
-    protected ManagementUIState getManagmentEntityState() {
+    protected ManagementUIState getManagementEntityState() {
         return managementUIState;
     }
 
@@ -468,7 +468,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         return false;
     }
 
-    private Boolean isNoTagButton(final String tagData, final String targetNoTagData) {
+    private boolean isNoTagButton(final String tagData, final String targetNoTagData) {
         if (tagData.equals(targetNoTagData)) {
             notification.displayValidationError(i18n.getMessage("message.tag.cannot.be.assigned",
                     new Object[] { i18n.getMessage("label.no.tag.assigned") }));
@@ -538,12 +538,10 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
         managementUIState.getDistributionTableFilters().getPinnedTarget().map(TargetIdName::getControllerId)
                 .ifPresent(controllerId -> {
-
                     final Long installedDistId = deploymentManagement.getInstalledDistributionSet(controllerId)
                             .map(DistributionSet::getId).orElse(null);
                     final Long assignedDistId = deploymentManagement.getAssignedDistributionSet(controllerId)
                             .map(DistributionSet::getId).orElse(null);
-
                     styleDistributionSetTable(installedDistId, assignedDistId);
                 });
     }
@@ -632,13 +630,13 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         eventBus.publish(this, PinUnpinEvent.PIN_DISTRIBUTION);
         applyPinStyle(eventBtn);
         styleDistributionSetTable();
-        distPinned = Boolean.FALSE;
+        distPinned = false;
     }
 
     private void rePinDistribution(final Button pinBtn, final Long distID) {
         if (managementUIState.getTargetTableFilters().getPinnedDistId().map(distID::equals).orElse(false)) {
             applyPinStyle(pinBtn);
-            distPinned = Boolean.TRUE;
+            distPinned = true;
             distributinPinnedBtn = pinBtn;
             eventBus.publish(this, PinUnpinEvent.PIN_DISTRIBUTION);
         }

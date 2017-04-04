@@ -9,8 +9,6 @@
 package org.eclipse.hawkbit.ui.management;
 
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.Executor;
 
 import javax.annotation.PostConstruct;
@@ -22,11 +20,9 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
-import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.AbstractNotificationView;
 import org.eclipse.hawkbit.ui.components.NotificationUnreadButton;
@@ -69,7 +65,6 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
@@ -88,8 +83,9 @@ import com.vaadin.ui.UI;
 @SpringView(name = DeploymentView.VIEW_NAME, ui = HawkbitUI.class)
 public class DeploymentView extends AbstractNotificationView implements BrowserWindowResizeListener {
 
+    private static final long serialVersionUID = 1L;
+
     public static final String VIEW_NAME = "deployment";
-    private static final long serialVersionUID = 1847434723456644998L;
 
     private final SpPermissionChecker permChecker;
 
@@ -130,7 +126,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
             final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement,
             final NotificationUnreadButton notificationUnreadButton,
             final DeploymentViewMenuItem deploymentViewMenuItem, @Qualifier("uiExecutor") final Executor uiExecutor) {
-        super(eventBus, notificationUnreadButton, distributionSetManagement);
+        super(eventBus, notificationUnreadButton);
         this.permChecker = permChecker;
         this.i18n = i18n;
         this.uiNotification = uiNotification;
@@ -180,16 +176,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
 
     @Override
     public void enter(final ViewChangeEvent event) {
-
-        final Set<Long> values = AbstractTable.getTableValue(distributionTableLayout.getDistributionTable());
-        if (values != null && values.iterator().hasNext()) {
-            managementUIState.setSelectedEnitities(values);
-            final Long lastId = Iterables.getLast(values);
-            final Optional<DistributionSet> distributionSet = getDistributionSetManagement()
-                    .findDistributionSetById(lastId);
-            distributionTableLayout.getDistributionDetails().setSelectedBaseEntity(distributionSet.orElse(null));
-        }
-        distributionTableLayout.getDistributionDetails().restoreState();
+        distributionTableLayout.getDistributionTable().selectEntity(managementUIState.getLastSelectedDsIdName());
     }
 
     @Override

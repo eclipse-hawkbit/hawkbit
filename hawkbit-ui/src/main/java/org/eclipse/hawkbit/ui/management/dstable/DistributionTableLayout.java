@@ -24,15 +24,13 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
- * Software module table layout.
+ * Distribution Set table layout which is shown on the Distribution View
  */
 public class DistributionTableLayout extends AbstractTableLayout<DistributionTable> {
 
     private static final long serialVersionUID = 1L;
 
     private final DistributionTable distributionTable;
-
-    private final DistributionDetails distributionDetails;
 
     public DistributionTableLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState,
@@ -52,20 +50,14 @@ public class DistributionTableLayout extends AbstractTableLayout<DistributionTab
                 managementUIState, managementViewClientCriterion, targetManagement, dsMetadataPopupLayout,
                 distributionSetManagement, deploymentManagement);
 
-        this.distributionDetails = new DistributionDetails(i18n, eventBus, permissionChecker, managementUIState,
-                distributionSetManagement, dsMetadataPopupLayout, entityFactory, notification, tagManagement,
-                distributionAddUpdateWindowLayout);
-
         super.init(new DistributionTableHeader(i18n, permissionChecker, eventBus, managementUIState), distributionTable,
-                distributionDetails);
+                new DistributionDetails(i18n, eventBus, permissionChecker, managementUIState, distributionSetManagement,
+                        dsMetadataPopupLayout, entityFactory, notification, tagManagement,
+                        distributionAddUpdateWindowLayout));
     }
 
     public DistributionTable getDistributionTable() {
         return distributionTable;
-    }
-
-    public DistributionDetails getDistributionDetails() {
-        return distributionDetails;
     }
 
 }

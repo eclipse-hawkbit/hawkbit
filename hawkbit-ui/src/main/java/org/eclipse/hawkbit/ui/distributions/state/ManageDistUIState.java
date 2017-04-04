@@ -8,16 +8,15 @@
  */
 package org.eclipse.hawkbit.ui.distributions.state;
 
-import static java.util.Collections.emptySet;
-
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
+import org.eclipse.hawkbit.ui.common.ManagementEntityState;
 import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.entity.SoftwareModuleIdName;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,14 +26,12 @@ import com.vaadin.spring.annotation.VaadinSessionScope;
 
 /**
  * Manage Distributions user state.
- *
- *
  */
 @SpringComponent
 @VaadinSessionScope
-public class ManageDistUIState implements ManagmentEntityState<Long>, Serializable {
+public class ManageDistUIState implements ManagementEntityState<Long>, Serializable {
 
-    private static final long serialVersionUID = -7569047247017742928L;
+    private static final long serialVersionUID = 1L;
 
     private final ManageDistFilters manageDistFilters;
 
@@ -48,7 +45,7 @@ public class ManageDistUIState implements ManagmentEntityState<Long>, Serializab
 
     private Long lastSelectedDistribution;
 
-    private Set<Long> selectedSoftwareModules = emptySet();
+    private Set<Long> selectedSoftwareModules = Collections.emptySet();
 
     private final Set<String> selectedDeleteDistSetTypes = new HashSet<>();
 
@@ -81,16 +78,10 @@ public class ManageDistUIState implements ManagmentEntityState<Long>, Serializab
         this.softwareModuleFilters = softwareModuleFilters;
     }
 
-    /**
-     * @return the manageDistFilters
-     */
     public ManageDistFilters getManageDistFilters() {
         return manageDistFilters;
     }
 
-    /**
-     * @return the deletedDistributionList
-     */
     public Set<DistributionSetIdName> getDeletedDistributionList() {
         return deletedDistributionList;
     }
@@ -104,16 +95,10 @@ public class ManageDistUIState implements ManagmentEntityState<Long>, Serializab
         return assignedList;
     }
 
-    /**
-     * @return the slectedDistributions
-     */
     public Optional<Set<Long>> getSelectedDistributions() {
         return Optional.ofNullable(selectedDistributions);
     }
 
-    /**
-     * @return the lastSelectedDistribution
-     */
     public Optional<Long> getLastSelectedDistribution() {
         return Optional.ofNullable(lastSelectedDistribution);
     }
@@ -128,76 +113,42 @@ public class ManageDistUIState implements ManagmentEntityState<Long>, Serializab
         selectedDistributions = values;
     }
 
-    /**
-     * @return the softwareModuleFilters
-     */
     public ManageSoftwareModuleFilters getSoftwareModuleFilters() {
         return softwareModuleFilters;
     }
 
-    /**
-     * @return the selectedSoftwareModules
-     */
     public Optional<Set<Long>> getSelectedSoftwareModules() {
         return Optional.ofNullable(selectedSoftwareModules);
     }
 
-    /**
-     * @return the selectedBaseSwModuleId
-     */
     public Optional<Long> getSelectedBaseSwModuleId() {
         return Optional.ofNullable(selectedBaseSwModuleId);
     }
 
-    /**
-     * @param selectedBaseSwModuleId
-     *            the selectedBaseSwModuleId to set
-     */
     public void setSelectedBaseSwModuleId(final Long selectedBaseSwModuleId) {
         this.selectedBaseSwModuleId = selectedBaseSwModuleId;
     }
 
-    /**
-     * @param selectedSoftwareModules
-     *            the selectedSoftwareModules to set
-     */
     public void setSelectedSoftwareModules(final Set<Long> selectedSoftwareModules) {
         this.selectedSoftwareModules = selectedSoftwareModules;
     }
 
-    /**
-     * @return the distTypeFilterClosed
-     */
     public boolean isDistTypeFilterClosed() {
         return distTypeFilterClosed;
     }
 
-    /**
-     * @param distTypeFilterClosed
-     *            the distTypeFilterClosed to set
-     */
     public void setDistTypeFilterClosed(final boolean distTypeFilterClosed) {
         this.distTypeFilterClosed = distTypeFilterClosed;
     }
 
-    /**
-     * @return the swTypeFilterClosed
-     */
     public boolean isSwTypeFilterClosed() {
         return swTypeFilterClosed;
     }
 
-    /**
-     * @param swTypeFilterClosed
-     *            the swTypeFilterClosed to set
-     */
     public void setSwTypeFilterClosed(final boolean swTypeFilterClosed) {
         this.swTypeFilterClosed = swTypeFilterClosed;
     }
 
-    /**
-     * @return the deleteSofwareModulesList
-     */
     public Map<Long, String> getDeleteSofwareModulesList() {
         return deleteSofwareModulesList;
     }
@@ -214,20 +165,10 @@ public class ManageDistUIState implements ManagmentEntityState<Long>, Serializab
         this.selectedDeleteSWModuleTypes = selectedDeleteSWModuleTypes;
     }
 
-    /**
-     * Get isSwModuleTableMaximized.
-     *
-     * @return boolean
-     */
     public boolean isDsTableMaximized() {
         return dsTableMaximized;
     }
 
-    /***
-     * Set isDsModuleTableMaximized.
-     *
-     * @param dsModuleTableMaximized
-     */
     public void setDsTableMaximized(final boolean dsModuleTableMaximized) {
         dsTableMaximized = dsModuleTableMaximized;
     }
@@ -236,56 +177,30 @@ public class ManageDistUIState implements ManagmentEntityState<Long>, Serializab
         return assignedSoftwareModuleDetails;
     }
 
-    /**
-     * @return the isSwModuleTableMaximized
-     */
     public boolean isSwModuleTableMaximized() {
         return swModuleTableMaximized;
     }
 
-    /**
-     * @param swModuleTableMaximized
-     *            the isSwModuleTableMaximized to set
-     */
     public void setSwModuleTableMaximized(final boolean swModuleTableMaximized) {
         this.swModuleTableMaximized = swModuleTableMaximized;
     }
 
-    /**
-     * @return the noDataAvilableSwModule
-     */
     public boolean isNoDataAvilableSwModule() {
         return noDataAvilableSwModule;
     }
 
-    /**
-     * @param noDataAvilableSwModule
-     *            the noDataAvilableSwModule to set
-     */
     public void setNoDataAvilableSwModule(final boolean noDataAvilableSwModule) {
         this.noDataAvilableSwModule = noDataAvilableSwModule;
     }
 
-    /**
-     * @return the noDataAvailableDist
-     */
     public boolean isNoDataAvailableDist() {
         return noDataAvailableDist;
     }
 
-    /**
-     * @param noDataAvailableDist
-     *            the isNoDataAvailableDist to set
-     */
     public void setNoDataAvailableDist(final boolean noDataAvailableDist) {
         this.noDataAvailableDist = noDataAvailableDist;
     }
 
-    /**
-     * Need HashSet because the Set have to be serializable
-     *
-     * @return map
-     */
     public Map<DistributionSetIdName, HashMap<Long, HashSet<SoftwareModuleIdName>>> getConsolidatedDistSoftwarewList() {
         return consolidatedDistSoftwarewList;
     }

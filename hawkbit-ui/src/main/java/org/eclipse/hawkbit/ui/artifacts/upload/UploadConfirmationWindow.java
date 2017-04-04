@@ -13,9 +13,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
@@ -62,7 +64,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public class UploadConfirmationWindow implements Button.ClickListener {
 
-    private static final long serialVersionUID = -1679035890140031740L;
+    private static final long serialVersionUID = 1L;
 
     private static final Logger LOG = LoggerFactory.getLogger(UploadConfirmationWindow.class);
 
@@ -178,7 +180,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
 
     /**
      * Warning icon is displayed, if an artifact exists with same provided file
-     * name. Error icon is displayed ,if file name entered is duplicate.
+     * name. Error icon is displayed, if file name entered is duplicate.
      *
      * @param warningIconLabel
      *            warning/error label
@@ -241,9 +243,9 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             newItem.getItemProperty(SW_MODULE_NAME).setValue(HawkbitCommonUtil.getFormatedLabel(swNameVersion));
             newItem.getItemProperty(SIZE).setValue(customFile.getFileSize());
             final Button deleteIcon = SPUIComponentProvider.getButton(
-                    UIComponentIdProvider.UPLOAD_DELETE_ICON + "-" + itemId, "", SPUILabelDefinitions.DISCARD,
-                    ValoTheme.BUTTON_TINY + " " + "blueicon", true, FontAwesome.TRASH_O,
-                    SPUIButtonStyleSmallNoBorder.class);
+                    UIComponentIdProvider.UPLOAD_DELETE_ICON + "-" + itemId, StringUtils.EMPTY,
+                    SPUILabelDefinitions.DISCARD, ValoTheme.BUTTON_TINY + StringUtils.SPACE + "blueicon", true,
+                    FontAwesome.TRASH_O, SPUIButtonStyleSmallNoBorder.class);
             deleteIcon.addClickListener(this);
             deleteIcon.setData(itemId);
             newItem.getItemProperty(ACTION).setValue(deleteIcon);
@@ -344,7 +346,6 @@ public class UploadConfirmationWindow implements Button.ClickListener {
                 }
             }
         }
-
     }
 
     /**
@@ -354,7 +355,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
      *            label
      * @return Boolean
      */
-    private static Boolean isWarningIcon(final Label icon) {
+    private static boolean isWarningIcon(final Label icon) {
         return !isErrorIcon(icon);
     }
 
@@ -365,7 +366,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
      *            label
      * @return Boolean
      */
-    private static Boolean isErrorIcon(final Label icon) {
+    private static boolean isErrorIcon(final Label icon) {
         return icon.isVisible() && icon.getStyleName().contains(SPUIStyleDefinitions.ERROR_LABEL);
     }
 
@@ -633,7 +634,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             artifactManagement.createArtifact(fis, baseSw.getId(), providedFileName,
                     HawkbitCommonUtil.trimAndNullIfEmpty(md5Checksum),
                     HawkbitCommonUtil.trimAndNullIfEmpty(sha1Checksum), true, customFile.getMimeType());
-            saveUploadStatus(providedFileName, swModuleNameVersion, SPUILabelDefinitions.SUCCESS, "");
+            saveUploadStatus(providedFileName, swModuleNameVersion, SPUILabelDefinitions.SUCCESS, StringUtils.EMPTY);
 
         } catch (final ArtifactUploadFailedException | InvalidSHA1HashException | InvalidMD5HashException
                 | FileNotFoundException e) {
@@ -658,7 +659,6 @@ public class UploadConfirmationWindow implements Button.ClickListener {
         result.setUploadResult(status);
         result.setReason(message);
         uploadResultList.add(result);
-
     }
 
     public Table getUploadDetailsTable() {
