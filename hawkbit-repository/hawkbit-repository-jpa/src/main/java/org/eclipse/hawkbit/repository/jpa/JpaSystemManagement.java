@@ -59,9 +59,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     private TargetFilterQueryRepository targetFilterQueryRepository;
 
     @Autowired
-    private ActionRepository actionRepository;
-
-    @Autowired
     private DistributionSetRepository distributionSetRepository;
 
     @Autowired
@@ -83,16 +80,10 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     private DistributionSetTagRepository distributionSetTagRepository;
 
     @Autowired
-    private LocalArtifactRepository artifactRepository;
-
-    @Autowired
     private TenantConfigurationRepository tenantConfigurationRepository;
 
     @Autowired
     private RolloutRepository rolloutRepository;
-
-    @Autowired
-    private RolloutGroupRepository rolloutGroupRepository;
 
     @Autowired
     private TenantAware tenantAware;
@@ -196,6 +187,8 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         def.setName("initial-tenant-creation");
         def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        def.setReadOnly(false);
+        def.setIsolationLevel(Isolation.READ_UNCOMMITTED.value());
         return systemSecurityContext.runAsSystemAsTenant(
                 () -> new TransactionTemplate(txManager, def).execute(status -> tenantMetaDataRepository
                         .save(new JpaTenantMetaData(createStandardSoftwareDataSetup(), tenant))),
@@ -219,7 +212,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
             targetRepository.deleteByTenantIgnoreCase(tenant);
             targetFilterQueryRepository.deleteByTenantIgnoreCase(tenant);
             rolloutRepository.deleteByTenantIgnoreCase(tenant);
-            artifactRepository.deleteByTenantIgnoreCase(tenant);
             targetTagRepository.deleteByTenantIgnoreCase(tenant);
             distributionSetTagRepository.deleteByTenantIgnoreCase(tenant);
             distributionSetRepository.deleteByTenantIgnoreCase(tenant);
