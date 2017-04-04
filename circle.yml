@@ -14,8 +14,8 @@ machine:
     - rabbitmq-server
   environment:
     _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
-   pre:
-    - sudo rabbitmq-plugins enable rabbitmq_management
+  pre:
+   - sudo rabbitmq-plugins enable rabbitmq_management
     
 dependencies:
   cache_directories: 
