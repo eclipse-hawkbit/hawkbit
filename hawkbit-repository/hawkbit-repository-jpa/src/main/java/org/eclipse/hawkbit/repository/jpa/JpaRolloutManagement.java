@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -895,6 +896,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         final GenericRolloutUpdate update = (GenericRolloutUpdate) u;
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(update.getId());
 
+        checkIfDeleted(update.getId(), rollout.getStatus());
+
         update.getName().ifPresent(rollout::setName);
         update.getDescription().ifPresent(rollout::setDescription);
         update.getActionType().ifPresent(rollout::setActionType);
@@ -908,6 +911,12 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         });
 
         return rolloutRepository.save(rollout);
+    }
+
+    private static void checkIfDeleted(final Long rolloutId, final RolloutStatus status) {
+        if (RolloutStatus.DELETING.equals(status) || RolloutStatus.DELETED.equals(status)) {
+            throw new EntityReadOnlyException("Rollout " + rolloutId + " is soft deleted and cannot be changed");
+        }
     }
 
     private JpaRollout getRolloutAndThrowExceptionIfNotFound(final Long rolloutId) {
