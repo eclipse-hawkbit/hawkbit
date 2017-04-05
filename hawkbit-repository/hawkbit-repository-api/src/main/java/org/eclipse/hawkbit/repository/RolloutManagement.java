@@ -373,7 +373,7 @@ public interface RolloutManagement {
      * @throws EntityNotFoundException
      *             if rollout or DS with given IDs do not exist
      * @throws EntityReadOnlyException
-     *             is rollout is in soft deleted state, i.e. only kept as
+     *             if rollout is in soft deleted state, i.e. only kept as
      *             reference
      * 
      */
