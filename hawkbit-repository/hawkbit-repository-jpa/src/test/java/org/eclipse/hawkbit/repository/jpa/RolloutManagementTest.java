@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
 
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
@@ -1519,7 +1521,13 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         // verify
         final JpaRollout deletedRollout = rolloutRepository.findOne(createdRollout.getId());
         assertThat(deletedRollout).isNotNull();
+
         assertThat(deletedRollout.getStatus()).isEqualTo(RolloutStatus.DELETED);
+        assertThatExceptionOfType(EntityReadOnlyException.class)
+                .isThrownBy(() -> rolloutManagement
+                        .updateRollout(entityFactory.rollout().update(createdRollout.getId()).description("test")))
+                .withMessageContaining("" + createdRollout.getId());
+
         assertThat(rolloutManagement.findAll(pageReq, true).getContent()).hasSize(1);
         assertThat(rolloutManagement.findAll(pageReq, false).getContent()).hasSize(0);
         assertThat(rolloutGroupManagement.findAllRolloutGroupsWithDetailedStatus(createdRollout.getId(), pageReq)
