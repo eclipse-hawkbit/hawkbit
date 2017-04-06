@@ -35,7 +35,6 @@ import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEv
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -237,7 +236,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         // setup
         final String amqpUri = "amqp://anyhost";
         final TargetDeletedEvent targetDeletedEvent = new TargetDeletedEvent(TENANT, 1L, CONTROLLER_ID, amqpUri,
-                JpaTarget.class.getName(), serviceMatcher.getServiceId());
+                Target.class.getName(), serviceMatcher.getServiceId());
 
         // test
         amqpMessageDispatcherService.targetDelete(targetDeletedEvent);
@@ -254,7 +253,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         // setup
         final String noAmqpUri = "http://anyhost";
         final TargetDeletedEvent targetDeletedEvent = new TargetDeletedEvent(TENANT, 1L, CONTROLLER_ID, noAmqpUri,
-                JpaTarget.class.getName(), serviceMatcher.getServiceId());
+                Target.class.getName(), serviceMatcher.getServiceId());
 
         // test
         amqpMessageDispatcherService.targetDelete(targetDeletedEvent);
@@ -270,7 +269,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         // setup
         final String noAmqpUri = null;
         final TargetDeletedEvent targetDeletedEvent = new TargetDeletedEvent(TENANT, 1L, CONTROLLER_ID, noAmqpUri,
-                JpaTarget.class.getName(), serviceMatcher.getServiceId());
+                Target.class.getName(), serviceMatcher.getServiceId());
 
         // test
         amqpMessageDispatcherService.targetDelete(targetDeletedEvent);
