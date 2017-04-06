@@ -9,9 +9,6 @@
 package org.eclipse.hawkbit.repository.jpa.rollout;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorCompletionService;
 
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
@@ -20,8 +17,6 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
-
-import com.google.common.base.Throwables;
 
 /**
  * Scheduler to schedule the {@link RolloutManagement#handleRollouts()}. The
@@ -42,8 +37,6 @@ public class RolloutScheduler {
 
     private final SystemSecurityContext systemSecurityContext;
 
-    private final ExecutorCompletionService<Void> completionService;
-
     /**
      * Constructor.
      * 
@@ -55,17 +48,13 @@ public class RolloutScheduler {
      *            to run the rollout handler
      * @param systemSecurityContext
      *            to run as system
-     * @param threadPoolExecutor
-     *            to execute the handlers in parallel
      */
     public RolloutScheduler(final TenantAware tenantAware, final SystemManagement systemManagement,
-            final RolloutManagement rolloutManagement, final SystemSecurityContext systemSecurityContext,
-            final Executor threadPoolExecutor) {
+            final RolloutManagement rolloutManagement, final SystemSecurityContext systemSecurityContext) {
         this.tenantAware = tenantAware;
         this.systemManagement = systemManagement;
         this.rolloutManagement = rolloutManagement;
         this.systemSecurityContext = systemSecurityContext;
-        completionService = new ExecutorCompletionService<>(threadPoolExecutor);
     }
 
     /**
@@ -80,7 +69,7 @@ public class RolloutScheduler {
 
         // run this code in system code privileged to have the necessary
         // permission to query and create entities.
-        final int tasks = systemSecurityContext.runAsSystem(() -> {
+        systemSecurityContext.runAsSystem(() -> {
             // workaround eclipselink that is currently not possible to
             // execute a query without multitenancy if MultiTenant
             // annotation is used.
@@ -90,25 +79,13 @@ public class RolloutScheduler {
             final List<String> tenants = systemManagement.findTenants();
             LOGGER.info("Checking rollouts for {} tenants", tenants.size());
             for (final String tenant : tenants) {
-                completionService.submit(() -> tenantAware.runAsTenant(tenant, () -> {
+                tenantAware.runAsTenant(tenant, () -> {
                     rolloutManagement.handleRollouts();
                     return null;
-                }));
+                });
             }
-            return tenants.size();
+            return null;
         });
-
-        waitUntilHandlersAreComplete(tasks);
     }
 
-    private void waitUntilHandlersAreComplete(final int tasks) {
-        try {
-            for (int i = 0; i < tasks; i++) {
-                completionService.take().get();
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            Thread.currentThread().interrupt();
-            throw Throwables.propagate(e);
-        }
-    }
 }

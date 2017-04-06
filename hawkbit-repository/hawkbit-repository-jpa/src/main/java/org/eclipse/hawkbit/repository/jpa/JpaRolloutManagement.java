@@ -716,31 +716,31 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     // No transaction, will be created per handled rollout
     @Transactional(propagation = Propagation.NEVER)
     public void handleRollouts() {
-        rolloutRepository
-                .findByStatusIn(Lists.newArrayList(RolloutStatus.CREATING, RolloutStatus.DELETING,
-                        RolloutStatus.STARTING, RolloutStatus.READY, RolloutStatus.RUNNING))
-                .forEach(this::handleRollout);
-    }
+        final List<Long> rollouts = rolloutRepository.findByStatusIn(Lists.newArrayList(RolloutStatus.CREATING,
+                RolloutStatus.DELETING, RolloutStatus.STARTING, RolloutStatus.READY, RolloutStatus.RUNNING));
 
-    private void handleRollout(final Long rolloutId) {
-        LOGGER.debug("handleRollout called for rollout {}", rolloutId);
+        if (rollouts.isEmpty()) {
+            return;
+        }
 
         final String tenant = tenantAware.getCurrentTenant();
 
-        final String handlerId = tenant + "-rollout-" + rolloutId;
+        final String handlerId = tenant + "-rollout";
         final Lock lock = lockRegistry.obtain(handlerId);
         if (!lock.tryLock()) {
             return;
         }
 
         try {
-            runInNewTransaction(handlerId, status -> executeFittingHandler(rolloutId));
+            rollouts.forEach(rolloutId -> runInNewTransaction(handlerId + "-" + rolloutId,
+                    status -> executeFittingHandler(rolloutId)));
         } finally {
             lock.unlock();
         }
     }
 
     private int executeFittingHandler(final Long rolloutId) {
+        LOGGER.debug("handle rollout {}", rolloutId);
         final JpaRollout rollout = rolloutRepository.findOne(rolloutId);
 
         switch (rollout.getStatus()) {
