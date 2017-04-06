@@ -1,0 +1,5 @@
+# Site settings
+title: Eclipse hawkBit
+email: hawkbit-dev@eclipse.org
+description: Eclipse hawkBit - IoT Software Update
+baseurl: "/hawkbit/" # the subpath of your site, e.g. /blog/
