@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.SoftwareModuleNotAssignedToTargetException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -31,7 +32,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
 import org.eclipse.hawkbit.rest.util.RestResourceConversionHelper;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
-import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,10 +134,10 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    private ActionStatus checkAndReportDownloadByTarget(final HttpServletRequest request, final String targetid,
+    private ActionStatus checkAndReportDownloadByTarget(final HttpServletRequest request, final String controllerId,
             final Artifact artifact) {
-        final Target target = controllerManagement.updateLastTargetQuery(targetid,
-                IpUtil.getClientIpFromRequest(request, securityProperties));
+        final Target target = controllerManagement.findByControllerId(controllerId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         final Action action = controllerManagement
                 .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(),
