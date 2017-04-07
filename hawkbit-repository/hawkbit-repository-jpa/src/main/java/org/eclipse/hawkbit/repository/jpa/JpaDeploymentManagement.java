@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -232,12 +231,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         final List<List<Long>> targetIds = Lists.partition(
                 targets.stream().map(Target::getId).collect(Collectors.toList()), Constants.MAX_ENTRIES_IN_STATEMENT);
 
-        // override all active actions and set them into canceling state, we
-        // need to remember which one we have been switched to canceling state
-        // because for targets which we have changed to canceling we don't want
-        // to publish the new action update event.
-        final Set<Long> targetIdsCancellList = new HashSet<>();
-        targetIds.forEach(ids -> targetIdsCancellList.addAll(overrideObsoleteUpdateActions(ids)));
+        // override all active actions and set them into canceling state
+        targetIds.forEach(this::overrideObsoleteUpdateActions);
 
         // cancel all scheduled actions which are in-active, these actions were
         // not active before and the manual assignment which has been done
@@ -254,9 +249,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         targetIds.forEach(tIds -> targetRepository.setAssignedDistributionSetAndUpdateStatus(TargetUpdateStatus.PENDING,
                 set, System.currentTimeMillis(), currentUser, tIds));
-        final Map<String, JpaAction> targetIdsToActions = targets.stream()
-                .map(t -> actionRepository
-                        .save(createTargetAction(targetsWithActionMap, t, set, rollout, rolloutGroup)))
+        final Map<String, JpaAction> targetIdsToActions = targets.stream().map(
+                t -> actionRepository.save(createTargetAction(targetsWithActionMap, t, set, rollout, rolloutGroup)))
                 .collect(Collectors.toMap(a -> a.getTarget().getControllerId(), Function.identity()));
 
         // create initial action status when action is created so we remember
@@ -267,6 +261,9 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         // flush to get action IDs
         entityManager.flush();
+        // detaching as everything that needs to be stored is already flushed
+        entityManager.clear();
+
         // collect updated target and actions IDs in order to return them
         final DistributionSetAssignmentResult result = new DistributionSetAssignmentResult(
                 targets.stream().map(Target::getControllerId).collect(Collectors.toList()), targets.size(),
@@ -275,18 +272,14 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         LOG.debug("assignDistribution({}) finished {}", set, result);
 
-        // detaching as it is not necessary to persist the set itself
-        entityManager.detach(set);
-
-        sendDistributionSetAssignmentEvent(targets, targetIdsCancellList, targetIdsToActions);
+        sendDistributionSetAssignmentEvent(targets, targetIdsToActions);
 
         return result;
     }
 
-    private void sendDistributionSetAssignmentEvent(final List<JpaTarget> targets, final Set<Long> targetIdsCancellList,
+    private void sendDistributionSetAssignmentEvent(final List<JpaTarget> targets,
             final Map<String, JpaAction> targetIdsToActions) {
-        targets.stream().filter(t -> !!!targetIdsCancellList.contains(t.getId()))
-                .forEach(t -> assignDistributionSetEvent(targetIdsToActions.get(t.getControllerId())));
+        targets.forEach(t -> assignDistributionSetEvent(targetIdsToActions.get(t.getControllerId())));
     }
 
     private static JpaAction createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap,
@@ -311,7 +304,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         // through JQL
         final JpaTarget target = (JpaTarget) action.getTarget();
         target.setUpdateStatus(TargetUpdateStatus.PENDING);
-        entityManager.detach(target);
 
         afterCommit.afterCommit(
                 () -> eventPublisher.publishEvent(new TargetUpdatedEvent(target, applicationContext.getId())));
@@ -339,7 +331,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             // document that the status has been retrieved
 
             actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELING, System.currentTimeMillis(),
-                    "manual cancelation requested"));
+                    RepositoryConstants.SERVER_MESSAGE_PREFIX + "cancel obsolete action due to new update"));
             actionRepository.save(action);
 
             cancelAssignDistributionSetEvent(action.getTarget(), action.getId());
@@ -368,7 +360,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
             // document that the status has been retrieved
             actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELING, System.currentTimeMillis(),
-                    "manual cancelation requested"));
+                    RepositoryConstants.SERVER_MESSAGE_PREFIX + "manual cancelation requested"));
             final Action saveAction = actionRepository.save(action);
             cancelAssignDistributionSetEvent(action.getTarget(), action.getId());
 
@@ -412,7 +404,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         // document that the status has been retrieved
         actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELED, System.currentTimeMillis(),
-                "A force quit has been performed."));
+                RepositoryConstants.SERVER_MESSAGE_PREFIX + "A force quit has been performed."));
 
         DeploymentHelper.successCancellation(action, actionRepository, targetRepository);
 
@@ -420,8 +412,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_COMMITTED)
     public long startScheduledActionsByRolloutGroupParent(@NotNull final Long rolloutId,
             final Long rolloutGroupParentId) {
         long totalActionsCount = 0L;
@@ -438,7 +428,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private long startScheduledActionsByRolloutGroupParentInNewTransaction(final Long rolloutId,
             final Long rolloutGroupParentId, final int limit) {
         final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        def.setName("startScheduledActions");
+        def.setName("startScheduledActions-" + rolloutId);
         def.setReadOnly(false);
         def.setIsolationLevel(Isolation.READ_UNCOMMITTED.value());
         def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);

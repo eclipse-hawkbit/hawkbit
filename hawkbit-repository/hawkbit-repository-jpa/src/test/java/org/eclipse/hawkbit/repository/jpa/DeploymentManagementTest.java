@@ -23,8 +23,13 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
@@ -231,44 +236,16 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Ensures that distribution sets can assigned and unassigned to a  distribution set tag.")
-    public void assignAndUnassignDistributionSetToTag() {
-        final List<Long> assignDS = Lists.newArrayListWithExpectedSize(4);
-        for (int i = 0; i < 4; i++) {
-            assignDS.add(testdataFactory.createDistributionSet("DS" + i, "1.0", Collections.emptyList()).getId());
-        }
-
-        final DistributionSetTag tag = tagManagement
-                .createDistributionSetTag(entityFactory.tag().create().name("Tag1"));
-
-        final List<DistributionSet> assignedDS = distributionSetManagement.assignTag(assignDS, tag.getId());
-        assertThat(assignedDS.size()).as("assigned ds has wrong size").isEqualTo(4);
-        assignedDS.forEach(ds -> assertThat(ds.getTags().size()).as("ds has wrong tag size").isEqualTo(1));
-
-        DistributionSetTag findDistributionSetTag = tagManagement.findDistributionSetTag("Tag1").get();
-        assertThat(assignedDS.size()).as("assigned ds has wrong size")
-                .isEqualTo(findDistributionSetTag.getAssignedToDistributionSet().size());
-
-        final DistributionSet unAssignDS = distributionSetManagement.unAssignTag(assignDS.get(0),
-                findDistributionSetTag.getId());
-        assertThat(unAssignDS.getId()).as("unassigned ds is wrong").isEqualTo(assignDS.get(0));
-        assertThat(unAssignDS.getTags().size()).as("unassigned ds has wrong tag size").isEqualTo(0);
-        findDistributionSetTag = tagManagement.findDistributionSetTag("Tag1").get();
-        assertThat(findDistributionSetTag.getAssignedToDistributionSet().size()).as("ds tag ds has wrong ds size")
-                .isEqualTo(3);
-
-        final List<DistributionSet> unAssignTargets = distributionSetManagement
-                .unAssignAllDistributionSetsByTag(findDistributionSetTag.getId());
-        findDistributionSetTag = tagManagement.findDistributionSetTag("Tag1").get();
-        assertThat(findDistributionSetTag.getAssignedToDistributionSet().size()).as("ds tag has wrong ds size")
-                .isEqualTo(0);
-        assertThat(unAssignTargets.size()).as("unassigned target has wrong size").isEqualTo(3);
-        unAssignTargets
-                .forEach(target -> assertThat(target.getTags().size()).as("target has wrong tag size").isEqualTo(0));
-    }
-
-    @Test
     @Description("Test verifies that an assignment with automatic cancelation works correctly even if the update is split into multiple partitions on the database.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = Constants.MAX_ENTRIES_IN_STATEMENT + 10),
+            @Expect(type = TargetUpdatedEvent.class, count = 2 * (Constants.MAX_ENTRIES_IN_STATEMENT + 10)),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 2
+                    * (Constants.MAX_ENTRIES_IN_STATEMENT + 10)),
+            @Expect(type = ActionCreatedEvent.class, count = 2 * (Constants.MAX_ENTRIES_IN_STATEMENT + 10)),
+            @Expect(type = CancelTargetAssignmentEvent.class, count = Constants.MAX_ENTRIES_IN_STATEMENT + 10),
+            @Expect(type = ActionUpdatedEvent.class, count = Constants.MAX_ENTRIES_IN_STATEMENT + 10),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6) })
     public void multiAssigmentHistoryOverMultiplePagesResultsInTwoActiveAction() {
 
         final DistributionSet cancelDs = testdataFactory.createDistributionSet("Canceled DS", "1.0",
@@ -277,15 +254,14 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet cancelDs2 = testdataFactory.createDistributionSet("Canceled DS", "1.2",
                 Collections.emptyList());
 
-        List<Target> targets = testdataFactory.createTargets(Constants.MAX_ENTRIES_IN_STATEMENT + 10);
+        final List<Target> targets = testdataFactory.createTargets(Constants.MAX_ENTRIES_IN_STATEMENT + 10);
 
-        targets = assignDistributionSet(cancelDs, targets).getAssignedEntity();
-        targets = assignDistributionSet(cancelDs2, targets).getAssignedEntity();
+        assertThat(deploymentManagement.countActionsAll()).isEqualTo(0);
 
-        targetManagement.findTargetsAll(pageReq).getContent().forEach(targetIdName -> {
-            assertThat(deploymentManagement.findActiveActionsByTarget(targetIdName.getControllerId()))
-                    .as("active action has wrong size").hasSize(2);
-        });
+        assignDistributionSet(cancelDs, targets).getAssignedEntity();
+        assertThat(deploymentManagement.countActionsAll()).isEqualTo(Constants.MAX_ENTRIES_IN_STATEMENT + 10);
+        assignDistributionSet(cancelDs2, targets).getAssignedEntity();
+        assertThat(deploymentManagement.countActionsAll()).isEqualTo(2 * (Constants.MAX_ENTRIES_IN_STATEMENT + 10));
     }
 
     @Test
