@@ -111,7 +111,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that download and install event with no software modul works")
+    @Description("Verifies that download and install event with no software modul works")
     public void testSendDownloadRequesWithEmptySoftwareModules() {
 
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
@@ -137,7 +137,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that download and install event with 3 software moduls and no artifacts works")
+    @Description("Verifies that download and install event with 3 software moduls and no artifacts works")
     public void testSendDownloadRequesWithSoftwareModulesAndNoArtifacts() {
         final DistributionSet createDistributionSet = testdataFactory
                 .createDistributionSet(UUID.randomUUID().toString());
@@ -170,7 +170,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that download and install event with software moduls and artifacts works")
+    @Description("Verifies that download and install event with software moduls and artifacts works")
     public void testSendDownloadRequest() {
         DistributionSet dsA = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         SoftwareModule module = dsA.getModules().iterator().next();
@@ -217,7 +217,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that send cancel event works")
+    @Description("Verifies that send cancel event works")
     public void testSendCancelRequest() {
         final CancelTargetAssignmentEvent cancelTargetAssignmentDistributionSetEvent = new CancelTargetAssignmentEvent(
                 testTarget, 1L, serviceMatcher.getServiceId());
@@ -230,7 +230,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that sending a delete message when receiving a delete event works.")
+    @Description("Verifies that sending a delete message when receiving a delete event works.")
     public void sendDeleteRequest() {
 
         // setup
@@ -247,7 +247,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that a delete message is no send if the address is not an amqp address.")
+    @Description("Verifies that a delete message is not send if the address is not an amqp address.")
     public void sendDeleteRequestWithNoAmqpAdress() {
 
         // setup
@@ -263,7 +263,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that a delete message is no send if the address is null.")
+    @Description("Verfies that a delete message is not send if the address is null.")
     public void sendDeleteRequestWithNullAdress() {
 
         // setup
