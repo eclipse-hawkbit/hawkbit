@@ -102,6 +102,7 @@ public class RemoteIdEventTest extends AbstractRemoteEventTest {
     }
 
     private void assertDeserializeEvent(final RemoteIdEvent underTestCreatedEvent, final RemoteIdEvent event) {
+        // gets added because events inherit from of java.util.EventObject
         assertThat(underTestCreatedEvent).isEqualToIgnoringGivenFields(event, "source");
     }
 

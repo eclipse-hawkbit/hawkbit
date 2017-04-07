@@ -34,20 +34,24 @@ public class ReplyToListener implements TestRabbitListener {
         final MessageType messageType = MessageType
                 .valueOf(message.getMessageProperties().getHeaders().get(MessageHeaderKey.TYPE).toString());
 
-        switch (messageType) {
-        case EVENT:
+        if (messageType == MessageType.EVENT) {
             final EventTopic eventTopic = EventTopic
                     .valueOf(message.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC).toString());
             eventTopicMessages.put(eventTopic, message);
-            break;
-        case THING_DELETED:
+            return;
+        }
+
+        if (messageType == MessageType.THING_DELETED) {
             final String targetName = message.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID)
                     .toString();
             deleteMessages.put(targetName, message);
-            break;
-        default:
-            fail("Unexpected message type");
+            return;
         }
+
+        // if message type is not EVENT or THING_DELETED something unexpected
+        // happened
+        fail("Unexpected message type");
+
     }
 
     public Map<EventTopic, Message> getEventTopicMessages() {

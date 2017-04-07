@@ -136,7 +136,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         }
 
         final Message message = getMessageConverter().toMessage(downloadAndUpdateRequest,
-                createConnectorMessageProperties(tenant, target.getControllerId(), EventTopic.DOWNLOAD_AND_INSTALL));
+                createConnectorMessagePropertiesEvent(tenant, target.getControllerId(),
+                        EventTopic.DOWNLOAD_AND_INSTALL));
         amqpSenderService.sendMessage(message, targetAdress);
     }
 
@@ -197,35 +198,33 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
         final Message message = getMessageConverter().toMessage(actionId,
-                createConnectorMessageProperties(tenant, controllerId, EventTopic.CANCEL_DOWNLOAD));
+                createConnectorMessagePropertiesEvent(tenant, controllerId, EventTopic.CANCEL_DOWNLOAD));
 
         amqpSenderService.sendMessage(message, address);
 
     }
 
-    private static MessageProperties createConnectorMessageProperties(final String tenant, final String controllerId,
-            final EventTopic topic) {
-        final MessageProperties messageProperties = createMessageProperties();
+    private static MessageProperties createConnectorMessagePropertiesEvent(final String tenant,
+            final String controllerId, final EventTopic topic) {
+        final MessageProperties messageProperties = createConnectorMessageProperties(tenant, controllerId);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, topic);
-        messageProperties.setHeader(MessageHeaderKey.THING_ID, controllerId);
-        messageProperties.setHeader(MessageHeaderKey.TENANT, tenant);
         messageProperties.setHeader(MessageHeaderKey.TYPE, MessageType.EVENT);
-        return messageProperties;
-    }
-
-    private static MessageProperties createMessageProperties() {
-        final MessageProperties messageProperties = new MessageProperties();
-        messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON);
-        messageProperties.setHeader(MessageHeaderKey.CONTENT_TYPE, MessageProperties.CONTENT_TYPE_JSON);
         return messageProperties;
     }
 
     private static MessageProperties createConnectorMessagePropertiesDeleteThing(final String tenant,
             final String controllerId) {
-        final MessageProperties messageProperties = createMessageProperties();
+        final MessageProperties messageProperties = createConnectorMessageProperties(tenant, controllerId);
+        messageProperties.setHeader(MessageHeaderKey.TYPE, MessageType.THING_DELETED);
+        return messageProperties;
+    }
+
+    private static MessageProperties createConnectorMessageProperties(final String tenant, final String controllerId) {
+        final MessageProperties messageProperties = new MessageProperties();
+        messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON);
+        messageProperties.setHeader(MessageHeaderKey.CONTENT_TYPE, MessageProperties.CONTENT_TYPE_JSON);
         messageProperties.setHeader(MessageHeaderKey.THING_ID, controllerId);
         messageProperties.setHeader(MessageHeaderKey.TENANT, tenant);
-        messageProperties.setHeader(MessageHeaderKey.TYPE, MessageType.THING_DELETED);
         return messageProperties;
     }
 
