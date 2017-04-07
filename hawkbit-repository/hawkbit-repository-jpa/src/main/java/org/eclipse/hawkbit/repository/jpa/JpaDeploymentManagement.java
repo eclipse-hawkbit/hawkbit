@@ -231,8 +231,12 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         final List<List<Long>> targetIds = Lists.partition(
                 targets.stream().map(Target::getId).collect(Collectors.toList()), Constants.MAX_ENTRIES_IN_STATEMENT);
 
-        // override all active actions and set them into canceling state
-        targetIds.forEach(this::overrideObsoleteUpdateActions);
+        // override all active actions and set them into canceling state, we
+        // need to remember which one we have been switched to canceling state
+        // because for targets which we have changed to canceling we don't want
+        // to publish the new action update event.
+        final Set<Long> targetIdsCancellList = targetIds.stream().map(this::overrideObsoleteUpdateActions)
+                .flatMap(Collection::stream).collect(Collectors.toSet());
 
         // cancel all scheduled actions which are in-active, these actions were
         // not active before and the manual assignment which has been done
@@ -272,14 +276,17 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         LOG.debug("assignDistribution({}) finished {}", set, result);
 
-        sendDistributionSetAssignmentEvent(targets, targetIdsToActions);
+        sendDistributionSetAssignmentEvent(targets, targetIdsCancellList, targetIdsToActions);
 
         return result;
     }
 
-    private void sendDistributionSetAssignmentEvent(final List<JpaTarget> targets,
+    private void sendDistributionSetAssignmentEvent(final List<JpaTarget> targets, final Set<Long> targetIdsCancellList,
             final Map<String, JpaAction> targetIdsToActions) {
-        targets.forEach(t -> assignDistributionSetEvent(targetIdsToActions.get(t.getControllerId())));
+        targets.stream().filter(t -> !!!targetIdsCancellList.contains(t.getId()))
+                .forEach(t -> sendTargetAssignDistributionSetEvent(targetIdsToActions.get(t.getControllerId())));
+
+        targets.forEach(this::sendTargetUpdatedEvent);
     }
 
     private static JpaAction createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap,
@@ -298,17 +305,19 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return actionForTarget;
     }
 
-    private void assignDistributionSetEvent(final Action action) {
+    private void sendTargetAssignDistributionSetEvent(final Action action) {
+        afterCommit.afterCommit(() -> eventPublisher
+                .publishEvent(new TargetAssignDistributionSetEvent(action, applicationContext.getId())));
+    }
+
+    private void sendTargetUpdatedEvent(final JpaTarget target) {
 
         // Update is not available in the object as the update was executed
         // through JQL
-        final JpaTarget target = (JpaTarget) action.getTarget();
         target.setUpdateStatus(TargetUpdateStatus.PENDING);
 
         afterCommit.afterCommit(
                 () -> eventPublisher.publishEvent(new TargetUpdatedEvent(target, applicationContext.getId())));
-        afterCommit.afterCommit(() -> eventPublisher
-                .publishEvent(new TargetAssignDistributionSetEvent(action, applicationContext.getId())));
     }
 
     /**

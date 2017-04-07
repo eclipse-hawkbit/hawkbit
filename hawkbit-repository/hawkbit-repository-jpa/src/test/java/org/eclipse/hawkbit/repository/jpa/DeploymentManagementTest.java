@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -227,20 +228,16 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSetTag tag = tagManagement
                 .createDistributionSetTag(entityFactory.tag().create().name("Tag1"));
 
-        try {
-            distributionSetManagement.assignTag(assignDS, tag.getId());
-            fail("It should not be possible to assign a DS that does not exist");
-        } catch (final EntityNotFoundException e) {
-            // Ok
-        }
+        assertThatExceptionOfType(EntityNotFoundException.class)
+                .isThrownBy(() -> distributionSetManagement.assignTag(assignDS, tag.getId()))
+                .withMessageContaining("DistributionSet").withMessageContaining(String.valueOf(tag.getId()));
     }
 
     @Test
     @Description("Test verifies that an assignment with automatic cancelation works correctly even if the update is split into multiple partitions on the database.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = Constants.MAX_ENTRIES_IN_STATEMENT + 10),
             @Expect(type = TargetUpdatedEvent.class, count = 2 * (Constants.MAX_ENTRIES_IN_STATEMENT + 10)),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 2
-                    * (Constants.MAX_ENTRIES_IN_STATEMENT + 10)),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = Constants.MAX_ENTRIES_IN_STATEMENT + 10),
             @Expect(type = ActionCreatedEvent.class, count = 2 * (Constants.MAX_ENTRIES_IN_STATEMENT + 10)),
             @Expect(type = CancelTargetAssignmentEvent.class, count = Constants.MAX_ENTRIES_IN_STATEMENT + 10),
             @Expect(type = ActionUpdatedEvent.class, count = Constants.MAX_ENTRIES_IN_STATEMENT + 10),
@@ -364,7 +361,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Description("Force Quit an Assignment. Expected behaviour is that the action is canceled and is marked as deleted. The assigned Software module")
     public void forceQuitSetActionToInactive() throws InterruptedException {
         final Action action = prepareFinishedUpdate("4712", "installed", true);
-        Target target = action.getTarget();
+        final Target target = action.getTarget();
         final DistributionSet dsInstalled = action.getDistributionSet();
 
         final DistributionSet ds = testdataFactory.createDistributionSet("newDS", true);
@@ -378,8 +375,6 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // verify assignment
         assertThat(actionRepository.findAll()).as("wrong size of action").hasSize(2);
         assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(4);
-
-        target = targetManagement.findTargetByControllerID(target.getControllerId()).get();
 
         // force quit assignment
         deploymentManagement.cancelAction(assigningAction.getId());
