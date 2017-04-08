@@ -222,7 +222,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         if (targets.isEmpty()) {
             // detaching as it is not necessary to persist the set itself
-            entityManager.detach(set);
+            entityManager.clear();
             // return with nothing as all targets had the DS already assigned
             return new DistributionSetAssignmentResult(Collections.emptyList(), 0, targetsWithActionType.size(),
                     Collections.emptyList(), targetManagement);
@@ -327,7 +327,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      * @param targetsIds
      *            to override {@link Action}s
      */
-    private Set<Long> overrideObsoleteUpdateActions(final List<Long> targetsIds) {
+    private List<Long> overrideObsoleteUpdateActions(final Collection<Long> targetsIds) {
 
         // Figure out if there are potential target/action combinations that
         // need to be considered for cancellation
@@ -346,7 +346,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             cancelAssignDistributionSetEvent(action.getTarget(), action.getId());
 
             return action.getTarget().getId();
-        }).collect(Collectors.toSet());
+        }).collect(Collectors.toList());
 
     }
 
@@ -479,7 +479,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         }
 
         // check if we need to override running update actions
-        final Set<Long> overrideObsoleteUpdateActions = overrideObsoleteUpdateActions(
+        final List<Long> overrideObsoleteUpdateActions = overrideObsoleteUpdateActions(
                 Collections.singletonList(action.getTarget().getId()));
 
         action.setActive(true);
