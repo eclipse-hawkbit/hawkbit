@@ -93,32 +93,16 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         final Map<String, String> attributes = new HashMap<>();
         attributes.put("dsafsdf", "sdsds");
 
-        long current = System.currentTimeMillis();
         mvc.perform(put("/{tenant}/controller/v1/4717/configData", tenantAware.getCurrentTenant())
                 .content(JsonBuilder.configData("", attributes, "closed")).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
-        Thread.sleep(1); // is required: otherwise processing the next line is
-                         // often too fast and
-                         // the following assert will fail
-        assertThat(targetManagement.findTargetByControllerID("4717").get().getLastTargetQuery())
-                .isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(targetManagement.findTargetByControllerID("4717").get().getLastTargetQuery())
-                .isGreaterThanOrEqualTo(current);
         assertThat(targetManagement.getControllerAttributes("4717")).isEqualTo(attributes);
 
         // update
         attributes.put("sdsds", "123412");
-        current = System.currentTimeMillis();
         mvc.perform(put("/{tenant}/controller/v1/4717/configData", tenantAware.getCurrentTenant())
                 .content(JsonBuilder.configData("", attributes, "closed")).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
-        Thread.sleep(1); // is required: otherwise processing the next line is
-                         // often too fast and
-                         // the following assert will fail
-        assertThat(targetManagement.findTargetByControllerID("4717").get().getLastTargetQuery())
-                .isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(targetManagement.findTargetByControllerID("4717").get().getLastTargetQuery())
-                .isGreaterThanOrEqualTo(current);
         assertThat(targetManagement.getControllerAttributes("4717")).isEqualTo(attributes);
     }
 
