@@ -30,10 +30,10 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorderWithIcon;
 import org.eclipse.hawkbit.ui.filtermanagement.TargetFilterBeanQuery;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -68,7 +68,7 @@ public class DefineGroupsLayout extends GridLayout {
 
     private static final long serialVersionUID = 2939193468001472916L;
 
-    private VaadinMessageSource i18n;
+    private final VaadinMessageSource i18n;
 
     private transient EntityFactory entityFactory;
 
@@ -92,7 +92,7 @@ public class DefineGroupsLayout extends GridLayout {
 
     private ValidationStatus validationStatus = ValidationStatus.VALID;
 
-    private transient RolloutGroupsValidation groupsValidation;
+    private volatile transient RolloutGroupsValidation groupsValidation;
 
     private transient ListenableFuture<RolloutGroupsValidation> runningValidation;
 
@@ -152,7 +152,7 @@ public class DefineGroupsLayout extends GridLayout {
     }
 
     private Button createAddButton() {
-        Button button = SPUIComponentProvider.getButton(UIComponentIdProvider.ROLLOUT_GROUP_ADD_ID,
+        final Button button = SPUIComponentProvider.getButton(UIComponentIdProvider.ROLLOUT_GROUP_ADD_ID,
                 i18n.getMessage("button.rollout.add.group"), "", "", true, FontAwesome.PLUS,
                 SPUIButtonStyleNoBorderWithIcon.class);
         button.setSizeUndefined();
@@ -164,8 +164,8 @@ public class DefineGroupsLayout extends GridLayout {
     }
 
     private GroupRow addGroupRow() {
-        int rowIndex = addRow();
-        GroupRow groupRow = new GroupRow();
+        final int rowIndex = addRow();
+        final GroupRow groupRow = new GroupRow();
         groupRow.addToGridRow(this, rowIndex);
         groupRows.add(groupRow);
         updateValidation();
@@ -276,32 +276,33 @@ public class DefineGroupsLayout extends GridLayout {
 
         validationRequested = false;
 
-        final UI ui = UI.getCurrent();
-
         runningValidation = rolloutManagement.validateTargetsInGroups(savedRolloutGroups, targetFilter,
                 System.currentTimeMillis());
-        runningValidation.addCallback(validation -> ui.access(() -> this.setGroupsValidation(validation)),
-                throwable -> ui.access(() -> this.setGroupsValidation(null)));
+        runningValidation.addCallback(validation -> setGroupsValidation(validation),
+                throwable -> setGroupsValidation(null));
 
     }
 
     private void setGroupsValidation(RolloutGroupsValidation validation) {
-        groupsValidation = validation;
+        UI.getCurrent().access(() -> {
+            groupsValidation = validation;
 
-        if (validationRequested) {
-            validateRemainingTargets();
-            return;
-        }
+            if (validationRequested) {
+                validateRemainingTargets();
+                return;
+            }
 
-        final GroupRow lastRow = groupRows.get(groupRows.size() - 1);
-        if (groupsValidation != null && groupsValidation.isValid() && validationStatus != ValidationStatus.INVALID) {
-            lastRow.hideLastGroupError();
-            setValidationStatus(ValidationStatus.VALID);
+            final GroupRow lastRow = groupRows.get(groupRows.size() - 1);
+            if (validation != null && validation.isValid() && validationStatus != ValidationStatus.INVALID) {
+                lastRow.hideLastGroupError();
+                setValidationStatus(ValidationStatus.VALID);
+                return;
 
-        } else {
-            lastRow.markWithLastGroupError();
+            }
+
+            lastRow.markWithLastGroupError(validation);
             setValidationStatus(ValidationStatus.INVALID);
-        }
+        });
 
     }
 
@@ -484,8 +485,8 @@ public class DefineGroupsLayout extends GridLayout {
         }
 
         private Button createRemoveButton() {
-            Button button = SPUIComponentProvider.getButton(UIComponentIdProvider.ROLLOUT_GROUP_REMOVE_ID, "", "", "",
-                    true, FontAwesome.MINUS, SPUIButtonStyleNoBorderWithIcon.class);
+            final Button button = SPUIComponentProvider.getButton(UIComponentIdProvider.ROLLOUT_GROUP_REMOVE_ID, "", "",
+                    "", true, FontAwesome.MINUS, SPUIButtonStyleNoBorderWithIcon.class);
             button.setSizeUndefined();
             button.addStyleName("default-color");
             button.setEnabled(true);
@@ -495,7 +496,7 @@ public class DefineGroupsLayout extends GridLayout {
         }
 
         private void onRemove() {
-            int index = findRowIndexFor(groupName, 0);
+            final int index = findRowIndexFor(groupName, 0);
             if (index != -1) {
                 removeRow(index);
             }
@@ -505,7 +506,7 @@ public class DefineGroupsLayout extends GridLayout {
         private int findRowIndexFor(final Component component, final int col) {
             final int rows = getRows();
             for (int i = 0; i < rows; i++) {
-                Component rowComponent = getComponent(col, i);
+                final Component rowComponent = getComponent(col, i);
                 if (component.equals(rowComponent)) {
                     return i;
                 }
@@ -559,8 +560,8 @@ public class DefineGroupsLayout extends GridLayout {
                         .errorCondition(RolloutGroup.RolloutGroupErrorCondition.THRESHOLD, errorThreshold.getValue())
                         .errorAction(RolloutGroup.RolloutGroupErrorAction.PAUSE, null);
             }
-            String percentageString = targetPercentage.getValue().replace(",", ".");
-            Float percentage = Float.parseFloat(percentageString);
+            final String percentageString = targetPercentage.getValue().replace(",", ".");
+            final Float percentage = Float.parseFloat(percentageString);
 
             return entityFactory.rolloutGroup().create().name(groupName.getValue()).description(groupName.getValue())
                     .targetFilterQuery(getTargetFilterQuery()).targetPercentage(percentage)
@@ -595,11 +596,10 @@ public class DefineGroupsLayout extends GridLayout {
                     && triggerThreshold.isValid() && errorThreshold.isValid();
         }
 
-        /**
-         * Displays an error for the row
-         */
-        public void markWithLastGroupError() {
-            targetPercentage.setComponentError(new UserError(i18n.getMessage("message.rollout.remaining.targets.error")));
+        private void markWithLastGroupError(RolloutGroupsValidation rolloutGroupsValidation) {
+            targetPercentage.setComponentError(new UserError("Total targets: "
+                    + rolloutGroupsValidation.getTotalTargets() + "  TargetsInGroups"
+                    + rolloutGroupsValidation.getTargetsInGroups() + "   validationStatus:" + validationStatus.name()));
         }
 
         /**
