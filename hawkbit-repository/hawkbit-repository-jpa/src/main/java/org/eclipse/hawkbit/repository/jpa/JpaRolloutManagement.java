@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -108,6 +109,9 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
      * Maximum amount of actions that are deleted in one transaction.
      */
     private static final int TRANSACTION_ACTIONS = 5_000;
+
+    private static final List<RolloutStatus> ACTIVE_ROLLOUTS = Arrays.asList(RolloutStatus.CREATING,
+            RolloutStatus.DELETING, RolloutStatus.STARTING, RolloutStatus.READY, RolloutStatus.RUNNING);
 
     @Autowired
     private RolloutRepository rolloutRepository;
@@ -716,8 +720,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     // No transaction, will be created per handled rollout
     @Transactional(propagation = Propagation.NEVER)
     public void handleRollouts() {
-        final List<Long> rollouts = rolloutRepository.findByStatusIn(Lists.newArrayList(RolloutStatus.CREATING,
-                RolloutStatus.DELETING, RolloutStatus.STARTING, RolloutStatus.READY, RolloutStatus.RUNNING));
+        final List<Long> rollouts = rolloutRepository.findByStatusIn(ACTIVE_ROLLOUTS);
 
         if (rollouts.isEmpty()) {
             return;
