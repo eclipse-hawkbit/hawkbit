@@ -225,6 +225,7 @@
                   <exclude>**/addons.scss</exclude>
                   <exclude>**/VAADIN/widgetsets/**</exclude>
                   <exclude>.sonar</exclude>
+                  <exclude>**/Dockerfile</exclude>
                   <exclude>**/.sonar/**</exclude>
                   <exclude>docs/src/main/resources/**</exclude>
                </excludes>

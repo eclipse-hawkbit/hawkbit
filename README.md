@@ -33,9 +33,19 @@ There are clients outside of the Eclipse IoT eco system as well, e.g.:
 
 # Getting Started
 
-We are providing a [Spring Boot](https://projects.spring.io/spring-boot/) based reference [Update Server](hawkbit-runtime/hawkbit-update-server) including embedded H2 DB for test and evaluation purposes. See below for how to build and run the update server on your own. In addition we have [guide](http://www.eclipse.org/hawkbit/documentation/guide/runhawkbit.html) for setting up a complete landscape.
+We are providing a [Spring Boot](https://projects.spring.io/spring-boot/) based reference [Update Server](hawkbit-runtime/hawkbit-update-server) including embedded H2 DB for test and evaluation purposes. 
+Run with docker:
 
-Docker support by means of ready to go image is currently missing but we will look into this as soon as we can.
+```
+$  docker run -d -p 8080:8080 hawkbit/hawkbit-update-server
+```
+
+Open the update server in your browser:
+
+[localhost:8080](http://localhost:8080) 
+
+See below for how to build and run the update server on your own. In addition we have a [guide](http://www.eclipse.org/hawkbit/documentation/guide/runhawkbit.html) for setting up a complete landscape.
+
 
 # hawkBit (Spring boot) starters
 
