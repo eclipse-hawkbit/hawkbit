@@ -431,9 +431,10 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
      */
     @EventBusListenerMethod(scope = EventScope.UI)
     public void onEvent(final DistributionTableFilterEvent event) {
-        if (event == DistributionTableFilterEvent.FILTER_BY_TEXT
-                || event == DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT
-                || event == DistributionTableFilterEvent.FILTER_BY_TAG) {
+        if (event == DistributionTableFilterEvent.FILTER_BY_TEXT_DISTRIBUTION_VIEW
+                || event == DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT_DISTRIBUTION_VIEW
+                || event == DistributionTableFilterEvent.FILTER_BY_TAG_DISTRIBUTION_VIEW
+                || event == DistributionTableFilterEvent.REMOVE_FILTER_BY_TAG_DISTRIBUTION_VIEW) {
             UI.getCurrent().access(this::refreshFilter);
         }
     }

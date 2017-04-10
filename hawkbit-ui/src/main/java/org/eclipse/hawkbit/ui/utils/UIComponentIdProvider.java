@@ -67,7 +67,7 @@ public final class UIComponentIdProvider {
     public static final String TARGET_FILTER_ADD_ICON_ID = "target.filter.add.id";
 
     /**
-     * ID-Dist.
+     * ID-Dist. on deployment and distribution view
      */
     public static final String DIST_TABLE_ID = "dist.tableId";
 
@@ -501,7 +501,7 @@ public final class UIComponentIdProvider {
     public static final String SM_TYPE_FILTER_BTN_ID = "sm.type.filter.btn.";
 
     /**
-     * Software module table details header caption id.
+     * Target table details header caption id.
      */
     public static final String TARGET_DETAILS_HEADER_LABEL_ID = "target.details.header.caption";
 
@@ -509,6 +509,11 @@ public final class UIComponentIdProvider {
      * Software module table details header caption id.
      */
     public static final String DISTRIBUTION_DETAILS_HEADER_LABEL_ID = "distribution.details.header.caption";
+
+    /**
+     * Software Module table details header caption id.
+     */
+    public static final String SOFTWARE_MODULE_DETAILS_HEADER_LABEL_ID = "software.module.details.header.caption";
 
     /**
      * Software module table details vendor label id.

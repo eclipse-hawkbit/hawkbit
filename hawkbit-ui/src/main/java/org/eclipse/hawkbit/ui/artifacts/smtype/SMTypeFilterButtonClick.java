@@ -24,7 +24,7 @@ import com.vaadin.ui.Button;
  */
 public class SMTypeFilterButtonClick extends AbstractFilterSingleButtonClick implements Serializable {
 
-    private static final long serialVersionUID = 3707945900524967887L;
+    private static final long serialVersionUID = 1L;
 
     private final transient EventBus.UIEventBus eventBus;
 
@@ -42,7 +42,7 @@ public class SMTypeFilterButtonClick extends AbstractFilterSingleButtonClick imp
     @Override
     protected void filterUnClicked(final Button clickedButton) {
         artifactUploadState.getSoftwareModuleFilters().setSoftwareModuleType(null);
-        eventBus.publish(this, SMFilterEvent.FILTER_BY_TYPE);
+        eventBus.publish(this, SMFilterEvent.FILTER_BY_TYPE_UPLOAD_VIEW);
     }
 
     @Override
@@ -50,7 +50,7 @@ public class SMTypeFilterButtonClick extends AbstractFilterSingleButtonClick imp
         softwareManagement.findSoftwareModuleTypeByName(clickedButton.getData().toString())
                 .ifPresent(softwareModuleType -> {
                     artifactUploadState.getSoftwareModuleFilters().setSoftwareModuleType(softwareModuleType);
-                    eventBus.publish(this, SMFilterEvent.FILTER_BY_TYPE);
+                    eventBus.publish(this, SMFilterEvent.FILTER_BY_TYPE_UPLOAD_VIEW);
                 });
     }
 

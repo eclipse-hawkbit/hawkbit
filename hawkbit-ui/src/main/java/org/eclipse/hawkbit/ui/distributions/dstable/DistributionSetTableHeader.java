@@ -16,8 +16,8 @@ import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionAddUpdateWindowLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -35,8 +35,9 @@ public class DistributionSetTableHeader extends AbstractDistributionSetTableHead
 
     private final DistributionAddUpdateWindowLayout addUpdateWindowLayout;
 
-    DistributionSetTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
-            final ManageDistUIState manageDistUIstate, final DistributionAddUpdateWindowLayout addUpdateWindowLayout) {
+    DistributionSetTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
+            final UIEventBus eventbus, final ManageDistUIState manageDistUIstate,
+            final DistributionAddUpdateWindowLayout addUpdateWindowLayout) {
         super(i18n, permChecker, eventbus, null, manageDistUIstate, null);
         this.addUpdateWindowLayout = addUpdateWindowLayout;
     }
@@ -63,7 +64,7 @@ public class DistributionSetTableHeader extends AbstractDistributionSetTableHead
     protected void resetSearchText() {
         if (manageDistUIstate.getManageDistFilters().getSearchText().isPresent()) {
             manageDistUIstate.getManageDistFilters().setSearchText(null);
-            eventbus.publish(this, DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT);
+            eventbus.publish(this, DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT_DISTRIBUTION_VIEW);
         }
     }
 
@@ -92,7 +93,7 @@ public class DistributionSetTableHeader extends AbstractDistributionSetTableHead
     @Override
     protected void searchBy(final String newSearchText) {
         manageDistUIstate.getManageDistFilters().setSearchText(newSearchText);
-        eventbus.publish(this, DistributionTableFilterEvent.FILTER_BY_TEXT);
+        eventbus.publish(this, DistributionTableFilterEvent.FILTER_BY_TEXT_DISTRIBUTION_VIEW);
     }
 
     @Override

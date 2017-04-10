@@ -57,7 +57,7 @@ public class SwModuleTableHeader extends AbstractSoftwareModuleTableHeader {
     protected void resetSearchText() {
         if (manageDistUIstate.getSoftwareModuleFilters().getSearchText().isPresent()) {
             manageDistUIstate.getSoftwareModuleFilters().setSearchText(null);
-            eventbus.publish(this, SMFilterEvent.REMOVER_FILTER_BY_TEXT);
+            eventbus.publish(this, SMFilterEvent.REMOVE_FILTER_BY_TEXT_DISTRIBUTION_VIEW);
         }
     }
 
@@ -87,7 +87,7 @@ public class SwModuleTableHeader extends AbstractSoftwareModuleTableHeader {
     @Override
     protected void searchBy(final String newSearchText) {
         manageDistUIstate.getSoftwareModuleFilters().setSearchText(newSearchText);
-        eventbus.publish(this, SMFilterEvent.FILTER_BY_TEXT);
+        eventbus.publish(this, SMFilterEvent.FILTER_BY_TEXT_DISTRIBUTION_VIEW);
     }
 
 }

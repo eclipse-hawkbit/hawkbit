@@ -24,7 +24,7 @@ import com.vaadin.ui.Button;
  */
 public class DSTypeFilterButtonClick extends AbstractFilterSingleButtonClick implements Serializable {
 
-    private static final long serialVersionUID = -584783755917528648L;
+    private static final long serialVersionUID = 1L;
 
     private final transient EventBus.UIEventBus eventBus;
 
@@ -42,16 +42,14 @@ public class DSTypeFilterButtonClick extends AbstractFilterSingleButtonClick imp
     @Override
     protected void filterUnClicked(final Button clickedButton) {
         manageDistUIState.getManageDistFilters().setClickedDistSetType(null);
-        eventBus.publish(this, DistributionTableFilterEvent.FILTER_BY_TAG);
-
+        eventBus.publish(this, DistributionTableFilterEvent.FILTER_BY_TAG_DISTRIBUTION_VIEW);
     }
 
     @Override
     protected void filterClicked(final Button clickedButton) {
         distributionSetManagement.findDistributionSetTypeByName(clickedButton.getData().toString())
                 .ifPresent(manageDistUIState.getManageDistFilters()::setClickedDistSetType);
-        eventBus.publish(this, DistributionTableFilterEvent.FILTER_BY_TAG);
-
+        eventBus.publish(this, DistributionTableFilterEvent.FILTER_BY_TAG_DISTRIBUTION_VIEW);
     }
 
 }

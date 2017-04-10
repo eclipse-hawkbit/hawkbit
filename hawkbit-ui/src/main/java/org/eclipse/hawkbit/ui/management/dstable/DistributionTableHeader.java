@@ -59,7 +59,7 @@ public class DistributionTableHeader extends AbstractDistributionSetTableHeader 
     protected void resetSearchText() {
         if (managementUIState.getDistributionTableFilters().getSearchText().isPresent()) {
             managementUIState.getDistributionTableFilters().setSearchText(null);
-            eventbus.publish(this, DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT);
+            eventbus.publish(this, DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT_DEPLOYMENT_VIEW);
         }
     }
 
@@ -88,7 +88,7 @@ public class DistributionTableHeader extends AbstractDistributionSetTableHeader 
     @Override
     protected void searchBy(final String newSearchText) {
         managementUIState.getDistributionTableFilters().setSearchText(newSearchText);
-        eventbus.publish(this, DistributionTableFilterEvent.FILTER_BY_TEXT);
+        eventbus.publish(this, DistributionTableFilterEvent.FILTER_BY_TEXT_DEPLOYMENT_VIEW);
     }
 
     @Override

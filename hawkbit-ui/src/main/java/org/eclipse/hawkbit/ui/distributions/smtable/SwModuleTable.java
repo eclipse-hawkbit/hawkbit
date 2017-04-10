@@ -102,10 +102,10 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SMFilterEvent filterEvent) {
         UI.getCurrent().access(() -> {
-
-            if (filterEvent == SMFilterEvent.FILTER_BY_TYPE || filterEvent == SMFilterEvent.FILTER_BY_TEXT
-                    || filterEvent == SMFilterEvent.REMOVER_FILTER_BY_TYPE
-                    || filterEvent == SMFilterEvent.REMOVER_FILTER_BY_TEXT) {
+            if (filterEvent == SMFilterEvent.FILTER_BY_TYPE_DISTRIBUTION_VIEW
+                    || filterEvent == SMFilterEvent.FILTER_BY_TEXT_DISTRIBUTION_VIEW
+                    || filterEvent == SMFilterEvent.REMOVE_FILTER_BY_TYPE_DISTRIBUTION_VIEW
+                    || filterEvent == SMFilterEvent.REMOVE_FILTER_BY_TEXT_DISTRIBUTION_VIEW) {
                 refreshFilter();
                 styleTableOnDistSelection();
             }

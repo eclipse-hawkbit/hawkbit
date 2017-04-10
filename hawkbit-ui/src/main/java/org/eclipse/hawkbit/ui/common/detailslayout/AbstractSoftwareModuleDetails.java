@@ -130,7 +130,7 @@ public abstract class AbstractSoftwareModuleDetails
 
     @Override
     protected String getDetailsHeaderCaptionId() {
-        return UIComponentIdProvider.TARGET_DETAILS_HEADER_LABEL_ID;
+        return UIComponentIdProvider.SOFTWARE_MODULE_DETAILS_HEADER_LABEL_ID;
     }
 
     @Override

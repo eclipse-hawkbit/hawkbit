@@ -42,14 +42,14 @@ public class DistSMTypeFilterButtonClick extends AbstractFilterSingleButtonClick
     @Override
     protected void filterUnClicked(final Button clickedButton) {
         manageDistUIState.getSoftwareModuleFilters().setSoftwareModuleType(null);
-        eventBus.publish(this, SMFilterEvent.FILTER_BY_TYPE);
+        eventBus.publish(this, SMFilterEvent.FILTER_BY_TYPE_DISTRIBUTION_VIEW);
     }
 
     @Override
     protected void filterClicked(final Button clickedButton) {
         softwareManagement.findSoftwareModuleTypeByName(clickedButton.getData().toString()).ifPresent(smType -> {
             manageDistUIState.getSoftwareModuleFilters().setSoftwareModuleType(smType);
-            eventBus.publish(this, SMFilterEvent.FILTER_BY_TYPE);
+            eventBus.publish(this, SMFilterEvent.FILTER_BY_TYPE_DISTRIBUTION_VIEW);
         });
     }
 

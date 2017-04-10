@@ -22,8 +22,8 @@ import com.vaadin.ui.Button;
  *
  */
 public class DistributionTagButtonClick extends AbstractFilterMultiButtonClick {
-    private static final long serialVersionUID = 4120296456125178019L;
 
+    private static final long serialVersionUID = 1L;
     private final transient EventBus.UIEventBus eventBus;
     private final ManagementUIState managementUIState;
 
@@ -39,7 +39,7 @@ public class DistributionTagButtonClick extends AbstractFilterMultiButtonClick {
         } else {
             managementUIState.getDistributionTableFilters().getDistSetTags().remove(clickedButton.getId());
         }
-        eventBus.publish(this, DistributionTableFilterEvent.FILTER_BY_TAG);
+        eventBus.publish(this, DistributionTableFilterEvent.FILTER_BY_TAG_DEPLOYMENT_VIEW);
     }
 
     @Override
@@ -50,7 +50,7 @@ public class DistributionTagButtonClick extends AbstractFilterMultiButtonClick {
             managementUIState.getDistributionTableFilters().getDistSetTags().add(clickedButton.getId());
         }
 
-        eventBus.publish(this, DistributionTableFilterEvent.FILTER_BY_TAG);
+        eventBus.publish(this, DistributionTableFilterEvent.FILTER_BY_TAG_DEPLOYMENT_VIEW);
     }
 
 }

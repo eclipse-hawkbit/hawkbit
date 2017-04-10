@@ -56,7 +56,7 @@ public class SoftwareModuleTableHeader extends AbstractSoftwareModuleTableHeader
     protected void resetSearchText() {
         if (artifactUploadState.getSoftwareModuleFilters().getSearchText().isPresent()) {
             artifactUploadState.getSoftwareModuleFilters().setSearchText(null);
-            eventbus.publish(this, SMFilterEvent.REMOVER_FILTER_BY_TEXT);
+            eventbus.publish(this, SMFilterEvent.REMOVE_FILTER_BY_TEXT_UPLOAD_VIEW);
         }
     }
 
@@ -86,7 +86,7 @@ public class SoftwareModuleTableHeader extends AbstractSoftwareModuleTableHeader
     @Override
     protected void searchBy(final String newSearchText) {
         artifactUploadState.getSoftwareModuleFilters().setSearchText(newSearchText);
-        eventbus.publish(this, SMFilterEvent.FILTER_BY_TEXT);
+        eventbus.publish(this, SMFilterEvent.FILTER_BY_TEXT_UPLOAD_VIEW);
     }
 
     @Override
