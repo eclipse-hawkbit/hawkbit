@@ -80,7 +80,15 @@ public class RolloutScheduler {
             LOGGER.info("Checking rollouts for {} tenants", tenants.size());
             for (final String tenant : tenants) {
                 tenantAware.runAsTenant(tenant, () -> {
-                    rolloutManagement.handleRollouts();
+                    try {
+                        rolloutManagement.handleRollouts();
+                        // We catch all potential runtime exceptions here to
+                        // ensure that not all tenants are blocked if we have a
+                        // problem with a rollout.
+                    } catch (@SuppressWarnings("squid:S1166") final RuntimeException e) {
+                        LOGGER.error("Failed to handle rollouts for tenant {}. I will move on to next tenant.", tenant,
+                                e);
+                    }
                     return null;
                 });
             }
