@@ -19,7 +19,7 @@ RUN set -x \
     && wget -O hawkbit-update-server.jar.asc --no-verbose http://repo1.maven.org/maven2/org/eclipse/hawkbit/hawkbit-update-server/$HAWKBIT_VERSION/hawkbit-update-server-$HAWKBIT_VERSION.jar.asc \
     && gpg --batch --verify hawkbit-update-server.jar.asc hawkbit-update-server.jar
 
-VOLUME "$SONARQUBE_HOME/data"
+VOLUME "$HAWKBIT_HOME/data"
 
 WORKDIR $HAWKBIT_HOME
 ENTRYPOINT ["java","-jar","hawkbit-update-server.jar","-Xmx768m -Xmx768m -XX:MaxMetaspaceSize=250m -XX:MetaspaceSize=250m -Xss300K -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+UseCompressedOops -XX:+HeapDumpOnOutOfMemoryError"]
