@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
  * {@link SoftwareModuleMetadata} repository.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public interface SoftwareModuleMetadataRepository
         extends PagingAndSortingRepository<JpaSoftwareModuleMetadata, SwMetadataCompositeKey>,
         JpaSpecificationExecutor<JpaSoftwareModuleMetadata> {

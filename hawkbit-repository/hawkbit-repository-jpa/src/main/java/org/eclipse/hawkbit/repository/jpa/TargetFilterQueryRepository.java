@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Spring data repositories for {@link TargetFilterQuery}s.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public interface TargetFilterQueryRepository
         extends BaseEntityRepository<JpaTargetFilterQuery, Long>, JpaSpecificationExecutor<JpaTargetFilterQuery> {
 
@@ -49,7 +49,7 @@ public interface TargetFilterQueryRepository
      *            distribution set ids to be set to null
      */
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     @Query("update JpaTargetFilterQuery d set d.autoAssignDistributionSet = NULL where d.autoAssignDistributionSet in :ids")
     void unsetAutoAssignDistributionSet(@Param("ids") Long... dsIds);
 

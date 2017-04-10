@@ -72,7 +72,7 @@ import com.google.common.collect.Lists;
  * JPA implementation of {@link TargetManagement}.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 @Validated
 public class JpaTargetManagement implements TargetManagement {
 
@@ -151,7 +151,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public Target updateTarget(final TargetUpdate u) {
         final JpaTargetUpdate update = (JpaTargetUpdate) u;
 
@@ -168,7 +168,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public void deleteTargets(final Collection<Long> targetIDs) {
         final List<JpaTarget> targets = targetRepository.findAll(targetIDs);
 
@@ -185,7 +185,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public void deleteTarget(final String controllerID) {
         final Target target = targetRepository.findByControllerId(controllerID)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerID));
@@ -325,7 +325,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public TargetTagAssignmentResult toggleTagAssignment(final Collection<String> controllerIds, final String tagName) {
         final TargetTag tag = targetTagRepository.findByNameEquals(tagName)
                 .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, tagName));
@@ -363,7 +363,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public List<Target> assignTag(final Collection<String> controllerIds, final Long tagId) {
         final List<JpaTarget> allTargets = targetRepository
                 .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(controllerIds));
@@ -393,7 +393,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public List<Target> unAssignAllTargetsByTag(final Long targetTagId) {
 
         final TargetTag tag = targetTagRepository.findById(targetTagId)
@@ -408,7 +408,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public Target unAssignTag(final String controllerID, final Long targetTagId) {
         final Target target = targetRepository.findByControllerId(controllerID)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerID));
@@ -554,7 +554,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public Target createTarget(final TargetCreate c) {
         final JpaTargetCreate create = (JpaTargetCreate) c;
 
@@ -569,7 +569,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public List<Target> createTargets(final Collection<TargetCreate> targets) {
         return targets.stream().map(this::createTarget).collect(Collectors.toList());
     }

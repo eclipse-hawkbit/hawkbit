@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
  * repository for operations on {@link TenantMetaData} entity.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public interface TenantMetaDataRepository extends PagingAndSortingRepository<JpaTenantMetaData, Long> {
 
     /**

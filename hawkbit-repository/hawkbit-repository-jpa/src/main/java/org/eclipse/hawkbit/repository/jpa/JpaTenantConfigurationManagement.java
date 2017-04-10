@@ -31,7 +31,7 @@ import org.springframework.validation.annotation.Validated;
 /**
  * Central tenant configuration management operations of the SP server.
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 @Validated
 public class JpaTenantConfigurationManagement implements TenantConfigurationManagement {
 
@@ -123,7 +123,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
 
     @Override
     @CacheEvict(value = "tenantConfiguration", key = "#configurationKeyName")
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     @Modifying
     public <T extends Serializable> TenantConfigurationValue<T> addOrUpdateConfiguration(
             final String configurationKeyName, final T value) {
@@ -162,7 +162,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
 
     @Override
     @CacheEvict(value = "tenantConfiguration", key = "#configurationKeyName")
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     @Modifying
     public void deleteConfiguration(final String configurationKeyName) {
         tenantConfigurationRepository.deleteByKey(configurationKeyName);

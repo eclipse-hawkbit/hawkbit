@@ -37,7 +37,7 @@ public class JpaTenantStatsManagement implements TenantStatsManagement {
     private TenantAware tenantAware;
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public TenantUsage getStatsOfTenant() {
         final String tenant = tenantAware.getCurrentTenant();
 

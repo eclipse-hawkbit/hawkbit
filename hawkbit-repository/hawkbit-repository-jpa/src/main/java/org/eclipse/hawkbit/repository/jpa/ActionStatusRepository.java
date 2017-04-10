@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
  * {@link ActionStatus} repository.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public interface ActionStatusRepository
         extends BaseEntityRepository<JpaActionStatus, Long>, JpaSpecificationExecutor<JpaActionStatus> {
 

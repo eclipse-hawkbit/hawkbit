@@ -97,7 +97,7 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     @Autowired
     protected TenantConfigurationProperties tenantConfigurationProperties;
 
-    @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional(readOnly = true)
     protected List<Action> findActionsByRolloutAndStatus(final Rollout rollout, final Action.Status actionStatus) {
         return Lists.newArrayList(actionRepository.findByRolloutIdAndStatus(pageReq, rollout.getId(), actionStatus));
     }

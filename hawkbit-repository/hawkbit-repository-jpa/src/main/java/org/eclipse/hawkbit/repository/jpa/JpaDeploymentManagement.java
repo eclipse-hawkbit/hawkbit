@@ -95,7 +95,7 @@ import com.google.common.collect.Lists;
  * JPA implementation for {@link DeploymentManagement}.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 @Validated
 public class JpaDeploymentManagement implements DeploymentManagement {
     private static final Logger LOG = LoggerFactory.getLogger(JpaDeploymentManagement.class);
@@ -143,7 +143,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     // Exception squid:S2095: see
     // https://jira.sonarsource.com/browse/SONARJAVA-1478
     @SuppressWarnings({ "squid:S2095" })
@@ -254,9 +254,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         targetIds.forEach(tIds -> targetRepository.setAssignedDistributionSetAndUpdateStatus(TargetUpdateStatus.PENDING,
                 set, System.currentTimeMillis(), currentUser, tIds));
-        final Map<String, JpaAction> targetIdsToActions = targets.stream()
-                .map(t -> actionRepository
-                        .save(createTargetAction(targetsWithActionMap, t, set, rollout, rolloutGroup)))
+        final Map<String, JpaAction> targetIdsToActions = targets.stream().map(
+                t -> actionRepository.save(createTargetAction(targetsWithActionMap, t, set, rollout, rolloutGroup)))
                 .collect(Collectors.toMap(a -> a.getTarget().getControllerId(), Function.identity()));
 
         // create initial action status when action is created so we remember
@@ -440,7 +439,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         def.setName("startScheduledActions");
         def.setReadOnly(false);
-        def.setIsolationLevel(Isolation.READ_UNCOMMITTED.value());
         def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         return new TransactionTemplate(txManager, def).execute(status -> {
             final Page<Action> rolloutGroupActions = findActionsByRolloutAndRolloutGroupParent(rolloutId,
@@ -628,7 +626,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public Action forceTargetAction(final Long actionId) {
         final JpaAction action = actionRepository.findById(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));

@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Spring data repository for {@link RolloutTargetGroup}.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public interface RolloutTargetGroupRepository
         extends CrudRepository<RolloutTargetGroup, RolloutTargetGroupId>, JpaSpecificationExecutor<RolloutTargetGroup> {
 

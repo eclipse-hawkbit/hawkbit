@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
  *            of the entity type
  */
 @NoRepositoryBean
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity, I extends Serializable>
         extends PagingAndSortingRepository<T, I> {
 
@@ -40,7 +40,7 @@ public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity
      *            to delete data from
      */
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     void deleteByTenantIgnoreCase(String tenant);
 
     /**

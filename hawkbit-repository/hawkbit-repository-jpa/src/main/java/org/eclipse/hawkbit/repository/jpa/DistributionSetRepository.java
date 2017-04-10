@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
  * {@link DistributionSet} repository.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public interface DistributionSetRepository
         extends BaseEntityRepository<JpaDistributionSet, Long>, JpaSpecificationExecutor<JpaDistributionSet> {
 
@@ -51,7 +51,7 @@ public interface DistributionSetRepository
      *            to be deleted
      */
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     @Query("update JpaDistributionSet d set d.deleted = 1 where d.id in :ids")
     void deleteDistributionSet(@Param("ids") Long... ids);
 
@@ -63,7 +63,7 @@ public interface DistributionSetRepository
      * @return number of affected/deleted records
      */
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("DELETE FROM JpaDistributionSet d WHERE d.id IN ?1")
     int deleteByIdIn(Collection<Long> ids);

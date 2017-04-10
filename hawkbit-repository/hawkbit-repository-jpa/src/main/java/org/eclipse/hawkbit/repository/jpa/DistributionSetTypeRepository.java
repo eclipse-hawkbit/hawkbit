@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
  * {@link PagingAndSortingRepository} for {@link DistributionSetType}.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public interface DistributionSetTypeRepository
         extends BaseEntityRepository<JpaDistributionSetType, Long>, JpaSpecificationExecutor<JpaDistributionSetType> {
 

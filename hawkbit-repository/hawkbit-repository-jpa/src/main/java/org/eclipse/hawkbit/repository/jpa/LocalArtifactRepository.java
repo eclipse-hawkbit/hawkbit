@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
  * {@link Artifact} repository.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public interface LocalArtifactRepository extends BaseEntityRepository<JpaArtifact, Long> {
 
     /**

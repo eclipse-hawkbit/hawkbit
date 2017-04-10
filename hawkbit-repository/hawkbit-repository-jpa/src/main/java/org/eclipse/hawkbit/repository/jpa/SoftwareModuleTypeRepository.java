@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Repository for {@link SoftwareModuleType}.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public interface SoftwareModuleTypeRepository
         extends BaseEntityRepository<JpaSoftwareModuleType, Long>, JpaSpecificationExecutor<JpaSoftwareModuleType> {
 

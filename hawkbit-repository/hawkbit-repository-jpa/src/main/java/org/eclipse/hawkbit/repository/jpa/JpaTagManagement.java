@@ -43,7 +43,7 @@ import org.springframework.validation.annotation.Validated;
  * JP>A implementation of {@link TagManagement}.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 @Validated
 public class JpaTagManagement implements TagManagement {
 
@@ -68,7 +68,7 @@ public class JpaTagManagement implements TagManagement {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public TargetTag createTargetTag(final TagCreate c) {
         final JpaTagCreate create = (JpaTagCreate) c;
 
@@ -83,7 +83,7 @@ public class JpaTagManagement implements TagManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public List<TargetTag> createTargetTags(final Collection<TagCreate> tt) {
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final Collection<JpaTagCreate> targetTags = (Collection) tt;
@@ -94,7 +94,7 @@ public class JpaTagManagement implements TagManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public void deleteTargetTag(final String targetTagName) {
         final TargetTag tag = targetTagRepository.findByNameEquals(targetTagName)
                 .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagName));
@@ -132,7 +132,7 @@ public class JpaTagManagement implements TagManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public TargetTag updateTargetTag(final TagUpdate u) {
         final GenericTagUpdate update = (GenericTagUpdate) u;
 
@@ -148,7 +148,7 @@ public class JpaTagManagement implements TagManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public DistributionSetTag updateDistributionSetTag(final TagUpdate u) {
         final GenericTagUpdate update = (GenericTagUpdate) u;
 
@@ -169,7 +169,7 @@ public class JpaTagManagement implements TagManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public DistributionSetTag createDistributionSetTag(final TagCreate c) {
         final JpaTagCreate create = (JpaTagCreate) c;
 
@@ -184,7 +184,7 @@ public class JpaTagManagement implements TagManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public List<DistributionSetTag> createDistributionSetTags(final Collection<TagCreate> dst) {
 
         @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -197,7 +197,7 @@ public class JpaTagManagement implements TagManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public void deleteDistributionSetTag(final String tagName) {
         final DistributionSetTag tag = distributionSetTagRepository.findByNameEquals(tagName)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, tagName));

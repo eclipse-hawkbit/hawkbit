@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
  * {@link TargetTag} repository.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public interface DistributionSetTagRepository
         extends BaseEntityRepository<JpaDistributionSetTag, Long>, JpaSpecificationExecutor<JpaDistributionSetTag> {
     /**
@@ -35,7 +35,7 @@ public interface DistributionSetTagRepository
      * @return 1 if tag was deleted
      */
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     Long deleteByName(final String tagName);
 
     /**

@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * The repository interface for the {@link Rollout} model.
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public interface RolloutRepository
         extends BaseEntityRepository<JpaRollout, Long>, JpaSpecificationExecutor<JpaRollout> {
 

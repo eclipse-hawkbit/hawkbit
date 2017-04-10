@@ -49,7 +49,7 @@ import org.springframework.validation.annotation.Validated;
  * JPA implementation of {@link ReportManagement}.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 @Validated
 public class JpaReportManagement implements ReportManagement {
 

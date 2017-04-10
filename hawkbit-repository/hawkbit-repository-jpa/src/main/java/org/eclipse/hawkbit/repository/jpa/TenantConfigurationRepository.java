@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
  * The spring-data repository for the entity {@link TenantConfiguration}.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public interface TenantConfigurationRepository extends BaseEntityRepository<JpaTenantConfiguration, Long> {
 
     /**

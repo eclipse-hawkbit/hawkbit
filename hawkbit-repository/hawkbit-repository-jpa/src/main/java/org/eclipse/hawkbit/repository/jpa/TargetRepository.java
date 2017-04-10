@@ -32,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
  * {@link Target} repository.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>, JpaSpecificationExecutor<JpaTarget> {
 
     /**
@@ -50,7 +50,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      *            to update
      */
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     @Query("UPDATE JpaTarget t  SET t.assignedDistributionSet = :set, t.lastModifiedAt = :lastModifiedAt, t.lastModifiedBy = :lastModifiedBy, t.updateStatus = :status WHERE t.id IN :targets")
     void setAssignedDistributionSetAndUpdateStatus(@Param("status") TargetUpdateStatus status,
             @Param("set") JpaDistributionSet set, @Param("lastModifiedAt") Long modifiedAt,
@@ -85,7 +85,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      *            to be deleted
      */
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("DELETE FROM JpaTarget t WHERE t.id IN ?1")
     void deleteByIdIn(final Collection<Long> targetIDs);

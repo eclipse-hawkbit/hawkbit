@@ -59,7 +59,7 @@ import org.springframework.validation.annotation.Validated;
  * JPA implementation of {@link RolloutGroupManagement}.
  */
 @Validated
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
     @Autowired

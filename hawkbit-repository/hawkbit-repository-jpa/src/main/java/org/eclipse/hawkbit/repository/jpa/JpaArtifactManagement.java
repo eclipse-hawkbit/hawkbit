@@ -41,7 +41,7 @@ import org.springframework.validation.annotation.Validated;
  * JPA based {@link ArtifactManagement} implementation.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 @Validated
 public class JpaArtifactManagement implements ArtifactManagement {
 
@@ -73,7 +73,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public Artifact createArtifact(final InputStream stream, final Long moduleId, final String filename,
             final String providedMd5Sum, final String providedSha1Sum, final boolean overrideExisting,
             final String contentType) {
@@ -104,7 +104,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public boolean clearArtifactBinary(final String sha1Hash, final Long moduleId) {
 
         if (localArtifactRepository.existsWithSha1HashAndSoftwareModuleIdIsNot(sha1Hash, moduleId)) {
@@ -123,7 +123,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public void deleteArtifact(final Long id) {
         final JpaArtifact existing = (JpaArtifact) findArtifact(id)
                 .orElseThrow(() -> new EntityNotFoundException(Artifact.class, id));
@@ -191,7 +191,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public Artifact createArtifact(final InputStream inputStream, final Long moduleId, final String filename,
             final boolean overrideExisting) {
         return createArtifact(inputStream, moduleId, filename, null, null, overrideExisting, null);

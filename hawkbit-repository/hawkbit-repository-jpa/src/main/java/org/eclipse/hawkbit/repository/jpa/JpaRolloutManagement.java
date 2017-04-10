@@ -96,7 +96,7 @@ import com.google.common.collect.Lists;
  * JPA implementation of {@link RolloutManagement}.
  */
 @Validated
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public class JpaRolloutManagement extends AbstractRolloutManagement {
     private static final Logger LOGGER = LoggerFactory.getLogger(JpaRolloutManagement.class);
 
@@ -171,7 +171,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     @Modifying
     public Rollout createRollout(final RolloutCreate rollout, final int amountGroup,
             final RolloutGroupConditions conditions) {
@@ -181,7 +181,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     @Modifying
     public Rollout createRollout(final RolloutCreate rollout, final List<RolloutGroupCreate> groups,
             final RolloutGroupConditions conditions) {
@@ -414,7 +414,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     @Modifying
     public Rollout startRollout(final Long rolloutId) {
         LOGGER.debug("startRollout called for rollout {}", rolloutId);
@@ -545,7 +545,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     @Modifying
     public void pauseRollout(final Long rolloutId) {
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
@@ -563,7 +563,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     @Modifying
     public void resumeRollout(final Long rolloutId) {
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
@@ -788,7 +788,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     @Modifying
     public void deleteRollout(final long rolloutId) {
         final JpaRollout jpaRollout = rolloutRepository.findOne(rolloutId);
@@ -893,7 +893,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     @Modifying
     public Rollout updateRollout(final RolloutUpdate u) {
         final GenericRolloutUpdate update = (GenericRolloutUpdate) u;

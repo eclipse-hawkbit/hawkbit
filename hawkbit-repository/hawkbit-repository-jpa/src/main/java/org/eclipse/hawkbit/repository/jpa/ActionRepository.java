@@ -42,7 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
  * {@link Action} repository.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>, JpaSpecificationExecutor<JpaAction> {
     /**
      * Retrieves an Action with all lazy attributes.
@@ -190,7 +190,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      *            the current status of the actions which are affected
      */
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     @Query("UPDATE JpaAction a SET a.status = :statusToSet WHERE a.target IN :targetsIds AND a.active = :active AND a.status = :currentStatus AND a.distributionSet.requiredMigrationStep = false")
     void switchStatus(@Param("statusToSet") Action.Status statusToSet, @Param("targetsIds") List<Long> targetIds,
             @Param("active") boolean active, @Param("currentStatus") Action.Status currentStatus);
@@ -424,7 +424,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      *            the IDs of the actions to be deleted.
      */
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("DELETE FROM JpaAction a WHERE a.id IN ?1")
     void deleteByIdIn(final Collection<Long> actionIDs);
