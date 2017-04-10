@@ -293,14 +293,14 @@ public class DefineGroupsLayout extends GridLayout {
             }
 
             final GroupRow lastRow = groupRows.get(groupRows.size() - 1);
-            if (validation != null && validation.isValid()
-                    && validationStatus != ValidationStatus.INVALID) {
+            if (validation != null && validation.isValid() && validationStatus != ValidationStatus.INVALID) {
                 lastRow.hideLastGroupError();
                 setValidationStatus(ValidationStatus.VALID);
                 return;
 
             }
-            lastRow.markWithLastGroupError();
+
+            lastRow.markWithLastGroupError(validation);
             setValidationStatus(ValidationStatus.INVALID);
         });
 
@@ -596,12 +596,10 @@ public class DefineGroupsLayout extends GridLayout {
                     && triggerThreshold.isValid() && errorThreshold.isValid();
         }
 
-        /**
-         * Displays an error for the row
-         */
-        public void markWithLastGroupError() {
+        private void markWithLastGroupError(RolloutGroupsValidation rolloutGroupsValidation) {
             targetPercentage
-                    .setComponentError(new UserError(i18n.getMessage("message.rollout.remaining.targets.error")));
+                    .setComponentError(new UserError("Total targets: " + rolloutGroupsValidation.getTotalTargets()
+                            + "  TargetsInGroups" + rolloutGroupsValidation.getTargetsInGroups()));
         }
 
         /**
