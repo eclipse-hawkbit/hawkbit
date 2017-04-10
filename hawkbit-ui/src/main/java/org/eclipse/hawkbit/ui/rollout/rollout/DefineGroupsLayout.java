@@ -597,9 +597,9 @@ public class DefineGroupsLayout extends GridLayout {
         }
 
         private void markWithLastGroupError(RolloutGroupsValidation rolloutGroupsValidation) {
-            targetPercentage
-                    .setComponentError(new UserError("Total targets: " + rolloutGroupsValidation.getTotalTargets()
-                            + "  TargetsInGroups" + rolloutGroupsValidation.getTargetsInGroups()));
+            targetPercentage.setComponentError(new UserError("Total targets: "
+                    + rolloutGroupsValidation.getTotalTargets() + "  TargetsInGroups"
+                    + rolloutGroupsValidation.getTargetsInGroups() + "   validationStatus:" + validationStatus.name()));
         }
 
         /**
