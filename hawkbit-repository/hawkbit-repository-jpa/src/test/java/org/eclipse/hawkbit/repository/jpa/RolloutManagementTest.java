@@ -133,7 +133,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             + " by means of throwing EntityNotFoundException.")
     @ExpectEvents({ @Expect(type = RolloutDeletedEvent.class, count = 0),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 10),
-            @Expect(type = RolloutGroupUpdatedEvent.class, count = 20),
+            @Expect(type = RolloutGroupUpdatedEvent.class, count = 10),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = RolloutUpdatedEvent.class, count = 1),
@@ -1465,7 +1465,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetCreatedEvent.class, count = 25), @Expect(type = RolloutUpdatedEvent.class, count = 2),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 5),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = RolloutGroupUpdatedEvent.class, count = 10) })
+            @Expect(type = RolloutGroupUpdatedEvent.class, count = 5) })
     public void deleteRolloutWhichHasNeverStartedIsHardDeleted() {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
@@ -1488,7 +1488,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = RolloutGroupUpdatedEvent.class, count = 16),
+            @Expect(type = RolloutGroupUpdatedEvent.class, count = 11),
             @Expect(type = RolloutUpdatedEvent.class, count = 6),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 25), @Expect(type = TargetUpdatedEvent.class, count = 2),

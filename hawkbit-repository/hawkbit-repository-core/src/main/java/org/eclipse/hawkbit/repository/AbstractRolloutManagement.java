@@ -77,7 +77,7 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
         this.lockRegistry = lockRegistry;
     }
 
-    protected int runInNewTransaction(final String transactionName, final TransactionCallback<Integer> action) {
+    protected Long runInNewTransaction(final String transactionName, final TransactionCallback<Long> action) {
         final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         def.setName(transactionName);
         def.setReadOnly(false);
