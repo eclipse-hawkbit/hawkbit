@@ -69,7 +69,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
@@ -283,13 +282,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             create.type(systemManagement.getTenantMetadata().getDefaultDsType().getKey());
         }
 
-        final JpaDistributionSet dSet = create.build();
-
-        if (distributionSetRepository.countByNameAndVersion(dSet.getName(), dSet.getVersion()) > 0) {
-            throw new EntityAlreadyExistsException("DistributionSet with that name and version already exists.");
-        }
-
-        return distributionSetRepository.save(dSet);
+        return distributionSetRepository.save(create.build());
     }
 
     @Override

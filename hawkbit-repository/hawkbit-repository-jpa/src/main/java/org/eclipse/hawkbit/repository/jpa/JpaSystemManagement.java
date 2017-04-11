@@ -151,8 +151,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    @Transactional
-    @Modifying
     public TenantMetaData getTenantMetadata(final String tenant) {
         final TenantMetaData result = tenantMetaDataRepository.findByTenantIgnoreCase(tenant);
         // Create if it does not exist
@@ -187,10 +185,11 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         def.setName("initial-tenant-creation");
         def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         def.setReadOnly(false);
-        return systemSecurityContext.runAsSystemAsTenant(
-                () -> new TransactionTemplate(txManager, def).execute(status -> tenantMetaDataRepository
-                        .save(new JpaTenantMetaData(createStandardSoftwareDataSetup(), tenant))),
-                tenant);
+        return systemSecurityContext
+                .runAsSystemAsTenant(() -> new TransactionTemplate(txManager, def).execute(status -> {
+                    final DistributionSetType defaultDsType = createStandardSoftwareDataSetup();
+                    return tenantMetaDataRepository.save(new JpaTenantMetaData(defaultDsType, tenant));
+                }), tenant);
     }
 
     @Override
@@ -221,8 +220,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    @Transactional
-    @Modifying
     public TenantMetaData getTenantMetadata() {
         if (tenantAware.getCurrentTenant() == null) {
             throw new IllegalStateException("Tenant not set");

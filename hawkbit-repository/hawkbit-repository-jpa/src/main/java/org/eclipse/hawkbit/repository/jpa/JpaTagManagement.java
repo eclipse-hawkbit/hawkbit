@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.builder.GenericTagUpdate;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.builder.TagUpdate;
-import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTagCreate;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
@@ -35,7 +34,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -72,13 +70,7 @@ public class JpaTagManagement implements TagManagement {
     public TargetTag createTargetTag(final TagCreate c) {
         final JpaTagCreate create = (JpaTagCreate) c;
 
-        final JpaTargetTag targetTag = create.buildTargetTag();
-
-        if (findTargetTag(targetTag.getName()).isPresent()) {
-            throw new EntityAlreadyExistsException();
-        }
-
-        return targetTagRepository.save(targetTag);
+        return targetTagRepository.save(create.buildTargetTag());
     }
 
     @Override
@@ -172,14 +164,7 @@ public class JpaTagManagement implements TagManagement {
     @Transactional
     public DistributionSetTag createDistributionSetTag(final TagCreate c) {
         final JpaTagCreate create = (JpaTagCreate) c;
-
-        final JpaDistributionSetTag distributionSetTag = create.buildDistributionSetTag();
-
-        if (distributionSetTagRepository.findByNameEquals(distributionSetTag.getName()).isPresent()) {
-            throw new EntityAlreadyExistsException();
-        }
-
-        return distributionSetTagRepository.save(distributionSetTag);
+        return distributionSetTagRepository.save(create.buildDistributionSetTag());
     }
 
     @Override
