@@ -128,8 +128,8 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                 .getSelectedBaseSoftwareModule().map(softwareModule -> HawkbitCommonUtil
                         .getFormattedNameVersion(softwareModule.getName(), softwareModule.getVersion()))
                 .orElse(StringUtils.EMPTY);
-        titleOfArtifactDetails = new LabelBuilder().name(HawkbitCommonUtil.getArtifactoryDetailsLabelId(labelStr))
-                .buildCaptionLabel();
+        titleOfArtifactDetails = new LabelBuilder().id(UIComponentIdProvider.ARTIFACT_DETAILS_HEADER_LABEL_ID)
+                .name(HawkbitCommonUtil.getArtifactoryDetailsLabelId(labelStr)).buildCaptionLabel();
         titleOfArtifactDetails.setContentMode(ContentMode.HTML);
         titleOfArtifactDetails.setSizeFull();
         titleOfArtifactDetails.setImmediate(true);

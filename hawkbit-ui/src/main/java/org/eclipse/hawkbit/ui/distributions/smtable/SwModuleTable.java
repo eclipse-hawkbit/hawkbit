@@ -377,39 +377,39 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     }
 
     private void showArtifactDetailsWindow(final Long itemId, final String nameVersionStr) {
-        final Window atrifactDtlsWindow = new Window();
-        atrifactDtlsWindow.setCaption(HawkbitCommonUtil.getArtifactoryDetailsLabelId(nameVersionStr));
-        atrifactDtlsWindow.setCaptionAsHtml(true);
-        atrifactDtlsWindow.setClosable(true);
-        atrifactDtlsWindow.setResizable(true);
-        atrifactDtlsWindow.setImmediate(true);
-        atrifactDtlsWindow.setWindowMode(WindowMode.NORMAL);
-        atrifactDtlsWindow.setModal(true);
-        atrifactDtlsWindow.addStyleName(SPUIStyleDefinitions.CONFIRMATION_WINDOW_CAPTION);
+        final Window artifactDtlsWindow = new Window();
+        artifactDtlsWindow.setCaption(HawkbitCommonUtil.getArtifactoryDetailsLabelId(nameVersionStr));
+        artifactDtlsWindow.setCaptionAsHtml(true);
+        artifactDtlsWindow.setClosable(true);
+        artifactDtlsWindow.setResizable(true);
+        artifactDtlsWindow.setImmediate(true);
+        artifactDtlsWindow.setWindowMode(WindowMode.NORMAL);
+        artifactDtlsWindow.setModal(true);
+        artifactDtlsWindow.addStyleName(SPUIStyleDefinitions.CONFIRMATION_WINDOW_CAPTION);
 
         artifactDetailsLayout.setFullWindowMode(false);
         artifactDetailsLayout.populateArtifactDetails(itemId, nameVersionStr);
         /* Now add table to the window */
         artifactDetailsLayout.getArtifactDetailsTable().setWidth(700, Unit.PIXELS);
         artifactDetailsLayout.getArtifactDetailsTable().setHeight(500, Unit.PIXELS);
-        atrifactDtlsWindow.setContent(artifactDetailsLayout.getArtifactDetailsTable());
+        artifactDtlsWindow.setContent(artifactDetailsLayout.getArtifactDetailsTable());
 
         /* Create maximized view of the table */
-        atrifactDtlsWindow.addWindowModeChangeListener(event -> {
+        artifactDtlsWindow.addWindowModeChangeListener(event -> {
             if (event.getWindowMode() == WindowMode.MAXIMIZED) {
-                atrifactDtlsWindow.setSizeFull();
+                artifactDtlsWindow.setSizeFull();
                 artifactDetailsLayout.setFullWindowMode(true);
                 artifactDetailsLayout.createMaxArtifactDetailsTable();
                 artifactDetailsLayout.getMaxArtifactDetailsTable().setWidth(100, Unit.PERCENTAGE);
                 artifactDetailsLayout.getMaxArtifactDetailsTable().setHeight(100, Unit.PERCENTAGE);
-                atrifactDtlsWindow.setContent(artifactDetailsLayout.getMaxArtifactDetailsTable());
+                artifactDtlsWindow.setContent(artifactDetailsLayout.getMaxArtifactDetailsTable());
             } else {
-                atrifactDtlsWindow.setSizeUndefined();
-                atrifactDtlsWindow.setContent(artifactDetailsLayout.getArtifactDetailsTable());
+                artifactDtlsWindow.setSizeUndefined();
+                artifactDtlsWindow.setContent(artifactDetailsLayout.getArtifactDetailsTable());
             }
         });
         /* display the window */
-        UI.getCurrent().addWindow(atrifactDtlsWindow);
+        UI.getCurrent().addWindow(artifactDtlsWindow);
     }
 
     @Override

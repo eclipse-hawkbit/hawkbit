@@ -279,6 +279,11 @@ public final class UIComponentIdProvider {
     public static final String TARGET_FILTER_WRAPPER_ID = "target-drop-filter";
 
     /**
+     * ID for HorizontalLayout containing Action Buttons (delete, action)
+     */
+    public static final String ACTION_BUTTON_LAYOUT = "ActionButtonLayout";
+
+    /**
      * Delete button wrapper id.
      */
     public static final String DELETE_BUTTON_WRAPPER_ID = "delete.button";
@@ -1019,6 +1024,11 @@ public final class UIComponentIdProvider {
      * Id of the rollout deletion confirmation window
      */
     public static final String ROLLOUT_DELETE_CONFIRMATION_DIALOG = "rollout.delete.confirmation.window";
+
+    /**
+     * Details header caption id of the Artifacts Table
+     */
+    public static final String ARTIFACT_DETAILS_HEADER_LABEL_ID = "artifact.details.header.caption";
 
     /**
      * /* Private Constructor.

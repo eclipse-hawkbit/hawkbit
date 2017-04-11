@@ -100,6 +100,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
             dropHintLayout.addComponent(getCountMessageLabel());
         }
         final HorizontalLayout hLayout = new HorizontalLayout();
+        hLayout.setId(UIComponentIdProvider.ACTION_BUTTON_LAYOUT);
         hLayout.setSpacing(true);
         hLayout.setSizeUndefined();
         if (deleteWrapper != null) {
