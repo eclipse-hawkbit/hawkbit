@@ -198,7 +198,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Override
     @Transactional
-
     public void deleteTenant(final String tenant) {
         cacheManager.evictCaches(tenant);
         tenantAware.runAsTenant(tenant, () -> {
@@ -229,17 +228,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Override
     @Cacheable(value = "currentTenant", keyGenerator = "currentTenantKeyGenerator", cacheManager = "directCacheManager", unless = "#result == null")
-    // set transaction to not supported, due we call this in
-    // BaseEntity#prePersist methods
-    // and it seems that JPA committing the transaction when executing this
-    // transactional method,
-    // which then leads that the BaseEntity#prePersist is called again to
-    // persist the un-persisted
-    // entity and we landing again in the #currentTenant() method
-    // suspend the transaction here to do a read-request against the medata
-    // table, when the current
-    // tenant is not cached anyway already.
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public String currentTenant() {
         final String initialTenantCreation = currentTenantCacheKeyGenerator.getCreateInitialTenant().get();
         if (initialTenantCreation == null) {
@@ -252,7 +240,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Override
     @Transactional
-
     public TenantMetaData updateTenantMetadata(final Long defaultDsType) {
         final JpaTenantMetaData data = (JpaTenantMetaData) getTenantMetadata();
 

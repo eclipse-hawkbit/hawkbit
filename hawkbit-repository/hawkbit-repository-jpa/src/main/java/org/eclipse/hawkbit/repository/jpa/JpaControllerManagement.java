@@ -125,7 +125,6 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-
     @Transactional
     public Target updateLastTargetQuery(final String controllerId, final URI address) {
         final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerId)
@@ -195,7 +194,6 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-
     @Transactional
     public Target findOrRegisterTargetIfItDoesNotexist(final String controllerId, final URI address) {
         final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb
@@ -241,7 +239,6 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Action addCancelActionStatus(final ActionStatusCreate c) {
         final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
@@ -285,7 +282,6 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Action addUpdateActionStatus(final ActionStatusCreate c) {
         final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
@@ -385,7 +381,6 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-
     @Transactional
     public Target updateControllerAttributes(final String controllerId, final Map<String, String> data) {
         final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerId)
@@ -407,7 +402,6 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-
     @Transactional
     public Action registerRetrieved(final Long actionId, final String message) {
         return handleRegisterRetrieved(actionId, message);
@@ -467,7 +461,6 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-
     @Transactional
     public ActionStatus addInformationalActionStatus(final ActionStatusCreate c) {
         final JpaActionStatusCreate create = (JpaActionStatusCreate) c;

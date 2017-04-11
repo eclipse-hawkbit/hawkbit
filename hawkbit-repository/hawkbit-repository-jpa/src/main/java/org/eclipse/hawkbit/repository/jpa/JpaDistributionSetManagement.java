@@ -353,7 +353,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-
     @Transactional
     public DistributionSetType assignMandatorySoftwareModuleTypes(final Long dsTypeId,
             final Collection<Long> softwareModulesTypeIds) {
@@ -374,7 +373,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-
     @Transactional
     public DistributionSetType assignOptionalSoftwareModuleTypes(final Long dsTypeId,
             final Collection<Long> softwareModulesTypeIds) {
@@ -403,7 +401,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-
     @Transactional
     public DistributionSetType unassignSoftwareModuleType(final Long dsTypeId, final Long softwareModuleTypeId) {
         final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(dsTypeId);
@@ -583,7 +580,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-
     @Transactional
     public DistributionSetType createDistributionSetType(final DistributionSetTypeCreate c) {
         final JpaDistributionSetTypeCreate create = (JpaDistributionSetTypeCreate) c;
@@ -592,7 +588,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-
     @Transactional
     public void deleteDistributionSetType(final Long typeId) {
 
@@ -609,7 +604,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     @Transactional
-
     public List<DistributionSetMetadata> createDistributionSetMetadata(final Long dsId, final Collection<MetaData> md) {
 
         md.forEach(meta -> checkAndThrowAlreadyIfDistributionSetMetadataExists(
@@ -625,7 +619,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     @Transactional
-
     public DistributionSetMetadata updateDistributionSetMetadata(final Long dsId, final MetaData md) {
 
         // check if exists otherwise throw entity not found exception
@@ -641,7 +634,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     @Transactional
-
     public void deleteDistributionSetMetadata(final Long distributionSetId, final String key) {
         final JpaDistributionSetMetadata metadata = (JpaDistributionSetMetadata) findDistributionSetMetadata(
                 distributionSetId, key).orElseThrow(
@@ -825,7 +817,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-
     @Transactional
     public List<DistributionSet> assignTag(final Collection<Long> dsIds, final Long dsTagId) {
         final List<JpaDistributionSet> allDs = findDistributionSetListWithDetails(dsIds);
@@ -845,7 +836,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-
     @Transactional
     public List<DistributionSet> unAssignAllDistributionSetsByTag(final Long dsTagId) {
 
@@ -860,7 +850,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-
     @Transactional
     public DistributionSet unAssignTag(final Long dsId, final Long dsTagId) {
         final List<JpaDistributionSet> allDs = findDistributionSetListWithDetails(Arrays.asList(dsId));
@@ -883,7 +872,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-
     @Transactional
     public List<DistributionSetType> createDistributionSetTypes(final Collection<DistributionSetTypeCreate> types) {
 
@@ -891,7 +879,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-
     @Transactional
     public void deleteDistributionSet(final Long setId) {
         throwExceptionIfDistributionSetDoesNotExist(setId);

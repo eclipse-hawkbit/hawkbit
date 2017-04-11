@@ -74,7 +74,6 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-
     @Transactional
     public void deleteTargetFilterQuery(final Long targetFilterQueryId) {
         findTargetFilterQueryById(targetFilterQueryId)
@@ -169,7 +168,6 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-
     @Transactional
     public TargetFilterQuery updateTargetFilterQuery(final TargetFilterQueryUpdate u) {
         final GenericTargetFilterQueryUpdate update = (GenericTargetFilterQueryUpdate) u;
@@ -183,7 +181,6 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-
     @Transactional
     public TargetFilterQuery updateTargetFilterQueryAutoAssignDS(final Long queryId, final Long dsId) {
         final JpaTargetFilterQuery targetFilterQuery = findTargetFilterQueryOrThrowExceptionIfNotFound(queryId);

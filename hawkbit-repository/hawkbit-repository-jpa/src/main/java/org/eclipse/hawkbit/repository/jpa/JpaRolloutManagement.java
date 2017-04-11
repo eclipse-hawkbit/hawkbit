@@ -17,6 +17,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import javax.persistence.EntityManager;
 import javax.validation.ConstraintDeclarationException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -125,6 +126,9 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
 
+    @Autowired
+    private EntityManager entityManager;
+
     JpaRolloutManagement(final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
             final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
@@ -169,7 +173,6 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     @Transactional
-
     public Rollout createRollout(final RolloutCreate rollout, final int amountGroup,
             final RolloutGroupConditions conditions) {
         RolloutHelper.verifyRolloutGroupParameter(amountGroup);
@@ -179,7 +182,6 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     @Transactional
-
     public Rollout createRollout(final RolloutCreate rollout, final List<RolloutGroupCreate> groups,
             final RolloutGroupConditions conditions) {
         RolloutHelper.verifyRolloutGroupParameter(groups.size());
@@ -411,7 +413,6 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     @Transactional
-
     public Rollout startRollout(final Long rolloutId) {
         LOGGER.debug("startRollout called for rollout {}", rolloutId);
 
@@ -542,7 +543,6 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     @Transactional
-
     public void pauseRollout(final Long rolloutId) {
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
         if (!RolloutStatus.RUNNING.equals(rollout.getStatus())) {
@@ -560,7 +560,6 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     @Transactional
-
     public void resumeRollout(final Long rolloutId) {
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
         if (!(RolloutStatus.PAUSED.equals(rollout.getStatus()))) {
@@ -656,6 +655,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private boolean isRolloutComplete(final JpaRollout rollout) {
+        // ensure that changes in the same transaction count
+        entityManager.flush();
         final Long groupsActiveLeft = rolloutGroupRepository.countByRolloutIdAndStatusOrStatus(rollout.getId(),
                 RolloutGroupStatus.RUNNING, RolloutGroupStatus.SCHEDULED);
         return groupsActiveLeft == 0;
@@ -785,7 +786,6 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     @Transactional
-
     public void deleteRollout(final long rolloutId) {
         final JpaRollout jpaRollout = rolloutRepository.findOne(rolloutId);
 
@@ -817,8 +817,12 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         deleteScheduledActions(rollout, scheduledActions);
 
         // avoid another scheduler round and re-check if all scheduled actions
-        // has been cleaned up
-        final boolean hasScheduledActionsLeft = findScheduledActionsByRollout(rollout).getNumberOfElements() > 0;
+        // has been cleaned up. we flush first to ensure that the we include the
+        // deletion above
+        entityManager.flush();
+        final boolean hasScheduledActionsLeft = actionRepository.countByRolloutIdAndStatus(rollout.getId(),
+                Status.SCHEDULED) > 0;
+
         if (hasScheduledActionsLeft) {
             return;
         }
@@ -890,7 +894,6 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     @Transactional
-
     public Rollout updateRollout(final RolloutUpdate u) {
         final GenericRolloutUpdate update = (GenericRolloutUpdate) u;
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(update.getId());

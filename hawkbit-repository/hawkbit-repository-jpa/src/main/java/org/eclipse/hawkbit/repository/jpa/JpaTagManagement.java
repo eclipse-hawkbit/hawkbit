@@ -73,7 +73,6 @@ public class JpaTagManagement implements TagManagement {
     }
 
     @Override
-
     @Transactional
     public List<TargetTag> createTargetTags(final Collection<TagCreate> tt) {
         @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -84,7 +83,6 @@ public class JpaTagManagement implements TagManagement {
     }
 
     @Override
-
     @Transactional
     public void deleteTargetTag(final String targetTagName) {
         final TargetTag tag = targetTagRepository.findByNameEquals(targetTagName)
@@ -122,7 +120,6 @@ public class JpaTagManagement implements TagManagement {
     }
 
     @Override
-
     @Transactional
     public TargetTag updateTargetTag(final TagUpdate u) {
         final GenericTagUpdate update = (GenericTagUpdate) u;
@@ -159,7 +156,6 @@ public class JpaTagManagement implements TagManagement {
     }
 
     @Override
-
     @Transactional
     public DistributionSetTag createDistributionSetTag(final TagCreate c) {
         final JpaTagCreate create = (JpaTagCreate) c;
@@ -167,7 +163,6 @@ public class JpaTagManagement implements TagManagement {
     }
 
     @Override
-
     @Transactional
     public List<DistributionSetTag> createDistributionSetTags(final Collection<TagCreate> dst) {
 
@@ -180,7 +175,6 @@ public class JpaTagManagement implements TagManagement {
     }
 
     @Override
-
     @Transactional
     public void deleteDistributionSetTag(final String tagName) {
         final DistributionSetTag tag = distributionSetTagRepository.findByNameEquals(tagName)

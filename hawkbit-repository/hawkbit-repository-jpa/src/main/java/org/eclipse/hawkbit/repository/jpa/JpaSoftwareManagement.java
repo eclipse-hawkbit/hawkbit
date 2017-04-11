@@ -116,7 +116,6 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     private VirtualPropertyReplacer virtualPropertyReplacer;
 
     @Override
-
     @Transactional
     public SoftwareModule updateSoftwareModule(final SoftwareModuleUpdate u) {
         final GenericSoftwareModuleUpdate update = (GenericSoftwareModuleUpdate) u;
@@ -131,7 +130,6 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-
     @Transactional
     public SoftwareModuleType updateSoftwareModuleType(final SoftwareModuleTypeUpdate u) {
         final GenericSoftwareModuleTypeUpdate update = (GenericSoftwareModuleTypeUpdate) u;
@@ -146,7 +144,6 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-
     @Transactional
     public SoftwareModule createSoftwareModule(final SoftwareModuleCreate c) {
         final JpaSoftwareModuleCreate create = (JpaSoftwareModuleCreate) c;
@@ -155,7 +152,6 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-
     @Transactional
     public List<SoftwareModule> createSoftwareModule(final Collection<SoftwareModuleCreate> swModules) {
         return swModules.stream().map(this::createSoftwareModule).collect(Collectors.toList());
@@ -228,7 +224,6 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-
     @Transactional
     public void deleteSoftwareModules(final Collection<Long> ids) {
         final List<JpaSoftwareModule> swModulesToDelete = softwareModuleRepository.findByIdIn(ids);
@@ -487,7 +482,6 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-
     @Transactional
     public SoftwareModuleType createSoftwareModuleType(final SoftwareModuleTypeCreate c) {
         final JpaSoftwareModuleTypeCreate create = (JpaSoftwareModuleTypeCreate) c;
@@ -496,7 +490,6 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-
     @Transactional
     public void deleteSoftwareModuleType(final Long typeId) {
         final JpaSoftwareModuleType toDelete = softwareModuleTypeRepository.findById(typeId)
@@ -522,7 +515,6 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     @Transactional
-
     public SoftwareModuleMetadata createSoftwareModuleMetadata(final Long moduleId, final MetaData md) {
 
         checkAndThrowAlreadyIfSoftwareModuleMetadataExists(moduleId, md);
@@ -539,7 +531,6 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     @Transactional
-
     public List<SoftwareModuleMetadata> createSoftwareModuleMetadata(final Long moduleId,
             final Collection<MetaData> md) {
         md.forEach(meta -> checkAndThrowAlreadyIfSoftwareModuleMetadataExists(moduleId, meta));
@@ -554,7 +545,6 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     @Transactional
-
     public SoftwareModuleMetadata updateSoftwareModuleMetadata(final Long moduleId, final MetaData md) {
 
         // check if exists otherwise throw entity not found exception
@@ -599,7 +589,6 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     @Transactional
-
     public void deleteSoftwareModuleMetadata(final Long moduleId, final String key) {
         final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) findSoftwareModuleMetadata(moduleId, key)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleMetadata.class, moduleId, key));
@@ -663,14 +652,12 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-
     @Transactional
     public void deleteSoftwareModule(final Long moduleId) {
         deleteSoftwareModules(Sets.newHashSet(moduleId));
     }
 
     @Override
-
     @Transactional
     public List<SoftwareModuleType> createSoftwareModuleType(final Collection<SoftwareModuleTypeCreate> creates) {
         return creates.stream().map(this::createSoftwareModuleType).collect(Collectors.toList());

@@ -70,7 +70,6 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     @Override
-
     @Transactional
     public Artifact createArtifact(final InputStream stream, final Long moduleId, final String filename,
             final String providedMd5Sum, final String providedSha1Sum, final boolean overrideExisting,
@@ -101,7 +100,6 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     @Override
-
     @Transactional
     public boolean clearArtifactBinary(final String sha1Hash, final Long moduleId) {
 
@@ -120,7 +118,6 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     @Override
-
     @Transactional
     public void deleteArtifact(final Long id) {
         final JpaArtifact existing = (JpaArtifact) findArtifact(id)

@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.annotation.Transactional;
 
 public class JpaTestRepositoryManagement implements TestRepositoryManagement {
 
@@ -45,13 +44,11 @@ public class JpaTestRepositoryManagement implements TestRepositoryManagement {
     }
 
     @Override
-    @Transactional
     public void clearTestRepository() {
         deleteAllRepos();
         cacheManager.getDirectCacheNames().forEach(name -> cacheManager.getDirectCache(name).clear());
     }
 
-    @Transactional
     public void deleteAllRepos() {
         final List<String> tenants = systemSecurityContext.runAsSystem(() -> systemManagement.findTenants());
         tenants.forEach(tenant -> {

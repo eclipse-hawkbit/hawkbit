@@ -12,7 +12,9 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantMetaData;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -29,6 +31,7 @@ public interface TenantMetaDataRepository extends PagingAndSortingRepository<Jpa
      *            to search for
      * @return found {@link TenantMetaData} or <code>null</code>
      */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     TenantMetaData findByTenantIgnoreCase(String tenant);
 
     @Override
@@ -37,6 +40,8 @@ public interface TenantMetaDataRepository extends PagingAndSortingRepository<Jpa
     /**
      * @param tenant
      */
+    @Transactional
+    @Modifying
     void deleteByTenantIgnoreCase(String tenant);
 
 }
