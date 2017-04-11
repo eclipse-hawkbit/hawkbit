@@ -33,7 +33,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -74,7 +73,7 @@ public class JpaTagManagement implements TagManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public List<TargetTag> createTargetTags(final Collection<TagCreate> tt) {
         @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -85,7 +84,7 @@ public class JpaTagManagement implements TagManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public void deleteTargetTag(final String targetTagName) {
         final TargetTag tag = targetTagRepository.findByNameEquals(targetTagName)
@@ -123,7 +122,7 @@ public class JpaTagManagement implements TagManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public TargetTag updateTargetTag(final TagUpdate u) {
         final GenericTagUpdate update = (GenericTagUpdate) u;
@@ -139,7 +138,7 @@ public class JpaTagManagement implements TagManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public DistributionSetTag updateDistributionSetTag(final TagUpdate u) {
         final GenericTagUpdate update = (GenericTagUpdate) u;
@@ -160,7 +159,7 @@ public class JpaTagManagement implements TagManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public DistributionSetTag createDistributionSetTag(final TagCreate c) {
         final JpaTagCreate create = (JpaTagCreate) c;
@@ -168,7 +167,7 @@ public class JpaTagManagement implements TagManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public List<DistributionSetTag> createDistributionSetTags(final Collection<TagCreate> dst) {
 
@@ -181,7 +180,7 @@ public class JpaTagManagement implements TagManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public void deleteDistributionSetTag(final String tagName) {
         final DistributionSetTag tag = distributionSetTagRepository.findByNameEquals(tagName)

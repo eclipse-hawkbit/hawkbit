@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**

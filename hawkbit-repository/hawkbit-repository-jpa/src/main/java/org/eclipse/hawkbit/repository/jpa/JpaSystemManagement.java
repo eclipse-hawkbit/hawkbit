@@ -32,7 +32,6 @@ import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.interceptor.KeyGenerator;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
@@ -199,7 +198,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Override
     @Transactional
-    @Modifying
+
     public void deleteTenant(final String tenant) {
         cacheManager.evictCaches(tenant);
         tenantAware.runAsTenant(tenant, () -> {
@@ -253,7 +252,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Override
     @Transactional
-    @Modifying
+
     public TenantMetaData updateTenantMetadata(final Long defaultDsType) {
         final JpaTenantMetaData data = (JpaTenantMetaData) getTenantMetadata();
 

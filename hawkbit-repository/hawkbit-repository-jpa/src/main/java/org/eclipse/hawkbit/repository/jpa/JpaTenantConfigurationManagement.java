@@ -23,8 +23,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -124,7 +122,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     @Override
     @CacheEvict(value = "tenantConfiguration", key = "#configurationKeyName")
     @Transactional
-    @Modifying
+
     public <T extends Serializable> TenantConfigurationValue<T> addOrUpdateConfiguration(
             final String configurationKeyName, final T value) {
 
@@ -163,7 +161,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     @Override
     @CacheEvict(value = "tenantConfiguration", key = "#configurationKeyName")
     @Transactional
-    @Modifying
+
     public void deleteConfiguration(final String configurationKeyName) {
         tenantConfigurationRepository.deleteByKey(configurationKeyName);
     }

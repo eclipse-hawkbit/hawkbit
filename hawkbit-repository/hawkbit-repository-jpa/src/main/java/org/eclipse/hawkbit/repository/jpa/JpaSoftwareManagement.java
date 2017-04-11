@@ -69,9 +69,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -118,7 +116,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     private VirtualPropertyReplacer virtualPropertyReplacer;
 
     @Override
-    @Modifying
+
     @Transactional
     public SoftwareModule updateSoftwareModule(final SoftwareModuleUpdate u) {
         final GenericSoftwareModuleUpdate update = (GenericSoftwareModuleUpdate) u;
@@ -133,7 +131,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public SoftwareModuleType updateSoftwareModuleType(final SoftwareModuleTypeUpdate u) {
         final GenericSoftwareModuleTypeUpdate update = (GenericSoftwareModuleTypeUpdate) u;
@@ -148,7 +146,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public SoftwareModule createSoftwareModule(final SoftwareModuleCreate c) {
         final JpaSoftwareModuleCreate create = (JpaSoftwareModuleCreate) c;
@@ -157,7 +155,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public List<SoftwareModule> createSoftwareModule(final Collection<SoftwareModuleCreate> swModules) {
         return swModules.stream().map(this::createSoftwareModule).collect(Collectors.toList());
@@ -230,7 +228,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public void deleteSoftwareModules(final Collection<Long> ids) {
         final List<JpaSoftwareModule> swModulesToDelete = softwareModuleRepository.findByIdIn(ids);
@@ -489,7 +487,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public SoftwareModuleType createSoftwareModuleType(final SoftwareModuleTypeCreate c) {
         final JpaSoftwareModuleTypeCreate create = (JpaSoftwareModuleTypeCreate) c;
@@ -498,7 +496,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public void deleteSoftwareModuleType(final Long typeId) {
         final JpaSoftwareModuleType toDelete = softwareModuleTypeRepository.findById(typeId)
@@ -524,7 +522,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     @Transactional
-    @Modifying
+
     public SoftwareModuleMetadata createSoftwareModuleMetadata(final Long moduleId, final MetaData md) {
 
         checkAndThrowAlreadyIfSoftwareModuleMetadataExists(moduleId, md);
@@ -541,7 +539,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     @Transactional
-    @Modifying
+
     public List<SoftwareModuleMetadata> createSoftwareModuleMetadata(final Long moduleId,
             final Collection<MetaData> md) {
         md.forEach(meta -> checkAndThrowAlreadyIfSoftwareModuleMetadataExists(moduleId, meta));
@@ -556,7 +554,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     @Transactional
-    @Modifying
+
     public SoftwareModuleMetadata updateSoftwareModuleMetadata(final Long moduleId, final MetaData md) {
 
         // check if exists otherwise throw entity not found exception
@@ -601,7 +599,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     @Transactional
-    @Modifying
+
     public void deleteSoftwareModuleMetadata(final Long moduleId, final String key) {
         final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) findSoftwareModuleMetadata(moduleId, key)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleMetadata.class, moduleId, key));
@@ -665,14 +663,14 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public void deleteSoftwareModule(final Long moduleId) {
         deleteSoftwareModules(Sets.newHashSet(moduleId));
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public List<SoftwareModuleType> createSoftwareModuleType(final Collection<SoftwareModuleTypeCreate> creates) {
         return creates.stream().map(this::createSoftwareModuleType).collect(Collectors.toList());

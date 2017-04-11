@@ -32,8 +32,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -72,7 +70,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public Artifact createArtifact(final InputStream stream, final Long moduleId, final String filename,
             final String providedMd5Sum, final String providedSha1Sum, final boolean overrideExisting,
@@ -103,7 +101,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public boolean clearArtifactBinary(final String sha1Hash, final Long moduleId) {
 
@@ -122,7 +120,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public void deleteArtifact(final Long id) {
         final JpaArtifact existing = (JpaArtifact) findArtifact(id)
@@ -190,7 +188,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public Artifact createArtifact(final InputStream inputStream, final Long moduleId, final String filename,
             final boolean overrideExisting) {

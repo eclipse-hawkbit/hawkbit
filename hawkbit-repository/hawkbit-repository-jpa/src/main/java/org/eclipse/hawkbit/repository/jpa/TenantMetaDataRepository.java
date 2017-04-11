@@ -13,7 +13,6 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantMetaData;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**

@@ -77,7 +77,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
@@ -170,7 +169,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     @Transactional
-    @Modifying
+
     public Rollout createRollout(final RolloutCreate rollout, final int amountGroup,
             final RolloutGroupConditions conditions) {
         RolloutHelper.verifyRolloutGroupParameter(amountGroup);
@@ -180,7 +179,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     @Transactional
-    @Modifying
+
     public Rollout createRollout(final RolloutCreate rollout, final List<RolloutGroupCreate> groups,
             final RolloutGroupConditions conditions) {
         RolloutHelper.verifyRolloutGroupParameter(groups.size());
@@ -412,7 +411,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     @Transactional
-    @Modifying
+
     public Rollout startRollout(final Long rolloutId) {
         LOGGER.debug("startRollout called for rollout {}", rolloutId);
 
@@ -543,7 +542,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     @Transactional
-    @Modifying
+
     public void pauseRollout(final Long rolloutId) {
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
         if (!RolloutStatus.RUNNING.equals(rollout.getStatus())) {
@@ -561,7 +560,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     @Transactional
-    @Modifying
+
     public void resumeRollout(final Long rolloutId) {
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
         if (!(RolloutStatus.PAUSED.equals(rollout.getStatus()))) {
@@ -786,7 +785,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     @Transactional
-    @Modifying
+
     public void deleteRollout(final long rolloutId) {
         final JpaRollout jpaRollout = rolloutRepository.findOne(rolloutId);
 
@@ -891,7 +890,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     @Transactional
-    @Modifying
+
     public Rollout updateRollout(final RolloutUpdate u) {
         final GenericRolloutUpdate update = (GenericRolloutUpdate) u;
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(update.getId());

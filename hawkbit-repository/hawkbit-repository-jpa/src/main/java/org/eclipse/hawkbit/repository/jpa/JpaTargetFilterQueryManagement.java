@@ -36,7 +36,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -66,7 +65,6 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         this.distributionSetManagement = distributionSetManagement;
     }
 
-    @Modifying
     @Transactional
     @Override
     public TargetFilterQuery createTargetFilterQuery(final TargetFilterQueryCreate c) {
@@ -76,7 +74,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public void deleteTargetFilterQuery(final Long targetFilterQueryId) {
         findTargetFilterQueryById(targetFilterQueryId)
@@ -171,7 +169,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public TargetFilterQuery updateTargetFilterQuery(final TargetFilterQueryUpdate u) {
         final GenericTargetFilterQueryUpdate update = (GenericTargetFilterQueryUpdate) u;
@@ -185,7 +183,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public TargetFilterQuery updateTargetFilterQueryAutoAssignDS(final Long queryId, final Long dsId) {
         final JpaTargetFilterQuery targetFilterQuery = findTargetFilterQueryOrThrowExceptionIfNotFound(queryId);

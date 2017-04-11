@@ -60,7 +60,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -148,7 +147,6 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    @Modifying
     @Transactional
     public Target updateTarget(final TargetUpdate u) {
         final JpaTargetUpdate update = (JpaTargetUpdate) u;
@@ -165,7 +163,6 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    @Modifying
     @Transactional
     public void deleteTargets(final Collection<Long> targetIDs) {
         final List<JpaTarget> targets = targetRepository.findAll(targetIDs);
@@ -182,7 +179,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public void deleteTarget(final String controllerID) {
         final Target target = targetRepository.findByControllerId(controllerID)
@@ -322,7 +319,6 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    @Modifying
     @Transactional
     public TargetTagAssignmentResult toggleTagAssignment(final Collection<String> controllerIds, final String tagName) {
         final TargetTag tag = targetTagRepository.findByNameEquals(tagName)
@@ -360,7 +356,6 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    @Modifying
     @Transactional
     public List<Target> assignTag(final Collection<String> controllerIds, final Long tagId) {
         final List<JpaTarget> allTargets = targetRepository
@@ -390,7 +385,6 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    @Modifying
     @Transactional
     public List<Target> unAssignAllTargetsByTag(final Long targetTagId) {
 
@@ -405,7 +399,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public Target unAssignTag(final String controllerID, final Long targetTagId) {
         final Target target = targetRepository.findByControllerId(controllerID)
@@ -551,7 +545,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public Target createTarget(final TargetCreate c) {
         final JpaTargetCreate create = (JpaTargetCreate) c;
@@ -559,7 +553,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public List<Target> createTargets(final Collection<TargetCreate> targets) {
         return targets.stream().map(this::createTarget).collect(Collectors.toList());

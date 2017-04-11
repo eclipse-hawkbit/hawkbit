@@ -80,7 +80,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
@@ -142,7 +141,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private PlatformTransactionManager txManager;
 
     @Override
-    @Modifying
+
     @Transactional
     // Exception squid:S2095: see
     // https://jira.sonarsource.com/browse/SONARJAVA-1478
@@ -154,7 +153,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
             final Collection<TargetWithActionType> targets) {
@@ -162,7 +160,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
             final Collection<TargetWithActionType> targets, final String actionMessage) {
@@ -349,7 +346,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Action cancelAction(final Long actionId) {
         LOG.debug("cancelAction({})", actionId);
@@ -392,7 +388,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Action forceQuitAction(final Long actionId) {
         final JpaAction action = actionRepository.findById(actionId)
@@ -419,7 +414,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public long startScheduledActionsByRolloutGroupParent(@NotNull final Long rolloutId,
             final Long rolloutGroupParentId) {
@@ -625,7 +619,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    @Modifying
     @Transactional
     public Action forceTargetAction(final Long actionId) {
         final JpaAction action = actionRepository.findById(actionId)

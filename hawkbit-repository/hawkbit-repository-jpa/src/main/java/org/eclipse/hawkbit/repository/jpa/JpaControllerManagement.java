@@ -59,7 +59,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -126,7 +125,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public Target updateLastTargetQuery(final String controllerId, final URI address) {
         final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerId)
@@ -196,7 +195,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public Target findOrRegisterTargetIfItDoesNotexist(final String controllerId, final URI address) {
         final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb
@@ -242,7 +241,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Action addCancelActionStatus(final ActionStatusCreate c) {
         final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
@@ -286,7 +285,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Action addUpdateActionStatus(final ActionStatusCreate c) {
         final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
@@ -386,7 +385,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public Target updateControllerAttributes(final String controllerId, final Map<String, String> data) {
         final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerId)
@@ -408,7 +407,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public Action registerRetrieved(final Long actionId, final String message) {
         return handleRegisterRetrieved(actionId, message);
@@ -468,7 +467,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    @Modifying
+
     @Transactional
     public ActionStatus addInformationalActionStatus(final ActionStatusCreate c) {
         final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
