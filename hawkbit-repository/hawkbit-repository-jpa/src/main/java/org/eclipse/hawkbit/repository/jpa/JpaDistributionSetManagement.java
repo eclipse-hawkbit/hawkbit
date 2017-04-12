@@ -136,7 +136,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-
     @Transactional
     public DistributionSetTagAssignmentResult toggleTagAssignment(final Collection<Long> dsIds, final String tagName) {
         final List<JpaDistributionSet> sets = findDistributionSetListWithDetails(dsIds);
@@ -184,7 +183,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-
     @Transactional
     public DistributionSet updateDistributionSet(final DistributionSetUpdate u) {
         final GenericDistributionSetUpdate update = (GenericDistributionSetUpdate) u;
@@ -235,7 +233,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-
     @Transactional
     public void deleteDistributionSet(final Collection<Long> distributionSetIDs) {
         final List<DistributionSet> setsFound = findDistributionSetAllById(distributionSetIDs);
@@ -273,7 +270,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-
     @Transactional
     public DistributionSet createDistributionSet(final DistributionSetCreate c) {
         final JpaDistributionSetCreate create = (JpaDistributionSetCreate) c;
@@ -285,14 +281,12 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-
     @Transactional
     public List<DistributionSet> createDistributionSets(final Collection<DistributionSetCreate> creates) {
         return creates.stream().map(this::createDistributionSet).collect(Collectors.toList());
     }
 
     @Override
-
     @Transactional
     public DistributionSet assignSoftwareModules(final Long setId, final Collection<Long> moduleIds) {
 
@@ -312,7 +306,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-
     @Transactional
     public DistributionSet unassignSoftwareModule(final Long setId, final Long moduleId) {
         final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(setId);
@@ -326,7 +319,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-
     @Transactional
     public DistributionSetType updateDistributionSetType(final DistributionSetTypeUpdate u) {
         final GenericDistributionSetTypeUpdate update = (GenericDistributionSetTypeUpdate) u;
