@@ -105,6 +105,13 @@ public class TotalTargetCountStatus {
     }
 
     /**
+     * @return finished percentage of targets
+     */
+    public float getFinishedPercent() {
+        return ((float) getTotalTargetCountByStatus(TotalTargetCountStatus.Status.FINISHED) / totalTargetCount) * 100;
+    }
+
+    /**
      * Populate all target status to a the given map
      *
      * @param statusTotalCountMap

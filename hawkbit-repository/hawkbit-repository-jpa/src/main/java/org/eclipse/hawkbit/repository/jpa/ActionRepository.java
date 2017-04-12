@@ -381,7 +381,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      *            id of {@link Rollout}
      * @return list of objects with status and target count
      */
-    @Query("SELECT NEW org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus( a.rollout.id, a.status , COUNT(a.target)) FROM JpaAction a WHERE a.rollout.id IN ?1 GROUP BY a.rollout.id,a.status")
+    @Query("SELECT NEW org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus( a.rollout.id, a.status , COUNT(a.id)) FROM JpaAction a WHERE a.rollout.id IN ?1 GROUP BY a.rollout.id,a.status")
     List<TotalTargetCountActionStatus> getStatusCountByRolloutId(List<Long> rolloutId);
 
     /**
