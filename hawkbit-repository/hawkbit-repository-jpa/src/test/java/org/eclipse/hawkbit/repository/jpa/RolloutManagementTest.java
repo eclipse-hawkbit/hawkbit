@@ -143,12 +143,6 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         verifyThrownExceptionBy(() -> rolloutManagement.deleteRollout(NOT_EXIST_IDL), "Rollout");
 
-        verifyThrownExceptionBy(() -> rolloutManagement.getFinishedPercentForRunningGroup(NOT_EXIST_IDL, NOT_EXIST_IDL),
-                "Rollout");
-        verifyThrownExceptionBy(
-                () -> rolloutManagement.getFinishedPercentForRunningGroup(createdRollout.getId(), NOT_EXIST_IDL),
-                "RolloutGroup");
-
         verifyThrownExceptionBy(() -> rolloutManagement.pauseRollout(NOT_EXIST_IDL), "Rollout");
         verifyThrownExceptionBy(() -> rolloutManagement.resumeRollout(NOT_EXIST_IDL), "Rollout");
         verifyThrownExceptionBy(() -> rolloutManagement.startRollout(NOT_EXIST_IDL), "Rollout");
@@ -1005,23 +999,24 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutManagement.handleRollouts();
         myRollout = rolloutManagement.findRolloutById(myRollout.getId()).get();
 
-        float percent = rolloutManagement.getFinishedPercentForRunningGroup(myRollout.getId(),
-                myRollout.getRolloutGroups().get(0).getId());
+        float percent = rolloutGroupManagement
+                .findRolloutGroupWithDetailedStatus(myRollout.getRolloutGroups().get(0).getId()).get()
+                .getTotalTargetCountStatus().getFinishedPercent();
         assertThat(percent).isEqualTo(40);
 
         changeStatusForRunningActions(myRollout, Status.FINISHED, 3);
         rolloutManagement.handleRollouts();
 
-        percent = rolloutManagement.getFinishedPercentForRunningGroup(myRollout.getId(),
-                myRollout.getRolloutGroups().get(0).getId());
+        percent = rolloutGroupManagement.findRolloutGroupWithDetailedStatus(myRollout.getRolloutGroups().get(0).getId())
+                .get().getTotalTargetCountStatus().getFinishedPercent();
         assertThat(percent).isEqualTo(100);
 
         changeStatusForRunningActions(myRollout, Status.FINISHED, 4);
         changeStatusForAllRunningActions(myRollout, Status.ERROR);
         rolloutManagement.handleRollouts();
 
-        percent = rolloutManagement.getFinishedPercentForRunningGroup(myRollout.getId(),
-                myRollout.getRolloutGroups().get(1).getId());
+        percent = rolloutGroupManagement.findRolloutGroupWithDetailedStatus(myRollout.getRolloutGroups().get(1).getId())
+                .get().getTotalTargetCountStatus().getFinishedPercent();
         assertThat(percent).isEqualTo(80);
     }
 

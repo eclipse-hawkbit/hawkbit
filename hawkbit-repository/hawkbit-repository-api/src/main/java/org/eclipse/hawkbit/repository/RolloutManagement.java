@@ -286,19 +286,6 @@ public interface RolloutManagement {
      */
     boolean exists(@NotNull Long rolloutId);
 
-    /***
-     * Get finished percentage details for a specified group which is in running
-     * state.
-     *
-     * @param rolloutId
-     *            the ID of the {@link Rollout}
-     * @param rolloutGroupId
-     *            the ID of the {@link RolloutGroup}
-     * @return percentage finished
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    float getFinishedPercentForRunningGroup(@NotNull Long rolloutId, @NotNull Long rolloutGroupId);
-
     /**
      * Pauses a rollout which is currently running. The Rollout switches
      * {@link RolloutStatus#PAUSED}. {@link RolloutGroup}s which are currently

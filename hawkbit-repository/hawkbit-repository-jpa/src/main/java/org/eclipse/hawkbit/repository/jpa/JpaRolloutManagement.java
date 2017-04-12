@@ -141,7 +141,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     public Page<Rollout> findAll(final Pageable pageable, final boolean deleted) {
-        final Specification<JpaRollout> spec = RolloutSpecification.isDeleted(deleted);
+        final Specification<JpaRollout> spec = RolloutSpecification.isDeletedWithDistributionSet(deleted);
         return JpaRolloutHelper.convertPage(rolloutRepository.findAll(spec, pageable), pageable);
     }
 
@@ -149,7 +149,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     public Page<Rollout> findAllByPredicate(final String rsqlParam, final Pageable pageable, final boolean deleted) {
         final List<Specification<JpaRollout>> specList = Lists.newArrayListWithExpectedSize(2);
         specList.add(RSQLUtility.parse(rsqlParam, RolloutFields.class, virtualPropertyReplacer));
-        specList.add(RolloutSpecification.isDeleted(deleted));
+        specList.add(RolloutSpecification.isDeletedWithDistributionSet(deleted));
 
         return JpaRolloutHelper.convertPage(findByCriteriaAPI(pageable, specList), pageable);
     }
@@ -870,7 +870,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     public Long countRolloutsAll() {
-        return rolloutRepository.count(RolloutSpecification.isDeleted(false));
+        return rolloutRepository.count(RolloutSpecification.isDeletedWithDistributionSet(false));
     }
 
     @Override
@@ -929,7 +929,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Override
     public Page<Rollout> findAllRolloutsWithDetailedStatus(final Pageable pageable, final boolean deleted) {
         Page<JpaRollout> rollouts;
-        final Specification<JpaRollout> spec = RolloutSpecification.isDeleted(deleted);
+        final Specification<JpaRollout> spec = RolloutSpecification.isDeletedWithDistributionSet(deleted);
         rollouts = rolloutRepository.findAll(spec, pageable);
         setRolloutStatusDetails(rollouts);
         return JpaRolloutHelper.convertPage(rollouts, pageable);
@@ -972,24 +972,6 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
                 rollout.setTotalTargetCountStatus(totalTargetCountStatus);
             });
         }
-    }
-
-    @Override
-    public float getFinishedPercentForRunningGroup(final Long rolloutId, final Long rolloutGroupId) {
-        final RolloutGroup rolloutGroup = rolloutGroupRepository.findById(rolloutGroupId)
-                .orElseThrow(() -> new EntityNotFoundException(RolloutGroup.class, rolloutGroupId));
-
-        final long totalGroup = rolloutGroup.getTotalTargets();
-        if (totalGroup == 0) {
-            // in case e.g. targets has been deleted we don't have any actions
-            // left for this group, so the group is finished
-            return 100;
-        }
-
-        final Long finished = actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rolloutId,
-                rolloutGroup.getId(), Action.Status.FINISHED);
-        // calculate threshold
-        return ((float) finished / (float) totalGroup) * 100;
     }
 
     @Override
