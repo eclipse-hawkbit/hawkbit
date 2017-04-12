@@ -211,10 +211,6 @@ public class TargetTable extends AbstractTable<Target, Long> {
         if (event == SaveActionWindowEvent.SAVED_ASSIGNMENTS) {
             refreshContainer();
         }
-
-        if (event == SaveActionWindowEvent.DELETED_TARGETS) {
-            refreshFilter();
-        }
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -305,7 +301,7 @@ public class TargetTable extends AbstractTable<Target, Long> {
     }
 
     @Override
-    protected void setManagementEntitiyStateValues(final Set<Long> values, final Long lastId) {
+    protected void setManagementEntityStateValues(final Set<Long> values, final Long lastId) {
         managementUIState.setSelectedTargetId(values);
         managementUIState.setLastSelectedTargetId(lastId);
     }

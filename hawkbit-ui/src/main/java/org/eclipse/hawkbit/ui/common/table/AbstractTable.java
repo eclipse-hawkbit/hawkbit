@@ -83,10 +83,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
         setId(getTableId());
         addCustomGeneratedColumns();
         setDefault();
-        addValueChangeListener(
-
-                event -> onValueChange());
-
+        addValueChangeListener(event -> onValueChange());
         setPageLength(SPUIDefinitions.PAGE_SIZE);
         eventBus.subscribe(this);
     }
@@ -116,18 +113,18 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
         if (!values.isEmpty()) {
             lastId = Iterables.getLast(values);
         }
-        setManagementEntitiyStateValues(values, lastId);
+        setManagementEntityStateValues(values, lastId);
         selectEntity(lastId);
         publishAdditionalEvent();
     }
 
-    protected void setManagementEntitiyStateValues(final Set<I> values, final I lastId) {
-        final ManagementEntityState<I> managmentEntityState = getManagementEntityState();
-        if (managmentEntityState == null) {
+    protected void setManagementEntityStateValues(final Set<I> values, final I lastId) {
+        final ManagementEntityState<I> managementEntityState = getManagementEntityState();
+        if (managementEntityState == null) {
             return;
         }
-        managmentEntityState.setLastSelectedEntity(lastId);
-        managmentEntityState.setSelectedEnitities(values);
+        managementEntityState.setLastSelectedEntity(lastId);
+        managementEntityState.setSelectedEnitities(values);
     }
 
     private void setDefault() {

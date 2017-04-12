@@ -106,7 +106,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
                     || filterEvent == SMFilterEvent.FILTER_BY_TEXT_DISTRIBUTION_VIEW
                     || filterEvent == SMFilterEvent.REMOVE_FILTER_BY_TYPE_DISTRIBUTION_VIEW
                     || filterEvent == SMFilterEvent.REMOVE_FILTER_BY_TEXT_DISTRIBUTION_VIEW) {
-                refreshFilter();
+                UI.getCurrent().access(this::refreshFilter);
                 styleTableOnDistSelection();
             }
         });
@@ -253,7 +253,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     }
 
     @Override
-    protected void setManagementEntitiyStateValues(final Set<Long> values, final Long lastId) {
+    protected void setManagementEntityStateValues(final Set<Long> values, final Long lastId) {
         manageDistUIState.setSelectedBaseSwModuleId(lastId);
         manageDistUIState.setSelectedSoftwareModules(values);
     }
