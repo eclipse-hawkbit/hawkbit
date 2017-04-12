@@ -245,8 +245,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                     + convertCorrelationId(message));
         }
 
-        updateLastPollTime(action.getTarget());
-
         final Status status = mapStatus(message, actionUpdateStatus, action);
         final ActionStatusCreate actionStatus = entityFactory.actionStatus().create(action.getId()).status(status)
                 .messages(messages);
@@ -300,10 +298,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 "Cancel rejected message is not allowed, if action is on state: " + action.getStatus());
         return null;
 
-    }
-
-    private void updateLastPollTime(final Target target) {
-        controllerManagement.updateLastTargetQuery(target.getControllerId(), null);
     }
 
     private static String convertCorrelationId(final Message message) {

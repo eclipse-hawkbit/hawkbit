@@ -213,8 +213,6 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                         contains(ds.findFirstModuleByType(appType).get().getVersion())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].name",
                         contains(ds.findFirstModuleByType(appType).get().getName())));
-        assertThat(targetManagement.findTargetByControllerID("4712").get().getLastTargetQuery())
-                .isGreaterThanOrEqualTo(current);
 
         // Retrieved is reported
         final Iterable<ActionStatus> actionStatusMessages = deploymentManagement
@@ -301,7 +299,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         // Run test
 
-        long current = System.currentTimeMillis();
+        final long current = System.currentTimeMillis();
         mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
@@ -313,8 +311,6 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(targetManagement.findTargetByControllerID("4712").get().getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(2);
-
-        current = System.currentTimeMillis();
 
         final DistributionSet findDistributionSetByAction = distributionSetManagement
                 .findDistributionSetByAction(action.getId()).get();
@@ -371,8 +367,6 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                         contains(ds.findFirstModuleByType(appType).get().getVersion())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].name",
                         contains(ds.findFirstModuleByType(appType).get().getName())));
-        assertThat(targetManagement.findTargetByControllerID("4712").get().getLastTargetQuery())
-                .isGreaterThanOrEqualTo(current);
 
         // Retrieved is reported
         final List<ActionStatus> actionStatusMessages = deploymentManagement
@@ -488,8 +482,6 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                         contains(ds.findFirstModuleByType(appType).get().getVersion())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].name",
                         contains(ds.findFirstModuleByType(appType).get().getName())));
-        assertThat(targetManagement.findTargetByControllerID("4712").get().getLastTargetQuery())
-                .isGreaterThanOrEqualTo(current);
 
         // Retrieved is reported
         final Iterable<ActionStatus> actionStatusMessages = deploymentManagement
@@ -595,15 +587,12 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         // action1 done
 
-        long current = System.currentTimeMillis();
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action1.getId() + "/feedback",
                 tenantAware.getCurrentTenant())
                         .content(JsonBuilder.deploymentActionFeedback(action1.getId().toString(), "closed"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         myT = targetManagement.findTargetByControllerID("4712").get();
-        assertThat(myT.getLastTargetQuery()).isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(myT.getLastTargetQuery()).isGreaterThanOrEqualTo(current);
         assertThat(myT.getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
         assertThat(deploymentManagement.findActiveActionsByTarget(myT.getControllerId())).hasSize(2);
         assertThat(deploymentManagement.getAssignedDistributionSet(myT.getControllerId()).get()).isEqualTo(ds3);
@@ -615,15 +604,12 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(actionStatusMessages.iterator().next().getStatus()).isEqualTo(Status.FINISHED);
 
         // action2 done
-        current = System.currentTimeMillis();
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action2.getId() + "/feedback",
                 tenantAware.getCurrentTenant())
                         .content(JsonBuilder.deploymentActionFeedback(action2.getId().toString(), "closed"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         myT = targetManagement.findTargetByControllerID("4712").get();
-        assertThat(myT.getLastTargetQuery()).isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(myT.getLastTargetQuery()).isGreaterThanOrEqualTo(current);
 
         assertThat(myT.getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
         assertThat(deploymentManagement.findActiveActionsByTarget(myT.getControllerId())).hasSize(1);
@@ -635,15 +621,12 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(actionStatusMessages).haveAtLeast(1, new ActionStatusCondition(Status.FINISHED));
 
         // action3 done
-        current = System.currentTimeMillis();
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action3.getId() + "/feedback",
                 tenantAware.getCurrentTenant())
                         .content(JsonBuilder.deploymentActionFeedback(action3.getId().toString(), "closed"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         myT = targetManagement.findTargetByControllerID("4712").get();
-        assertThat(myT.getLastTargetQuery()).isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(myT.getLastTargetQuery()).isGreaterThanOrEqualTo(current);
         assertThat(myT.getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
         assertThat(deploymentManagement.findActiveActionsByTarget(myT.getControllerId())).hasSize(0);
         assertThat(deploymentManagement.getAssignedDistributionSet(myT.getControllerId()).get()).isEqualTo(ds3);
@@ -670,7 +653,6 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Action action = deploymentManagement.findActionsByDistributionSet(pageReq, ds.getId()).getContent()
                 .get(0);
 
-        long current = System.currentTimeMillis();
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action.getId() + "/feedback",
                 tenantAware.getCurrentTenant())
                         .content(JsonBuilder.deploymentActionFeedback(action.getId().toString(), "closed", "failure",
@@ -678,8 +660,6 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         Target myT = targetManagement.findTargetByControllerID("4712").get();
-        assertThat(myT.getLastTargetQuery()).isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(myT.getLastTargetQuery()).isGreaterThanOrEqualTo(current);
         assertThat(targetManagement.findTargetByControllerID("4712").get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.ERROR);
         assertThat(targetManagement.findTargetByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.PENDING))
@@ -699,7 +679,6 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         ds = distributionSetManagement.findDistributionSetByIdWithDetails(ds.getId()).get();
         assignDistributionSet(ds, Lists.newArrayList(targetManagement.findTargetByControllerID("4712").get()));
         final Action action2 = deploymentManagement.findActiveActionsByTarget(myT.getControllerId()).get(0);
-        current = System.currentTimeMillis();
 
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action2.getId() + "/feedback",
                 tenantAware.getCurrentTenant())
@@ -708,8 +687,6 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         myT = targetManagement.findTargetByControllerID("4712").get();
-        assertThat(myT.getLastTargetQuery()).isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(myT.getLastTargetQuery()).isGreaterThanOrEqualTo(current);
         assertThat(myT.getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
         assertThat(targetManagement.findTargetByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.PENDING))
                 .hasSize(0);
@@ -748,9 +725,6 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(targetManagement.findTargetByAssignedDistributionSet(ds.getId(), pageReq)).hasSize(1);
 
         // Now valid Feedback
-
-        long current = System.currentTimeMillis();
-
         for (int i = 0; i < 4; i++) {
             mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action.getId() + "/feedback",
                     tenantAware.getCurrentTenant())
@@ -760,7 +734,6 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         }
 
         myT = targetManagement.findTargetByControllerID("4712").get();
-        assertThat(myT.getLastTargetQuery()).isGreaterThanOrEqualTo(current);
         assertThat(myT.getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
         assertThat(targetManagement.findTargetByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.PENDING))
                 .hasSize(1);
@@ -773,14 +746,12 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(deploymentManagement.findActionStatusAll(pageReq).getContent()).haveAtLeast(5,
                 new ActionStatusCondition(Status.RUNNING));
 
-        current = System.currentTimeMillis();
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action.getId() + "/feedback",
                 tenantAware.getCurrentTenant())
                         .content(JsonBuilder.deploymentActionFeedback(action.getId().toString(), "scheduled"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         myT = targetManagement.findTargetByControllerID("4712").get();
-        assertThat(myT.getLastTargetQuery()).isGreaterThanOrEqualTo(current);
         assertThat(myT.getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
         assertThat(targetManagement.findTargetByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.PENDING))
                 .hasSize(1);
@@ -793,14 +764,12 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(deploymentManagement.findActionStatusAll(pageReq).getContent()).haveAtLeast(5,
                 new ActionStatusCondition(Status.RUNNING));
 
-        current = System.currentTimeMillis();
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action.getId() + "/feedback",
                 tenantAware.getCurrentTenant())
                         .content(JsonBuilder.deploymentActionFeedback(action.getId().toString(), "resumed"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         myT = targetManagement.findTargetByControllerID("4712").get();
-        assertThat(myT.getLastTargetQuery()).isGreaterThanOrEqualTo(current);
         assertThat(myT.getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
         assertThat(targetManagement.findTargetByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.PENDING))
                 .hasSize(1);
@@ -813,14 +782,12 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(deploymentManagement.findActionStatusAll(pageReq).getContent()).haveAtLeast(6,
                 new ActionStatusCondition(Status.RUNNING));
 
-        current = System.currentTimeMillis();
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action.getId() + "/feedback",
                 tenantAware.getCurrentTenant())
                         .content(JsonBuilder.deploymentActionFeedback(action.getId().toString(), "canceled"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         myT = targetManagement.findTargetByControllerID("4712").get();
-        assertThat(myT.getLastTargetQuery()).isGreaterThanOrEqualTo(current);
         assertThat(myT.getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
         assertThat(deploymentManagement.findActiveActionsByTarget(myT.getControllerId())).hasSize(1);
         assertThat(targetManagement.findTargetByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.PENDING))
@@ -836,14 +803,12 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(deploymentManagement.findActionStatusAll(pageReq).getContent()).haveAtLeast(1,
                 new ActionStatusCondition(Status.CANCELED));
 
-        current = System.currentTimeMillis();
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action.getId() + "/feedback",
                 tenantAware.getCurrentTenant())
                         .content(JsonBuilder.deploymentActionFeedback(action.getId().toString(), "rejected"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         myT = targetManagement.findTargetByControllerID("4712").get();
-        assertThat(myT.getLastTargetQuery()).isGreaterThanOrEqualTo(current);
         assertThat(myT.getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
         assertThat(deploymentManagement.findActiveActionsByTarget(myT.getControllerId())).hasSize(1);
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(9);
@@ -854,14 +819,12 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(deploymentManagement.findActionStatusAll(pageReq).getContent()).haveAtLeast(1,
                 new ActionStatusCondition(Status.CANCELED));
 
-        current = System.currentTimeMillis();
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action.getId() + "/feedback",
                 tenantAware.getCurrentTenant())
                         .content(JsonBuilder.deploymentActionFeedback(action.getId().toString(), "closed"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         myT = targetManagement.findTargetByControllerID("4712").get();
-        assertThat(myT.getLastTargetQuery()).isGreaterThanOrEqualTo(current);
         assertThat(myT.getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
         assertThat(deploymentManagement.findActiveActionsByTarget(myT.getControllerId())).hasSize(0);
         assertThat(targetManagement.findTargetByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.ERROR))
