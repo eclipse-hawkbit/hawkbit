@@ -276,17 +276,22 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         LOG.debug("assignDistribution({}) finished {}", set, result);
 
-        sendDistributionSetAssignmentEvent(targets, targetIdsCancellList, targetIdsToActions);
+        sendAssignmentEvents(targets, targetIdsCancellList, targetIdsToActions);
 
         return result;
     }
 
-    private void sendDistributionSetAssignmentEvent(final List<JpaTarget> targets, final Set<Long> targetIdsCancellList,
+    private void sendAssignmentEvents(final List<JpaTarget> targets, final Set<Long> targetIdsCancellList,
             final Map<String, JpaAction> targetIdsToActions) {
-        targets.stream().filter(t -> !!!targetIdsCancellList.contains(t.getId()))
-                .forEach(t -> sendTargetAssignDistributionSetEvent(targetIdsToActions.get(t.getControllerId())));
 
-        targets.forEach(this::sendTargetUpdatedEvent);
+        targets.forEach(target -> {
+            sendTargetUpdatedEvent(target);
+            if (targetIdsCancellList.contains(target.getId())) {
+                return;
+            }
+
+            sendTargetAssignDistributionSetEvent(targetIdsToActions.get(target.getControllerId()));
+        });
     }
 
     private static JpaAction createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap,
