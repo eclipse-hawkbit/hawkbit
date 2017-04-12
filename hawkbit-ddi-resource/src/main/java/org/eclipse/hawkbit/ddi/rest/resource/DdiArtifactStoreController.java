@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
 import org.eclipse.hawkbit.rest.util.RestResourceConversionHelper;
-import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,9 +60,6 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
 
     @Autowired
     private ControllerManagement controllerManagement;
-
-    @Autowired
-    private HawkbitSecurityProperties securityProperties;
 
     @Autowired
     private RequestResponseContextHolder requestResponseContextHolder;
