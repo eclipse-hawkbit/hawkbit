@@ -329,7 +329,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verifies that a DS is cannot be created if another DS with same name and version exists.")
+    @Description("Verifies that a DS cannot be created if another DS with same name and version exists.")
     public void createDistributionSetWithDuplicateNameAndVersionFails() {
         distributionSetManagement
                 .createDistributionSet(entityFactory.distributionSet().create().name("newtypesoft").version("1"));
