@@ -10,15 +10,19 @@ package org.eclipse.hawkbit.rabbitmq.test;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
+import java.util.concurrent.TimeUnit;
+
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.junit.Before;
 import org.junit.Rule;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.junit.BrokerRunning;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.annotation.DirtiesContext;
@@ -38,13 +42,16 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
     public BrokerRunning brokerRunning;
 
     @Autowired
-    private RabbitTemplate dmfClient;
+    private ConnectionFactory connectionFactory;
 
     @Autowired
     private RabbitAdmin rabbitAdmin;
 
+    private RabbitTemplate dmfClient;
+
     @Before
     public void setup() {
+        dmfClient = createDmfClient();
         dmfClient.setExchange(getExchange());
     }
 
@@ -73,6 +80,17 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
 
     protected RabbitAdmin getRabbitAdmin() {
         return rabbitAdmin;
+    }
+
+    RabbitTemplate createDmfClient() {
+        final RabbitTemplate template = new RabbitTemplate(connectionFactory);
+        template.setMessageConverter(new Jackson2JsonMessageConverter());
+        template.setReceiveTimeout(TimeUnit.SECONDS.toMillis(3));
+        return template;
+    }
+
+    protected ConnectionFactory getConnectionFactory() {
+        return connectionFactory;
     }
 
 }

@@ -39,7 +39,6 @@ import org.junit.Before;
 import org.mockito.Mockito;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
-import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.test.RabbitListenerTestHarness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -64,9 +63,6 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
     @Autowired
     private RabbitListenerTestHarness harness;
 
-    @Autowired
-    private ConnectionFactory connectionFactory;
-
     @Before
     public void initListener() {
         deadletterListener = harness.getSpy(DeadletterListener.LISTENER_ID);
@@ -75,7 +71,6 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         replyToListener = harness.getSpy(ReplyToListener.LISTENER_ID);
         assertThat(replyToListener).isNotNull();
         Mockito.reset(replyToListener);
-        getDmfClient().setExchange(AmqpSettings.DMF_EXCHANGE);
     }
 
     protected <T> T waitUntilIsPresent(final Callable<Optional<T>> callable) {
@@ -219,7 +214,7 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         assertThat(target.getCreatedBy()).isEqualTo(createdBy);
         assertThat(target.getUpdateStatus()).isEqualTo(updateStatus);
         assertThat(target.getAddress()).isEqualTo(
-                IpUtil.createAmqpUri(connectionFactory.getVirtualHost(), DmfTestConfiguration.REPLY_TO_EXCHANGE));
+                IpUtil.createAmqpUri(getConnectionFactory().getVirtualHost(), DmfTestConfiguration.REPLY_TO_EXCHANGE));
     }
 
     protected Message createTargetMessage(final String target, final String tenant) {

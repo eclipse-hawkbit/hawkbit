@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.amqp;
 
 import java.net.URI;
 
+import javax.validation.constraints.NotNull;
+
 import org.springframework.amqp.core.Message;
 
 /**
@@ -27,7 +29,7 @@ public interface AmqpSenderService {
      * @param replyTo
      *            the reply to uri
      */
-    void sendMessage(Message message, URI replyTo);
+    void sendMessage(@NotNull Message message, @NotNull URI replyTo);
 
     /**
      * Extract the exchange from the uri. Default implementation removes the

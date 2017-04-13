@@ -51,13 +51,13 @@ public class RabbitMqSetupService {
         if (StringUtils.isEmpty(password)) {
             password = GUEST;
         }
+
     }
 
     private synchronized Client getRabbitmqHttpClient() {
         if (rabbitmqHttpClient == null) {
             try {
-                rabbitmqHttpClient = new Client("http://" + getHostname() + ":15672/api/", getUsername(),
-                        getPassword());
+                rabbitmqHttpClient = new Client(getHttpApiUrl(), getUsername(), getPassword());
             } catch (MalformedURLException | URISyntaxException e) {
                 throw Throwables.propagate(e);
             }
@@ -65,10 +65,14 @@ public class RabbitMqSetupService {
         return rabbitmqHttpClient;
     }
 
+    public String getHttpApiUrl() {
+        return "http://" + getHostname() + ":15672/api/";
+    }
+
     // would to throw a checked exception, because without the management api
     // the test cannot be run.
     @SuppressWarnings("squid:S1162")
-    String createVirtualHost() throws JsonProcessingException, AlivenessException {
+    public String createVirtualHost() throws JsonProcessingException {
         if (!getRabbitmqHttpClient().alivenessTest("/")) {
             throw new AlivenessException(getHostname());
 
@@ -81,7 +85,7 @@ public class RabbitMqSetupService {
     }
 
     @PreDestroy
-    void deleteVirtualHost() {
+    public void deleteVirtualHost() {
         if (StringUtils.isEmpty(virtualHost)) {
             return;
         }
@@ -109,7 +113,7 @@ public class RabbitMqSetupService {
         return permissions;
     }
 
-    static class AlivenessException extends Exception {
+    static class AlivenessException extends RuntimeException {
         private static final long serialVersionUID = 1L;
 
         public AlivenessException(String hostname) {
