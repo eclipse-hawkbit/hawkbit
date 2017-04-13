@@ -10,13 +10,17 @@
 machine:
   java:
     version: oraclejdk8
+  services:
+    - rabbitmq-server
   environment:
     _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
+  pre:
+   - sudo rabbitmq-plugins enable rabbitmq_management
+    
 dependencies:
-  cache_directories:
-    - "~/.embedmongo"
   override:
     - mvn install -DskipTests
+    
 test:
   override:
     - sh sonarCircleCi.sh

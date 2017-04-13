@@ -1,3 +1,4 @@
+
 /**
  * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
  *
@@ -19,10 +20,10 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.dstable.DsMetadataPopupLayout;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.PageRequest;
 
 import com.vaadin.data.Item;
@@ -37,7 +38,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * DistributionSet Metadata details layout.
  *
  */
-public class DistributionSetMetadatadetailslayout extends Table {
+public class DistributionSetMetadatadetailsLayout extends Table {
 
     private static final long serialVersionUID = 2913758299611837718L;
 
@@ -59,8 +60,8 @@ public class DistributionSetMetadatadetailslayout extends Table {
 
     private final UINotification notification;
 
-    public DistributionSetMetadatadetailslayout(final VaadinMessageSource i18n, final SpPermissionChecker permissionChecker,
-            final DistributionSetManagement distributionSetManagement,
+    public DistributionSetMetadatadetailsLayout(final VaadinMessageSource i18n,
+            final SpPermissionChecker permissionChecker, final DistributionSetManagement distributionSetManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout, final EntityFactory entityFactory,
             final UINotification notification) {
         this.i18n = i18n;

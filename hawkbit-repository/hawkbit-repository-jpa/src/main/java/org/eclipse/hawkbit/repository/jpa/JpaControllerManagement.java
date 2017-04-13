@@ -401,7 +401,6 @@ public class JpaControllerManagement implements ControllerManagement {
                     String.valueOf(securityProperties.getDos().getMaxAttributeEntriesPerTarget()));
         }
 
-        target.setLastTargetQuery(System.currentTimeMillis());
         target.setRequestControllerAttributes(false);
 
         return targetRepository.save(target);

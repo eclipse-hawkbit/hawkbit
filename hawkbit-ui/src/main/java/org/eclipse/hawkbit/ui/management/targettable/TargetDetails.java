@@ -25,11 +25,11 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -64,10 +64,11 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
     private VerticalLayout assignedDistLayout;
     private VerticalLayout installedDistLayout;
 
-    TargetDetails(final VaadinMessageSource i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
-            final ManagementUIState managementUIState, final UINotification uiNotification,
-            final TagManagement tagManagement, final TargetManagement targetManagement,
-            final DeploymentManagement deploymentManagement, final EntityFactory entityFactory) {
+    TargetDetails(final VaadinMessageSource i18n, final UIEventBus eventBus,
+            final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState,
+            final UINotification uiNotification, final TagManagement tagManagement,
+            final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
+            final EntityFactory entityFactory) {
         super(i18n, eventBus, permissionChecker, managementUIState);
         this.targetTagToken = new TargetTagToken(permissionChecker, i18n, uiNotification, eventBus, managementUIState,
                 tagManagement, targetManagement);
@@ -75,7 +76,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
                 entityFactory);
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
-        addTabs(detailsTab);
+        addDetailsTab();
         restoreState();
     }
 
@@ -84,32 +85,24 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         return getI18n().getMessage("target.details.header");
     }
 
-    @Override
-    protected void addTabs(final TabSheet detailsTab) {
-        detailsTab.addTab(createDetailsLayout(), getI18n().getMessage("caption.tab.details"), null);
-        detailsTab.addTab(createDescriptionLayout(), getI18n().getMessage("caption.tab.description"), null);
-        detailsTab.addTab(createAttributesLayout(), getI18n().getMessage("caption.attributes.tab"), null);
-        detailsTab.addTab(createAssignedDistLayout(), getI18n().getMessage("header.target.assigned"), null);
-        detailsTab.addTab(createInstalledDistLayout(), getI18n().getMessage("header.target.installed"), null);
-        detailsTab.addTab(createTagsLayout(), getI18n().getMessage("caption.tags.tab"), null);
-        detailsTab.addTab(createLogLayout(), getI18n().getMessage("caption.logs.tab"), null);
-
+    private final void addDetailsTab() {
+        getDetailsTab().addTab(getDetailsLayout(), getI18n().getMessage("caption.tab.details"), null);
+        getDetailsTab().addTab(getDescriptionLayout(), getI18n().getMessage("caption.tab.description"), null);
+        getDetailsTab().addTab(getAttributesLayout(), getI18n().getMessage("caption.attributes.tab"), null);
+        getDetailsTab().addTab(createAssignedDistLayout(), getI18n().getMessage("header.target.assigned"), null);
+        getDetailsTab().addTab(createInstalledDistLayout(), getI18n().getMessage("header.target.installed"), null);
+        getDetailsTab().addTab(getTagsLayout(), getI18n().getMessage("caption.tags.tab"), null);
+        getDetailsTab().addTab(getLogLayout(), getI18n().getMessage("caption.logs.tab"), null);
     }
 
     private Component createInstalledDistLayout() {
-        installedDistLayout = getTabLayout();
+        installedDistLayout = createTabLayout();
         return installedDistLayout;
     }
 
     private Component createAssignedDistLayout() {
-        assignedDistLayout = getTabLayout();
+        assignedDistLayout = createTabLayout();
         return assignedDistLayout;
-    }
-
-    private VerticalLayout createTagsLayout() {
-        final VerticalLayout tagsLayout = getTabLayout();
-        tagsLayout.addComponent(targetTagToken.getTokenField());
-        return tagsLayout;
     }
 
     @Override
@@ -137,12 +130,12 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
     @Override
     protected boolean onLoadIsTableRowSelected() {
-        return managementUIState.getLastSelectedTargetId() != null;
+        return getManagementUIState().getLastSelectedTargetId() != null;
     }
 
     @Override
     protected boolean onLoadIsTableMaximized() {
-        return managementUIState.isTargetTableMaximized();
+        return getManagementUIState().isTargetTableMaximized();
     }
 
     @Override
@@ -163,7 +156,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
             populateDistributionDtls(installedDistLayout, null);
             populateDistributionDtls(assignedDistLayout, null);
         }
-
+        populateTags(targetTagToken);
     }
 
     @Override
@@ -176,7 +169,8 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         final VerticalLayout detailsTabLayout = getDetailsLayout();
         detailsTabLayout.removeAllComponents();
 
-        final Label controllerLabel = SPUIComponentProvider.createNameValueLabel(getI18n().getMessage("label.target.id"),
+        final Label controllerLabel = SPUIComponentProvider.createNameValueLabel(
+                getI18n().getMessage("label.target.id"),
                 HawkbitCommonUtil.trimAndNullIfEmpty(controllerId) == null ? "" : controllerId);
         controllerLabel.setId(UIComponentIdProvider.TARGET_CONTROLLER_ID);
         detailsTabLayout.addComponent(controllerLabel);
@@ -203,7 +197,8 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         final HorizontalLayout securityTokenLayout = new HorizontalLayout();
 
         final Label securityTableLbl = new Label(
-                SPUIComponentProvider.getBoldHTMLText(getI18n().getMessage("label.target.security.token")), ContentMode.HTML);
+                SPUIComponentProvider.getBoldHTMLText(getI18n().getMessage("label.target.security.token")),
+                ContentMode.HTML);
         securityTableLbl.addStyleName(SPUIDefinitions.TEXT_STYLE);
         securityTableLbl.addStyleName("label-style");
 
@@ -229,8 +224,8 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         layout.addComponent(SPUIComponentProvider.createNameValueLabel(getI18n().getMessage("label.dist.details.name"),
                 distributionSet.getName()));
 
-        layout.addComponent(SPUIComponentProvider.createNameValueLabel(getI18n().getMessage("label.dist.details.version"),
-                distributionSet.getVersion()));
+        layout.addComponent(SPUIComponentProvider.createNameValueLabel(
+                getI18n().getMessage("label.dist.details.version"), distributionSet.getVersion()));
 
         distributionSet.getModules()
                 .forEach(module -> layout.addComponent(getSWModlabel(module.getType().getName(), module)));

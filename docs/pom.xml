@@ -21,6 +21,10 @@
    <description>Documenation for hawkBit</description>
 
 
+   <properties>
+    <jekyll.config>localconfig.yml</jekyll.config>
+   </properties>
+
 
    <!-- Jekyll Linux Build -->
    <profiles>
@@ -59,7 +63,7 @@
                         <phase>generate-resources</phase>
                         <configuration>
                            <file>${project.build.directory}/rubygems/bin/jekyll</file>
-                           <execArgs>build --trace --source ${project.basedir}/src/main/resources --destination ${project.build.outputDirectory}</execArgs>
+                           <execArgs>build --trace --source ${project.basedir}/src/main/resources --destination ${project.build.outputDirectory} --config ${project.basedir}/src/main/resources/${jekyll.config}</execArgs>
                         </configuration>
                      </execution>
                      <execution>
@@ -70,7 +74,7 @@
                         </goals>
                         <configuration>
                            <file>${project.build.directory}/rubygems/bin/jekyll</file>
-                           <execArgs>serve --trace --source ${project.basedir}/src/main/resources --destination ${project.build.outputDirectory}</execArgs>
+                           <execArgs>serve --trace --source ${project.basedir}/src/main/resources --destination ${project.build.outputDirectory} --config ${project.basedir}/src/main/resources/${jekyll.config}</execArgs>
                         </configuration>
                         <phase>none</phase>
                      </execution>
@@ -124,6 +128,8 @@
                               <argument>${project.basedir}/src/main/resources</argument>
                               <argument>--destination</argument>
                               <argument>${project.build.outputDirectory}</argument>
+                              <argument>--config</argument>
+                              <argument>${project.basedir}/src/main/resources/${jekyll.config}</argument>
                            </arguments>
                         </configuration>
                      </execution>
@@ -142,6 +148,8 @@
                               <argument>${project.basedir}/src/main/resources</argument>
                               <argument>--destination</argument>
                               <argument>${project.build.outputDirectory}</argument>
+                              <argument>--config</argument>
+                              <argument>${project.basedir}/src/main/resources/${jekyll.config}</argument>
                            </arguments>
                         </configuration>
                         <phase>none</phase>

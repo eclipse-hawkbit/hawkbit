@@ -111,8 +111,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("softwareModuleId") final Long softwareModuleId) {
         LOG.debug("getSoftwareModulesArtifacts({})", controllerId);
 
-        final Target target = controllerManagement.updateLastTargetQuery(controllerId, IpUtil
-                .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
+        final Target target = controllerManagement.findByControllerId(controllerId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         final SoftwareModule softwareModule = softwareManagement.findSoftwareModuleById(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
@@ -142,8 +142,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("fileName") final String fileName) {
         ResponseEntity<InputStream> result;
 
-        final Target target = controllerManagement.updateLastTargetQuery(controllerId, IpUtil
-                .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
+        final Target target = controllerManagement.findByControllerId(controllerId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
         final SoftwareModule module = softwareManagement.findSoftwareModuleById(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
 
@@ -205,8 +205,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("controllerId") final String controllerId,
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("fileName") final String fileName) {
-        controllerManagement.updateLastTargetQuery(controllerId, IpUtil
-                .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
+        controllerManagement.findByControllerId(controllerId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         final SoftwareModule module = softwareManagement.findSoftwareModuleById(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
@@ -234,8 +234,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @RequestParam(value = "c", required = false, defaultValue = "-1") final int resource) {
         LOG.debug("getControllerBasedeploymentAction({},{})", controllerId, resource);
 
-        final Target target = controllerManagement.updateLastTargetQuery(controllerId, IpUtil
-                .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
+        final Target target = controllerManagement.findByControllerId(controllerId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         final Action action = findActionWithExceptionIfNotFound(actionId);
         if (!action.getTarget().getId().equals(target.getId())) {
@@ -271,8 +271,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("actionId") @NotEmpty final Long actionId) {
         LOG.debug("provideBasedeploymentActionFeedback for target [{},{}]: {}", controllerId, actionId, feedback);
 
-        final Target target = controllerManagement.updateLastTargetQuery(controllerId, IpUtil
-                .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
+        final Target target = controllerManagement.findByControllerId(controllerId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         if (!actionId.equals(feedback.getId())) {
             LOG.warn(
@@ -361,9 +361,6 @@ public class DdiRootController implements DdiRootControllerRestApi {
     @Override
     public ResponseEntity<Void> putConfigData(@Valid @RequestBody final DdiConfigData configData,
             @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId) {
-        controllerManagement.updateLastTargetQuery(controllerId, IpUtil
-                .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
-
         controllerManagement.updateControllerAttributes(controllerId, configData.getData());
 
         return new ResponseEntity<>(HttpStatus.OK);
@@ -375,8 +372,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("actionId") @NotEmpty final Long actionId) {
         LOG.debug("getControllerCancelAction({})", controllerId);
 
-        final Target target = controllerManagement.updateLastTargetQuery(controllerId, IpUtil
-                .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
+        final Target target = controllerManagement.findByControllerId(controllerId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         final Action action = findActionWithExceptionIfNotFound(actionId);
         if (!action.getTarget().getId().equals(target.getId())) {
@@ -406,8 +403,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("actionId") @NotEmpty final Long actionId) {
         LOG.debug("provideCancelActionFeedback for target [{}]: {}", controllerId, feedback);
 
-        final Target target = controllerManagement.updateLastTargetQuery(controllerId, IpUtil
-                .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
+        final Target target = controllerManagement.findByControllerId(controllerId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         if (!actionId.equals(feedback.getId())) {
             LOG.warn(

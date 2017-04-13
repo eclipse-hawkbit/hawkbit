@@ -2,7 +2,7 @@
 
 # Eclipse hawkBit™ - Update Server
 
-Eclipse [hawkBit](https://projects.eclipse.org/projects/iot.hawkbit) is an domain independent back end solution for rolling out software updates to constrained edge devices as well as more powerful controllers and gateways connected to IP based networking infrastructure.
+Eclipse [hawkBit](http://www.eclipse.org/hawkbit/index.html) is an domain independent back end solution for rolling out software updates to constrained edge devices as well as more powerful controllers and gateways connected to IP based networking infrastructure.
 
 Build: [![Circle CI](https://circleci.com/gh/eclipse/hawkbit.svg?style=shield)](https://circleci.com/gh/eclipse/hawkbit)
  [![Codacy Badge](https://api.codacy.com/project/badge/Grade/83b1ace1fba94ea2aec93b202b52f39a)](https://www.codacy.com/app/kai-zimmermann/hawkbit?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=eclipse/hawkbit&amp;utm_campaign=Badge_Grade) [![SonarQuality](https://sonar.ops.bosch-iot-rollouts.com/api/badges/gate?key=org.eclipse.hawkbit:hawkbit-parent)](https://sonar.ops.bosch-iot-rollouts.com) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent)
@@ -23,40 +23,58 @@ We offer a sandbox installation that is free for everyone to try out hawkBit. Ho
 
 https://hawkbit.eu-gb.mybluemix.net/UI/
 
-# Compile, Run and Getting Started
+# Device Integration
 
-We are not providing an off the shelf installation ready hawkBit update server. In addition we have [guide](http://www.eclipse.org/hawkbit/documentation/guide/runhawkbit.html) for setting up a complete landscape.
+hawkBit does not provide off the shelf clients for devices as part of the project. The long term goal is to provide an [Eclipse hono](https://github.com/eclipse/hono) integration which will provide connectivity through various IoT protocols and as a result allows a wide range of clients to connect to hawkBit. However, the hawkBit [Direct Device Integration (API) API](http://www.eclipse.org/hawkbit/documentation/interfaces/ddi-api.html) is HTTP/JSon based which should allow any update client to integrate quite easily.
 
-Docker support by means of ready to go images is currently missing but we will look into this as soon as we can.
+There are clients outside of the Eclipse IoT eco system as well, e.g.:
 
-# API stability
+* [SWupdate](https://github.com/sbabic/swupdate) which is a Linux Update agent with focus on a efficient and safe way to update embedded systems.
 
-hawkBit is currently in '0.X' semantic version. That is due to the need that there is still content in hawkBit that is in need for refactoring. That includes the maven module structure, Spring Boot Properties, Spring Boot auto configuration as well as internal Java APIs (e.g. the [repository API](https://github.com/eclipse/hawkbit/issues/197) ).
+# Getting Started
 
-However, the external APIs (i.e. [Management API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-mgmt-api), [DDI API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-ddi-api), [DDI Artifact Download API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-ddi-dl-api) and [DMF API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf-api) are on major version 'v1' and will be kept stable.
+We are providing a [Spring Boot](https://projects.spring.io/spring-boot/) based reference [Update Server](hawkbit-runtime/hawkbit-update-server) including embedded H2 DB for test and evaluation purposes. 
+Run with docker:
+
+```
+$  docker run -d -p 8080:8080 hawkbit/hawkbit-update-server
+```
+
+Open the update server in your browser:
+
+[localhost:8080](http://localhost:8080) 
+
+See below for how to build and run the update server on your own. In addition we have a [guide](http://www.eclipse.org/hawkbit/documentation/guide/runhawkbit.html) for setting up a complete landscape.
+
 
 # hawkBit (Spring boot) starters
 
-Next to the [Example Application](examples/hawkbit-example-app) we are also providing a set of [Spring Boot Starters](hawkbit-starters) to quick start your own [Spring Boot](https://projects.spring.io/spring-boot/) based application.
+Next to the [Update Server](hawkbit-runtime/hawkbit-update-server) we are also providing a set of [Spring Boot Starters](hawkbit-starters) to quick start your own [Spring Boot](https://projects.spring.io/spring-boot/) based application.
 
-#### Clone and build hawkBit
+# Clone, build and run hawkBit
+
+## Build
+
 ```
 $ git clone https://github.com/eclipse/hawkbit.git
 $ cd hawkbit
 $ mvn clean install
 ```
-#### Start hawkBit Update Server
-[Update Server](hawkbit-runtime/hawkbit-update-server)
+
+## Start hawkBit [Update Server](hawkbit-runtime/hawkbit-update-server)
+
 ```
 $ java -jar ./hawkbit-runtime/hawkbit-update-server/target/hawkbit-update-server-#version#.jar
 ```
-#### Start hawkBit device simulator
-[Device Simulator](examples/hawkbit-device-simulator)
+
+## Start hawkBit [Device Simulator](examples/hawkbit-device-simulator) (optional)
+
 ```
 $ java -jar ./examples/hawkbit-device-simulator/target/hawkbit-device-simulator-#version#.jar
 ```
-#### Generate Getting Started data
-[Example Management API Client](examples/hawkbit-example-mgmt-simulator)
+
+## Generate getting started data with the [Management API example](examples/hawkbit-example-mgmt-simulator) (optional)
+
 ```
 $ java -jar ./examples/hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulator-#version#.jar
 ```
@@ -77,3 +95,9 @@ $ java -jar ./examples/hawkbit-example-mgmt-simulator/target/hawkbit-example-mgm
   * Flexible DMF messaging infrastructure (e.g. with Spring Cloud Stream).
   * Migrate to Spring Framework 5, Spring Boot 2 and Vaadin 8
   * Re-evaluate JPA as persistence provider (e.g. look into jOOQ)
+
+# Status and API stability
+
+hawkBit is currently in '0.X' semantic version. That is due to the need that there is still content in hawkBit that is in need for refactoring. That includes the maven module structure, Spring Boot Properties, Spring Boot auto configuration as well as internal Java APIs (e.g. the [repository API](https://github.com/eclipse/hawkbit/issues/197) ).
+
+However, the external APIs (i.e. [Management API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-mgmt-api), [DDI API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-ddi-api), [DDI Artifact Download API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-ddi-dl-api) and [DMF API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf-api) are on major version 'v1' and will be kept stable.
