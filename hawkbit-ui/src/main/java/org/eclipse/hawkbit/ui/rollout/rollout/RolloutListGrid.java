@@ -82,8 +82,6 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
     private static final String DELETE_OPTION = "Delete";
 
-    private static final String IS_REQUIRED_MIGRATION_STEP = "isRequiredMigrationStep";
-
     private static final String ROLLOUT_RENDERER_DATA = "rolloutRendererData";
 
     private final transient RolloutManagement rolloutManagement;
@@ -219,7 +217,6 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", false, false);
         rolloutGridContainer.addContainerProperty(ROLLOUT_RENDERER_DATA, RolloutRendererData.class, null, false, false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, null, false, false);
-        rolloutGridContainer.addContainerProperty(IS_REQUIRED_MIGRATION_STEP, boolean.class, null, false, false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_STATUS, RolloutStatus.class, null, false,
                 false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_DIST_NAME_VERSION, String.class, null, false,
@@ -299,7 +296,6 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     @Override
     protected void setColumnHeaderNames() {
         getColumn(ROLLOUT_RENDERER_DATA).setHeaderCaption(i18n.getMessage("header.name"));
-        getColumn(IS_REQUIRED_MIGRATION_STEP).setHeaderCaption(i18n.getMessage("header.migrations.step"));
         getColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION)
                 .setHeaderCaption(i18n.getMessage("header.distributionset"));
         getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setHeaderCaption(i18n.getMessage("header.numberofgroups"));
@@ -352,7 +348,6 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         final List<Object> columnList = new ArrayList<>();
         columnList.add(ROLLOUT_RENDERER_DATA);
         columnList.add(SPUILabelDefinitions.VAR_DIST_NAME_VERSION);
-        columnList.add(IS_REQUIRED_MIGRATION_STEP);
         columnList.add(SPUILabelDefinitions.VAR_STATUS);
         columnList.add(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS);
         columnList.add(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS);
@@ -387,7 +382,6 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         columnsToBeHidden.add(SPUILabelDefinitions.VAR_MODIFIED_DATE);
         columnsToBeHidden.add(SPUILabelDefinitions.VAR_MODIFIED_BY);
         columnsToBeHidden.add(SPUILabelDefinitions.VAR_DESC);
-        columnsToBeHidden.add(IS_REQUIRED_MIGRATION_STEP);
         for (final Object propertyId : columnsToBeHidden) {
             getColumn(propertyId).setHidden(true);
         }
