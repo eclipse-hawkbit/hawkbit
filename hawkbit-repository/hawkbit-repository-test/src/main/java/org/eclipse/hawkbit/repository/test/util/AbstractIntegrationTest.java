@@ -292,8 +292,12 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     }
 
     @After
-    public void cleanCurrentCollection() throws IOException {
-        FileUtils.deleteDirectory(new File(artifactFilesystemProperties.getPath()));
+    public void cleanUp() {
+        try {
+            FileUtils.deleteDirectory(new File(artifactFilesystemProperties.getPath()));
+        } catch (final IOException e) {
+            LOG.warn("Cannot cleanup file-directory", e);
+        }
     }
 
     protected DefaultMockMvcBuilder createMvcWebAppContext() {

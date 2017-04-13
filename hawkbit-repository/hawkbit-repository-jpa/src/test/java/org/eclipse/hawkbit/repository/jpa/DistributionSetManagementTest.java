@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -360,6 +361,36 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(createdMetadata.getId().getKey()).isEqualTo(knownKey);
         assertThat(createdMetadata.getDistributionSet().getId()).isEqualTo(ds.getId());
         assertThat(createdMetadata.getValue()).isEqualTo(knownValue);
+    }
+
+    @Test
+    @Description("Ensures that distribution sets can assigned and unassigned to a  distribution set tag.")
+    public void assignAndUnassignDistributionSetToTag() {
+        final List<Long> assignDS = Lists.newArrayListWithExpectedSize(4);
+        for (int i = 0; i < 4; i++) {
+            assignDS.add(testdataFactory.createDistributionSet("DS" + i, "1.0", Collections.emptyList()).getId());
+        }
+
+        final DistributionSetTag tag = tagManagement
+                .createDistributionSetTag(entityFactory.tag().create().name("Tag1"));
+
+        final List<DistributionSet> assignedDS = distributionSetManagement.assignTag(assignDS, tag.getId());
+        assertThat(assignedDS.size()).as("assigned ds has wrong size").isEqualTo(4);
+        assignedDS.stream().map(c -> (JpaDistributionSet) c)
+                .forEach(ds -> assertThat(ds.getTags().size()).as("ds has wrong tag size").isEqualTo(1));
+
+        DistributionSetTag findDistributionSetTag = tagManagement.findDistributionSetTag("Tag1").get();
+
+        assertThat(assignedDS.size()).as("assigned ds has wrong size")
+                .isEqualTo(distributionSetManagement.findDistributionSetsByTag(pageReq, "Tag1").getNumberOfElements());
+
+        final JpaDistributionSet unAssignDS = (JpaDistributionSet) distributionSetManagement
+                .unAssignTag(assignDS.get(0), findDistributionSetTag.getId());
+        assertThat(unAssignDS.getId()).as("unassigned ds is wrong").isEqualTo(assignDS.get(0));
+        assertThat(unAssignDS.getTags().size()).as("unassigned ds has wrong tag size").isEqualTo(0);
+        findDistributionSetTag = tagManagement.findDistributionSetTag("Tag1").get();
+        assertThat(distributionSetManagement.findDistributionSetsByTag(pageReq, "Tag1").getNumberOfElements())
+                .as("ds tag ds has wrong ds size").isEqualTo(3);
     }
 
     @Test

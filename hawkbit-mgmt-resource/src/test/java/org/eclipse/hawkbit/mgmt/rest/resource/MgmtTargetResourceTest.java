@@ -888,7 +888,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("content.[0].id", equalTo(actionStatus.get(0).getId().intValue())))
                 .andExpect(jsonPath("content.[0].type", equalTo("canceling")))
-                .andExpect(jsonPath("content.[0].messages", hasItem("manual cancelation requested")))
+                .andExpect(jsonPath("content.[0].messages",
+                        hasItem("Update Server: cancel obsolete action due to new update")))
                 .andExpect(jsonPath("content.[0].reportedAt", equalTo(actionStatus.get(0).getCreatedAt())))
                 .andExpect(jsonPath("content.[1].id", equalTo(actionStatus.get(1).getId().intValue())))
                 .andExpect(jsonPath("content.[1].type", equalTo("running")))
@@ -915,7 +916,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("content.[0].id", equalTo(actionStatus.get(1).getId().intValue())))
                 .andExpect(jsonPath("content.[0].type", equalTo("canceling")))
-                .andExpect(jsonPath("content.[0].messages", hasItem("manual cancelation requested")))
+                .andExpect(jsonPath("content.[0].messages",
+                        hasItem("Update Server: cancel obsolete action due to new update")))
                 .andExpect(jsonPath("content.[0].reportedAt", equalTo(actionStatus.get(1).getCreatedAt())))
                 .andExpect(jsonPath("content.[1].id", equalTo(actionStatus.get(0).getId().intValue())))
                 .andExpect(jsonPath("content.[1].type", equalTo("running")))
@@ -932,7 +934,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("content.[1].id", equalTo(actionStatus.get(1).getId().intValue())))
                 .andExpect(jsonPath("content.[1].type", equalTo("canceling")))
-                .andExpect(jsonPath("content.[1].messages", hasItem("manual cancelation requested")))
+                .andExpect(jsonPath("content.[1].messages",
+                        hasItem("Update Server: cancel obsolete action due to new update")))
                 .andExpect(jsonPath("content.[1].reportedAt", equalTo(actionStatus.get(1).getCreatedAt())))
                 .andExpect(jsonPath("content.[0].id", equalTo(actionStatus.get(0).getId().intValue())))
                 .andExpect(jsonPath("content.[0].type", equalTo("running")))
@@ -960,7 +963,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("content.[0].id", equalTo(actionStatus.get(1).getId().intValue())))
                 .andExpect(jsonPath("content.[0].type", equalTo("canceling")))
-                .andExpect(jsonPath("content.[0].messages", hasItem("manual cancelation requested")))
+                .andExpect(jsonPath("content.[0].messages",
+                        hasItem("Update Server: cancel obsolete action due to new update")))
                 .andExpect(jsonPath("content.[0].reportedAt", equalTo(actionStatus.get(1).getCreatedAt())))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(1)))

@@ -58,7 +58,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
@@ -417,9 +416,6 @@ public class AmqpMessageHandlerServiceTest {
 
         // test
         amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
-
-        // verify
-        verify(controllerManagementMock).updateLastTargetQuery(any(String.class), Matchers.isNull(URI.class));
 
         final ArgumentCaptor<String> tenantCaptor = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<Target> targetCaptor = ArgumentCaptor.forClass(Target.class);

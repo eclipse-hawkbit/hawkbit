@@ -93,20 +93,21 @@ public class AutoAssignScheduler {
             tenants = systemManagement.findTenants(query);
 
             LOGGER.info("Checking target filter queries for tenants: {}", tenants.getSize());
-            for (final String tenant : tenants) {
 
-                final Lock lock = lockRegistry.obtain(tenant + "-autoassign");
-                if (!lock.tryLock()) {
-                    return null;
-                }
-                try {
+            final Lock lock = lockRegistry.obtain("autoassign");
+            if (!lock.tryLock()) {
+                return null;
+            }
+
+            try {
+                for (final String tenant : tenants) {
                     tenantAware.runAsTenant(tenant, () -> {
                         autoAssignChecker.check();
                         return null;
                     });
-                } finally {
-                    lock.unlock();
                 }
+            } finally {
+                lock.unlock();
             }
 
             return null;

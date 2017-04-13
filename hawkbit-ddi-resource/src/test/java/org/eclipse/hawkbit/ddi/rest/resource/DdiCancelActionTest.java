@@ -167,8 +167,6 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$.cancelAction.stopId", equalTo(String.valueOf(updateAction.getId()))));
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
                 .getLastTargetQuery()).isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getLastTargetQuery()).isGreaterThanOrEqualTo(current);
 
         // controller confirmed cancelled action, should not be active anymore
         mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
@@ -246,50 +244,38 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(2);
 
         assertThat(deploymentManagement.findActiveActionsByTarget(pageReq, savedTarget.getControllerId())).hasSize(1);
-        long current = System.currentTimeMillis();
         mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
                 + cancelAction.getId() + "/feedback", tenantAware.getCurrentTenant())
                         .content(JsonBuilder.cancelActionFeedback(cancelAction.getId().toString(), "proceeding"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getLastTargetQuery()).isGreaterThanOrEqualTo(current);
 
         assertThat(deploymentManagement.findActiveActionsByTarget(pageReq, savedTarget.getControllerId())).hasSize(1);
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(3);
 
-        current = System.currentTimeMillis();
         mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
                 + cancelAction.getId() + "/feedback", tenantAware.getCurrentTenant())
                         .content(JsonBuilder.cancelActionFeedback(cancelAction.getId().toString(), "resumed"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getLastTargetQuery()).isGreaterThanOrEqualTo(current);
         assertThat(deploymentManagement.findActiveActionsByTarget(pageReq, savedTarget.getControllerId())).hasSize(1);
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(4);
 
-        current = System.currentTimeMillis();
         mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
                 + cancelAction.getId() + "/feedback", tenantAware.getCurrentTenant())
                         .content(JsonBuilder.cancelActionFeedback(cancelAction.getId().toString(), "scheduled"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getLastTargetQuery()).isGreaterThanOrEqualTo(current);
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(5);
         assertThat(deploymentManagement.findActiveActionsByTarget(pageReq, savedTarget.getControllerId())).hasSize(1);
 
         // cancellation canceled -> should remove the action from active
         assertThat(deploymentManagement.findActiveActionsByTarget(pageReq, savedTarget.getControllerId())).hasSize(1);
-        current = System.currentTimeMillis();
         mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
                 + cancelAction.getId() + "/feedback", tenantAware.getCurrentTenant())
                         .content(JsonBuilder.cancelActionFeedback(cancelAction.getId().toString(), "canceled"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getLastTargetQuery()).isGreaterThanOrEqualTo(current);
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(6);
         assertThat(deploymentManagement.findActiveActionsByTarget(pageReq, savedTarget.getControllerId())).hasSize(1);
 
@@ -298,26 +284,20 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         // with finished or
         // error
         assertThat(deploymentManagement.findActiveActionsByTarget(pageReq, savedTarget.getControllerId())).hasSize(1);
-        current = System.currentTimeMillis();
         mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
                 + cancelAction.getId() + "/feedback", tenantAware.getCurrentTenant())
                         .content(JsonBuilder.cancelActionFeedback(cancelAction.getId().toString(), "rejected"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getLastTargetQuery()).isGreaterThanOrEqualTo(current);
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(7);
         assertThat(deploymentManagement.findActiveActionsByTarget(pageReq, savedTarget.getControllerId())).hasSize(1);
 
         // update closed -> should remove the action from active
-        current = System.currentTimeMillis();
         mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/deploymentBase/"
                 + cancelAction.getId() + "/feedback", tenantAware.getCurrentTenant())
                         .content(JsonBuilder.cancelActionFeedback(cancelAction.getId().toString(), "closed"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getLastTargetQuery()).isGreaterThanOrEqualTo(current);
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(8);
         assertThat(deploymentManagement.findActiveActionsByTarget(pageReq, savedTarget.getControllerId())).hasSize(0);
     }
