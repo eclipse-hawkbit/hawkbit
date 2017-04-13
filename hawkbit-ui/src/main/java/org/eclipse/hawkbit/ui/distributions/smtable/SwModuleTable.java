@@ -106,7 +106,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
                     || filterEvent == SMFilterEvent.FILTER_BY_TEXT_DISTRIBUTION_VIEW
                     || filterEvent == SMFilterEvent.REMOVE_FILTER_BY_TYPE_DISTRIBUTION_VIEW
                     || filterEvent == SMFilterEvent.REMOVE_FILTER_BY_TEXT_DISTRIBUTION_VIEW) {
-                UI.getCurrent().access(this::refreshFilter);
+                refreshFilter();
                 styleTableOnDistSelection();
             }
         });
