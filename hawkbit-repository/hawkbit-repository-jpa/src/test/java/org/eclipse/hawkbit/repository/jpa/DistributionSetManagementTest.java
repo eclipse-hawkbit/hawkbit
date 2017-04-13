@@ -378,6 +378,43 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that distribution sets can assigned and unassigned to a  distribution set tag.")
+    public void assignAndUnassignDistributionSetToTag() {
+        final List<Long> assignDS = Lists.newArrayListWithExpectedSize(4);
+        for (int i = 0; i < 4; i++) {
+            assignDS.add(testdataFactory.createDistributionSet("DS" + i, "1.0", Collections.emptyList()).getId());
+        }
+
+        final DistributionSetTag tag = tagManagement
+                .createDistributionSetTag(entityFactory.tag().create().name("Tag1"));
+
+        final List<DistributionSet> assignedDS = distributionSetManagement.assignTag(assignDS, tag.getId());
+        assertThat(assignedDS.size()).as("assigned ds has wrong size").isEqualTo(4);
+        assignedDS.forEach(ds -> assertThat(ds.getTags().size()).as("ds has wrong tag size").isEqualTo(1));
+
+        DistributionSetTag findDistributionSetTag = tagManagement.findDistributionSetTag("Tag1").get();
+        assertThat(assignedDS.size()).as("assigned ds has wrong size")
+                .isEqualTo(findDistributionSetTag.getAssignedToDistributionSet().size());
+
+        final DistributionSet unAssignDS = distributionSetManagement.unAssignTag(assignDS.get(0),
+                findDistributionSetTag.getId());
+        assertThat(unAssignDS.getId()).as("unassigned ds is wrong").isEqualTo(assignDS.get(0));
+        assertThat(unAssignDS.getTags().size()).as("unassigned ds has wrong tag size").isEqualTo(0);
+        findDistributionSetTag = tagManagement.findDistributionSetTag("Tag1").get();
+        assertThat(findDistributionSetTag.getAssignedToDistributionSet().size()).as("ds tag ds has wrong ds size")
+                .isEqualTo(3);
+
+        final List<DistributionSet> unAssignTargets = distributionSetManagement
+                .unAssignAllDistributionSetsByTag(findDistributionSetTag.getId());
+        findDistributionSetTag = tagManagement.findDistributionSetTag("Tag1").get();
+        assertThat(findDistributionSetTag.getAssignedToDistributionSet().size()).as("ds tag has wrong ds size")
+                .isEqualTo(0);
+        assertThat(unAssignTargets.size()).as("unassigned target has wrong size").isEqualTo(3);
+        unAssignTargets
+                .forEach(target -> assertThat(target.getTags().size()).as("target has wrong tag size").isEqualTo(0));
+    }
+
+    @Test
     @Description("Ensures that updates concerning the internal software structure of a DS are not possible if the DS is already assigned.")
     public void updateDistributionSetForbiddedWithIllegalUpdate() {
         // prepare data
