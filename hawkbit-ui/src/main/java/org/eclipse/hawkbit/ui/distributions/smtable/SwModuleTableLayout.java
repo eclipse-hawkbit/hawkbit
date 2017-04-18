@@ -36,15 +36,14 @@ public class SwModuleTableLayout extends AbstractTableLayout<SwModuleTable> {
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final ArtifactUploadState artifactUploadState, final ArtifactManagement artifactManagement) {
 
-        final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow = new SoftwareModuleAddUpdateWindow(i18n,
-                uiNotification, eventBus, softwareManagement, entityFactory);
-
         final SwMetadataPopupLayout swMetadataPopupLayout = new SwMetadataPopupLayout(i18n, uiNotification, eventBus,
                 softwareManagement, entityFactory, permChecker);
 
         this.swModuleTable = new SwModuleTable(eventBus, i18n, uiNotification, manageDistUIState, softwareManagement,
                 distributionsViewClientCriterion, artifactManagement, swMetadataPopupLayout, artifactUploadState);
 
+        final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow = new SoftwareModuleAddUpdateWindow(i18n,
+                uiNotification, eventBus, softwareManagement, entityFactory, swModuleTable);
         super.init(
                 new SwModuleTableHeader(i18n, permChecker, eventBus, manageDistUIState, softwareModuleAddUpdateWindow),
                 swModuleTable, new SwModuleDetails(i18n, eventBus, permChecker, softwareModuleAddUpdateWindow,

@@ -133,14 +133,13 @@ public class ArtifactUploadState implements ManagementEntityState<Long>, Seriali
         return baseSwModuleList;
     }
 
-    public Set<Long> getSelectedSoftwareModules() {
-        return selectedSoftwareModules;
+    public Optional<Set<Long>> getSelectedSoftwareModules() {
+        return Optional.ofNullable(selectedSoftwareModules);
     }
 
     @Override
     public void setLastSelectedEntity(final Long value) {
         this.selectedBaseSwModuleId = value;
-
     }
 
     @Override

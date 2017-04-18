@@ -18,9 +18,9 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -64,13 +64,15 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
     private Button bulkUploadIcon;
 
-    protected final ManagementUIState managementUIState;
-    protected final ManageDistUIState manageDistUIstate;
-    protected final ArtifactUploadState artifactUploadState;
+    private final ManagementUIState managementUIState;
 
-    protected AbstractTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
-            final ManagementUIState managementUIState, final ManageDistUIState manageDistUIstate,
-            final ArtifactUploadState artifactUploadState) {
+    private final ManageDistUIState manageDistUIstate;
+
+    private final ArtifactUploadState artifactUploadState;
+
+    protected AbstractTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
+            final UIEventBus eventbus, final ManagementUIState managementUIState,
+            final ManageDistUIState manageDistUIstate, final ArtifactUploadState artifactUploadState) {
         this.i18n = i18n;
         this.permChecker = permChecker;
         this.eventbus = eventbus;
@@ -534,5 +536,17 @@ public abstract class AbstractTableHeader extends VerticalLayout {
     protected abstract void searchBy(String newSearchText);
 
     protected abstract void addNewItem(final Button.ClickEvent event);
+
+    public ManagementUIState getManagementUIState() {
+        return managementUIState;
+    }
+
+    public ManageDistUIState getManageDistUIstate() {
+        return manageDistUIstate;
+    }
+
+    public ArtifactUploadState getArtifactUploadState() {
+        return artifactUploadState;
+    }
 
 }

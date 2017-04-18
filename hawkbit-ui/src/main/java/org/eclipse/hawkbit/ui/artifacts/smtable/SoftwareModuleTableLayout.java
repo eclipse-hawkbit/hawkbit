@@ -39,7 +39,7 @@ public class SoftwareModuleTableLayout extends AbstractTableLayout<SoftwareModul
                 softwareManagement, uploadViewClientCriterion, swMetadataPopupLayout);
 
         final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow = new SoftwareModuleAddUpdateWindow(i18n,
-                uiNotification, eventBus, softwareManagement, entityFactory);
+                uiNotification, eventBus, softwareManagement, entityFactory, softwareModuleTable);
 
         super.init(
                 new SoftwareModuleTableHeader(i18n, permChecker, eventBus, artifactUploadState,

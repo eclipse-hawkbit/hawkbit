@@ -19,17 +19,19 @@ import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
+import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
+import com.google.common.collect.Sets;
 import com.vaadin.data.validator.RegexpValidator;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
@@ -62,13 +64,17 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     private FormLayout formLayout;
     private CommonDialogWindow window;
 
-    TargetAddUpdateWindowLayout(final VaadinMessageSource i18n, final TargetManagement targetManagement, final UIEventBus eventBus,
-            final UINotification uINotification, final EntityFactory entityFactory) {
+    private final AbstractTable<Target, Long> targetTable;
+
+    TargetAddUpdateWindowLayout(final VaadinMessageSource i18n, final TargetManagement targetManagement,
+            final UIEventBus eventBus, final UINotification uINotification, final EntityFactory entityFactory,
+            final AbstractTable<Target, Long> targetTable) {
         this.i18n = i18n;
         this.targetManagement = targetManagement;
         this.eventBus = eventBus;
         this.uINotification = uINotification;
         this.entityFactory = entityFactory;
+        this.targetTable = targetTable;
         createRequiredComponents();
         buildLayout();
         setCompositionRoot(formLayout);
@@ -96,13 +102,14 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     private void createRequiredComponents() {
         controllerIDTextField = createTextField("prompt.target.id", UIComponentIdProvider.TARGET_ADD_CONTROLLER_ID);
-        controllerIDTextField.addValidator(new RegexpValidator("[.\\S]*", i18n.getMessage("message.target.whitespace.check")));
+        controllerIDTextField
+                .addValidator(new RegexpValidator("[.\\S]*", i18n.getMessage("message.target.whitespace.check")));
         nameTextField = createTextField("textfield.name", UIComponentIdProvider.TARGET_ADD_NAME);
         nameTextField.setRequired(false);
 
         descTextArea = new TextAreaBuilder().caption(i18n.getMessage("textfield.description")).style("text-area-style")
-                .prompt(i18n.getMessage("textfield.description")).immediate(true).id(UIComponentIdProvider.TARGET_ADD_DESC)
-                .buildTextComponent();
+                .prompt(i18n.getMessage("textfield.description")).immediate(true)
+                .id(UIComponentIdProvider.TARGET_ADD_DESC).buildTextComponent();
         descTextArea.setNullRepresentation(StringUtils.EMPTY);
     }
 
@@ -143,14 +150,14 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
                 entityFactory.target().create().controllerId(newControllerId).name(newName).description(newDesc));
 
         eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.ADD_ENTITY, newTarget));
-
         uINotification.displaySuccess(i18n.getMessage("message.save.success", new Object[] { newTarget.getName() }));
+        targetTable.setValue(Sets.newHashSet(newTarget.getId()));
     }
 
     public Window createNewWindow() {
         window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
-                .caption(i18n.getMessage(UIComponentIdProvider.TARGET_ADD_CAPTION)).content(this).layout(formLayout).i18n(i18n)
-                .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
+                .caption(i18n.getMessage(UIComponentIdProvider.TARGET_ADD_CAPTION)).content(this).layout(formLayout)
+                .i18n(i18n).saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
 
         return window;
     }

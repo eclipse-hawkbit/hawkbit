@@ -42,50 +42,50 @@ public class SoftwareModuleTableHeader extends AbstractSoftwareModuleTableHeader
 
     @Override
     protected String onLoadSearchBoxValue() {
-        return artifactUploadState.getSoftwareModuleFilters().getSearchText().orElse(null);
+        return getArtifactUploadState().getSoftwareModuleFilters().getSearchText().orElse(null);
     }
 
     @Override
     protected void showFilterButtonsLayout() {
-        artifactUploadState.setSwTypeFilterClosed(false);
+        getArtifactUploadState().setSwTypeFilterClosed(false);
         eventbus.publish(this, UploadArtifactUIEvent.SHOW_FILTER_BY_TYPE);
 
     }
 
     @Override
     protected void resetSearchText() {
-        if (artifactUploadState.getSoftwareModuleFilters().getSearchText().isPresent()) {
-            artifactUploadState.getSoftwareModuleFilters().setSearchText(null);
+        if (getArtifactUploadState().getSoftwareModuleFilters().getSearchText().isPresent()) {
+            getArtifactUploadState().getSoftwareModuleFilters().setSearchText(null);
             eventbus.publish(this, SMFilterEvent.REMOVE_FILTER_BY_TEXT_UPLOAD_VIEW);
         }
     }
 
     @Override
     public void maximizeTable() {
-        artifactUploadState.setSwModuleTableMaximized(Boolean.TRUE);
+        getArtifactUploadState().setSwModuleTableMaximized(Boolean.TRUE);
         eventbus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.MAXIMIZED));
 
     }
 
     @Override
     public void minimizeTable() {
-        artifactUploadState.setSwModuleTableMaximized(Boolean.FALSE);
+        getArtifactUploadState().setSwModuleTableMaximized(Boolean.FALSE);
         eventbus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.MINIMIZED));
     }
 
     @Override
     public Boolean onLoadIsTableMaximized() {
-        return artifactUploadState.isSwModuleTableMaximized();
+        return getArtifactUploadState().isSwModuleTableMaximized();
     }
 
     @Override
     public Boolean onLoadIsShowFilterButtonDisplayed() {
-        return artifactUploadState.isSwTypeFilterClosed();
+        return getArtifactUploadState().isSwTypeFilterClosed();
     }
 
     @Override
     protected void searchBy(final String newSearchText) {
-        artifactUploadState.getSoftwareModuleFilters().setSearchText(newSearchText);
+        getArtifactUploadState().getSoftwareModuleFilters().setSearchText(newSearchText);
         eventbus.publish(this, SMFilterEvent.FILTER_BY_TEXT_UPLOAD_VIEW);
     }
 

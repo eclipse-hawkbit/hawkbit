@@ -51,48 +51,48 @@ public class DistributionSetTableHeader extends AbstractDistributionSetTableHead
 
     @Override
     protected String onLoadSearchBoxValue() {
-        return manageDistUIstate.getManageDistFilters().getSearchText().orElse(null);
+        return getManageDistUIstate().getManageDistFilters().getSearchText().orElse(null);
     }
 
     @Override
     protected void showFilterButtonsLayout() {
-        manageDistUIstate.setDistTypeFilterClosed(false);
+        getManageDistUIstate().setDistTypeFilterClosed(false);
         eventbus.publish(this, DistributionsUIEvent.SHOW_DIST_FILTER_BY_TYPE);
     }
 
     @Override
     protected void resetSearchText() {
-        if (manageDistUIstate.getManageDistFilters().getSearchText().isPresent()) {
-            manageDistUIstate.getManageDistFilters().setSearchText(null);
+        if (getManageDistUIstate().getManageDistFilters().getSearchText().isPresent()) {
+            getManageDistUIstate().getManageDistFilters().setSearchText(null);
             eventbus.publish(this, DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT_DISTRIBUTION_VIEW);
         }
     }
 
     @Override
     public void maximizeTable() {
-        manageDistUIstate.setDsTableMaximized(Boolean.TRUE);
+        getManageDistUIstate().setDsTableMaximized(Boolean.TRUE);
         eventbus.publish(this, new DistributionTableEvent(BaseEntityEventType.MAXIMIZED));
     }
 
     @Override
     public void minimizeTable() {
-        manageDistUIstate.setDsTableMaximized(Boolean.FALSE);
+        getManageDistUIstate().setDsTableMaximized(Boolean.FALSE);
         eventbus.publish(this, new DistributionTableEvent(BaseEntityEventType.MINIMIZED));
     }
 
     @Override
     public Boolean onLoadIsTableMaximized() {
-        return manageDistUIstate.isDsTableMaximized();
+        return getManageDistUIstate().isDsTableMaximized();
     }
 
     @Override
     public Boolean onLoadIsShowFilterButtonDisplayed() {
-        return manageDistUIstate.isDistTypeFilterClosed();
+        return getManageDistUIstate().isDistTypeFilterClosed();
     }
 
     @Override
     protected void searchBy(final String newSearchText) {
-        manageDistUIstate.getManageDistFilters().setSearchText(newSearchText);
+        getManageDistUIstate().getManageDistFilters().setSearchText(newSearchText);
         eventbus.publish(this, DistributionTableFilterEvent.FILTER_BY_TEXT_DISTRIBUTION_VIEW);
     }
 

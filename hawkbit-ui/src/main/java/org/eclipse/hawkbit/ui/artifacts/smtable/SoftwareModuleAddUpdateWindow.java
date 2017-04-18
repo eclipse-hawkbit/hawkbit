@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
+import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -36,6 +37,7 @@ import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
+import com.google.common.collect.Sets;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
@@ -77,6 +79,8 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
     private FormLayout formLayout;
 
+    private final AbstractTable<SoftwareModule, Long> softwareModuleTable;
+
     /**
      * Constructor for SoftwareModuleAddUpdateWindow
      * 
@@ -92,12 +96,14 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
      *            EntityFactory
      */
     public SoftwareModuleAddUpdateWindow(final VaadinMessageSource i18n, final UINotification uiNotifcation,
-            final UIEventBus eventBus, final SoftwareManagement softwareManagement, final EntityFactory entityFactory) {
+            final UIEventBus eventBus, final SoftwareManagement softwareManagement, final EntityFactory entityFactory,
+            final AbstractTable<SoftwareModule, Long> softwareModuleTable) {
         this.i18n = i18n;
         this.uiNotifcation = uiNotifcation;
         this.eventBus = eventBus;
         this.softwareManagement = softwareManagement;
         this.entityFactory = entityFactory;
+        this.softwareModuleTable = softwareModuleTable;
 
         createRequiredComponents();
     }
@@ -133,12 +139,10 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
                     .type(softwareModuleTypeByName).name(name).version(version).description(description).vendor(vendor);
 
             final SoftwareModule newSoftwareModule = softwareManagement.createSoftwareModule(softwareModule);
-
-            if (newSoftwareModule != null) {
-                eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.ADD_ENTITY, newSoftwareModule));
-                uiNotifcation.displaySuccess(i18n.getMessage("message.save.success",
-                        new Object[] { newSoftwareModule.getName() + ":" + newSoftwareModule.getVersion() }));
-            }
+            eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.ADD_ENTITY, newSoftwareModule));
+            uiNotifcation.displaySuccess(i18n.getMessage("message.save.success",
+                    new Object[] { newSoftwareModule.getName() + ":" + newSoftwareModule.getVersion() }));
+            softwareModuleTable.setValue(Sets.newHashSet(newSoftwareModule.getId()));
         }
 
         private boolean isDuplicate() {

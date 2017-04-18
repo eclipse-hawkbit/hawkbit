@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
@@ -136,12 +137,12 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     @Override
     protected boolean isFirstRowSelectedOnLoad() {
-        return artifactUploadState.getSelectedSoftwareModules().isEmpty();
+        return artifactUploadState.getSelectedSoftwareModules().map(Set::isEmpty).orElse(true);
     }
 
     @Override
     protected Object getItemIdToSelect() {
-        return artifactUploadState.getSelectedSoftwareModules();
+        return artifactUploadState.getSelectedSoftwareModules().orElse(null);
     }
 
     @Override
@@ -163,10 +164,10 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     protected void publishSelectedEntityEvent(final SoftwareModule lastSoftwareModule) {
         eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, lastSoftwareModule));
         if (lastSoftwareModule == null) {
-            artifactUploadState.setSelectedBaseSoftwareModule(null);
+            artifactUploadState.setLastSelectedEntity(null);
             return;
         }
-        artifactUploadState.setSelectedBaseSoftwareModule(lastSoftwareModule);
+        artifactUploadState.setLastSelectedEntity(lastSoftwareModule.getId());
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)

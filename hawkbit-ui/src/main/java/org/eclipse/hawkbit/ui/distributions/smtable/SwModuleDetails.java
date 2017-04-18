@@ -59,7 +59,8 @@ public class SwModuleDetails extends AbstractSoftwareModuleDetails {
 
     @Override
     protected boolean isSoftwareModuleSelected(final SoftwareModule softwareModule) {
-        return compareSoftwareModulesById(softwareModule, manageDistUIState.getSelectedBaseSwModuleId().orElse(null));
+        return compareSoftwareModulesById(softwareModule,
+                manageDistUIState.getLastSelectedSoftwareModule().orElse(null));
     }
 
 }

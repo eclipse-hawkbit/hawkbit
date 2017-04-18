@@ -144,7 +144,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     }
 
     private void handleSelectedAndUpdatedSoftwareModules(final List<SoftwareModuleUpdatedEvent> events) {
-        manageDistUIState.getSelectedBaseSwModuleId()
+        manageDistUIState.getLastSelectedSoftwareModule()
                 .ifPresent(lastSelectedModuleId -> events.stream()
                         .filter(event -> lastSelectedModuleId.equals(event.getEntityId())).findAny()
                         .ifPresent(lastEvent -> eventBus.publish(this,
@@ -231,7 +231,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     @Override
     protected Object getItemIdToSelect() {
-        return manageDistUIState.getSelectedSoftwareModules();
+        return manageDistUIState.getSelectedSoftwareModules().orElse(null);
     }
 
     @Override
@@ -243,15 +243,15 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     protected void publishSelectedEntityEvent(final SoftwareModule selectedLastEntity) {
         eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, selectedLastEntity));
         if (selectedLastEntity == null) {
-            manageDistUIState.setSelectedBaseSwModuleId(null);
+            manageDistUIState.setLastSelectedSoftwareModule(null);
             return;
         }
-        manageDistUIState.setSelectedBaseSwModuleId(selectedLastEntity.getId());
+        manageDistUIState.setLastSelectedSoftwareModule(selectedLastEntity.getId());
     }
 
     @Override
     protected void setManagementEntityStateValues(final Set<Long> values, final Long lastId) {
-        manageDistUIState.setSelectedBaseSwModuleId(lastId);
+        manageDistUIState.setLastSelectedSoftwareModule(lastId);
         manageDistUIState.setSelectedSoftwareModules(values);
     }
 

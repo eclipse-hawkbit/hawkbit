@@ -45,13 +45,13 @@ public class ManageDistUIState implements ManagementEntityState<Long>, Serializa
 
     private Long lastSelectedDistribution;
 
+    private Long lastSelectedSoftwareModule;
+
     private Set<Long> selectedSoftwareModules = Collections.emptySet();
 
     private final Set<String> selectedDeleteDistSetTypes = new HashSet<>();
 
     private Set<String> selectedDeleteSWModuleTypes = new HashSet<>();
-
-    private Long selectedBaseSwModuleId;
 
     private boolean distTypeFilterClosed;
 
@@ -117,16 +117,16 @@ public class ManageDistUIState implements ManagementEntityState<Long>, Serializa
         return softwareModuleFilters;
     }
 
+    public Optional<Long> getLastSelectedSoftwareModule() {
+        return Optional.ofNullable(lastSelectedSoftwareModule);
+    }
+
+    public void setLastSelectedSoftwareModule(final Long value) {
+        this.lastSelectedSoftwareModule = value;
+    }
+
     public Optional<Set<Long>> getSelectedSoftwareModules() {
         return Optional.ofNullable(selectedSoftwareModules);
-    }
-
-    public Optional<Long> getSelectedBaseSwModuleId() {
-        return Optional.ofNullable(selectedBaseSwModuleId);
-    }
-
-    public void setSelectedBaseSwModuleId(final Long selectedBaseSwModuleId) {
-        this.selectedBaseSwModuleId = selectedBaseSwModuleId;
     }
 
     public void setSelectedSoftwareModules(final Set<Long> selectedSoftwareModules) {

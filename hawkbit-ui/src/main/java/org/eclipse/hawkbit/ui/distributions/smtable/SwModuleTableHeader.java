@@ -44,49 +44,49 @@ public class SwModuleTableHeader extends AbstractSoftwareModuleTableHeader {
 
     @Override
     protected String onLoadSearchBoxValue() {
-        return manageDistUIstate.getSoftwareModuleFilters().getSearchText().orElse(null);
+        return getManageDistUIstate().getSoftwareModuleFilters().getSearchText().orElse(null);
     }
 
     @Override
     protected void showFilterButtonsLayout() {
-        manageDistUIstate.setSwTypeFilterClosed(false);
+        getManageDistUIstate().setSwTypeFilterClosed(false);
         eventbus.publish(this, DistributionsUIEvent.SHOW_SM_FILTER_BY_TYPE);
     }
 
     @Override
     protected void resetSearchText() {
-        if (manageDistUIstate.getSoftwareModuleFilters().getSearchText().isPresent()) {
-            manageDistUIstate.getSoftwareModuleFilters().setSearchText(null);
+        if (getManageDistUIstate().getSoftwareModuleFilters().getSearchText().isPresent()) {
+            getManageDistUIstate().getSoftwareModuleFilters().setSearchText(null);
             eventbus.publish(this, SMFilterEvent.REMOVE_FILTER_BY_TEXT_DISTRIBUTION_VIEW);
         }
     }
 
     @Override
     public void maximizeTable() {
-        manageDistUIstate.setSwModuleTableMaximized(Boolean.TRUE);
+        getManageDistUIstate().setSwModuleTableMaximized(Boolean.TRUE);
         eventbus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.MAXIMIZED));
 
     }
 
     @Override
     public void minimizeTable() {
-        manageDistUIstate.setSwModuleTableMaximized(Boolean.FALSE);
+        getManageDistUIstate().setSwModuleTableMaximized(Boolean.FALSE);
         eventbus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.MINIMIZED));
     }
 
     @Override
     public Boolean onLoadIsTableMaximized() {
-        return manageDistUIstate.isSwModuleTableMaximized();
+        return getManageDistUIstate().isSwModuleTableMaximized();
     }
 
     @Override
     public Boolean onLoadIsShowFilterButtonDisplayed() {
-        return manageDistUIstate.isSwTypeFilterClosed();
+        return getManageDistUIstate().isSwTypeFilterClosed();
     }
 
     @Override
     protected void searchBy(final String newSearchText) {
-        manageDistUIstate.getSoftwareModuleFilters().setSearchText(newSearchText);
+        getManageDistUIstate().getSoftwareModuleFilters().setSearchText(newSearchText);
         eventbus.publish(this, SMFilterEvent.FILTER_BY_TEXT_DISTRIBUTION_VIEW);
     }
 
