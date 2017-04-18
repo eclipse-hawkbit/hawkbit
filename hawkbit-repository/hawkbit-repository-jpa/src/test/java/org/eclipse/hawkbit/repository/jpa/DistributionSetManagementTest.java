@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.ArrayList;
@@ -324,6 +325,17 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(set.getType()).as("Type should be equal to default type of tenant")
                 .isEqualTo(systemManagement.getTenantMetadata().getDefaultDsType());
+
+    }
+
+    @Test
+    @Description("Verifies that a DS cannot be created if another DS with same name and version exists.")
+    public void createDistributionSetWithDuplicateNameAndVersionFails() {
+        distributionSetManagement
+                .createDistributionSet(entityFactory.distributionSet().create().name("newtypesoft").version("1"));
+
+        assertThatExceptionOfType(EntityAlreadyExistsException.class).isThrownBy(() -> distributionSetManagement
+                .createDistributionSet(entityFactory.distributionSet().create().name("newtypesoft").version("1")));
 
     }
 

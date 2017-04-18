@@ -133,7 +133,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             + " by means of throwing EntityNotFoundException.")
     @ExpectEvents({ @Expect(type = RolloutDeletedEvent.class, count = 0),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 10),
-            @Expect(type = RolloutGroupUpdatedEvent.class, count = 20),
+            @Expect(type = RolloutGroupUpdatedEvent.class, count = 10),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = RolloutUpdatedEvent.class, count = 1),
@@ -142,12 +142,6 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final Rollout createdRollout = testdataFactory.createRollout("xxx");
 
         verifyThrownExceptionBy(() -> rolloutManagement.deleteRollout(NOT_EXIST_IDL), "Rollout");
-
-        verifyThrownExceptionBy(() -> rolloutManagement.getFinishedPercentForRunningGroup(NOT_EXIST_IDL, NOT_EXIST_IDL),
-                "Rollout");
-        verifyThrownExceptionBy(
-                () -> rolloutManagement.getFinishedPercentForRunningGroup(createdRollout.getId(), NOT_EXIST_IDL),
-                "RolloutGroup");
 
         verifyThrownExceptionBy(() -> rolloutManagement.pauseRollout(NOT_EXIST_IDL), "Rollout");
         verifyThrownExceptionBy(() -> rolloutManagement.resumeRollout(NOT_EXIST_IDL), "Rollout");
@@ -1005,23 +999,24 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutManagement.handleRollouts();
         myRollout = rolloutManagement.findRolloutById(myRollout.getId()).get();
 
-        float percent = rolloutManagement.getFinishedPercentForRunningGroup(myRollout.getId(),
-                myRollout.getRolloutGroups().get(0).getId());
+        float percent = rolloutGroupManagement
+                .findRolloutGroupWithDetailedStatus(myRollout.getRolloutGroups().get(0).getId()).get()
+                .getTotalTargetCountStatus().getFinishedPercent();
         assertThat(percent).isEqualTo(40);
 
         changeStatusForRunningActions(myRollout, Status.FINISHED, 3);
         rolloutManagement.handleRollouts();
 
-        percent = rolloutManagement.getFinishedPercentForRunningGroup(myRollout.getId(),
-                myRollout.getRolloutGroups().get(0).getId());
+        percent = rolloutGroupManagement.findRolloutGroupWithDetailedStatus(myRollout.getRolloutGroups().get(0).getId())
+                .get().getTotalTargetCountStatus().getFinishedPercent();
         assertThat(percent).isEqualTo(100);
 
         changeStatusForRunningActions(myRollout, Status.FINISHED, 4);
         changeStatusForAllRunningActions(myRollout, Status.ERROR);
         rolloutManagement.handleRollouts();
 
-        percent = rolloutManagement.getFinishedPercentForRunningGroup(myRollout.getId(),
-                myRollout.getRolloutGroups().get(1).getId());
+        percent = rolloutGroupManagement.findRolloutGroupWithDetailedStatus(myRollout.getRolloutGroups().get(1).getId())
+                .get().getTotalTargetCountStatus().getFinishedPercent();
         assertThat(percent).isEqualTo(80);
     }
 
@@ -1465,7 +1460,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetCreatedEvent.class, count = 25), @Expect(type = RolloutUpdatedEvent.class, count = 2),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 5),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = RolloutGroupUpdatedEvent.class, count = 10) })
+            @Expect(type = RolloutGroupUpdatedEvent.class, count = 5) })
     public void deleteRolloutWhichHasNeverStartedIsHardDeleted() {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
@@ -1488,7 +1483,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = RolloutGroupUpdatedEvent.class, count = 16),
+            @Expect(type = RolloutGroupUpdatedEvent.class, count = 10),
             @Expect(type = RolloutUpdatedEvent.class, count = 6),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 25), @Expect(type = TargetUpdatedEvent.class, count = 2),

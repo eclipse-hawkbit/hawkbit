@@ -28,7 +28,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -78,12 +77,11 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
         this.lockRegistry = lockRegistry;
     }
 
-    protected int runInNewTransaction(final String transactionName, final TransactionCallback<Integer> action) {
+    protected Long runInNewTransaction(final String transactionName, final TransactionCallback<Long> action) {
         final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         def.setName(transactionName);
         def.setReadOnly(false);
         def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        def.setIsolationLevel(Isolation.READ_UNCOMMITTED.value());
         return new TransactionTemplate(txManager, def).execute(action);
     }
 
