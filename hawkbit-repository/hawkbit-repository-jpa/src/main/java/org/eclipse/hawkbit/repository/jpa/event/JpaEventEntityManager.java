@@ -13,14 +13,13 @@ import javax.persistence.EntityManager;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * A TenantAwareEvent entity manager, which loads an entity by id and type for
  * remote events.
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public class JpaEventEntityManager implements EventEntityManager {
 
     private final TenantAware tenantAware;

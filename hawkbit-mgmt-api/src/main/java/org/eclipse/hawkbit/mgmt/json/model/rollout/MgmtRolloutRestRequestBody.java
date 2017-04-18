@@ -8,14 +8,14 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.rollout;
 
+import java.util.List;
+
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
+import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroup;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroup;
-
-import java.util.List;
 
 /**
  * Model for request containing a rollout body e.g. in a POST request of

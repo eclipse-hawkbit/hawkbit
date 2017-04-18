@@ -8,9 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
-import org.eclipse.hawkbit.repository.model.Action.ActionType;
-
 import java.util.Optional;
+
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 
 /**
  * Create and update builder DTO.

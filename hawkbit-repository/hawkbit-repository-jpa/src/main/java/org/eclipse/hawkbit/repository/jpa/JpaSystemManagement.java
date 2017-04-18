@@ -37,10 +37,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
@@ -51,7 +49,7 @@ import org.springframework.validation.annotation.Validated;
  * JPA implementation of {@link SystemManagement}.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 @Validated
 public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, SystemManagement {
     private static final int MAX_TENANTS_QUERY = 500;
@@ -159,8 +157,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @Modifying
     public TenantMetaData getTenantMetadata(final String tenant) {
         final TenantMetaData result = tenantMetaDataRepository.findByTenantIgnoreCase(tenant);
         // Create if it does not exist
@@ -195,11 +191,11 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         def.setName("initial-tenant-creation");
         def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         def.setReadOnly(false);
-        def.setIsolationLevel(Isolation.READ_UNCOMMITTED.value());
-        return systemSecurityContext.runAsSystemAsTenant(
-                () -> new TransactionTemplate(txManager, def).execute(status -> tenantMetaDataRepository
-                        .save(new JpaTenantMetaData(createStandardSoftwareDataSetup(), tenant))),
-                tenant);
+        return systemSecurityContext
+                .runAsSystemAsTenant(() -> new TransactionTemplate(txManager, def).execute(status -> {
+                    final DistributionSetType defaultDsType = createStandardSoftwareDataSetup();
+                    return tenantMetaDataRepository.save(new JpaTenantMetaData(defaultDsType, tenant));
+                }), tenant);
     }
 
     @Override
@@ -213,8 +209,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @Modifying
+    @Transactional
     public void deleteTenant(final String tenant) {
         cacheManager.evictCaches(tenant);
         tenantAware.runAsTenant(tenant, () -> {
@@ -235,8 +230,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @Modifying
     public TenantMetaData getTenantMetadata() {
         if (tenantAware.getCurrentTenant() == null) {
             throw new IllegalStateException("Tenant not set");
@@ -247,17 +240,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Override
     @Cacheable(value = "currentTenant", keyGenerator = "currentTenantKeyGenerator", cacheManager = "directCacheManager", unless = "#result == null")
-    // set transaction to not supported, due we call this in
-    // BaseEntity#prePersist methods
-    // and it seems that JPA committing the transaction when executing this
-    // transactional method,
-    // which then leads that the BaseEntity#prePersist is called again to
-    // persist the un-persisted
-    // entity and we landing again in the #currentTenant() method
-    // suspend the transaction here to do a read-request against the medata
-    // table, when the current
-    // tenant is not cached anyway already.
-    @Transactional(propagation = Propagation.NOT_SUPPORTED, isolation = Isolation.READ_UNCOMMITTED)
     public String currentTenant() {
         final String initialTenantCreation = currentTenantCacheKeyGenerator.getCreateInitialTenant().get();
         if (initialTenantCreation == null) {
@@ -269,8 +251,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @Modifying
+    @Transactional
     public TenantMetaData updateTenantMetadata(final Long defaultDsType) {
         final JpaTenantMetaData data = (JpaTenantMetaData) getTenantMetadata();
 

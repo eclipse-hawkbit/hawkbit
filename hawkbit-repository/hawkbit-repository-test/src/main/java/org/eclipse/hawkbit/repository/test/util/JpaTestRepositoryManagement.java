@@ -19,7 +19,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.transaction.annotation.Transactional;
 
 public class JpaTestRepositoryManagement implements TestRepositoryManagement {
 
@@ -50,13 +49,11 @@ public class JpaTestRepositoryManagement implements TestRepositoryManagement {
     }
 
     @Override
-    @Transactional
     public void clearTestRepository() {
         deleteAllRepos();
         cacheManager.getDirectCacheNames().forEach(name -> cacheManager.getDirectCache(name).clear());
     }
 
-    @Transactional
     public void deleteAllRepos() {
         final List<String> tenants = systemSecurityContext
                 .runAsSystem(() -> systemManagement.findTenants(pageReq).getContent());

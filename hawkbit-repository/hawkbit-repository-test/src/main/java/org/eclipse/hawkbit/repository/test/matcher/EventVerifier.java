@@ -23,6 +23,8 @@ import org.junit.Assert;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -38,6 +40,7 @@ import com.jayway.awaitility.core.ConditionTimeoutException;
  * Test rule to setup and verify the event count for a method.
  */
 public class EventVerifier implements TestRule {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventVerifier.class);
 
     private EventCaptor eventCaptor;
 
@@ -116,6 +119,7 @@ public class EventVerifier implements TestRule {
 
         @Override
         public void onApplicationEvent(final RemoteApplicationEvent event) {
+            LOGGER.debug("Received event {}", event.getClass().getSimpleName());
             capturedEvents.add(event.getClass());
         }
 

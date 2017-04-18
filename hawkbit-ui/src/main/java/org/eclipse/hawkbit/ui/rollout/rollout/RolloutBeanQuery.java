@@ -10,9 +10,9 @@ package org.eclipse.hawkbit.ui.rollout.rollout;
 
 import static org.apache.commons.lang3.ArrayUtils.isEmpty;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -104,36 +104,30 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
     }
 
     private static List<ProxyRollout> getProxyRolloutList(final Slice<Rollout> rolloutBeans) {
-        final List<ProxyRollout> proxyRolloutList = new ArrayList<>();
-        for (final Rollout rollout : rolloutBeans) {
-            final ProxyRollout proxyRollout = new ProxyRollout();
-            proxyRollout.setName(rollout.getName());
-            proxyRollout.setDescription(rollout.getDescription());
-            final DistributionSet distributionSet = rollout.getDistributionSet();
-            proxyRollout.setDistributionSetNameVersion(
-                    HawkbitCommonUtil.getFormattedNameVersion(distributionSet.getName(), distributionSet.getVersion()));
-            proxyRollout.setDistributionSet(distributionSet);
-            proxyRollout.setNumberOfGroups(Integer.valueOf(rollout.getRolloutGroups().size()));
-            proxyRollout.setCreatedDate(SPDateTimeUtil.getFormattedDate(rollout.getCreatedAt()));
-            proxyRollout.setModifiedDate(SPDateTimeUtil.getFormattedDate(rollout.getLastModifiedAt()));
-            proxyRollout.setCreatedBy(UserDetailsFormatter.loadAndFormatCreatedBy(rollout));
-            proxyRollout.setLastModifiedBy(UserDetailsFormatter.loadAndFormatLastModifiedBy(rollout));
-            proxyRollout.setForcedTime(rollout.getForcedTime());
-            proxyRollout.setId(rollout.getId());
-            proxyRollout.setStatus(rollout.getStatus());
-            proxyRollout
-                    .setRolloutRendererData(new RolloutRendererData(rollout.getName(), rollout.getStatus().toString()));
+        return rolloutBeans.getContent().stream().map(RolloutBeanQuery::createProxy).collect(Collectors.toList());
+    }
 
-            final TotalTargetCountStatus totalTargetCountActionStatus = rollout.getTotalTargetCountStatus();
-            proxyRollout.setTotalTargetCountStatus(totalTargetCountActionStatus);
-            proxyRollout.setTotalTargetsCount(String.valueOf(rollout.getTotalTargets()));
-            proxyRollout.setType(distributionSet.getType().getName());
-            proxyRollout.setIsRequiredMigrationStep(distributionSet.isRequiredMigrationStep());
-            proxyRollout.setSwModules(distributionSet.getModules());
+    private static ProxyRollout createProxy(final Rollout rollout) {
+        final ProxyRollout proxyRollout = new ProxyRollout();
+        proxyRollout.setName(rollout.getName());
+        proxyRollout.setDescription(rollout.getDescription());
+        final DistributionSet distributionSet = rollout.getDistributionSet();
+        proxyRollout.setDistributionSetNameVersion(
+                HawkbitCommonUtil.getFormattedNameVersion(distributionSet.getName(), distributionSet.getVersion()));
+        proxyRollout.setNumberOfGroups(rollout.getRolloutGroupsCreated());
+        proxyRollout.setCreatedDate(SPDateTimeUtil.getFormattedDate(rollout.getCreatedAt()));
+        proxyRollout.setModifiedDate(SPDateTimeUtil.getFormattedDate(rollout.getLastModifiedAt()));
+        proxyRollout.setCreatedBy(UserDetailsFormatter.loadAndFormatCreatedBy(rollout));
+        proxyRollout.setLastModifiedBy(UserDetailsFormatter.loadAndFormatLastModifiedBy(rollout));
+        proxyRollout.setForcedTime(rollout.getForcedTime());
+        proxyRollout.setId(rollout.getId());
+        proxyRollout.setStatus(rollout.getStatus());
+        proxyRollout.setRolloutRendererData(new RolloutRendererData(rollout.getName(), rollout.getStatus().toString()));
 
-            proxyRolloutList.add(proxyRollout);
-        }
-        return proxyRolloutList;
+        final TotalTargetCountStatus totalTargetCountActionStatus = rollout.getTotalTargetCountStatus();
+        proxyRollout.setTotalTargetCountStatus(totalTargetCountActionStatus);
+        proxyRollout.setTotalTargetsCount(String.valueOf(rollout.getTotalTargets()));
+        return proxyRollout;
     }
 
     @Override

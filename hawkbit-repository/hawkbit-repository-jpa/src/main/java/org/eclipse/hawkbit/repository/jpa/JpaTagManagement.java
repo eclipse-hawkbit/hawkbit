@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.builder.GenericTagUpdate;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.builder.TagUpdate;
-import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTagCreate;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
@@ -36,8 +35,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -45,7 +42,7 @@ import org.springframework.validation.annotation.Validated;
  * JP>A implementation of {@link TagManagement}.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 @Validated
 public class JpaTagManagement implements TagManagement {
 
@@ -70,22 +67,15 @@ public class JpaTagManagement implements TagManagement {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public TargetTag createTargetTag(final TagCreate c) {
         final JpaTagCreate create = (JpaTagCreate) c;
 
-        final JpaTargetTag targetTag = create.buildTargetTag();
-
-        if (findTargetTag(targetTag.getName()).isPresent()) {
-            throw new EntityAlreadyExistsException();
-        }
-
-        return targetTagRepository.save(targetTag);
+        return targetTagRepository.save(create.buildTargetTag());
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public List<TargetTag> createTargetTags(final Collection<TagCreate> tt) {
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final Collection<JpaTagCreate> targetTags = (Collection) tt;
@@ -95,8 +85,7 @@ public class JpaTagManagement implements TagManagement {
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public void deleteTargetTag(final String targetTagName) {
         if (!targetTagRepository.existsByName(targetTagName)) {
             throw new EntityNotFoundException(TargetTag.class, targetTagName);
@@ -128,8 +117,7 @@ public class JpaTagManagement implements TagManagement {
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public TargetTag updateTargetTag(final TagUpdate u) {
         final GenericTagUpdate update = (GenericTagUpdate) u;
 
@@ -144,8 +132,8 @@ public class JpaTagManagement implements TagManagement {
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+
+    @Transactional
     public DistributionSetTag updateDistributionSetTag(final TagUpdate u) {
         final GenericTagUpdate update = (GenericTagUpdate) u;
 
@@ -165,23 +153,14 @@ public class JpaTagManagement implements TagManagement {
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public DistributionSetTag createDistributionSetTag(final TagCreate c) {
         final JpaTagCreate create = (JpaTagCreate) c;
-
-        final JpaDistributionSetTag distributionSetTag = create.buildDistributionSetTag();
-
-        if (distributionSetTagRepository.findByNameEquals(distributionSetTag.getName()).isPresent()) {
-            throw new EntityAlreadyExistsException();
-        }
-
-        return distributionSetTagRepository.save(distributionSetTag);
+        return distributionSetTagRepository.save(create.buildDistributionSetTag());
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public List<DistributionSetTag> createDistributionSetTags(final Collection<TagCreate> dst) {
 
         @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -193,8 +172,7 @@ public class JpaTagManagement implements TagManagement {
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public void deleteDistributionSetTag(final String tagName) {
         if (!distributionSetTagRepository.existsByName(tagName)) {
             throw new EntityNotFoundException(DistributionSetTag.class, tagName);

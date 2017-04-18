@@ -51,7 +51,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -59,7 +58,7 @@ import org.springframework.validation.annotation.Validated;
  * JPA implementation of {@link RolloutGroupManagement}.
  */
 @Validated
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
     @Autowired

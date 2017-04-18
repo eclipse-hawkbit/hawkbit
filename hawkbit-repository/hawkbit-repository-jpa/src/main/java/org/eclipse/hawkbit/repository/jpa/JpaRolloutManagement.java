@@ -17,6 +17,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import javax.persistence.EntityManager;
 import javax.validation.ConstraintDeclarationException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -35,7 +36,6 @@ import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
-import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
@@ -78,13 +78,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -96,7 +94,7 @@ import com.google.common.collect.Lists;
  * JPA implementation of {@link RolloutManagement}.
  */
 @Validated
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public class JpaRolloutManagement extends AbstractRolloutManagement {
     private static final Logger LOGGER = LoggerFactory.getLogger(JpaRolloutManagement.class);
 
@@ -128,6 +126,9 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
 
+    @Autowired
+    private EntityManager entityManager;
+
     JpaRolloutManagement(final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
             final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
@@ -140,7 +141,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     public Page<Rollout> findAll(final Pageable pageable, final boolean deleted) {
-        final Specification<JpaRollout> spec = RolloutSpecification.isDeleted(deleted);
+        final Specification<JpaRollout> spec = RolloutSpecification.isDeletedWithDistributionSet(deleted);
         return JpaRolloutHelper.convertPage(rolloutRepository.findAll(spec, pageable), pageable);
     }
 
@@ -148,7 +149,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     public Page<Rollout> findAllByPredicate(final String rsqlParam, final Pageable pageable, final boolean deleted) {
         final List<Specification<JpaRollout>> specList = Lists.newArrayListWithExpectedSize(2);
         specList.add(RSQLUtility.parse(rsqlParam, RolloutFields.class, virtualPropertyReplacer));
-        specList.add(RolloutSpecification.isDeleted(deleted));
+        specList.add(RolloutSpecification.isDeletedWithDistributionSet(deleted));
 
         return JpaRolloutHelper.convertPage(findByCriteriaAPI(pageable, specList), pageable);
     }
@@ -171,8 +172,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @Modifying
+    @Transactional
     public Rollout createRollout(final RolloutCreate rollout, final int amountGroup,
             final RolloutGroupConditions conditions) {
         RolloutHelper.verifyRolloutGroupParameter(amountGroup);
@@ -181,8 +181,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @Modifying
+    @Transactional
     public Rollout createRollout(final RolloutCreate rollout, final List<RolloutGroupCreate> groups,
             final RolloutGroupConditions conditions) {
         RolloutHelper.verifyRolloutGroupParameter(groups.size());
@@ -191,10 +190,6 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private JpaRollout createRollout(final JpaRollout rollout) {
-        final Optional<Rollout> existingRollout = rolloutRepository.findByName(rollout.getName());
-        if (existingRollout.isPresent()) {
-            throw new EntityAlreadyExistsException(existingRollout.get().getName());
-        }
 
         final Long totalTargets = targetManagement.countTargetByTargetFilterQuery(rollout.getTargetFilterQuery());
         if (totalTargets == 0) {
@@ -346,10 +341,12 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout, RolloutGroupStatus.READY,
                 group);
 
-        final long targetsInGroupFilter = targetManagement
-                .countAllTargetsByTargetFilterQueryAndNotInRolloutGroups(readyGroups, groupTargetFilter);
+        final long targetsInGroupFilter = runInNewTransaction("countAllTargetsByTargetFilterQueryAndNotInRolloutGroups",
+                count -> targetManagement.countAllTargetsByTargetFilterQueryAndNotInRolloutGroups(readyGroups,
+                        groupTargetFilter));
         final long expectedInGroup = Math.round(group.getTargetPercentage() / 100 * (double) targetsInGroupFilter);
-        final long currentlyInGroup = rolloutTargetGroupRepository.countByRolloutGroup(group);
+        final long currentlyInGroup = runInNewTransaction("countRolloutTargetGroupByRolloutGroup",
+                count -> rolloutTargetGroupRepository.countByRolloutGroup(group));
 
         // Switch the Group status to READY, when there are enough Targets in
         // the Group
@@ -369,7 +366,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             } while (targetsLeftToAdd > 0);
 
             group.setStatus(RolloutGroupStatus.READY);
-            group.setTotalTargets(rolloutTargetGroupRepository.countByRolloutGroup(group).intValue());
+            group.setTotalTargets(runInNewTransaction("countRolloutTargetGroupByRolloutGroup",
+                    count -> rolloutTargetGroupRepository.countByRolloutGroup(group)).intValue());
             return rolloutGroupRepository.save(group);
 
         } catch (final TransactionException e) {
@@ -378,7 +376,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         }
     }
 
-    private Integer assignTargetsToGroupInNewTransaction(final Rollout rollout, final RolloutGroup group,
+    private Long assignTargetsToGroupInNewTransaction(final Rollout rollout, final RolloutGroup group,
             final String targetFilter, final long limit) {
 
         return runInNewTransaction("assignTargetsToRolloutGroup", status -> {
@@ -390,7 +388,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
             createAssignmentOfTargetsToGroup(targets, group);
 
-            return targets.getNumberOfElements();
+            return Long.valueOf(targets.getNumberOfElements());
         });
     }
 
@@ -414,8 +412,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @Modifying
+    @Transactional
     public Rollout startRollout(final Long rolloutId) {
         LOGGER.debug("startRollout called for rollout {}", rolloutId);
 
@@ -496,7 +493,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         return totalActionsCreated;
     }
 
-    private Integer createActionsForTargetsInNewTransaction(final long rolloutId, final long groupId, final int limit) {
+    private Long createActionsForTargetsInNewTransaction(final long rolloutId, final long groupId, final int limit) {
         return runInNewTransaction("createActionsForTargets", status -> {
             final PageRequest pageRequest = new PageRequest(0, limit);
             final Rollout rollout = rolloutRepository.findOne(rolloutId);
@@ -512,7 +509,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
                 createScheduledAction(targets.getContent(), distributionSet, actionType, forceTime, rollout, group);
             }
 
-            return targets.getNumberOfElements();
+            return Long.valueOf(targets.getNumberOfElements());
         });
     }
 
@@ -545,8 +542,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @Modifying
+    @Transactional
     public void pauseRollout(final Long rolloutId) {
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
         if (!RolloutStatus.RUNNING.equals(rollout.getStatus())) {
@@ -563,8 +559,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @Modifying
+    @Transactional
     public void resumeRollout(final Long rolloutId) {
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
         if (!(RolloutStatus.PAUSED.equals(rollout.getStatus()))) {
@@ -660,6 +655,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private boolean isRolloutComplete(final JpaRollout rollout) {
+        // ensure that changes in the same transaction count
+        entityManager.flush();
         final Long groupsActiveLeft = rolloutGroupRepository.countByRolloutIdAndStatusOrStatus(rollout.getId(),
                 RolloutGroupStatus.RUNNING, RolloutGroupStatus.SCHEDULED);
         return groupsActiveLeft == 0;
@@ -742,7 +739,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         }
     }
 
-    private int executeFittingHandler(final Long rolloutId) {
+    private long executeFittingHandler(final Long rolloutId) {
         LOGGER.debug("handle rollout {}", rolloutId);
         final JpaRollout rollout = rolloutRepository.findOne(rolloutId);
 
@@ -788,8 +785,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @Modifying
+    @Transactional
     public void deleteRollout(final long rolloutId) {
         final JpaRollout jpaRollout = rolloutRepository.findOne(rolloutId);
 
@@ -821,8 +817,12 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         deleteScheduledActions(rollout, scheduledActions);
 
         // avoid another scheduler round and re-check if all scheduled actions
-        // has been cleaned up
-        final boolean hasScheduledActionsLeft = findScheduledActionsByRollout(rollout).getNumberOfElements() > 0;
+        // has been cleaned up. we flush first to ensure that the we include the
+        // deletion above
+        entityManager.flush();
+        final boolean hasScheduledActionsLeft = actionRepository.countByRolloutIdAndStatus(rollout.getId(),
+                Status.SCHEDULED) > 0;
+
         if (hasScheduledActionsLeft) {
             return;
         }
@@ -870,7 +870,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     public Long countRolloutsAll() {
-        return rolloutRepository.count(RolloutSpecification.isDeleted(false));
+        return rolloutRepository.count(RolloutSpecification.isDeletedWithDistributionSet(false));
     }
 
     @Override
@@ -893,8 +893,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @Modifying
+    @Transactional
     public Rollout updateRollout(final RolloutUpdate u) {
         final GenericRolloutUpdate update = (GenericRolloutUpdate) u;
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(update.getId());
@@ -930,7 +929,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Override
     public Page<Rollout> findAllRolloutsWithDetailedStatus(final Pageable pageable, final boolean deleted) {
         Page<JpaRollout> rollouts;
-        final Specification<JpaRollout> spec = RolloutSpecification.isDeleted(deleted);
+        final Specification<JpaRollout> spec = RolloutSpecification.isDeletedWithDistributionSet(deleted);
         rollouts = rolloutRepository.findAll(spec, pageable);
         setRolloutStatusDetails(rollouts);
         return JpaRolloutHelper.convertPage(rollouts, pageable);
@@ -973,24 +972,6 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
                 rollout.setTotalTargetCountStatus(totalTargetCountStatus);
             });
         }
-    }
-
-    @Override
-    public float getFinishedPercentForRunningGroup(final Long rolloutId, final Long rolloutGroupId) {
-        final RolloutGroup rolloutGroup = rolloutGroupRepository.findById(rolloutGroupId)
-                .orElseThrow(() -> new EntityNotFoundException(RolloutGroup.class, rolloutGroupId));
-
-        final long totalGroup = rolloutGroup.getTotalTargets();
-        if (totalGroup == 0) {
-            // in case e.g. targets has been deleted we don't have any actions
-            // left for this group, so the group is finished
-            return 100;
-        }
-
-        final Long finished = actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rolloutId,
-                rolloutGroup.getId(), Action.Status.FINISHED);
-        // calculate threshold
-        return ((float) finished / (float) totalGroup) * 100;
     }
 
     @Override
