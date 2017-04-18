@@ -113,6 +113,11 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         statusIconMap.put(RolloutStatus.DELETING, new StatusFontIcon(null, SPUIStyleDefinitions.STATUS_SPINNER_RED));
     }
 
+    private static final List<Object> HIDDEN_COLUMNS = Arrays.asList(SPUILabelDefinitions.VAR_NAME,
+            SPUILabelDefinitions.VAR_CREATED_DATE, SPUILabelDefinitions.VAR_CREATED_USER,
+            SPUILabelDefinitions.VAR_MODIFIED_DATE, SPUILabelDefinitions.VAR_MODIFIED_BY,
+            SPUILabelDefinitions.VAR_DESC);
+
     RolloutListGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final RolloutManagement rolloutManagement, final UINotification uiNotification,
             final RolloutUIState rolloutUIState, final SpPermissionChecker permissionChecker,
@@ -375,14 +380,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
     @Override
     protected void setHiddenColumns() {
-        final List<Object> columnsToBeHidden = new ArrayList<>();
-        columnsToBeHidden.add(SPUILabelDefinitions.VAR_NAME);
-        columnsToBeHidden.add(SPUILabelDefinitions.VAR_CREATED_DATE);
-        columnsToBeHidden.add(SPUILabelDefinitions.VAR_CREATED_USER);
-        columnsToBeHidden.add(SPUILabelDefinitions.VAR_MODIFIED_DATE);
-        columnsToBeHidden.add(SPUILabelDefinitions.VAR_MODIFIED_BY);
-        columnsToBeHidden.add(SPUILabelDefinitions.VAR_DESC);
-        for (final Object propertyId : columnsToBeHidden) {
+        for (final Object propertyId : HIDDEN_COLUMNS) {
             getColumn(propertyId).setHidden(true);
         }
     }
