@@ -69,7 +69,7 @@ public class DistributionSetAssignmentResult extends AssignmentResult<Target> {
             return Collections.emptyList();
         }
 
-        return targetManagement.findTargetByControllerID(assignedTargets);
+        return targetManagement.findTargetsByControllerID(assignedTargets);
     }
 
 }

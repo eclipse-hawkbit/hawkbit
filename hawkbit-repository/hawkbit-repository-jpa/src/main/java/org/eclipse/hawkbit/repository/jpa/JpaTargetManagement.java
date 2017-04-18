@@ -112,7 +112,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public List<Target> findTargetByControllerID(final Collection<String> controllerIDs) {
+    public List<Target> findTargetsByControllerID(final Collection<String> controllerIDs) {
         return Collections.unmodifiableList(
                 targetRepository.findAll(TargetSpecifications.byControllerIdWithAssignedDsInJoin(controllerIDs)));
     }
@@ -566,7 +566,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public List<Target> findTargetAllById(final Collection<Long> ids) {
+    public List<Target> findTargetsById(final Collection<Long> ids) {
         return Collections.unmodifiableList(targetRepository.findAll(ids));
     }
 

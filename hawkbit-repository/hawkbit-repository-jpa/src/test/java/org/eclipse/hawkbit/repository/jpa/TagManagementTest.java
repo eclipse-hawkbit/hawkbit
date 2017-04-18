@@ -198,7 +198,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         assertThat(result.getAlreadyAssigned()).isEqualTo(0);
         assertThat(result.getAssigned()).isEqualTo(20);
         assertThat(result.getAssignedEntity()).containsAll(distributionSetManagement
-                .findDistributionSetsAll(groupA.stream().map(set -> set.getId()).collect(Collectors.toList())));
+                .findDistributionSetsById(groupA.stream().map(DistributionSet::getId).collect(Collectors.toList())));
         assertThat(result.getUnassigned()).isEqualTo(0);
         assertThat(result.getUnassignedEntity()).isEmpty();
         assertThat(result.getDistributionSetTag()).isEqualTo(tag);
@@ -208,7 +208,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         assertThat(result.getAlreadyAssigned()).isEqualTo(20);
         assertThat(result.getAssigned()).isEqualTo(20);
         assertThat(result.getAssignedEntity()).containsAll(distributionSetManagement
-                .findDistributionSetsAll(groupB.stream().map(set -> set.getId()).collect(Collectors.toList())));
+                .findDistributionSetsById(groupB.stream().map(DistributionSet::getId).collect(Collectors.toList())));
         assertThat(result.getUnassigned()).isEqualTo(0);
         assertThat(result.getUnassignedEntity()).isEmpty();
         assertThat(result.getDistributionSetTag()).isEqualTo(tag);
@@ -219,8 +219,8 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         assertThat(result.getAssigned()).isEqualTo(0);
         assertThat(result.getAssignedEntity()).isEmpty();
         assertThat(result.getUnassigned()).isEqualTo(40);
-        assertThat(result.getUnassignedEntity()).containsAll(distributionSetManagement.findDistributionSetsAll(
-                concat(groupB, groupA).stream().map(set -> set.getId()).collect(Collectors.toList())));
+        assertThat(result.getUnassignedEntity()).containsAll(distributionSetManagement.findDistributionSetsById(
+                concat(groupB, groupA).stream().map(DistributionSet::getId).collect(Collectors.toList())));
         assertThat(result.getDistributionSetTag()).isEqualTo(tag);
 
     }
@@ -239,7 +239,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         TargetTagAssignmentResult result = toggleTagAssignment(groupA, tag);
         assertThat(result.getAlreadyAssigned()).isEqualTo(0);
         assertThat(result.getAssigned()).isEqualTo(20);
-        assertThat(result.getAssignedEntity()).containsAll(targetManagement.findTargetByControllerID(
+        assertThat(result.getAssignedEntity()).containsAll(targetManagement.findTargetsByControllerID(
                 groupA.stream().map(target -> target.getControllerId()).collect(Collectors.toList())));
         assertThat(result.getUnassigned()).isEqualTo(0);
         assertThat(result.getUnassignedEntity()).isEmpty();
@@ -249,7 +249,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         result = toggleTagAssignment(concat(groupA, groupB), tag);
         assertThat(result.getAlreadyAssigned()).isEqualTo(20);
         assertThat(result.getAssigned()).isEqualTo(20);
-        assertThat(result.getAssignedEntity()).containsAll(targetManagement.findTargetByControllerID(
+        assertThat(result.getAssignedEntity()).containsAll(targetManagement.findTargetsByControllerID(
                 groupB.stream().map(target -> target.getControllerId()).collect(Collectors.toList())));
         assertThat(result.getUnassigned()).isEqualTo(0);
         assertThat(result.getUnassignedEntity()).isEmpty();
@@ -261,7 +261,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         assertThat(result.getAssigned()).isEqualTo(0);
         assertThat(result.getAssignedEntity()).isEmpty();
         assertThat(result.getUnassigned()).isEqualTo(40);
-        assertThat(result.getUnassignedEntity()).containsAll(targetManagement.findTargetByControllerID(
+        assertThat(result.getUnassignedEntity()).containsAll(targetManagement.findTargetsByControllerID(
                 concat(groupB, groupA).stream().map(target -> target.getControllerId()).collect(Collectors.toList())));
         assertThat(result.getTargetTag()).isEqualTo(tag);
 

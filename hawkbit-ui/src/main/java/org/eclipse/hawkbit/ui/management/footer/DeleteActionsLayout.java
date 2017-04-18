@@ -288,7 +288,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         }
 
         final List<DistributionSet> findDistributionSetAllById = distributionSetManagement
-                .findDistributionSetAllById(ids);
+                .findDistributionSetsById(ids);
 
         if (findDistributionSetAllById.isEmpty()) {
             notification.displayWarning(i18n.getMessage("distributionsets.not.exists"));
@@ -348,7 +348,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         @SuppressWarnings("unchecked")
         final TargetTable targetTable = (TargetTable) sourceTable;
         final Set<Long> targetIdSet = targetTable.getDeletedEntityByTransferable(transferable);
-        final Collection<Target> findTargetAllById = targetManagement.findTargetAllById(targetIdSet);
+        final Collection<Target> findTargetAllById = targetManagement.findTargetsById(targetIdSet);
         if (findTargetAllById.isEmpty()) {
             notification.displayWarning(i18n.getMessage("targets.not.exists"));
             return;

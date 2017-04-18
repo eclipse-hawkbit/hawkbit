@@ -235,7 +235,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     @Transactional
     public void deleteDistributionSet(final Collection<Long> distributionSetIDs) {
-        final List<DistributionSet> setsFound = findDistributionSetAllById(distributionSetIDs);
+        final List<DistributionSet> setsFound = findDistributionSetsById(distributionSetIDs);
 
         if (setsFound.size() < distributionSetIDs.size()) {
             throw new EntityNotFoundException(DistributionSet.class, distributionSetIDs,
@@ -534,12 +534,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                 .equalsNameAndVersionIgnoreCase(distributionName, version);
         return Optional.ofNullable(distributionSetRepository.findOne(spec));
 
-    }
-
-    @Override
-    public List<DistributionSet> findDistributionSetsAll(final Collection<Long> dist) {
-        return Collections
-                .unmodifiableList(distributionSetRepository.findAll(DistributionSetSpecification.byIds(dist)));
     }
 
     @Override
@@ -880,7 +874,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    public List<DistributionSet> findDistributionSetAllById(final Collection<Long> ids) {
+    public List<DistributionSet> findDistributionSetsById(final Collection<Long> ids) {
         return Collections.unmodifiableList(distributionSetRepository.findAll(ids));
     }
 

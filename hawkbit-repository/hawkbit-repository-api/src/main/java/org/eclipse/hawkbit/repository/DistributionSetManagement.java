@@ -364,17 +364,6 @@ public interface DistributionSetManagement {
             @NotNull String rsqlParam, @NotNull Pageable pageable);
 
     /**
-     * Retrieves {@link DistributionSet} List for overview purposes (no
-     * {@link SoftwareModule}s and {@link DistributionSetTag}s).
-     *
-     * @param dist
-     *            List of {@link DistributionSet} IDs to be found
-     * @return the found {@link DistributionSet}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    List<DistributionSet> findDistributionSetsAll(Collection<Long> dist);
-
-    /**
      * finds all {@link DistributionSet}s.
      *
      * @param pageReq
@@ -729,6 +718,6 @@ public interface DistributionSetManagement {
      * @return the found {@link DistributionSet}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    List<DistributionSet> findDistributionSetAllById(@NotEmpty Collection<Long> ids);
+    List<DistributionSet> findDistributionSetsById(@NotEmpty Collection<Long> ids);
 
 }

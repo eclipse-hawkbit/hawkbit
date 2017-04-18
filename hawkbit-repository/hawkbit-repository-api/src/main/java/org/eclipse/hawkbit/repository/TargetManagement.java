@@ -339,7 +339,7 @@ public interface TargetManagement {
      * @return List of found{@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<Target> findTargetByControllerID(@NotEmpty Collection<String> controllerIDs);
+    List<Target> findTargetsByControllerID(@NotEmpty Collection<String> controllerIDs);
 
     /**
      * Find a {@link Target} based a given ID.
@@ -615,7 +615,7 @@ public interface TargetManagement {
      * @return the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<Target> findTargetAllById(@NotNull Collection<Long> ids);
+    List<Target> findTargetsById(@NotNull Collection<Long> ids);
 
     /**
      * Get controller attributes of given {@link Target}.

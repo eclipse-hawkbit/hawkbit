@@ -426,7 +426,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
 
         final Object distItemId = dropData.getItemIdOver();
-        assignTargetToDs(getItem(distItemId), targetManagement.findTargetAllById(targetIdSet));
+        assignTargetToDs(getItem(distItemId), targetManagement.findTargetsById(targetIdSet));
 
     }
 

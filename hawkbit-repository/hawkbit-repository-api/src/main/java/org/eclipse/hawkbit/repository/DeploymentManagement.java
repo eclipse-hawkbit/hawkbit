@@ -67,12 +67,9 @@ public interface DeploymentManagement {
      *             do not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    default DistributionSetAssignmentResult assignDistributionSet(@NotNull final Long dsID,
-            @NotNull final ActionType actionType, final long forcedTimestamp,
-            @NotEmpty final Collection<String> controllerIDs) {
-        return assignDistributionSet(dsID, controllerIDs.stream()
-                .map(t -> new TargetWithActionType(t, actionType, forcedTimestamp)).collect(Collectors.toList()));
-    }
+    DistributionSetAssignmentResult assignDistributionSet(@NotNull Long dsID, @NotNull ActionType actionType,
+            long forcedTimestamp, @NotEmpty Collection<String> controllerIDs);
+
 
     /**
      * method assigns the {@link DistributionSet} to all {@link Target}s by

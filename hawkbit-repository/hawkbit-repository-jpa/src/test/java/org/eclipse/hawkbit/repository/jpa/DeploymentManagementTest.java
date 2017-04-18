@@ -461,7 +461,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final Iterable<Target> allFoundTargets = targetManagement.findTargetsAll(pageReq).getContent();
 
         // get final updated version of targets
-        savedDeployedTargets = targetManagement.findTargetByControllerID(
+        savedDeployedTargets = targetManagement.findTargetsByControllerID(
                 savedDeployedTargets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()));
 
         assertThat(allFoundTargets).as("founded targets are wrong").containsAll(savedDeployedTargets)
@@ -667,7 +667,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         actionRepository.findByDistributionSetId(pageRequest, dsA.getId()).getContent().get(1);
 
         // get final updated version of targets
-        final List<Target> deployResWithDsBTargets = targetManagement.findTargetByControllerID(deployResWithDsB
+        final List<Target> deployResWithDsBTargets = targetManagement.findTargetsByControllerID(deployResWithDsB
                 .getDeployedTargets().stream().map(Target::getControllerId).collect(Collectors.toList()));
 
         assertThat(deployed2DS).as("deployed ds is wrong").containsAll(deployResWithDsBTargets);

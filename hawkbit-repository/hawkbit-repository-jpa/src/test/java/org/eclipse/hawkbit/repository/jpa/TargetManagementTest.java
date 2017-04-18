@@ -775,7 +775,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
             testdataFactory.createTarget("test" + i);
         }
 
-        final List<Target> foundDs = targetManagement.findTargetAllById(searchIds);
+        final List<Target> foundDs = targetManagement.findTargetsById(searchIds);
 
         assertThat(foundDs).hasSize(3);
 

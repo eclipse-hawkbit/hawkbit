@@ -917,7 +917,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
             testdataFactory.createDistributionSet("test" + i);
         }
 
-        final List<DistributionSet> foundDs = distributionSetManagement.findDistributionSetAllById(searchIds);
+        final List<DistributionSet> foundDs = distributionSetManagement.findDistributionSetsById(searchIds);
 
         assertThat(foundDs).hasSize(3);
 

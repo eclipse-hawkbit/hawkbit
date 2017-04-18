@@ -185,7 +185,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
         final AbstractTable<?, Long> table = (AbstractTable<?, Long>) sourceTable;
         final Set<Long> ids = table.getDeletedEntityByTransferable(transferable);
         final List<DistributionSet> findDistributionSetAllById = distributionSetManagement
-                .findDistributionSetAllById(ids);
+                .findDistributionSetsById(ids);
 
         if (findDistributionSetAllById.isEmpty()) {
             notification.displayWarning(i18n.getMessage("distributionsets.not.exists"));
