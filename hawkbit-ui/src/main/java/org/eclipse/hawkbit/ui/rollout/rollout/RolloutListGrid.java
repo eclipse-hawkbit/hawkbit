@@ -262,19 +262,19 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     protected void setColumnExpandRatio() {
 
         getColumn(ROLLOUT_RENDERER_DATA).setMinimumWidth(40);
-        getColumn(ROLLOUT_RENDERER_DATA).setMaximumWidth(150);
+        getColumn(ROLLOUT_RENDERER_DATA).setMaximumWidth(300);
 
         getColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION).setMinimumWidth(40);
-        getColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION).setMaximumWidth(150);
+        getColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION).setMaximumWidth(300);
 
-        getColumn(SPUILabelDefinitions.VAR_STATUS).setMinimumWidth(75);
-        getColumn(SPUILabelDefinitions.VAR_STATUS).setMaximumWidth(75);
+        getColumn(SPUILabelDefinitions.VAR_STATUS).setMinimumWidth(40);
+        getColumn(SPUILabelDefinitions.VAR_STATUS).setMaximumWidth(60);
 
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS).setMinimumWidth(40);
-        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS).setMaximumWidth(100);
+        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS).setMaximumWidth(60);
 
         getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setMinimumWidth(40);
-        getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setMaximumWidth(100);
+        getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setMaximumWidth(60);
 
         getColumn(RUN_OPTION).setMinimumWidth(25);
         getColumn(RUN_OPTION).setMaximumWidth(25);
