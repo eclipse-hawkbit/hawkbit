@@ -179,7 +179,6 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-
     @Transactional
     public void deleteTarget(final String controllerID) {
         final Target target = targetRepository.findByControllerId(controllerID)
@@ -399,7 +398,6 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-
     @Transactional
     public Target unAssignTag(final String controllerID, final Long targetTagId) {
         final Target target = targetRepository.findByControllerId(controllerID)
@@ -545,7 +543,6 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-
     @Transactional
     public Target createTarget(final TargetCreate c) {
         final JpaTargetCreate create = (JpaTargetCreate) c;
@@ -553,7 +550,6 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-
     @Transactional
     public List<Target> createTargets(final Collection<TargetCreate> targets) {
         return targets.stream().map(this::createTarget).collect(Collectors.toList());

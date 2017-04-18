@@ -185,7 +185,6 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     @Override
-
     @Transactional
     public Artifact createArtifact(final InputStream inputStream, final Long moduleId, final String filename,
             final boolean overrideExisting) {

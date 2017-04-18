@@ -140,7 +140,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private PlatformTransactionManager txManager;
 
     @Override
-
     @Transactional
     // Exception squid:S2095: see
     // https://jira.sonarsource.com/browse/SONARJAVA-1478
