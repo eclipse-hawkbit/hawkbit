@@ -101,15 +101,15 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SMFilterEvent filterEvent) {
-        UI.getCurrent().access(() -> {
-            if (filterEvent == SMFilterEvent.FILTER_BY_TYPE_DISTRIBUTION_VIEW
-                    || filterEvent == SMFilterEvent.FILTER_BY_TEXT_DISTRIBUTION_VIEW
-                    || filterEvent == SMFilterEvent.REMOVE_FILTER_BY_TYPE_DISTRIBUTION_VIEW
-                    || filterEvent == SMFilterEvent.REMOVE_FILTER_BY_TEXT_DISTRIBUTION_VIEW) {
+        if (filterEvent == SMFilterEvent.FILTER_BY_TYPE_DISTRIBUTION_VIEW
+                || filterEvent == SMFilterEvent.FILTER_BY_TEXT_DISTRIBUTION_VIEW
+                || filterEvent == SMFilterEvent.REMOVE_FILTER_BY_TYPE_DISTRIBUTION_VIEW
+                || filterEvent == SMFilterEvent.REMOVE_FILTER_BY_TEXT_DISTRIBUTION_VIEW) {
+            UI.getCurrent().access(() -> {
                 refreshFilter();
                 styleTableOnDistSelection();
-            }
-        });
+            });
+        }
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -138,9 +138,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     void onSoftwareModuleUpdateEvents(final SoftwareModuleUpdatedEventContainer eventContainer) {
         @SuppressWarnings("unchecked")
         final List<Long> visibleItemIds = (List<Long>) getVisibleItemIds();
-
         handleSelectedAndUpdatedSoftwareModules(eventContainer.getEvents());
-
         eventContainer.getEvents().stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
                 .forEach(event -> updateSoftwareModuleInTable(event.getEntity()));
     }
@@ -177,14 +175,12 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
         final Map<String, Object> queryConfig = Maps.newHashMapWithExpectedSize(3);
         manageDistUIState.getSoftwareModuleFilters().getSearchText()
                 .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
-
         manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType()
                 .ifPresent(type -> queryConfig.put(SPUIDefinitions.BY_SOFTWARE_MODULE_TYPE, type));
-
         manageDistUIState.getLastSelectedDistribution()
                 .ifPresent(id -> queryConfig.put(SPUIDefinitions.ORDER_BY_DISTRIBUTION, id));
-
         return queryConfig;
+
     }
 
     @Override
@@ -225,6 +221,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
                 return iconLayout;
             }
         });
+
     }
 
     @Override
@@ -395,21 +392,24 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
         artifactDtlsWindow.setContent(artifactDetailsLayout.getArtifactDetailsTable());
 
         /* Create maximized view of the table */
-        artifactDtlsWindow.addWindowModeChangeListener(event -> {
-            if (event.getWindowMode() == WindowMode.MAXIMIZED) {
-                artifactDtlsWindow.setSizeFull();
-                artifactDetailsLayout.setFullWindowMode(true);
-                artifactDetailsLayout.createMaxArtifactDetailsTable();
-                artifactDetailsLayout.getMaxArtifactDetailsTable().setWidth(100, Unit.PERCENTAGE);
-                artifactDetailsLayout.getMaxArtifactDetailsTable().setHeight(100, Unit.PERCENTAGE);
-                artifactDtlsWindow.setContent(artifactDetailsLayout.getMaxArtifactDetailsTable());
-            } else {
-                artifactDtlsWindow.setSizeUndefined();
-                artifactDtlsWindow.setContent(artifactDetailsLayout.getArtifactDetailsTable());
-            }
-        });
+        artifactDtlsWindow.addWindowModeChangeListener(
+
+                event -> {
+                    if (event.getWindowMode() == WindowMode.MAXIMIZED) {
+                        artifactDtlsWindow.setSizeFull();
+                        artifactDetailsLayout.setFullWindowMode(true);
+                        artifactDetailsLayout.createMaxArtifactDetailsTable();
+                        artifactDetailsLayout.getMaxArtifactDetailsTable().setWidth(100, Unit.PERCENTAGE);
+                        artifactDetailsLayout.getMaxArtifactDetailsTable().setHeight(100, Unit.PERCENTAGE);
+                        artifactDtlsWindow.setContent(artifactDetailsLayout.getMaxArtifactDetailsTable());
+                    } else {
+                        artifactDtlsWindow.setSizeUndefined();
+                        artifactDtlsWindow.setContent(artifactDetailsLayout.getArtifactDetailsTable());
+                    }
+                });
         /* display the window */
         UI.getCurrent().addWindow(artifactDtlsWindow);
+
     }
 
     @Override
@@ -419,8 +419,9 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     }
 
     private void showMetadataDetails(final Long itemId) {
-        softwareManagement.findSoftwareModuleById(itemId)
-                .ifPresent(swmodule -> UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null)));
+        softwareManagement.findSoftwareModuleById(itemId).ifPresent(
+
+                swmodule -> UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null)));
     }
 
 }

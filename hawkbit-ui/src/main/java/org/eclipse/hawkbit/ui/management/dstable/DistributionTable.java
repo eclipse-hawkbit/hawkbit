@@ -38,7 +38,6 @@ import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
-import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.push.DistributionSetUpdatedEventContainer;
@@ -210,13 +209,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
                 restoreDistributionTableStyle();
             }
         });
-    }
-
-    @EventBusListenerMethod(scope = EventScope.UI)
-    void onEvent(final SaveActionWindowEvent event) {
-        if (event == SaveActionWindowEvent.DELETED_DISTRIBUTIONS) {
-            refreshFilter();
-        }
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
