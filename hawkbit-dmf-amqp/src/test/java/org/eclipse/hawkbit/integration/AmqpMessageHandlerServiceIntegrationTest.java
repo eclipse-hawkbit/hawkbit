@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.util.List;
 import java.util.UUID;
@@ -594,9 +595,20 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     }
 
     private void assertAction(final Long actionId, final Status... expectedActionStates) {
-        final List<Status> status = deploymentManagement.findActionStatusByAction(pageReq, actionId).getContent()
-                .stream().map(actionStatus -> actionStatus.getStatus()).collect(Collectors.toList());
-        assertThat(status).containsOnly(expectedActionStates);
+
+        createConditionFactory().await().until(() -> {
+            try {
+                securityRule.runAsPrivileged(() -> {
+                    final List<Status> status = deploymentManagement.findActionStatusByAction(pageReq, actionId)
+                            .getContent().stream().map(actionStatus -> actionStatus.getStatus())
+                            .collect(Collectors.toList());
+                    assertThat(status).containsOnly(expectedActionStates);
+                    return null;
+                });
+            } catch (final Exception e) {
+                fail(e.getMessage());
+            }
+        });
     }
 
     private Message createEventMessage(final String tenant, final EventTopic eventTopic, final Object payload) {
