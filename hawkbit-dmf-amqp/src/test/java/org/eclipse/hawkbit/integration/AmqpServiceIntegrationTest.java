@@ -78,7 +78,7 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         });
 
         try {
-            return callable.call().get();
+            return securityRule.runAsPrivileged(() -> callable.call().get());
         } catch (final Exception e) {
             return null;
         }
