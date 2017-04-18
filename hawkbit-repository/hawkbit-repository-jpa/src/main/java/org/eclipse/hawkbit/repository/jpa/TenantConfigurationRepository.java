@@ -10,14 +10,13 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The spring-data repository for the entity {@link TenantConfiguration}.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public interface TenantConfigurationRepository extends BaseEntityRepository<JpaTenantConfiguration, Long> {
 
     /**

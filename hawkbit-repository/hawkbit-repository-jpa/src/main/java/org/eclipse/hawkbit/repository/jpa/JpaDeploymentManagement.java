@@ -79,7 +79,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
@@ -94,7 +93,7 @@ import com.google.common.collect.Lists;
  * JPA implementation for {@link DeploymentManagement}.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 @Validated
 public class JpaDeploymentManagement implements DeploymentManagement {
     private static final Logger LOG = LoggerFactory.getLogger(JpaDeploymentManagement.class);
@@ -141,8 +140,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private PlatformTransactionManager txManager;
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     // Exception squid:S2095: see
     // https://jira.sonarsource.com/browse/SONARJAVA-1478
     @SuppressWarnings({ "squid:S2095" })
@@ -153,7 +151,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
             final Collection<TargetWithActionType> targets) {
@@ -161,7 +158,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
             final Collection<TargetWithActionType> targets, final String actionMessage) {
@@ -356,7 +352,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Action cancelAction(final Long actionId) {
         LOG.debug("cancelAction({})", actionId);
@@ -399,7 +394,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Action forceQuitAction(final Long actionId) {
         final JpaAction action = actionRepository.findById(actionId)
@@ -444,7 +438,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         def.setName("startScheduledActions-" + rolloutId);
         def.setReadOnly(false);
-        def.setIsolationLevel(Isolation.READ_UNCOMMITTED.value());
         def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         return new TransactionTemplate(txManager, def).execute(status -> {
             final Page<Action> rolloutGroupActions = findActionsByRolloutAndRolloutGroupParent(rolloutId,
@@ -631,8 +624,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public Action forceTargetAction(final Long actionId) {
         final JpaAction action = actionRepository.findById(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));

@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
  * A TenantAwareEvent entity manager, which loads an entity by id and type for
  * remote events.
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public class JpaEventEntityManager implements EventEntityManager {
 
     private final TenantAware tenantAware;

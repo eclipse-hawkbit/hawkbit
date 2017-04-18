@@ -41,7 +41,6 @@ import org.eclipse.hawkbit.repository.report.model.SeriesTime;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -49,7 +48,7 @@ import org.springframework.validation.annotation.Validated;
  * JPA implementation of {@link ReportManagement}.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 @Validated
 public class JpaReportManagement implements ReportManagement {
 

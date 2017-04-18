@@ -270,7 +270,7 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     @Before
     public void before() throws Exception {
         mvc = createMvcWebAppContext().build();
-        final String description = "Updated description to have lastmodified available in tests";
+        final String description = "Updated description.";
 
         osType = securityRule
                 .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_OS));
