@@ -294,7 +294,7 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     public void cleanUp() {
         try {
             FileUtils.deleteDirectory(new File(artifactFilesystemProperties.getPath()));
-        } catch (final IOException e) {
+        } catch (final IOException | IllegalArgumentException e) {
             LOG.warn("Cannot cleanup file-directory", e);
         }
     }
