@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.common.detailslayout;
 
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
@@ -135,12 +134,9 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
      * Restores the tables and tabs displayed on the view based on the selected
      * entity.
      */
-    public void restoreState() {
+    protected void restoreState() {
         if (onLoadIsTableRowSelected()) {
             populateData(getSelectedBaseEntity());
-        } else {
-            populateData(null);
-            editButton.setEnabled(true);
         }
         if (onLoadIsTableMaximized()) {
             setVisible(false);
@@ -191,8 +187,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
             attributesLayout.removeAllComponents();
             for (final Map.Entry<String, String> entry : attributes.entrySet()) {
                 final Label conAttributeLabel = SPUIComponentProvider.createNameValueLabel(
-                        entry.getKey().concat("  :  "), HawkbitCommonUtil.trimAndNullIfEmpty(entry.getValue()) == null
-                                ? StringUtils.EMPTY : entry.getValue());
+                        entry.getKey().concat("  :  "),
+                        HawkbitCommonUtil.trimAndNullIfEmpty(entry.getValue()) == null ? "" : entry.getValue());
                 conAttributeLabel.setDescription(entry.getKey().concat("  :  ") + entry.getValue());
                 conAttributeLabel.addStyleName("label-style");
                 attributesLayout.addComponent(conAttributeLabel);
@@ -234,14 +230,14 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         caption.setContentMode(ContentMode.HTML);
         caption.setId(getDetailsHeaderCaptionId());
 
-        editButton = SPUIComponentProvider.getButton(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, null,
-                false, FontAwesome.PENCIL_SQUARE_O, SPUIButtonStyleSmallNoBorder.class);
+        editButton = SPUIComponentProvider.getButton("", "", "", null, false, FontAwesome.PENCIL_SQUARE_O,
+                SPUIButtonStyleSmallNoBorder.class);
         editButton.setId(getEditButtonId());
         editButton.addClickListener(this::onEdit);
         editButton.setEnabled(false);
 
-        manageMetadataBtn = SPUIComponentProvider.getButton(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, false, FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
+        manageMetadataBtn = SPUIComponentProvider.getButton("", "", "", null, false, FontAwesome.LIST_ALT,
+                SPUIButtonStyleSmallNoBorder.class);
         manageMetadataBtn.setId(getEditButtonId());
         manageMetadataBtn.setDescription(i18n.getMessage("tooltip.metadata.icon"));
         manageMetadataBtn.addClickListener(this::showMetadata);
@@ -294,7 +290,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         editButton.setEnabled(selectedBaseEntity != null);
         manageMetadataBtn.setEnabled(selectedBaseEntity != null);
         if (selectedBaseEntity == null) {
-            setName(getDefaultCaption(), StringUtils.EMPTY);
+            setName(getDefaultCaption(), "");
         } else {
             setName(getDefaultCaption(), getName());
         }

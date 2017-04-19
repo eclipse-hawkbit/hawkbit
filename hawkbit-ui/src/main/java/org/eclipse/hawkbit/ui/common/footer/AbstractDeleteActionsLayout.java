@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.common.footer;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -147,8 +146,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
 
     private Button createActionsButton() {
         final Button button = SPUIComponentProvider.getButton(UIComponentIdProvider.PENDING_ACTION_BUTTON,
-                getNoActionsButtonLabel(), StringUtils.EMPTY, StringUtils.EMPTY, false, FontAwesome.BELL,
-                SPUIButtonStyleSmall.class);
+                getNoActionsButtonLabel(), "", "", false, FontAwesome.BELL, SPUIButtonStyleSmall.class);
         button.setStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
         button.addStyleName(SPUIStyleDefinitions.DEL_ACTION_BUTTON);
 
@@ -158,8 +156,8 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
     }
 
     private Button createBulkUploadStatusButton() {
-        final Button button = SPUIComponentProvider.getButton(UIComponentIdProvider.BULK_UPLOAD_STATUS_BUTTON,
-                StringUtils.EMPTY, StringUtils.EMPTY, "", false, null, SPUIButtonStyleSmall.class);
+        final Button button = SPUIComponentProvider.getButton(UIComponentIdProvider.BULK_UPLOAD_STATUS_BUTTON, "", "",
+                "", false, null, SPUIButtonStyleSmall.class);
         button.setStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
         button.addStyleName(SPUIStyleDefinitions.UPLOAD_PROGRESS_INDICATOR_STYLE);
         button.setWidth("100px");

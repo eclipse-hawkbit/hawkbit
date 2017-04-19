@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
@@ -226,12 +225,13 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     @Override
     protected boolean isFirstRowSelectedOnLoad() {
-        return manageDistUIState.getSelectedSoftwareModules().map(Set::isEmpty).orElse(true);
+        return manageDistUIState.getSelectedSoftwareModules().isEmpty();
     }
 
     @Override
     protected Object getItemIdToSelect() {
-        return manageDistUIState.getSelectedSoftwareModules().orElse(null);
+        return manageDistUIState.getSelectedSoftwareModules().isEmpty() ? null
+                : manageDistUIState.getSelectedSoftwareModules();
     }
 
     @Override
@@ -271,7 +271,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
         if (isMaximized()) {
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VENDOR, i18n.getMessage("header.vendor"), 0.1F));
         } else {
-            columnList.add(new TableColumn(SPUILabelDefinitions.ARTIFACT_ICON, StringUtils.EMPTY, 0.1F));
+            columnList.add(new TableColumn(SPUILabelDefinitions.ARTIFACT_ICON, "", 0.1F));
         }
         return columnList;
     }

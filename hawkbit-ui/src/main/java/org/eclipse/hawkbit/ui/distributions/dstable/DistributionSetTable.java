@@ -16,7 +16,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -169,12 +168,13 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     @Override
     protected boolean isFirstRowSelectedOnLoad() {
-        return manageDistUIState.getSelectedDistributions().map(Set::isEmpty).orElse(true);
+        return manageDistUIState.getSelectedDistributions().isEmpty();
     }
 
     @Override
     protected Object getItemIdToSelect() {
-        return manageDistUIState.getSelectedDistributions().orElse(null);
+        return manageDistUIState.getSelectedDistributions().isEmpty() ? null
+                : manageDistUIState.getSelectedDistributions();
     }
 
     @Override
@@ -472,15 +472,15 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     protected List<TableColumn> getTableVisibleColumns() {
         final List<TableColumn> columnList = super.getTableVisibleColumns();
         if (!isMaximized()) {
-            columnList.add(new TableColumn(SPUILabelDefinitions.METADATA_ICON, StringUtils.EMPTY, 0.1F));
+            columnList.add(new TableColumn(SPUILabelDefinitions.METADATA_ICON, "", 0.1F));
         }
         return columnList;
     }
 
     private Button createManageMetadataButton(final String nameVersionStr) {
         final Button manageMetadataBtn = SPUIComponentProvider.getButton(
-                UIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, StringUtils.EMPTY,
-                StringUtils.EMPTY, null, false, FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
+                UIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
+                FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
         manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
         manageMetadataBtn.setDescription(i18n.getMessage("tooltip.metadata.icon"));
         return manageMetadataBtn;

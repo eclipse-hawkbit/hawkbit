@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management.dstable;
 
-import java.util.Set;
-
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
@@ -48,7 +46,7 @@ public class DistributionDetails extends AbstractDistributionSetDetails {
 
     @Override
     protected boolean onLoadIsTableRowSelected() {
-        return !getManagementUIState().getSelectedDsIdName().map(Set::isEmpty).orElse(true);
+        return getManagementUIState().getSelectedDsIdName().isEmpty();
     }
 
     @Override

@@ -11,9 +11,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
@@ -137,12 +135,13 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     @Override
     protected boolean isFirstRowSelectedOnLoad() {
-        return artifactUploadState.getSelectedSoftwareModules().map(Set::isEmpty).orElse(true);
+        return artifactUploadState.getSelectedSoftwareModules().isEmpty();
     }
 
     @Override
     protected Object getItemIdToSelect() {
-        return artifactUploadState.getSelectedSoftwareModules().orElse(null);
+        return artifactUploadState.getSelectedSoftwareModules().isEmpty() ? null
+                : artifactUploadState.getSelectedSoftwareModules();
     }
 
     @Override
@@ -162,6 +161,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     @Override
     protected void publishSelectedEntityEvent(final SoftwareModule lastSoftwareModule) {
+        // TODO
         artifactUploadState.setSelectedBaseSoftwareModule(lastSoftwareModule);
         eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, lastSoftwareModule));
         if (lastSoftwareModule == null) {
@@ -226,7 +226,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     protected List<TableColumn> getTableVisibleColumns() {
         final List<TableColumn> columnList = super.getTableVisibleColumns();
         if (!isMaximized()) {
-            columnList.add(new TableColumn(SPUILabelDefinitions.METADATA_ICON, StringUtils.EMPTY, 0.1F));
+            columnList.add(new TableColumn(SPUILabelDefinitions.METADATA_ICON, "", 0.1F));
             return columnList;
         }
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VENDOR, i18n.getMessage("header.vendor"), 0.1F));
@@ -250,8 +250,8 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     private Button createManageMetadataButton(final String nameVersionStr) {
         final Button manageMetadataBtn = SPUIComponentProvider.getButton(
-                UIComponentIdProvider.SW_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, StringUtils.EMPTY,
-                StringUtils.EMPTY, null, false, FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
+                UIComponentIdProvider.SW_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
+                FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
         manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
         manageMetadataBtn.setDescription(i18n.getMessage("tooltip.metadata.icon"));
         return manageMetadataBtn;

@@ -210,15 +210,15 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
         vendorTextField = createTextField("textfield.vendor", UIComponentIdProvider.SOFT_MODULE_VENDOR);
         vendorTextField.setRequired(false);
-        vendorTextField.setNullRepresentation(StringUtils.EMPTY);
+        vendorTextField.setNullRepresentation("");
 
         descTextArea = new TextAreaBuilder().caption(i18n.getMessage("textfield.description")).style("text-area-style")
                 .prompt(i18n.getMessage("textfield.description")).id(UIComponentIdProvider.ADD_SW_MODULE_DESCRIPTION)
                 .buildTextComponent();
-        descTextArea.setNullRepresentation(StringUtils.EMPTY);
+        descTextArea.setNullRepresentation("");
 
-        typeComboBox = SPUIComponentProvider.getComboBox(i18n.getMessage("upload.swmodule.type"), StringUtils.EMPTY,
-                null, null, true, null, i18n.getMessage("upload.swmodule.type"));
+        typeComboBox = SPUIComponentProvider.getComboBox(i18n.getMessage("upload.swmodule.type"), "", null, null, true,
+                null, i18n.getMessage("upload.swmodule.type"));
         typeComboBox.setId(UIComponentIdProvider.SW_MODULE_TYPE);
         typeComboBox
                 .setStyleName(SPUIDefinitions.COMBO_BOX_SPECIFIC_STYLE + StringUtils.SPACE + ValoTheme.COMBOBOX_TINY);

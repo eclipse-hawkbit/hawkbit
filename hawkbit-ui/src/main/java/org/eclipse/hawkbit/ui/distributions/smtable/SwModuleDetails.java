@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.distributions.smtable;
 
-import java.util.Set;
-
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -44,7 +42,7 @@ public class SwModuleDetails extends AbstractSoftwareModuleDetails {
 
     @Override
     protected boolean onLoadIsTableRowSelected() {
-        return !manageDistUIState.getSelectedSoftwareModules().map(Set::isEmpty).orElse(true);
+        return manageDistUIState.getSelectedSoftwareModules().isEmpty();
     }
 
     @Override

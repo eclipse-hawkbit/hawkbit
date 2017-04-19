@@ -14,7 +14,6 @@ import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 
@@ -102,9 +101,9 @@ public final class SPDateTimeUtil {
      */
     public static String formatCreatedAt(final BaseEntity baseEntity) {
         if (baseEntity == null) {
-            return StringUtils.EMPTY;
+            return "";
         }
-        return formatDate(baseEntity.getCreatedAt(), StringUtils.EMPTY);
+        return formatDate(baseEntity.getCreatedAt(), "");
     }
 
     /**
@@ -116,9 +115,9 @@ public final class SPDateTimeUtil {
      */
     public static String formatLastModifiedAt(final BaseEntity baseEntity) {
         if (baseEntity == null) {
-            return StringUtils.EMPTY;
+            return "";
         }
-        return formatDate(baseEntity.getLastModifiedAt(), StringUtils.EMPTY);
+        return formatDate(baseEntity.getLastModifiedAt(), "");
     }
 
     /**
@@ -132,9 +131,9 @@ public final class SPDateTimeUtil {
      */
     public static String formatLastModifiedAt(final BaseEntity baseEntity, final String datePattern) {
         if (baseEntity == null) {
-            return StringUtils.EMPTY;
+            return "";
         }
-        return formatDate(baseEntity.getLastModifiedAt(), StringUtils.EMPTY, datePattern);
+        return formatDate(baseEntity.getLastModifiedAt(), "", datePattern);
     }
 
     private static String formatDate(final Long lastQueryDate, final String defaultString, final String datePattern) {

@@ -19,7 +19,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -252,10 +251,10 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
     private IndexedContainer getAssignmentsTableContainer() {
         final IndexedContainer contactContainer = new IndexedContainer();
-        contactContainer.addContainerProperty(TARGET_NAME, String.class, StringUtils.EMPTY);
-        contactContainer.addContainerProperty(DISTRIBUTION_NAME, String.class, StringUtils.EMPTY);
-        contactContainer.addContainerProperty(TARGET_ID, Long.class, StringUtils.EMPTY);
-        contactContainer.addContainerProperty(DIST_ID, Long.class, StringUtils.EMPTY);
+        contactContainer.addContainerProperty(TARGET_NAME, String.class, "");
+        contactContainer.addContainerProperty(DISTRIBUTION_NAME, String.class, "");
+        contactContainer.addContainerProperty(TARGET_ID, Long.class, "");
+        contactContainer.addContainerProperty(DIST_ID, Long.class, "");
         final Map<TargetIdName, DistributionSetIdName> assignedList = managementUIState.getAssignedList();
 
         for (final Map.Entry<TargetIdName, DistributionSetIdName> entry : assignedList.entrySet()) {
@@ -349,8 +348,8 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
     private IndexedContainer getDSModuleTableContainer() {
         final IndexedContainer contactContainer = new IndexedContainer();
-        contactContainer.addContainerProperty(DIST_ID, Long.class, StringUtils.EMPTY);
-        contactContainer.addContainerProperty(DISTRIBUTION_NAME, String.class, StringUtils.EMPTY);
+        contactContainer.addContainerProperty(DIST_ID, Long.class, "");
+        contactContainer.addContainerProperty(DISTRIBUTION_NAME, String.class, "");
         Item item;
         for (final DistributionSetIdName distIdName : managementUIState.getDeletedDistributionList()) {
             item = contactContainer.addItem(distIdName);
@@ -428,8 +427,8 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
     private IndexedContainer getTargetModuleTableContainer() {
         final IndexedContainer contactContainer = new IndexedContainer();
-        contactContainer.addContainerProperty(TARGET_ID, Long.class, StringUtils.EMPTY);
-        contactContainer.addContainerProperty(TARGET_NAME, String.class, StringUtils.EMPTY);
+        contactContainer.addContainerProperty(TARGET_ID, Long.class, "");
+        contactContainer.addContainerProperty(TARGET_NAME, String.class, "");
         Item item;
         for (final TargetIdName targteId : managementUIState.getDeletedTargetList()) {
             item = contactContainer.addItem(targteId);

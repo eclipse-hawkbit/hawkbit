@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.common;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -24,11 +23,11 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -231,8 +230,8 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     private TextField createKeyTextField() {
         final TextField keyField = new TextFieldBuilder().caption(i18n.getMessage("textfield.key")).required(true)
-                .prompt(i18n.getMessage("textfield.key")).immediate(true).id(UIComponentIdProvider.METADATA_KEY_FIELD_ID)
-                .maxLengthAllowed(128).buildTextComponent();
+                .prompt(i18n.getMessage("textfield.key")).immediate(true)
+                .id(UIComponentIdProvider.METADATA_KEY_FIELD_ID).maxLengthAllowed(128).buildTextComponent();
         keyField.addTextChangeListener(this::onKeyChange);
         keyField.setTextChangeEventMode(TextChangeEventMode.EAGER);
         keyField.setWidth("100%");
@@ -243,7 +242,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         valueTextArea = new TextAreaBuilder().caption(i18n.getMessage("textfield.value")).required(true)
                 .prompt(i18n.getMessage("textfield.value")).immediate(true).id(UIComponentIdProvider.METADATA_VALUE_ID)
                 .maxLengthAllowed(4000).buildTextComponent();
-        valueTextArea.setNullRepresentation(StringUtils.EMPTY);
+        valueTextArea.setNullRepresentation("");
         valueTextArea.setSizeFull();
         valueTextArea.setHeight(100, Unit.PERCENTAGE);
         valueTextArea.addTextChangeListener(this::onValueChange);
@@ -278,8 +277,9 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         final String value = (String) item.getItemProperty(VALUE).getValue();
 
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
-                i18n.getMessage("caption.metadata.delete.action.confirmbox"), i18n.getMessage("message.confirm.delete.metadata", key),
-                i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
+                i18n.getMessage("caption.metadata.delete.action.confirmbox"),
+                i18n.getMessage("message.confirm.delete.metadata", key), i18n.getMessage("button.ok"),
+                i18n.getMessage("button.cancel"), ok -> {
                     if (ok) {
                         handleOkDeleteMetadata(event, key, value);
                     }
@@ -320,8 +320,9 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     }
 
     private Button createAddIcon() {
-        addIcon = SPUIComponentProvider.getButton(UIComponentIdProvider.METADTA_ADD_ICON_ID, i18n.getMessage("button.save"),
-                null, null, false, FontAwesome.PLUS, SPUIButtonStyleSmallNoBorder.class);
+        addIcon = SPUIComponentProvider.getButton(UIComponentIdProvider.METADTA_ADD_ICON_ID,
+                i18n.getMessage("button.save"), null, null, false, FontAwesome.PLUS,
+                SPUIButtonStyleSmallNoBorder.class);
         addIcon.addClickListener(event -> onAdd());
         return addIcon;
     }
@@ -425,7 +426,8 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
             return false;
         }
 
-        uiNotification.displayValidationError(i18n.getMessage("message.metadata.duplicate.check", keyTextField.getValue()));
+        uiNotification
+                .displayValidationError(i18n.getMessage("message.metadata.duplicate.check", keyTextField.getValue()));
         return true;
     }
 

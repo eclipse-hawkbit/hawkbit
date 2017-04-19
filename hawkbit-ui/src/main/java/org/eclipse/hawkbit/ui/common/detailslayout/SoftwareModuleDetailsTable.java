@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.common.detailslayout;
 
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -217,7 +216,7 @@ public class SoftwareModuleDetailsTable extends Table {
             if (swModType.getKey().equals(sw.getType().getKey())) {
                 final HorizontalLayout horizontalLayout = new HorizontalLayout();
                 horizontalLayout.setSizeFull();
-                final Label softwareModule = HawkbitCommonUtil.getFormatedLabel(StringUtils.EMPTY);
+                final Label softwareModule = HawkbitCommonUtil.getFormatedLabel("");
                 final Button reassignSoftModule = SPUIComponentProvider.getButton(sw.getName(), "", "", "", true,
                         FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
                 reassignSoftModule

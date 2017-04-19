@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
@@ -541,7 +540,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
             scheduledActions = 0L;
         }
         final Long runningActions = statusTotalCount.get(Status.RUNNING);
-        String rolloutDetailsMessage = StringUtils.EMPTY;
+        String rolloutDetailsMessage = "";
         if ((scheduledActions > 0) || (runningActions > 0)) {
             rolloutDetailsMessage = i18n.getMessage("message.delete.rollout.details", runningActions, scheduledActions);
         }

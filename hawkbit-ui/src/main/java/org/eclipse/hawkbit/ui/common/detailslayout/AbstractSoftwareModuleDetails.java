@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.common.detailslayout;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.MetaData;
@@ -197,7 +196,7 @@ public abstract class AbstractSoftwareModuleDetails
             updateSoftwareModuleDetailsLayout(getSelectedBaseEntity().getType().getName(),
                     getSelectedBaseEntity().getVendor(), maxAssign);
         } else {
-            updateSoftwareModuleDetailsLayout(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY);
+            updateSoftwareModuleDetailsLayout("", "", "");
         }
     }
 

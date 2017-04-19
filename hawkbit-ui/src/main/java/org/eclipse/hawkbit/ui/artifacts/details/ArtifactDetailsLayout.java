@@ -14,7 +14,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.ui.artifacts.event.ArtifactDetailsEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -124,10 +123,10 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     }
 
     private void createComponents() {
-        final String labelStr = artifactUploadState
-                .getSelectedBaseSoftwareModule().map(softwareModule -> HawkbitCommonUtil
-                        .getFormattedNameVersion(softwareModule.getName(), softwareModule.getVersion()))
-                .orElse(StringUtils.EMPTY);
+        final String labelStr = artifactUploadState.getSelectedBaseSoftwareModule()
+                .map(softwareModule -> HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(),
+                        softwareModule.getVersion()))
+                .orElse("");
         titleOfArtifactDetails = new LabelBuilder().id(UIComponentIdProvider.ARTIFACT_DETAILS_HEADER_LABEL_ID)
                 .name(HawkbitCommonUtil.getArtifactoryDetailsLabelId(labelStr)).buildCaptionLabel();
         titleOfArtifactDetails.setContentMode(ContentMode.HTML);
@@ -147,8 +146,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private SPUIButton createMaxMinButton() {
         final SPUIButton button = (SPUIButton) SPUIComponentProvider.getButton(SPUIDefinitions.EXPAND_ACTION_HISTORY,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, true, FontAwesome.EXPAND,
-                SPUIButtonStyleSmallNoBorder.class);
+                "", "", null, true, FontAwesome.EXPAND, SPUIButtonStyleSmallNoBorder.class);
         button.addClickListener(event -> maxArtifactDetails());
         return button;
     }
@@ -194,7 +192,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     }
 
     private void addArtifactTableProperties(final LazyQueryContainer artifactCont) {
-        artifactCont.addContainerProperty(PROVIDED_FILE_NAME, Label.class, StringUtils.EMPTY, false, false);
+        artifactCont.addContainerProperty(PROVIDED_FILE_NAME, Label.class, "", false, false);
         artifactCont.addContainerProperty(SIZE, Long.class, null, false, false);
         artifactCont.addContainerProperty(SHA1HASH, String.class, null, false, false);
         artifactCont.addContainerProperty(MD5HASH, String.class, null, false, false);
@@ -232,7 +230,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                 final String fileName = (String) table.getContainerDataSource().getItem(itemId)
                         .getItemProperty(PROVIDED_FILE_NAME).getValue();
                 final Button deleteIcon = SPUIComponentProvider.getButton(
-                        fileName + "-" + UIComponentIdProvider.UPLOAD_FILE_DELETE_ICON, StringUtils.EMPTY,
+                        fileName + "-" + UIComponentIdProvider.UPLOAD_FILE_DELETE_ICON, "",
                         SPUILabelDefinitions.DISCARD, ValoTheme.BUTTON_TINY + " " + "blueicon", true,
                         FontAwesome.TRASH_O, SPUIButtonStyleSmallNoBorder.class);
                 deleteIcon.setData(itemId);
@@ -416,7 +414,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
      * Set title of artifact details header layout.
      */
     private void setTitleOfLayoutHeader() {
-        titleOfArtifactDetails.setValue(HawkbitCommonUtil.getArtifactoryDetailsLabelId(StringUtils.EMPTY));
+        titleOfArtifactDetails.setValue(HawkbitCommonUtil.getArtifactoryDetailsLabelId(""));
         titleOfArtifactDetails.setContentMode(ContentMode.HTML);
     }
 

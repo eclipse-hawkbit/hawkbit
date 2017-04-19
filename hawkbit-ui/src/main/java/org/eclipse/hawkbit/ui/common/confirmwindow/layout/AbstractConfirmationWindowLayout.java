@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.common.confirmwindow.layout;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -70,8 +69,7 @@ public abstract class AbstractConfirmationWindowLayout extends VerticalLayout {
     }
 
     private void createActionMessgaeLabel() {
-        actionMessage = new LabelBuilder().name(StringUtils.EMPTY).id(UIComponentIdProvider.ACTION_LABEL).visible(false)
-                .buildLabel();
+        actionMessage = new LabelBuilder().name("").id(UIComponentIdProvider.ACTION_LABEL).visible(false).buildLabel();
         actionMessage.addStyleName(SPUIStyleDefinitions.CONFIRM_WINDOW_INFO_BOX);
     }
 
@@ -144,9 +142,9 @@ public abstract class AbstractConfirmationWindowLayout extends VerticalLayout {
     }
 
     protected Button createDiscardButton(final Object itemId, final ClickListener clickListener) {
-        final Button deletesDsIcon = SPUIComponentProvider.getButton(StringUtils.EMPTY, StringUtils.EMPTY,
-                SPUILabelDefinitions.DISCARD, ValoTheme.BUTTON_TINY + " " + SPUIStyleDefinitions.REDICON, true,
-                FontAwesome.REPLY, SPUIButtonStyleSmallNoBorder.class);
+        final Button deletesDsIcon = SPUIComponentProvider.getButton("", "", SPUILabelDefinitions.DISCARD,
+                ValoTheme.BUTTON_TINY + " " + SPUIStyleDefinitions.REDICON, true, FontAwesome.REPLY,
+                SPUIButtonStyleSmallNoBorder.class);
         deletesDsIcon.setData(itemId);
         deletesDsIcon.setImmediate(true);
         deletesDsIcon.addClickListener(clickListener);

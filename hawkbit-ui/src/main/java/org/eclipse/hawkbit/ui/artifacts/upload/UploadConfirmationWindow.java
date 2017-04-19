@@ -13,7 +13,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -243,9 +242,9 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             newItem.getItemProperty(SW_MODULE_NAME).setValue(HawkbitCommonUtil.getFormatedLabel(swNameVersion));
             newItem.getItemProperty(SIZE).setValue(customFile.getFileSize());
             final Button deleteIcon = SPUIComponentProvider.getButton(
-                    UIComponentIdProvider.UPLOAD_DELETE_ICON + "-" + itemId, StringUtils.EMPTY,
-                    SPUILabelDefinitions.DISCARD, ValoTheme.BUTTON_TINY + StringUtils.SPACE + "blueicon", true,
-                    FontAwesome.TRASH_O, SPUIButtonStyleSmallNoBorder.class);
+                    UIComponentIdProvider.UPLOAD_DELETE_ICON + "-" + itemId, "", SPUILabelDefinitions.DISCARD,
+                    ValoTheme.BUTTON_TINY + StringUtils.SPACE + "blueicon", true, FontAwesome.TRASH_O,
+                    SPUIButtonStyleSmallNoBorder.class);
             deleteIcon.addClickListener(this);
             deleteIcon.setData(itemId);
             newItem.getItemProperty(ACTION).setValue(deleteIcon);
@@ -634,7 +633,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             artifactManagement.createArtifact(fis, baseSw.getId(), providedFileName,
                     HawkbitCommonUtil.trimAndNullIfEmpty(md5Checksum),
                     HawkbitCommonUtil.trimAndNullIfEmpty(sha1Checksum), true, customFile.getMimeType());
-            saveUploadStatus(providedFileName, swModuleNameVersion, SPUILabelDefinitions.SUCCESS, StringUtils.EMPTY);
+            saveUploadStatus(providedFileName, swModuleNameVersion, SPUILabelDefinitions.SUCCESS, "");
 
         } catch (final ArtifactUploadFailedException | InvalidSHA1HashException | InvalidMD5HashException
                 | FileNotFoundException e) {

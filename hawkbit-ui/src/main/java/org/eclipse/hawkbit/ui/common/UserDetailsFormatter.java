@@ -60,7 +60,7 @@ public final class UserDetailsFormatter {
      */
     public static String loadAndFormatCreatedBy(final BaseEntity baseEntity) {
         if (baseEntity == null || baseEntity.getCreatedBy() == null) {
-            return StringUtils.EMPTY;
+            return "";
         }
 
         return loadAndFormatUsername(baseEntity.getCreatedBy());
@@ -78,7 +78,7 @@ public final class UserDetailsFormatter {
      */
     public static String loadAndFormatLastModifiedBy(final BaseEntity baseEntity) {
         if (baseEntity == null || baseEntity.getLastModifiedBy() == null) {
-            return StringUtils.EMPTY;
+            return "";
         }
 
         return loadAndFormatUsername(baseEntity.getLastModifiedBy());
@@ -123,14 +123,13 @@ public final class UserDetailsFormatter {
 
         final UserPrincipal userPrincipal = (UserPrincipal) userDetails;
 
-        String firstname = StringUtils.defaultIfEmpty(userPrincipal.getFirstname(), StringUtils.EMPTY);
+        String firstname = StringUtils.defaultIfEmpty(userPrincipal.getFirstname(), "");
 
         if (!StringUtils.isEmpty(firstname)) {
             firstname += DETAIL_SEPERATOR;
         }
 
-        final String firstAndLastname = firstname
-                + StringUtils.defaultIfEmpty(userPrincipal.getLastname(), StringUtils.EMPTY);
+        final String firstAndLastname = firstname + StringUtils.defaultIfEmpty(userPrincipal.getLastname(), "");
 
         final String trimmedUsername = trimAndFormatDetail(firstAndLastname, expectedNameLength);
 
@@ -177,7 +176,7 @@ public final class UserDetailsFormatter {
     }
 
     private static String trimAndFormatDetail(final String formatString, final int expectedDetailLength) {
-        final String detail = StringUtils.defaultIfEmpty(formatString, StringUtils.EMPTY);
+        final String detail = StringUtils.defaultIfEmpty(formatString, "");
         final String trimmedDetail = StringUtils.substring(detail, 0, expectedDetailLength);
         if (StringUtils.length(detail) > expectedDetailLength) {
             return trimmedDetail + TRIM_APPENDIX;

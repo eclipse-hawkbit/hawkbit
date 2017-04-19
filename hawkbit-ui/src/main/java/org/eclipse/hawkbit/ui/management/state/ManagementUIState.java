@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -157,8 +156,8 @@ public class ManagementUIState implements ManagementEntityState<Long>, Serializa
         this.lastSelectedTargetId = lastSelectedTargetId;
     }
 
-    public Optional<Set<Long>> getSelectedTargetId() {
-        return Optional.ofNullable(selectedTargetId);
+    public Set<Long> getSelectedTargetId() {
+        return selectedTargetId;
     }
 
     public void setSelectedTargetId(final Set<Long> selectedTargetId) {
@@ -219,8 +218,8 @@ public class ManagementUIState implements ManagementEntityState<Long>, Serializa
         this.selectedDsIdName = values;
     }
 
-    public Optional<Set<Long>> getSelectedDsIdName() {
-        return Optional.ofNullable(selectedDsIdName);
+    public Set<Long> getSelectedDsIdName() {
+        return selectedDsIdName;
     }
 
     public boolean isTargetTableMaximized() {

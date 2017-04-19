@@ -133,8 +133,8 @@ public class ArtifactUploadState implements ManagementEntityState<Long>, Seriali
         return baseSwModuleList;
     }
 
-    public Optional<Set<Long>> getSelectedSoftwareModules() {
-        return Optional.ofNullable(selectedSoftwareModules);
+    public Set<Long> getSelectedSoftwareModules() {
+        return selectedSoftwareModules;
     }
 
     @Override

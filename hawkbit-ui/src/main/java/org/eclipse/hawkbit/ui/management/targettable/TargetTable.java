@@ -19,7 +19,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.TagManagement;
@@ -240,20 +239,18 @@ public class TargetTable extends AbstractTable<Target, Long> {
     @Override
     protected void addContainerProperties(final Container container) {
         final LazyQueryContainer targetTableContainer = (LazyQueryContainer) container;
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CONT_ID, String.class, StringUtils.EMPTY,
-                false, false);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, StringUtils.EMPTY, false,
-                true);
+        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CONT_ID, String.class, "", false, false);
+        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", false, true);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_TARGET_STATUS, TargetUpdateStatus.class,
                 TargetUpdateStatus.UNKNOWN, false, false);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_ID, Long.class, null,
                 false, false);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_ID, Long.class, null,
                 false, false);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER, String.class,
-                StringUtils.EMPTY, false, true);
+        targetTableContainer.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER, String.class, "",
+                false, true);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_NAME_VER, String.class,
-                StringUtils.EMPTY, false, true);
+                "", false, true);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.LAST_QUERY_DATE, Date.class, null, false, false);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_BY, String.class, null, false, true);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, String.class, null, false,
@@ -264,8 +261,7 @@ public class TargetTable extends AbstractTable<Target, Long> {
                 false, true);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP, String.class, null,
                 false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, StringUtils.EMPTY, false,
-                true);
+        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, "", false, true);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.ASSIGN_DIST_SET, DistributionSet.class, null,
                 false, true);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.INSTALL_DIST_SET, DistributionSet.class, null,
@@ -282,12 +278,12 @@ public class TargetTable extends AbstractTable<Target, Long> {
 
     @Override
     protected boolean isFirstRowSelectedOnLoad() {
-        return managementUIState.getSelectedTargetId().map(Set::isEmpty).orElse(true);
+        return managementUIState.getSelectedTargetId().isEmpty();
     }
 
     @Override
     protected Object getItemIdToSelect() {
-        return managementUIState.getSelectedTargetId().orElse(null);
+        return managementUIState.getSelectedTargetId().isEmpty() ? null : managementUIState.getSelectedTargetId();
     }
 
     @Override
@@ -325,8 +321,8 @@ public class TargetTable extends AbstractTable<Target, Long> {
     protected List<TableColumn> getTableVisibleColumns() {
         final List<TableColumn> columnList = super.getTableVisibleColumns();
         if (!isMaximized()) {
-            columnList.add(new TableColumn(SPUIDefinitions.TARGET_STATUS_POLL_TIME, StringUtils.EMPTY, 0.0F));
-            columnList.add(new TableColumn(SPUIDefinitions.TARGET_STATUS_PIN_TOGGLE_ICON, StringUtils.EMPTY, 0.0F));
+            columnList.add(new TableColumn(SPUIDefinitions.TARGET_STATUS_POLL_TIME, "", 0.0F));
+            columnList.add(new TableColumn(SPUIDefinitions.TARGET_STATUS_PIN_TOGGLE_ICON, "", 0.0F));
         }
         return columnList;
     }
@@ -580,13 +576,13 @@ public class TargetTable extends AbstractTable<Target, Long> {
         final Object targetItemId = dropData.getItemIdOver();
         LOG.debug("Adding a log to check if targetItemId is null : {} ", targetItemId);
         if (targetItemId == null) {
-            getNotification().displayWarning(i18n.getMessage("target.not.exists", new Object[] { StringUtils.EMPTY }));
+            getNotification().displayWarning(i18n.getMessage("target.not.exists", new Object[] { "" }));
             return;
         }
         final Long targetId = (Long) targetItemId;
         final Optional<Target> target = targetManagement.findTargetById(targetId);
         if (!target.isPresent()) {
-            getNotification().displayWarning(i18n.getMessage("target.not.exists", new Object[] { StringUtils.EMPTY }));
+            getNotification().displayWarning(i18n.getMessage("target.not.exists", new Object[] { "" }));
             return;
         }
         final TargetIdName createTargetIdName = new TargetIdName(target.get());

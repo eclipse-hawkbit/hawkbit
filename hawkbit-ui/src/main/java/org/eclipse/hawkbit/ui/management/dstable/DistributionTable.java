@@ -17,7 +17,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -285,8 +284,8 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     private Button createManageMetadataButton(final String nameVersionStr) {
         final Button manageMetadataBtn = SPUIComponentProvider.getButton(
-                UIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, StringUtils.EMPTY,
-                StringUtils.EMPTY, null, false, FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
+                UIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
+                FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
         manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
         manageMetadataBtn.addStyleName(SPUIStyleDefinitions.DS_METADATA_ICON);
         manageMetadataBtn.setDescription(i18n.getMessage("tooltip.metadata.icon"));
@@ -295,12 +294,12 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     @Override
     protected boolean isFirstRowSelectedOnLoad() {
-        return managementUIState.getSelectedDsIdName().map(Set::isEmpty).orElse(true);
+        return managementUIState.getSelectedDsIdName().isEmpty();
     }
 
     @Override
     protected Object getItemIdToSelect() {
-        return managementUIState.getSelectedDsIdName().orElse(null);
+        return managementUIState.getSelectedDsIdName().isEmpty() ? null : managementUIState.getSelectedDsIdName();
     }
 
     @Override
@@ -334,7 +333,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         if (isMaximized()) {
             return columnList;
         }
-        columnList.add(new TableColumn(SPUILabelDefinitions.PIN_COLUMN, StringUtils.EMPTY, 0.2F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.PIN_COLUMN, "", 0.2F));
         return columnList;
     }
 

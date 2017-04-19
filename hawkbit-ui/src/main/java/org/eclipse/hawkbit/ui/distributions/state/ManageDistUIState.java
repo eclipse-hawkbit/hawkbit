@@ -95,8 +95,8 @@ public class ManageDistUIState implements ManagementEntityState<Long>, Serializa
         return assignedList;
     }
 
-    public Optional<Set<Long>> getSelectedDistributions() {
-        return Optional.ofNullable(selectedDistributions);
+    public Set<Long> getSelectedDistributions() {
+        return selectedDistributions;
     }
 
     public Optional<Long> getLastSelectedDistribution() {
@@ -125,8 +125,8 @@ public class ManageDistUIState implements ManagementEntityState<Long>, Serializa
         this.lastSelectedSoftwareModule = value;
     }
 
-    public Optional<Set<Long>> getSelectedSoftwareModules() {
-        return Optional.ofNullable(selectedSoftwareModules);
+    public Set<Long> getSelectedSoftwareModules() {
+        return selectedSoftwareModules;
     }
 
     public void setSelectedSoftwareModules(final Set<Long> selectedSoftwareModules) {

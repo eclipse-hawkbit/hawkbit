@@ -9,9 +9,7 @@
 package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.net.URI;
-import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
@@ -132,7 +130,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
     @Override
     protected boolean onLoadIsTableRowSelected() {
-        return !getManagementUIState().getSelectedTargetId().map(Set::isEmpty).orElse(true);
+        return getManagementUIState().getSelectedTargetId().isEmpty();
     }
 
     @Override
@@ -173,18 +171,18 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
         final Label controllerLabel = SPUIComponentProvider.createNameValueLabel(
                 getI18n().getMessage("label.target.id"),
-                HawkbitCommonUtil.trimAndNullIfEmpty(controllerId) == null ? StringUtils.EMPTY : controllerId);
+                HawkbitCommonUtil.trimAndNullIfEmpty(controllerId) == null ? "" : controllerId);
         controllerLabel.setId(UIComponentIdProvider.TARGET_CONTROLLER_ID);
         detailsTabLayout.addComponent(controllerLabel);
 
         final Label lastPollDtLabel = SPUIComponentProvider.createNameValueLabel(
                 getI18n().getMessage("label.target.lastpolldate"),
-                HawkbitCommonUtil.trimAndNullIfEmpty(lastQueryDate) == null ? StringUtils.EMPTY : lastQueryDate);
+                HawkbitCommonUtil.trimAndNullIfEmpty(lastQueryDate) == null ? "" : lastQueryDate);
         lastPollDtLabel.setId(UIComponentIdProvider.TARGET_LAST_QUERY_DT);
         detailsTabLayout.addComponent(lastPollDtLabel);
 
         final Label typeLabel = SPUIComponentProvider.createNameValueLabel(getI18n().getMessage("label.ip"),
-                address == null ? StringUtils.EMPTY : address.toString());
+                address == null ? "" : address.toString());
         typeLabel.setId(UIComponentIdProvider.TARGET_IP_ADDRESS);
         detailsTabLayout.addComponent(typeLabel);
 

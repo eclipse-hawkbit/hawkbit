@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.util.Optional;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -110,7 +109,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         descTextArea = new TextAreaBuilder().caption(i18n.getMessage("textfield.description")).style("text-area-style")
                 .prompt(i18n.getMessage("textfield.description")).immediate(true)
                 .id(UIComponentIdProvider.TARGET_ADD_DESC).buildTextComponent();
-        descTextArea.setNullRepresentation(StringUtils.EMPTY);
+        descTextArea.setNullRepresentation("");
     }
 
     private TextField createTextField(final String in18Key, final String id) {
