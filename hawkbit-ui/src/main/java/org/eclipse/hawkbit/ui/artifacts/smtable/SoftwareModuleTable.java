@@ -162,6 +162,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     @Override
     protected void publishSelectedEntityEvent(final SoftwareModule lastSoftwareModule) {
+        artifactUploadState.setSelectedBaseSoftwareModule(lastSoftwareModule);
         eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, lastSoftwareModule));
         if (lastSoftwareModule == null) {
             artifactUploadState.setLastSelectedEntity(null);
