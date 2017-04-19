@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.RolloutGroupFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleMetadataFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeFields;
+import org.eclipse.hawkbit.repository.TagFields;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetFilterQueryFields;
 import org.eclipse.hawkbit.rest.util.SortUtility;
@@ -58,6 +59,14 @@ public final class PagingUtility {
             return new Sort(Direction.ASC, TargetFields.NAME.getFieldName());
         }
         return new Sort(SortUtility.parse(TargetFields.class, sortParam));
+    }
+
+    static Sort sanitizeTagSortParam(final String sortParam) {
+        if (sortParam == null) {
+            // default
+            return new Sort(Direction.ASC, TargetFields.NAME.getFieldName());
+        }
+        return new Sort(SortUtility.parse(TagFields.class, sortParam));
     }
 
     static Sort sanitizeTargetFilterQuerySortParam(final String sortParam) {

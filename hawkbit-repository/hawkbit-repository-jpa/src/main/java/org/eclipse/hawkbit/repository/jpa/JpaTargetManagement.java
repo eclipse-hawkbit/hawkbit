@@ -533,11 +533,26 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Page<Target> findTargetsByTag(final Pageable pageable, final String tagName) {
-        final TargetTag tag = targetTagRepository.findByNameEquals(tagName)
-                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, tagName));
+    public Page<Target> findTargetsByTag(final Pageable pageable, final Long tagId) {
+        if (!targetTagRepository.exists(tagId)) {
+            throw new EntityNotFoundException(TargetTag.class, tagId);
+        }
 
-        return convertPage(targetRepository.findByTag(pageable, tag.getId()), pageable);
+        return convertPage(targetRepository.findByTag(pageable, tagId), pageable);
+    }
+
+    @Override
+    public Page<Target> findTargetsByTag(final Pageable pageable, final String rsqlParam, final Long tagId) {
+
+        if (!targetTagRepository.exists(tagId)) {
+            throw new EntityNotFoundException(TargetTag.class, tagId);
+        }
+
+        final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class, virtualPropertyReplacer);
+
+        return convertPage(targetRepository.findAll((Specification<JpaTarget>) (root, query, cb) -> cb.and(
+                TargetSpecifications.hasTag(tagId).toPredicate(root, query, cb), spec.toPredicate(root, query, cb)),
+                pageable), pageable);
     }
 
     @Override

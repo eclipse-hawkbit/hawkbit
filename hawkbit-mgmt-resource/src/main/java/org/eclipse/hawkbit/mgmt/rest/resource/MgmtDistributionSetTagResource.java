@@ -33,7 +33,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -68,25 +67,20 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
-        final Sort sorting = PagingUtility.sanitizeTargetSortParam(sortParam);
+        final Sort sorting = PagingUtility.sanitizeTagSortParam(sortParam);
 
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
-        final Slice<DistributionSetTag> findTargetsAll;
-        final Long countTargetsAll;
+        final Page<DistributionSetTag> findTargetsAll;
         if (rsqlParam == null) {
-            findTargetsAll = this.tagManagement.findAllDistributionSetTags(pageable);
-            countTargetsAll = this.tagManagement.countTargetTags();
+            findTargetsAll = tagManagement.findAllDistributionSetTags(pageable);
 
         } else {
-            final Page<DistributionSetTag> findTargetPage = this.tagManagement.findAllDistributionSetTags(rsqlParam,
-                    pageable);
-            countTargetsAll = findTargetPage.getTotalElements();
-            findTargetsAll = findTargetPage;
+            findTargetsAll = tagManagement.findAllDistributionSetTags(rsqlParam, pageable);
 
         }
 
         final List<MgmtTag> rest = MgmtTagMapper.toResponseDistributionSetTag(findTargetsAll.getContent());
-        return new ResponseEntity<>(new PagedList<>(rest, countTargetsAll), HttpStatus.OK);
+        return new ResponseEntity<>(new PagedList<>(rest, findTargetsAll.getTotalElements()), HttpStatus.OK);
     }
 
     @Override

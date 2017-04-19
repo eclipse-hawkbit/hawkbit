@@ -33,7 +33,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -68,24 +67,19 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
-        final Sort sorting = PagingUtility.sanitizeTargetSortParam(sortParam);
+        final Sort sorting = PagingUtility.sanitizeTagSortParam(sortParam);
 
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
-        final Slice<TargetTag> findTargetsAll;
-        final Long countTargetsAll;
+        Page<TargetTag> findTargetsAll;
         if (rsqlParam == null) {
             findTargetsAll = this.tagManagement.findAllTargetTags(pageable);
-            countTargetsAll = this.tagManagement.countTargetTags();
 
         } else {
-            final Page<TargetTag> findTargetPage = this.tagManagement.findAllTargetTags(rsqlParam, pageable);
-            countTargetsAll = findTargetPage.getTotalElements();
-            findTargetsAll = findTargetPage;
-
+            findTargetsAll = this.tagManagement.findAllTargetTags(rsqlParam, pageable);
         }
 
         final List<MgmtTag> rest = MgmtTagMapper.toResponse(findTargetsAll.getContent());
-        return new ResponseEntity<>(new PagedList<>(rest, countTargetsAll), HttpStatus.OK);
+        return new ResponseEntity<>(new PagedList<>(rest, findTargetsAll.getTotalElements()), HttpStatus.OK);
     }
 
     @Override
@@ -103,7 +97,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtTag> updateTagretTag(@PathVariable("targetTagId") final Long targetTagId,
+    public ResponseEntity<MgmtTag> updateTargetTag(@PathVariable("targetTagId") final Long targetTagId,
             @RequestBody final MgmtTagRequestBodyPut restTargetTagRest) {
         LOG.debug("update {} target tag", restTargetTagRest);
 
@@ -134,6 +128,30 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
                 .findTargetsByTag(new PageRequest(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT),
                         targetTag.getName())
                 .getContent()), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(final Long targetTagId, final int pagingOffsetParam,
+            final int pagingLimitParam, final String sortParam, final String rsqlParam) {
+        final TargetTag targetTag = findTargetTagById(targetTagId);
+
+        final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
+        final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
+        final Sort sorting = PagingUtility.sanitizeTargetSortParam(sortParam);
+
+        final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
+        Page<Target> findTargetsAll;
+        if (rsqlParam == null) {
+            findTargetsAll = targetManagement.findTargetsByTag(pageable, targetTag.getName());
+
+        } else {
+            findTargetsAll = targetManagement.findTargetsByTag(rsqlParam, pageable, targetTag.getName());
+        }
+
+        final Long countTargetsAll = findTargetsAll.getTotalElements();
+
+        final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(findTargetsAll.getContent());
+        return new ResponseEntity<>(new PagedList<>(rest, countTargetsAll), HttpStatus.OK);
     }
 
     @Override

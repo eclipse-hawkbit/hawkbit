@@ -98,7 +98,7 @@ public interface MgmtTargetTagRestApi {
     @RequestMapping(method = RequestMethod.PUT, value = "/{targetTagId}", consumes = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtTag> updateTagretTag(@PathVariable("targetTagId") final Long targetTagId,
+    ResponseEntity<MgmtTag> updateTargetTag(@PathVariable("targetTagId") final Long targetTagId,
             final MgmtTagRequestBodyPut restTargetTagRest);
 
     /**
@@ -112,6 +112,10 @@ public interface MgmtTargetTagRestApi {
     @RequestMapping(method = RequestMethod.DELETE, value = "/{targetTagId}")
     ResponseEntity<Void> deleteTargetTag(@PathVariable("targetTagId") final Long targetTagId);
 
+    // FIXME the others of MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING
+    // as well, create extra
+    // MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING
+
     /**
      * Handles the GET request of retrieving all assigned targets by the given
      * tag id.
@@ -120,10 +124,45 @@ public interface MgmtTargetTagRestApi {
      *            the ID of the target tag to retrieve
      *
      * @return the list of assigned targets.
+     * 
+     * @deprecated please use
+     *             {@link #getAssignedTargets(Long, int, int, String, String)}
+     *             instead as this variant does not include paging and as result
+     *             rturns only a limited list of target
      */
+    @Deprecated
     @RequestMapping(method = RequestMethod.GET, value = MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING, produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtTarget>> getAssignedTargets(@PathVariable("targetTagId") final Long targetTagId);
+
+    /**
+     * Handles the GET request of retrieving all assigned targets by the given
+     * tag id.
+     *
+     * @param targetTagId
+     *            the ID of the target tag to retrieve
+     * @param pagingOffsetParam
+     *            the offset of list of target tags for pagination, might not be
+     *            present in the rest request then default value will be applied
+     * @param pagingLimitParam
+     *            the limit of the paged request, might not be present in the
+     *            rest request then default value will be applied
+     * @param sortParam
+     *            the sorting parameter in the request URL, syntax
+     *            {@code field:direction, field:direction}
+     * @param rsqlParam
+     *            the search parameter in the request URL, syntax
+     *            {@code q=name==abc}
+     *
+     * @return the list of assigned targets.
+     */
+    @RequestMapping(method = RequestMethod.GET, value = MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING, produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(@PathVariable("targetTagId") final Long targetTagId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam);
 
     /**
      * Handles the POST request to toggle the assignment of targets by the given

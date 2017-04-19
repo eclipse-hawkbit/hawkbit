@@ -536,15 +536,39 @@ public interface TargetManagement {
      * 
      * @param pageable
      *            the page request parameter for paging and sorting the result
-     * @param tagName
-     *            tag name
+     * @param tagId
+     *            tag ID
      * @return list of matching targets
      * 
      * @throws EntityNotFoundException
      *             if target tag with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findTargetsByTag(@NotNull Pageable pageable, @NotEmpty String tagName);
+    Page<Target> findTargetsByTag(@NotNull Pageable pageable, @NotNull Long tagId);
+
+    // FIXME exception test
+    /**
+     * Find targets by tag name.
+     * 
+     * @param pageable
+     *            the page request parameter for paging and sorting the result
+     * @param tagId
+     *            tag ID
+     * @param rsqlParam
+     *            in RSQL notation
+     * 
+     * @return list of matching targets
+     * 
+     * @throws EntityNotFoundException
+     *             if target tag with given ID does not exist
+     * @throws RSQLParameterUnsupportedFieldException
+     *             if a field in the RSQL string is used but not provided by the
+     *             given {@code fieldNameProvider}
+     * @throws RSQLParameterSyntaxException
+     *             if the RSQL syntax is wrong
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Page<Target> findTargetsByTag(@NotNull Pageable pageable, @NotNull String rsqlParam, @NotNull Long tagId);
 
     /**
      * Toggles {@link TargetTag} assignment to given {@link Target}s by means
