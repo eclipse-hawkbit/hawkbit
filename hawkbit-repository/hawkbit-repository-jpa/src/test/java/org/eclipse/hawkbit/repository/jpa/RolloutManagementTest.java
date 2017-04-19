@@ -1457,14 +1457,14 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @ExpectEvents({ @Expect(type = RolloutDeletedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = TargetCreatedEvent.class, count = 25), @Expect(type = RolloutUpdatedEvent.class, count = 2),
-            @Expect(type = RolloutGroupCreatedEvent.class, count = 5),
+            @Expect(type = TargetCreatedEvent.class, count = 115), @Expect(type = RolloutUpdatedEvent.class, count = 2),
+            @Expect(type = RolloutGroupCreatedEvent.class, count = 50),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = RolloutGroupUpdatedEvent.class, count = 5) })
+            @Expect(type = RolloutGroupUpdatedEvent.class, count = 50) })
     public void deleteRolloutWhichHasNeverStartedIsHardDeleted() {
-        final int amountTargetsForRollout = 10;
+        final int amountTargetsForRollout = 100;
         final int amountOtherTargets = 15;
-        final int amountGroups = 5;
+        final int amountGroups = 50;
         final String successCondition = "50";
         final String errorCondition = "80";
         final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
