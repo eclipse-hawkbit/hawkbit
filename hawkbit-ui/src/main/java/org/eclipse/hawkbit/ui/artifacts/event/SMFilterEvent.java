@@ -41,7 +41,7 @@ public class SMFilterEvent {
 
     private final SMFilterEventType eventType;
 
-    private final ManagementEntityState<?> origin;
+    private final ManagementEntityState<Long> origin;
 
     /**
      * Constructor for SMFilterEvent
@@ -51,7 +51,7 @@ public class SMFilterEvent {
      * @param origin
      *            the origin of the event
      */
-    public SMFilterEvent(final SMFilterEventType eventType, final ManagementEntityState<?> origin) {
+    public SMFilterEvent(final SMFilterEventType eventType, final ManagementEntityState<Long> origin) {
         this.eventType = eventType;
         this.origin = origin;
     }
@@ -60,7 +60,7 @@ public class SMFilterEvent {
         return eventType;
     }
 
-    public ManagementEntityState<?> getOrigin() {
+    public ManagementEntityState<Long> getOrigin() {
         return origin;
     }
 

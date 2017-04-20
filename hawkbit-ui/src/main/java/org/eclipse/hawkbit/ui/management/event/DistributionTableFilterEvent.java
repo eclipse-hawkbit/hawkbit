@@ -41,7 +41,7 @@ public class DistributionTableFilterEvent {
 
     private final DistributionTableFilterEventType eventType;
 
-    private final ManagementEntityState<?> origin;
+    private final ManagementEntityState<Long> origin;
 
     /**
      * Constructor for DistributionTableFilterEvent
@@ -52,7 +52,7 @@ public class DistributionTableFilterEvent {
      *            the origin of the event
      */
     public DistributionTableFilterEvent(final DistributionTableFilterEventType eventType,
-            final ManagementEntityState<?> origin) {
+            final ManagementEntityState<Long> origin) {
         this.eventType = eventType;
         this.origin = origin;
     }
@@ -61,7 +61,7 @@ public class DistributionTableFilterEvent {
         return eventType;
     }
 
-    public ManagementEntityState<?> getOrigin() {
+    public ManagementEntityState<Long> getOrigin() {
         return origin;
     }
 
