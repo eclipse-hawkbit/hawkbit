@@ -21,13 +21,12 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The repository interface for the {@link RolloutGroup} model.
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public interface RolloutGroupRepository
         extends BaseEntityRepository<JpaRolloutGroup, Long>, JpaSpecificationExecutor<JpaRolloutGroup> {
 
@@ -119,7 +118,7 @@ public interface RolloutGroupRepository
      *            the status of the rolloutgroups
      */
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     @Query("UPDATE JpaRolloutGroup g SET g.status = :status WHERE g.parent = :parent")
     void setStatusForCildren(@Param("status") RolloutGroupStatus status, @Param("parent") RolloutGroup parent);
 

@@ -813,27 +813,27 @@ public final class UIComponentIdProvider {
     /**
      * Rollout start button id.
      */
-    public static final String ROLLOUT_RUN_BUTTON_ID = ROLLOUT_ACTION_ID + ".9";
+    public static final String ROLLOUT_RUN_BUTTON_ID = ROLLOUT_ACTION_ID + ".6";
 
     /**
      * Rollout pause button id.
      */
-    public static final String ROLLOUT_PAUSE_BUTTON_ID = ROLLOUT_ACTION_ID + ".10";
+    public static final String ROLLOUT_PAUSE_BUTTON_ID = ROLLOUT_ACTION_ID + ".7";
 
     /**
      * Rollout update button id.
      */
-    public static final String ROLLOUT_UPDATE_BUTTON_ID = ROLLOUT_ACTION_ID + ".11";
+    public static final String ROLLOUT_UPDATE_BUTTON_ID = ROLLOUT_ACTION_ID + ".8";
 
     /**
      * Rollout copy button id.
      */
-    public static final String ROLLOUT_COPY_BUTTON_ID = ROLLOUT_ACTION_ID + ".12";
+    public static final String ROLLOUT_COPY_BUTTON_ID = ROLLOUT_ACTION_ID + ".9";
 
     /**
      * Rollout delete button id.
      */
-    public static final String ROLLOUT_DELETE_BUTTON_ID = ROLLOUT_ACTION_ID + ".13";
+    public static final String ROLLOUT_DELETE_BUTTON_ID = ROLLOUT_ACTION_ID + ".10";
 
     /**
      * Rollout status label id.

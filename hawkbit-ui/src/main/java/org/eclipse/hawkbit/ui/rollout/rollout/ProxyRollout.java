@@ -8,11 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
-import java.util.Set;
-
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
 
@@ -30,98 +26,23 @@ public class ProxyRollout {
 
     private String modifiedDate;
 
-    private Integer numberOfGroups;
+    private int numberOfGroups;
 
     private Boolean isActionRecieved = Boolean.FALSE;
-
-    private Boolean isRequiredMigrationStep = Boolean.FALSE;
 
     private String totalTargetsCount;
 
     private RolloutRendererData rolloutRendererData;
 
-    private String discription;
-
-    private String type;
-
-    private Set<SoftwareModule> swModules;
-
     private Long id;
     private String name;
     private String version;
     private String description;
-    private DistributionSet distributionSet;
     private String createdBy;
     private String lastModifiedBy;
     private long forcedTime;
     private RolloutStatus status;
     private TotalTargetCountStatus totalTargetCountStatus;
-
-    /**
-     * @return the isRequiredMigrationStep
-     */
-
-    public Boolean getIsRequiredMigrationStep() {
-        return isRequiredMigrationStep;
-    }
-
-    /**
-     * @param isRequiredMigrationStep
-     *            the isRequiredMigrationStep to set
-     */
-
-    public void setIsRequiredMigrationStep(final Boolean isRequiredMigrationStep) {
-        this.isRequiredMigrationStep = isRequiredMigrationStep;
-    }
-
-    /**
-     * @return the discription
-     */
-
-    public String getDiscription() {
-        return discription;
-    }
-
-    /**
-     * @param discription
-     *            the discription to set
-     */
-
-    public void setDiscription(final String discription) {
-        this.discription = discription;
-    }
-
-    /**
-     * @return the type
-     */
-    public String getType() {
-        return type;
-    }
-
-    /**
-     * @param type
-     *            the type to set
-     */
-
-    public void setType(final String type) {
-        this.type = type;
-    }
-
-    /**
-     * 
-     * @return the Set of Software modules
-     */
-    public Set<SoftwareModule> getSwModules() {
-        return swModules;
-    }
-
-    /**
-     * @param swModules
-     *            Set<SoftwareModule> to set
-     */
-    public void setSwModules(final Set<SoftwareModule> swModules) {
-        this.swModules = swModules;
-    }
 
     public RolloutRendererData getRolloutRendererData() {
         return rolloutRendererData;
@@ -149,7 +70,7 @@ public class ProxyRollout {
     /**
      * @return the numberOfGroups
      */
-    public Integer getNumberOfGroups() {
+    public int getNumberOfGroups() {
         return numberOfGroups;
     }
 
@@ -157,7 +78,7 @@ public class ProxyRollout {
      * @param numberOfGroups
      *            the numberOfGroups to set
      */
-    public void setNumberOfGroups(final Integer numberOfGroups) {
+    public void setNumberOfGroups(final int numberOfGroups) {
         this.numberOfGroups = numberOfGroups;
     }
 
@@ -255,14 +176,6 @@ public class ProxyRollout {
 
     public void setDescription(final String description) {
         this.description = description;
-    }
-
-    public DistributionSet getDistributionSet() {
-        return distributionSet;
-    }
-
-    public void setDistributionSet(final DistributionSet distributionSet) {
-        this.distributionSet = distributionSet;
     }
 
     public String getCreatedBy() {

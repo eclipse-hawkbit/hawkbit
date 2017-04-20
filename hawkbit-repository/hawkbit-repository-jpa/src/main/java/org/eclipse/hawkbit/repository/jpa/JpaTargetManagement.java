@@ -32,7 +32,6 @@ import org.eclipse.hawkbit.repository.TimestampCalculator;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
-import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetCreate;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetUpdate;
@@ -61,8 +60,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -72,7 +69,7 @@ import com.google.common.collect.Lists;
  * JPA implementation of {@link TargetManagement}.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 @Validated
 public class JpaTargetManagement implements TargetManagement {
 
@@ -116,8 +113,8 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public List<Target> findTargetByControllerID(final Collection<String> controllerIDs) {
-        return Collections.unmodifiableList(targetRepository
-                .findAll(TargetSpecifications.byControllerIdWithStatusAndAssignedInJoin(controllerIDs)));
+        return Collections.unmodifiableList(
+                targetRepository.findAll(TargetSpecifications.byControllerIdWithAssignedDsInJoin(controllerIDs)));
     }
 
     @Override
@@ -150,8 +147,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public Target updateTarget(final TargetUpdate u) {
         final JpaTargetUpdate update = (JpaTargetUpdate) u;
 
@@ -167,8 +163,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public void deleteTargets(final Collection<Long> targetIDs) {
         final List<JpaTarget> targets = targetRepository.findAll(targetIDs);
 
@@ -184,8 +179,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public void deleteTarget(final String controllerID) {
         final Target target = targetRepository.findByControllerId(controllerID)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerID));
@@ -324,13 +318,12 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public TargetTagAssignmentResult toggleTagAssignment(final Collection<String> controllerIds, final String tagName) {
         final TargetTag tag = targetTagRepository.findByNameEquals(tagName)
                 .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, tagName));
         final List<JpaTarget> allTargets = targetRepository
-                .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(controllerIds));
+                .findAll(TargetSpecifications.byControllerIdWithTagsInJoin(controllerIds));
 
         if (allTargets.size() < controllerIds.size()) {
             throw new EntityNotFoundException(Target.class, controllerIds,
@@ -362,11 +355,10 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public List<Target> assignTag(final Collection<String> controllerIds, final Long tagId) {
         final List<JpaTarget> allTargets = targetRepository
-                .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(controllerIds));
+                .findAll(TargetSpecifications.byControllerIdWithTagsInJoin(controllerIds));
 
         if (allTargets.size() < controllerIds.size()) {
             throw new EntityNotFoundException(Target.class, controllerIds,
@@ -392,8 +384,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public List<Target> unAssignAllTargetsByTag(final Long targetTagId) {
 
         final TargetTag tag = targetTagRepository.findById(targetTagId)
@@ -407,8 +398,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public Target unAssignTag(final String controllerID, final Long targetTagId) {
         final Target target = targetRepository.findByControllerId(controllerID)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerID));
@@ -553,23 +543,14 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public Target createTarget(final TargetCreate c) {
         final JpaTargetCreate create = (JpaTargetCreate) c;
-
-        final JpaTarget target = create.build();
-
-        if (targetRepository.existsByControllerId(target.getControllerId())) {
-            throw new EntityAlreadyExistsException();
-        }
-
-        return targetRepository.save(target);
+        return targetRepository.save(create.build());
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public List<Target> createTargets(final Collection<TargetCreate> targets) {
         return targets.stream().map(this::createTarget).collect(Collectors.toList());
     }
