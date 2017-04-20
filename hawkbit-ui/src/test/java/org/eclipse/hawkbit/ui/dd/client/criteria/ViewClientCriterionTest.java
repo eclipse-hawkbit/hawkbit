@@ -20,7 +20,6 @@ import org.eclipse.hawkbit.ui.dd.client.criteria.ViewClientCriterion.ViewCriteri
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.springframework.context.annotation.Description;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
@@ -35,6 +34,7 @@ import com.vaadin.client.ui.VDragAndDropWrapper;
 import com.vaadin.client.ui.VScrollTable;
 import com.vaadin.client.ui.dd.VDragEvent;
 
+import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
@@ -47,11 +47,11 @@ public class ViewClientCriterionTest {
     @Test
     @Description("Verfies compilation of template strings.")
     public void verifyCompiledTemplateStrings() {
-        ViewCriterionTemplates templates = GWT.create(ViewCriterionTemplates.class);
+        final ViewCriterionTemplates templates = GWT.create(ViewCriterionTemplates.class);
 
         // compile templates
-        String multiSelectionStyle = templates.multiSelectionStyle("my-theme", "10").asString();
-        String notificationMsg = templates.notificationMsg("some-message").asString();
+        final String multiSelectionStyle = templates.multiSelectionStyle("my-theme", "10").asString();
+        final String notificationMsg = templates.notificationMsg("some-message").asString();
 
         // assure compilation
         assertThat(multiSelectionStyle).as("Expected: Compiled template string").isNotNull();
@@ -61,13 +61,13 @@ public class ViewClientCriterionTest {
     @Test
     @Description("Process serialized config for hiding the drop hints.")
     public void processSerializedDropTargetHintsConfig() {
-        ViewClientCriterion cut = new ViewClientCriterion();
+        final ViewClientCriterion cut = new ViewClientCriterion();
 
         // prepare configuration:
-        Document document = Document.get();
-        UIDL uidl = GWT.create(UIDL.class);
+        final Document document = Document.get();
+        final UIDL uidl = GWT.create(UIDL.class);
         when(uidl.getIntAttribute("cdac")).thenReturn(3);
-        Element[] elements = new Element[3];
+        final Element[] elements = new Element[3];
         for (int i = 0; i < 3; i++) {
             when(uidl.getStringAttribute("dac" + String.valueOf(i))).thenReturn("itemId" + String.valueOf(i));
             elements[i] = Mockito.mock(Element.class);
@@ -95,11 +95,11 @@ public class ViewClientCriterionTest {
     @Test
     @Description("Exception occures when processing serialized config for hiding the drop hints.")
     public void exceptionWhenProcessingDropTargetHintsDataStructure() {
-        ViewClientCriterion cut = new ViewClientCriterion();
+        final ViewClientCriterion cut = new ViewClientCriterion();
 
         // prepare configuration:
-        Document document = Document.get();
-        UIDL uidl = GWT.create(UIDL.class);
+        final Document document = Document.get();
+        final UIDL uidl = GWT.create(UIDL.class);
         when(uidl.getIntAttribute("cdac")).thenReturn(2);
         when(uidl.getStringAttribute("dac0")).thenReturn("no-problem");
         when(uidl.getStringAttribute("dac1")).thenReturn("problem-bear");
@@ -114,7 +114,7 @@ public class ViewClientCriterionTest {
 
             // cross-check that problem-bear was never invoked
             verify(document, Mockito.never()).getElementById("problem-bear");
-        } catch (RuntimeException re) {
+        } catch (final RuntimeException re) {
             fail("Exception is not re-thrown in order to continue with the loop");
         } finally {
             reset(Document.get());
@@ -124,12 +124,12 @@ public class ViewClientCriterionTest {
     @Test
     @Description("Check multi row drag decoration with non-table widget")
     public void processMultiRowDragDecorationNonTable() {
-        ViewClientCriterion cut = new ViewClientCriterion();
+        final ViewClientCriterion cut = new ViewClientCriterion();
 
         // prepare drag-event with non table widget:
-        VDragAndDropWrapper nonTable = Mockito.mock(VDragAndDropWrapper.class);
-        VDragEvent dragEvent = CriterionTestHelper.createMockedVDragEvent("thisId", nonTable);
-        Document document = Document.get();
+        final VDragAndDropWrapper nonTable = Mockito.mock(VDragAndDropWrapper.class);
+        final VDragEvent dragEvent = CriterionTestHelper.createMockedVDragEvent("thisId", nonTable);
+        final Document document = Document.get();
 
         // act
         cut.setMultiRowDragDecoration(dragEvent);
@@ -141,18 +141,18 @@ public class ViewClientCriterionTest {
     @Test
     @Description("Check multi row drag decoration with single selection")
     public void processMultiRowDragDecorationSingleSelection() {
-        ViewClientCriterion cut = new ViewClientCriterion();
+        final ViewClientCriterion cut = new ViewClientCriterion();
 
         // prepare table
-        VScrollTable table = Mockito.spy(new VScrollTable());
+        final VScrollTable table = Mockito.spy(new VScrollTable());
         table.selectedRowKeys.add("one");
 
         // prepare drag-event with table widget:
-        VDragEvent dragEvent = CriterionTestHelper.createMockedVDragEvent("thisId", table);
+        final VDragEvent dragEvent = CriterionTestHelper.createMockedVDragEvent("thisId", table);
 
         // prepare document
-        Document document = Document.get();
-        Element ele = Mockito.mock(Element.class);
+        final Document document = Document.get();
+        final Element ele = Mockito.mock(Element.class);
         when(document.getElementById(ViewClientCriterion.SP_DRAG_COUNT)).thenReturn(ele);
 
         try {
@@ -172,21 +172,21 @@ public class ViewClientCriterionTest {
     @Test
     @Description("Check multi row drag decoration with a single item dragged while a multi selection is active in table")
     public void processMultiRowDragDecorationMultiSelectionNotDragged() {
-        ViewClientCriterion cut = new ViewClientCriterion();
+        final ViewClientCriterion cut = new ViewClientCriterion();
 
         // prepare table
-        VScrollTable table = Mockito.spy(new VScrollTable());
+        final VScrollTable table = Mockito.spy(new VScrollTable());
         table.selectedRowKeys.add("one");
         table.selectedRowKeys.add("two");
         table.focusedRow = Mockito.mock(VScrollTable.VScrollTableBody.VScrollTableRow.class);
         when(table.focusedRow.getKey()).thenReturn("another");
 
         // prepare drag-event with table widget:
-        VDragEvent dragEvent = CriterionTestHelper.createMockedVDragEvent("thisId", table);
+        final VDragEvent dragEvent = CriterionTestHelper.createMockedVDragEvent("thisId", table);
 
         // prepare document
-        Document document = Document.get();
-        Element ele = Mockito.mock(Element.class);
+        final Document document = Document.get();
+        final Element ele = Mockito.mock(Element.class);
         when(document.getElementById(ViewClientCriterion.SP_DRAG_COUNT)).thenReturn(ele);
 
         try {
@@ -206,22 +206,22 @@ public class ViewClientCriterionTest {
     @Test
     @Description("Check multi row drag decoration with a valid multi selection")
     public void processMultiRowDragDecorationMultiSelection() {
-        ViewClientCriterion cut = new ViewClientCriterion();
+        final ViewClientCriterion cut = new ViewClientCriterion();
 
         // prepare table
-        VScrollTable table = Mockito.spy(new VScrollTable());
+        final VScrollTable table = Mockito.spy(new VScrollTable());
         table.selectedRowKeys.add("one");
         table.selectedRowKeys.add("two");
         table.focusedRow = Mockito.mock(VScrollTable.VScrollTableBody.VScrollTableRow.class);
         when(table.focusedRow.getKey()).thenReturn("one");
 
         // prepare drag-event with table widget:
-        VDragEvent dragEvent = CriterionTestHelper.createMockedVDragEvent("thisId", table, "myTheme");
+        final VDragEvent dragEvent = CriterionTestHelper.createMockedVDragEvent("thisId", table, "myTheme");
         dragEvent.getTransferable().getDragSource().getConnection().getUIConnector();
 
         // prepare document
-        Document document = Document.get();
-        StyleElement ele = Mockito.spy(StyleElement.class);
+        final Document document = Document.get();
+        final StyleElement ele = Mockito.spy(StyleElement.class);
         when(ele.getTagName()).thenReturn(StyleElement.TAG);
         when(document.getElementById(ViewClientCriterion.SP_DRAG_COUNT)).thenReturn(ele);
 
