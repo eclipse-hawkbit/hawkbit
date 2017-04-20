@@ -44,7 +44,7 @@ public interface TenantMetaDataRepository extends PagingAndSortingRepository<Jpa
      */
     @Transactional
     @Modifying
-    @Query("DELETE FROM JpaTenantMetaData t WHERE t.tenant = :tenant")
-    void deleteByTenant(@Param("tenant") String tenant);
+    @Query("DELETE FROM JpaTenantMetaData t WHERE UPPER(t.tenant) = UPPER(:tenant)")
+    void deleteByTenantIgnoreCase(@Param("tenant") String tenant);
 
 }
