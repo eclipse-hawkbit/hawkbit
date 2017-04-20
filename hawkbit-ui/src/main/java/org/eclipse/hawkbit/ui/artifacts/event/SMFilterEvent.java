@@ -8,27 +8,60 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.event;
 
+import org.eclipse.hawkbit.ui.common.ManagementEntityState;
+
 /**
- * Software module filter events. It is necessary to specify events for every
- * view, because otherwise the events are processed from every view which
- * catches the event. The result is, that the software module search is not
- * working correctly on the Distribution and Upload View.
+ * Software module filter event. Is thrown when there is a filter action on a
+ * software module table on the Distribution or Upload View. It is possible to
+ * filter by text or type.
  */
-public enum SMFilterEvent {
+public class SMFilterEvent {
 
-    REMOVE_FILTER_BY_TYPE_DISTRIBUTION_VIEW,
+    /**
+     * Enum for the different types of SMFilterEvent
+     */
+    public enum SMFilterEventType {
+        /**
+         * filters the software modules by type
+         */
+        REMOVE_FILTER_BY_TYPE,
+        /**
+         * remove software modules' filter by type
+         */
+        FILTER_BY_TYPE,
+        /**
+         * filters the software modules by text
+         */
+        FILTER_BY_TEXT,
+        /**
+         * remove software modules' filter by text
+         */
+        REMOVE_FILTER_BY_TEXT;
+    }
 
-    FILTER_BY_TYPE_DISTRIBUTION_VIEW,
+    private final SMFilterEventType eventType;
 
-    FILTER_BY_TEXT_DISTRIBUTION_VIEW,
+    private final ManagementEntityState<?> origin;
 
-    REMOVE_FILTER_BY_TEXT_DISTRIBUTION_VIEW,
+    /**
+     * Constructor for SMFilterEvent
+     * 
+     * @param eventType
+     *            the type of the event
+     * @param origin
+     *            the origin of the event
+     */
+    public SMFilterEvent(final SMFilterEventType eventType, final ManagementEntityState<?> origin) {
+        this.eventType = eventType;
+        this.origin = origin;
+    }
 
-    FILTER_BY_TEXT_UPLOAD_VIEW,
+    public SMFilterEventType getEventType() {
+        return eventType;
+    }
 
-    REMOVE_FILTER_BY_TEXT_UPLOAD_VIEW,
+    public ManagementEntityState<?> getOrigin() {
+        return origin;
+    }
 
-    REMOVE_FILTER_BY_TYPE_UPLOAD_VIEW,
-
-    FILTER_BY_TYPE_UPLOAD_VIEW,
 }

@@ -171,17 +171,18 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     /**
      * DistributionTableFilterEvent.
      *
-     * @param event
+     * @param filterEvent
      *            as instance of {@link DistributionTableFilterEvent}
      */
     @EventBusListenerMethod(scope = EventScope.UI)
-    void onEvent(final DistributionTableFilterEvent event) {
-        if (event == DistributionTableFilterEvent.FILTER_BY_TEXT_DEPLOYMENT_VIEW
-                || event == DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT_DEPLOYMENT_VIEW
-                || event == DistributionTableFilterEvent.FILTER_BY_TAG_DEPLOYMENT_VIEW
-                || event == DistributionTableFilterEvent.REMOVE_FILTER_BY_TAG_DEPLOYMENT_VIEW) {
+    void onEvent(final DistributionTableFilterEvent filterEvent) {
+        if (isEventForCurrentView(filterEvent)) {
             UI.getCurrent().access(this::refreshFilter);
         }
+    }
+
+    private static boolean isEventForCurrentView(final DistributionTableFilterEvent filterEvent) {
+        return filterEvent.getOrigin() instanceof ManagementUIState;
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)

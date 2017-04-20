@@ -426,17 +426,18 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     /**
      * DistributionTableFilterEvent.
      *
-     * @param event
+     * @param filterEvent
      *            as instance of {@link DistributionTableFilterEvent}
      */
     @EventBusListenerMethod(scope = EventScope.UI)
-    public void onEvent(final DistributionTableFilterEvent event) {
-        if (event == DistributionTableFilterEvent.FILTER_BY_TEXT_DISTRIBUTION_VIEW
-                || event == DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT_DISTRIBUTION_VIEW
-                || event == DistributionTableFilterEvent.FILTER_BY_TAG_DISTRIBUTION_VIEW
-                || event == DistributionTableFilterEvent.REMOVE_FILTER_BY_TAG_DISTRIBUTION_VIEW) {
+    public void onEvent(final DistributionTableFilterEvent filterEvent) {
+        if (isEventForCurrentView(filterEvent)) {
             UI.getCurrent().access(this::refreshFilter);
         }
+    }
+
+    private static boolean isEventForCurrentView(final DistributionTableFilterEvent filterEvent) {
+        return filterEvent.getOrigin() instanceof ManageDistUIState;
     }
 
     @Override
@@ -450,7 +451,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     @Override
     protected void setDataAvailable(final boolean available) {
         manageDistUIState.setNoDataAvailableDist(!available);
-
     }
 
     @Override

@@ -100,15 +100,16 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SMFilterEvent filterEvent) {
-        if (filterEvent == SMFilterEvent.FILTER_BY_TYPE_DISTRIBUTION_VIEW
-                || filterEvent == SMFilterEvent.FILTER_BY_TEXT_DISTRIBUTION_VIEW
-                || filterEvent == SMFilterEvent.REMOVE_FILTER_BY_TYPE_DISTRIBUTION_VIEW
-                || filterEvent == SMFilterEvent.REMOVE_FILTER_BY_TEXT_DISTRIBUTION_VIEW) {
+        if (isEventForCurrentView(filterEvent)) {
             UI.getCurrent().access(() -> {
                 refreshFilter();
                 styleTableOnDistSelection();
             });
         }
+    }
+
+    private static boolean isEventForCurrentView(final SMFilterEvent filterEvent) {
+        return filterEvent.getOrigin() instanceof ManageDistUIState;
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)

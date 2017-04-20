@@ -13,6 +13,7 @@ import org.eclipse.hawkbit.ui.common.table.AbstractDistributionSetTableHeader;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
+import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent.DistributionTableFilterEventType;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -30,9 +31,12 @@ public class DistributionTableHeader extends AbstractDistributionSetTableHeader 
 
     private static final long serialVersionUID = 1L;
 
+    private final ManagementUIState managementUIState;
+
     DistributionTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final UIEventBus eventbus, final ManagementUIState managementUIState) {
         super(i18n, permChecker, eventbus, managementUIState, null, null);
+        this.managementUIState = managementUIState;
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -59,7 +63,8 @@ public class DistributionTableHeader extends AbstractDistributionSetTableHeader 
     protected void resetSearchText() {
         if (getManagementUIState().getDistributionTableFilters().getSearchText().isPresent()) {
             getManagementUIState().getDistributionTableFilters().setSearchText(null);
-            eventbus.publish(this, DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT_DEPLOYMENT_VIEW);
+            eventbus.publish(this, new DistributionTableFilterEvent(
+                    DistributionTableFilterEventType.REMOVE_FILTER_BY_TEXT, managementUIState));
         }
     }
 
@@ -88,7 +93,8 @@ public class DistributionTableHeader extends AbstractDistributionSetTableHeader 
     @Override
     protected void searchBy(final String newSearchText) {
         getManagementUIState().getDistributionTableFilters().setSearchText(newSearchText);
-        eventbus.publish(this, DistributionTableFilterEvent.FILTER_BY_TEXT_DEPLOYMENT_VIEW);
+        eventbus.publish(this,
+                new DistributionTableFilterEvent(DistributionTableFilterEventType.FILTER_BY_TEXT, managementUIState));
     }
 
     @Override

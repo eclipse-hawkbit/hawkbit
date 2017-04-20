@@ -8,28 +8,61 @@
  */
 package org.eclipse.hawkbit.ui.management.event;
 
+import org.eclipse.hawkbit.ui.common.ManagementEntityState;
+
 /**
- * Distribution Set Filter Events. It is necessary to specify events for every
- * view, because otherwise the events are processed from every view which
- * catches the event. The result is, that the distribution set search is not
- * working correctly on the Deployment and Distribution View.
+ * Distribution Set Filter Event. Is thrown when there is a filter action on a
+ * distribution set table on the Deployment or Distribution View. It is possible
+ * to filter by text or tag.
  */
-public enum DistributionTableFilterEvent {
+public class DistributionTableFilterEvent {
 
-    FILTER_BY_TAG_DEPLOYMENT_VIEW,
+    /**
+     * Enum for the different types of DistributionTableFilterEvents
+     */
+    public enum DistributionTableFilterEventType {
+        /**
+         * filters the distribution sets by tag
+         */
+        FILTER_BY_TAG,
+        /**
+         * remove distribution sets' filter by tag
+         */
+        REMOVE_FILTER_BY_TAG,
+        /**
+         * filters the distribution sets by text
+         */
+        FILTER_BY_TEXT,
+        /**
+         * remove distribution sets' filter by text
+         */
+        REMOVE_FILTER_BY_TEXT;
+    }
 
-    REMOVE_FILTER_BY_TAG_DEPLOYMENT_VIEW,
+    private final DistributionTableFilterEventType eventType;
 
-    FILTER_BY_TEXT_DEPLOYMENT_VIEW,
+    private final ManagementEntityState<?> origin;
 
-    REMOVE_FILTER_BY_TEXT_DEPLOYMENT_VIEW,
+    /**
+     * Constructor for DistributionTableFilterEvent
+     * 
+     * @param eventType
+     *            the type of the event
+     * @param origin
+     *            the origin of the event
+     */
+    public DistributionTableFilterEvent(final DistributionTableFilterEventType eventType,
+            final ManagementEntityState<?> origin) {
+        this.eventType = eventType;
+        this.origin = origin;
+    }
 
-    FILTER_BY_TEXT_DISTRIBUTION_VIEW,
+    public DistributionTableFilterEventType getEventType() {
+        return eventType;
+    }
 
-    REMOVE_FILTER_BY_TEXT_DISTRIBUTION_VIEW,
-
-    FILTER_BY_TAG_DISTRIBUTION_VIEW,
-
-    REMOVE_FILTER_BY_TAG_DISTRIBUTION_VIEW,
+    public ManagementEntityState<?> getOrigin() {
+        return origin;
+    }
 
 }

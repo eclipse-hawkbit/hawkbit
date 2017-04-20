@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionAddUpdateWindowLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
+import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent.DistributionTableFilterEventType;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -35,11 +36,14 @@ public class DistributionSetTableHeader extends AbstractDistributionSetTableHead
 
     private final DistributionAddUpdateWindowLayout addUpdateWindowLayout;
 
+    private final ManageDistUIState manageDistUIstate;
+
     DistributionSetTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final UIEventBus eventbus, final ManageDistUIState manageDistUIstate,
             final DistributionAddUpdateWindowLayout addUpdateWindowLayout) {
         super(i18n, permChecker, eventbus, null, manageDistUIstate, null);
         this.addUpdateWindowLayout = addUpdateWindowLayout;
+        this.manageDistUIstate = manageDistUIstate;
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -64,7 +68,8 @@ public class DistributionSetTableHeader extends AbstractDistributionSetTableHead
     protected void resetSearchText() {
         if (getManageDistUIstate().getManageDistFilters().getSearchText().isPresent()) {
             getManageDistUIstate().getManageDistFilters().setSearchText(null);
-            eventbus.publish(this, DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT_DISTRIBUTION_VIEW);
+            eventbus.publish(this, new DistributionTableFilterEvent(
+                    DistributionTableFilterEventType.REMOVE_FILTER_BY_TEXT, manageDistUIstate));
         }
     }
 
@@ -93,7 +98,8 @@ public class DistributionSetTableHeader extends AbstractDistributionSetTableHead
     @Override
     protected void searchBy(final String newSearchText) {
         getManageDistUIstate().getManageDistFilters().setSearchText(newSearchText);
-        eventbus.publish(this, DistributionTableFilterEvent.FILTER_BY_TEXT_DISTRIBUTION_VIEW);
+        eventbus.publish(this,
+                new DistributionTableFilterEvent(DistributionTableFilterEventType.FILTER_BY_TEXT, manageDistUIstate));
     }
 
     @Override

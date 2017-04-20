@@ -83,13 +83,14 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SMFilterEvent filterEvent) {
         UI.getCurrent().access(() -> {
-            if (filterEvent == SMFilterEvent.FILTER_BY_TYPE_UPLOAD_VIEW
-                    || filterEvent == SMFilterEvent.FILTER_BY_TEXT_UPLOAD_VIEW
-                    || filterEvent == SMFilterEvent.REMOVE_FILTER_BY_TYPE_UPLOAD_VIEW
-                    || filterEvent == SMFilterEvent.REMOVE_FILTER_BY_TEXT_UPLOAD_VIEW) {
+            if (isEventForCurrentView(filterEvent)) {
                 refreshFilter();
             }
         });
+    }
+
+    private static boolean isEventForCurrentView(final SMFilterEvent filterEvent) {
+        return filterEvent.getOrigin() instanceof ArtifactUploadState;
     }
 
     @Override
