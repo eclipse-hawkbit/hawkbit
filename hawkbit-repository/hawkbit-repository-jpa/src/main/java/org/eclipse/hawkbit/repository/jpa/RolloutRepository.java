@@ -15,8 +15,11 @@ import java.util.Optional;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -45,4 +48,15 @@ public interface RolloutRepository
      * @return {@link Rollout} for specific name
      */
     Optional<Rollout> findByName(String name);
+
+    /**
+     * Deletes all {@link TenantAwareBaseEntity} of a given tenant.
+     *
+     * @param tenant
+     *            to delete data from
+     */
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM JpaRollout t WHERE UPPER(t.tenant) = UPPER(:tenant)")
+    void deleteByTenantIgnoreCase(@Param("tenant") String tenant);
 }

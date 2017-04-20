@@ -14,10 +14,13 @@ import java.util.Optional;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -74,4 +77,15 @@ public interface SoftwareModuleTypeRepository
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("SELECT sm FROM JpaSoftwareModuleType sm WHERE sm.id IN ?1")
     List<JpaSoftwareModuleType> findByIdIn(Iterable<Long> ids);
+
+    /**
+     * Deletes all {@link TenantAwareBaseEntity} of a given tenant.
+     *
+     * @param tenant
+     *            to delete data from
+     */
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM JpaSoftwareModuleType t WHERE UPPER(t.tenant) = UPPER(:tenant)")
+    void deleteByTenantIgnoreCase(@Param("tenant") String tenant);
 }

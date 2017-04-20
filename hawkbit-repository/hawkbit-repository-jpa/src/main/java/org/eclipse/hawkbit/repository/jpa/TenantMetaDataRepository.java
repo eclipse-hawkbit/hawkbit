@@ -13,7 +13,9 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantMetaData;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +44,7 @@ public interface TenantMetaDataRepository extends PagingAndSortingRepository<Jpa
      */
     @Transactional
     @Modifying
-    void deleteByTenantIgnoreCase(String tenant);
+    @Query("DELETE FROM JpaTenantMetaData t WHERE UPPER(t.tenant) = UPPER(:tenant)")
+    void deleteByTenantIgnoreCase(@Param("tenant") String tenant);
 
 }

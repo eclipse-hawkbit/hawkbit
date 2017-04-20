@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
+import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
@@ -38,6 +39,7 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
 public class JpaTargetTag extends JpaTag implements TargetTag, EventAwareEntity {
     private static final long serialVersionUID = 1L;
 
+    @CascadeOnDelete
     @ManyToMany(mappedBy = "tags", targetEntity = JpaTarget.class, fetch = FetchType.LAZY)
     private List<Target> assignedToTargets;
 

@@ -14,7 +14,6 @@ import java.util.Optional;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaTenantAwareBaseEntity;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,16 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity, I extends Serializable>
         extends PagingAndSortingRepository<T, I> {
-
-    /**
-     * Deletes all {@link TenantAwareBaseEntity} of a given tenant.
-     *
-     * @param tenant
-     *            to delete data from
-     */
-    @Modifying
-    @Transactional
-    void deleteByTenantIgnoreCase(String tenant);
 
     /**
      * Retrieves an {@link BaseEntity} by its id.
