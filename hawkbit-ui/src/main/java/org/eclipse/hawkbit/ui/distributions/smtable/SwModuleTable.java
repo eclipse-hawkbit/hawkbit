@@ -89,7 +89,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
         this.softwareManagement = softwareManagement;
         this.distributionsViewClientCriterion = distributionsViewClientCriterion;
         this.artifactDetailsLayout = new ArtifactDetailsLayout(i18n, eventBus, artifactUploadState, uiNotification,
-                artifactManagement);
+                artifactManagement, softwareManagement);
         this.swMetadataPopupLayout = swMetadataPopupLayout;
 
         addNewContainerDS();

@@ -139,8 +139,8 @@ public class UploadConfirmationWindow implements Button.ClickListener {
     }
 
     private boolean checkIfArtifactDetailsDisplayed(final Long bSoftwareModuleId) {
-        return artifactUploadState.getSelectedBaseSoftwareModule()
-                .map(module -> module.getId().equals(bSoftwareModuleId)).orElse(false);
+        return artifactUploadState.getSelectedBaseSwModuleId().map(moduleId -> moduleId.equals(bSoftwareModuleId))
+                .orElse(false);
     }
 
     private Boolean preUploadValidation(final List<String> itemIds) {
@@ -596,7 +596,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             }
 
             if (refreshArtifactDetailsLayout) {
-                uploadLayout.refreshArtifactDetailsLayout(artifactUploadState.getSelectedBaseSoftwareModule().get());
+                uploadLayout.refreshArtifactDetailsLayout(artifactUploadState.getSelectedBaseSwModuleId().get());
             }
             uploadLayout.clearFileList();
             window.close();

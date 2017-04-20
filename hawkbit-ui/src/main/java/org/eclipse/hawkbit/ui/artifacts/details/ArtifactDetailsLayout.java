@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.ArtifactDetailsEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
@@ -101,32 +103,50 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private final transient ArtifactManagement artifactManagement;
 
+    private final transient SoftwareManagement softwareManagement;
+
+    private final SoftwareModule selectedSoftwareModule;
+
     public ArtifactDetailsLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final ArtifactUploadState artifactUploadState, final UINotification uINotification,
-            final ArtifactManagement artifactManagement) {
+            final ArtifactManagement artifactManagement, final SoftwareManagement softwareManagement) {
         this.i18n = i18n;
         this.eventBus = eventBus;
         this.artifactUploadState = artifactUploadState;
         this.uINotification = uINotification;
         this.artifactManagement = artifactManagement;
+        this.softwareManagement = softwareManagement;
+        this.selectedSoftwareModule = getSelectedSoftwareModule();
 
         createComponents();
         buildLayout();
         eventBus.subscribe(this);
-        artifactUploadState.getSelectedBaseSoftwareModule()
-                .ifPresent(selectedSoftwareModule -> populateArtifactDetails(selectedSoftwareModule.getId(),
-                        HawkbitCommonUtil.getFormattedNameVersion(selectedSoftwareModule.getName(),
-                                selectedSoftwareModule.getVersion())));
+
+        if (selectedSoftwareModule != null) {
+            populateArtifactDetails(selectedSoftwareModule.getId(), HawkbitCommonUtil
+                    .getFormattedNameVersion(selectedSoftwareModule.getName(), selectedSoftwareModule.getVersion()));
+        }
+
         if (isMaximized()) {
             maximizedArtifactDetailsView();
         }
     }
 
+    private SoftwareModule getSelectedSoftwareModule() {
+        if (artifactUploadState.getSelectedBaseSwModuleId().isPresent()) {
+            return softwareManagement.findSoftwareModuleById(artifactUploadState.getSelectedBaseSwModuleId().get())
+                    .orElse(null);
+        }
+        return null;
+    }
+
     private void createComponents() {
-        final String labelStr = artifactUploadState.getSelectedBaseSoftwareModule()
-                .map(softwareModule -> HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(),
-                        softwareModule.getVersion()))
-                .orElse("");
+        String labelStr = "";
+        if (selectedSoftwareModule != null) {
+            labelStr = HawkbitCommonUtil.getFormattedNameVersion(selectedSoftwareModule.getName(),
+                    selectedSoftwareModule.getVersion());
+        }
+
         titleOfArtifactDetails = new LabelBuilder().id(UIComponentIdProvider.ARTIFACT_DETAILS_HEADER_LABEL_ID)
                 .name(HawkbitCommonUtil.getArtifactoryDetailsLabelId(labelStr)).buildCaptionLabel();
         titleOfArtifactDetails.setContentMode(ContentMode.HTML);
@@ -149,6 +169,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                 "", "", null, true, FontAwesome.EXPAND, SPUIButtonStyleSmallNoBorder.class);
         button.addClickListener(event -> maxArtifactDetails());
         return button;
+
     }
 
     private void buildLayout() {
@@ -238,6 +259,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                 return deleteIcon;
             }
         });
+
     }
 
     private void confirmAndDeleteArtifact(final Long id, final String fileName) {
@@ -249,10 +271,9 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                         artifactManagement.deleteArtifact(id);
                         uINotification.displaySuccess(i18n.getMessage("message.artifact.deleted", fileName));
                         if (artifactUploadState.getSelectedBaseSwModuleId().isPresent()) {
-                            populateArtifactDetails(artifactUploadState.getSelectedBaseSwModuleId().get(),
-                                    HawkbitCommonUtil.getFormattedNameVersion(
-                                            artifactUploadState.getSelectedBaseSoftwareModule().get().getName(),
-                                            artifactUploadState.getSelectedBaseSoftwareModule().get().getVersion()));
+                            final SoftwareModule sm = getSelectedSoftwareModule();
+                            populateArtifactDetails(sm.getId(),
+                                    HawkbitCommonUtil.getFormattedNameVersion(sm.getName(), sm.getVersion()));
                         } else {
                             populateArtifactDetails(null, null);
                         }

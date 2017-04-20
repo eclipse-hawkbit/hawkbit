@@ -105,9 +105,9 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         this.smTableLayout = new SoftwareModuleTableLayout(i18n, permChecker, artifactUploadState, uiNotification,
                 eventBus, softwareManagement, entityFactory, uploadViewClientCriterion);
         this.artifactDetailsLayout = new ArtifactDetailsLayout(i18n, eventBus, artifactUploadState, uiNotification,
-                artifactManagement);
+                artifactManagement, softwareManagement);
         this.uploadLayout = new UploadLayout(i18n, uiNotification, eventBus, artifactUploadState,
-                multipartConfigElement, artifactManagement);
+                multipartConfigElement, artifactManagement, softwareManagement);
         this.deleteActionsLayout = new SMDeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
                 artifactUploadState, softwareManagement, uploadViewClientCriterion);
     }

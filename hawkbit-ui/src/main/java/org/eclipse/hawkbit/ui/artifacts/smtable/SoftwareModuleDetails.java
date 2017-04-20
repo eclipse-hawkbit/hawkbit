@@ -40,7 +40,7 @@ public class SoftwareModuleDetails extends AbstractSoftwareModuleDetails {
 
     @Override
     protected boolean onLoadIsTableRowSelected() {
-        return artifactUploadState.getSelectedBaseSoftwareModule().isPresent();
+        return artifactUploadState.getSelectedBaseSwModuleId().isPresent();
     }
 
     @Override

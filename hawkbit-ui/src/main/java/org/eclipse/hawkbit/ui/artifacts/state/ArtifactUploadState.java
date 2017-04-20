@@ -44,8 +44,6 @@ public class ArtifactUploadState implements ManagementEntityState<Long>, Seriali
 
     private Long selectedBaseSwModuleId;
 
-    private SoftwareModule selectedBaseSoftwareModule;
-
     private final Map<String, SoftwareModule> baseSwModuleList = new HashMap<>();
 
     private Set<Long> selectedSoftwareModules = Collections.emptySet();
@@ -181,13 +179,5 @@ public class ArtifactUploadState implements ManagementEntityState<Long>, Seriali
 
     public void setNoDataAvilableSoftwareModule(final boolean noDataAvilableSoftwareModule) {
         this.noDataAvilableSoftwareModule = noDataAvilableSoftwareModule;
-    }
-
-    public Optional<SoftwareModule> getSelectedBaseSoftwareModule() {
-        return Optional.ofNullable(selectedBaseSoftwareModule);
-    }
-
-    public void setSelectedBaseSoftwareModule(final SoftwareModule selectedBaseSoftwareModule) {
-        this.selectedBaseSoftwareModule = selectedBaseSoftwareModule;
     }
 }
