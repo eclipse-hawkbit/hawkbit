@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.EntityManager;
+
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
@@ -110,13 +112,16 @@ public interface SoftwareModuleRepository
     List<JpaSoftwareModule> findByIdIn(Iterable<Long> ids);
 
     /**
-     * Deletes all {@link TenantAwareBaseEntity} of a given tenant.
+     * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety
+     * reasons (this is a delete everything after all) we add the tenant manually to
+     * query even if this will by done by {@link EntityManager} anyhow. The DB
+     * should take of optimizing this away.
      *
      * @param tenant
      *            to delete data from
      */
     @Modifying
     @Transactional
-    @Query("DELETE FROM JpaSoftwareModule t WHERE UPPER(t.tenant) = UPPER(:tenant)")
-    void deleteByTenantIgnoreCase(@Param("tenant") String tenant);
+    @Query("DELETE FROM JpaSoftwareModule t WHERE t.tenant = :tenant")
+    void deleteByTenant(@Param("tenant") String tenant);
 }
