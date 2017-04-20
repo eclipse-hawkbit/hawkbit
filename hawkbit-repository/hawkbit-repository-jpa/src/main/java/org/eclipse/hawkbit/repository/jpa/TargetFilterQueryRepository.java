@@ -12,6 +12,7 @@ import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -51,5 +52,16 @@ public interface TargetFilterQueryRepository
     @Transactional
     @Query("update JpaTargetFilterQuery d set d.autoAssignDistributionSet = NULL where d.autoAssignDistributionSet in :ids")
     void unsetAutoAssignDistributionSet(@Param("ids") Long... dsIds);
+
+    /**
+     * Deletes all {@link TenantAwareBaseEntity} of a given tenant.
+     *
+     * @param tenant
+     *            to delete data from
+     */
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM JpaTargetFilterQuery t WHERE UPPER(t.tenant) = UPPER(:tenant)")
+    void deleteByTenantIgnoreCase(@Param("tenant") String tenant);
 
 }

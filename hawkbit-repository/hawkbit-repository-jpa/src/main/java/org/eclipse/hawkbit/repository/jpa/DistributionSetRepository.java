@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Tag;
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -141,4 +142,15 @@ public interface DistributionSetRepository
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("SELECT d FROM JpaDistributionSet d WHERE d.id IN ?1")
     List<JpaDistributionSet> findAll(Iterable<Long> ids);
+
+    /**
+     * Deletes all {@link TenantAwareBaseEntity} of a given tenant.
+     *
+     * @param tenant
+     *            to delete data from
+     */
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM JpaDistributionSet t WHERE UPPER(t.tenant) = UPPER(:tenant)")
+    void deleteByTenantIgnoreCase(@Param("tenant") String tenant);
 }

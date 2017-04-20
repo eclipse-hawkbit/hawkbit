@@ -15,8 +15,11 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -53,4 +56,15 @@ public interface DistributionSetTagRepository
      */
     @Override
     List<JpaDistributionSetTag> findAll();
+
+    /**
+     * Deletes all {@link TenantAwareBaseEntity} of a given tenant.
+     *
+     * @param tenant
+     *            to delete data from
+     */
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM JpaDistributionSetTag t WHERE UPPER(t.tenant) = UPPER(:tenant)")
+    void deleteByTenantIgnoreCase(@Param("tenant") String tenant);
 }

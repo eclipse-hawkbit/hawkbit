@@ -9,7 +9,11 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantConfiguration;
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -37,5 +41,16 @@ public interface TenantConfigurationRepository extends BaseEntityRepository<JpaT
      *            the name of the key to be deleted
      */
     void deleteByKey(String keyName);
+
+    /**
+     * Deletes all {@link TenantAwareBaseEntity} of a given tenant.
+     *
+     * @param tenant
+     *            to delete data from
+     */
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM JpaTenantConfiguration t WHERE UPPER(t.tenant) = UPPER(:tenant)")
+    void deleteByTenantIgnoreCase(@Param("tenant") String tenant);
 
 }
