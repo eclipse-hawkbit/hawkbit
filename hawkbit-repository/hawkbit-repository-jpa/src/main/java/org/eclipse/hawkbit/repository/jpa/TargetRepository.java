@@ -218,6 +218,6 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      */
     @Modifying
     @Transactional
-    @Query("DELETE FROM JpaTenantConfiguration t WHERE UPPER(t.tenant) = UPPER(:tenant)")
+    @Query("DELETE FROM JpaTarget t WHERE UPPER(t.tenant) = UPPER(:tenant)")
     void deleteByTenantIgnoreCase(@Param("tenant") String tenant);
 }
