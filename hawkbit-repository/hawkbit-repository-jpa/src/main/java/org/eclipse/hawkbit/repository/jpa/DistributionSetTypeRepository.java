@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import javax.persistence.EntityManager;
+
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -61,13 +63,16 @@ public interface DistributionSetTypeRepository
     Long countByElementsSmType(JpaSoftwareModuleType softwareModuleType);
 
     /**
-     * Deletes all {@link TenantAwareBaseEntity} of a given tenant.
+     * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety
+     * reasons (this is a "delete everything" query after all) we add the tenant manually to
+     * query even if this will by done by {@link EntityManager} anyhow. The DB
+     * should take care of optimizing this away.
      *
      * @param tenant
      *            to delete data from
      */
     @Modifying
     @Transactional
-    @Query("DELETE FROM JpaDistributionSetType t WHERE UPPER(t.tenant) = UPPER(:tenant)")
-    void deleteByTenantIgnoreCase(@Param("tenant") String tenant);
+    @Query("DELETE FROM JpaDistributionSetType t WHERE t.tenant = :tenant")
+    void deleteByTenant(@Param("tenant") String tenant);
 }

@@ -12,6 +12,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.EntityManager;
+
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
@@ -50,13 +52,16 @@ public interface RolloutRepository
     Optional<Rollout> findByName(String name);
 
     /**
-     * Deletes all {@link TenantAwareBaseEntity} of a given tenant.
+     * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety
+     * reasons (this is a "delete everything" query after all) we add the tenant manually to
+     * query even if this will by done by {@link EntityManager} anyhow. The DB
+     * should take care of optimizing this away.
      *
      * @param tenant
      *            to delete data from
      */
     @Modifying
     @Transactional
-    @Query("DELETE FROM JpaRollout t WHERE UPPER(t.tenant) = UPPER(:tenant)")
-    void deleteByTenantIgnoreCase(@Param("tenant") String tenant);
+    @Query("DELETE FROM JpaRollout t WHERE t.tenant = :tenant")
+    void deleteByTenant(@Param("tenant") String tenant);
 }
