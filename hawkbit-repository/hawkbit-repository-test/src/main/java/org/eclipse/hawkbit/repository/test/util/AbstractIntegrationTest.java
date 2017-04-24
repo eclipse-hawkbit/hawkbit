@@ -270,7 +270,7 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     @Before
     public void before() throws Exception {
         mvc = createMvcWebAppContext().build();
-        final String description = "Updated description to have lastmodified available in tests";
+        final String description = "Updated description.";
 
         osType = securityRule
                 .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_OS));
@@ -294,7 +294,7 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     public void cleanUp() {
         try {
             FileUtils.deleteDirectory(new File(artifactFilesystemProperties.getPath()));
-        } catch (final IOException e) {
+        } catch (final IOException | IllegalArgumentException e) {
             LOG.warn("Cannot cleanup file-directory", e);
         }
     }

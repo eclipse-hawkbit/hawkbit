@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import static org.junit.Assert.fail;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.Constructor;
 import java.util.UUID;

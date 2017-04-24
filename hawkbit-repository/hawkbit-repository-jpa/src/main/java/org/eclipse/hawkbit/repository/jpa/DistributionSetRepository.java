@@ -12,6 +12,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.EntityManager;
+
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -19,18 +21,18 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Tag;
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * {@link DistributionSet} repository.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public interface DistributionSetRepository
         extends BaseEntityRepository<JpaDistributionSet, Long>, JpaSpecificationExecutor<JpaDistributionSet> {
 
@@ -51,7 +53,7 @@ public interface DistributionSetRepository
      *            to be deleted
      */
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     @Query("update JpaDistributionSet d set d.deleted = 1 where d.id in :ids")
     void deleteDistributionSet(@Param("ids") Long... ids);
 
@@ -63,7 +65,7 @@ public interface DistributionSetRepository
      * @return number of affected/deleted records
      */
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("DELETE FROM JpaDistributionSet d WHERE d.id IN ?1")
     int deleteByIdIn(Collection<Long> ids);
@@ -142,4 +144,18 @@ public interface DistributionSetRepository
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("SELECT d FROM JpaDistributionSet d WHERE d.id IN ?1")
     List<JpaDistributionSet> findAll(Iterable<Long> ids);
+
+    /**
+     * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety
+     * reasons (this is a "delete everything" query after all) we add the tenant manually to
+     * query even if this will by done by {@link EntityManager} anyhow. The DB
+     * should take care of optimizing this away.
+     *
+     * @param tenant
+     *            to delete data from
+     */
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM JpaDistributionSet t WHERE t.tenant = :tenant")
+    void deleteByTenant(@Param("tenant") String tenant);
 }

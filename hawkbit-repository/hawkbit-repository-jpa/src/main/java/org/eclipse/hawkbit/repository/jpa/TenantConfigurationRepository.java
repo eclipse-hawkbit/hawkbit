@@ -8,16 +8,21 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import javax.persistence.EntityManager;
+
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantConfiguration;
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
-import org.springframework.transaction.annotation.Isolation;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The spring-data repository for the entity {@link TenantConfiguration}.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public interface TenantConfigurationRepository extends BaseEntityRepository<JpaTenantConfiguration, Long> {
 
     /**
@@ -38,5 +43,19 @@ public interface TenantConfigurationRepository extends BaseEntityRepository<JpaT
      *            the name of the key to be deleted
      */
     void deleteByKey(String keyName);
+
+    /**
+     * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety
+     * reasons (this is a "delete everything" query after all) we add the tenant manually to
+     * query even if this will by done by {@link EntityManager} anyhow. The DB
+     * should take care of optimizing this away.
+     *
+     * @param tenant
+     *            to delete data from
+     */
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM JpaTenantConfiguration t WHERE t.tenant = :tenant")
+    void deleteByTenant(@Param("tenant") String tenant);
 
 }

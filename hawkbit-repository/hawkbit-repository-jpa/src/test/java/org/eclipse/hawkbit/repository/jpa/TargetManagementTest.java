@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
@@ -190,6 +191,16 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         } catch (final ConstraintViolationException e) {
             // ok
         }
+    }
+
+    @Test
+    @Description("Verify that a target with same controller ID than another device cannot be created.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
+    public void createTargetThatViolatesUniqueConstraintFails() {
+        targetManagement.createTarget(entityFactory.target().create().controllerId("123"));
+
+        assertThatExceptionOfType(EntityAlreadyExistsException.class)
+                .isThrownBy(() -> targetManagement.createTarget(entityFactory.target().create().controllerId("123")));
     }
 
     @Test

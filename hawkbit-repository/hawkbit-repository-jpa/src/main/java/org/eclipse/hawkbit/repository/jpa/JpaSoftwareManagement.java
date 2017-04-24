@@ -69,9 +69,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -83,7 +81,7 @@ import com.google.common.collect.Sets;
  * JPA implementation of {@link SoftwareManagement}.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 @Validated
 public class JpaSoftwareManagement implements SoftwareManagement {
 
@@ -118,8 +116,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     private VirtualPropertyReplacer virtualPropertyReplacer;
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public SoftwareModule updateSoftwareModule(final SoftwareModuleUpdate u) {
         final GenericSoftwareModuleUpdate update = (GenericSoftwareModuleUpdate) u;
 
@@ -133,8 +130,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public SoftwareModuleType updateSoftwareModuleType(final SoftwareModuleTypeUpdate u) {
         final GenericSoftwareModuleTypeUpdate update = (GenericSoftwareModuleTypeUpdate) u;
 
@@ -148,8 +144,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public SoftwareModule createSoftwareModule(final SoftwareModuleCreate c) {
         final JpaSoftwareModuleCreate create = (JpaSoftwareModuleCreate) c;
 
@@ -157,8 +152,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public List<SoftwareModule> createSoftwareModule(final Collection<SoftwareModuleCreate> swModules) {
         return swModules.stream().map(this::createSoftwareModule).collect(Collectors.toList());
     }
@@ -230,8 +224,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public void deleteSoftwareModules(final Collection<Long> ids) {
         final List<JpaSoftwareModule> swModulesToDelete = softwareModuleRepository.findByIdIn(ids);
 
@@ -489,8 +482,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public SoftwareModuleType createSoftwareModuleType(final SoftwareModuleTypeCreate c) {
         final JpaSoftwareModuleTypeCreate create = (JpaSoftwareModuleTypeCreate) c;
 
@@ -498,8 +490,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public void deleteSoftwareModuleType(final Long typeId) {
         final JpaSoftwareModuleType toDelete = softwareModuleTypeRepository.findById(typeId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, typeId));
@@ -523,8 +514,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @Modifying
+    @Transactional
     public SoftwareModuleMetadata createSoftwareModuleMetadata(final Long moduleId, final MetaData md) {
 
         checkAndThrowAlreadyIfSoftwareModuleMetadataExists(moduleId, md);
@@ -540,8 +530,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @Modifying
+    @Transactional
     public List<SoftwareModuleMetadata> createSoftwareModuleMetadata(final Long moduleId,
             final Collection<MetaData> md) {
         md.forEach(meta -> checkAndThrowAlreadyIfSoftwareModuleMetadataExists(moduleId, meta));
@@ -555,8 +544,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @Modifying
+    @Transactional
     public SoftwareModuleMetadata updateSoftwareModuleMetadata(final Long moduleId, final MetaData md) {
 
         // check if exists otherwise throw entity not found exception
@@ -600,8 +588,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @Modifying
+    @Transactional
     public void deleteSoftwareModuleMetadata(final Long moduleId, final String key) {
         final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) findSoftwareModuleMetadata(moduleId, key)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleMetadata.class, moduleId, key));
@@ -665,15 +652,13 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public void deleteSoftwareModule(final Long moduleId) {
         deleteSoftwareModules(Sets.newHashSet(moduleId));
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public List<SoftwareModuleType> createSoftwareModuleType(final Collection<SoftwareModuleTypeCreate> creates) {
         return creates.stream().map(this::createSoftwareModuleType).collect(Collectors.toList());
     }

@@ -12,18 +12,22 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.EntityManager;
+
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.transaction.annotation.Isolation;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The repository interface for the {@link Rollout} model.
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public interface RolloutRepository
         extends BaseEntityRepository<JpaRollout, Long>, JpaSpecificationExecutor<JpaRollout> {
 
@@ -46,4 +50,18 @@ public interface RolloutRepository
      * @return {@link Rollout} for specific name
      */
     Optional<Rollout> findByName(String name);
+
+    /**
+     * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety
+     * reasons (this is a "delete everything" query after all) we add the tenant manually to
+     * query even if this will by done by {@link EntityManager} anyhow. The DB
+     * should take care of optimizing this away.
+     *
+     * @param tenant
+     *            to delete data from
+     */
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM JpaRollout t WHERE t.tenant = :tenant")
+    void deleteByTenant(@Param("tenant") String tenant);
 }

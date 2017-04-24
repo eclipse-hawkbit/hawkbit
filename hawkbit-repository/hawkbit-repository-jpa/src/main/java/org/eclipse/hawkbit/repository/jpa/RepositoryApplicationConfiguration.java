@@ -276,7 +276,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Override
     protected Map<String, Object> getVendorProperties() {
 
-        final Map<String, Object> properties = Maps.newHashMapWithExpectedSize(4);
+        final Map<String, Object> properties = Maps.newHashMapWithExpectedSize(5);
         // Turn off dynamic weaving to disable LTW lookup in static weaving mode
         properties.put("eclipselink.weaving", "false");
         // needed for reports
@@ -285,6 +285,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         properties.put("eclipselink.ddl-generation", "none");
         // Embeed into hawkBit logging
         properties.put("eclipselink.logging.logger", "JavaLogger");
+        // Ensure that we flush only at the end of the transaction
+        properties.put("eclipselink.persistence-context.flush-mode", "COMMIT");
 
         return properties;
     }
