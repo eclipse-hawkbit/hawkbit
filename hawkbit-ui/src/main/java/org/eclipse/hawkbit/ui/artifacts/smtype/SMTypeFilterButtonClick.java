@@ -42,7 +42,7 @@ public class SMTypeFilterButtonClick extends AbstractFilterSingleButtonClick {
     @Override
     protected void filterUnClicked(final Button clickedButton) {
         artifactUploadState.getSoftwareModuleFilters().setSoftwareModuleType(null);
-        eventBus.publish(this, new SMFilterEvent(SMFilterEventType.FILTER_BY_TYPE, artifactUploadState));
+        eventBus.publish(this, new SMFilterEvent(SMFilterEventType.FILTER_BY_TYPE));
     }
 
     @Override
@@ -50,7 +50,7 @@ public class SMTypeFilterButtonClick extends AbstractFilterSingleButtonClick {
         softwareManagement.findSoftwareModuleTypeByName(clickedButton.getData().toString())
                 .ifPresent(softwareModuleType -> {
                     artifactUploadState.getSoftwareModuleFilters().setSoftwareModuleType(softwareModuleType);
-                    eventBus.publish(this, new SMFilterEvent(SMFilterEventType.FILTER_BY_TYPE, artifactUploadState));
+                    eventBus.publish(this, new SMFilterEvent(SMFilterEventType.FILTER_BY_TYPE));
                 });
     }
 

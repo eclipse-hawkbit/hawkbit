@@ -135,9 +135,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
      * entity.
      */
     protected void restoreState() {
-        if (onLoadIsTableRowSelected()) {
-            populateData(getSelectedBaseEntity());
-        }
+        populateData(getSelectedBaseEntity());
         if (onLoadIsTableMaximized()) {
             setVisible(false);
         }
@@ -331,8 +329,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     protected abstract void onEdit(Button.ClickEvent event);
 
     protected abstract String getEditButtonId();
-
-    protected abstract boolean onLoadIsTableRowSelected();
 
     protected abstract boolean onLoadIsTableMaximized();
 

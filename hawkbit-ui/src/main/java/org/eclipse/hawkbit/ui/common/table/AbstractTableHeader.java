@@ -40,7 +40,7 @@ import com.vaadin.ui.VerticalLayout;
  */
 public abstract class AbstractTableHeader extends VerticalLayout {
 
-    private static final long serialVersionUID = 4881626370291837175L;
+    private static final long serialVersionUID = 1L;
 
     protected VaadinMessageSource i18n;
 

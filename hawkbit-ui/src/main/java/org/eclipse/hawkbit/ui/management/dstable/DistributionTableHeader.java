@@ -31,12 +31,9 @@ public class DistributionTableHeader extends AbstractDistributionSetTableHeader 
 
     private static final long serialVersionUID = 1L;
 
-    private final ManagementUIState managementUIState;
-
     DistributionTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final UIEventBus eventbus, final ManagementUIState managementUIState) {
         super(i18n, permChecker, eventbus, managementUIState, null, null);
-        this.managementUIState = managementUIState;
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -63,8 +60,8 @@ public class DistributionTableHeader extends AbstractDistributionSetTableHeader 
     protected void resetSearchText() {
         if (getManagementUIState().getDistributionTableFilters().getSearchText().isPresent()) {
             getManagementUIState().getDistributionTableFilters().setSearchText(null);
-            eventbus.publish(this, new DistributionTableFilterEvent(
-                    DistributionTableFilterEventType.REMOVE_FILTER_BY_TEXT, managementUIState));
+            eventbus.publish(this,
+                    new DistributionTableFilterEvent(DistributionTableFilterEventType.REMOVE_FILTER_BY_TEXT));
         }
     }
 
@@ -93,8 +90,7 @@ public class DistributionTableHeader extends AbstractDistributionSetTableHeader 
     @Override
     protected void searchBy(final String newSearchText) {
         getManagementUIState().getDistributionTableFilters().setSearchText(newSearchText);
-        eventbus.publish(this,
-                new DistributionTableFilterEvent(DistributionTableFilterEventType.FILTER_BY_TEXT, managementUIState));
+        eventbus.publish(this, new DistributionTableFilterEvent(DistributionTableFilterEventType.FILTER_BY_TEXT));
     }
 
     @Override

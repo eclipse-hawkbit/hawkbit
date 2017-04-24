@@ -30,13 +30,10 @@ public class SwModuleTableHeader extends AbstractSoftwareModuleTableHeader {
 
     private static final long serialVersionUID = 1L;
 
-    private final ManageDistUIState manageDistUIstate;
-
     SwModuleTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final UIEventBus eventbus, final ManageDistUIState manageDistUIstate,
             final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow) {
         super(i18n, permChecker, eventbus, null, manageDistUIstate, null, softwareModuleAddUpdateWindow);
-        this.manageDistUIstate = manageDistUIstate;
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -61,7 +58,7 @@ public class SwModuleTableHeader extends AbstractSoftwareModuleTableHeader {
     protected void resetSearchText() {
         if (getManageDistUIstate().getSoftwareModuleFilters().getSearchText().isPresent()) {
             getManageDistUIstate().getSoftwareModuleFilters().setSearchText(null);
-            eventbus.publish(this, new SMFilterEvent(SMFilterEventType.REMOVE_FILTER_BY_TEXT, manageDistUIstate));
+            eventbus.publish(this, new SMFilterEvent(SMFilterEventType.REMOVE_FILTER_BY_TEXT));
         }
     }
 
@@ -91,7 +88,7 @@ public class SwModuleTableHeader extends AbstractSoftwareModuleTableHeader {
     @Override
     protected void searchBy(final String newSearchText) {
         getManageDistUIstate().getSoftwareModuleFilters().setSearchText(newSearchText);
-        eventbus.publish(this, new SMFilterEvent(SMFilterEventType.FILTER_BY_TEXT, manageDistUIstate));
+        eventbus.publish(this, new SMFilterEvent(SMFilterEventType.FILTER_BY_TEXT));
     }
 
 }

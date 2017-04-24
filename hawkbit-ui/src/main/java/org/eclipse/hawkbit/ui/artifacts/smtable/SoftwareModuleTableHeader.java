@@ -28,13 +28,10 @@ public class SoftwareModuleTableHeader extends AbstractSoftwareModuleTableHeader
 
     private static final long serialVersionUID = 1L;
 
-    private final ArtifactUploadState artifactUploadState;
-
     SoftwareModuleTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final UIEventBus eventbus, final ArtifactUploadState artifactUploadState,
             final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow) {
         super(i18n, permChecker, eventbus, null, null, artifactUploadState, softwareModuleAddUpdateWindow);
-        this.artifactUploadState = artifactUploadState;
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -60,7 +57,7 @@ public class SoftwareModuleTableHeader extends AbstractSoftwareModuleTableHeader
     protected void resetSearchText() {
         if (getArtifactUploadState().getSoftwareModuleFilters().getSearchText().isPresent()) {
             getArtifactUploadState().getSoftwareModuleFilters().setSearchText(null);
-            eventbus.publish(this, new SMFilterEvent(SMFilterEventType.REMOVE_FILTER_BY_TEXT, artifactUploadState));
+            eventbus.publish(this, new SMFilterEvent(SMFilterEventType.REMOVE_FILTER_BY_TEXT));
         }
     }
 
@@ -89,7 +86,7 @@ public class SoftwareModuleTableHeader extends AbstractSoftwareModuleTableHeader
     @Override
     protected void searchBy(final String newSearchText) {
         getArtifactUploadState().getSoftwareModuleFilters().setSearchText(newSearchText);
-        eventbus.publish(this, new SMFilterEvent(SMFilterEventType.FILTER_BY_TEXT, artifactUploadState));
+        eventbus.publish(this, new SMFilterEvent(SMFilterEventType.FILTER_BY_TEXT));
     }
 
     @Override

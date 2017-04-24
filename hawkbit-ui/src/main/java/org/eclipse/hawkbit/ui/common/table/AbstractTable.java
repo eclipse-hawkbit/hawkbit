@@ -268,7 +268,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
 
     /**
      * Is called inside the onValueChange()-method and is performed after
-     * selecting the current entity in the table. If it is necessary to throw
+     * selecting the current entity in the table. If it is necessary to publish
      * one or more events after selecting the entity, this method can be
      * overridden
      */

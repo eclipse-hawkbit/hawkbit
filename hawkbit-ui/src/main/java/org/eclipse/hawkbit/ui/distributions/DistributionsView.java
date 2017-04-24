@@ -155,16 +155,17 @@ public class DistributionsView extends AbstractNotificationView implements Brows
     }
 
     private void buildLayout() {
-        if (isUserHasPermission()) {
-            setSizeFull();
-            setStyleName("rootLayout");
-            createMainLayout();
-            addComponents(mainLayout);
-            setExpandRatio(mainLayout, 1);
+        if (!hasUserPermission()) {
+            return;
         }
+        setSizeFull();
+        setStyleName("rootLayout");
+        createMainLayout();
+        addComponents(mainLayout);
+        setExpandRatio(mainLayout, 1);
     }
 
-    private boolean isUserHasPermission() {
+    private boolean hasUserPermission() {
         return permChecker.hasUpdateDistributionPermission() || permChecker.hasCreateDistributionPermission()
                 || permChecker.hasReadDistributionPermission();
     }

@@ -41,11 +41,6 @@ public class SwModuleDetails extends AbstractSoftwareModuleDetails {
     }
 
     @Override
-    protected boolean onLoadIsTableRowSelected() {
-        return manageDistUIState.getSelectedSoftwareModules().isEmpty();
-    }
-
-    @Override
     protected boolean onLoadIsTableMaximized() {
         return manageDistUIState.isSwModuleTableMaximized();
     }

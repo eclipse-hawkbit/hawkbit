@@ -43,8 +43,7 @@ public class DistributionTagButtonClick extends AbstractFilterMultiButtonClick {
         } else {
             managementUIState.getDistributionTableFilters().getDistSetTags().remove(clickedButton.getId());
         }
-        eventBus.publish(this,
-                new DistributionTableFilterEvent(DistributionTableFilterEventType.FILTER_BY_TAG, managementUIState));
+        eventBus.publish(this, new DistributionTableFilterEvent(DistributionTableFilterEventType.FILTER_BY_TAG));
     }
 
     @Override
@@ -54,8 +53,7 @@ public class DistributionTagButtonClick extends AbstractFilterMultiButtonClick {
         } else {
             managementUIState.getDistributionTableFilters().getDistSetTags().add(clickedButton.getId());
         }
-        eventBus.publish(this,
-                new DistributionTableFilterEvent(DistributionTableFilterEventType.FILTER_BY_TAG, managementUIState));
+        eventBus.publish(this, new DistributionTableFilterEvent(DistributionTableFilterEventType.FILTER_BY_TAG));
     }
 
 }

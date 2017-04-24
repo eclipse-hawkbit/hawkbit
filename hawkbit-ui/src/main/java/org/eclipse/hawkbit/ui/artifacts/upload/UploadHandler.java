@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.artifacts.upload;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
@@ -72,7 +73,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     private SoftwareModule selectedSwForUpload;
     private final ArtifactUploadState artifactUploadState;
 
-    private final SoftwareManagement softwareManagement;
+    private final transient SoftwareManagement softwareManagement;
 
     UploadHandler(final String fileName, final long fileSize, final UploadLayout view, final long maxSize,
             final Upload upload, final String mimeType, final SoftwareModule selectedSw,
@@ -212,10 +213,11 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     @Override
     public void uploadStarted(final StartedEvent event) {
         uploadInterrupted = false;
+        selectedSwForUpload = null;
 
-        if (artifactUploadState.getSelectedBaseSwModuleId().isPresent()) {
-            selectedSwForUpload = softwareManagement
-                    .findSoftwareModuleById(artifactUploadState.getSelectedBaseSwModuleId().get()).orElse(null);
+        final Optional<Long> selectedBaseSwModuleId = artifactUploadState.getSelectedBaseSwModuleId();
+        if (selectedBaseSwModuleId.isPresent()) {
+            selectedSwForUpload = softwareManagement.findSoftwareModuleById(selectedBaseSwModuleId.get()).orElse(null);
         }
 
         if (selectedSwForUpload != null && view.checkIfSoftwareModuleIsSelected()

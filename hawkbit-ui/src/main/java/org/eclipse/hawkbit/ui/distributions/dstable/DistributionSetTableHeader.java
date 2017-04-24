@@ -36,14 +36,11 @@ public class DistributionSetTableHeader extends AbstractDistributionSetTableHead
 
     private final DistributionAddUpdateWindowLayout addUpdateWindowLayout;
 
-    private final ManageDistUIState manageDistUIstate;
-
     DistributionSetTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final UIEventBus eventbus, final ManageDistUIState manageDistUIstate,
             final DistributionAddUpdateWindowLayout addUpdateWindowLayout) {
         super(i18n, permChecker, eventbus, null, manageDistUIstate, null);
         this.addUpdateWindowLayout = addUpdateWindowLayout;
-        this.manageDistUIstate = manageDistUIstate;
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -68,8 +65,8 @@ public class DistributionSetTableHeader extends AbstractDistributionSetTableHead
     protected void resetSearchText() {
         if (getManageDistUIstate().getManageDistFilters().getSearchText().isPresent()) {
             getManageDistUIstate().getManageDistFilters().setSearchText(null);
-            eventbus.publish(this, new DistributionTableFilterEvent(
-                    DistributionTableFilterEventType.REMOVE_FILTER_BY_TEXT, manageDistUIstate));
+            eventbus.publish(this,
+                    new DistributionTableFilterEvent(DistributionTableFilterEventType.REMOVE_FILTER_BY_TEXT));
         }
     }
 
@@ -98,8 +95,7 @@ public class DistributionSetTableHeader extends AbstractDistributionSetTableHead
     @Override
     protected void searchBy(final String newSearchText) {
         getManageDistUIstate().getManageDistFilters().setSearchText(newSearchText);
-        eventbus.publish(this,
-                new DistributionTableFilterEvent(DistributionTableFilterEventType.FILTER_BY_TEXT, manageDistUIstate));
+        eventbus.publish(this, new DistributionTableFilterEvent(DistributionTableFilterEventType.FILTER_BY_TEXT));
     }
 
     @Override

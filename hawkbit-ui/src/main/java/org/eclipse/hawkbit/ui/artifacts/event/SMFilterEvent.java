@@ -8,14 +8,14 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.event;
 
-import org.eclipse.hawkbit.ui.common.ManagementEntityState;
+import org.eclipse.hawkbit.ui.common.table.BaseUIEvent;
 
 /**
  * Software module filter event. Is thrown when there is a filter action on a
  * software module table on the Distribution or Upload View. It is possible to
  * filter by text or type.
  */
-public class SMFilterEvent {
+public class SMFilterEvent extends BaseUIEvent {
 
     /**
      * Enum for the different types of SMFilterEvent
@@ -41,27 +41,19 @@ public class SMFilterEvent {
 
     private final SMFilterEventType eventType;
 
-    private final ManagementEntityState<Long> origin;
-
     /**
      * Constructor for SMFilterEvent
      * 
      * @param eventType
      *            the type of the event
-     * @param origin
-     *            the origin of the event
      */
-    public SMFilterEvent(final SMFilterEventType eventType, final ManagementEntityState<Long> origin) {
+    public SMFilterEvent(final SMFilterEventType eventType) {
+        super();
         this.eventType = eventType;
-        this.origin = origin;
     }
 
     public SMFilterEventType getEventType() {
         return eventType;
-    }
-
-    public ManagementEntityState<Long> getOrigin() {
-        return origin;
     }
 
 }

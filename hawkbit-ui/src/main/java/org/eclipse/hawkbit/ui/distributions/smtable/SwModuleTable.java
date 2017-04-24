@@ -39,6 +39,7 @@ import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.eclipse.hawkbit.ui.view.filter.DistributionsViewFilter;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -98,18 +99,12 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
         styleTableOnDistSelection();
     }
 
-    @EventBusListenerMethod(scope = EventScope.UI)
+    @EventBusListenerMethod(scope = EventScope.UI, filter = DistributionsViewFilter.class)
     void onEvent(final SMFilterEvent filterEvent) {
-        if (isEventForCurrentView(filterEvent)) {
-            UI.getCurrent().access(() -> {
-                refreshFilter();
-                styleTableOnDistSelection();
-            });
-        }
-    }
-
-    private static boolean isEventForCurrentView(final SMFilterEvent filterEvent) {
-        return filterEvent.getOrigin() instanceof ManageDistUIState;
+        UI.getCurrent().access(() -> {
+            refreshFilter();
+            styleTableOnDistSelection();
+        });
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)

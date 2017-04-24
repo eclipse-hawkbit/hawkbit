@@ -234,11 +234,6 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
     }
 
     @Override
-    protected boolean onLoadIsTableRowSelected() {
-        return manageDistUIState.getSelectedDistributions().isEmpty();
-    }
-
-    @Override
     protected boolean onLoadIsTableMaximized() {
         return manageDistUIState.isDsTableMaximized();
     }

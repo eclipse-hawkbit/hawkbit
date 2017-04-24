@@ -47,6 +47,7 @@ import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.eclipse.hawkbit.ui.view.filter.DistributionsViewFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -429,15 +430,9 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
      * @param filterEvent
      *            as instance of {@link DistributionTableFilterEvent}
      */
-    @EventBusListenerMethod(scope = EventScope.UI)
+    @EventBusListenerMethod(scope = EventScope.UI, filter = DistributionsViewFilter.class)
     public void onEvent(final DistributionTableFilterEvent filterEvent) {
-        if (isEventForCurrentView(filterEvent)) {
-            UI.getCurrent().access(this::refreshFilter);
-        }
-    }
-
-    private static boolean isEventForCurrentView(final DistributionTableFilterEvent filterEvent) {
-        return filterEvent.getOrigin() instanceof ManageDistUIState;
+        UI.getCurrent().access(this::refreshFilter);
     }
 
     @Override

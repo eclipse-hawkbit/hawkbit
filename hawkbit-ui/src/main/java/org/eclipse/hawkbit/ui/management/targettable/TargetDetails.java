@@ -129,11 +129,6 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
     }
 
     @Override
-    protected boolean onLoadIsTableRowSelected() {
-        return getManagementUIState().getSelectedTargetId().isEmpty();
-    }
-
-    @Override
     protected boolean onLoadIsTableMaximized() {
         return getManagementUIState().isTargetTableMaximized();
     }

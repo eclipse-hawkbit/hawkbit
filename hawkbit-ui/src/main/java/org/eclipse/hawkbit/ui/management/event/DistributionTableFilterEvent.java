@@ -8,14 +8,14 @@
  */
 package org.eclipse.hawkbit.ui.management.event;
 
-import org.eclipse.hawkbit.ui.common.ManagementEntityState;
+import org.eclipse.hawkbit.ui.common.table.BaseUIEvent;
 
 /**
- * Distribution Set Filter Event. Is thrown when there is a filter action on a
- * distribution set table on the Deployment or Distribution View. It is possible
- * to filter by text or tag.
+ * Distribution Set Filter Event. Is published when there is a filter action on
+ * a distribution set table on the Deployment or Distribution View. It is
+ * possible to filter by text or tag.
  */
-public class DistributionTableFilterEvent {
+public class DistributionTableFilterEvent extends BaseUIEvent {
 
     /**
      * Enum for the different types of DistributionTableFilterEvents
@@ -41,28 +41,19 @@ public class DistributionTableFilterEvent {
 
     private final DistributionTableFilterEventType eventType;
 
-    private final ManagementEntityState<Long> origin;
-
     /**
      * Constructor for DistributionTableFilterEvent
      * 
      * @param eventType
      *            the type of the event
-     * @param origin
-     *            the origin of the event
      */
-    public DistributionTableFilterEvent(final DistributionTableFilterEventType eventType,
-            final ManagementEntityState<Long> origin) {
+    public DistributionTableFilterEvent(final DistributionTableFilterEventType eventType) {
+        super();
         this.eventType = eventType;
-        this.origin = origin;
     }
 
     public DistributionTableFilterEventType getEventType() {
         return eventType;
-    }
-
-    public ManagementEntityState<Long> getOrigin() {
-        return origin;
     }
 
 }

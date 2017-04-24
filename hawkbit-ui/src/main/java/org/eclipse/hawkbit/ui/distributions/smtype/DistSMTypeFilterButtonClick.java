@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.distributions.smtype;
 
-import java.io.Serializable;
-
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent.SMFilterEventType;
@@ -23,7 +21,7 @@ import com.vaadin.ui.Button;
 /**
  * Single button click behaviour of filter buttons layout.
  */
-public class DistSMTypeFilterButtonClick extends AbstractFilterSingleButtonClick implements Serializable {
+public class DistSMTypeFilterButtonClick extends AbstractFilterSingleButtonClick {
 
     private static final long serialVersionUID = -4166632002904286983L;
 
@@ -43,14 +41,14 @@ public class DistSMTypeFilterButtonClick extends AbstractFilterSingleButtonClick
     @Override
     protected void filterUnClicked(final Button clickedButton) {
         manageDistUIState.getSoftwareModuleFilters().setSoftwareModuleType(null);
-        eventBus.publish(this, new SMFilterEvent(SMFilterEventType.FILTER_BY_TYPE, manageDistUIState));
+        eventBus.publish(this, new SMFilterEvent(SMFilterEventType.FILTER_BY_TYPE));
     }
 
     @Override
     protected void filterClicked(final Button clickedButton) {
         softwareManagement.findSoftwareModuleTypeByName(clickedButton.getData().toString()).ifPresent(smType -> {
             manageDistUIState.getSoftwareModuleFilters().setSoftwareModuleType(smType);
-            eventBus.publish(this, new SMFilterEvent(SMFilterEventType.FILTER_BY_TYPE, manageDistUIState));
+            eventBus.publish(this, new SMFilterEvent(SMFilterEventType.FILTER_BY_TYPE));
         });
     }
 

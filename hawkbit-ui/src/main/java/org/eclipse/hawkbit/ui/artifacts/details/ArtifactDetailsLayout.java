@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
@@ -105,7 +106,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private final transient SoftwareManagement softwareManagement;
 
-    private final SoftwareModule selectedSoftwareModule;
+    private final Optional<SoftwareModule> selectedSoftwareModule;
 
     public ArtifactDetailsLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final ArtifactUploadState artifactUploadState, final UINotification uINotification,
@@ -122,29 +123,28 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         buildLayout();
         eventBus.subscribe(this);
 
-        if (selectedSoftwareModule != null) {
-            populateArtifactDetails(selectedSoftwareModule.getId(), HawkbitCommonUtil
-                    .getFormattedNameVersion(selectedSoftwareModule.getName(), selectedSoftwareModule.getVersion()));
-        }
+        selectedSoftwareModule.ifPresent(softwareModule -> populateArtifactDetails(softwareModule.getId(),
+                HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(), softwareModule.getVersion())));
 
         if (isMaximized()) {
             maximizedArtifactDetailsView();
         }
     }
 
-    private SoftwareModule getSelectedSoftwareModule() {
-        if (artifactUploadState.getSelectedBaseSwModuleId().isPresent()) {
-            return softwareManagement.findSoftwareModuleById(artifactUploadState.getSelectedBaseSwModuleId().get())
-                    .orElse(null);
+    private Optional<SoftwareModule> getSelectedSoftwareModule() {
+        final Optional<Long> selectedBaseSwModuleId = artifactUploadState.getSelectedBaseSwModuleId();
+        if (selectedBaseSwModuleId.isPresent()) {
+            return softwareManagement.findSoftwareModuleById(selectedBaseSwModuleId.get());
         }
-        return null;
+        return Optional.empty();
     }
 
     private void createComponents() {
         String labelStr = "";
-        if (selectedSoftwareModule != null) {
-            labelStr = HawkbitCommonUtil.getFormattedNameVersion(selectedSoftwareModule.getName(),
-                    selectedSoftwareModule.getVersion());
+        final Optional<SoftwareModule> selectedBaseSwModule = selectedSoftwareModule;
+        if (selectedBaseSwModule.isPresent()) {
+            labelStr = HawkbitCommonUtil.getFormattedNameVersion(selectedSoftwareModule.get().getName(),
+                    selectedSoftwareModule.get().getVersion());
         }
 
         titleOfArtifactDetails = new LabelBuilder().id(UIComponentIdProvider.ARTIFACT_DETAILS_HEADER_LABEL_ID)
@@ -271,9 +271,9 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                         artifactManagement.deleteArtifact(id);
                         uINotification.displaySuccess(i18n.getMessage("message.artifact.deleted", fileName));
                         if (artifactUploadState.getSelectedBaseSwModuleId().isPresent()) {
-                            final SoftwareModule sm = getSelectedSoftwareModule();
-                            populateArtifactDetails(sm.getId(),
-                                    HawkbitCommonUtil.getFormattedNameVersion(sm.getName(), sm.getVersion()));
+                            final Optional<SoftwareModule> softwareModule = getSelectedSoftwareModule();
+                            softwareModule.ifPresent(swm -> populateArtifactDetails(swm.getId(),
+                                    HawkbitCommonUtil.getFormattedNameVersion(swm.getName(), swm.getVersion())));
                         } else {
                             populateArtifactDetails(null, null);
                         }
@@ -441,19 +441,8 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SoftwareModuleEvent softwareModuleEvent) {
-        if (softwareModuleEvent.getEventType() == BaseEntityEventType.SELECTED_ENTITY) {
-            UI.getCurrent().access(() -> {
-                if (softwareModuleEvent.getEntity() != null) {
-                    populateArtifactDetails(softwareModuleEvent.getEntity().getId(),
-                            HawkbitCommonUtil.getFormattedNameVersion(softwareModuleEvent.getEntity().getName(),
-                                    softwareModuleEvent.getEntity().getVersion()));
-                } else {
-                    populateArtifactDetails(null, null);
-                }
-            });
-        }
-        if (softwareModuleEvent.getSoftwareModuleEventType() == SoftwareModuleEventType.ARTIFACTS_CHANGED
-                || softwareModuleEvent.getEventType() == BaseEntityEventType.REMOVE_ENTITY) {
+        if (softwareModuleEvent.getEventType() == BaseEntityEventType.SELECTED_ENTITY
+                || softwareModuleEvent.getSoftwareModuleEventType() == SoftwareModuleEventType.ARTIFACTS_CHANGED) {
             UI.getCurrent().access(() -> {
                 if (softwareModuleEvent.getEntity() != null) {
                     populateArtifactDetails(softwareModuleEvent.getEntity().getId(),

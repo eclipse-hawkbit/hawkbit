@@ -48,6 +48,7 @@ import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.eclipse.hawkbit.ui.view.filter.DeploymentViewFilter;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -174,15 +175,9 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
      * @param filterEvent
      *            as instance of {@link DistributionTableFilterEvent}
      */
-    @EventBusListenerMethod(scope = EventScope.UI)
+    @EventBusListenerMethod(scope = EventScope.UI, filter = DeploymentViewFilter.class)
     void onEvent(final DistributionTableFilterEvent filterEvent) {
-        if (isEventForCurrentView(filterEvent)) {
-            UI.getCurrent().access(this::refreshFilter);
-        }
-    }
-
-    private static boolean isEventForCurrentView(final DistributionTableFilterEvent filterEvent) {
-        return filterEvent.getOrigin() instanceof ManagementUIState;
+        UI.getCurrent().access(this::refreshFilter);
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
