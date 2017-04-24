@@ -595,7 +595,6 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     }
 
     private void assertAction(final Long actionId, final Status... expectedActionStates) {
-
         createConditionFactory().await().until(() -> {
             try {
                 securityRule.runAsPrivileged(() -> {

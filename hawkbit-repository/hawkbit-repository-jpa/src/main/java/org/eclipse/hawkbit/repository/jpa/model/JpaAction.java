@@ -64,7 +64,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     private JpaDistributionSet distributionSet;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "target", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_target"))
+    @JoinColumn(name = "target", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_act_hist_targ"))
     @NotNull
     private JpaTarget target;
 

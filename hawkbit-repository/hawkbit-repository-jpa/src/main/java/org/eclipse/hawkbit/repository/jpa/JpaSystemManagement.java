@@ -210,21 +210,22 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Override
     @Transactional
-    public void deleteTenant(final String tenant) {
+    public void deleteTenant(final String t) {
+        final String tenant = t.toUpperCase();
         cacheManager.evictCaches(tenant);
         tenantAware.runAsTenant(tenant, () -> {
-            entityManager.setProperty(PersistenceUnitProperties.MULTITENANT_PROPERTY_DEFAULT, tenant.toUpperCase());
+            entityManager.setProperty(PersistenceUnitProperties.MULTITENANT_PROPERTY_DEFAULT, tenant);
             tenantMetaDataRepository.deleteByTenantIgnoreCase(tenant);
-            tenantConfigurationRepository.deleteByTenantIgnoreCase(tenant);
-            targetRepository.deleteByTenantIgnoreCase(tenant);
-            targetFilterQueryRepository.deleteByTenantIgnoreCase(tenant);
-            rolloutRepository.deleteByTenantIgnoreCase(tenant);
-            targetTagRepository.deleteByTenantIgnoreCase(tenant);
-            distributionSetTagRepository.deleteByTenantIgnoreCase(tenant);
-            distributionSetRepository.deleteByTenantIgnoreCase(tenant);
-            distributionSetTypeRepository.deleteByTenantIgnoreCase(tenant);
-            softwareModuleRepository.deleteByTenantIgnoreCase(tenant);
-            softwareModuleTypeRepository.deleteByTenantIgnoreCase(tenant);
+            tenantConfigurationRepository.deleteByTenant(tenant);
+            targetRepository.deleteByTenant(tenant);
+            targetFilterQueryRepository.deleteByTenant(tenant);
+            rolloutRepository.deleteByTenant(tenant);
+            targetTagRepository.deleteByTenant(tenant);
+            distributionSetTagRepository.deleteByTenant(tenant);
+            distributionSetRepository.deleteByTenant(tenant);
+            distributionSetTypeRepository.deleteByTenant(tenant);
+            softwareModuleRepository.deleteByTenant(tenant);
+            softwareModuleTypeRepository.deleteByTenant(tenant);
             return null;
         });
     }
