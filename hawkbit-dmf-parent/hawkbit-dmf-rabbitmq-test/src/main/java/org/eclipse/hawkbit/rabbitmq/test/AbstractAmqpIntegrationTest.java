@@ -84,8 +84,8 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
     RabbitTemplate createDmfClient() {
         final RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(new Jackson2JsonMessageConverter());
-        template.setReceiveTimeout(TimeUnit.SECONDS.toMillis(2));
-        template.setReplyTimeout(TimeUnit.SECONDS.toMillis(2));
+        template.setReceiveTimeout(TimeUnit.SECONDS.toMillis(3));
+        template.setReplyTimeout(TimeUnit.SECONDS.toMillis(3));
         template.setExchange(getExchange());
         return template;
     }
