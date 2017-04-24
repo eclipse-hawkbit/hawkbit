@@ -110,8 +110,8 @@ public class AmqpTestConfiguration {
     public RabbitTemplate rabbitTemplateForTest(ConnectionFactory connectionFactory) {
         final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
-        rabbitTemplate.setReplyTimeout(TimeUnit.SECONDS.toMillis(2));
-        rabbitTemplate.setReceiveTimeout(TimeUnit.SECONDS.toMillis(2));
+        rabbitTemplate.setReplyTimeout(TimeUnit.SECONDS.toMillis(3));
+        rabbitTemplate.setReceiveTimeout(TimeUnit.SECONDS.toMillis(3));
         return rabbitTemplate;
     }
 
