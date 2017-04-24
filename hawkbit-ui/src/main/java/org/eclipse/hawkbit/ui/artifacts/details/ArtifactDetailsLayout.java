@@ -106,7 +106,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private final transient SoftwareManagement softwareManagement;
 
-    private final Optional<SoftwareModule> selectedSoftwareModule;
+    private final transient Optional<SoftwareModule> selectedSoftwareModule;
 
     public ArtifactDetailsLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final ArtifactUploadState artifactUploadState, final UINotification uINotification,
