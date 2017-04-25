@@ -27,8 +27,10 @@ This can be configured/disabled by spring boot properties
 ## hawkBit APIs
 
 The simulator supports `DDI` as well as the `DMF` integration APIs.
-In case there is no AMQP message broker (like rabbitMQ) running, you can disable the AMQP support for the device simulator, so the simulator is not trying to connect to an amqp message broker. 
-Configuration property `hawkbit.device.simulator.amqp.enabled=true` 
+
+In case there is no AMQP message broker (like rabbitMQ) running, you can disable the AMQP support for the device simulator, so the simulator is not trying to connect to an amqp message broker.
+
+Configuration property `hawkbit.device.simulator.amqp.enabled=false`
 
 ## Usage
 

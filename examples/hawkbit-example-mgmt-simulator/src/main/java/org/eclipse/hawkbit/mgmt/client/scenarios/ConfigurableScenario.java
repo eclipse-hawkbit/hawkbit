@@ -316,31 +316,36 @@ public class ConfigurableScenario {
 
     private void createDistributionSets(final Scenario scenario) {
         LOGGER.info("Creating {} distribution sets", scenario.getDistributionSets());
+        IntStream.range(0, scenario.getDistributionSets() / PAGE_SIZE).parallel()
+                .forEach(i -> createDistributionSetPage(scenario, i));
+        LOGGER.info("Creating {} distribution sets -> Done", scenario.getDistributionSets());
+    }
+
+    private void createDistributionSetPage(final Scenario scenario, final int page) {
 
         final List<MgmtDistributionSet> sets = distributionSetResource
                 .createDistributionSets(new DistributionSetBuilder().name(scenario.getDsName()).type("os_app")
-                        .version("1.0.").buildAsList(scenario.getDistributionSets()))
+                        .version("1.0.").buildAsList(calculateOffset(page),
+                                (page + 1) * PAGE_SIZE > scenario.getDistributionSets()
+                                        ? (scenario.getDistributionSets() - calculateOffset(page)) : PAGE_SIZE))
                 .getBody();
 
         assignSoftwareModulesTo(scenario, sets);
 
-        tagDistributionSets(scenario, sets);
+        tagDistributionSets(page, sets);
 
-        LOGGER.info("Creating {} distribution sets -> Done", scenario.getDistributionSets());
     }
 
-    private void tagDistributionSets(final Scenario scenario, final List<MgmtDistributionSet> sets) {
-        for (int i = 0; i < scenario.getDsTags(); i++) {
-            final MgmtTag tag = distributionSetTagResource
-                    .createDistributionSetTags(
-                            new TagBuilder().name("DS Tag" + i).description("DS tag for DS " + i).build())
-                    .getBody().get(0);
+    private void tagDistributionSets(final int page, final List<MgmtDistributionSet> sets) {
+        final MgmtTag tag = distributionSetTagResource
+                .createDistributionSetTags(
+                        new TagBuilder().name("Page " + page).description("DS tag for DS page" + page).build())
+                .getBody().get(0);
 
-            distributionSetTagResource.assignDistributionSets(tag.getTagId(),
-                    sets.stream().map(
-                            set -> new MgmtAssignedDistributionSetRequestBody().setDistributionSetId(set.getDsId()))
-                            .collect(Collectors.toList()));
-        }
+        distributionSetTagResource.assignDistributionSets(tag.getTagId(),
+                sets.stream()
+                        .map(set -> new MgmtAssignedDistributionSetRequestBody().setDistributionSetId(set.getDsId()))
+                        .collect(Collectors.toList()));
     }
 
     private void assignSoftwareModulesTo(final Scenario scenario, final List<MgmtDistributionSet> sets) {
