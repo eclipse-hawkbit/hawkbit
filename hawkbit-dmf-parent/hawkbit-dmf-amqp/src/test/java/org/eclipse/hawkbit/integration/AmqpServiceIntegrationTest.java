@@ -85,7 +85,6 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         }
     }
 
-
     protected DeadletterListener getDeadletterListener() {
         return deadletterListener;
     }
@@ -214,8 +213,8 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         assertThat(target.getDescription()).contains(target.getControllerId());
         assertThat(target.getCreatedBy()).isEqualTo(createdBy);
         assertThat(target.getUpdateStatus()).isEqualTo(updateStatus);
-        assertThat(target.getAddress()).isEqualTo(
-                IpUtil.createAmqpUri(getConnectionFactory().getVirtualHost(), DmfTestConfiguration.REPLY_TO_EXCHANGE));
+        assertThat(target.getAddress())
+                .isEqualTo(IpUtil.createAmqpUri(getVirtualHost(), DmfTestConfiguration.REPLY_TO_EXCHANGE));
     }
 
     protected Message createTargetMessage(final String target, final String tenant) {

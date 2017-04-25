@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- *
+ * DMF Test configuration.
  */
 @Configuration
 @RabbitListenerTest

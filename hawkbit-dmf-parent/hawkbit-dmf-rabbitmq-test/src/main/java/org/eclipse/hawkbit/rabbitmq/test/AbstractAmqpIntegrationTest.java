@@ -81,7 +81,7 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
         return rabbitAdmin;
     }
 
-    RabbitTemplate createDmfClient() {
+    private RabbitTemplate createDmfClient() {
         final RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(new Jackson2JsonMessageConverter());
         template.setReceiveTimeout(TimeUnit.SECONDS.toMillis(3));
@@ -90,8 +90,8 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
         return template;
     }
 
-    protected ConnectionFactory getConnectionFactory() {
-        return connectionFactory;
+    protected String getVirtualHost() {
+        return connectionFactory.getVirtualHost();
     }
 
 }

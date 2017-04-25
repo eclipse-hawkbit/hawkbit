@@ -82,8 +82,7 @@ public class AmqpTestConfiguration {
     }
 
     @Bean
-    ConnectionFactory rabbitConnectionFactory(final RabbitMqSetupService rabbitmqSetupService)
-            throws AlivenessException {
+    ConnectionFactory rabbitConnectionFactory(final RabbitMqSetupService rabbitmqSetupService) {
         final CachingConnectionFactory factory = new CachingConnectionFactory();
         factory.setHost(rabbitmqSetupService.getHostname());
         factory.setPort(5672);
@@ -91,7 +90,7 @@ public class AmqpTestConfiguration {
         factory.setPassword(rabbitmqSetupService.getPassword());
         try {
             factory.setVirtualHost(rabbitmqSetupService.createVirtualHost());
-            // all exception should be catch the BrokerRunning decide if the
+            // All exception are catched. The BrokerRunning decide if the
             // test should break or not
         } catch (@SuppressWarnings("squid:S2221") final Exception e) {
             Throwables.propagateIfInstanceOf(e, AlivenessException.class);
