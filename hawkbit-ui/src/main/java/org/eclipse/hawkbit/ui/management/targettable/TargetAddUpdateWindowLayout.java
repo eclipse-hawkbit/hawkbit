@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
-import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -63,11 +62,11 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     private FormLayout formLayout;
     private CommonDialogWindow window;
 
-    private final AbstractTable<Target, Long> targetTable;
+    private final TargetTable targetTable;
 
     TargetAddUpdateWindowLayout(final VaadinMessageSource i18n, final TargetManagement targetManagement,
             final UIEventBus eventBus, final UINotification uINotification, final EntityFactory entityFactory,
-            final AbstractTable<Target, Long> targetTable) {
+            final TargetTable targetTable) {
         this.i18n = i18n;
         this.targetManagement = targetManagement;
         this.eventBus = eventBus;

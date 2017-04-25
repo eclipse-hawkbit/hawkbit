@@ -14,7 +14,7 @@ import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
+import org.eclipse.hawkbit.ui.artifacts.event.RefreshSoftwareModuleByFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
@@ -33,7 +33,7 @@ import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.eclipse.hawkbit.ui.view.filter.UploadArtifactViewFilter;
+import org.eclipse.hawkbit.ui.view.filter.OnlyEventsFromUploadArtifactViewFilter;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -81,8 +81,8 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         setDataAvailable(getContainerDataSource().size() != 0);
     }
 
-    @EventBusListenerMethod(scope = EventScope.UI, filter = UploadArtifactViewFilter.class)
-    void onEvent(final SMFilterEvent filterEvent) {
+    @EventBusListenerMethod(scope = EventScope.UI, filter = OnlyEventsFromUploadArtifactViewFilter.class)
+    void onEvent(final RefreshSoftwareModuleByFilterEvent filterEvent) {
         UI.getCurrent().access(this::refreshFilter);
     }
 

@@ -12,8 +12,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.table.AbstractDistributionSetTableHeader;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
-import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
-import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent.DistributionTableFilterEventType;
+import org.eclipse.hawkbit.ui.management.event.RefreshDistributionTableByFilterEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -60,8 +59,7 @@ public class DistributionTableHeader extends AbstractDistributionSetTableHeader 
     protected void resetSearchText() {
         if (getManagementUIState().getDistributionTableFilters().getSearchText().isPresent()) {
             getManagementUIState().getDistributionTableFilters().setSearchText(null);
-            eventbus.publish(this,
-                    new DistributionTableFilterEvent(DistributionTableFilterEventType.REMOVE_FILTER_BY_TEXT));
+            eventbus.publish(this, new RefreshDistributionTableByFilterEvent());
         }
     }
 
@@ -90,7 +88,7 @@ public class DistributionTableHeader extends AbstractDistributionSetTableHeader 
     @Override
     protected void searchBy(final String newSearchText) {
         getManagementUIState().getDistributionTableFilters().setSearchText(newSearchText);
-        eventbus.publish(this, new DistributionTableFilterEvent(DistributionTableFilterEventType.FILTER_BY_TEXT));
+        eventbus.publish(this, new RefreshDistributionTableByFilterEvent());
     }
 
     @Override

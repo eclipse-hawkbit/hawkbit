@@ -9,8 +9,7 @@
 package org.eclipse.hawkbit.ui.distributions.smtype;
 
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent.SMFilterEventType;
+import org.eclipse.hawkbit.ui.artifacts.event.RefreshSoftwareModuleByFilterEvent;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterSingleButtonClick;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.vaadin.spring.events.EventBus;
@@ -41,14 +40,14 @@ public class DistSMTypeFilterButtonClick extends AbstractFilterSingleButtonClick
     @Override
     protected void filterUnClicked(final Button clickedButton) {
         manageDistUIState.getSoftwareModuleFilters().setSoftwareModuleType(null);
-        eventBus.publish(this, new SMFilterEvent(SMFilterEventType.FILTER_BY_TYPE));
+        eventBus.publish(this, new RefreshSoftwareModuleByFilterEvent());
     }
 
     @Override
     protected void filterClicked(final Button clickedButton) {
         softwareManagement.findSoftwareModuleTypeByName(clickedButton.getData().toString()).ifPresent(smType -> {
             manageDistUIState.getSoftwareModuleFilters().setSoftwareModuleType(smType);
-            eventBus.publish(this, new SMFilterEvent(SMFilterEventType.FILTER_BY_TYPE));
+            eventBus.publish(this, new RefreshSoftwareModuleByFilterEvent());
         });
     }
 

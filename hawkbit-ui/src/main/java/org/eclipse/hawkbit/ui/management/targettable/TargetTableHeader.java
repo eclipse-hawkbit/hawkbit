@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
@@ -84,7 +83,7 @@ public class TargetTableHeader extends AbstractTableHeader {
             final DeploymentManagement deploymentManagement, final UiProperties uiproperties, final UIEventBus eventBus,
             final EntityFactory entityFactory, final UINotification uinotification, final TagManagement tagManagement,
             final DistributionSetManagement distributionSetManagement, final Executor uiExecutor,
-            final AbstractTable<Target, Long> targetTable) {
+            final TargetTable targetTable) {
         super(i18n, permChecker, eventbus, managementUIState, null, null);
         this.notification = notification;
         this.managementViewClientCriterion = managementViewClientCriterion;

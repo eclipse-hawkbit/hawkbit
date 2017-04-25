@@ -15,8 +15,7 @@ import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionAddUpdateWindowLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
-import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
-import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent.DistributionTableFilterEventType;
+import org.eclipse.hawkbit.ui.management.event.RefreshDistributionTableByFilterEvent;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -65,8 +64,7 @@ public class DistributionSetTableHeader extends AbstractDistributionSetTableHead
     protected void resetSearchText() {
         if (getManageDistUIstate().getManageDistFilters().getSearchText().isPresent()) {
             getManageDistUIstate().getManageDistFilters().setSearchText(null);
-            eventbus.publish(this,
-                    new DistributionTableFilterEvent(DistributionTableFilterEventType.REMOVE_FILTER_BY_TEXT));
+            eventbus.publish(this, new RefreshDistributionTableByFilterEvent());
         }
     }
 
@@ -95,7 +93,7 @@ public class DistributionSetTableHeader extends AbstractDistributionSetTableHead
     @Override
     protected void searchBy(final String newSearchText) {
         getManageDistUIstate().getManageDistFilters().setSearchText(newSearchText);
-        eventbus.publish(this, new DistributionTableFilterEvent(DistributionTableFilterEventType.FILTER_BY_TEXT));
+        eventbus.publish(this, new RefreshDistributionTableByFilterEvent());
     }
 
     @Override

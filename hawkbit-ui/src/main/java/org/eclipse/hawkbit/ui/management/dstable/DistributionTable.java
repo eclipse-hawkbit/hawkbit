@@ -34,7 +34,7 @@ import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.dstable.DsMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
-import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
+import org.eclipse.hawkbit.ui.management.event.RefreshDistributionTableByFilterEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
@@ -48,7 +48,7 @@ import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.eclipse.hawkbit.ui.view.filter.DeploymentViewFilter;
+import org.eclipse.hawkbit.ui.view.filter.OnlyEventsFromDeploymentViewFilter;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -173,10 +173,10 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
      * DistributionTableFilterEvent.
      *
      * @param filterEvent
-     *            as instance of {@link DistributionTableFilterEvent}
+     *            as instance of {@link RefreshDistributionTableByFilterEvent}
      */
-    @EventBusListenerMethod(scope = EventScope.UI, filter = DeploymentViewFilter.class)
-    void onEvent(final DistributionTableFilterEvent filterEvent) {
+    @EventBusListenerMethod(scope = EventScope.UI, filter = OnlyEventsFromDeploymentViewFilter.class)
+    void onEvent(final RefreshDistributionTableByFilterEvent filterEvent) {
         UI.getCurrent().access(this::refreshFilter);
     }
 

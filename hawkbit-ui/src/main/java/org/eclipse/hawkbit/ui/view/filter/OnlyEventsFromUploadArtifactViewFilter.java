@@ -8,17 +8,17 @@
  */
 package org.eclipse.hawkbit.ui.view.filter;
 
+import org.eclipse.hawkbit.ui.artifacts.UploadArtifactView;
 import org.eclipse.hawkbit.ui.common.table.AbstractBaseViewFilter;
-import org.eclipse.hawkbit.ui.management.DeploymentView;
 
 /**
- * View Filter class which holds the information about the Deployment View
+ * View Filter class which holds the information about the Upload View
  *
  */
-public class DeploymentViewFilter extends AbstractBaseViewFilter {
+public class OnlyEventsFromUploadArtifactViewFilter extends AbstractBaseViewFilter {
 
     @Override
     protected Class<?> getOriginView() {
-        return DeploymentView.class;
+        return UploadArtifactView.class;
     }
 }

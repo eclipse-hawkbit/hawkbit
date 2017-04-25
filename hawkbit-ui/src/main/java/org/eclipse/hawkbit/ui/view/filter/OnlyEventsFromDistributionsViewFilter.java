@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.ui.distributions.DistributionsView;
  * View Filter class which holds the information about the Distributions View
  *
  */
-public class DistributionsViewFilter extends AbstractBaseViewFilter {
+public class OnlyEventsFromDistributionsViewFilter extends AbstractBaseViewFilter {
 
     @Override
     protected Class<?> getOriginView() {

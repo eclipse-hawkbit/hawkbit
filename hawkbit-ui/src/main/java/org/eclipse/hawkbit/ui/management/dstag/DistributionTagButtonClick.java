@@ -9,8 +9,7 @@
 package org.eclipse.hawkbit.ui.management.dstag;
 
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterMultiButtonClick;
-import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
-import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent.DistributionTableFilterEventType;
+import org.eclipse.hawkbit.ui.management.event.RefreshDistributionTableByFilterEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.vaadin.spring.events.EventBus;
@@ -43,7 +42,7 @@ public class DistributionTagButtonClick extends AbstractFilterMultiButtonClick {
         } else {
             managementUIState.getDistributionTableFilters().getDistSetTags().remove(clickedButton.getId());
         }
-        eventBus.publish(this, new DistributionTableFilterEvent(DistributionTableFilterEventType.FILTER_BY_TAG));
+        eventBus.publish(this, new RefreshDistributionTableByFilterEvent());
     }
 
     @Override
@@ -53,7 +52,7 @@ public class DistributionTagButtonClick extends AbstractFilterMultiButtonClick {
         } else {
             managementUIState.getDistributionTableFilters().getDistSetTags().add(clickedButton.getId());
         }
-        eventBus.publish(this, new DistributionTableFilterEvent(DistributionTableFilterEventType.FILTER_BY_TAG));
+        eventBus.publish(this, new RefreshDistributionTableByFilterEvent());
     }
 
 }

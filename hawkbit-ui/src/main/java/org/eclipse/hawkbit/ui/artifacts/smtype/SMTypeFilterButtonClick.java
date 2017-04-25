@@ -9,8 +9,7 @@
 package org.eclipse.hawkbit.ui.artifacts.smtype;
 
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent.SMFilterEventType;
+import org.eclipse.hawkbit.ui.artifacts.event.RefreshSoftwareModuleByFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterSingleButtonClick;
 import org.vaadin.spring.events.EventBus;
@@ -42,7 +41,7 @@ public class SMTypeFilterButtonClick extends AbstractFilterSingleButtonClick {
     @Override
     protected void filterUnClicked(final Button clickedButton) {
         artifactUploadState.getSoftwareModuleFilters().setSoftwareModuleType(null);
-        eventBus.publish(this, new SMFilterEvent(SMFilterEventType.FILTER_BY_TYPE));
+        eventBus.publish(this, new RefreshSoftwareModuleByFilterEvent());
     }
 
     @Override
@@ -50,7 +49,7 @@ public class SMTypeFilterButtonClick extends AbstractFilterSingleButtonClick {
         softwareManagement.findSoftwareModuleTypeByName(clickedButton.getData().toString())
                 .ifPresent(softwareModuleType -> {
                     artifactUploadState.getSoftwareModuleFilters().setSoftwareModuleType(softwareModuleType);
-                    eventBus.publish(this, new SMFilterEvent(SMFilterEventType.FILTER_BY_TYPE));
+                    eventBus.publish(this, new RefreshSoftwareModuleByFilterEvent());
                 });
     }
 

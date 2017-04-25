@@ -9,9 +9,8 @@
 package org.eclipse.hawkbit.ui.distributions.smtable;
 
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent.SMFilterEventType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
+import org.eclipse.hawkbit.ui.artifacts.event.RefreshSoftwareModuleByFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.common.table.AbstractSoftwareModuleTableHeader;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
@@ -58,7 +57,7 @@ public class SwModuleTableHeader extends AbstractSoftwareModuleTableHeader {
     protected void resetSearchText() {
         if (getManageDistUIstate().getSoftwareModuleFilters().getSearchText().isPresent()) {
             getManageDistUIstate().getSoftwareModuleFilters().setSearchText(null);
-            eventbus.publish(this, new SMFilterEvent(SMFilterEventType.REMOVE_FILTER_BY_TEXT));
+            eventbus.publish(this, new RefreshSoftwareModuleByFilterEvent());
         }
     }
 
@@ -88,7 +87,7 @@ public class SwModuleTableHeader extends AbstractSoftwareModuleTableHeader {
     @Override
     protected void searchBy(final String newSearchText) {
         getManageDistUIstate().getSoftwareModuleFilters().setSearchText(newSearchText);
-        eventbus.publish(this, new SMFilterEvent(SMFilterEventType.FILTER_BY_TEXT));
+        eventbus.publish(this, new RefreshSoftwareModuleByFilterEvent());
     }
 
 }

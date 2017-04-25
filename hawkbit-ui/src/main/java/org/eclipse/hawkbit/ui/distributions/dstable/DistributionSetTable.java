@@ -37,7 +37,7 @@ import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
-import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
+import org.eclipse.hawkbit.ui.management.event.RefreshDistributionTableByFilterEvent;
 import org.eclipse.hawkbit.ui.push.DistributionSetUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -47,7 +47,7 @@ import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.eclipse.hawkbit.ui.view.filter.DistributionsViewFilter;
+import org.eclipse.hawkbit.ui.view.filter.OnlyEventsFromDistributionsViewFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -189,7 +189,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     @Override
-    protected void publishAdditionalEvent() {
+    protected void afterEntityIsSelected() {
         eventBus.publish(this, DistributionsUIEvent.ORDER_BY_DISTRIBUTION);
     }
 
@@ -428,10 +428,10 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
      * DistributionTableFilterEvent.
      *
      * @param filterEvent
-     *            as instance of {@link DistributionTableFilterEvent}
+     *            as instance of {@link RefreshDistributionTableByFilterEvent}
      */
-    @EventBusListenerMethod(scope = EventScope.UI, filter = DistributionsViewFilter.class)
-    public void onEvent(final DistributionTableFilterEvent filterEvent) {
+    @EventBusListenerMethod(scope = EventScope.UI, filter = OnlyEventsFromDistributionsViewFilter.class)
+    public void onEvent(final RefreshDistributionTableByFilterEvent filterEvent) {
         UI.getCurrent().access(this::refreshFilter);
     }
 

@@ -9,9 +9,8 @@
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent.SMFilterEventType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
+import org.eclipse.hawkbit.ui.artifacts.event.RefreshSoftwareModuleByFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.AbstractSoftwareModuleTableHeader;
@@ -57,7 +56,7 @@ public class SoftwareModuleTableHeader extends AbstractSoftwareModuleTableHeader
     protected void resetSearchText() {
         if (getArtifactUploadState().getSoftwareModuleFilters().getSearchText().isPresent()) {
             getArtifactUploadState().getSoftwareModuleFilters().setSearchText(null);
-            eventbus.publish(this, new SMFilterEvent(SMFilterEventType.REMOVE_FILTER_BY_TEXT));
+            eventbus.publish(this, new RefreshSoftwareModuleByFilterEvent());
         }
     }
 
@@ -86,7 +85,7 @@ public class SoftwareModuleTableHeader extends AbstractSoftwareModuleTableHeader
     @Override
     protected void searchBy(final String newSearchText) {
         getArtifactUploadState().getSoftwareModuleFilters().setSearchText(newSearchText);
-        eventbus.publish(this, new SMFilterEvent(SMFilterEventType.FILTER_BY_TEXT));
+        eventbus.publish(this, new RefreshSoftwareModuleByFilterEvent());
     }
 
     @Override

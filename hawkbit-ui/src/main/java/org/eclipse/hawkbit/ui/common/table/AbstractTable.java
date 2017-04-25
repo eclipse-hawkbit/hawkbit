@@ -115,7 +115,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
         }
         setManagementEntityStateValues(values, lastId);
         selectEntity(lastId);
-        publishAdditionalEvent();
+        afterEntityIsSelected();
     }
 
     protected void setManagementEntityStateValues(final Set<I> values, final I lastId) {
@@ -272,7 +272,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
      * one or more events after selecting the entity, this method can be
      * overridden
      */
-    protected void publishAdditionalEvent() {
+    protected void afterEntityIsSelected() {
         // can be overridden by subclass
     }
 

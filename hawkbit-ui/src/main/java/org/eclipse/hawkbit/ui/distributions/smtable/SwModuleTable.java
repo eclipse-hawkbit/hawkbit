@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsLayout;
-import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
+import org.eclipse.hawkbit.ui.artifacts.event.RefreshSoftwareModuleByFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.ManagementEntityState;
@@ -39,7 +39,7 @@ import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.eclipse.hawkbit.ui.view.filter.DistributionsViewFilter;
+import org.eclipse.hawkbit.ui.view.filter.OnlyEventsFromDistributionsViewFilter;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -99,8 +99,8 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
         styleTableOnDistSelection();
     }
 
-    @EventBusListenerMethod(scope = EventScope.UI, filter = DistributionsViewFilter.class)
-    void onEvent(final SMFilterEvent filterEvent) {
+    @EventBusListenerMethod(scope = EventScope.UI, filter = OnlyEventsFromDistributionsViewFilter.class)
+    void onEvent(final RefreshSoftwareModuleByFilterEvent filterEvent) {
         UI.getCurrent().access(() -> {
             refreshFilter();
             styleTableOnDistSelection();
