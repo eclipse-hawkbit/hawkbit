@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.rollout;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -27,10 +26,6 @@ public class RolloutScheduler {
 
     private static final String PROP_SCHEDULER_DELAY_PLACEHOLDER = "${hawkbit.rollout.scheduler.fixedDelay:2000}";
 
-    private static final int MAX_TENANTS_QUERY = 500;
-
-    private final TenantAware tenantAware;
-
     private final SystemManagement systemManagement;
 
     private final RolloutManagement rolloutManagement;
@@ -40,8 +35,6 @@ public class RolloutScheduler {
     /**
      * Constructor.
      * 
-     * @param tenantAware
-     *            to run as specific tenant
      * @param systemManagement
      *            to find all tenants
      * @param rolloutManagement
@@ -49,9 +42,8 @@ public class RolloutScheduler {
      * @param systemSecurityContext
      *            to run as system
      */
-    public RolloutScheduler(final TenantAware tenantAware, final SystemManagement systemManagement,
-            final RolloutManagement rolloutManagement, final SystemSecurityContext systemSecurityContext) {
-        this.tenantAware = tenantAware;
+    public RolloutScheduler(final SystemManagement systemManagement, final RolloutManagement rolloutManagement,
+            final SystemSecurityContext systemSecurityContext) {
         this.systemManagement = systemManagement;
         this.rolloutManagement = rolloutManagement;
         this.systemSecurityContext = systemSecurityContext;
