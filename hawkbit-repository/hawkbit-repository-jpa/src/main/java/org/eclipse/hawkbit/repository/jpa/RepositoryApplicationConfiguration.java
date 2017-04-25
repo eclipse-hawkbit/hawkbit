@@ -564,8 +564,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     AutoAssignScheduler autoAssignScheduler(final TenantAware tenantAware, final SystemManagement systemManagement,
             final SystemSecurityContext systemSecurityContext, final AutoAssignChecker autoAssignChecker,
             final LockRegistry lockRegistry) {
-        return new AutoAssignScheduler(tenantAware, systemManagement, systemSecurityContext, autoAssignChecker,
-                lockRegistry);
+        return new AutoAssignScheduler(systemManagement, systemSecurityContext, autoAssignChecker, lockRegistry);
     }
 
     /**
@@ -574,8 +573,6 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      * Note: does not activate in test profile, otherwise it is hard to test the
      * rollout handling functionality.
      * 
-     * @param tenantAware
-     *            to run as specific tenant
      * @param systemManagement
      *            to find all tenants
      * @param rolloutManagement
@@ -590,6 +587,6 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnProperty(prefix = "hawkbit.rollout.scheduler", name = "enabled", matchIfMissing = true)
     RolloutScheduler rolloutScheduler(final TenantAware tenantAware, final SystemManagement systemManagement,
             final RolloutManagement rolloutManagement, final SystemSecurityContext systemSecurityContext) {
-        return new RolloutScheduler(tenantAware, systemManagement, rolloutManagement, systemSecurityContext);
+        return new RolloutScheduler(systemManagement, rolloutManagement, systemSecurityContext);
     }
 }
