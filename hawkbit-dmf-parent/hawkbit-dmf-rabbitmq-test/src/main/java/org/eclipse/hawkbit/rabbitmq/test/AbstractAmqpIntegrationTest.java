@@ -94,4 +94,8 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
         return connectionFactory.getVirtualHost();
     }
 
+    protected int getPort() {
+        return connectionFactory.getPort();
+    }
+
 }
