@@ -286,6 +286,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void forEachTenant(final Consumer<String> consumer) {
 
         Page<String> tenants;
