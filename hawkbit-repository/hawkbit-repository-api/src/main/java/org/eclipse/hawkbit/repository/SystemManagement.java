@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.util.function.Consumer;
+
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -44,10 +46,22 @@ public interface SystemManagement {
 
     /**
      *
+     * @param pageable
+     *            for paging information
      * @return list of all tenant names in the system.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
     Page<String> findTenants(@NotNull Pageable pageable);
+
+    /**
+     * Runs consumer for each teant as
+     * {@link TenantAware#runAsTenant(String, org.eclipse.hawkbit.tenancy.TenantAware.TenantRunner)}
+     * 
+     * @param consumer
+     *            to run as teanant
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
+    void forEachTenant(Consumer<String> consumer);
 
     /**
      * Calculated system usage statistics, both overall for the entire system

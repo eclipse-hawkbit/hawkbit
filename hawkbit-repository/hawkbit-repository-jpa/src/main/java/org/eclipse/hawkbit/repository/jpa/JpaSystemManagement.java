@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
@@ -282,5 +283,17 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     @Override
     public TenantMetaData getTenantMetadata(final Long tenantId) {
         return tenantMetaDataRepository.findOne(tenantId);
+    }
+
+    @Override
+    public void forEachTenant(final Consumer<String> consumer) {
+
+        Page<String> tenants;
+        Pageable query = new PageRequest(0, MAX_TENANTS_QUERY);
+        do {
+            tenants = findTenants(query);
+            tenants.forEach(tenant -> tenantAware.runAsTenant(tenant, () -> consumer));
+        } while (tenants.hasNext() && (query = tenants.nextPageable()) != null);
+
     }
 }

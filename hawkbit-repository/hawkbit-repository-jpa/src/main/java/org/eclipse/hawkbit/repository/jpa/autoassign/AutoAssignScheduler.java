@@ -15,9 +15,6 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -86,31 +83,17 @@ public class AutoAssignScheduler {
         // https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So
         // iterate through all tenants and execute the rollout check for
         // each tenant separately.
-        Page<String> tenants;
-        Pageable query = new PageRequest(0, MAX_TENANTS_QUERY);
-        do {
-
-            tenants = systemManagement.findTenants(query);
-
-            LOGGER.info("Checking target filter queries for tenants: {}", tenants.getSize());
-
-            final Lock lock = lockRegistry.obtain("autoassign");
-            if (!lock.tryLock()) {
-                return null;
-            }
-
-            try {
-                for (final String tenant : tenants) {
-                    tenantAware.runAsTenant(tenant, () -> {
-                        autoAssignChecker.check();
-                        return null;
-                    });
-                }
-            } finally {
-                lock.unlock();
-            }
-
+        final Lock lock = lockRegistry.obtain("autoassign");
+        if (!lock.tryLock()) {
             return null;
-        } while (tenants.hasNext() && (query = tenants.nextPageable()) != null);
+        }
+
+        try {
+            systemManagement.forEachTenant(tenant -> autoAssignChecker.check());
+        } finally {
+            lock.unlock();
+        }
+
+        return null;
     }
 }

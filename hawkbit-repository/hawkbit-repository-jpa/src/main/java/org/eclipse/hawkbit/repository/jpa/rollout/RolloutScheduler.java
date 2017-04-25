@@ -8,16 +8,12 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rollout;
 
-
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 
 /**
@@ -80,28 +76,8 @@ public class RolloutScheduler {
             // https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So
             // iterate through all tenants and execute the rollout check for
             // each tenant seperately.
-            Page<String> tenants;
-            Pageable query = new PageRequest(0, MAX_TENANTS_QUERY);
-            do {
 
-                tenants = systemManagement.findTenants(query);
-                LOGGER.info("Checking rollouts for {} tenants", tenants.getSize());
-                for (final String tenant : tenants) {
-                tenantAware.runAsTenant(tenant, () -> {
-                    try {
-                        rolloutManagement.handleRollouts();
-                        // We catch all potential runtime exceptions here to
-                        // ensure that not all tenants are blocked if we have a
-                        // problem with a rollout.
-                    } catch (@SuppressWarnings("squid:S1166") final RuntimeException e) {
-                        LOGGER.error("Failed to handle rollouts for tenant {}. I will move on to next tenant.", tenant,
-                                e);
-                    }
-                    return null;
-                });
-            }
-
-            } while (tenants.hasNext() && (query = tenants.nextPageable()) != null);
+            systemManagement.forEachTenant(tenant -> rolloutManagement.handleRollouts());
 
             return null;
         });
