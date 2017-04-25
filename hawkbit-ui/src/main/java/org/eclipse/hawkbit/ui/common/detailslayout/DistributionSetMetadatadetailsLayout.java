@@ -1,4 +1,3 @@
-
 /**
  * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
  *
