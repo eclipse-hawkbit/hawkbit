@@ -292,7 +292,10 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         Pageable query = new PageRequest(0, MAX_TENANTS_QUERY);
         do {
             tenants = findTenants(query);
-            tenants.forEach(tenant -> tenantAware.runAsTenant(tenant, () -> consumer));
+            tenants.forEach(tenant -> tenantAware.runAsTenant(tenant, () -> {
+                consumer.accept(tenant);
+                return null;
+            }));
         } while (tenants.hasNext() && (query = tenants.nextPageable()) != null);
 
     }
