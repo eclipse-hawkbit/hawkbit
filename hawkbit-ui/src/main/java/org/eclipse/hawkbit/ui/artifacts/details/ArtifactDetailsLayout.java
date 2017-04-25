@@ -106,8 +106,22 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private final transient SoftwareManagement softwareManagement;
 
-    private final transient Optional<SoftwareModule> selectedSoftwareModule;
-
+    /**
+     * Constructor for ArtifactDetailsLayout
+     * 
+     * @param i18n
+     *            VaadinMessageSource
+     * @param eventBus
+     *            UIEventBus
+     * @param artifactUploadState
+     *            ArtifactUploadState
+     * @param uINotification
+     *            UINotification
+     * @param artifactManagement
+     *            ArtifactManagement
+     * @param softwareManagement
+     *            SoftwareManagement
+     */
     public ArtifactDetailsLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final ArtifactUploadState artifactUploadState, final UINotification uINotification,
             final ArtifactManagement artifactManagement, final SoftwareManagement softwareManagement) {
@@ -117,9 +131,15 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         this.uINotification = uINotification;
         this.artifactManagement = artifactManagement;
         this.softwareManagement = softwareManagement;
-        this.selectedSoftwareModule = getSelectedSoftwareModule();
 
-        createComponents();
+        final Optional<SoftwareModule> selectedSoftwareModule = findSelectedSoftwareModule();
+
+        String labelSoftwareModule = "";
+        if (selectedSoftwareModule.isPresent()) {
+            labelSoftwareModule = HawkbitCommonUtil.getFormattedNameVersion(selectedSoftwareModule.get().getName(),
+                    selectedSoftwareModule.get().getVersion());
+        }
+        createComponents(labelSoftwareModule);
         buildLayout();
         eventBus.subscribe(this);
 
@@ -131,7 +151,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         }
     }
 
-    private Optional<SoftwareModule> getSelectedSoftwareModule() {
+    private Optional<SoftwareModule> findSelectedSoftwareModule() {
         final Optional<Long> selectedBaseSwModuleId = artifactUploadState.getSelectedBaseSwModuleId();
         if (selectedBaseSwModuleId.isPresent()) {
             return softwareManagement.findSoftwareModuleById(selectedBaseSwModuleId.get());
@@ -139,16 +159,9 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         return Optional.empty();
     }
 
-    private void createComponents() {
-        String labelStr = "";
-        final Optional<SoftwareModule> selectedBaseSwModule = selectedSoftwareModule;
-        if (selectedBaseSwModule.isPresent()) {
-            labelStr = HawkbitCommonUtil.getFormattedNameVersion(selectedSoftwareModule.get().getName(),
-                    selectedSoftwareModule.get().getVersion());
-        }
-
+    private void createComponents(final String labelSoftwareModule) {
         titleOfArtifactDetails = new LabelBuilder().id(UIComponentIdProvider.ARTIFACT_DETAILS_HEADER_LABEL_ID)
-                .name(HawkbitCommonUtil.getArtifactoryDetailsLabelId(labelStr)).buildCaptionLabel();
+                .name(HawkbitCommonUtil.getArtifactoryDetailsLabelId(labelSoftwareModule)).buildCaptionLabel();
         titleOfArtifactDetails.setContentMode(ContentMode.HTML);
         titleOfArtifactDetails.setSizeFull();
         titleOfArtifactDetails.setImmediate(true);
@@ -270,10 +283,11 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                     if (ok) {
                         artifactManagement.deleteArtifact(id);
                         uINotification.displaySuccess(i18n.getMessage("message.artifact.deleted", fileName));
-                        if (artifactUploadState.getSelectedBaseSwModuleId().isPresent()) {
-                            final Optional<SoftwareModule> softwareModule = getSelectedSoftwareModule();
-                            softwareModule.ifPresent(swm -> populateArtifactDetails(swm.getId(),
-                                    HawkbitCommonUtil.getFormattedNameVersion(swm.getName(), swm.getVersion())));
+                        final Optional<SoftwareModule> softwareModule = findSelectedSoftwareModule();
+                        if (softwareModule.isPresent()) {
+                            populateArtifactDetails(softwareModule.get().getId(),
+                                    HawkbitCommonUtil.getFormattedNameVersion(softwareModule.get().getName(),
+                                            softwareModule.get().getVersion()));
                         } else {
                             populateArtifactDetails(null, null);
                         }
