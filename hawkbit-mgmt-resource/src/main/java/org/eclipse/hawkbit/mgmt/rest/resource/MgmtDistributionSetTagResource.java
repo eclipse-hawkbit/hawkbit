@@ -127,14 +127,36 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     @Override
     public ResponseEntity<List<MgmtDistributionSet>> getAssignedDistributionSets(
             @PathVariable("distributionsetTagId") final Long distributionsetTagId) {
-        final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);
+        return new ResponseEntity<>(MgmtDistributionSetMapper.toResponseDistributionSets(distributionSetManagement
+                .findDistributionSetsByTag(new PageRequest(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT),
+                        distributionsetTagId)
+                .getContent()), HttpStatus.OK);
+    }
 
-        return new ResponseEntity<>(
-                MgmtDistributionSetMapper.toResponseDistributionSets(distributionSetManagement
-                        .findDistributionSetsByTag(
-                                new PageRequest(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT), tag.getName())
-                        .getContent()),
-                HttpStatus.OK);
+    @Override
+    public ResponseEntity<PagedList<MgmtDistributionSet>> getAssignedDistributionSets(
+            @PathVariable("distributionsetTagId") final Long distributionsetTagId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
+        final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
+        final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
+        final Sort sorting = PagingUtility.sanitizeTargetSortParam(sortParam);
+
+        final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
+        Page<DistributionSet> findDistrAll;
+        if (rsqlParam == null) {
+            findDistrAll = distributionSetManagement.findDistributionSetsByTag(pageable, distributionsetTagId);
+
+        } else {
+            findDistrAll = distributionSetManagement.findDistributionSetsByTag(pageable, rsqlParam,
+                    distributionsetTagId);
+        }
+
+        final List<MgmtDistributionSet> rest = MgmtDistributionSetMapper
+                .toResponseFromDsList(findDistrAll.getContent());
+        return new ResponseEntity<>(new PagedList<>(rest, findDistrAll.getTotalElements()), HttpStatus.OK);
     }
 
     @Override
@@ -191,4 +213,5 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
         return assignedDistributionSetRequestBodies.stream()
                 .map(MgmtAssignedDistributionSetRequestBody::getDistributionSetId).collect(Collectors.toList());
     }
+
 }

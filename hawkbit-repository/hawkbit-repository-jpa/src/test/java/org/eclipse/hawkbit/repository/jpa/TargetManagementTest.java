@@ -84,7 +84,9 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> targetManagement.assignTag(Lists.newArrayList(NOT_EXIST_ID), tag.getId()),
                 "Target");
 
-        verifyThrownExceptionBy(() -> targetManagement.findTargetsByTag(pageReq, NOT_EXIST_ID), "TargetTag");
+        verifyThrownExceptionBy(() -> targetManagement.findTargetsByTag(pageReq, NOT_EXIST_IDL), "TargetTag");
+        verifyThrownExceptionBy(() -> targetManagement.findTargetsByTag(pageReq, "name==*", NOT_EXIST_IDL),
+                "TargetTag");
 
         verifyThrownExceptionBy(() -> targetManagement.countTargetByAssignedDistributionSet(NOT_EXIST_IDL),
                 "DistributionSet");
@@ -277,14 +279,20 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         TargetTag findTargetTag = tagManagement.findTargetTag("Tag1").get();
         assertThat(assignedTargets.size()).as("Assigned targets are wrong")
-                .isEqualTo(targetManagement.findTargetsByTag(pageReq, "Tag1").getNumberOfElements());
+                .isEqualTo(targetManagement.findTargetsByTag(pageReq, targetTag.getId()).getNumberOfElements());
 
         final Target unAssignTarget = targetManagement.unAssignTag("targetId123", findTargetTag.getId());
         assertThat(unAssignTarget.getControllerId()).as("Controller id is wrong").isEqualTo("targetId123");
         assertThat(tagManagement.findAllTargetTags(pageReq, unAssignTarget.getControllerId())).as("Tag size is wrong")
                 .isEmpty();
         findTargetTag = tagManagement.findTargetTag("Tag1").get();
-        assertThat(targetManagement.findTargetsByTag(pageReq, "Tag1")).as("Assigned targets are wrong").hasSize(3);
+        assertThat(targetManagement.findTargetsByTag(pageReq, targetTag.getId())).as("Assigned targets are wrong")
+                .hasSize(3);
+        assertThat(targetManagement.findTargetsByTag(pageReq, "controllerId==targetId123", targetTag.getId()))
+                .as("Assigned targets are wrong").isEmpty();
+        assertThat(targetManagement.findTargetsByTag(pageReq, "controllerId==targetId1234", targetTag.getId()))
+                .as("Assigned targets are wrong").hasSize(1);
+
     }
 
     @Test

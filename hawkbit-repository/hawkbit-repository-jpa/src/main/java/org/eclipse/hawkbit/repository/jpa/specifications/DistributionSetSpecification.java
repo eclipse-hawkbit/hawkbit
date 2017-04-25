@@ -217,4 +217,20 @@ public final class DistributionSetSpecification {
         };
     }
 
+    /**
+     * {@link Specification} for retrieving {@link DistributionSet}s by tag.
+     *
+     * @param tagId
+     *            the ID of the distribution set which must be assigned
+     * @return the {@link DistributionSet} {@link Specification}
+     */
+    public static Specification<JpaDistributionSet> hasTag(final Long tagId) {
+
+        return (targetRoot, query, cb) -> {
+            final SetJoin<JpaDistributionSet, JpaDistributionSetTag> tags = targetRoot.join(JpaDistributionSet_.tags,
+                    JoinType.LEFT);
+            return cb.equal(tags.get(JpaDistributionSetTag_.id), tagId);
+        };
+    }
+
 }

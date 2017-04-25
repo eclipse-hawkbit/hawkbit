@@ -10,22 +10,22 @@ package org.eclipse.hawkbit.ui.push;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdatedEvent;
 
 /**
- * EventHolder for {@link DistributionSetTagUpdateEvent}s.
+ * EventHolder for {@link DistributionSetTagUpdatedEvent}s.
  *
  */
-public class DistributionSetTagUpdatedEventContainer implements EventContainer<DistributionSetTagUpdateEvent> {
+public class DistributionSetTagUpdatedEventContainer implements EventContainer<DistributionSetTagUpdatedEvent> {
     private static final String I18N_UNREAD_NOTIFICATION_UNREAD_MESSAGE = "distribution.set.tag.updated.event.container.notifcation.message";
-    private final List<DistributionSetTagUpdateEvent> events;
+    private final List<DistributionSetTagUpdatedEvent> events;
 
-    DistributionSetTagUpdatedEventContainer(final List<DistributionSetTagUpdateEvent> events) {
+    DistributionSetTagUpdatedEventContainer(final List<DistributionSetTagUpdatedEvent> events) {
         this.events = events;
     }
 
     @Override
-    public List<DistributionSetTagUpdateEvent> getEvents() {
+    public List<DistributionSetTagUpdatedEvent> getEvents() {
         return events;
     }
 

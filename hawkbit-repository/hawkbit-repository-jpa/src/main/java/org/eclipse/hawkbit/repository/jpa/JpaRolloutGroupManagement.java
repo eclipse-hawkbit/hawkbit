@@ -86,6 +86,8 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
     @Override
     public Page<RolloutGroup> findRolloutGroupsByRolloutId(final Long rolloutId, final Pageable pageable) {
+        throwEntityNotFoundExceptionIfRolloutDoesNotExist(rolloutId);
+
         return convertPage(rolloutGroupRepository.findByRolloutId(rolloutId, pageable), pageable);
     }
 
@@ -100,6 +102,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     @Override
     public Page<RolloutGroup> findRolloutGroupsAll(final Long rolloutId, final String rsqlParam,
             final Pageable pageable) {
+        throwEntityNotFoundExceptionIfRolloutDoesNotExist(rolloutId);
 
         final Specification<JpaRolloutGroup> specification = RSQLUtility.parse(rsqlParam, RolloutGroupFields.class,
                 virtualPropertyReplacer);
@@ -115,11 +118,15 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
                 pageable);
     }
 
-    @Override
-    public Page<RolloutGroup> findAllRolloutGroupsWithDetailedStatus(final Long rolloutId, final Pageable pageable) {
+    private void throwEntityNotFoundExceptionIfRolloutDoesNotExist(final Long rolloutId) {
         if (!rolloutRepository.exists(rolloutId)) {
             throw new EntityNotFoundException(Rollout.class, rolloutId);
         }
+    }
+
+    @Override
+    public Page<RolloutGroup> findAllRolloutGroupsWithDetailedStatus(final Long rolloutId, final Pageable pageable) {
+        throwEntityNotFoundExceptionIfRolloutDoesNotExist(rolloutId);
 
         final Page<JpaRolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutId(rolloutId, pageable);
         final List<Long> rolloutGroupIds = rolloutGroups.getContent().stream().map(RolloutGroup::getId)
@@ -172,6 +179,8 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     @Override
     public Page<Target> findRolloutGroupTargets(final Long rolloutGroupId, final String rsqlParam,
             final Pageable pageable) {
+
+        throwExceptionIfRolloutGroupDoesNotExist(rolloutGroupId);
 
         final Specification<JpaTarget> rsqlSpecification = RSQLUtility.parse(rsqlParam, TargetFields.class,
                 virtualPropertyReplacer);
@@ -251,6 +260,13 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
         if (!rolloutGroupRepository.exists(rolloutGroupId)) {
             throw new EntityNotFoundException(RolloutGroup.class, rolloutGroupId);
         }
+    }
+
+    @Override
+    public long countRolloutGroupsByRolloutId(final Long rolloutId) {
+        throwEntityNotFoundExceptionIfRolloutDoesNotExist(rolloutId);
+
+        return rolloutGroupRepository.countByRolloutId(rolloutId);
     }
 
 }

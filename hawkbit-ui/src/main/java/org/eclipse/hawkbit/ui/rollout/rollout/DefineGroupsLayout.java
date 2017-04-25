@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.QuotaManagement;
+import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
@@ -75,6 +77,10 @@ public class DefineGroupsLayout extends GridLayout {
 
     private transient RolloutManagement rolloutManagement;
 
+    private transient RolloutGroupManagement rolloutGroupManagement;
+
+    private final transient QuotaManagement quotaManagement;
+
     private transient TargetFilterQueryManagement targetFilterQueryManagement;
 
     private String defaultTriggerThreshold;
@@ -97,11 +103,14 @@ public class DefineGroupsLayout extends GridLayout {
 
     private final AtomicInteger runningValidationsCounter;
 
-    DefineGroupsLayout(VaadinMessageSource i18n, EntityFactory entityFactory, RolloutManagement rolloutManagement,
-            TargetFilterQueryManagement targetFilterQueryManagement) {
+    DefineGroupsLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
+            final RolloutManagement rolloutManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
+            final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement) {
         this.i18n = i18n;
         this.entityFactory = entityFactory;
         this.rolloutManagement = rolloutManagement;
+        this.rolloutGroupManagement = rolloutGroupManagement;
+        this.quotaManagement = quotaManagement;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         runningValidationsCounter = new AtomicInteger(0);
 
@@ -229,7 +238,8 @@ public class DefineGroupsLayout extends GridLayout {
 
         removeAllRows();
 
-        final List<RolloutGroup> groups = rollout.getRolloutGroups();
+        final List<RolloutGroup> groups = rolloutGroupManagement.findRolloutGroupsByRolloutId(rollout.getId(),
+                new PageRequest(0, quotaManagement.getMaxRolloutGroupsPerRollout())).getContent();
         for (final RolloutGroup group : groups) {
             final GroupRow groupRow = addGroupRow();
             groupRow.populateByGroup(group);
@@ -547,7 +557,7 @@ public class DefineGroupsLayout extends GridLayout {
          * @param rowIndex
          *            the row of the grid layout
          */
-        public void addToGridRow(GridLayout layout, int rowIndex) {
+        public void addToGridRow(final GridLayout layout, final int rowIndex) {
             layout.addComponent(groupName, 0, rowIndex);
             if (populated) {
                 layout.addComponent(targetFilterQuery, 1, rowIndex);

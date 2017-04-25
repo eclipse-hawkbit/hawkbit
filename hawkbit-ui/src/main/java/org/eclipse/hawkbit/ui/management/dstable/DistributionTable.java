@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -135,13 +135,13 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     }
 
-    private static boolean allOfThemAffectCompletedSetsThatAreNotVisible(final List<DistributionSetUpdateEvent> events,
+    private static boolean allOfThemAffectCompletedSetsThatAreNotVisible(final List<DistributionSetUpdatedEvent> events,
             final List<Long> visibleItemIds) {
         return events.stream()
                 .allMatch(event -> !visibleItemIds.contains(event.getEntityId()) && event.getEntity().isComplete());
     }
 
-    private void updateVisableTableEntries(final List<DistributionSetUpdateEvent> events,
+    private void updateVisableTableEntries(final List<DistributionSetUpdatedEvent> events,
             final List<Long> visibleItemIds) {
         events.stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
                 .filter(event -> event.getEntity().isComplete())
@@ -149,10 +149,10 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     private boolean checkAndHandleIfVisibleDsSwitchesFromCompleteToIncomplete(
-            final List<DistributionSetUpdateEvent> events, final List<Long> visibleItemIds) {
+            final List<DistributionSetUpdatedEvent> events, final List<Long> visibleItemIds) {
         final List<Long> setsThatAreVisibleButNotCompleteAnymore = events.stream()
                 .filter(event -> visibleItemIds.contains(event.getEntityId()))
-                .filter(event -> !event.getEntity().isComplete()).map(DistributionSetUpdateEvent::getEntityId)
+                .filter(event -> !event.getEntity().isComplete()).map(DistributionSetUpdatedEvent::getEntityId)
                 .collect(Collectors.toList());
 
         if (!setsThatAreVisibleButNotCompleteAnymore.isEmpty()) {

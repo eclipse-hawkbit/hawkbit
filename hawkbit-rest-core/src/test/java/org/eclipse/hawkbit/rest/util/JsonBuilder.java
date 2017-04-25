@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.rest.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,6 +21,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,6 +34,62 @@ import org.json.JSONObject;
  *
  */
 public abstract class JsonBuilder {
+
+    public static String ids(final Collection<Long> ids) {
+        final JSONArray list = new JSONArray();
+        for (final Long smID : ids) {
+            list.put(new JSONObject().put("id", smID));
+        }
+
+        return list.toString();
+    }
+
+    public static String controllerIds(final Collection<String> ids) {
+        final JSONArray list = new JSONArray();
+        for (final String smID : ids) {
+            list.put(new JSONObject().put("controllerId", smID));
+        }
+
+        return list.toString();
+    }
+
+    public static String tags(final List<Tag> tags) throws JSONException {
+        final StringBuilder builder = new StringBuilder();
+
+        builder.append("[");
+        int i = 0;
+        for (final Tag tag : tags) {
+            try {
+                createTagLine(builder, tag);
+            } catch (final Exception e) {
+                e.printStackTrace();
+            }
+
+            if (++i < tags.size()) {
+                builder.append(",");
+            }
+        }
+
+        builder.append("]");
+
+        return builder.toString();
+
+    }
+
+    private static void createTagLine(final StringBuilder builder, final Tag tag) {
+        builder.append(new JSONObject().put("name", tag.getName()).put("description", tag.getDescription())
+                .put("colour", tag.getColour()).put("createdAt", "0").put("updatedAt", "0")
+                .put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh").toString());
+    }
+
+    public static String tag(final Tag tag) throws JSONException {
+        final StringBuilder builder = new StringBuilder();
+
+        createTagLine(builder, tag);
+
+        return builder.toString();
+
+    }
 
     public static String softwareModules(final List<SoftwareModule> modules) throws JSONException {
         final StringBuilder builder = new StringBuilder();

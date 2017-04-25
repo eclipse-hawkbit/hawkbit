@@ -410,6 +410,21 @@ public interface DistributionSetManagement {
             Boolean deleted);
 
     /**
+     * finds all {@link DistributionSet}s.
+     *
+     * @param pageReq
+     *            the pagination parameter
+     * @param deleted
+     *            if TRUE, {@link DistributionSet}s marked as deleted are
+     *            returned. If FALSE, on {@link DistributionSet}s not marked as
+     *            deleted are returned. <code>null</code> if both are to be
+     *            returned
+     * @return all found {@link DistributionSet}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Page<DistributionSet> findDistributionSetsAll(@NotNull Pageable pageReq, Boolean deleted);
+
+    /**
      * method retrieves all {@link DistributionSet}s from the repository in the
      * following order:
      * <p>
@@ -452,12 +467,39 @@ public interface DistributionSetManagement {
      *
      * @param pageable
      *            page parameter
-     * @param tagName
+     * @param tagId
      *            of the tag the DS are assigned to
      * @return the page of found {@link DistributionSet}
+     * 
+     * @throws RSQLParameterUnsupportedFieldException
+     *             if a field in the RSQL string is used but not provided by the
+     *             given {@code fieldNameProvider}
+     * @throws RSQLParameterSyntaxException
+     *             if the RSQL syntax is wrong
+     * 
+     * @throws EntityNotFoundException
+     *             of distribution set tag with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<DistributionSet> findDistributionSetsByTag(@NotNull final Pageable pageable, @NotNull final String tagName);
+    Page<DistributionSet> findDistributionSetsByTag(@NotNull final Pageable pageable, @NotNull final Long tagId);
+
+    /**
+     * retrieves {@link DistributionSet}s by filtering on the given parameters.
+     *
+     * @param pageable
+     *            page parameter
+     * @param rsqlParam
+     *            rsql query string
+     * @param tagId
+     *            of the tag the DS are assigned to
+     * @return the page of found {@link DistributionSet}
+     * 
+     * @throws EntityNotFoundException
+     *             of distribution set tag with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Page<DistributionSet> findDistributionSetsByTag(@NotNull final Pageable pageable, @NotNull String rsqlParam,
+            @NotNull final Long tagId);
 
     /**
      * @param id

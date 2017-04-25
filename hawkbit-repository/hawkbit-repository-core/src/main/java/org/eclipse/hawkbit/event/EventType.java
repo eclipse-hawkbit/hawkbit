@@ -26,8 +26,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdateEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
@@ -35,7 +35,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 
 /**
@@ -66,7 +66,7 @@ public class EventType {
 
         // target tag
         TYPES.put(6, TargetTagCreatedEvent.class);
-        TYPES.put(7, TargetTagUpdateEvent.class);
+        TYPES.put(7, TargetTagUpdatedEvent.class);
         TYPES.put(8, TargetTagDeletedEvent.class);
 
         // action
@@ -75,12 +75,12 @@ public class EventType {
 
         // distribution set
         TYPES.put(11, DistributionSetCreatedEvent.class);
-        TYPES.put(12, DistributionSetUpdateEvent.class);
+        TYPES.put(12, DistributionSetUpdatedEvent.class);
         TYPES.put(13, DistributionSetDeletedEvent.class);
 
         // distribution set tag
         TYPES.put(14, DistributionSetTagCreatedEvent.class);
-        TYPES.put(15, DistributionSetTagUpdateEvent.class);
+        TYPES.put(15, DistributionSetTagUpdatedEvent.class);
         TYPES.put(16, DistributionSetTagDeletedEvent.class);
 
         // rollout

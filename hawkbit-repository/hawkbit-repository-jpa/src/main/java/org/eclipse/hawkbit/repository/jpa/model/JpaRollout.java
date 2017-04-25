@@ -130,7 +130,6 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
         this.distributionSet = (JpaDistributionSet) distributionSet;
     }
 
-    @Override
     public List<RolloutGroup> getRolloutGroups() {
         if (rolloutGroups == null) {
             return Collections.emptyList();

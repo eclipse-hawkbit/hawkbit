@@ -146,6 +146,16 @@ public interface RolloutGroupRepository
      */
     Page<JpaRolloutGroup> findByRolloutId(final Long rolloutId, Pageable page);
 
+    /**
+     * Counts all {@link RolloutGroup} for a specific rollout.
+     * 
+     * @param rolloutId
+     *            the ID of the rollout to find the rollout groups
+     * 
+     * @return the amount of found {@link RolloutGroup}s.
+     */
+    long countByRolloutId(final Long rolloutId);
+
     @Modifying
     @Query("DELETE FROM JpaRolloutGroup g where g.id in :rolloutGroupIds")
     void deleteByIds(@Param("rolloutGroupIds") List<Long> rolloutGroups);

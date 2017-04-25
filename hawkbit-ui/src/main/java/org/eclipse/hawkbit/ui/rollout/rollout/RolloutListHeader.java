@@ -9,6 +9,8 @@
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.QuotaManagement;
+import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -18,10 +20,10 @@ import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGridHeader;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -45,11 +47,13 @@ public class RolloutListHeader extends AbstractGridHeader {
             final UIEventBus eventBus, final RolloutManagement rolloutManagement,
             final TargetManagement targetManagement, final UINotification uiNotification,
             final UiProperties uiProperties, final EntityFactory entityFactory, final VaadinMessageSource i18n,
-            final TargetFilterQueryManagement targetFilterQueryManagement) {
+            final TargetFilterQueryManagement targetFilterQueryManagement,
+            final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement) {
         super(permissionChecker, rolloutUIState, i18n);
         this.eventBus = eventBus;
         this.addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout(rolloutManagement, targetManagement,
-                uiNotification, uiProperties, entityFactory, i18n, eventBus, targetFilterQueryManagement);
+                uiNotification, uiProperties, entityFactory, i18n, eventBus, targetFilterQueryManagement,
+                rolloutGroupManagement, quotaManagement);
     }
 
     @Override

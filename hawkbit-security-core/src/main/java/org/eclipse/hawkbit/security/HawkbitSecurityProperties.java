@@ -92,6 +92,11 @@ public class HawkbitSecurityProperties {
          */
         private int maxAttributeEntriesPerTarget = 100;
 
+        /**
+         * Maximum number of allowed groups per Rollout.
+         */
+        private int maxRolloutGroupsPerRollout = 500;
+
         private final Filter filter = new Filter();
 
         public Filter getFilter() {
@@ -112,6 +117,14 @@ public class HawkbitSecurityProperties {
 
         public void setMaxAttributeEntriesPerTarget(final int maxAttributeEntriesPerTarget) {
             this.maxAttributeEntriesPerTarget = maxAttributeEntriesPerTarget;
+        }
+
+        public int getMaxRolloutGroupsPerRollout() {
+            return maxRolloutGroupsPerRollout;
+        }
+
+        public void setMaxRolloutGroupsPerRollout(final int maxRolloutGroupsPerRollout) {
+            this.maxRolloutGroupsPerRollout = maxRolloutGroupsPerRollout;
         }
 
         /**

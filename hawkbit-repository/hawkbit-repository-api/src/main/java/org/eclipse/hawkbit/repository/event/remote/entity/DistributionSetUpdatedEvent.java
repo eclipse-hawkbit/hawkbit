@@ -8,32 +8,32 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 
 /**
- * Defines the remote event for update a {@link DistributionSetTag}.
+ * Defines the remote event for updating a {@link DistributionSet}.
  *
  */
-public class DistributionSetTagUpdateEvent extends RemoteEntityEvent<DistributionSetTag> {
+public class DistributionSetUpdatedEvent extends RemoteEntityEvent<DistributionSet> {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * Default constructor.
      */
-    public DistributionSetTagUpdateEvent() {
+    public DistributionSetUpdatedEvent() {
         // for serialization libs like jackson
     }
 
     /**
      * Constructor.
      * 
-     * @param tag
-     *            tag the tag which is updated
+     * @param ds
+     *            Distribution Set
      * @param applicationId
-     *            the applicationID
+     *            the origin application id
      */
-    public DistributionSetTagUpdateEvent(final DistributionSetTag tag, final String applicationId) {
-        super(tag, applicationId);
+    public DistributionSetUpdatedEvent(final DistributionSet ds, final String applicationId) {
+        super(ds, applicationId);
     }
 }

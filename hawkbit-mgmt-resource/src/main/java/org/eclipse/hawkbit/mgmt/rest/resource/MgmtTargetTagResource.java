@@ -122,18 +122,18 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
 
     @Override
     public ResponseEntity<List<MgmtTarget>> getAssignedTargets(@PathVariable("targetTagId") final Long targetTagId) {
-        final TargetTag targetTag = findTargetTagById(targetTagId);
 
         return new ResponseEntity<>(MgmtTargetMapper.toResponse(targetManagement
-                .findTargetsByTag(new PageRequest(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT),
-                        targetTag.getName())
+                .findTargetsByTag(new PageRequest(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT), targetTagId)
                 .getContent()), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(final Long targetTagId, final int pagingOffsetParam,
-            final int pagingLimitParam, final String sortParam, final String rsqlParam) {
-        final TargetTag targetTag = findTargetTagById(targetTagId);
+    public ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(@PathVariable("targetTagId") final Long targetTagId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -142,10 +142,10 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
         Page<Target> findTargetsAll;
         if (rsqlParam == null) {
-            findTargetsAll = targetManagement.findTargetsByTag(pageable, targetTag.getName());
+            findTargetsAll = targetManagement.findTargetsByTag(pageable, targetTagId);
 
         } else {
-            findTargetsAll = targetManagement.findTargetsByTag(rsqlParam, pageable, targetTag.getName());
+            findTargetsAll = targetManagement.findTargetsByTag(pageable, rsqlParam, targetTagId);
         }
 
         final Long countTargetsAll = findTargetsAll.getTotalElements();

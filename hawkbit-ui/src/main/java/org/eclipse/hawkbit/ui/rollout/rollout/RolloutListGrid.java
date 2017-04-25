@@ -20,6 +20,8 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.QuotaManagement;
+import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -38,7 +40,7 @@ import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.RolloutRenderer;
 import org.eclipse.hawkbit.ui.push.RolloutChangeEventContainer;
 import org.eclipse.hawkbit.ui.push.RolloutDeletedEventContainer;
-import org.eclipse.hawkbit.ui.push.event.RolloutChangeEvent;
+import org.eclipse.hawkbit.ui.push.event.RolloutChangedEvent;
 import org.eclipse.hawkbit.ui.rollout.DistributionBarHelper;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
@@ -85,6 +87,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     private static final String ROLLOUT_RENDERER_DATA = "rolloutRendererData";
 
     private final transient RolloutManagement rolloutManagement;
+    private final transient RolloutGroupManagement rolloutGroupManagement;
 
     private final AddUpdateRolloutWindowLayout addUpdateRolloutWindow;
 
@@ -122,11 +125,14 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
             final RolloutManagement rolloutManagement, final UINotification uiNotification,
             final RolloutUIState rolloutUIState, final SpPermissionChecker permissionChecker,
             final TargetManagement targetManagement, final EntityFactory entityFactory, final UiProperties uiProperties,
-            final TargetFilterQueryManagement targetFilterQueryManagement) {
+            final TargetFilterQueryManagement targetFilterQueryManagement,
+            final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement) {
         super(i18n, eventBus, permissionChecker);
         this.rolloutManagement = rolloutManagement;
+        this.rolloutGroupManagement = rolloutGroupManagement;
         this.addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout(rolloutManagement, targetManagement,
-                uiNotification, uiProperties, entityFactory, i18n, eventBus, targetFilterQueryManagement);
+                uiNotification, uiProperties, entityFactory, i18n, eventBus, targetFilterQueryManagement,
+                rolloutGroupManagement, quotaManagement);
         this.uiNotification = uiNotification;
         this.rolloutUIState = rolloutUIState;
 
@@ -173,7 +179,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         eventContainer.getEvents().forEach(this::handleEvent);
     }
 
-    private void handleEvent(final RolloutChangeEvent rolloutChangeEvent) {
+    private void handleEvent(final RolloutChangedEvent rolloutChangeEvent) {
         if (!rolloutUIState.isShowRollOuts() || rolloutChangeEvent.getRolloutId() == null) {
             return;
         }
@@ -197,16 +203,21 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         final TotalTargetCountStatus totalTargetCountStatus = rollout.getTotalTargetCountStatus();
         item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).setValue(rollout.getStatus());
         item.getItemProperty(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setValue(totalTargetCountStatus);
-        final Integer groupCount = (Integer) item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).getValue();
+        final Long groupCount = Long
+                .valueOf((Integer) item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).getValue());
         final int groupsCreated = rollout.getRolloutGroupsCreated();
-        if (groupsCreated != 0) {
-            item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setValue(Integer.valueOf(groupsCreated));
-        } else if (rollout.getRolloutGroups() != null && !groupCount.equals(rollout.getRolloutGroups().size())) {
-            item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS)
-                    .setValue(Integer.valueOf(rollout.getRolloutGroups().size()));
-        }
         item.getItemProperty(ROLLOUT_RENDERER_DATA)
                 .setValue(new RolloutRendererData(rollout.getName(), rollout.getStatus().toString()));
+
+        if (groupsCreated != 0) {
+            item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setValue(Integer.valueOf(groupsCreated));
+            return;
+        }
+
+        final Long size = rolloutGroupManagement.countTargetsOfRolloutsGroup(rollout.getId());
+        if (!size.equals(groupCount)) {
+            item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setValue(size.intValue());
+        }
     }
 
     @Override

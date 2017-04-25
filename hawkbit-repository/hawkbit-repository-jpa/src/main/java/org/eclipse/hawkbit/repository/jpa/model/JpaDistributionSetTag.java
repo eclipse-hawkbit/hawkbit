@@ -20,7 +20,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
@@ -81,7 +81,7 @@ public class JpaDistributionSetTag extends JpaTag implements DistributionSetTag,
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
-                new DistributionSetTagUpdateEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+                new DistributionSetTagUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
 
     }
 

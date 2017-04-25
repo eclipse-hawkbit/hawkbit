@@ -546,7 +546,6 @@ public interface TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<Target> findTargetsByTag(@NotNull Pageable pageable, @NotNull Long tagId);
 
-    // FIXME exception test
     /**
      * Find targets by tag name.
      * 

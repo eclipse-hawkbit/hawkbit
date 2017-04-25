@@ -169,14 +169,11 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         // create Software Modules
         final List<Long> smIDs = Lists.newArrayList(testdataFactory.createSoftwareModuleOs().getId(),
                 testdataFactory.createSoftwareModuleApp().getId());
-        final JSONArray list = new JSONArray();
-        for (final Long smID : smIDs) {
-            list.put(new JSONObject().put("id", Long.valueOf(smID)));
-        }
+
         // post assignment
         mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId() + "/assignedSM")
-                .contentType(MediaType.APPLICATION_JSON).content(list.toString())).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .contentType(MediaType.APPLICATION_JSON).content(JsonBuilder.ids(smIDs)))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         // Test if size is 3
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId() + "/assignedSM"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())

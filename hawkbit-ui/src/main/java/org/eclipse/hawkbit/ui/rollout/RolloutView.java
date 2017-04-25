@@ -14,6 +14,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
@@ -27,8 +28,8 @@ import org.eclipse.hawkbit.ui.rollout.rollout.RolloutListView;
 import org.eclipse.hawkbit.ui.rollout.rolloutgroup.RolloutGroupsListView;
 import org.eclipse.hawkbit.ui.rollout.rolloutgrouptargets.RolloutGroupTargetsListView;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -71,11 +72,13 @@ public class RolloutView extends VerticalLayout implements View {
             final UIEventBus eventBus, final RolloutManagement rolloutManagement,
             final RolloutGroupManagement rolloutGroupManagement, final TargetManagement targetManagement,
             final UINotification uiNotification, final UiProperties uiProperties, final EntityFactory entityFactory,
-            final VaadinMessageSource i18n, final TargetFilterQueryManagement targetFilterQueryManagement) {
+            final VaadinMessageSource i18n, final TargetFilterQueryManagement targetFilterQueryManagement,
+            final QuotaManagement quotaManagement) {
         this.permChecker = permissionChecker;
         this.rolloutManagement = rolloutManagement;
         this.rolloutListView = new RolloutListView(permissionChecker, rolloutUIState, eventBus, rolloutManagement,
-                targetManagement, uiNotification, uiProperties, entityFactory, i18n, targetFilterQueryManagement);
+                targetManagement, uiNotification, uiProperties, entityFactory, i18n, targetFilterQueryManagement,
+                rolloutGroupManagement, quotaManagement);
         this.rolloutGroupsListView = new RolloutGroupsListView(i18n, eventBus, rolloutGroupManagement, rolloutUIState,
                 permissionChecker);
         this.rolloutGroupTargetsListView = new RolloutGroupTargetsListView(eventBus, i18n, rolloutUIState);

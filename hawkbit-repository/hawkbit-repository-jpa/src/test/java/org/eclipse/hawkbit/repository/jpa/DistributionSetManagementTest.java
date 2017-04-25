@@ -122,6 +122,12 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 () -> distributionSetManagement.assignTag(Lists.newArrayList(NOT_EXIST_IDL), dsTag.getId()),
                 "DistributionSet");
 
+        verifyThrownExceptionBy(() -> distributionSetManagement.findDistributionSetsByTag(pageReq, NOT_EXIST_IDL),
+                "DistributionSetTag");
+        verifyThrownExceptionBy(
+                () -> distributionSetManagement.findDistributionSetsByTag(pageReq, "name==*", NOT_EXIST_IDL),
+                "DistributionSetTag");
+
         verifyThrownExceptionBy(
                 () -> distributionSetManagement.toggleTagAssignment(Lists.newArrayList(NOT_EXIST_IDL), dsTag.getName()),
                 "DistributionSet");
@@ -393,16 +399,23 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         DistributionSetTag findDistributionSetTag = tagManagement.findDistributionSetTag("Tag1").get();
 
-        assertThat(assignedDS.size()).as("assigned ds has wrong size")
-                .isEqualTo(distributionSetManagement.findDistributionSetsByTag(pageReq, "Tag1").getNumberOfElements());
+        assertThat(assignedDS.size()).as("assigned ds has wrong size").isEqualTo(
+                distributionSetManagement.findDistributionSetsByTag(pageReq, tag.getId()).getNumberOfElements());
 
         final JpaDistributionSet unAssignDS = (JpaDistributionSet) distributionSetManagement
                 .unAssignTag(assignDS.get(0), findDistributionSetTag.getId());
         assertThat(unAssignDS.getId()).as("unassigned ds is wrong").isEqualTo(assignDS.get(0));
         assertThat(unAssignDS.getTags().size()).as("unassigned ds has wrong tag size").isEqualTo(0);
         findDistributionSetTag = tagManagement.findDistributionSetTag("Tag1").get();
-        assertThat(distributionSetManagement.findDistributionSetsByTag(pageReq, "Tag1").getNumberOfElements())
+        assertThat(distributionSetManagement.findDistributionSetsByTag(pageReq, tag.getId()).getNumberOfElements())
                 .as("ds tag ds has wrong ds size").isEqualTo(3);
+
+        assertThat(distributionSetManagement
+                .findDistributionSetsByTag(pageReq, "name==" + unAssignDS.getName(), tag.getId()).getNumberOfElements())
+                        .as("ds tag ds has wrong ds size").isEqualTo(0);
+        assertThat(distributionSetManagement
+                .findDistributionSetsByTag(pageReq, "name!=" + unAssignDS.getName(), tag.getId()).getNumberOfElements())
+                        .as("ds tag ds has wrong ds size").isEqualTo(3);
     }
 
     @Test

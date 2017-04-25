@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.QuotaManagement;
+import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -106,6 +108,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private final transient RolloutManagement rolloutManagement;
 
+    private final transient RolloutGroupManagement rolloutGroupManagement;
+
+    private final transient QuotaManagement quotaManagement;
+
     private final transient TargetManagement targetManagement;
 
     private final transient TargetFilterQueryManagement targetFilterQueryManagement;
@@ -163,10 +169,13 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     AddUpdateRolloutWindowLayout(final RolloutManagement rolloutManagement, final TargetManagement targetManagement,
             final UINotification uiNotification, final UiProperties uiProperties, final EntityFactory entityFactory,
             final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final TargetFilterQueryManagement targetFilterQueryManagement) {
+            final TargetFilterQueryManagement targetFilterQueryManagement,
+            final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement) {
         actionTypeOptionGroupLayout = new ActionTypeOptionGroupLayout(i18n);
         autoStartOptionGroupLayout = new AutoStartOptionGroupLayout(i18n);
         this.rolloutManagement = rolloutManagement;
+        this.rolloutGroupManagement = rolloutGroupManagement;
+        this.quotaManagement = quotaManagement;
         this.targetManagement = targetManagement;
         this.uiNotification = uiNotification;
         this.uiProperties = uiProperties;
@@ -175,8 +184,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         this.eventBus = eventBus;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
 
-        defineGroupsLayout = new DefineGroupsLayout(i18n, entityFactory, rolloutManagement,
-                targetFilterQueryManagement);
+        defineGroupsLayout = new DefineGroupsLayout(i18n, entityFactory, rolloutManagement, targetFilterQueryManagement,
+                rolloutGroupManagement, quotaManagement);
 
         defaultRolloutGroupConditions = new RolloutGroupConditionBuilder().withDefaults().build();
 
@@ -928,7 +937,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             window.updateAllComponents(this);
             window.setOrginaleValues();
 
-            updateGroupsChart(rollout.getRolloutGroups(), rollout.getTotalTargets());
+            updateGroupsChart(
+                    rolloutGroupManagement.findRolloutGroupsByRolloutId(rollout.getId(),
+                            new PageRequest(0, quotaManagement.getMaxRolloutGroupsPerRollout())).getContent(),
+                    rollout.getTotalTargets());
         }
 
         totalTargetsCount = targetManagement.countTargetByTargetFilterQuery(rollout.getTargetFilterQuery());

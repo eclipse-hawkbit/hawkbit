@@ -125,6 +125,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Autowired
     private SoftwareModuleTypeRepository softwareModuleTypeRepository;
 
+    @Autowired
+    private DistributionSetTagRepository distributionSetTagRepository;
+
     @Override
     public Optional<DistributionSet> findDistributionSetByIdWithDetails(final Long distid) {
         return Optional.ofNullable(distributionSetRepository.findOne(DistributionSetSpecification.byId(distid)));
@@ -481,6 +484,17 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             specList.add(DistributionSetSpecification.isDeleted(deleted));
         }
         specList.add(spec);
+
+        return convertDsPage(findByCriteriaAPI(pageReq, specList), pageReq);
+    }
+
+    @Override
+    public Page<DistributionSet> findDistributionSetsAll(final Pageable pageReq, final Boolean deleted) {
+
+        final List<Specification<JpaDistributionSet>> specList = new ArrayList<>(1);
+        if (deleted != null) {
+            specList.add(DistributionSetSpecification.isDeleted(deleted));
+        }
 
         return convertDsPage(findByCriteriaAPI(pageReq, specList), pageReq);
     }
@@ -879,9 +893,31 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    public Page<DistributionSet> findDistributionSetsByTag(final Pageable pageable, final String tagName) {
-        return findDistributionSetsByFilters(pageable,
-                new DistributionSetFilterBuilder().setTagNames(Arrays.asList(tagName)).build());
+    public Page<DistributionSet> findDistributionSetsByTag(final Pageable pageable, final Long tagId) {
+        throwEntityNotFoundExceptionIfDsTagDoesNotExist(tagId);
+
+        return convertDsPage(distributionSetRepository.findByTag(pageable, tagId), pageable);
+
+    }
+
+    private void throwEntityNotFoundExceptionIfDsTagDoesNotExist(final Long tagId) {
+        if (!distributionSetTagRepository.exists(tagId)) {
+            throw new EntityNotFoundException(DistributionSetTag.class, tagId);
+        }
+    }
+
+    @Override
+    public Page<DistributionSet> findDistributionSetsByTag(final Pageable pageable, final String rsqlParam,
+            final Long tagId) {
+        throwEntityNotFoundExceptionIfDsTagDoesNotExist(tagId);
+
+        final Specification<JpaDistributionSet> spec = RSQLUtility.parse(rsqlParam, DistributionSetFields.class,
+                virtualPropertyReplacer);
+
+        return convertDsPage(distributionSetRepository.findAll((Specification<JpaDistributionSet>) (root, query,
+                cb) -> cb.and(DistributionSetSpecification.hasTag(tagId).toPredicate(root, query, cb),
+                        spec.toPredicate(root, query, cb)),
+                pageable), pageable);
     }
 
 }

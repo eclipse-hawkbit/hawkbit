@@ -93,10 +93,16 @@ public final class MgmtRestConstants {
      * The tag URL mapping rest resource.
      */
     public static final String TARGET_TAG_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/targettags";
+
+    /**
+     * The deprecated tag URL mapping rest resource.
+     */
+    public static final String DEPRECATAED_TARGET_TAG_TARGETS_REQUEST_MAPPING = "/{targetTagId}/targets";
+
     /**
      * The tag URL mapping rest resource.
      */
-    public static final String TARGET_TAG_TARGETS_REQUEST_MAPPING = "/{targetTagId}/targets";
+    public static final String TARGET_TAG_TARGETS_REQUEST_MAPPING = "/{targetTagId}/assigned";
 
     /**
      * The tag URL mapping rest resource.
@@ -110,9 +116,14 @@ public final class MgmtRestConstants {
     public static final String TARGET_FILTER_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/targetfilters";
 
     /**
+     * The deprecated tag URL mapping rest resource.
+     */
+    public static final String DEPRECATED_DISTRIBUTIONSET_REQUEST_MAPPING = "/{distributionsetTagId}/distributionsets";
+
+    /**
      * The tag URL mapping rest resource.
      */
-    public static final String DISTRIBUTIONSET_REQUEST_MAPPING = "/{distributionsetTagId}/distributionsets";
+    public static final String DISTRIBUTIONSET_REQUEST_MAPPING = "/{distributionsetTagId}/assigned";
 
     /**
      * The default offset parameter in case the offset parameter is not present
