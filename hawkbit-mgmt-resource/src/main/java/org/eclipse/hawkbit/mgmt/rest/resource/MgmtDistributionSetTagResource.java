@@ -214,4 +214,23 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
                 .map(MgmtAssignedDistributionSetRequestBody::getDistributionSetId).collect(Collectors.toList());
     }
 
+    @Override
+    public ResponseEntity<MgmtDistributionSetTagAssigmentResult> toggleTagAssignmentUnpaged(
+            final Long distributionsetTagId,
+            final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies) {
+        return toggleTagAssignment(distributionsetTagId, assignedDSRequestBodies);
+    }
+
+    @Override
+    public ResponseEntity<List<MgmtDistributionSet>> assignDistributionSetsUnpaged(final Long distributionsetTagId,
+            final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies) {
+        return assignDistributionSets(distributionsetTagId, assignedDSRequestBodies);
+    }
+
+    @Override
+    public ResponseEntity<Void> unassignDistributionSetUnpaged(final Long distributionsetTagId,
+            final Long distributionsetId) {
+        return unassignDistributionSet(distributionsetTagId, distributionsetId);
+    }
+
 }

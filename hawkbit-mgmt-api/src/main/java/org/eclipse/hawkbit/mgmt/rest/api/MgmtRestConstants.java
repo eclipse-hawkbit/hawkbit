@@ -95,8 +95,12 @@ public final class MgmtRestConstants {
     public static final String TARGET_TAG_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/targettags";
 
     /**
-     * The deprecated tag URL mapping rest resource.
+     * The tag URL mapping rest resource.
+     * 
+     * @deprecated {@link #TARGET_TAG_TARGETS_REQUEST_MAPPING} is preferred as
+     *             this resource on GET supports paging
      */
+    @Deprecated
     public static final String DEPRECATAED_TARGET_TAG_TARGETS_REQUEST_MAPPING = "/{targetTagId}/targets";
 
     /**

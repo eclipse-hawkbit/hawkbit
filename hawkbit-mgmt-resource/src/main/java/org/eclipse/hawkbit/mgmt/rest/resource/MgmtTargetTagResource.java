@@ -198,4 +198,21 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public ResponseEntity<MgmtTargetTagAssigmentResult> toggleTagAssignmentUnpaged(final Long targetTagId,
+            final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
+        return toggleTagAssignment(targetTagId, assignedTargetRequestBodies);
+    }
+
+    @Override
+    public ResponseEntity<List<MgmtTarget>> assignTargetsUnpaged(final Long targetTagId,
+            final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
+        return assignTargets(targetTagId, assignedTargetRequestBodies);
+    }
+
+    @Override
+    public ResponseEntity<Void> unassignTargetUnpaged(final Long targetTagId, final String controllerId) {
+        return unassignTarget(targetTagId, controllerId);
+    }
+
 }

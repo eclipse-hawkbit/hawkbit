@@ -178,10 +178,31 @@ public interface MgmtDistributionSetTagRestApi {
      * @return the list of assigned distribution sets and unassigned
      *         distribution sets.
      */
-    @RequestMapping(method = RequestMethod.POST, value = {
-            MgmtRestConstants.DISTRIBUTIONSET_REQUEST_MAPPING + "/toggleTagAssignment",
-            MgmtRestConstants.DEPRECATED_DISTRIBUTIONSET_REQUEST_MAPPING + "/toggleTagAssignment" })
+    @RequestMapping(method = RequestMethod.POST, value = MgmtRestConstants.DISTRIBUTIONSET_REQUEST_MAPPING
+            + "/toggleTagAssignment")
     ResponseEntity<MgmtDistributionSetTagAssigmentResult> toggleTagAssignment(
+            @PathVariable("distributionsetTagId") final Long distributionsetTagId,
+            final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies);
+
+    /**
+     * Handles the POST request to toggle the assignment of distribution sets by
+     * the given tag id.
+     *
+     * @param distributionsetTagId
+     *            the ID of the distribution set tag to retrieve
+     * @param assignedDSRequestBodies
+     *            list of distribution set ids to be toggled
+     *
+     * @return the list of assigned distribution sets and unassigned
+     *         distribution sets.
+     * 
+     * @deprecated please use
+     *             {@link MgmtDistributionSetTagRestApi#toggleTagAssignment}
+     */
+    @Deprecated
+    @RequestMapping(method = RequestMethod.POST, value = MgmtRestConstants.DEPRECATED_DISTRIBUTIONSET_REQUEST_MAPPING
+            + "/toggleTagAssignment")
+    ResponseEntity<MgmtDistributionSetTagAssigmentResult> toggleTagAssignmentUnpaged(
             @PathVariable("distributionsetTagId") final Long distributionsetTagId,
             final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies);
 
@@ -195,11 +216,31 @@ public interface MgmtDistributionSetTagRestApi {
      *
      * @return the list of assigned distribution set.
      */
-    @RequestMapping(method = RequestMethod.POST, value = { MgmtRestConstants.DISTRIBUTIONSET_REQUEST_MAPPING,
-            MgmtRestConstants.DEPRECATED_DISTRIBUTIONSET_REQUEST_MAPPING }, consumes = { MediaTypes.HAL_JSON_VALUE,
-                    MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-                            MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.POST, value = MgmtRestConstants.DISTRIBUTIONSET_REQUEST_MAPPING, consumes = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtDistributionSet>> assignDistributionSets(
+            @PathVariable("distributionsetTagId") final Long distributionsetTagId,
+            final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies);
+
+    /**
+     * Handles the POST request to assign distribution sets to the given tag id.
+     *
+     * @param distributionsetTagId
+     *            the ID of the distribution set tag to retrieve
+     * @param assignedDSRequestBodies
+     *            list of distribution sets ids to be assigned
+     *
+     * @return the list of assigned distribution set.
+     * 
+     * @deprecated please use
+     *             {@link MgmtDistributionSetTagRestApi#assignDistributionSets}
+     */
+    @Deprecated
+    @RequestMapping(method = RequestMethod.POST, value = MgmtRestConstants.DEPRECATED_DISTRIBUTIONSET_REQUEST_MAPPING, consumes = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<List<MgmtDistributionSet>> assignDistributionSetsUnpaged(
             @PathVariable("distributionsetTagId") final Long distributionsetTagId,
             final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies);
 
@@ -213,9 +254,28 @@ public interface MgmtDistributionSetTagRestApi {
      *            the ID of the distribution set to unassign
      * @return http status code
      */
-    @RequestMapping(method = RequestMethod.DELETE, value = {
-            MgmtRestConstants.DISTRIBUTIONSET_REQUEST_MAPPING + "/{distributionsetId}",
-            MgmtRestConstants.DEPRECATED_DISTRIBUTIONSET_REQUEST_MAPPING + "/{distributionsetId}" })
+    @RequestMapping(method = RequestMethod.DELETE, value = MgmtRestConstants.DISTRIBUTIONSET_REQUEST_MAPPING
+            + "/{distributionsetId}")
     ResponseEntity<Void> unassignDistributionSet(@PathVariable("distributionsetTagId") final Long distributionsetTagId,
+            @PathVariable("distributionsetId") final Long distributionsetId);
+
+    /**
+     * Handles the DELETE request to unassign one distribution set from the
+     * given tag id.
+     *
+     * @param distributionsetTagId
+     *            the ID of the distribution set tag
+     * @param distributionsetId
+     *            the ID of the distribution set to unassign
+     * @return http status code
+     * 
+     * @deprecated please use
+     *             {@link MgmtDistributionSetTagRestApi#unassignDistributionSet}
+     */
+    @Deprecated
+    @RequestMapping(method = RequestMethod.DELETE, value = MgmtRestConstants.DEPRECATED_DISTRIBUTIONSET_REQUEST_MAPPING
+            + "/{distributionsetId}")
+    ResponseEntity<Void> unassignDistributionSetUnpaged(
+            @PathVariable("distributionsetTagId") final Long distributionsetTagId,
             @PathVariable("distributionsetId") final Long distributionsetId);
 }
