@@ -143,8 +143,9 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         buildLayout();
         eventBus.subscribe(this);
 
-        selectedSoftwareModule.ifPresent(softwareModule -> populateArtifactDetails(softwareModule.getId(),
-                HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(), softwareModule.getVersion())));
+        if (selectedSoftwareModule.isPresent()) {
+            populateArtifactDetails(selectedSoftwareModule.get().getId(), labelSoftwareModule);
+        }
 
         if (isMaximized()) {
             maximizedArtifactDetailsView();
