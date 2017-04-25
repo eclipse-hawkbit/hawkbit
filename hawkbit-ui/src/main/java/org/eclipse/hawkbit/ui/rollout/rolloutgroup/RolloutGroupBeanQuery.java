@@ -15,6 +15,7 @@ import static org.springframework.data.domain.Sort.Direction.DESC;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
@@ -113,38 +114,34 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
     }
 
     private List<ProxyRolloutGroup> getProxyRolloutGroupList(final List<RolloutGroup> rolloutGroupBeans) {
-        final List<ProxyRolloutGroup> proxyRolloutGroupsList = new ArrayList<>();
-        for (final RolloutGroup rolloutGroup : rolloutGroupBeans) {
-            final ProxyRolloutGroup proxyRolloutGroup = new ProxyRolloutGroup();
-            proxyRolloutGroup.setName(rolloutGroup.getName());
-            proxyRolloutGroup.setDescription(rolloutGroup.getDescription());
-            proxyRolloutGroup.setCreatedDate(SPDateTimeUtil.getFormattedDate(rolloutGroup.getCreatedAt()));
-            proxyRolloutGroup.setModifiedDate(SPDateTimeUtil.getFormattedDate(rolloutGroup.getLastModifiedAt()));
-            proxyRolloutGroup.setCreatedBy(UserDetailsFormatter.loadAndFormatCreatedBy(rolloutGroup));
-            proxyRolloutGroup.setLastModifiedBy(UserDetailsFormatter.loadAndFormatLastModifiedBy(rolloutGroup));
-            proxyRolloutGroup.setId(rolloutGroup.getId());
-            proxyRolloutGroup.setStatus(rolloutGroup.getStatus());
-            proxyRolloutGroup.setErrorAction(rolloutGroup.getErrorAction());
-            proxyRolloutGroup.setErrorActionExp(rolloutGroup.getErrorActionExp());
-            proxyRolloutGroup.setErrorCondition(rolloutGroup.getErrorCondition());
-            proxyRolloutGroup.setErrorConditionExp(rolloutGroup.getErrorConditionExp());
-            proxyRolloutGroup.setSuccessCondition(rolloutGroup.getSuccessCondition());
-            proxyRolloutGroup.setSuccessConditionExp(rolloutGroup.getSuccessConditionExp());
-            proxyRolloutGroup.setFinishedPercentage(calculateFinishedPercentage(rolloutGroup));
-
-            proxyRolloutGroup.setRolloutRendererData(new RolloutRendererData(rolloutGroup.getName(), null));
-
-            proxyRolloutGroup.setTotalTargetsCount(String.valueOf(rolloutGroup.getTotalTargets()));
-            proxyRolloutGroup.setTotalTargetCountStatus(rolloutGroup.getTotalTargetCountStatus());
-
-            proxyRolloutGroupsList.add(proxyRolloutGroup);
-        }
-        return proxyRolloutGroupsList;
+        return rolloutGroupBeans.stream().map(RolloutGroupBeanQuery::createProxy).collect(Collectors.toList());
     }
 
-    private String calculateFinishedPercentage(final RolloutGroup rolloutGroup) {
-        return HawkbitCommonUtil.formattingFinishedPercentage(rolloutGroup, getRolloutManagement()
-                .getFinishedPercentForRunningGroup(rolloutGroup.getRollout().getId(), rolloutGroup.getId()));
+    private static ProxyRolloutGroup createProxy(final RolloutGroup rolloutGroup) {
+        final ProxyRolloutGroup proxyRolloutGroup = new ProxyRolloutGroup();
+        proxyRolloutGroup.setName(rolloutGroup.getName());
+        proxyRolloutGroup.setDescription(rolloutGroup.getDescription());
+        proxyRolloutGroup.setCreatedDate(SPDateTimeUtil.getFormattedDate(rolloutGroup.getCreatedAt()));
+        proxyRolloutGroup.setModifiedDate(SPDateTimeUtil.getFormattedDate(rolloutGroup.getLastModifiedAt()));
+        proxyRolloutGroup.setCreatedBy(UserDetailsFormatter.loadAndFormatCreatedBy(rolloutGroup));
+        proxyRolloutGroup.setLastModifiedBy(UserDetailsFormatter.loadAndFormatLastModifiedBy(rolloutGroup));
+        proxyRolloutGroup.setId(rolloutGroup.getId());
+        proxyRolloutGroup.setStatus(rolloutGroup.getStatus());
+        proxyRolloutGroup.setErrorAction(rolloutGroup.getErrorAction());
+        proxyRolloutGroup.setErrorActionExp(rolloutGroup.getErrorActionExp());
+        proxyRolloutGroup.setErrorCondition(rolloutGroup.getErrorCondition());
+        proxyRolloutGroup.setErrorConditionExp(rolloutGroup.getErrorConditionExp());
+        proxyRolloutGroup.setSuccessCondition(rolloutGroup.getSuccessCondition());
+        proxyRolloutGroup.setSuccessConditionExp(rolloutGroup.getSuccessConditionExp());
+        proxyRolloutGroup.setFinishedPercentage(HawkbitCommonUtil.formattingFinishedPercentage(rolloutGroup,
+                rolloutGroup.getTotalTargetCountStatus().getFinishedPercent()));
+
+        proxyRolloutGroup.setRolloutRendererData(new RolloutRendererData(rolloutGroup.getName(), null));
+
+        proxyRolloutGroup.setTotalTargetsCount(String.valueOf(rolloutGroup.getTotalTargets()));
+        proxyRolloutGroup.setTotalTargetCountStatus(rolloutGroup.getTotalTargetCountStatus());
+
+        return proxyRolloutGroup;
     }
 
     @Override

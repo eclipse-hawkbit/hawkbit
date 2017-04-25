@@ -49,12 +49,14 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
                 .name("targetName123").description("targetDesc123"));
         attributes.put("revision", "1.1");
         target = controllerManagement.updateControllerAttributes(target.getControllerId(), attributes);
+        target = controllerManagement.updateLastTargetQuery(target.getControllerId(), null);
 
         target2 = targetManagement
                 .createTarget(entityFactory.target().create().controllerId("targetId1234").description("targetId1234"));
         attributes.put("revision", "1.2");
         Thread.sleep(1);
         target2 = controllerManagement.updateControllerAttributes(target2.getControllerId(), attributes);
+        target2 = controllerManagement.updateLastTargetQuery(target2.getControllerId(), null);
 
         testdataFactory.createTarget("targetId1235");
         testdataFactory.createTarget("targetId1236");

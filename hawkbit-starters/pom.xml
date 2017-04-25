@@ -17,7 +17,7 @@
       <version>0.2.0-SNAPSHOT</version>
    </parent>
    <artifactId>hawkbit-starters</artifactId>
-   <name>hawkBit :: Spring Boot Starters Parent</name>
+   <name>hawkBit :: Spring Boot Starters</name>
    <packaging>pom</packaging>
    <modules>
       <module>hawkbit-boot-starter</module>

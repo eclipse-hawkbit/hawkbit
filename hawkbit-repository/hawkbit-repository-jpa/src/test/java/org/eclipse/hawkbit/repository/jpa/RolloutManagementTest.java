@@ -9,9 +9,11 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,14 +37,17 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.utils.MultipleInvokeHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.SuccessCondition;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -58,7 +63,6 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.Test;
-import org.springframework.context.annotation.Description;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -66,6 +70,7 @@ import org.springframework.data.domain.Sort.Direction;
 
 import com.google.common.collect.Lists;
 
+import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Step;
 import ru.yandex.qatools.allure.annotations.Stories;
@@ -77,6 +82,42 @@ import ru.yandex.qatools.allure.annotations.Title;
 @Features("Component Tests - Repository")
 @Stories("Rollout Management")
 public class RolloutManagementTest extends AbstractJpaIntegrationTest {
+
+    @Test
+    @Description("Verifies that a running action with distribution-set (A) is not canceled by a rollout which tries to also assign a distribution-set (A)")
+    public void rolloutShouldNotCancelRunningActionWithTheSameDistributionSet() {
+        // manually assign distribution set to target
+        final String knownControllerId = "controller12345";
+        final DistributionSet knownDistributionSet = testdataFactory.createDistributionSet();
+        testdataFactory.createTarget(knownControllerId);
+        final DistributionSetAssignmentResult assignmentResult = deploymentManagement.assignDistributionSet(
+                knownDistributionSet.getId(), ActionType.FORCED, 0, Collections.singleton(knownControllerId));
+        final Long manuallyAssignedActionId = assignmentResult.getActions().get(0);
+
+        // create rollout with the same distribution set already assigned
+        // start rollout
+        final Rollout rollout = testdataFactory.createRolloutByVariables("rolloutNotCancelRunningAction", "description",
+                1, "name==*", knownDistributionSet, "50", "5");
+        rolloutManagement.startRollout(rollout.getId());
+        rolloutManagement.handleRollouts();
+
+        // verify that manually created action is still running and action
+        // created from rollout is finished
+        final List<Action> actionsByKnownTarget = deploymentManagement.findActionsByTarget(knownControllerId, pageReq)
+                .getContent();
+        // should be 2 actions, one manually and one from the rollout
+        assertThat(actionsByKnownTarget).hasSize(2);
+        // verify that manually assigned action is still running
+        assertThat(deploymentManagement.findAction(manuallyAssignedActionId).get().getStatus())
+                .isEqualTo(Status.RUNNING);
+        // verify that rollout management created action is finished because is
+        // duplicate assignment
+        final Action rolloutCreatedAction = actionsByKnownTarget.stream()
+                .filter(action -> !action.getId().equals(manuallyAssignedActionId)).findAny().get();
+        assertThat(rolloutCreatedAction.getStatus()).isEqualTo(Status.FINISHED);
+
+    }
+
     @Test
     @Description("Verifies that management get access reacts as specfied on calls for non existing entities by means "
             + "of Optional not present.")
@@ -92,7 +133,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             + " by means of throwing EntityNotFoundException.")
     @ExpectEvents({ @Expect(type = RolloutDeletedEvent.class, count = 0),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 10),
-            @Expect(type = RolloutGroupUpdatedEvent.class, count = 20),
+            @Expect(type = RolloutGroupUpdatedEvent.class, count = 10),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = RolloutUpdatedEvent.class, count = 1),
@@ -101,12 +142,6 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final Rollout createdRollout = testdataFactory.createRollout("xxx");
 
         verifyThrownExceptionBy(() -> rolloutManagement.deleteRollout(NOT_EXIST_IDL), "Rollout");
-
-        verifyThrownExceptionBy(() -> rolloutManagement.getFinishedPercentForRunningGroup(NOT_EXIST_IDL, NOT_EXIST_IDL),
-                "Rollout");
-        verifyThrownExceptionBy(
-                () -> rolloutManagement.getFinishedPercentForRunningGroup(createdRollout.getId(), NOT_EXIST_IDL),
-                "RolloutGroup");
 
         verifyThrownExceptionBy(() -> rolloutManagement.pauseRollout(NOT_EXIST_IDL), "Rollout");
         verifyThrownExceptionBy(() -> rolloutManagement.resumeRollout(NOT_EXIST_IDL), "Rollout");
@@ -964,23 +999,24 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutManagement.handleRollouts();
         myRollout = rolloutManagement.findRolloutById(myRollout.getId()).get();
 
-        float percent = rolloutManagement.getFinishedPercentForRunningGroup(myRollout.getId(),
-                myRollout.getRolloutGroups().get(0).getId());
+        float percent = rolloutGroupManagement
+                .findRolloutGroupWithDetailedStatus(myRollout.getRolloutGroups().get(0).getId()).get()
+                .getTotalTargetCountStatus().getFinishedPercent();
         assertThat(percent).isEqualTo(40);
 
         changeStatusForRunningActions(myRollout, Status.FINISHED, 3);
         rolloutManagement.handleRollouts();
 
-        percent = rolloutManagement.getFinishedPercentForRunningGroup(myRollout.getId(),
-                myRollout.getRolloutGroups().get(0).getId());
+        percent = rolloutGroupManagement.findRolloutGroupWithDetailedStatus(myRollout.getRolloutGroups().get(0).getId())
+                .get().getTotalTargetCountStatus().getFinishedPercent();
         assertThat(percent).isEqualTo(100);
 
         changeStatusForRunningActions(myRollout, Status.FINISHED, 4);
         changeStatusForAllRunningActions(myRollout, Status.ERROR);
         rolloutManagement.handleRollouts();
 
-        percent = rolloutManagement.getFinishedPercentForRunningGroup(myRollout.getId(),
-                myRollout.getRolloutGroups().get(1).getId());
+        percent = rolloutGroupManagement.findRolloutGroupWithDetailedStatus(myRollout.getRolloutGroups().get(1).getId())
+                .get().getTotalTargetCountStatus().getFinishedPercent();
         assertThat(percent).isEqualTo(80);
     }
 
@@ -1424,7 +1460,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetCreatedEvent.class, count = 25), @Expect(type = RolloutUpdatedEvent.class, count = 2),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 5),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = RolloutGroupUpdatedEvent.class, count = 10) })
+            @Expect(type = RolloutGroupUpdatedEvent.class, count = 5) })
     public void deleteRolloutWhichHasNeverStartedIsHardDeleted() {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
@@ -1447,7 +1483,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = RolloutGroupUpdatedEvent.class, count = 16),
+            @Expect(type = RolloutGroupUpdatedEvent.class, count = 10),
             @Expect(type = RolloutUpdatedEvent.class, count = 6),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 25), @Expect(type = TargetUpdatedEvent.class, count = 2),
@@ -1480,7 +1516,13 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         // verify
         final JpaRollout deletedRollout = rolloutRepository.findOne(createdRollout.getId());
         assertThat(deletedRollout).isNotNull();
+
         assertThat(deletedRollout.getStatus()).isEqualTo(RolloutStatus.DELETED);
+        assertThatExceptionOfType(EntityReadOnlyException.class)
+                .isThrownBy(() -> rolloutManagement
+                        .updateRollout(entityFactory.rollout().update(createdRollout.getId()).description("test")))
+                .withMessageContaining("" + createdRollout.getId());
+
         assertThat(rolloutManagement.findAll(pageReq, true).getContent()).hasSize(1);
         assertThat(rolloutManagement.findAll(pageReq, false).getContent()).hasSize(0);
         assertThat(rolloutGroupManagement.findAllRolloutGroupsWithDetailedStatus(createdRollout.getId(), pageReq)

@@ -16,18 +16,21 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.hawkbit.repository.test.util.TestContextProvider;
 import org.junit.Assert;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ApplicationEventMulticaster;
 
-import com.google.common.collect.HashMultiset;
+import com.google.common.collect.ConcurrentHashMultiset;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Sets;
 import com.jayway.awaitility.Awaitility;
@@ -37,6 +40,7 @@ import com.jayway.awaitility.core.ConditionTimeoutException;
  * Test rule to setup and verify the event count for a method.
  */
 public class EventVerifier implements TestRule {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventVerifier.class);
 
     private EventCaptor eventCaptor;
 
@@ -111,20 +115,21 @@ public class EventVerifier implements TestRule {
 
     private static class EventCaptor implements ApplicationListener<RemoteApplicationEvent> {
 
-        private final Multiset<Class<?>> capturedEvents = HashMultiset.create();
+        private final Multiset<Class<?>> capturedEvents = ConcurrentHashMultiset.create();
 
         @Override
-        public synchronized void onApplicationEvent(final RemoteApplicationEvent event) {
+        public void onApplicationEvent(final RemoteApplicationEvent event) {
+            LOGGER.debug("Received event {}", event.getClass().getSimpleName());
             capturedEvents.add(event.getClass());
         }
 
-        public synchronized int getCountFor(final Class<?> expectedEvent) {
+        public int getCountFor(final Class<?> expectedEvent) {
             return capturedEvents.count(expectedEvent);
         }
 
-        public synchronized Set<Class<?>> diff(final Expect[] allEvents) {
+        public Set<Class<?>> diff(final Expect[] allEvents) {
             return Sets.difference(capturedEvents.elementSet(),
-                    java.util.stream.Stream.of(allEvents).map((e) -> e.type()).collect(Collectors.toSet()));
+                    Stream.of(allEvents).map(Expect::type).collect(Collectors.toSet()));
         }
 
     }

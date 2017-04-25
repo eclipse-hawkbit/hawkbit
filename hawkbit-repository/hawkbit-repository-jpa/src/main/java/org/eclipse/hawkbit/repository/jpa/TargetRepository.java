@@ -13,26 +13,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.persistence.EntityManager;
+
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * {@link Target} repository.
  *
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>, JpaSpecificationExecutor<JpaTarget> {
 
     /**
@@ -50,7 +52,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      *            to update
      */
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     @Query("UPDATE JpaTarget t  SET t.assignedDistributionSet = :set, t.lastModifiedAt = :lastModifiedAt, t.lastModifiedBy = :lastModifiedBy, t.updateStatus = :status WHERE t.id IN :targets")
     void setAssignedDistributionSetAndUpdateStatus(@Param("status") TargetUpdateStatus status,
             @Param("set") JpaDistributionSet set, @Param("lastModifiedAt") Long modifiedAt,
@@ -85,7 +87,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      *            to be deleted
      */
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("DELETE FROM JpaTarget t WHERE t.id IN ?1")
     void deleteByIdIn(final Collection<Long> targetIDs);
@@ -209,4 +211,18 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      * @return a page of all targets related to a rollout group
      */
     Page<Target> findByActionsRolloutGroupId(Long rolloutGroupId, Pageable page);
+
+    /**
+     * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety
+     * reasons (this is a "delete everything" query after all) we add the tenant manually to
+     * query even if this will by done by {@link EntityManager} anyhow. The DB
+     * should take care of optimizing this away.
+     *
+     * @param tenant
+     *            to delete data from
+     */
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM JpaTarget t WHERE t.tenant = :tenant")
+    void deleteByTenant(@Param("tenant") String tenant);
 }

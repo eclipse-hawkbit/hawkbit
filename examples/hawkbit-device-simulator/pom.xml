@@ -19,7 +19,7 @@
    </parent>
 
    <artifactId>hawkbit-device-simulator</artifactId>
-   <name>hawkBit-example :: Device Simulator</name>
+   <name>hawkBit :: Examples :: Device Simulator</name>
    <description>Device Management Federation API based simulator</description>
 
    <build>
@@ -73,6 +73,10 @@
       </dependency>
       <dependency>
          <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-jetty</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
          <artifactId>spring-boot-starter-logging</artifactId>
       </dependency>
       <dependency>
@@ -90,7 +94,6 @@
       <dependency>
          <groupId>com.vaadin</groupId>
          <artifactId>vaadin-spring-boot-starter</artifactId>
-         <version>1.0.0</version>
       </dependency>
       <dependency>
          <groupId>com.vaadin</groupId>
@@ -115,11 +118,6 @@
       <dependency>
          <groupId>com.jayway.jsonpath</groupId>
          <artifactId>json-path</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-configuration-processor</artifactId>
-         <optional>true</optional>
       </dependency>
       <dependency>
          <groupId>org.apache.httpcomponents</groupId>

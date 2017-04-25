@@ -67,14 +67,6 @@
          <artifactId>slf4j-api</artifactId>
       </dependency>
 
-      <!-- Optional -->
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-configuration-processor</artifactId>
-         <optional>true</optional>
-      </dependency>
-
-
       <!-- Test -->
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>

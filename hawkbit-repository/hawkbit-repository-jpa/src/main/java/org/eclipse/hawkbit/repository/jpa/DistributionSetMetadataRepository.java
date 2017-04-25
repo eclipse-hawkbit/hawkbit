@@ -13,13 +13,12 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * {@link DistributionSetMetadata} repository.
  */
-@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+@Transactional(readOnly = true)
 public interface DistributionSetMetadataRepository
         extends PagingAndSortingRepository<JpaDistributionSetMetadata, DsMetadataCompositeKey>,
         JpaSpecificationExecutor<JpaDistributionSetMetadata> {

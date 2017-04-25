@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Map;
-import java.util.concurrent.Executor;
 
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
@@ -70,7 +69,6 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
@@ -278,7 +276,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Override
     protected Map<String, Object> getVendorProperties() {
 
-        final Map<String, Object> properties = Maps.newHashMapWithExpectedSize(4);
+        final Map<String, Object> properties = Maps.newHashMapWithExpectedSize(5);
         // Turn off dynamic weaving to disable LTW lookup in static weaving mode
         properties.put("eclipselink.weaving", "false");
         // needed for reports
@@ -287,6 +285,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         properties.put("eclipselink.ddl-generation", "none");
         // Embeed into hawkBit logging
         properties.put("eclipselink.logging.logger", "JavaLogger");
+        // Ensure that we flush only at the end of the transaction
+        properties.put("eclipselink.persistence-context.flush-mode", "COMMIT");
 
         return properties;
     }
@@ -545,7 +545,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      * @param autoAssignChecker
      *            to run a check as tenant
      * @param lockRegistry
-     *            to lock the tenant for auto assigment
+     *            to lock the tenant for auto assignment
      * @return a new {@link AutoAssignChecker}
      */
     @Bean
@@ -575,8 +575,6 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      *            to run the rollout handler
      * @param systemSecurityContext
      *            to run as system
-     * @param threadPoolExecutor
-     *            to execute the handlers in parallel
      * @return a new {@link RolloutScheduler} bean.
      */
     @Bean
@@ -584,9 +582,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Profile("!test")
     @ConditionalOnProperty(prefix = "hawkbit.rollout.scheduler", name = "enabled", matchIfMissing = true)
     RolloutScheduler rolloutScheduler(final TenantAware tenantAware, final SystemManagement systemManagement,
-            final RolloutManagement rolloutManagement, final SystemSecurityContext systemSecurityContext,
-            @Qualifier("asyncExecutor") final Executor threadPoolExecutor) {
-        return new RolloutScheduler(tenantAware, systemManagement, rolloutManagement, systemSecurityContext,
-                threadPoolExecutor);
+            final RolloutManagement rolloutManagement, final SystemSecurityContext systemSecurityContext) {
+        return new RolloutScheduler(tenantAware, systemManagement, rolloutManagement, systemSecurityContext);
     }
 }
