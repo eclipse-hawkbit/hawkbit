@@ -10,9 +10,9 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.fail;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +36,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -1084,13 +1083,10 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsFor" + rolloutName);
 
-        try {
-            testdataFactory.createRolloutByVariables(rolloutName, "desc", amountGroups, "id==notExisting",
-                    distributionSet, successCondition, errorCondition);
-            fail("Was able to create a Rollout without targets.");
-        } catch (final ConstraintViolationException e) {
-            // OK
-        }
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> testdataFactory.createRolloutByVariables(rolloutName, "desc", amountGroups,
+                        "id==notExisting", distributionSet, successCondition, errorCondition))
+                .withMessageContaining("does not match any existing");
 
     }
 
@@ -1109,14 +1105,10 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         testdataFactory.createRolloutByVariables(rolloutName, "desc", amountGroups, "id==dup-ro-*", distributionSet,
                 successCondition, errorCondition);
 
-        try {
-            testdataFactory.createRolloutByVariables(rolloutName, "desc", amountGroups, "id==dup-ro-*", distributionSet,
-                    successCondition, errorCondition);
-            fail("Was able to create a duplicate Rollout.");
-        } catch (final EntityAlreadyExistsException e) {
-            // OK
-        }
-
+        assertThatExceptionOfType(EntityAlreadyExistsException.class)
+                .isThrownBy(() -> testdataFactory.createRolloutByVariables(rolloutName, "desc", amountGroups,
+                        "id==dup-ro-*", distributionSet, successCondition, errorCondition))
+                .withMessageContaining("already exists in database");
     }
 
     @Test
@@ -1138,7 +1130,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         final List<RolloutGroup> groups = rolloutGroupManagement
                 .findRolloutGroupsByRolloutId(myRollout.getId(), pageReq).getContent();
-        ;
+
         assertThat(groups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.READY);
         assertThat(groups.get(0).getTotalTargets()).isEqualTo(1);
         assertThat(groups.get(1).getStatus()).isEqualTo(RolloutGroupStatus.READY);
@@ -1338,12 +1330,9 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutGroups.add(generateRolloutGroup(0, percentTargetsInGroup1, null));
         rolloutGroups.add(generateRolloutGroup(1, percentTargetsInGroup2, null));
 
-        try {
-            rolloutManagement.createRollout(myRollout, rolloutGroups, conditions);
-            fail("Was able to create a Rollout with groups that are not addressing all targets");
-        } catch (final ConstraintViolationException e) {
-            // OK
-        }
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> rolloutManagement.createRollout(myRollout, rolloutGroups, conditions))
+                .withMessageContaining("groups don't match");
 
     }
 
@@ -1358,16 +1347,13 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults().build();
         final RolloutCreate myRollout = generateTargetsAndRollout(rolloutName, amountTargetsForRollout);
 
-        final List<RolloutGroupCreate> rolloutGroups = new ArrayList<>(2);
-        rolloutGroups.add(generateRolloutGroup(0, percentTargetsInGroup1, null));
-        rolloutGroups.add(generateRolloutGroup(1, percentTargetsInGroup2, null));
+        final List<RolloutGroupCreate> rolloutGroups = Arrays.asList(
+                generateRolloutGroup(0, percentTargetsInGroup1, null),
+                generateRolloutGroup(1, percentTargetsInGroup2, null));
 
-        try {
-            rolloutManagement.createRollout(myRollout, rolloutGroups, conditions);
-            fail("Was able to create a Rollout with groups that have illegal percentages");
-        } catch (final ConstraintViolationException e) {
-            // OK
-        }
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> rolloutManagement.createRollout(myRollout, rolloutGroups, conditions))
+                .withMessageContaining("percentage has to be between 1 and 100");
 
     }
 
@@ -1381,57 +1367,10 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults().build();
         final RolloutCreate myRollout = generateTargetsAndRollout(rolloutName, amountTargetsForRollout);
 
-        try {
-            rolloutManagement.createRollout(myRollout, illegalGroupAmount, conditions);
-            fail("Was able to create a Rollout with too many groups");
-        } catch (final ConstraintViolationException e) {
-            // OK
-        }
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> rolloutManagement.createRollout(myRollout, illegalGroupAmount, conditions))
+                .withMessageContaining("not be greater than " + quotaManagement.getMaxRolloutGroupsPerRollout());
 
-    }
-
-    @Test
-    @Description("Verify Exception when a Rollout groups are queried for rollout that does not exist.")
-    public void findRolloutGroupsForRolloutThatDoesNotExist() throws Exception {
-        try {
-            rolloutGroupManagement.findAllRolloutGroupsWithDetailedStatus(1234L, pageReq);
-            fail("Was able to get Rollout group for rollout that does not exist.");
-        } catch (final EntityNotFoundException e) {
-            // OK
-        }
-    }
-
-    @Test
-    @Description("Verify Exception when targets are queried for rollout group that does not exist.")
-    public void findRolloutGroupTargetsForGroupThatDoesNotExist() throws Exception {
-        try {
-            rolloutGroupManagement.findRolloutGroupTargets(1234L, pageReq);
-            fail("Was able to get Rollout group targets for rollout group that does not exist.");
-        } catch (final EntityNotFoundException e) {
-            // OK
-        }
-    }
-
-    @Test
-    @Description("Verify Exception when targets are queried for rollout group that does not exist.")
-    public void findRolloutGroupTargetWithActionsForGroupThatDoesNotExist() throws Exception {
-        try {
-            rolloutGroupManagement.findAllTargetsWithActionStatus(pageReq, 1234L);
-            fail("Was able to get Rollout group targets for rollout group that does not exist.");
-        } catch (final EntityNotFoundException e) {
-            // OK
-        }
-    }
-
-    @Test
-    @Description("Verify Exception when targets are counted for rollout group that does not exist.")
-    public void countRolloutGroupTargetWithActionsForGroupThatDoesNotExist() throws Exception {
-        try {
-            rolloutGroupManagement.countTargetsOfRolloutsGroup(1234L);
-            fail("Was able to count Rollout group targets for rollout group that does not exist.");
-        } catch (final EntityNotFoundException e) {
-            // OK
-        }
     }
 
     @Test
@@ -1459,12 +1398,10 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.CREATING);
 
-        try {
-            rolloutManagement.startRollout(myRollout.getId());
-            fail("Was able to start a Rollout in CREATING status");
-        } catch (final RolloutIllegalStateException e) {
-            // OK
-        }
+        final Long rolloutId = myRollout.getId();
+        assertThatExceptionOfType(RolloutIllegalStateException.class)
+                .isThrownBy(() -> rolloutManagement.startRollout(rolloutId))
+                .withMessageContaining("can only be started in state ready");
 
     }
 

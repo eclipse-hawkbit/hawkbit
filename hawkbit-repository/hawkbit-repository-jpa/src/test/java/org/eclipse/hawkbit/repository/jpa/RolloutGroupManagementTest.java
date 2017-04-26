@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupUpdatedEve
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
-import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.Test;
@@ -51,7 +50,7 @@ public class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = RolloutUpdatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 10) })
     public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
-        final Rollout createdRollout = testdataFactory.createRollout("xxx");
+        testdataFactory.createRollout("xxx");
 
         verifyThrownExceptionBy(() -> rolloutGroupManagement.countRolloutGroupsByRolloutId(NOT_EXIST_IDL), "Rollout");
         verifyThrownExceptionBy(() -> rolloutGroupManagement.countTargetsOfRolloutsGroup(NOT_EXIST_IDL),

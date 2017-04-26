@@ -74,9 +74,9 @@ public final class RolloutHelper {
      */
     public static void verifyRolloutGroupParameter(final int amountGroup, final int maxGroups) {
         if (amountGroup <= 0) {
-            throw new ConstraintViolationException("the amountGroup must be greater than zero");
+            throw new ConstraintViolationException("the amount of groups cannot be lower than zero");
         } else if (amountGroup > maxGroups) {
-            throw new ConstraintViolationException("the amountGroup must not be greater than 500");
+            throw new ConstraintViolationException("the amount of groups cannot be greater than 500");
         }
     }
 
