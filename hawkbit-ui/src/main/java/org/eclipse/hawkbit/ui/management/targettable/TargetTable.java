@@ -788,8 +788,8 @@ public class TargetTable extends AbstractTable<Target, Long> {
     }
 
     private boolean isLastSelectedTarget(final Long targetId) {
-        return managementUIState.getLastSelectedTargetId() != null
-                && managementUIState.getLastSelectedTargetId().equals(targetId);
+        final Optional<Long> currentTargetId = managementUIState.getLastSelectedTargetId();
+        return currentTargetId.isPresent() && currentTargetId.get().equals(targetId);
     }
 
     private boolean isFilterEnabled() {

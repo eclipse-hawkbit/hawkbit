@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -49,7 +50,7 @@ public class ManagementUIState implements ManagementEntityState<Long>, Serializa
 
     private Boolean distTagLayoutVisible = Boolean.FALSE;
 
-    private Long lastSelectedTargetId;
+    private transient Optional<Long> lastSelectedTargetId = Optional.empty();
 
     private Set<Long> selectedTargetId = Collections.emptySet();
 
@@ -148,12 +149,12 @@ public class ManagementUIState implements ManagementEntityState<Long>, Serializa
         return deletedTargetList;
     }
 
-    public Long getLastSelectedTargetId() {
+    public Optional<Long> getLastSelectedTargetId() {
         return lastSelectedTargetId;
     }
 
     public void setLastSelectedTargetId(final Long lastSelectedTargetId) {
-        this.lastSelectedTargetId = lastSelectedTargetId;
+        this.lastSelectedTargetId = Optional.ofNullable(lastSelectedTargetId);
     }
 
     public Set<Long> getSelectedTargetId() {

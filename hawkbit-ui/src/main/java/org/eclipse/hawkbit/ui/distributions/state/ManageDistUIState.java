@@ -43,9 +43,9 @@ public class ManageDistUIState implements ManagementEntityState<Long>, Serializa
 
     private Set<Long> selectedDistributions = new HashSet<>();
 
-    private Long lastSelectedDistribution;
+    private Optional<Long> lastSelectedDistribution = Optional.empty();
 
-    private Long lastSelectedSoftwareModule;
+    private Optional<Long> lastSelectedSoftwareModule = Optional.empty();
 
     private Set<Long> selectedSoftwareModules = Collections.emptySet();
 
@@ -100,12 +100,12 @@ public class ManageDistUIState implements ManagementEntityState<Long>, Serializa
     }
 
     public Optional<Long> getLastSelectedDistribution() {
-        return Optional.ofNullable(lastSelectedDistribution);
+        return lastSelectedDistribution;
     }
 
     @Override
     public void setLastSelectedEntity(final Long value) {
-        this.lastSelectedDistribution = value;
+        this.lastSelectedDistribution = Optional.ofNullable(value);
     }
 
     @Override
@@ -118,11 +118,11 @@ public class ManageDistUIState implements ManagementEntityState<Long>, Serializa
     }
 
     public Optional<Long> getLastSelectedSoftwareModule() {
-        return Optional.ofNullable(lastSelectedSoftwareModule);
+        return lastSelectedSoftwareModule;
     }
 
     public void setLastSelectedSoftwareModule(final Long value) {
-        this.lastSelectedSoftwareModule = value;
+        this.lastSelectedSoftwareModule = Optional.ofNullable(value);
     }
 
     public Set<Long> getSelectedSoftwareModules() {

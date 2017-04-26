@@ -42,7 +42,7 @@ public class ArtifactUploadState implements ManagementEntityState<Long>, Seriali
 
     private final Set<CustomFile> fileSelected = new HashSet<>();
 
-    private Long selectedBaseSwModuleId;
+    private Optional<Long> selectedBaseSwModuleId = Optional.empty();
 
     private final Map<String, SoftwareModule> baseSwModuleList = new HashMap<>();
 
@@ -124,7 +124,7 @@ public class ArtifactUploadState implements ManagementEntityState<Long>, Seriali
     }
 
     public Optional<Long> getSelectedBaseSwModuleId() {
-        return Optional.ofNullable(selectedBaseSwModuleId);
+        return selectedBaseSwModuleId;
     }
 
     public Map<String, SoftwareModule> getBaseSwModuleList() {
@@ -137,7 +137,7 @@ public class ArtifactUploadState implements ManagementEntityState<Long>, Seriali
 
     @Override
     public void setLastSelectedEntity(final Long value) {
-        this.selectedBaseSwModuleId = value;
+        this.selectedBaseSwModuleId = Optional.ofNullable(value);
     }
 
     @Override
