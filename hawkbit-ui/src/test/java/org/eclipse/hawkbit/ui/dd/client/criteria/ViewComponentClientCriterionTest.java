@@ -17,7 +17,6 @@ import static org.mockito.Mockito.when;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.springframework.context.annotation.Description;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
@@ -28,6 +27,7 @@ import com.vaadin.client.ui.dd.VDragAndDropManager;
 import com.vaadin.client.ui.dd.VDragEvent;
 import com.vaadin.client.ui.dd.VDropHandler;
 
+import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
@@ -39,13 +39,13 @@ public class ViewComponentClientCriterionTest {
     @Test
     @Description("Process serialized data structure for preparing the drop targets to show.")
     public void processSerializedDropTargetHintsDataStructure() {
-        ViewComponentClientCriterion cut = new ViewComponentClientCriterion();
+        final ViewComponentClientCriterion cut = new ViewComponentClientCriterion();
 
         // prepare configuration:
-        Document document = Document.get();
-        UIDL uidl = GWT.create(UIDL.class);
+        final Document document = Document.get();
+        final UIDL uidl = GWT.create(UIDL.class);
         when(uidl.getIntAttribute("cda")).thenReturn(3);
-        Element[] elements = new Element[3];
+        final Element[] elements = new Element[3];
         for (int i = 0; i < 3; i++) {
             when(uidl.getStringAttribute("da" + String.valueOf(i))).thenReturn("itemId" + String.valueOf(i));
             elements[i] = Mockito.mock(Element.class);
@@ -69,11 +69,11 @@ public class ViewComponentClientCriterionTest {
     @Test
     @Description("Exception occures when processing serialized data structure for preparing the drop targets to show.")
     public void exceptionWhenProcessingDropTargetHintsDataStructure() {
-        ViewComponentClientCriterion cut = new ViewComponentClientCriterion();
+        final ViewComponentClientCriterion cut = new ViewComponentClientCriterion();
 
         // prepare configuration:
-        Document document = Document.get();
-        UIDL uidl = GWT.create(UIDL.class);
+        final Document document = Document.get();
+        final UIDL uidl = GWT.create(UIDL.class);
         when(uidl.getIntAttribute("cda")).thenReturn(2);
         when(uidl.getStringAttribute("da0")).thenReturn("no-problem");
         when(uidl.getStringAttribute("da1")).thenReturn("problem-bear");
@@ -82,7 +82,7 @@ public class ViewComponentClientCriterionTest {
         // act
         try {
             cut.showDropTargetHints(uidl);
-        } catch (RuntimeException re) {
+        } catch (final RuntimeException re) {
             fail("Exception is not re-thrown in order to continue with the loop");
         }
 
@@ -96,19 +96,19 @@ public class ViewComponentClientCriterionTest {
     @Test
     @Description("Verifies that drag source is valid for the configured prefix")
     public void checkDragSourceWithValidId() {
-        ViewComponentClientCriterion cut = new ViewComponentClientCriterion();
+        final ViewComponentClientCriterion cut = new ViewComponentClientCriterion();
 
         // prepare drag-event:
-        String prefix = "this";
-        String id = "thisId";
-        VDragEvent dragEvent = CriterionTestHelper.createMockedVDragEvent(id);
+        final String prefix = "this";
+        final String id = "thisId";
+        final VDragEvent dragEvent = CriterionTestHelper.createMockedVDragEvent(id);
 
         // prepare configuration:
-        UIDL uidl = GWT.create(UIDL.class);
+        final UIDL uidl = GWT.create(UIDL.class);
         when(uidl.getStringAttribute("ds")).thenReturn(prefix);
 
         // act
-        boolean result = cut.isValidDragSource(dragEvent, uidl);
+        final boolean result = cut.isValidDragSource(dragEvent, uidl);
 
         // assure that drag source is valid: [thisId startsWith this]
         assertThat(result).as("Expected: [" + id + " startsWith " + prefix + "].").isTrue();
@@ -117,19 +117,19 @@ public class ViewComponentClientCriterionTest {
     @Test
     @Description("Verifies that drag source is not valid for the configured prefix")
     public void checkDragSourceWithInvalidId() {
-        ViewComponentClientCriterion cut = new ViewComponentClientCriterion();
+        final ViewComponentClientCriterion cut = new ViewComponentClientCriterion();
 
         // prepare drag-event:
-        String prefix = "this";
-        String id = "notThis";
-        VDragEvent dragEvent = CriterionTestHelper.createMockedVDragEvent(id);
+        final String prefix = "this";
+        final String id = "notThis";
+        final VDragEvent dragEvent = CriterionTestHelper.createMockedVDragEvent(id);
 
         // prepare configuration:
-        UIDL uidl = GWT.create(UIDL.class);
+        final UIDL uidl = GWT.create(UIDL.class);
         when(uidl.getStringAttribute("ds")).thenReturn(prefix);
 
         // act
-        boolean result = cut.isValidDragSource(dragEvent, uidl);
+        final boolean result = cut.isValidDragSource(dragEvent, uidl);
 
         // assure that drag source is valid: [thisId !startsWith this]
         assertThat(result).as("Expected: [" + id + " !startsWith " + prefix + "].").isFalse();
@@ -139,23 +139,23 @@ public class ViewComponentClientCriterionTest {
     @Description("An exception occures while the drag source is validated against the configured prefix")
     public void exceptionWhenCheckingDragSource() {
 
-        ViewComponentClientCriterion cut = new ViewComponentClientCriterion();
+        final ViewComponentClientCriterion cut = new ViewComponentClientCriterion();
 
         // prepare drag-event:
-        String prefix = "this";
-        String id = "notThis";
-        VDragEvent dragEvent = CriterionTestHelper.createMockedVDragEvent(id);
+        final String prefix = "this";
+        final String id = "notThis";
+        final VDragEvent dragEvent = CriterionTestHelper.createMockedVDragEvent(id);
         doThrow(new RuntimeException()).when(dragEvent).getTransferable();
 
         // prepare configuration:
-        UIDL uidl = GWT.create(UIDL.class);
+        final UIDL uidl = GWT.create(UIDL.class);
         when(uidl.getStringAttribute("ds")).thenReturn(prefix);
 
         // act
         Boolean result = null;
         try {
             result = cut.isValidDragSource(dragEvent, uidl);
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             fail("Exception is not re-thrown");
         }
 
@@ -166,18 +166,18 @@ public class ViewComponentClientCriterionTest {
     @Test
     @Description("Successfully checks if the current drop location is in the list of valid drop targets")
     public void successfulCheckValidDropTarget() {
-        ViewComponentClientCriterion cut = new ViewComponentClientCriterion();
+        final ViewComponentClientCriterion cut = new ViewComponentClientCriterion();
 
         // prepare drag and drop manager:
-        String dtargetid = "dropTarget1Id";
-        VDropHandler dropHandler = CriterionTestHelper.createMockedVDropHandler(dtargetid);
+        final String dtargetid = "dropTarget1Id";
+        final VDropHandler dropHandler = CriterionTestHelper.createMockedVDropHandler(dtargetid);
         when(VDragAndDropManager.get().getCurrentDropHandler()).thenReturn(dropHandler);
 
         // prepare configuration:
-        UIDL uidl = createUidlWithThreeDropTargets();
+        final UIDL uidl = createUidlWithThreeDropTargets();
 
         // act
-        boolean result = cut.isValidDropTarget(uidl);
+        final boolean result = cut.isValidDropTarget(uidl);
 
         // assure drop target is valid: [dropTarget1Id startsWith dropTarget1]
         assertThat(result).as("Expected: [" + dtargetid + " startsWith dropTarget1].").isTrue();
@@ -186,43 +186,42 @@ public class ViewComponentClientCriterionTest {
     @Test
     @Description("Failed check if the current drop location is in the list of valid drop targets")
     public void failedCheckValidDropTarget() {
-        ViewComponentClientCriterion cut = new ViewComponentClientCriterion();
+        final ViewComponentClientCriterion cut = new ViewComponentClientCriterion();
 
         // prepare drag and drop manager:
-        String dtargetid = "no-hit";
-        VDropHandler dropHandler = CriterionTestHelper.createMockedVDropHandler(dtargetid);
+        final String dtargetid = "no-hit";
+        final VDropHandler dropHandler = CriterionTestHelper.createMockedVDropHandler(dtargetid);
         when(VDragAndDropManager.get().getCurrentDropHandler()).thenReturn(dropHandler);
 
         // prepare configuration:
-        UIDL uidl = createUidlWithThreeDropTargets();
+        final UIDL uidl = createUidlWithThreeDropTargets();
 
         // act
-        boolean result = cut.isValidDropTarget(uidl);
+        final boolean result = cut.isValidDropTarget(uidl);
 
         // assure "no-hit" does not match [dropTarget0,dropTarget1,dropTarget2]
-        assertThat(result).as("Expected: [" + dtargetid + " does not match one of the list entries].")
-                .isFalse();
+        assertThat(result).as("Expected: [" + dtargetid + " does not match one of the list entries].").isFalse();
     }
 
     @Test
     @Description("An exception occures while the current drop location is validated against the list of valid drop target prefixes")
     public void exceptionWhenCheckingValidDropTarget() {
-        ViewComponentClientCriterion cut = new ViewComponentClientCriterion();
+        final ViewComponentClientCriterion cut = new ViewComponentClientCriterion();
 
         // prepare drag and drop manager:
-        String dtargetid = "no-hit";
-        VDropHandler dropHandler = CriterionTestHelper.createMockedVDropHandler(dtargetid);
+        final String dtargetid = "no-hit";
+        final VDropHandler dropHandler = CriterionTestHelper.createMockedVDropHandler(dtargetid);
         when(VDragAndDropManager.get().getCurrentDropHandler()).thenReturn(dropHandler);
         doThrow(new RuntimeException()).when(dropHandler).getConnector();
 
         // prepare configuration:
-        UIDL uidl = createUidlWithThreeDropTargets();
+        final UIDL uidl = createUidlWithThreeDropTargets();
 
         // act
         Boolean result = null;
         try {
             result = cut.isValidDropTarget(uidl);
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             fail("Exception is not re-thrown");
         }
 
@@ -231,7 +230,7 @@ public class ViewComponentClientCriterionTest {
     }
 
     private UIDL createUidlWithThreeDropTargets() {
-        UIDL uidl = GWT.create(UIDL.class);
+        final UIDL uidl = GWT.create(UIDL.class);
         when(uidl.getIntAttribute("cdt")).thenReturn(3);
         for (int i = 0; i < 3; i++) {
             when(uidl.getStringAttribute("dt" + String.valueOf(i))).thenReturn("dropTarget" + String.valueOf(i));

@@ -24,6 +24,7 @@ import javax.validation.constraints.Size;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Tenant entity with meta data that is configured globally for the entire
@@ -45,6 +46,7 @@ public class JpaTenantMetaData extends AbstractJpaBaseEntity implements TenantMe
 
     @Column(name = "tenant", nullable = false, updatable = false, length = 40)
     @Size(max = 40)
+    @NotEmpty
     private String tenant;
 
     @OneToOne(fetch = FetchType.LAZY)

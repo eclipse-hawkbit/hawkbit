@@ -39,8 +39,7 @@
       <module>hawkbit-ddi-api</module>
       <module>hawkbit-ddi-dl-api</module>
       <module>hawkbit-ddi-resource</module>
-      <module>hawkbit-dmf-api</module>
-      <module>hawkbit-dmf-amqp</module>
+      <module>hawkbit-dmf-parent</module>
       <module>hawkbit-repository</module>
       <module>hawkbit-security-integration</module>
       <module>hawkbit-http-security</module>
