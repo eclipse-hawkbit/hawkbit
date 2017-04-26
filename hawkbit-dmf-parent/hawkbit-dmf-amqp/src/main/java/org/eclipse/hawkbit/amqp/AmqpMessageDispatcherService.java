@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.dmf.json.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -102,7 +103,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      */
     @EventListener(classes = TargetAssignDistributionSetEvent.class)
     public void targetAssignDistributionSet(final TargetAssignDistributionSetEvent assignedEvent) {
-        if (isFromSelf(assignedEvent)) {
+        if (isNotFromSelf(assignedEvent)) {
             return;
         }
 
@@ -135,7 +136,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         }
 
         final Message message = getMessageConverter().toMessage(downloadAndUpdateRequest,
-                createConnectorMessageProperties(tenant, target.getControllerId(), EventTopic.DOWNLOAD_AND_INSTALL));
+                createConnectorMessagePropertiesEvent(tenant, target.getControllerId(),
+                        EventTopic.DOWNLOAD_AND_INSTALL));
         amqpSenderService.sendMessage(message, targetAdress);
     }
 
@@ -148,7 +150,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      */
     @EventListener(classes = CancelTargetAssignmentEvent.class)
     public void targetCancelAssignmentToDistributionSet(final CancelTargetAssignmentEvent cancelEvent) {
-        if (isFromSelf(cancelEvent)) {
+        if (isNotFromSelf(cancelEvent)) {
             return;
         }
 
@@ -156,7 +158,37 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 cancelEvent.getActionId(), cancelEvent.getEntity().getAddress());
     }
 
-    private boolean isFromSelf(final RemoteApplicationEvent event) {
+    /**
+     * Method to send a message to a RabbitMQ Exchange after a Target was
+     * deleted.
+     *
+     * @param deleteEvent
+     *            the TargetDeletedEvent which holds the necessary data for
+     *            sending a target delete message.
+     */
+    @EventListener(classes = TargetDeletedEvent.class)
+    public void targetDelete(final TargetDeletedEvent deleteEvent) {
+        if (isNotFromSelf(deleteEvent)) {
+            return;
+        }
+        sendDeleteMessage(deleteEvent.getTenant(), deleteEvent.getControllerId(), deleteEvent.getTargetAddress());
+    }
+
+    void sendDeleteMessage(final String tenant, final String controllerId, final String targetAddress) {
+
+        if (!hasValidAddress(targetAddress)) {
+            return;
+        }
+
+        final Message message = new Message(null, createConnectorMessagePropertiesDeleteThing(tenant, controllerId));
+        amqpSenderService.sendMessage(message, URI.create(targetAddress));
+    }
+
+    private boolean hasValidAddress(final String targetAddress) {
+        return targetAddress != null && IpUtil.isAmqpUri(URI.create(targetAddress));
+    }
+
+    private boolean isNotFromSelf(final RemoteApplicationEvent event) {
         return serviceMatcher != null && !serviceMatcher.isFromSelf(event);
     }
 
@@ -166,26 +198,33 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
         final Message message = getMessageConverter().toMessage(actionId,
-                createConnectorMessageProperties(tenant, controllerId, EventTopic.CANCEL_DOWNLOAD));
+                createConnectorMessagePropertiesEvent(tenant, controllerId, EventTopic.CANCEL_DOWNLOAD));
 
         amqpSenderService.sendMessage(message, address);
 
     }
 
-    private static MessageProperties createConnectorMessageProperties(final String tenant, final String controllerId,
-            final EventTopic topic) {
-        final MessageProperties messageProperties = createMessageProperties();
+    private static MessageProperties createConnectorMessagePropertiesEvent(final String tenant,
+            final String controllerId, final EventTopic topic) {
+        final MessageProperties messageProperties = createConnectorMessageProperties(tenant, controllerId);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, topic);
-        messageProperties.setHeader(MessageHeaderKey.THING_ID, controllerId);
-        messageProperties.setHeader(MessageHeaderKey.TENANT, tenant);
         messageProperties.setHeader(MessageHeaderKey.TYPE, MessageType.EVENT);
         return messageProperties;
     }
 
-    private static MessageProperties createMessageProperties() {
+    private static MessageProperties createConnectorMessagePropertiesDeleteThing(final String tenant,
+            final String controllerId) {
+        final MessageProperties messageProperties = createConnectorMessageProperties(tenant, controllerId);
+        messageProperties.setHeader(MessageHeaderKey.TYPE, MessageType.THING_DELETED);
+        return messageProperties;
+    }
+
+    private static MessageProperties createConnectorMessageProperties(final String tenant, final String controllerId) {
         final MessageProperties messageProperties = new MessageProperties();
         messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON);
         messageProperties.setHeader(MessageHeaderKey.CONTENT_TYPE, MessageProperties.CONTENT_TYPE_JSON);
+        messageProperties.setHeader(MessageHeaderKey.THING_ID, controllerId);
+        messageProperties.setHeader(MessageHeaderKey.TENANT, tenant);
         return messageProperties;
     }
 

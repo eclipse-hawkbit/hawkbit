@@ -8,11 +8,14 @@
  */
 package org.eclipse.hawkbit.integration.listener;
 
-import java.util.EnumMap;
+import static org.junit.Assert.fail;
+
+import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
+import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.rabbitmq.test.listener.TestRabbitListener;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -22,17 +25,42 @@ public class ReplyToListener implements TestRabbitListener {
     public static final String LISTENER_ID = "replyto";
     public static final String REPLY_TO_QUEUE = "reply_queue";
 
-    private final EnumMap<EventTopic, Message> messages = new EnumMap<>(EventTopic.class);
+    private final Map<EventTopic, Message> eventTopicMessages = new HashMap<>();
+    private final Map<String, Message> deleteMessages = new HashMap<>();
 
     @Override
     @RabbitListener(id = LISTENER_ID, queues = REPLY_TO_QUEUE)
-    public void handleMessage(Message message) {
-        final EventTopic eventTopic = EventTopic
-                .valueOf(message.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC).toString());
-        messages.put(eventTopic, message);
+    public void handleMessage(final Message message) {
+
+        final MessageType messageType = MessageType
+                .valueOf(message.getMessageProperties().getHeaders().get(MessageHeaderKey.TYPE).toString());
+
+        if (messageType == MessageType.EVENT) {
+            final EventTopic eventTopic = EventTopic
+                    .valueOf(message.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC).toString());
+            eventTopicMessages.put(eventTopic, message);
+            return;
+        }
+
+        if (messageType == MessageType.THING_DELETED) {
+            final String targetName = message.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID)
+                    .toString();
+            deleteMessages.put(targetName, message);
+            return;
+        }
+
+        // if message type is not EVENT or THING_DELETED something unexpected
+        // happened
+        fail("Unexpected message type");
+
     }
 
-    public Map<EventTopic, Message> getMessages() {
-        return messages;
+    public Map<EventTopic, Message> getEventTopicMessages() {
+        return eventTopicMessages;
     }
+
+    public Map<String, Message> getDeleteMessages() {
+        return deleteMessages;
+    }
+
 }

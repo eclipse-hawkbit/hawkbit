@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -110,7 +111,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that download and install event with no software modul works")
+    @Description("Verifies that download and install event with no software modul works")
     public void testSendDownloadRequesWithEmptySoftwareModules() {
 
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
@@ -136,7 +137,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that download and install event with 3 software moduls and no artifacts works")
+    @Description("Verifies that download and install event with 3 software moduls and no artifacts works")
     public void testSendDownloadRequesWithSoftwareModulesAndNoArtifacts() {
         final DistributionSet createDistributionSet = testdataFactory
                 .createDistributionSet(UUID.randomUUID().toString());
@@ -169,7 +170,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that download and install event with software moduls and artifacts works")
+    @Description("Verifies that download and install event with software moduls and artifacts works")
     public void testSendDownloadRequest() {
         DistributionSet dsA = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         SoftwareModule module = dsA.getModules().iterator().next();
@@ -216,7 +217,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that send cancel event works")
+    @Description("Verifies that send cancel event works")
     public void testSendCancelRequest() {
         final CancelTargetAssignmentEvent cancelTargetAssignmentDistributionSetEvent = new CancelTargetAssignmentEvent(
                 testTarget, 1L, serviceMatcher.getServiceId());
@@ -228,13 +229,71 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     }
 
+    @Test
+    @Description("Verifies that sending a delete message when receiving a delete event works.")
+    public void sendDeleteRequest() {
+
+        // setup
+        final String amqpUri = "amqp://anyhost";
+        final TargetDeletedEvent targetDeletedEvent = new TargetDeletedEvent(TENANT, 1L, CONTROLLER_ID, amqpUri,
+                Target.class.getName(), serviceMatcher.getServiceId());
+
+        // test
+        amqpMessageDispatcherService.targetDelete(targetDeletedEvent);
+
+        // verify
+        final Message sendMessage = createArgumentCapture(URI.create(amqpUri));
+        assertDeleteMessage(sendMessage);
+    }
+
+    @Test
+    @Description("Verifies that a delete message is not send if the address is not an amqp address.")
+    public void sendDeleteRequestWithNoAmqpAdress() {
+
+        // setup
+        final String noAmqpUri = "http://anyhost";
+        final TargetDeletedEvent targetDeletedEvent = new TargetDeletedEvent(TENANT, 1L, CONTROLLER_ID, noAmqpUri,
+                Target.class.getName(), serviceMatcher.getServiceId());
+
+        // test
+        amqpMessageDispatcherService.targetDelete(targetDeletedEvent);
+
+        // verify
+        Mockito.verifyZeroInteractions(senderService);
+    }
+
+    @Test
+    @Description("Verfies that a delete message is not send if the address is null.")
+    public void sendDeleteRequestWithNullAdress() {
+
+        // setup
+        final String noAmqpUri = null;
+        final TargetDeletedEvent targetDeletedEvent = new TargetDeletedEvent(TENANT, 1L, CONTROLLER_ID, noAmqpUri,
+                Target.class.getName(), serviceMatcher.getServiceId());
+
+        // test
+        amqpMessageDispatcherService.targetDelete(targetDeletedEvent);
+
+        // verify
+        Mockito.verifyZeroInteractions(senderService);
+    }
+
     private void assertCancelMessage(final Message sendMessage) {
         assertEventMessage(sendMessage);
         final Long actionId = convertMessage(sendMessage, Long.class);
         assertEquals("Action ID should be 1", actionId, Long.valueOf(1));
         assertEquals("The topc in the message should be a CANCEL_DOWNLOAD value", EventTopic.CANCEL_DOWNLOAD,
                 sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC));
+    }
 
+    private void assertDeleteMessage(final Message sendMessage) {
+
+        assertNotNull(sendMessage);
+        assertThat(sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID))
+                .isEqualTo(CONTROLLER_ID);
+        assertThat(sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TENANT)).isEqualTo(TENANT);
+        assertThat(sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TYPE))
+                .isEqualTo(MessageType.THING_DELETED);
     }
 
     private DownloadAndUpdateRequest assertDownloadAndInstallMessage(final Message sendMessage, final Long action) {
