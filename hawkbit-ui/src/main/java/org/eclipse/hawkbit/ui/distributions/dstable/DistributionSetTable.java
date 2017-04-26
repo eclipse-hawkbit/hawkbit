@@ -194,16 +194,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     @Override
-    protected void publishSelectedEntityEvent(final DistributionSet distributionSet) {
-        eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, distributionSet));
-        if (distributionSet == null) {
-            manageDistUIState.setLastSelectedEntity(null);
-            return;
-        }
-        manageDistUIState.setLastSelectedEntity(distributionSet.getId());
-    }
-
-    @Override
     protected boolean isMaximized() {
         return manageDistUIState.isDsTableMaximized();
     }

@@ -34,9 +34,9 @@ import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.dstable.DsMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
-import org.eclipse.hawkbit.ui.management.event.RefreshDistributionTableByFilterEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
+import org.eclipse.hawkbit.ui.management.event.RefreshDistributionTableByFilterEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.push.DistributionSetUpdatedEventContainer;
@@ -301,16 +301,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     @Override
     protected Optional<DistributionSet> findEntityByTableValue(final Long lastSelectedId) {
         return distributionSetManagement.findDistributionSetByIdWithDetails(lastSelectedId);
-    }
-
-    @Override
-    protected void publishSelectedEntityEvent(final DistributionSet selectedLastEntity) {
-        eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, selectedLastEntity));
-        if (selectedLastEntity == null) {
-            managementUIState.setLastSelectedEntity(null);
-            return;
-        }
-        managementUIState.setLastSelectedEntity(selectedLastEntity.getId());
     }
 
     @Override

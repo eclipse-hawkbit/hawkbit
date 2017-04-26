@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
-import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -151,16 +150,6 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     @Override
     protected ArtifactUploadState getManagementEntityState() {
         return artifactUploadState;
-    }
-
-    @Override
-    protected void publishSelectedEntityEvent(final SoftwareModule lastSoftwareModule) {
-        eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, lastSoftwareModule));
-        if (lastSoftwareModule == null) {
-            artifactUploadState.setLastSelectedEntity(null);
-            return;
-        }
-        artifactUploadState.setLastSelectedEntity(lastSoftwareModule.getId());
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
