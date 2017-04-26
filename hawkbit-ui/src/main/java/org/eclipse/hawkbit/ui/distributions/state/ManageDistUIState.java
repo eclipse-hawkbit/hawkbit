@@ -43,9 +43,9 @@ public class ManageDistUIState implements ManagementEntityState<Long>, Serializa
 
     private Set<Long> selectedDistributions = new HashSet<>();
 
-    private Optional<Long> lastSelectedDistribution = Optional.empty();
+    private transient Optional<Long> lastSelectedDistribution = Optional.empty();
 
-    private Optional<Long> lastSelectedSoftwareModule = Optional.empty();
+    private transient Optional<Long> lastSelectedSoftwareModule = Optional.empty();
 
     private Set<Long> selectedSoftwareModules = Collections.emptySet();
 

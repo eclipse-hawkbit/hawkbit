@@ -42,7 +42,7 @@ public class ArtifactUploadState implements ManagementEntityState<Long>, Seriali
 
     private final Set<CustomFile> fileSelected = new HashSet<>();
 
-    private Optional<Long> selectedBaseSwModuleId = Optional.empty();
+    private transient Optional<Long> selectedBaseSwModuleId = Optional.empty();
 
     private final Map<String, SoftwareModule> baseSwModuleList = new HashMap<>();
 
