@@ -537,15 +537,15 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
     protected abstract void addNewItem(final Button.ClickEvent event);
 
-    public ManagementUIState getManagementUIState() {
+    protected ManagementUIState getManagementUIState() {
         return managementUIState;
     }
 
-    public ManageDistUIState getManageDistUIstate() {
+    protected ManageDistUIState getManageDistUIstate() {
         return manageDistUIstate;
     }
 
-    public ArtifactUploadState getArtifactUploadState() {
+    protected ArtifactUploadState getArtifactUploadState() {
         return artifactUploadState;
     }
 
