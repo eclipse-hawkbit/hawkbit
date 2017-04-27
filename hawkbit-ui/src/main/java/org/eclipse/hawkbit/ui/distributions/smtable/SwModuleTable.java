@@ -236,8 +236,13 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     }
 
     @Override
-    protected void publishSelectedEntityEvent(final SoftwareModule selectedLastEntity, final Class<?> tableClass) {
+    protected void publishSelectedEntityEvent(final SoftwareModule selectedLastEntity) {
         eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, selectedLastEntity));
+        setLastSelectedEntity(selectedLastEntity);
+    }
+
+    @Override
+    protected void setLastSelectedEntity(final SoftwareModule selectedLastEntity) {
         if (selectedLastEntity == null) {
             manageDistUIState.setLastSelectedSoftwareModule(null);
             return;

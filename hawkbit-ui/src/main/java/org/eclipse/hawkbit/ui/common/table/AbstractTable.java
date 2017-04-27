@@ -17,18 +17,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
-import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleTable;
 import org.eclipse.hawkbit.ui.common.ManagementEntityState;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
-import org.eclipse.hawkbit.ui.distributions.dstable.DistributionSetTable;
-import org.eclipse.hawkbit.ui.management.dstable.DistributionTable;
-import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -121,7 +114,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
             lastId = Iterables.getLast(values);
         }
         setManagementEntityStateValues(values, lastId);
-        selectEntity(lastId, this.getClass());
+        selectEntity(lastId);
         afterEntityIsSelected();
     }
 
@@ -289,19 +282,10 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
      * 
      * @param selectedLastEntity
      *            entity that was selected in the table
-     * @param tableClass
-     *            the class of the table where the entity was selected in. Is
-     *            necessary to publish the correct event, in case the entity
-     *            value is null --> clear the entity details
      */
-    protected void publishSelectedEntityEvent(final E selectedLastEntity, final Class<?> tableClass) {
-        if (tableClass.equals(DistributionTable.class) || tableClass.equals(DistributionSetTable.class)) {
-            eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY,
-                    (DistributionSet) selectedLastEntity));
-        } else if (tableClass.equals(SoftwareModuleTable.class)) {
-            eventBus.publish(this,
-                    new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, (SoftwareModule) selectedLastEntity));
-        }
+    protected abstract void publishSelectedEntityEvent(final E selectedLastEntity);
+
+    protected void setLastSelectedEntity(final E selectedLastEntity) {
         if (selectedLastEntity == null) {
             getManagementEntityState().setLastSelectedEntity(null);
             return;
@@ -502,17 +486,13 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
      * 
      * @param entityId
      *            ID of the current entity
-     * @param tableClass
-     *            the class of the table where the entity was selected in. Is
-     *            necessary to publish the correct event, in case the entity
-     *            value is null --> clear the entity details
      */
-    public void selectEntity(final I entityId, final Class<?> tableClass) {
+    public void selectEntity(final I entityId) {
         if (entityId == null) {
-            publishSelectedEntityEvent(null, tableClass);
+            publishSelectedEntityEvent(null);
             return;
         }
-        publishSelectedEntityEvent(findEntityByTableValue(entityId).orElse(null), tableClass);
+        publishSelectedEntityEvent(findEntityByTableValue(entityId).orElse(null));
     }
 
     protected abstract boolean hasDropPermission();

@@ -133,13 +133,11 @@ public class DistributionsView extends AbstractNotificationView implements Brows
 
     @Override
     public void enter(final ViewChangeEvent event) {
-        softwareModuleTableLayout.getSwModuleTable().selectEntity(
-                manageDistUIState.getLastSelectedSoftwareModule().orElse(null),
-                softwareModuleTableLayout.getSwModuleTable().getClass());
+        softwareModuleTableLayout.getSwModuleTable()
+                .selectEntity(manageDistUIState.getLastSelectedSoftwareModule().orElse(null));
 
-        distributionTableLayout.getDistributionSetTable().selectEntity(
-                manageDistUIState.getLastSelectedDistribution().orElse(null),
-                distributionTableLayout.getDistributionSetTable().getClass());
+        distributionTableLayout.getDistributionSetTable()
+                .selectEntity(manageDistUIState.getLastSelectedDistribution().orElse(null));
     }
 
     @Override

@@ -304,6 +304,12 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     @Override
+    protected void publishSelectedEntityEvent(final DistributionSet selectedLastEntity) {
+        eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, selectedLastEntity));
+        setLastSelectedEntity(selectedLastEntity);
+    }
+
+    @Override
     protected ManagementUIState getManagementEntityState() {
         return managementUIState;
     }
