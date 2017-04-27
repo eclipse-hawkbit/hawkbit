@@ -17,7 +17,7 @@
       <artifactId>hawkbit-parent</artifactId>
    </parent>
    <artifactId>hawkbit-dmf-parent</artifactId>
-   <name>hawkBit :: Device Management Federation</name>
+   <name>hawkBit :: DMF</name>
    <packaging>pom</packaging>
 
    <properties>
