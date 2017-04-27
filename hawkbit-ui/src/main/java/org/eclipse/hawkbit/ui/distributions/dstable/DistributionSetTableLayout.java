@@ -24,7 +24,7 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
- * DistributionSet table layout which is used on the Distributions View
+ * DistributionSet table layout.
  */
 public class DistributionSetTableLayout extends AbstractTableLayout<DistributionSetTable> {
 

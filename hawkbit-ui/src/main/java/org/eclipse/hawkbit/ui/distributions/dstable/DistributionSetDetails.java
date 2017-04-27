@@ -47,7 +47,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 /**
- * Distribution set details layout which is used on the Deployment View
+ * Distribution set details layout.
  */
 public class DistributionSetDetails extends AbstractDistributionSetDetails {
 

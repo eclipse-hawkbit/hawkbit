@@ -69,7 +69,7 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 
 /**
- * Distribution set table used on the Distribution View.
+ * Distribution set table.
  */
 public class DistributionSetTable extends AbstractNamedVersionTable<DistributionSet, Long> {
 

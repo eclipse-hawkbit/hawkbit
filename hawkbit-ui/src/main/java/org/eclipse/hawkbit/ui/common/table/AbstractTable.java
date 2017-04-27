@@ -267,10 +267,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
     protected abstract Optional<E> findEntityByTableValue(I lastSelectedId);
 
     /**
-     * Is called inside the onValueChange()-method and is performed after
-     * selecting the current entity in the table. If it is necessary to publish
-     * one or more events after selecting the entity, this method can be
-     * overridden
+     * This method is performed after selecting the current entity in the table.
      */
     protected void afterEntityIsSelected() {
         // can be overridden by subclass

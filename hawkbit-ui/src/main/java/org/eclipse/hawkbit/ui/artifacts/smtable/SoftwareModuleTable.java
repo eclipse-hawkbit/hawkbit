@@ -52,7 +52,7 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 
 /**
- * The Software module table which is used in the Upload artifacts view
+ * The Software module table.
  */
 public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModule, Long> {
 

@@ -64,7 +64,6 @@ import com.vaadin.ui.Window;
 
 /**
  * Implementation of software module table using generic abstract table styles .
- * Used on the Distribution view.
  */
 public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Long> {
 

@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
- * Distribution set details layout which is shown on the Distributions View.
+ * Distribution set details layout.
  */
 public class DistributionDetails extends AbstractDistributionSetDetails {
 

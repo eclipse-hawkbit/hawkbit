@@ -19,8 +19,7 @@ import com.vaadin.ui.Button;
 
 /**
  * Abstract class for button click behavior of the distribution set's tag
- * buttons. Filters the distribution sets according to the active tags. Is used
- * on the Deployment View.
+ * buttons. Filters the distribution sets according to the active tags.
  */
 public class DistributionTagButtonClick extends AbstractFilterMultiButtonClick {
 
