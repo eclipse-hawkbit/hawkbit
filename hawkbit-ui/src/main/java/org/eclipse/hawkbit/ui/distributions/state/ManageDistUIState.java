@@ -104,7 +104,7 @@ public class ManageDistUIState implements ManagementEntityState<Long>, Serializa
     }
 
     @Override
-    public void setLastSelectedEntity(final Long value) {
+    public void setLastSelectedEntityId(final Long value) {
         this.lastSelectedDistribution = Optional.ofNullable(value);
     }
 

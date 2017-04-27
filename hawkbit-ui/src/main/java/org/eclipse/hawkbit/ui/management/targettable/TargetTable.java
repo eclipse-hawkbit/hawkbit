@@ -289,16 +289,15 @@ public class TargetTable extends AbstractTable<Target, Long> {
     @Override
     protected void publishSelectedEntityEvent(final Target selectedLastEntity) {
         eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, selectedLastEntity));
-        setLastSelectedEntity(selectedLastEntity);
     }
 
     @Override
-    protected void setLastSelectedEntity(final Target selectedLastEntity) {
-        if (selectedLastEntity == null) {
+    protected void setLastSelectedEntityId(final Long selectedLastEntityId) {
+        if (selectedLastEntityId == null) {
             managementUIState.setLastSelectedTargetId(null);
             return;
         }
-        managementUIState.setLastSelectedTargetId(selectedLastEntity.getId());
+        managementUIState.setLastSelectedTargetId(selectedLastEntityId);
     }
 
     @Override

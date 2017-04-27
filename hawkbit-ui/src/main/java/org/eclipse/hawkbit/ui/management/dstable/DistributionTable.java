@@ -160,7 +160,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             refreshContainer();
             if (setsThatAreVisibleButNotCompleteAnymore.stream()
                     .anyMatch(id -> id.equals(managementUIState.getLastSelectedDsIdName()))) {
-                managementUIState.setLastSelectedEntity(null);
+                managementUIState.setLastSelectedEntityId(null);
             }
 
             return true;
@@ -306,7 +306,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     @Override
     protected void publishSelectedEntityEvent(final DistributionSet selectedLastEntity) {
         eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, selectedLastEntity));
-        setLastSelectedEntity(selectedLastEntity);
     }
 
     @Override

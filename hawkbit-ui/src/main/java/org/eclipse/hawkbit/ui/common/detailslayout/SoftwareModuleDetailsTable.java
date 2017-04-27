@@ -190,7 +190,7 @@ public class SoftwareModuleDetailsTable extends Table {
         } else {
             final DistributionSet newDistributionSet = distributionSetManagement
                     .unassignSoftwareModule(distributionSet.getId(), unAssignedSw.getId());
-            manageDistUIState.setLastSelectedEntity(newDistributionSet.getId());
+            manageDistUIState.setLastSelectedEntityId(newDistributionSet.getId());
             eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, newDistributionSet));
             eventBus.publish(this, DistributionsUIEvent.ORDER_BY_DISTRIBUTION);
             uiNotification.displaySuccess(i18n.getMessage("message.sw.unassigned", unAssignedSw.getName()));

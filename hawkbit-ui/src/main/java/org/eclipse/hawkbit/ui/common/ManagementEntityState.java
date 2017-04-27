@@ -30,6 +30,6 @@ public interface ManagementEntityState<T> {
      * @param value
      *            the value
      */
-    void setLastSelectedEntity(T value);
+    void setLastSelectedEntityId(T value);
 
 }

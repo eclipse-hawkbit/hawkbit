@@ -123,7 +123,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
         if (managementEntityState == null) {
             return;
         }
-        managementEntityState.setLastSelectedEntity(lastId);
+        managementEntityState.setLastSelectedEntityId(lastId);
         managementEntityState.setSelectedEnitities(values);
     }
 
@@ -282,12 +282,8 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
      */
     protected abstract void publishSelectedEntityEvent(final E selectedLastEntity);
 
-    protected void setLastSelectedEntity(final E selectedLastEntity) {
-        if (selectedLastEntity == null) {
-            getManagementEntityState().setLastSelectedEntity(null);
-            return;
-        }
-        getManagementEntityState().setLastSelectedEntity((I) selectedLastEntity.getId());
+    protected void setLastSelectedEntityId(final I selectedLastEntityId) {
+        getManagementEntityState().setLastSelectedEntityId(selectedLastEntityId);
     }
 
     protected abstract ManagementEntityState<I> getManagementEntityState();
@@ -485,11 +481,13 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
      *            ID of the current entity
      */
     public void selectEntity(final I entityId) {
-        if (entityId == null) {
-            publishSelectedEntityEvent(null);
-            return;
+        E entity = null;
+        if (entityId != null) {
+            entity = findEntityByTableValue(entityId).orElse(null);
         }
-        publishSelectedEntityEvent(findEntityByTableValue(entityId).orElse(null));
+
+        setLastSelectedEntityId(entityId);
+        publishSelectedEntityEvent(entity);
     }
 
     protected abstract boolean hasDropPermission();

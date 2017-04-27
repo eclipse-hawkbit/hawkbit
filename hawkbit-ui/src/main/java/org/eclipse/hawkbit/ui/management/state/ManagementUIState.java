@@ -210,7 +210,7 @@ public class ManagementUIState implements ManagementEntityState<Long>, Serializa
     }
 
     @Override
-    public void setLastSelectedEntity(final Long value) {
+    public void setLastSelectedEntityId(final Long value) {
         this.lastSelectedDsIdName = value;
     }
 

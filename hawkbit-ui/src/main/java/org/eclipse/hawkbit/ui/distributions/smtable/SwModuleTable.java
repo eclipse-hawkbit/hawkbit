@@ -237,16 +237,15 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     @Override
     protected void publishSelectedEntityEvent(final SoftwareModule selectedLastEntity) {
         eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, selectedLastEntity));
-        setLastSelectedEntity(selectedLastEntity);
     }
 
     @Override
-    protected void setLastSelectedEntity(final SoftwareModule selectedLastEntity) {
-        if (selectedLastEntity == null) {
+    protected void setLastSelectedEntityId(final Long selectedLastEntityId) {
+        if (selectedLastEntityId == null) {
             manageDistUIState.setLastSelectedSoftwareModule(null);
             return;
         }
-        manageDistUIState.setLastSelectedSoftwareModule(selectedLastEntity.getId());
+        manageDistUIState.setLastSelectedSoftwareModule(selectedLastEntityId);
     }
 
     @Override
@@ -419,9 +418,8 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     }
 
     private void showMetadataDetails(final Long itemId) {
-        softwareManagement.findSoftwareModuleById(itemId).ifPresent(
-
-                swmodule -> UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null)));
+        softwareManagement.findSoftwareModuleById(itemId)
+                .ifPresent(swmodule -> UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null)));
     }
 
 }

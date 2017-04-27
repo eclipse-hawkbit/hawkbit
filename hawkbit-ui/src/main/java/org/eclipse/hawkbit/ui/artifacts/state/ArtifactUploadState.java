@@ -136,7 +136,7 @@ public class ArtifactUploadState implements ManagementEntityState<Long>, Seriali
     }
 
     @Override
-    public void setLastSelectedEntity(final Long value) {
+    public void setLastSelectedEntityId(final Long value) {
         this.selectedBaseSwModuleId = Optional.ofNullable(value);
     }
 
