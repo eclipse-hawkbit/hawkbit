@@ -35,8 +35,12 @@ public class RemoteIdEventTest extends AbstractRemoteEventTest {
 
     private static String NODE = "Node";
 
+    private static String CONTROLLER_ID = "controller911";
+
+    private static String ADDRESS = "amqp://anyhost";
+
     @Test
-    @Description("Verifies that the is ds id correct reloaded")
+    @Description("Verifies that the ds id is correct reloaded")
     public void testDistributionSetDeletedEvent() {
         assertAndCreateRemoteEvent(DistributionSetDeletedEvent.class);
     }
@@ -50,7 +54,9 @@ public class RemoteIdEventTest extends AbstractRemoteEventTest {
     @Test
     @Description("Verifies that the target id is correct reloaded")
     public void testTargetDeletedEvent() {
-        assertAndCreateRemoteEvent(TargetDeletedEvent.class);
+        final TargetDeletedEvent deletedEvent = new TargetDeletedEvent(TENANT, ENTITY_ID, CONTROLLER_ID, ADDRESS,
+                ENTIY_CLASS, NODE);
+        assertEntity(deletedEvent);
     }
 
     @Test
@@ -85,23 +91,19 @@ public class RemoteIdEventTest extends AbstractRemoteEventTest {
         }
     }
 
-    protected RemoteIdEvent assertEntity(final RemoteIdEvent event) {
+    protected void assertEntity(final RemoteIdEvent event) {
         assertThat(event.getEntityId()).isSameAs(ENTITY_ID);
 
-        RemoteIdEvent underTestCreatedEvent = (RemoteIdEvent) createProtoStuffEvent(event);
-        assertDeserializeEvent(underTestCreatedEvent);
+        final RemoteIdEvent protoStuffEvent = (RemoteIdEvent) createProtoStuffEvent(event);
+        assertDeserializeEvent(protoStuffEvent, event);
 
-        underTestCreatedEvent = (RemoteIdEvent) createJacksonEvent(event);
-        assertDeserializeEvent(underTestCreatedEvent);
-
-        return underTestCreatedEvent;
+        final RemoteIdEvent jacksonEvent = (RemoteIdEvent) createJacksonEvent(event);
+        assertDeserializeEvent(jacksonEvent, event);
     }
 
-    private void assertDeserializeEvent(final RemoteIdEvent underTestCreatedEvent) {
-        assertThat(underTestCreatedEvent.getEntityId()).isEqualTo(ENTITY_ID);
-        assertThat(underTestCreatedEvent.getTenant()).isEqualTo(TENANT);
-        assertThat(underTestCreatedEvent.getEntityClass()).isEqualTo(ENTIY_CLASS);
-        assertThat(underTestCreatedEvent.getOriginService()).isEqualTo(NODE);
+    private void assertDeserializeEvent(final RemoteIdEvent underTestCreatedEvent, final RemoteIdEvent event) {
+        // gets added because events inherit from of java.util.EventObject
+        assertThat(underTestCreatedEvent).isEqualToIgnoringGivenFields(event, "source");
     }
 
 }

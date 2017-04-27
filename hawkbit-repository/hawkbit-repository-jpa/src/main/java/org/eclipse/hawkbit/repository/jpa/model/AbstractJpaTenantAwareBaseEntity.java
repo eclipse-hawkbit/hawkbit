@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.eclipse.persistence.annotations.Multitenant;
 import org.eclipse.persistence.annotations.MultitenantType;
 import org.eclipse.persistence.annotations.TenantDiscriminatorColumn;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Holder of the base attributes common to all tenant aware entities.
@@ -33,6 +34,7 @@ public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEn
 
     @Column(name = "tenant", nullable = false, insertable = false, updatable = false, length = 40)
     @Size(max = 40)
+    @NotEmpty
     private String tenant;
 
     /**

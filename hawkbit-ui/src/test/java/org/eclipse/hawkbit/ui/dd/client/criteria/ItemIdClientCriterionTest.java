@@ -13,13 +13,13 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.context.annotation.Description;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.vaadin.client.UIDL;
 import com.vaadin.client.ui.dd.VDragEvent;
 
+import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
@@ -31,25 +31,25 @@ public class ItemIdClientCriterionTest {
     @Test
     @Description("Verifies that drag source is not valid for the configured id (strict mode)")
     public void noMatchInStrictMode() {
-        ItemIdClientCriterion cut = new ItemIdClientCriterion();
+        final ItemIdClientCriterion cut = new ItemIdClientCriterion();
 
         // prepare drag-event:
-        String testId = "thisId";
-        VDragEvent dragEvent = CriterionTestHelper.createMockedVDragEvent(testId);
+        final String testId = "thisId";
+        final VDragEvent dragEvent = CriterionTestHelper.createMockedVDragEvent(testId);
 
         // prepare configuration:
-        UIDL uidl = GWT.create(UIDL.class);
-        String configuredId = "component0";
-        String id = "this";
+        final UIDL uidl = GWT.create(UIDL.class);
+        final String configuredId = "component0";
+        final String id = "this";
         when(uidl.getStringAttribute(configuredId)).thenReturn(id);
-        String configuredMode = "m";
-        String strictMode = "s";
+        final String configuredMode = "m";
+        final String strictMode = "s";
         when(uidl.getStringAttribute(configuredMode)).thenReturn(strictMode);
-        String count = "c";
+        final String count = "c";
         when(uidl.getIntAttribute(count)).thenReturn(1);
 
         // act
-        boolean result = cut.accept(dragEvent, uidl);
+        final boolean result = cut.accept(dragEvent, uidl);
 
         // verify that in strict mode: [thisId !equals this]
         assertThat(result).as("Expected: [" + id + " !equals " + testId + "].").isFalse();
@@ -58,25 +58,25 @@ public class ItemIdClientCriterionTest {
     @Test
     @Description("Verifies that drag source is valid for the configured id (strict mode)")
     public void matchInStrictMode() {
-        ItemIdClientCriterion cut = new ItemIdClientCriterion();
+        final ItemIdClientCriterion cut = new ItemIdClientCriterion();
 
         // prepare drag-event:
-        String testId = "thisId";
-        VDragEvent dragEvent = CriterionTestHelper.createMockedVDragEvent(testId);
+        final String testId = "thisId";
+        final VDragEvent dragEvent = CriterionTestHelper.createMockedVDragEvent(testId);
 
         // prepare configuration:
-        UIDL uidl = GWT.create(UIDL.class);
-        String configuredId = "component0";
-        String id = "thisId";
+        final UIDL uidl = GWT.create(UIDL.class);
+        final String configuredId = "component0";
+        final String id = "thisId";
         when(uidl.getStringAttribute(configuredId)).thenReturn(id);
-        String configuredMode = "m";
-        String strictMode = "s";
+        final String configuredMode = "m";
+        final String strictMode = "s";
         when(uidl.getStringAttribute(configuredMode)).thenReturn(strictMode);
-        String count = "c";
+        final String count = "c";
         when(uidl.getIntAttribute(count)).thenReturn(1);
 
         // act
-        boolean result = cut.accept(dragEvent, uidl);
+        final boolean result = cut.accept(dragEvent, uidl);
 
         // verify that in strict mode: [thisId equals thisId]
         assertThat(result).as("Expected: [" + id + " equals " + testId + "].").isTrue();
@@ -85,25 +85,25 @@ public class ItemIdClientCriterionTest {
     @Test
     @Description("Verifies that drag source is not valid for the configured id (prefix mode)")
     public void noMatchInPrefixMode() {
-        ItemIdClientCriterion cut = new ItemIdClientCriterion();
+        final ItemIdClientCriterion cut = new ItemIdClientCriterion();
 
         // prepare drag-event:
-        String testId = "thisId";
-        VDragEvent dragEvent = CriterionTestHelper.createMockedVDragEvent(testId);
+        final String testId = "thisId";
+        final VDragEvent dragEvent = CriterionTestHelper.createMockedVDragEvent(testId);
 
         // prepare configuration:
-        UIDL uidl = GWT.create(UIDL.class);
-        String configuredId = "component0";
-        String prefix = "any";
+        final UIDL uidl = GWT.create(UIDL.class);
+        final String configuredId = "component0";
+        final String prefix = "any";
         when(uidl.getStringAttribute(configuredId)).thenReturn(prefix);
-        String configuredMode = "m";
-        String prefixMode = "p";
+        final String configuredMode = "m";
+        final String prefixMode = "p";
         when(uidl.getStringAttribute(configuredMode)).thenReturn(prefixMode);
-        String count = "c";
+        final String count = "c";
         when(uidl.getIntAttribute(count)).thenReturn(1);
 
         // act
-        boolean result = cut.accept(dragEvent, uidl);
+        final boolean result = cut.accept(dragEvent, uidl);
 
         // verify that in strict mode: [thisId !startsWith any]
         assertThat(result).as("Expected: [" + testId + " !startsWith " + prefix + "].").isFalse();
@@ -112,25 +112,25 @@ public class ItemIdClientCriterionTest {
     @Test
     @Description("Verifies that drag source is valid for the configured id (prefix mode)")
     public void matchInPrefixMode() {
-        ItemIdClientCriterion cut = new ItemIdClientCriterion();
+        final ItemIdClientCriterion cut = new ItemIdClientCriterion();
 
         // prepare drag-event:
-        String testId = "thisId";
-        VDragEvent dragEvent = CriterionTestHelper.createMockedVDragEvent(testId);
+        final String testId = "thisId";
+        final VDragEvent dragEvent = CriterionTestHelper.createMockedVDragEvent(testId);
 
         // prepare configuration:
-        UIDL uidl = GWT.create(UIDL.class);
-        String configuredId = "component0";
-        String prefix = "this";
+        final UIDL uidl = GWT.create(UIDL.class);
+        final String configuredId = "component0";
+        final String prefix = "this";
         when(uidl.getStringAttribute(configuredId)).thenReturn(prefix);
-        String configuredMode = "m";
-        String prefixMode = "p";
+        final String configuredMode = "m";
+        final String prefixMode = "p";
         when(uidl.getStringAttribute(configuredMode)).thenReturn(prefixMode);
-        String count = "c";
+        final String count = "c";
         when(uidl.getIntAttribute(count)).thenReturn(1);
 
         // act
-        boolean result = cut.accept(dragEvent, uidl);
+        final boolean result = cut.accept(dragEvent, uidl);
 
         // verify that in strict mode: [thisId startsWith this]
         assertThat(result).as("Expected: [" + testId + " startsWith " + prefix + "].").isTrue();
