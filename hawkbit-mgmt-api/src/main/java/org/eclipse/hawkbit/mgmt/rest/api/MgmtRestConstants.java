@@ -121,13 +121,17 @@ public final class MgmtRestConstants {
 
     /**
      * The deprecated tag URL mapping rest resource.
+     * 
+     * @deprecated {@link #DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING} is preferred as
+     *             this resource on GET supports paging
      */
-    public static final String DEPRECATED_DISTRIBUTIONSET_REQUEST_MAPPING = "/{distributionsetTagId}/distributionsets";
+    @Deprecated
+    public static final String DEPRECATED_DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING = "/{distributionsetTagId}/distributionsets";
 
     /**
      * The tag URL mapping rest resource.
      */
-    public static final String DISTRIBUTIONSET_REQUEST_MAPPING = "/{distributionsetTagId}/assigned";
+    public static final String DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING = "/{distributionsetTagId}/assigned";
 
     /**
      * The default offset parameter in case the offset parameter is not present

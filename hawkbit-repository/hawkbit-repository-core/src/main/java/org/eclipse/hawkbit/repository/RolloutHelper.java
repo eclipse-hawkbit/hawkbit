@@ -69,13 +69,13 @@ public final class RolloutHelper {
      * 
      * @param amountGroup
      *            amount of groups
-     * @param maxGroups
-     *            maximum number of groups allowed
+     * @param quotaManagement
+     *            to retrieve maximum number of groups allowed
      */
-    public static void verifyRolloutGroupParameter(final int amountGroup, final int maxGroups) {
+    public static void verifyRolloutGroupParameter(final int amountGroup, final QuotaManagement quotaManagement) {
         if (amountGroup <= 0) {
             throw new ConstraintViolationException("the amount of groups cannot be lower than zero");
-        } else if (amountGroup > maxGroups) {
+        } else if (amountGroup > quotaManagement.getMaxRolloutGroupsPerRollout()) {
             throw new ConstraintViolationException("the amount of groups cannot be greater than 500");
         }
     }

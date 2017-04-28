@@ -24,7 +24,7 @@ import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.StaticQuotaManagement;
+import org.eclipse.hawkbit.repository.PropertiesQuotaManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
@@ -126,8 +126,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     @Bean
-    StaticQuotaManagement staticQuotaManagement(final HawkbitSecurityProperties securityProperties) {
-        return new StaticQuotaManagement(securityProperties);
+    PropertiesQuotaManagement staticQuotaManagement(final HawkbitSecurityProperties securityProperties) {
+        return new PropertiesQuotaManagement(securityProperties);
     }
 
     /**

@@ -56,7 +56,7 @@ public final class PagingUtility {
     static Sort sanitizeTargetSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return new Sort(Direction.ASC, TargetFields.NAME.getFieldName());
+            return new Sort(Direction.ASC, TargetFields.CONTROLLERID.getFieldName());
         }
         return new Sort(SortUtility.parse(TargetFields.class, sortParam));
     }
@@ -64,7 +64,7 @@ public final class PagingUtility {
     static Sort sanitizeTagSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return new Sort(Direction.ASC, TargetFields.NAME.getFieldName());
+            return new Sort(Direction.ASC, TagFields.ID.getFieldName());
         }
         return new Sort(SortUtility.parse(TagFields.class, sortParam));
     }
@@ -72,7 +72,7 @@ public final class PagingUtility {
     static Sort sanitizeTargetFilterQuerySortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return new Sort(Direction.ASC, TargetFilterQueryFields.NAME.getFieldName());
+            return new Sort(Direction.ASC, TargetFilterQueryFields.ID.getFieldName());
         }
         return new Sort(SortUtility.parse(TargetFilterQueryFields.class, sortParam));
     }
@@ -80,7 +80,7 @@ public final class PagingUtility {
     static Sort sanitizeSoftwareModuleSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return new Sort(Direction.ASC, SoftwareModuleFields.NAME.getFieldName());
+            return new Sort(Direction.ASC, SoftwareModuleFields.ID.getFieldName());
         }
         return new Sort(SortUtility.parse(SoftwareModuleFields.class, sortParam));
     }
@@ -88,7 +88,7 @@ public final class PagingUtility {
     static Sort sanitizeSoftwareModuleTypeSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return new Sort(Direction.ASC, SoftwareModuleTypeFields.NAME.getFieldName());
+            return new Sort(Direction.ASC, SoftwareModuleTypeFields.ID.getFieldName());
         }
         return new Sort(SortUtility.parse(SoftwareModuleTypeFields.class, sortParam));
     }
@@ -96,7 +96,7 @@ public final class PagingUtility {
     static Sort sanitizeDistributionSetSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return new Sort(Direction.ASC, DistributionSetFields.NAME.getFieldName());
+            return new Sort(Direction.ASC, DistributionSetFields.ID.getFieldName());
         }
         return new Sort(SortUtility.parse(DistributionSetFields.class, sortParam));
     }
@@ -104,7 +104,7 @@ public final class PagingUtility {
     static Sort sanitizeDistributionSetTypeSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return new Sort(Direction.ASC, DistributionSetTypeFields.NAME.getFieldName());
+            return new Sort(Direction.ASC, DistributionSetTypeFields.ID.getFieldName());
         }
         return new Sort(SortUtility.parse(DistributionSetTypeFields.class, sortParam));
     }
@@ -146,7 +146,7 @@ public final class PagingUtility {
     static Sort sanitizeRolloutSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return new Sort(Direction.ASC, RolloutFields.NAME.getFieldName());
+            return new Sort(Direction.ASC, RolloutFields.ID.getFieldName());
         }
         return new Sort(SortUtility.parse(RolloutFields.class, sortParam));
     }
@@ -154,7 +154,7 @@ public final class PagingUtility {
     static Sort sanitizeRolloutGroupSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return new Sort(Direction.ASC, RolloutGroupFields.NAME.getFieldName());
+            return new Sort(Direction.ASC, RolloutGroupFields.ID.getFieldName());
         }
         return new Sort(SortUtility.parse(RolloutGroupFields.class, sortParam));
     }

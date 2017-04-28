@@ -181,7 +181,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Transactional
     public Rollout createRollout(final RolloutCreate rollout, final int amountGroup,
             final RolloutGroupConditions conditions) {
-        RolloutHelper.verifyRolloutGroupParameter(amountGroup, quotaManagement.getMaxRolloutGroupsPerRollout());
+        RolloutHelper.verifyRolloutGroupParameter(amountGroup, quotaManagement);
         final JpaRollout savedRollout = createRollout((JpaRollout) rollout.build());
         return createRolloutGroups(amountGroup, conditions, savedRollout);
     }
@@ -190,7 +190,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Transactional
     public Rollout createRollout(final RolloutCreate rollout, final List<RolloutGroupCreate> groups,
             final RolloutGroupConditions conditions) {
-        RolloutHelper.verifyRolloutGroupParameter(groups.size(), quotaManagement.getMaxRolloutGroupsPerRollout());
+        RolloutHelper.verifyRolloutGroupParameter(groups.size(), quotaManagement);
         final JpaRollout savedRollout = createRollout((JpaRollout) rollout.build());
         return createRolloutGroups(groups, conditions, savedRollout);
     }

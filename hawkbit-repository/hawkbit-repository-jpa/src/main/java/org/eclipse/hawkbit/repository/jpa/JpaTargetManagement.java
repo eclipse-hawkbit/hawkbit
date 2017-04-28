@@ -537,19 +537,21 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Page<Target> findTargetsByTag(final Pageable pageable, final Long tagId) {
+        throwEntityNotFoundExceptionIfTagDoesNotExist(tagId);
+
+        return convertPage(targetRepository.findByTag(pageable, tagId), pageable);
+    }
+
+    private void throwEntityNotFoundExceptionIfTagDoesNotExist(final Long tagId) {
         if (!targetTagRepository.exists(tagId)) {
             throw new EntityNotFoundException(TargetTag.class, tagId);
         }
-
-        return convertPage(targetRepository.findByTag(pageable, tagId), pageable);
     }
 
     @Override
     public Page<Target> findTargetsByTag(final Pageable pageable, final String rsqlParam, final Long tagId) {
 
-        if (!targetTagRepository.exists(tagId)) {
-            throw new EntityNotFoundException(TargetTag.class, tagId);
-        }
+        throwEntityNotFoundExceptionIfTagDoesNotExist(tagId);
 
         final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class, virtualPropertyReplacer);
 
