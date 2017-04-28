@@ -13,7 +13,7 @@ import java.util.Set;
 /**
  * Interface for all entity states UI to show the details to a entity.
  */
-public interface ManagementEntityState<T> {
+public interface ManagementEntityState<Long> {
 
     /**
      * The selected entities for the detail.
@@ -22,7 +22,7 @@ public interface ManagementEntityState<T> {
      *            the selected entities.
      * 
      */
-    void setSelectedEnitities(Set<T> values);
+    void setSelectedEnitities(Set<Long> values);
 
     /**
      * The last selected value.
@@ -30,6 +30,6 @@ public interface ManagementEntityState<T> {
      * @param value
      *            the value
      */
-    void setLastSelectedEntityId(T value);
+    void setLastSelectedEntityId(Long value);
 
 }

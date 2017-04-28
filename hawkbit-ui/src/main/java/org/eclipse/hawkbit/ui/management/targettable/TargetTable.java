@@ -293,10 +293,6 @@ public class TargetTable extends AbstractTable<Target, Long> {
 
     @Override
     protected void setLastSelectedEntityId(final Long selectedLastEntityId) {
-        if (selectedLastEntityId == null) {
-            managementUIState.setLastSelectedTargetId(null);
-            return;
-        }
         managementUIState.setLastSelectedTargetId(selectedLastEntityId);
     }
 

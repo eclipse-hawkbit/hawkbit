@@ -241,10 +241,6 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     @Override
     protected void setLastSelectedEntityId(final Long selectedLastEntityId) {
-        if (selectedLastEntityId == null) {
-            manageDistUIState.setLastSelectedSoftwareModule(null);
-            return;
-        }
         manageDistUIState.setLastSelectedSoftwareModule(selectedLastEntityId);
     }
 
