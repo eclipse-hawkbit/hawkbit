@@ -142,7 +142,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
-        final Sort sorting = PagingUtility.sanitizeTargetSortParam(sortParam);
+        final Sort sorting = PagingUtility.sanitizeTagSortParam(sortParam);
 
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
         Page<DistributionSet> findDistrAll;
