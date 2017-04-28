@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -174,8 +175,10 @@ public class JpaTargetManagement implements TargetManagement {
 
         targetRepository.deleteByIdIn(targetIDs);
 
-        targetIDs.forEach(targetId -> eventPublisher.publishEvent(new TargetDeletedEvent(tenantAware.getCurrentTenant(),
-                targetId, JpaTarget.class.getName(), applicationContext.getId())));
+        targets.forEach(target -> eventPublisher.publishEvent(
+                new TargetDeletedEvent(tenantAware.getCurrentTenant(), target.getId(), target.getControllerId(),
+                        Optional.ofNullable(target.getAddress()).map(URI::toString).orElse(null),
+                        JpaTarget.class.getName(), applicationContext.getId())));
     }
 
     @Override

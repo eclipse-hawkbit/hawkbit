@@ -14,9 +14,9 @@
 cf api https://api.eu-gb.bluemix.net
 cf login
 cf stop hawkbit-simulator
-cd examples/hawkbit-example-app/target/
+cd hawkbit-runtime/hawkbit-update-server/target/
 cf push
-cd ../..
+cd ../../../examples/
 java -jar hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulator-0.2.0-SNAPSHOT-exec.jar --hawkbit.url=https://hawkbit.eu-gb.mybluemix.net
 cd hawkbit-device-simulator/target/
 cf push
