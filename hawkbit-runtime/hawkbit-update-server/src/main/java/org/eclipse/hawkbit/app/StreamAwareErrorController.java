@@ -13,10 +13,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.boot.autoconfigure.web.BasicErrorController;
 import org.springframework.boot.autoconfigure.web.ErrorAttributes;
-import org.springframework.boot.autoconfigure.web.ErrorProperties;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * case of an error.
  *
  */
+@Controller
 public class StreamAwareErrorController extends BasicErrorController {
 
     /**
@@ -31,11 +33,11 @@ public class StreamAwareErrorController extends BasicErrorController {
      * 
      * @param errorAttributes
      *            the error attributes
-     * @param errorProperties
+     * @param serverProperties
      *            configuration properties
      */
-    public StreamAwareErrorController(final ErrorAttributes errorAttributes, final ErrorProperties errorProperties) {
-        super(errorAttributes, errorProperties);
+    public StreamAwareErrorController(final ErrorAttributes errorAttributes, final ServerProperties serverProperties) {
+        super(errorAttributes, serverProperties.getError());
     }
 
     @RequestMapping(produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
