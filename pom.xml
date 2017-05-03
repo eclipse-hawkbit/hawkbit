@@ -37,7 +37,6 @@
       <module>hawkbit-mgmt-api</module>
       <module>hawkbit-mgmt-resource</module>
       <module>hawkbit-ddi-api</module>
-      <module>hawkbit-ddi-dl-api</module>
       <module>hawkbit-ddi-resource</module>
       <module>hawkbit-dmf</module>
       <module>hawkbit-repository</module>
