@@ -304,7 +304,9 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
                 .addFilter(new DosFilter(100, 10, "127\\.0\\.0\\.1|\\[0:0:0:0:0:0:0:1\\]", "(^192\\.168\\.)",
                         "X-Forwarded-For"))
                 .addFilter(new ExcludePathAwareShallowETagFilter(
-                        "/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download", "/*/controller/artifacts/**"));
+                        "/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download",
+                        "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/**",
+                        "/api/v1/downloadserver/**"));
     }
 
     private static CIMySqlTestDatabase tesdatabase;

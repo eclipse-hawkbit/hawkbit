@@ -28,11 +28,6 @@
       </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-ddi-dl-api</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-rest-core</artifactId>
          <version>${project.version}</version>
       </dependency>

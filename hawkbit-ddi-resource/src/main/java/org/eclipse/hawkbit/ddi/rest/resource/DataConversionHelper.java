@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.api.ApiType;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.api.URLPlaceholder;
 import org.eclipse.hawkbit.api.URLPlaceholder.SoftwareData;
-import org.eclipse.hawkbit.ddi.dl.rest.api.DdiDlRestConstants;
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifact;
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifactHash;
 import org.eclipse.hawkbit.ddi.json.model.DdiChunk;
@@ -160,7 +159,7 @@ public final class DataConversionHelper {
         final StringBuilder header = new StringBuilder();
         header.append("attachment;filename=");
         header.append(fileName);
-        header.append(DdiDlRestConstants.ARTIFACT_MD5_DWNL_SUFFIX);
+        header.append(DdiRestConstants.ARTIFACT_MD5_DWNL_SUFFIX);
 
         response.setContentLength(content.length);
         response.setHeader("Content-Disposition", header.toString());
