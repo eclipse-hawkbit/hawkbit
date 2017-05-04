@@ -1080,16 +1080,27 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     }
 
     @Test
+    @Description("Verfies that a DS to target assignment is reflected by the repository and that repeating "
+            + "the assignment does not change the target.")
     public void assignDistributionSetToTarget() throws Exception {
 
-        testdataFactory.createTarget("fsdfsd");
+        Target target = testdataFactory.createTarget();
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
-        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/fsdfsd/assignedDS")
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
                 .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        assertThat(deploymentManagement.getAssignedDistributionSet("fsdfsd").get()).isEqualTo(set);
+        assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get()).isEqualTo(set);
+        target = targetManagement.findTargetByControllerID(target.getControllerId()).get();
+
+        // repeating DS assignment leads again to OK
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
+                .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        // ...but does not change the target
+        assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).get()).isEqualTo(target);
     }
 
     @Test

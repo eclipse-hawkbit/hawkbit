@@ -12,7 +12,6 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -282,17 +281,10 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         findTargetWithExceptionIfNotFound(controllerId);
         final ActionType type = (dsId.getType() != null) ? MgmtRestModelMapper.convertActionType(dsId.getType())
                 : ActionType.FORCED;
-        final Iterator<Target> changed = this.deploymentManagement
-                .assignDistributionSet(dsId.getId(), type, dsId.getForcetime(), Lists.newArrayList(controllerId))
-                .getAssignedEntity().iterator();
-        if (changed.hasNext()) {
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
+        this.deploymentManagement.assignDistributionSet(dsId.getId(), type, dsId.getForcetime(),
+                Lists.newArrayList(controllerId));
 
-        LOG.error("Target update (ds {} assigment to target {}) failed! Returnd target list is empty.", dsId.getId(),
-                controllerId);
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
