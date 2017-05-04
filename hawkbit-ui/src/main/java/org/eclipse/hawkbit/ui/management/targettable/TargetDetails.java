@@ -180,11 +180,9 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         typeLabel.setId(UIComponentIdProvider.TARGET_IP_ADDRESS);
         detailsTabLayout.addComponent(typeLabel);
 
-        if (securityToken != null) {
-            final HorizontalLayout securityTokenLayout = getSecurityTokenLayout(securityToken);
-            controllerLabel.setId(UIComponentIdProvider.TARGET_SECURITY_TOKEN);
-            detailsTabLayout.addComponent(securityTokenLayout);
-        }
+        final HorizontalLayout securityTokenLayout = getSecurityTokenLayout(securityToken);
+        controllerLabel.setId(UIComponentIdProvider.TARGET_SECURITY_TOKEN);
+        detailsTabLayout.addComponent(securityTokenLayout);
     }
 
     private HorizontalLayout getSecurityTokenLayout(final String securityToken) {
@@ -202,6 +200,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         securityTokentxt.addStyleName("targetDtls-securityToken");
         securityTokentxt.addStyleName(SPUIDefinitions.TEXT_STYLE);
         securityTokentxt.setCaption(null);
+        securityTokentxt.setNullRepresentation("");
         securityTokentxt.setValue(securityToken);
         securityTokentxt.setReadOnly(true);
 
@@ -212,15 +211,16 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
     private void populateDistributionDtls(final VerticalLayout layout, final DistributionSet distributionSet) {
         layout.removeAllComponents();
+        layout.addComponent(SPUIComponentProvider.createNameValueLabel(getI18n().getMessage("label.dist.details.name"),
+                distributionSet == null ? "" : distributionSet.getName()));
+
+        layout.addComponent(
+                SPUIComponentProvider.createNameValueLabel(getI18n().getMessage("label.dist.details.version"),
+                        distributionSet == null ? "" : distributionSet.getVersion()));
+
         if (distributionSet == null) {
             return;
         }
-        layout.addComponent(SPUIComponentProvider.createNameValueLabel(getI18n().getMessage("label.dist.details.name"),
-                distributionSet.getName()));
-
-        layout.addComponent(SPUIComponentProvider.createNameValueLabel(
-                getI18n().getMessage("label.dist.details.version"), distributionSet.getVersion()));
-
         distributionSet.getModules()
                 .forEach(module -> layout.addComponent(getSWModlabel(module.getType().getName(), module)));
     }

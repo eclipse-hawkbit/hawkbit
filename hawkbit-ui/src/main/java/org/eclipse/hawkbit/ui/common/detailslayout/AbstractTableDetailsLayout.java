@@ -155,18 +155,14 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
                 SPDateTimeUtil.formatCreatedAt(selectedBaseEntity)));
         logLayout.addComponent(SPUIComponentProvider.createCreatedByLabel(i18n, selectedBaseEntity));
 
-        if (selectedBaseEntity == null || selectedBaseEntity.getLastModifiedAt() == null) {
-            return;
-        }
-
         logLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.getMessage("label.modified.date"),
                 SPDateTimeUtil.formatLastModifiedAt(selectedBaseEntity)));
         logLayout.addComponent(SPUIComponentProvider.createLastModifiedByLabel(i18n, selectedBaseEntity));
     }
 
-    protected void updateDescriptionLayout(final String descriptionLabel, final String description) {
+    protected void updateDescriptionLayout(final String description) {
         descriptionLayout.removeAllComponents();
-        final Label descLabel = SPUIComponentProvider.createNameValueLabel(descriptionLabel,
+        final Label descLabel = SPUIComponentProvider.createNameValueLabel("",
                 HawkbitCommonUtil.trimAndNullIfEmpty(description) == null ? "" : description);
         /**
          * By default text will be truncated based on layout width. So removing
@@ -299,9 +295,9 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     private void populateDescription() {
         if (selectedBaseEntity != null) {
-            updateDescriptionLayout(i18n.getMessage("label.description"), selectedBaseEntity.getDescription());
+            updateDescriptionLayout(selectedBaseEntity.getDescription());
         } else {
-            updateDescriptionLayout(i18n.getMessage("label.description"), null);
+            updateDescriptionLayout(null);
         }
     }
 
