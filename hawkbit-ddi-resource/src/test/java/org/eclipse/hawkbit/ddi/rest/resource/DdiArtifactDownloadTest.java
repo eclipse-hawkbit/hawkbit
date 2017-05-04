@@ -31,8 +31,6 @@ import java.util.TimeZone;
 import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.ddi.rest.resource.DdiArtifactDownloadTest.DownloadTestConfiguration;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
-import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -42,9 +40,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -66,8 +63,8 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
     private static final int ARTIFACT_SIZE = 5 * 1024 * 1024;
 
-    private volatile static int downLoadProgress = 0;
-    private volatile static long shippedBytes = 0;
+    private static volatile int downLoadProgress = 0;
+    private static volatile long shippedBytes = 0;
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH);
 
@@ -93,147 +90,69 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
                 ds.findFirstModuleByType(osType).get().getId(), "file1", false);
 
         // no artifact available
-        mvc.perform(get("/controller/v1/{targetid}/softwaremodules/{softwareModuleId}/artifacts/123455",
+        mvc.perform(get("/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/123455",
                 target.getControllerId(), getOsModule(ds))).andExpect(status().isNotFound());
-        mvc.perform(get("/controller/v1/{targetid}/softwaremodules/{softwareModuleId}/artifacts/123455.MD5SUM",
+        mvc.perform(get("/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/123455.MD5SUM",
                 target.getControllerId(), getOsModule(ds))).andExpect(status().isNotFound());
 
         // SM does not exist
-        mvc.perform(get("/controller/v1/{targetid}/softwaremodules/1234567890/artifacts/{filename}",
+        mvc.perform(get("/controller/v1/{controllerId}/softwaremodules/1234567890/artifacts/{filename}",
                 target.getControllerId(), artifact.getFilename())).andExpect(status().isNotFound());
-        mvc.perform(get("/controller/v1/{targetid}/softwaremodules/1234567890/artifacts/{filename}.MD5SUM",
+        mvc.perform(get("/controller/v1/{controllerId}/softwaremodules/1234567890/artifacts/{filename}.MD5SUM",
                 target.getControllerId(), artifact.getFilename())).andExpect(status().isNotFound());
 
         // test now consistent data to test allowed methods
-        mvc.perform(get("/{tenant}/controller/v1/{targetid}/softwaremodules/{smId}/artifacts/{filename}",
+        mvc.perform(get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{smId}/artifacts/{filename}",
                 tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename())
                         .header(HttpHeaders.IF_MATCH, artifact.getSha1Hash()))
                 .andExpect(status().isOk());
-        mvc.perform(get("/{tenant}/controller/v1/{targetid}/softwaremodules/{smId}/artifacts/{filename}.MD5SUM",
+        mvc.perform(get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{smId}/artifacts/{filename}.MD5SUM",
                 tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
                 .andExpect(status().isOk());
 
         // test failed If-match
-        mvc.perform(get("/{tenant}/controller/v1/{targetid}/softwaremodules/{smId}/artifacts/{filename}",
+        mvc.perform(get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{smId}/artifacts/{filename}",
                 tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename())
                         .header("If-Match", "fsjkhgjfdhg"))
                 .andExpect(status().isPreconditionFailed());
 
         // test invalid range
-        mvc.perform(get("/{tenant}/controller/v1/{targetid}/softwaremodules/{smId}/artifacts/{filename}",
+        mvc.perform(get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{smId}/artifacts/{filename}",
                 tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename())
                         .header("Range", "bytes=1-10,hdsfjksdh"))
                 .andExpect(header().string("Content-Range", "bytes */" + 5 * 1024))
                 .andExpect(status().isRequestedRangeNotSatisfiable());
 
-        mvc.perform(get("/{tenant}/controller/v1/{targetid}/softwaremodules/{smId}/artifacts/{filename}",
+        mvc.perform(get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{smId}/artifacts/{filename}",
                 tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename())
                         .header("Range", "bytes=100-10"))
                 .andExpect(header().string("Content-Range", "bytes */" + 5 * 1024))
                 .andExpect(status().isRequestedRangeNotSatisfiable());
 
         // not allowed methods
-        mvc.perform(put("/{tenant}/controller/v1/{targetid}/softwaremodules/{smId}/artifacts/{filename}",
+        mvc.perform(put("/{tenant}/controller/v1/{controllerId}/softwaremodules/{smId}/artifacts/{filename}",
                 tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
                 .andExpect(status().isMethodNotAllowed());
 
-        mvc.perform(delete("/{tenant}/controller/v1/{targetid}/softwaremodules/{smId}/artifacts/{filename}",
+        mvc.perform(delete("/{tenant}/controller/v1/{controllerId}/softwaremodules/{smId}/artifacts/{filename}",
                 tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
                 .andExpect(status().isMethodNotAllowed());
 
-        mvc.perform(post("/{tenant}/controller/v1/{targetid}/softwaremodules/{smId}/artifacts/{filename}",
+        mvc.perform(post("/{tenant}/controller/v1/{controllerId}/softwaremodules/{smId}/artifacts/{filename}",
                 tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
                 .andExpect(status().isMethodNotAllowed());
 
-        mvc.perform(put("/{tenant}/controller/v1/{targetid}/softwaremodules/{smId}/artifacts/{filename}.MD5SUM",
+        mvc.perform(put("/{tenant}/controller/v1/{controllerId}/softwaremodules/{smId}/artifacts/{filename}.MD5SUM",
                 tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
                 .andExpect(status().isMethodNotAllowed());
 
-        mvc.perform(delete("/{tenant}/controller/v1/{targetid}/softwaremodules/{smId}/artifacts/{filename}.MD5SUM",
+        mvc.perform(delete("/{tenant}/controller/v1/{controllerId}/softwaremodules/{smId}/artifacts/{filename}.MD5SUM",
                 tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
                 .andExpect(status().isMethodNotAllowed());
 
-        mvc.perform(post("/{tenant}/controller/v1/{targetid}/softwaremodules/{smId}/artifacts/{filename}.MD5SUM",
+        mvc.perform(post("/{tenant}/controller/v1/{controllerId}/softwaremodules/{smId}/artifacts/{filename}.MD5SUM",
                 tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
                 .andExpect(status().isMethodNotAllowed());
-    }
-
-    @Test
-    @WithUser(principal = TestdataFactory.DEFAULT_CONTROLLER_ID, authorities = "ROLE_CONTROLLER", allSpPermissions = true)
-    @Description("Tests non allowed requests on the artifact ressource, e.g. invalid URI, wrong if-match, wrong command.")
-    public void invalidRequestsOnArtifactResourceByName() throws Exception {
-        // create target
-        final Target target = testdataFactory.createTarget();
-        final List<Target> targets = Lists.newArrayList(target);
-
-        // create ds
-        final DistributionSet ds = testdataFactory.createDistributionSet("");
-        assignDistributionSet(ds, targets);
-
-        // create artifact
-        final byte random[] = RandomUtils.nextBytes(5 * 1024);
-
-        // Binary
-        // no artifact available
-        mvc.perform(get("/controller/artifacts/v1/filename/{filename}", "file1")).andExpect(status().isNotFound());
-
-        // no artifact available
-        mvc.perform(get("/controller/artifacts/v1/filename/{filename}.MD5SUM", "file1"))
-                .andExpect(status().isNotFound());
-
-        // test now consistent data to test allowed methods
-        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random), getOsModule(ds),
-                "file1", false);
-
-        mvc.perform(
-                get("/{tenant}/controller/artifacts/v1/filename/{filename}", tenantAware.getCurrentTenant(), "file1")
-                        .header(HttpHeaders.IF_MATCH, artifact.getSha1Hash()))
-                .andExpect(status().isOk());
-
-        mvc.perform(get("/{tenant}/controller/artifacts/v1/filename/{filename}.MD5SUM", tenantAware.getCurrentTenant(),
-                "file1")).andExpect(status().isOk());
-
-        // test failed If-match
-        mvc.perform(
-                get("/{tenant}/controller/artifacts/v1/filename/{filename}", tenantAware.getCurrentTenant(), "file1")
-                        .header("If-Match", "fsjkhgjfdhg"))
-                .andExpect(status().isPreconditionFailed());
-
-        // test invalid range
-        mvc.perform(
-                get("/{tenant}/controller/artifacts/v1/filename/{filename}", tenantAware.getCurrentTenant(), "file1")
-                        .header("Range", "bytes=1-10,hdsfjksdh"))
-                .andExpect(header().string("Content-Range", "bytes */" + 5 * 1024))
-                .andExpect(status().isRequestedRangeNotSatisfiable());
-
-        mvc.perform(
-                get("/{tenant}/controller/artifacts/v1/filename/{filename}", tenantAware.getCurrentTenant(), "file1")
-                        .header("Range", "bytes=100-10"))
-                .andExpect(header().string("Content-Range", "bytes */" + 5 * 1024))
-                .andExpect(status().isRequestedRangeNotSatisfiable());
-
-        // not allowed methods
-        mvc.perform(
-                put("/{tenant}/controller/artifacts/v1/filename/{filename}", tenantAware.getCurrentTenant(), "file1"))
-                .andExpect(status().isMethodNotAllowed());
-
-        mvc.perform(delete("/{tenant}/controller/artifacts/v1/filename/{filename}", tenantAware.getCurrentTenant(),
-                "file1")).andExpect(status().isMethodNotAllowed());
-
-        mvc.perform(
-                post("/{tenant}/controller/artifacts/v1/filename/{filename}", tenantAware.getCurrentTenant(), "file1"))
-                .andExpect(status().isMethodNotAllowed());
-
-        // not allowed methods
-        mvc.perform(put("/{tenant}/controller/artifacts/v1/filename/{filename}.MD5SUM", tenantAware.getCurrentTenant(),
-                "file1")).andExpect(status().isMethodNotAllowed());
-
-        mvc.perform(delete("/{tenant}/controller/artifacts/v1/filename/{filename}.MD5SUM",
-                tenantAware.getCurrentTenant(), "file1")).andExpect(status().isMethodNotAllowed());
-
-        mvc.perform(post("/{tenant}/controller/artifacts/v1/filename/{filename}.MD5SUM", tenantAware.getCurrentTenant(),
-                "file1")).andExpect(status().isMethodNotAllowed());
-
     }
 
     @Test
@@ -257,14 +176,14 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
                 ds.findFirstModuleByType(osType).get().getId(), "file1", false);
 
         // download fails as artifact is not yet assigned
-        mvc.perform(get("/controller/v1/{targetid}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
+        mvc.perform(get("/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
                 target.getControllerId(), getOsModule(ds), artifact.getFilename())).andExpect(status().isNotFound());
 
         // now assign and download successful
         assignDistributionSet(ds, targets);
         final MvcResult result = mvc
                 .perform(
-                        get("/{tenant}/controller/v1/{targetid}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
+                        get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
                                 tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds),
                                 artifact.getFilename()))
                 .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
@@ -298,7 +217,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         // download
         final MvcResult result = mvc
                 .perform(
-                        get("/{tenant}/controller/v1/{targetid}/softwaremodules/{softwareModuleId}/artifacts/{filename}.MD5SUM",
+                        get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}.MD5SUM",
                                 tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds),
                                 artifact.getFilename()))
                 .andExpect(status().isOk()).andExpect(header().string("Content-Disposition",
@@ -310,94 +229,9 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
     }
 
     @Test
-    @WithUser(authorities = "ROLE_CONTROLLER_ANONYMOUS", allSpPermissions = true)
-    @Description("Ensures that even an authenticated controller is not permitted to download if "
-            + "anonymous as authorization is notpossible, e.g. chekc if the controller has the artifact assigned.")
-    public void downloadArtifactByNameFailsIfNotAuthenticated() throws Exception {
-        downLoadProgress = 1;
-        shippedBytes = 0;
-
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
-
-        // create target
-        final Target target = testdataFactory.createTarget();
-        final List<Target> targets = Lists.newArrayList(target);
-
-        // create ds
-        final DistributionSet ds = testdataFactory.createDistributionSet("");
-
-        // create artifact
-        final byte random[] = RandomUtils.nextBytes(ARTIFACT_SIZE);
-        artifactManagement.createArtifact(new ByteArrayInputStream(random), getOsModule(ds), "file1.tar.bz2", false);
-
-        // download fails as artifact is not yet assigned to target
-        assignDistributionSet(ds, targets);
-        mvc.perform(get("/controller/artifacts/v1/filename/{filename}", "file1.tar.bz2"))
-                .andExpect(status().isNotFound());
-
-        assertThat(downLoadProgress).isEqualTo(1);
-        assertThat(shippedBytes).isEqualTo(0L);
-    }
-
-    @Test
-    @WithUser(principal = TestdataFactory.DEFAULT_CONTROLLER_ID, authorities = "ROLE_CONTROLLER", allSpPermissions = true)
-    @Description("Ensures that an authenticated and named controller is permitted to download.")
-    public void downloadArtifactByNameByNamedController() throws Exception {
-        downLoadProgress = 1;
-        shippedBytes = 0;
-
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
-
-        // create target
-        final Target target = testdataFactory.createTarget();
-        final List<Target> targets = Lists.newArrayList(target);
-
-        // create ds
-        final DistributionSet ds = testdataFactory.createDistributionSet("");
-
-        // create artifact
-        final byte random[] = RandomUtils.nextBytes(ARTIFACT_SIZE);
-        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random), getOsModule(ds),
-                "file1", false);
-
-        // download fails as artifact is not yet assigned to target
-        mvc.perform(get("/{tenant}/controller/artifacts/v1/filename/{filename}", tenantAware.getCurrentTenant(),
-                "file1.tar.bz2")).andExpect(status().isNotFound());
-
-        // now assign and download successful
-        assignDistributionSet(ds, targets);
-        final MvcResult result = mvc
-                .perform(get("/{tenant}/controller/artifacts/v1/filename/{filename}", tenantAware.getCurrentTenant(),
-                        "file1"))
-                .andExpect(status().isOk()).andExpect(header().string("ETag", artifact.getSha1Hash()))
-                .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
-                .andExpect(header().string("Accept-Ranges", "bytes"))
-                .andExpect(header().string("Last-Modified", dateFormat.format(new Date(artifact.getCreatedAt()))))
-                .andExpect(header().string("Content-Disposition", "attachment;filename=file1")).andReturn();
-
-        assertTrue("The same file that was uploaded is expected when downloaded",
-                Arrays.equals(result.getResponse().getContentAsByteArray(), random));
-
-        // one (update) action
-        assertThat(deploymentManagement.countActionsByTarget(target.getControllerId())).isEqualTo(1);
-        final Action action = deploymentManagement.findActionsByTarget(target.getControllerId(), pageReq).getContent()
-                .get(0);
-
-        // one status - download
-        assertThat(action.getActionStatus()).hasSize(2);
-        assertThat(deploymentManagement
-                .findActionStatusByAction(new PageRequest(0, 400, Direction.DESC, "id"), action.getId()).getContent()
-                .get(0).getStatus()).isEqualTo(Status.DOWNLOAD);
-
-        // download complete
-        assertThat(downLoadProgress).isEqualTo(10);
-        assertThat(shippedBytes).isEqualTo(ARTIFACT_SIZE);
-    }
-
-    @Test
     @WithUser(principal = TestdataFactory.DEFAULT_CONTROLLER_ID, authorities = "ROLE_CONTROLLER", allSpPermissions = true)
     @Description("Test various HTTP range requests for artifact download, e.g. chunk download or download resume.")
-    public void rangeDownloadArtifactByName() throws Exception {
+    public void rangeDownloadArtifact() throws Exception {
         // create target
         final Target target = testdataFactory.createTarget();
         final List<Target> targets = Lists.newArrayList(target);
@@ -425,8 +259,10 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
             final String rangeString = "" + i * range + "-" + ((i + 1) * range - 1);
 
             final MvcResult result = mvc
-                    .perform(get("/{tenant}/controller/artifacts/v1/filename/{filename}",
-                            tenantAware.getCurrentTenant(), "file1").header("Range", "bytes=" + rangeString))
+                    .perform(
+                            get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
+                                    tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), "file1")
+                                            .header("Range", "bytes=" + rangeString))
                     .andExpect(status().isPartialContent()).andExpect(header().string("ETag", artifact.getSha1Hash()))
                     .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
                     .andExpect(header().string("Accept-Ranges", "bytes"))
@@ -442,8 +278,10 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
         // return last 1000 Bytes
         MvcResult result = mvc
-                .perform(get("/${tenant}/controller/artifacts/v1/filename/{filename}", tenantAware.getCurrentTenant(),
-                        "file1").header("Range", "bytes=-1000"))
+                .perform(
+                        get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
+                                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), "file1")
+                                        .header("Range", "bytes=-1000"))
                 .andExpect(status().isPartialContent()).andExpect(header().string("ETag", artifact.getSha1Hash()))
                 .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andExpect(header().string("Accept-Ranges", "bytes"))
@@ -458,8 +296,10 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
         // skip first 1000 Bytes and return the rest
         result = mvc
-                .perform(get("/{tenant}/controller/artifacts/v1/filename/{filename}", tenantAware.getCurrentTenant(),
-                        "file1").header("Range", "bytes=1000-"))
+                .perform(
+                        get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
+                                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), "file1")
+                                        .header("Range", "bytes=1000-"))
                 .andExpect(status().isPartialContent()).andExpect(header().string("ETag", artifact.getSha1Hash()))
                 .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andExpect(header().string("Accept-Ranges", "bytes"))
@@ -474,8 +314,10 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
         // multipart download - first 20 bytes in 2 parts
         result = mvc
-                .perform(get("/{tenant}/controller/artifacts/v1/filename/{filename}", tenantAware.getCurrentTenant(),
-                        "file1").header("Range", "bytes=0-9,10-19"))
+                .perform(
+                        get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
+                                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), "file1")
+                                        .header("Range", "bytes=0-9,10-19"))
                 .andExpect(status().isPartialContent()).andExpect(header().string("ETag", artifact.getSha1Hash()))
                 .andExpect(content().contentType("multipart/byteranges; boundary=THIS_STRING_SEPARATES_MULTIPART"))
                 .andExpect(header().string("Accept-Ranges", "bytes"))
@@ -497,54 +339,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
     }
 
-    @Test
-    @Description("Ensures that the download fails if te controller is not authenticated.")
-    public void faildDownloadArtifactByNameIfAuthenticationMissing() throws Exception {
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
-
-        // create target
-        final Target target = testdataFactory.createTarget();
-        final List<Target> targets = Lists.newArrayList(target);
-
-        // create ds
-        final DistributionSet ds = testdataFactory.createDistributionSet("");
-
-        // create artifact
-        final byte random[] = RandomUtils.nextBytes(5 * 1024);
-        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random), getOsModule(ds),
-                "file1.tar.bz2", false);
-
-        // download fails as artifact is not yet assigned to target
-        mvc.perform(get("/controller/artifacts/v1/filename/{filename}", "file1.tar.bz2"))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    @Description("Downloads an MD5SUM file by the related artifacts filename.")
-    public void downloadMd5sumFileByName() throws Exception {
-        // create target
-        final Target target = testdataFactory.createTarget();
-
-        // create ds
-        final DistributionSet ds = testdataFactory.createDistributionSet("");
-
-        // create artifact
-        final byte random[] = RandomUtils.nextBytes(5 * 1024);
-        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random), getOsModule(ds),
-                "file1.tar.bz2", false);
-
-        // download
-        final MvcResult result = mvc
-                .perform(get("/{tenant}/controller/artifacts/v1/filename/file1.tar.bz2.MD5SUM",
-                        tenantAware.getCurrentTenant()))
-                .andExpect(status().isOk())
-                .andExpect(header().string("Content-Disposition", "attachment;filename=file1.tar.bz2.MD5SUM"))
-                .andReturn();
-
-        assertThat(result.getResponse().getContentAsByteArray())
-                .isEqualTo(new String(artifact.getMd5Hash() + "  file1.tar.bz2").getBytes(Charsets.US_ASCII));
-    }
-
+    @Configuration
     public static class DownloadTestConfiguration {
 
         @Bean
@@ -557,7 +352,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
     private static class Listener {
 
         @EventListener(classes = DownloadProgressEvent.class)
-        public void listen(final DownloadProgressEvent event) {
+        public static void listen(final DownloadProgressEvent event) {
             downLoadProgress++;
             shippedBytes += event.getShippedBytesSinceLast();
 
