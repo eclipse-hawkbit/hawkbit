@@ -71,7 +71,7 @@ import com.vaadin.ui.UI;
 /**
  * Distribution set table.
  */
-public class DistributionSetTable extends AbstractNamedVersionTable<DistributionSet, Long> {
+public class DistributionSetTable extends AbstractNamedVersionTable<DistributionSet> {
 
     private static final long serialVersionUID = 1L;
 
@@ -112,6 +112,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onDistributionSetUpdateEvents(final DistributionSetUpdatedEventContainer eventContainer) {
+        @SuppressWarnings("unchecked")
         final List<Long> visibleItemIds = (List<Long>) getVisibleItemIds();
         updateVisableTableEntries(eventContainer.getEvents(), visibleItemIds);
         handleSelectedAndUpdatedDs(eventContainer.getEvents());
@@ -210,8 +211,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     @Override
     protected void onDropEventFromTable(final DragAndDropEvent event) {
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
-        @SuppressWarnings("unchecked")
-        final AbstractTable<?, Long> source = (AbstractTable<?, Long>) transferable.getSourceComponent();
+        final AbstractTable<?> source = (AbstractTable<?>) transferable.getSourceComponent();
         final Set<Long> softwareModulesIdList = source.getDeletedEntityByTransferable(transferable);
 
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();

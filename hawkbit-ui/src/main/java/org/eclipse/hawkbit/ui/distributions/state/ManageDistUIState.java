@@ -29,7 +29,7 @@ import com.vaadin.spring.annotation.VaadinSessionScope;
  */
 @SpringComponent
 @VaadinSessionScope
-public class ManageDistUIState implements ManagementEntityState<Long>, Serializable {
+public class ManageDistUIState implements ManagementEntityState, Serializable {
 
     private static final long serialVersionUID = 1L;
 

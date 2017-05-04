@@ -54,7 +54,7 @@ import com.vaadin.ui.UI;
 /**
  * The Software module table.
  */
-public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModule, Long> {
+public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
 
     private static final long serialVersionUID = 1L;
 
@@ -172,6 +172,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onSoftwareModuleUpdateEvents(final SoftwareModuleUpdatedEventContainer eventContainer) {
+        @SuppressWarnings("unchecked")
         final List<Long> visibleItemIds = (List<Long>) getVisibleItemIds();
         eventContainer.getEvents().stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
                 .forEach(event -> updateSoftwareModuleInTable(event.getEntity()));

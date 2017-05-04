@@ -79,7 +79,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
     private FormLayout formLayout;
 
-    private final AbstractTable<SoftwareModule, Long> softwareModuleTable;
+    private final AbstractTable<SoftwareModule> softwareModuleTable;
 
     /**
      * Constructor for SoftwareModuleAddUpdateWindow
@@ -97,7 +97,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
      */
     public SoftwareModuleAddUpdateWindow(final VaadinMessageSource i18n, final UINotification uiNotifcation,
             final UIEventBus eventBus, final SoftwareManagement softwareManagement, final EntityFactory entityFactory,
-            final AbstractTable<SoftwareModule, Long> softwareModuleTable) {
+            final AbstractTable<SoftwareModule> softwareModuleTable) {
         this.i18n = i18n;
         this.uiNotifcation = uiNotifcation;
         this.eventBus = eventBus;

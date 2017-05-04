@@ -32,7 +32,7 @@ import com.vaadin.spring.annotation.VaadinSessionScope;
  */
 @VaadinSessionScope
 @SpringComponent
-public class ArtifactUploadState implements ManagementEntityState<Long>, Serializable {
+public class ArtifactUploadState implements ManagementEntityState, Serializable {
 
     private static final long serialVersionUID = 1L;
 

@@ -72,7 +72,7 @@ import com.vaadin.ui.UI;
 /**
  * Distribution set table which is shown on the Deployment View.
  */
-public class DistributionTable extends AbstractNamedVersionTable<DistributionSet, Long> {
+public class DistributionTable extends AbstractNamedVersionTable<DistributionSet> {
 
     private static final long serialVersionUID = 1L;
 

@@ -273,8 +273,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
     }
 
     private void addInDeleteDistributionList(final Table sourceTable, final TableTransferable transferable) {
-        @SuppressWarnings("unchecked")
-        final AbstractTable<?, Long> distTable = (AbstractTable<?, Long>) sourceTable;
+        final AbstractTable<?> distTable = (AbstractTable<?>) sourceTable;
         final Set<Long> ids = distTable.getDeletedEntityByTransferable(transferable);
 
         final Long dsInBulkUpload = managementUIState.getTargetTableFilters().getBulkUpload().getDsNameAndVersion();

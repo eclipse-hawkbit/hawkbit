@@ -51,10 +51,8 @@ import com.vaadin.ui.themes.ValoTheme;
  *
  * @param <E>
  *            e is the entity class
- * @param <I>
- *            i is the id of the table
  */
-public abstract class AbstractTable<E extends NamedEntity, I> extends Table implements RefreshableContainer {
+public abstract class AbstractTable<E extends NamedEntity> extends Table implements RefreshableContainer {
 
     private static final long serialVersionUID = 1L;
 
@@ -107,9 +105,9 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
     private void onValueChange() {
         eventBus.publish(this, UploadArtifactUIEvent.HIDE_DROP_HINTS);
 
-        final Set<I> values = getTableValue(this);
+        final Set<Long> values = getTableValue(this);
 
-        I lastId = null;
+        Long lastId = null;
         if (!values.isEmpty()) {
             lastId = Iterables.getLast(values);
         }
@@ -118,8 +116,8 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
         afterEntityIsSelected();
     }
 
-    protected void setManagementEntityStateValues(final Set<I> values, final I lastId) {
-        final ManagementEntityState<I> managementEntityState = getManagementEntityState();
+    protected void setManagementEntityStateValues(final Set<Long> values, final Long lastId) {
+        final ManagementEntityState managementEntityState = getManagementEntityState();
         if (managementEntityState == null) {
             return;
         }
@@ -239,17 +237,16 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
      *            the table transferable
      * @return set of entities id which will deleted
      */
-    @SuppressWarnings("unchecked")
-    public Set<I> getDeletedEntityByTransferable(final TableTransferable transferable) {
-        final Set<I> selectedEntities = (Set<I>) getTableValue(this);
-        final Set<I> ids = new HashSet<>();
-        final Object tranferableData = transferable.getData(SPUIDefinitions.ITEMID);
+    public Set<Long> getDeletedEntityByTransferable(final TableTransferable transferable) {
+        final Set<Long> selectedEntities = getTableValue(this);
+        final Set<Long> ids = new HashSet<>();
+        final Long tranferableData = (Long) transferable.getData(SPUIDefinitions.ITEMID);
         if (tranferableData == null) {
             return ids;
         }
 
         if (!selectedEntities.contains(tranferableData)) {
-            ids.add((I) tranferableData);
+            ids.add(tranferableData);
         } else {
             ids.addAll(selectedEntities);
         }
@@ -264,7 +261,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
      *            ID of the entity
      * @return entity object as Optional
      */
-    protected abstract Optional<E> findEntityByTableValue(I lastSelectedId);
+    protected abstract Optional<E> findEntityByTableValue(Long lastSelectedId);
 
     /**
      * This method is performed after selecting the current entity in the table.
@@ -282,11 +279,11 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
      */
     protected abstract void publishSelectedEntityEvent(final E selectedLastEntity);
 
-    protected void setLastSelectedEntityId(final I selectedLastEntityId) {
+    protected void setLastSelectedEntityId(final Long selectedLastEntityId) {
         getManagementEntityState().setLastSelectedEntityId(selectedLastEntityId);
     }
 
-    protected abstract ManagementEntityState<I> getManagementEntityState();
+    protected abstract ManagementEntityState getManagementEntityState();
 
     /**
      * Get Id of the table.
@@ -400,24 +397,24 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
         };
     }
 
-    protected Set<I> getDraggedTargetList(final DragAndDropEvent event) {
+    protected Set<Long> getDraggedTargetList(final DragAndDropEvent event) {
         final com.vaadin.event.dd.TargetDetails targetDet = event.getTargetDetails();
         final Table targetTable = (Table) targetDet.getTarget();
-        final Set<I> targetSelected = getTableValue(targetTable);
+        final Set<Long> targetSelected = getTableValue(targetTable);
 
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
-        final Object targetItemId = dropData.getItemIdOver();
+        final Long targetItemId = (Long) dropData.getItemIdOver();
 
         if (!targetSelected.contains(targetItemId)) {
-            return Sets.newHashSet((I) targetItemId);
+            return Sets.newHashSet(targetItemId);
         }
 
         return targetSelected;
     }
 
-    private Set<Object> getDraggedTargetList(final TableTransferable transferable, final Table source) {
+    private Set<Long> getDraggedTargetList(final TableTransferable transferable, final Table source) {
         @SuppressWarnings("unchecked")
-        final AbstractTable<NamedEntity, Object> table = (AbstractTable<NamedEntity, Object>) source;
+        final AbstractTable<NamedEntity> table = (AbstractTable<NamedEntity>) source;
         return table.getDeletedEntityByTransferable(transferable);
     }
 
@@ -480,7 +477,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
      * @param entityId
      *            ID of the current entity
      */
-    public void selectEntity(final I entityId) {
+    public void selectEntity(final Long entityId) {
         E entity = null;
         if (entityId != null) {
             entity = findEntityByTableValue(entityId).orElse(null);

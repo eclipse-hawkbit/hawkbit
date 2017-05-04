@@ -90,7 +90,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * Concrete implementation of Target table which is displayed on the Deployment
  * View.
  */
-public class TargetTable extends AbstractTable<Target, Long> {
+public class TargetTable extends AbstractTable<Target> {
 
     private static final long serialVersionUID = 1L;
 
@@ -145,7 +145,8 @@ public class TargetTable extends AbstractTable<Target, Long> {
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onTargetUpdatedEvents(final TargetUpdatedEventContainer eventContainer) {
-        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
+        @SuppressWarnings("unchecked")
+        final List<Long> visibleItemIds = (List<Long>) getVisibleItemIds();
 
         if (isFilterEnabled()) {
             refreshTargets();
@@ -308,7 +309,7 @@ public class TargetTable extends AbstractTable<Target, Long> {
     }
 
     @Override
-    protected ManagementEntityState<Long> getManagementEntityState() {
+    protected ManagementEntityState getManagementEntityState() {
         return null;
     }
 
@@ -569,8 +570,7 @@ public class TargetTable extends AbstractTable<Target, Long> {
 
     private void dsToTargetAssignment(final DragAndDropEvent event) {
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
-        @SuppressWarnings("unchecked")
-        final AbstractTable<?, Long> source = (AbstractTable<?, Long>) transferable.getSourceComponent();
+        final AbstractTable<?> source = (AbstractTable<?>) transferable.getSourceComponent();
         final Set<Long> ids = source.getDeletedEntityByTransferable(transferable);
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
         final Object targetItemId = dropData.getItemIdOver();

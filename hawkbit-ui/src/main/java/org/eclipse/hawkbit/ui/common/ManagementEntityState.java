@@ -13,7 +13,7 @@ import java.util.Set;
 /**
  * Interface for all entity states UI to show the details to a entity.
  */
-public interface ManagementEntityState<Long> {
+public interface ManagementEntityState {
 
     /**
      * The selected entities for the detail.

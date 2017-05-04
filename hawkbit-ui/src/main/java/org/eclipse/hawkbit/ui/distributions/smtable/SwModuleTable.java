@@ -65,7 +65,7 @@ import com.vaadin.ui.Window;
 /**
  * Implementation of software module table using generic abstract table styles .
  */
-public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Long> {
+public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
 
     private static final long serialVersionUID = 1L;
 
@@ -256,7 +256,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     }
 
     @Override
-    protected ManagementEntityState<Long> getManagementEntityState() {
+    protected ManagementEntityState getManagementEntityState() {
         return null;
     }
 

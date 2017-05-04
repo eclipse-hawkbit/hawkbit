@@ -377,8 +377,7 @@ public class TargetTableHeader extends AbstractTableHeader {
     }
 
     private static Set<Long> getDropppedDistributionDetails(final TableTransferable transferable) {
-        @SuppressWarnings("unchecked")
-        final AbstractTable<?, Long> distTable = (AbstractTable<?, Long>) transferable.getSourceComponent();
+        final AbstractTable<?> distTable = (AbstractTable<?>) transferable.getSourceComponent();
         return distTable.getDeletedEntityByTransferable(transferable);
     }
 
