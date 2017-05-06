@@ -19,7 +19,7 @@ Please read this if you intend to contribute to the project.
   * we follow the standard [scss-lint](https://github.com/brigade/scss-lint/) rules with the following exception:
     * disabled rules: ImportantRule, PropertySortOrder
 * Sonarqube:
-  * Our rule set is defined [here](http://sonar.eu-gb.mybluemix.net)
+  * Our rule set can be found [here](https://sonar.ops.bosch-iot-rollouts.com/projects) with navigating to the tab "Quality Profiles", selecting "hawkBit", and then selecting "Actions" - "Back up"
 
 ### Test documentation
 
