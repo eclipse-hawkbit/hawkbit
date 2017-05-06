@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.common.grid;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -42,7 +41,7 @@ public class DefaultGridHeader extends VerticalLayout {
      * @param managementUIState
      */
     public DefaultGridHeader(final ManagementUIState managementUIState) {
-        this(managementUIState, StringUtils.EMPTY);
+        this(managementUIState, "");
     }
 
     /**

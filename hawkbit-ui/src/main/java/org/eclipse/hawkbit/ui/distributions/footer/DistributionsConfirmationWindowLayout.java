@@ -28,12 +28,13 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
+import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -93,7 +94,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     }
 
     @Override
-    protected Map<String, ConfirmationTab> getConfimrationTabs() {
+    protected Map<String, ConfirmationTab> getConfirmationTabs() {
         final Map<String, ConfirmationTab> tabs = Maps.newHashMapWithExpectedSize(5);
         /* Create tab for SW Modules delete */
         if (!manageDistUIState.getDeleteSofwareModulesList().isEmpty()) {
@@ -102,7 +103,8 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
         /* Create tab for SW Module Type delete */
         if (!manageDistUIState.getSelectedDeleteSWModuleTypes().isEmpty()) {
-            tabs.put(i18n.getMessage("caption.delete.sw.module.type.accordion.tab"), createSMtypeDeleteConfirmationTab());
+            tabs.put(i18n.getMessage("caption.delete.sw.module.type.accordion.tab"),
+                    createSMtypeDeleteConfirmationTab());
         }
 
         /* Create tab for Distributions delete */
@@ -112,7 +114,8 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
         /* Create tab for Distribution Set Types delete */
         if (!manageDistUIState.getSelectedDeleteDistSetTypes().isEmpty()) {
-            tabs.put(i18n.getMessage("caption.delete.dist.set.type.accordion.tab"), createDistSetTypeDeleteConfirmationTab());
+            tabs.put(i18n.getMessage("caption.delete.dist.set.type.accordion.tab"),
+                    createDistSetTypeDeleteConfirmationTab());
         }
 
         /* Create tab for Assign Software Module */
@@ -361,18 +364,17 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     private void deleteDistAll(final ConfirmationTab tab) {
         final Long[] deletedIds = manageDistUIState.getDeletedDistributionList().stream().map(idName -> idName.getId())
                 .toArray(Long[]::new);
-        if (null != manageDistUIState.getAssignedList() && !manageDistUIState.getAssignedList().isEmpty()) {
+        if (manageDistUIState.getAssignedList() != null && !manageDistUIState.getAssignedList().isEmpty()) {
             manageDistUIState.getDeletedDistributionList().forEach(distSetName -> {
                 if (manageDistUIState.getAssignedList().containsKey(distSetName)) {
                     manageDistUIState.getAssignedList().remove(distSetName);
-
                 }
-
             });
-
         }
 
         dsManagement.deleteDistributionSet(Lists.newArrayList(deletedIds));
+        eventBus.publish(this,
+                new DistributionTableEvent(BaseEntityEventType.REMOVE_ENTITY, Lists.newArrayList(deletedIds)));
 
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.getMessage("message.dist.deleted", deletedIds.length));
@@ -543,7 +545,8 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
         assignmnetTab.getTable().setVisibleColumns(DIST_NAME, SOFTWARE_MODULE_NAME, DISCARD);
         assignmnetTab.getTable().setColumnHeaders(i18n.getMessage("header.dist.first.assignment.table"),
-                i18n.getMessage("header.dist.second.assignment.table"), i18n.getMessage("header.third.assignment.table"));
+                i18n.getMessage("header.dist.second.assignment.table"),
+                i18n.getMessage("header.third.assignment.table"));
 
         assignmnetTab.getTable().setColumnExpandRatio(DIST_NAME, 2);
         assignmnetTab.getTable().setColumnExpandRatio(SOFTWARE_MODULE_NAME, 2);

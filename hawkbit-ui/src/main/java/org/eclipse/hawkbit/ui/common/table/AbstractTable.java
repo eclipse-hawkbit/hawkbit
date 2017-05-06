@@ -19,15 +19,15 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
-import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
+import org.eclipse.hawkbit.ui.common.ManagementEntityState;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -51,14 +51,12 @@ import com.vaadin.ui.themes.ValoTheme;
  *
  * @param <E>
  *            e is the entity class
- * @param <I>
- *            i is the id of the table
  */
-public abstract class AbstractTable<E extends NamedEntity, I> extends Table implements RefreshableContainer {
+public abstract class AbstractTable<E extends NamedEntity> extends Table implements RefreshableContainer {
+
+    private static final long serialVersionUID = 1L;
 
     private static final float DEFAULT_COLUMN_NAME_MIN_SIZE = 0.8F;
-
-    private static final long serialVersionUID = 4856562746502217630L;
 
     protected static final String ACTION_NOT_ALLOWED_MSG = "message.action.not.allowed";
 
@@ -68,7 +66,8 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
 
     protected UINotification notification;
 
-    protected AbstractTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification notification) {
+    protected AbstractTable(final UIEventBus eventBus, final VaadinMessageSource i18n,
+            final UINotification notification) {
         this.eventBus = eventBus;
         this.i18n = i18n;
         this.notification = notification;
@@ -84,7 +83,6 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
         setDefault();
         addValueChangeListener(event -> onValueChange());
         setPageLength(SPUIDefinitions.PAGE_SIZE);
-
         eventBus.subscribe(this);
     }
 
@@ -107,26 +105,24 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
     private void onValueChange() {
         eventBus.publish(this, UploadArtifactUIEvent.HIDE_DROP_HINTS);
 
-        final Set<I> values = getTableValue(this);
+        final Set<Long> values = getTableValue(this);
 
-        I lastId = null;
+        Long lastId = null;
         if (!values.isEmpty()) {
             lastId = Iterables.getLast(values);
         }
-        setManagementEntitiyStateValues(values, lastId);
-
-        if (lastId != null) {
-            findEntityByTableValue(lastId).ifPresent(this::publishEntityAfterValueChange);
-        }
+        setManagementEntityStateValues(values, lastId);
+        selectEntity(lastId);
+        afterEntityIsSelected();
     }
 
-    protected void setManagementEntitiyStateValues(final Set<I> values, final I lastId) {
-        final ManagmentEntityState<I> managmentEntityState = getManagmentEntityState();
-        if (managmentEntityState == null) {
+    protected void setManagementEntityStateValues(final Set<Long> values, final Long lastId) {
+        final ManagementEntityState managementEntityState = getManagementEntityState();
+        if (managementEntityState == null) {
             return;
         }
-        managmentEntityState.setLastSelectedEntity(lastId);
-        managmentEntityState.setSelectedEnitities(values);
+        managementEntityState.setLastSelectedEntityId(lastId);
+        managementEntityState.setSelectedEnitities(values);
     }
 
     private void setDefault() {
@@ -241,28 +237,53 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
      *            the table transferable
      * @return set of entities id which will deleted
      */
-    @SuppressWarnings("unchecked")
-    public Set<I> getDeletedEntityByTransferable(final TableTransferable transferable) {
-        final Set<I> selectedEntities = (Set<I>) getTableValue(this);
-        final Set<I> ids = new HashSet<>();
-        final Object tranferableData = transferable.getData(SPUIDefinitions.ITEMID);
+    public Set<Long> getDeletedEntityByTransferable(final TableTransferable transferable) {
+        final Set<Long> selectedEntities = getTableValue(this);
+        final Set<Long> ids = new HashSet<>();
+        final Long tranferableData = (Long) transferable.getData(SPUIDefinitions.ITEMID);
         if (tranferableData == null) {
             return ids;
         }
 
         if (!selectedEntities.contains(tranferableData)) {
-            ids.add((I) tranferableData);
+            ids.add(tranferableData);
         } else {
             ids.addAll(selectedEntities);
         }
         return ids;
     }
 
-    protected abstract Optional<E> findEntityByTableValue(I lastSelectedId);
+    /**
+     * Finds the entity object of the given entity ID by performing a database
+     * search
+     * 
+     * @param lastSelectedId
+     *            ID of the entity
+     * @return entity object as Optional
+     */
+    protected abstract Optional<E> findEntityByTableValue(Long lastSelectedId);
 
-    protected abstract void publishEntityAfterValueChange(E selectedLastEntity);
+    /**
+     * This method is performed after selecting the current entity in the table.
+     */
+    protected void afterEntityIsSelected() {
+        // can be overridden by subclass
+    }
 
-    protected abstract ManagmentEntityState<I> getManagmentEntityState();
+    /**
+     * Publish the BaseEntityEventType.SELECTED_ENTITY Event with the given
+     * entity.
+     * 
+     * @param selectedLastEntity
+     *            entity that was selected in the table
+     */
+    protected abstract void publishSelectedEntityEvent(final E selectedLastEntity);
+
+    protected void setLastSelectedEntityId(final Long selectedLastEntityId) {
+        getManagementEntityState().setLastSelectedEntityId(selectedLastEntityId);
+    }
+
+    protected abstract ManagementEntityState getManagementEntityState();
 
     /**
      * Get Id of the table.
@@ -292,14 +313,16 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
     }
 
     /**
-     * Check if first row should be selected by default on load.
+     * Check if the first row should be selected by default on load. (if there
+     * is no other item selected)
      * 
-     * @return true if it should be selected otherwise return false.
+     * @return true if it should be selected otherwise return false, if there is
+     *         a different item already selected.
      */
     protected abstract boolean isFirstRowSelectedOnLoad();
 
     /**
-     * Get Item Id should be displayed as selected.
+     * Get Item Id which should be displayed as selected.
      * 
      * @return reference of Item Id of the Row.
      */
@@ -326,10 +349,12 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
         }
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.getMessage("header.name"), 0.2F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.getMessage("header.createdBy"), 0.1F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.getMessage("header.createdDate"), 0.1F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.getMessage("header.modifiedBy"), 0.1F));
         columnList.add(
-                new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.getMessage("header.modifiedDate"), 0.1F));
+                new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.getMessage("header.createdDate"), 0.1F));
+        columnList.add(
+                new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.getMessage("header.modifiedBy"), 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE,
+                i18n.getMessage("header.modifiedDate"), 0.1F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.getMessage("header.description"), 0.2F));
         setItemDescriptionGenerator((source, itemId, propertyId) -> {
 
@@ -372,24 +397,24 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
         };
     }
 
-    protected Set<I> getDraggedTargetList(final DragAndDropEvent event) {
+    protected Set<Long> getDraggedTargetList(final DragAndDropEvent event) {
         final com.vaadin.event.dd.TargetDetails targetDet = event.getTargetDetails();
         final Table targetTable = (Table) targetDet.getTarget();
-        final Set<I> targetSelected = getTableValue(targetTable);
+        final Set<Long> targetSelected = getTableValue(targetTable);
 
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
-        final Object targetItemId = dropData.getItemIdOver();
+        final Long targetItemId = (Long) dropData.getItemIdOver();
 
         if (!targetSelected.contains(targetItemId)) {
-            return Sets.newHashSet((I) targetItemId);
+            return Sets.newHashSet(targetItemId);
         }
 
         return targetSelected;
     }
 
-    private Set<Object> getDraggedTargetList(final TableTransferable transferable, final Table source) {
+    private Set<Long> getDraggedTargetList(final TableTransferable transferable, final Table source) {
         @SuppressWarnings("unchecked")
-        final AbstractTable<NamedEntity, Object> table = (AbstractTable<NamedEntity, Object>) source;
+        final AbstractTable<NamedEntity> table = (AbstractTable<NamedEntity>) source;
         return table.getDeletedEntityByTransferable(transferable);
     }
 
@@ -432,9 +457,6 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
         return true;
     }
 
-    /**
-     * Refresh the container.
-     */
     @Override
     public void refreshContainer() {
         final Container container = getContainerDataSource();
@@ -446,6 +468,23 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
 
     protected UINotification getNotification() {
         return notification;
+    }
+
+    /**
+     * Finds the entity object of the given entity ID and performs the
+     * publishing of the BaseEntityEventType.SELECTED_ENTITY event
+     * 
+     * @param entityId
+     *            ID of the current entity
+     */
+    public void selectEntity(final Long entityId) {
+        E entity = null;
+        if (entityId != null) {
+            entity = findEntityByTableValue(entityId).orElse(null);
+        }
+
+        setLastSelectedEntityId(entityId);
+        publishSelectedEntityEvent(entity);
     }
 
     protected abstract boolean hasDropPermission();

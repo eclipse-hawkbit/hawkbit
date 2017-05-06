@@ -19,16 +19,18 @@ import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
 import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionAddUpdateWindowLayout;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
- * DistributionSet table layout
+ * DistributionSet table layout.
  */
 public class DistributionSetTableLayout extends AbstractTableLayout<DistributionSetTable> {
 
-    private static final long serialVersionUID = 6464291374980641235L;
+    private static final long serialVersionUID = 1L;
+
+    private final DistributionSetTable distributionSetTable;
 
     public DistributionSetTableLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManageDistUIState manageDistUIState,
@@ -41,9 +43,9 @@ public class DistributionSetTableLayout extends AbstractTableLayout<Distribution
         final DsMetadataPopupLayout popupLayout = new DsMetadataPopupLayout(i18n, uiNotification, eventBus,
                 distributionSetManagement, entityFactory, permissionChecker);
 
-        final DistributionSetTable distributionSetTable = new DistributionSetTable(eventBus, i18n, uiNotification,
-                permissionChecker, manageDistUIState, distributionSetManagement, softwareManagement,
-                distributionsViewClientCriterion, targetManagement, popupLayout);
+        this.distributionSetTable = new DistributionSetTable(eventBus, i18n, uiNotification, permissionChecker,
+                manageDistUIState, distributionSetManagement, softwareManagement, distributionsViewClientCriterion,
+                targetManagement, popupLayout);
 
         final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout = new DistributionAddUpdateWindowLayout(
                 i18n, uiNotification, eventBus, distributionSetManagement, systemManagement, entityFactory,
@@ -56,6 +58,10 @@ public class DistributionSetTableLayout extends AbstractTableLayout<Distribution
                 new DistributionSetDetails(i18n, eventBus, permissionChecker, manageDistUIState, null,
                         distributionAddUpdateWindowLayout, softwareManagement, distributionSetManagement,
                         targetManagement, entityFactory, uiNotification, tagManagement, popupLayout));
+    }
+
+    public DistributionSetTable getDistributionSetTable() {
+        return distributionSetTable;
     }
 
 }

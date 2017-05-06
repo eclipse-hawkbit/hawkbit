@@ -14,7 +14,7 @@ import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
+import org.eclipse.hawkbit.ui.artifacts.event.RefreshSoftwareModuleByFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
@@ -26,13 +26,14 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.push.SoftwareModuleUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.eclipse.hawkbit.ui.view.filter.OnlyEventsFromUploadArtifactViewFilter;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -53,9 +54,9 @@ import com.vaadin.ui.UI;
 /**
  * The Software module table.
  */
-public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModule, Long> {
+public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
 
-    private static final long serialVersionUID = 6469417305487144809L;
+    private static final long serialVersionUID = 1L;
 
     private final ArtifactUploadState artifactUploadState;
 
@@ -80,16 +81,9 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         setDataAvailable(getContainerDataSource().size() != 0);
     }
 
-    @EventBusListenerMethod(scope = EventScope.UI)
-    void onEvent(final SMFilterEvent filterEvent) {
-        UI.getCurrent().access(() -> {
-
-            if (filterEvent == SMFilterEvent.FILTER_BY_TYPE || filterEvent == SMFilterEvent.FILTER_BY_TEXT
-                    || filterEvent == SMFilterEvent.REMOVER_FILTER_BY_TYPE
-                    || filterEvent == SMFilterEvent.REMOVER_FILTER_BY_TEXT) {
-                refreshFilter();
-            }
-        });
+    @EventBusListenerMethod(scope = EventScope.UI, filter = OnlyEventsFromUploadArtifactViewFilter.class)
+    void onEvent(final RefreshSoftwareModuleByFilterEvent filterEvent) {
+        UI.getCurrent().access(this::refreshFilter);
     }
 
     @Override
@@ -140,7 +134,8 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     @Override
     protected Object getItemIdToSelect() {
-        return artifactUploadState.getSelectedSoftwareModules();
+        return artifactUploadState.getSelectedSoftwareModules().isEmpty() ? null
+                : artifactUploadState.getSelectedSoftwareModules();
     }
 
     @Override
@@ -154,13 +149,12 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     }
 
     @Override
-    protected ArtifactUploadState getManagmentEntityState() {
+    protected ArtifactUploadState getManagementEntityState() {
         return artifactUploadState;
     }
 
     @Override
-    protected void publishEntityAfterValueChange(final SoftwareModule lastSoftwareModule) {
-        artifactUploadState.setSelectedBaseSoftwareModule(lastSoftwareModule);
+    protected void publishSelectedEntityEvent(final SoftwareModule lastSoftwareModule) {
         eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, lastSoftwareModule));
     }
 
@@ -178,12 +172,10 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onSoftwareModuleUpdateEvents(final SoftwareModuleUpdatedEventContainer eventContainer) {
-
+        @SuppressWarnings("unchecked")
         final List<Long> visibleItemIds = (List<Long>) getVisibleItemIds();
-
         eventContainer.getEvents().stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
                 .forEach(event -> updateSoftwareModuleInTable(event.getEntity()));
-
     }
 
     private void updateSoftwareModuleInTable(final SoftwareModule editedSm) {
@@ -205,7 +197,8 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     @Override
     protected void addCustomGeneratedColumns() {
         addGeneratedColumn(SPUILabelDefinitions.METADATA_ICON, new ColumnGenerator() {
-            private static final long serialVersionUID = 117186282275044399L;
+
+            private static final long serialVersionUID = 1L;
 
             @Override
             public Object generateCell(final Table source, final Object itemId, final Object columnId) {

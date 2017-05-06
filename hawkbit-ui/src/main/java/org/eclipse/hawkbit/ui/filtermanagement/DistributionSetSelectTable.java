@@ -17,11 +17,11 @@ import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.ui.distributions.dstable.ManageDistBeanQuery;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -46,7 +46,8 @@ public class DistributionSetSelectTable extends Table {
 
     private Container container;
 
-    DistributionSetSelectTable(final VaadinMessageSource i18n, final UIEventBus eventBus, final ManageDistUIState manageDistUIState) {
+    DistributionSetSelectTable(final VaadinMessageSource i18n, final UIEventBus eventBus,
+            final ManageDistUIState manageDistUIState) {
         this.i18n = i18n;
         this.manageDistUIState = manageDistUIState;
         setStyleName("sp-table");
@@ -139,7 +140,8 @@ public class DistributionSetSelectTable extends Table {
     }
 
     private Object getItemIdToSelect() {
-        return manageDistUIState.getSelectedDistributions().orElse(null);
+        return manageDistUIState.getSelectedDistributions().isEmpty() ? null
+                : manageDistUIState.getSelectedDistributions();
     }
 
     private void selectRow() {

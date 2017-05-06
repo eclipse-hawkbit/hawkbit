@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.common.detailslayout;
 
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
@@ -40,10 +39,11 @@ import com.vaadin.ui.VerticalLayout;
 /**
  * Abstract Layout to show the entity details.
  *
+ * @param <T>
  */
 public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends VerticalLayout {
 
-    private static final long serialVersionUID = 4862529368471627190L;
+    private static final long serialVersionUID = 1L;
 
     private final VaadinMessageSource i18n;
 
@@ -116,7 +116,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
      */
     protected void onBaseEntityEvent(final BaseUIEntityEvent<T> baseEntityEvent) {
         final BaseEntityEventType eventType = baseEntityEvent.getEventType();
-        if (BaseEntityEventType.SELECTED_ENTITY == eventType || BaseEntityEventType.UPDATED_ENTITY == eventType) {
+        if (BaseEntityEventType.SELECTED_ENTITY == eventType || BaseEntityEventType.UPDATED_ENTITY == eventType
+                || BaseEntityEventType.REMOVE_ENTITY == eventType) {
             UI.getCurrent().access(() -> populateData(baseEntityEvent.getEntity()));
         } else if (BaseEntityEventType.MINIMIZED == eventType) {
             UI.getCurrent().access(() -> setVisible(true));
@@ -129,11 +130,12 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         caption.setValue(HawkbitCommonUtil.getSoftwareModuleName(headerCaption, value));
     }
 
+    /**
+     * Restores the tables and tabs displayed on the view based on the selected
+     * entity.
+     */
     protected void restoreState() {
-        if (onLoadIsTableRowSelected()) {
-            populateData(null);
-            editButton.setEnabled(true);
-        }
+        populateData(getSelectedBaseEntity());
         if (onLoadIsTableMaximized()) {
             setVisible(false);
         }
@@ -149,28 +151,21 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     protected void populateLog() {
         logLayout.removeAllComponents();
-
         logLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.getMessage("label.created.at"),
                 SPDateTimeUtil.formatCreatedAt(selectedBaseEntity)));
-
         logLayout.addComponent(SPUIComponentProvider.createCreatedByLabel(i18n, selectedBaseEntity));
-
-        if (selectedBaseEntity == null || selectedBaseEntity.getLastModifiedAt() == null) {
-            return;
-        }
 
         logLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.getMessage("label.modified.date"),
                 SPDateTimeUtil.formatLastModifiedAt(selectedBaseEntity)));
-
         logLayout.addComponent(SPUIComponentProvider.createLastModifiedByLabel(i18n, selectedBaseEntity));
     }
 
-    protected void updateDescriptionLayout(final String descriptionLabel, final String description) {
+    protected void updateDescriptionLayout(final String description) {
         descriptionLayout.removeAllComponents();
-        final Label descLabel = SPUIComponentProvider.createNameValueLabel(descriptionLabel,
+        final Label descLabel = SPUIComponentProvider.createNameValueLabel("",
                 HawkbitCommonUtil.trimAndNullIfEmpty(description) == null ? "" : description);
         /**
-         * By default text will be truncated based on layout width .so removing
+         * By default text will be truncated based on layout width. So removing
          * it as we need full description.
          */
         descLabel.removeStyleName("label-style");
@@ -191,7 +186,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
                 conAttributeLabel.setDescription(entry.getKey().concat("  :  ") + entry.getValue());
                 conAttributeLabel.addStyleName("label-style");
                 attributesLayout.addComponent(conAttributeLabel);
-
             }
         }
     }
@@ -282,15 +276,15 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     }
 
     /**
-     * If no data in table (i,e no row selected),then disable the edit button.
-     * If row is selected ,enable edit button.
+     * If there is no data in table (i.e. no row selected), then disable the
+     * edit button. If row is selected, enable edit button.
      */
     private void populateData(final T selectedBaseEntity) {
         this.selectedBaseEntity = selectedBaseEntity;
         editButton.setEnabled(selectedBaseEntity != null);
         manageMetadataBtn.setEnabled(selectedBaseEntity != null);
         if (selectedBaseEntity == null) {
-            setName(getDefaultCaption(), StringUtils.EMPTY);
+            setName(getDefaultCaption(), "");
         } else {
             setName(getDefaultCaption(), getName());
         }
@@ -301,9 +295,9 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     private void populateDescription() {
         if (selectedBaseEntity != null) {
-            updateDescriptionLayout(i18n.getMessage("label.description"), selectedBaseEntity.getDescription());
+            updateDescriptionLayout(selectedBaseEntity.getDescription());
         } else {
-            updateDescriptionLayout(i18n.getMessage("label.description"), null);
+            updateDescriptionLayout(null);
         }
     }
 
@@ -331,8 +325,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     protected abstract void onEdit(Button.ClickEvent event);
 
     protected abstract String getEditButtonId();
-
-    protected abstract boolean onLoadIsTableRowSelected();
 
     protected abstract boolean onLoadIsTableMaximized();
 

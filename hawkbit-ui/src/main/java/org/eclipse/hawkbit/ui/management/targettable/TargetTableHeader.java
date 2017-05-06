@@ -35,10 +35,10 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUITargetDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.CollectionUtils;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
@@ -82,12 +82,13 @@ public class TargetTableHeader extends AbstractTableHeader {
             final ManagementViewClientCriterion managementViewClientCriterion, final TargetManagement targetManagement,
             final DeploymentManagement deploymentManagement, final UiProperties uiproperties, final UIEventBus eventBus,
             final EntityFactory entityFactory, final UINotification uinotification, final TagManagement tagManagement,
-            final DistributionSetManagement distributionSetManagement, final Executor uiExecutor) {
+            final DistributionSetManagement distributionSetManagement, final Executor uiExecutor,
+            final TargetTable targetTable) {
         super(i18n, permChecker, eventbus, managementUIState, null, null);
         this.notification = notification;
         this.managementViewClientCriterion = managementViewClientCriterion;
         this.targetAddUpdateWindow = new TargetAddUpdateWindowLayout(i18n, targetManagement, eventBus, uinotification,
-                entityFactory);
+                entityFactory, targetTable);
         this.targetBulkUpdateWindow = new TargetBulkUpdateWindowLayout(i18n, targetManagement, eventBus,
                 managementUIState, deploymentManagement, uiproperties, permChecker, uinotification, tagManagement,
                 distributionSetManagement, entityFactory, uiExecutor);
@@ -114,7 +115,7 @@ public class TargetTableHeader extends AbstractTableHeader {
             targetBulkUpdateWindow.restoreComponentsValue();
             openBulkUploadWindow();
         } else if (BulkUploadPopupEvent.CLOSED == event) {
-            UI.getCurrent().access(() -> enableBulkUpload());
+            UI.getCurrent().access(this::enableBulkUpload);
         }
     }
 
@@ -127,11 +128,11 @@ public class TargetTableHeader extends AbstractTableHeader {
     void onEvent(final TargetTableEvent event) {
         if (TargetComponentEvent.BULK_TARGET_CREATED == event.getTargetComponentEvent()) {
             this.getUI().access(() -> targetBulkUpdateWindow.setProgressBarValue(
-                    managementUIState.getTargetTableFilters().getBulkUpload().getProgressBarCurrentValue()));
+                    getManagementUIState().getTargetTableFilters().getBulkUpload().getProgressBarCurrentValue()));
         } else if (TargetComponentEvent.BULK_UPLOAD_COMPLETED == event.getTargetComponentEvent()) {
-            this.getUI().access(() -> targetBulkUpdateWindow.onUploadCompletion());
+            this.getUI().access(targetBulkUpdateWindow::onUploadCompletion);
         } else if (TargetComponentEvent.BULK_TARGET_UPLOAD_STARTED == event.getTargetComponentEvent()) {
-            this.getUI().access(() -> onStartOfBulkUpload());
+            this.getUI().access(this::onStartOfBulkUpload);
         } else if (TargetComponentEvent.BULK_UPLOAD_PROCESS_STARTED == event.getTargetComponentEvent()) {
             this.getUI().access(() -> targetBulkUpdateWindow.getBulkUploader().getUpload().setEnabled(false));
         }
@@ -148,7 +149,7 @@ public class TargetTableHeader extends AbstractTableHeader {
     }
 
     private void onLoadRestoreState() {
-        if (managementUIState.isCustomFilterSelected()) {
+        if (getManagementUIState().isCustomFilterSelected()) {
             onSimpleFilterReset();
         }
     }
@@ -159,7 +160,7 @@ public class TargetTableHeader extends AbstractTableHeader {
         if (isSearchFieldOpen()) {
             resetSearch();
         }
-        if (managementUIState.getTargetTableFilters().getDistributionSet().isPresent()) {
+        if (getManagementUIState().getTargetTableFilters().getDistributionSet().isPresent()) {
             closeFilterByDistribution();
         }
     }
@@ -226,20 +227,20 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     @Override
     protected void showFilterButtonsLayout() {
-        managementUIState.setTargetTagFilterClosed(false);
+        getManagementUIState().setTargetTagFilterClosed(false);
         eventbus.publish(this, ManagementUIEvent.SHOW_TARGET_TAG_LAYOUT);
     }
 
     @Override
     protected void resetSearchText() {
-        if (managementUIState.getTargetTableFilters().getSearchText().isPresent()) {
-            managementUIState.getTargetTableFilters().setSearchText(null);
+        if (getManagementUIState().getTargetTableFilters().getSearchText().isPresent()) {
+            getManagementUIState().getTargetTableFilters().setSearchText(null);
             eventbus.publish(this, TargetFilterEvent.REMOVE_FILTER_BY_TEXT);
         }
     }
 
     private String getSearchText() {
-        return managementUIState.getTargetTableFilters().getSearchText().orElse(null);
+        return getManagementUIState().getTargetTableFilters().getSearchText().orElse(null);
     }
 
     @Override
@@ -249,29 +250,29 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     @Override
     public void maximizeTable() {
-        managementUIState.setTargetTableMaximized(Boolean.TRUE);
+        getManagementUIState().setTargetTableMaximized(Boolean.TRUE);
         eventbus.publish(this, new TargetTableEvent(BaseEntityEventType.MAXIMIZED));
     }
 
     @Override
     public void minimizeTable() {
-        managementUIState.setTargetTableMaximized(Boolean.FALSE);
+        getManagementUIState().setTargetTableMaximized(Boolean.FALSE);
         eventbus.publish(this, new TargetTableEvent(BaseEntityEventType.MINIMIZED));
     }
 
     @Override
     public Boolean onLoadIsTableMaximized() {
-        return managementUIState.isTargetTableMaximized();
+        return getManagementUIState().isTargetTableMaximized();
     }
 
     @Override
     public Boolean onLoadIsShowFilterButtonDisplayed() {
-        return managementUIState.isTargetTagFilterClosed();
+        return getManagementUIState().isTargetTagFilterClosed();
     }
 
     @Override
     protected void searchBy(final String newSearchText) {
-        managementUIState.getTargetTableFilters().setSearchText(newSearchText);
+        getManagementUIState().getTargetTableFilters().setSearchText(newSearchText);
         eventbus.publish(this, TargetFilterEvent.FILTER_BY_TEXT);
     }
 
@@ -341,7 +342,7 @@ public class TargetTableHeader extends AbstractTableHeader {
                 return;
             }
             final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distributionSet.get());
-            managementUIState.getTargetTableFilters().setDistributionSet(distributionSetIdName);
+            getManagementUIState().getTargetTableFilters().setDistributionSet(distributionSetIdName);
             addFilterTextField(distributionSetIdName);
         }
     }
@@ -376,8 +377,7 @@ public class TargetTableHeader extends AbstractTableHeader {
     }
 
     private static Set<Long> getDropppedDistributionDetails(final TableTransferable transferable) {
-        @SuppressWarnings("unchecked")
-        final AbstractTable<?, Long> distTable = (AbstractTable<?, Long>) transferable.getSourceComponent();
+        final AbstractTable<?> distTable = (AbstractTable<?>) transferable.getSourceComponent();
         return distTable.getDeletedEntityByTransferable(transferable);
     }
 
@@ -409,7 +409,7 @@ public class TargetTableHeader extends AbstractTableHeader {
         getFilterDroppedInfo().removeAllComponents();
         getFilterDroppedInfo().setSizeUndefined();
         /* Remove distribution Id from target filter parameters */
-        managementUIState.getTargetTableFilters().setDistributionSet(null);
+        getManagementUIState().getTargetTableFilters().setDistributionSet(null);
 
         /* Reload the table */
         eventbus.publish(this, TargetFilterEvent.REMOVE_FILTER_BY_DISTRIBUTION);
@@ -417,13 +417,13 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     @Override
     protected void displayFilterDropedInfoOnLoad() {
-        managementUIState.getTargetTableFilters().getDistributionSet().ifPresent(this::addFilterTextField);
+        getManagementUIState().getTargetTableFilters().getDistributionSet().ifPresent(this::addFilterTextField);
     }
 
     @Override
     protected boolean isBulkUploadInProgress() {
-        return managementUIState.getTargetTableFilters().getBulkUpload().getSucessfulUploadCount() != 0
-                || managementUIState.getTargetTableFilters().getBulkUpload().getFailedUploadCount() != 0;
+        return getManagementUIState().getTargetTableFilters().getBulkUpload().getSucessfulUploadCount() != 0
+                || getManagementUIState().getTargetTableFilters().getBulkUpload().getFailedUploadCount() != 0;
     }
 
     @Override

@@ -13,7 +13,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
@@ -33,11 +32,11 @@ import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent.DistributionSetTypeEnum;
 import org.eclipse.hawkbit.ui.layouts.CreateUpdateTypeLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.PageRequest;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -127,12 +126,13 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.DIST_SET_TYPE_DESC)
                 .prompt(i18n.getMessage("textfield.description")).immediate(true)
                 .id(SPUIDefinitions.NEW_DISTRIBUTION_TYPE_DESC).buildTextComponent();
-        tagDesc.setNullRepresentation(StringUtils.EMPTY);
+        tagDesc.setNullRepresentation("");
     }
 
     private TextField createTextField(final String in18Key, final String styleName, final String id) {
-        return new TextFieldBuilder().caption(i18n.getMessage(in18Key)).styleName(ValoTheme.TEXTFIELD_TINY + " " + styleName)
-                .required(true).prompt(i18n.getMessage(in18Key)).immediate(true).id(id).buildTextComponent();
+        return new TextFieldBuilder().caption(i18n.getMessage(in18Key))
+                .styleName(ValoTheme.TEXTFIELD_TINY + " " + styleName).required(true).prompt(i18n.getMessage(in18Key))
+                .immediate(true).id(id).buildTextComponent();
     }
 
     @Override
@@ -400,7 +400,8 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
             final DistributionSetType newDistType = distributionSetManagement.createDistributionSetType(
                     entityFactory.distributionSetType().create().key(typeKeyValue).name(typeNameValue)
                             .description(typeDescValue).colour(colorPicked).mandatory(mandatory).optional(optional));
-            uiNotification.displaySuccess(i18n.getMessage("message.save.success", new Object[] { newDistType.getName() }));
+            uiNotification
+                    .displaySuccess(i18n.getMessage("message.save.success", new Object[] { newDistType.getName() }));
             eventBus.publish(this,
                     new DistributionSetTypeEvent(DistributionSetTypeEnum.ADD_DIST_SET_TYPE, newDistType));
         } else {
@@ -439,7 +440,8 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
 
         final DistributionSetType updateDistSetType = distributionSetManagement.updateDistributionSetType(update);
 
-        uiNotification.displaySuccess(i18n.getMessage("message.update.success", new Object[] { updateDistSetType.getName() }));
+        uiNotification.displaySuccess(
+                i18n.getMessage("message.update.success", new Object[] { updateDistSetType.getName() }));
         eventBus.publish(this,
                 new DistributionSetTypeEvent(DistributionSetTypeEnum.UPDATE_DIST_SET_TYPE, updateDistSetType));
 

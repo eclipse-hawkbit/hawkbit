@@ -18,11 +18,11 @@ import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -85,8 +85,8 @@ public class DistributionTagDropEvent implements DropHandler {
     private Boolean isNoTagAssigned(final DragAndDropEvent event) {
         final String tagName = ((DragAndDropWrapper) (event.getTargetDetails().getTarget())).getData().toString();
         if (tagName.equals(SPUIDefinitions.DISTRIBUTION_TAG_BUTTON)) {
-            notification.displayValidationError(
-                    i18n.getMessage("message.tag.cannot.be.assigned", new Object[] { i18n.getMessage("label.no.tag.assigned") }));
+            notification.displayValidationError(i18n.getMessage("message.tag.cannot.be.assigned",
+                    new Object[] { i18n.getMessage("label.no.tag.assigned") }));
             return false;
         }
         return true;
@@ -131,8 +131,7 @@ public class DistributionTagDropEvent implements DropHandler {
         final com.vaadin.event.dd.TargetDetails targetDetails = event.getTargetDetails();
 
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
-        @SuppressWarnings("unchecked")
-        final AbstractTable<?, Long> source = (AbstractTable<?, Long>) transferable.getSourceComponent();
+        final AbstractTable<?> source = (AbstractTable<?>) transferable.getSourceComponent();
 
         final Set<Long> distSelected = source.getDeletedEntityByTransferable(transferable);
 

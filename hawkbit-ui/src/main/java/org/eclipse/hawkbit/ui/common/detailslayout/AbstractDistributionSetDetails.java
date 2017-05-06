@@ -172,18 +172,22 @@ public abstract class AbstractDistributionSetDetails
         final VerticalLayout detailsTabLayout = getDetailsLayout();
         detailsTabLayout.removeAllComponents();
 
-        if (type != null) {
-            final Label typeLabel = SPUIComponentProvider
-                    .createNameValueLabel(getI18n().getMessage("label.dist.details.type"), type);
-            typeLabel.setId(UIComponentIdProvider.DETAILS_TYPE_LABEL_ID);
-            detailsTabLayout.addComponent(typeLabel);
-        }
+        final Label typeLabel = SPUIComponentProvider
+                .createNameValueLabel(getI18n().getMessage("label.dist.details.type"), type);
+        typeLabel.setId(UIComponentIdProvider.DETAILS_TYPE_LABEL_ID);
+        detailsTabLayout.addComponent(typeLabel);
 
-        if (isMigrationRequired != null) {
-            detailsTabLayout.addComponent(SPUIComponentProvider.createNameValueLabel(
-                    getI18n().getMessage("checkbox.dist.migration.required"), isMigrationRequired.equals(Boolean.TRUE)
-                            ? getI18n().getMessage("label.yes") : getI18n().getMessage("label.no")));
+        detailsTabLayout.addComponent(
+                SPUIComponentProvider.createNameValueLabel(getI18n().getMessage("checkbox.dist.migration.required"),
+                        getMigrationRequiredValue(isMigrationRequired)));
+    }
+
+    private String getMigrationRequiredValue(final Boolean isMigrationRequired) {
+        if (isMigrationRequired == null) {
+            return null;
         }
+        return isMigrationRequired.equals(Boolean.TRUE) ? getI18n().getMessage("label.yes")
+                : getI18n().getMessage("label.no");
     }
 
     protected SoftwareModuleDetailsTable getSoftwareModuleTable() {

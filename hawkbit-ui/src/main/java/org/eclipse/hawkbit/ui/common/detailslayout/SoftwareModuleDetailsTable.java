@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.common.detailslayout;
 
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -24,9 +23,9 @@ import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vaadin.spring.events.EventBus;
@@ -191,12 +190,11 @@ public class SoftwareModuleDetailsTable extends Table {
         } else {
             final DistributionSet newDistributionSet = distributionSetManagement
                     .unassignSoftwareModule(distributionSet.getId(), unAssignedSw.getId());
-            manageDistUIState.setLastSelectedEntity(newDistributionSet.getId());
+            manageDistUIState.setLastSelectedEntityId(newDistributionSet.getId());
             eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, newDistributionSet));
             eventBus.publish(this, DistributionsUIEvent.ORDER_BY_DISTRIBUTION);
             uiNotification.displaySuccess(i18n.getMessage("message.sw.unassigned", unAssignedSw.getName()));
         }
-
     }
 
     private static boolean isSoftModAvaiableForSoftType(final Set<SoftwareModule> swModulesSet,
@@ -218,7 +216,7 @@ public class SoftwareModuleDetailsTable extends Table {
             if (swModType.getKey().equals(sw.getType().getKey())) {
                 final HorizontalLayout horizontalLayout = new HorizontalLayout();
                 horizontalLayout.setSizeFull();
-                final Label softwareModule = HawkbitCommonUtil.getFormatedLabel(StringUtils.EMPTY);
+                final Label softwareModule = HawkbitCommonUtil.getFormatedLabel("");
                 final Button reassignSoftModule = SPUIComponentProvider.getButton(sw.getName(), "", "", "", true,
                         FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
                 reassignSoftModule

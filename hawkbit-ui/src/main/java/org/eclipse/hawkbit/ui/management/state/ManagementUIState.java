@@ -17,7 +17,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
+import org.eclipse.hawkbit.ui.common.ManagementEntityState;
 import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.entity.TargetIdName;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,14 +27,12 @@ import com.vaadin.spring.annotation.VaadinSessionScope;
 
 /**
  * User action on management UI.
- *
- *
  */
 @VaadinSessionScope
 @SpringComponent
-public class ManagementUIState implements ManagmentEntityState<Long>, Serializable {
+public class ManagementUIState implements ManagementEntityState, Serializable {
 
-    private static final long serialVersionUID = 7301409196969723794L;
+    private static final long serialVersionUID = 1L;
 
     private final transient Set<Object> expandParentActionRowId = new HashSet<>();
 
@@ -52,7 +50,8 @@ public class ManagementUIState implements ManagmentEntityState<Long>, Serializab
 
     private Boolean distTagLayoutVisible = Boolean.FALSE;
 
-    private Long lastSelectedTargetId;
+    private transient Optional<Long> lastSelectedTargetId = Optional.empty();
+
     private Set<Long> selectedTargetId = Collections.emptySet();
 
     private boolean targetTagFilterClosed;
@@ -90,32 +89,18 @@ public class ManagementUIState implements ManagmentEntityState<Long>, Serializab
         this.targetTableFilters = targetTableFilters;
     }
 
-    /**
-     * @return the bulkUploadWindowMinimised
-     */
     public boolean isBulkUploadWindowMinimised() {
         return bulkUploadWindowMinimised;
     }
 
-    /**
-     * @param bulkUploadWindowMinimised
-     *            the bulkUploadWindowMinimised to set
-     */
     public void setBulkUploadWindowMinimised(final boolean bulkUploadWindowMinimised) {
         this.bulkUploadWindowMinimised = bulkUploadWindowMinimised;
     }
 
-    /**
-     * @return the isCustomFilterSelected
-     */
     public boolean isCustomFilterSelected() {
         return customFilterSelected;
     }
 
-    /**
-     * @param isCustomFilterSelected
-     *            the isCustomFilterSelected to set
-     */
     public void setCustomFilterSelected(final boolean isCustomFilterSelected) {
         customFilterSelected = isCustomFilterSelected;
     }
@@ -164,78 +149,50 @@ public class ManagementUIState implements ManagmentEntityState<Long>, Serializab
         return deletedTargetList;
     }
 
-    public Long getLastSelectedTargetId() {
+    public Optional<Long> getLastSelectedTargetId() {
         return lastSelectedTargetId;
     }
 
     public void setLastSelectedTargetId(final Long lastSelectedTargetId) {
-        this.lastSelectedTargetId = lastSelectedTargetId;
+        this.lastSelectedTargetId = Optional.ofNullable(lastSelectedTargetId);
     }
 
-    public Optional<Set<Long>> getSelectedTargetId() {
-        return Optional.ofNullable(selectedTargetId);
+    public Set<Long> getSelectedTargetId() {
+        return selectedTargetId;
     }
 
     public void setSelectedTargetId(final Set<Long> selectedTargetId) {
         this.selectedTargetId = selectedTargetId;
     }
 
-    /**
-     * @return the targetTagFilterClosed
-     */
     public boolean isTargetTagFilterClosed() {
         return targetTagFilterClosed;
     }
 
-    /**
-     * @param targetTagFilterClosed
-     *            the targetTagFilterClosed to set
-     */
     public void setTargetTagFilterClosed(final boolean targetTagFilterClosed) {
         this.targetTagFilterClosed = targetTagFilterClosed;
     }
 
-    /**
-     * @return the distTagFilterClosed
-     */
     public boolean isDistTagFilterClosed() {
         return distTagFilterClosed;
     }
 
-    /**
-     * @param distTagFilterClosed
-     *            the distTagFilterClosed to set
-     */
     public void setDistTagFilterClosed(final boolean distTagFilterClosed) {
         this.distTagFilterClosed = distTagFilterClosed;
     }
 
-    /**
-     * @return the targetsTruncated
-     */
     public Long getTargetsTruncated() {
         return targetsTruncated;
     }
 
-    /**
-     * @param targetsTruncated
-     *            the targetsTruncated to set
-     */
     public void setTargetsTruncated(final Long targetsTruncated) {
         this.targetsTruncated = targetsTruncated;
     }
 
-    /**
-     * @return the targetsCountAll
-     */
     public long getTargetsCountAll() {
         return targetsCountAll.get();
     }
 
-    /**
-     * @param targetsCountAll
-     *            the targetsCountAll to set
-     */
     public void setTargetsCountAll(final long targetsCountAll) {
         this.targetsCountAll.set(targetsCountAll);
     }
@@ -253,76 +210,47 @@ public class ManagementUIState implements ManagmentEntityState<Long>, Serializab
     }
 
     @Override
-    public void setLastSelectedEntity(final Long value) {
+    public void setLastSelectedEntityId(final Long value) {
         this.lastSelectedDsIdName = value;
     }
 
     @Override
     public void setSelectedEnitities(final Set<Long> values) {
         this.selectedDsIdName = values;
-
     }
 
-    public Optional<Set<Long>> getSelectedDsIdName() {
-        return Optional.ofNullable(selectedDsIdName);
+    public Set<Long> getSelectedDsIdName() {
+        return selectedDsIdName;
     }
 
-    /**
-     * @return the isTargetTableMaximized
-     */
     public boolean isTargetTableMaximized() {
         return targetTableMaximized;
     }
 
-    /**
-     * @param isTargetTableMaximized
-     *            the isTargetTableMaximized to set
-     */
     public void setTargetTableMaximized(final boolean isTargetTableMaximized) {
         this.targetTableMaximized = isTargetTableMaximized;
     }
 
-    /**
-     * @return the isActionHistoryMaximized
-     */
     public boolean isActionHistoryMaximized() {
         return actionHistoryMaximized;
     }
 
-    /**
-     * @param isActionHistoryMaximized
-     *            the isActionHistoryMaximized to set
-     */
     public void setActionHistoryMaximized(final boolean isActionHistoryMaximized) {
         this.actionHistoryMaximized = isActionHistoryMaximized;
     }
 
-    /**
-     * @return the noDataAvilableTarget
-     */
     public boolean isNoDataAvilableTarget() {
         return noDataAvilableTarget;
     }
 
-    /**
-     * @param noDataAvilableTarget
-     *            the noDataAvilableTarget to set
-     */
     public void setNoDataAvilableTarget(final boolean noDataAvilableTarget) {
         this.noDataAvilableTarget = noDataAvilableTarget;
     }
 
-    /**
-     * @return the noDataAvailableDistribution
-     */
     public boolean isNoDataAvailableDistribution() {
         return noDataAvailableDistribution;
     }
 
-    /**
-     * @param noDataAvailableDistribution
-     *            the noDataAvailableDistribution to set
-     */
     public void setNoDataAvailableDistribution(final boolean noDataAvailableDistribution) {
         this.noDataAvailableDistribution = noDataAvailableDistribution;
     }

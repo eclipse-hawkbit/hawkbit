@@ -31,7 +31,7 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
+import org.eclipse.hawkbit.ui.common.ManagementEntityState;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.entity.TargetIdName;
@@ -51,7 +51,6 @@ import org.eclipse.hawkbit.ui.push.CancelTargetAssignmentEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.AssignInstalledDSTooltipGenerator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -59,6 +58,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -87,17 +87,23 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * Concrete implementation of Target table.
+ * Concrete implementation of Target table which is displayed on the Deployment
+ * View.
  */
-public class TargetTable extends AbstractTable<Target, Long> {
+public class TargetTable extends AbstractTable<Target> {
+
+    private static final long serialVersionUID = 1L;
 
     private static final Logger LOG = LoggerFactory.getLogger(TargetTable.class);
+
     private static final String TARGET_PINNED = "targetPinned";
-    private static final long serialVersionUID = -2300392868806614568L;
+
     private static final int PROPERTY_DEPT = 3;
 
     private final transient TargetManagement targetManagement;
+
     private final transient DistributionSetManagement distributionSetManagement;
+
     private final transient TagManagement tagManagement;
 
     private final SpPermissionChecker permChecker;
@@ -107,7 +113,8 @@ public class TargetTable extends AbstractTable<Target, Long> {
     private final ManagementUIState managementUIState;
 
     private Button targetPinnedBtn;
-    private boolean isTargetPinned;
+
+    private boolean targetPinned;
 
     public TargetTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification notification,
             final TargetManagement targetManagement, final ManagementUIState managementUIState,
@@ -122,7 +129,6 @@ public class TargetTable extends AbstractTable<Target, Long> {
         this.tagManagement = tagManagement;
 
         setItemDescriptionGenerator(new AssignInstalledDSTooltipGenerator());
-
         addNewContainerDS();
         setColumnProperties();
         setDataAvailable(getContainerDataSource().size() != 0);
@@ -139,7 +145,8 @@ public class TargetTable extends AbstractTable<Target, Long> {
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onTargetUpdatedEvents(final TargetUpdatedEventContainer eventContainer) {
-        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
+        @SuppressWarnings("unchecked")
+        final List<Long> visibleItemIds = (List<Long>) getVisibleItemIds();
 
         if (isFilterEnabled()) {
             refreshTargets();
@@ -256,7 +263,6 @@ public class TargetTable extends AbstractTable<Target, Long> {
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP, String.class, null,
                 false, true);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, "", false, true);
-
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.ASSIGN_DIST_SET, DistributionSet.class, null,
                 false, true);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.INSTALL_DIST_SET, DistributionSet.class, null,
@@ -273,17 +279,22 @@ public class TargetTable extends AbstractTable<Target, Long> {
 
     @Override
     protected boolean isFirstRowSelectedOnLoad() {
-        return managementUIState.getSelectedTargetId().map(Set::isEmpty).orElse(true);
+        return managementUIState.getSelectedTargetId().isEmpty();
     }
 
     @Override
     protected Object getItemIdToSelect() {
-        return managementUIState.getSelectedTargetId().orElse(null);
+        return managementUIState.getSelectedTargetId().isEmpty() ? null : managementUIState.getSelectedTargetId();
     }
 
     @Override
-    protected void publishEntityAfterValueChange(final Target selectedLastEntity) {
+    protected void publishSelectedEntityEvent(final Target selectedLastEntity) {
         eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, selectedLastEntity));
+    }
+
+    @Override
+    protected void setLastSelectedEntityId(final Long selectedLastEntityId) {
+        managementUIState.setLastSelectedTargetId(selectedLastEntityId);
     }
 
     @Override
@@ -292,13 +303,13 @@ public class TargetTable extends AbstractTable<Target, Long> {
     }
 
     @Override
-    protected void setManagementEntitiyStateValues(final Set<Long> values, final Long lastId) {
+    protected void setManagementEntityStateValues(final Set<Long> values, final Long lastId) {
         managementUIState.setSelectedTargetId(values);
         managementUIState.setLastSelectedTargetId(lastId);
     }
 
     @Override
-    protected ManagmentEntityState<Long> getManagmentEntityState() {
+    protected ManagementEntityState getManagementEntityState() {
         return null;
     }
 
@@ -383,7 +394,7 @@ public class TargetTable extends AbstractTable<Target, Long> {
         pinBtn.addClickListener(this::addPinClickListener);
         if (isPinned(pinnedTarget)) {
             pinBtn.addStyleName(TARGET_PINNED);
-            isTargetPinned = Boolean.TRUE;
+            targetPinned = Boolean.TRUE;
             targetPinnedBtn = pinBtn;
             eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
         }
@@ -397,38 +408,26 @@ public class TargetTable extends AbstractTable<Target, Long> {
                 .map(pinnedTarget -> pinnedTarget.equals(target)).orElse(false);
     }
 
-    /**
-     * Add listener to pin.
-     *
-     * @param event
-     *            as event
-     */
     private void addPinClickListener(final ClickEvent event) {
         checkifAlreadyPinned(event.getButton());
-        if (isTargetPinned) {
+        if (targetPinned) {
             pinTarget(event.getButton());
         } else {
             unPinTarget(event.getButton());
         }
     }
 
-    /**
-     * Check already pinned.
-     *
-     * @param eventBtn
-     *            as button
-     */
     private void checkifAlreadyPinned(final Button eventBtn) {
         final TargetIdName newPinnedTargetItemId = (TargetIdName) eventBtn.getData();
         final TargetIdName targetId = managementUIState.getDistributionTableFilters().getPinnedTarget().orElse(null);
 
         if (targetId == null) {
-            isTargetPinned = !isTargetPinned;
+            targetPinned = !targetPinned;
             managementUIState.getDistributionTableFilters().setPinnedTarget(newPinnedTargetItemId);
         } else if (targetId.equals(newPinnedTargetItemId)) {
-            isTargetPinned = Boolean.FALSE;
+            targetPinned = Boolean.FALSE;
         } else {
-            isTargetPinned = true;
+            targetPinned = true;
             managementUIState.getDistributionTableFilters().setPinnedTarget(newPinnedTargetItemId);
             if (null != targetPinnedBtn) {
                 resetPinStyle(targetPinnedBtn);
@@ -445,7 +444,7 @@ public class TargetTable extends AbstractTable<Target, Long> {
         /* change target table styling */
         styleTargetTable();
         eventBtn.addStyleName(TARGET_PINNED);
-        isTargetPinned = Boolean.FALSE;
+        targetPinned = Boolean.FALSE;
     }
 
     private void unPinTarget(final Button eventBtn) {
@@ -458,13 +457,9 @@ public class TargetTable extends AbstractTable<Target, Long> {
         pinBtn.removeStyleName(TARGET_PINNED);
         pinBtn.addStyleName(SPUIStyleDefinitions.TARGET_STATUS_PIN_TOGGLE);
         final TargetIdName targetIdname = (TargetIdName) pinBtn.getData();
-
         HawkbitCommonUtil.applyStatusLblStyle(this, pinBtn, targetIdname.getTargetId());
     }
 
-    /**
-     * Set style of target table.
-     */
     private void styleTargetTable() {
         setCellStyleGenerator((source, itemId, propertyId) -> null);
     }
@@ -485,8 +480,8 @@ public class TargetTable extends AbstractTable<Target, Long> {
         final String tagName = ((DragAndDropWrapper) (event.getTransferable().getSourceComponent())).getData()
                 .toString();
         if (tagName.equals(SPUIDefinitions.TARGET_TAG_BUTTON)) {
-            notification.displayValidationError(
-                    i18n.getMessage("message.tag.cannot.be.assigned", new Object[] { i18n.getMessage("label.no.tag.assigned") }));
+            notification.displayValidationError(i18n.getMessage("message.tag.cannot.be.assigned",
+                    new Object[] { i18n.getMessage("label.no.tag.assigned") }));
             return false;
         }
         return true;
@@ -575,8 +570,7 @@ public class TargetTable extends AbstractTable<Target, Long> {
 
     private void dsToTargetAssignment(final DragAndDropEvent event) {
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
-        @SuppressWarnings("unchecked")
-        final AbstractTable<?, Long> source = (AbstractTable<?, Long>) transferable.getSourceComponent();
+        final AbstractTable<?> source = (AbstractTable<?>) transferable.getSourceComponent();
         final Set<Long> ids = source.getDeletedEntityByTransferable(transferable);
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
         final Object targetItemId = dropData.getItemIdOver();
@@ -794,8 +788,8 @@ public class TargetTable extends AbstractTable<Target, Long> {
     }
 
     private boolean isLastSelectedTarget(final Long targetId) {
-        return managementUIState.getLastSelectedTargetId() != null
-                && managementUIState.getLastSelectedTargetId().equals(targetId);
+        final Optional<Long> currentTargetId = managementUIState.getLastSelectedTargetId();
+        return currentTargetId.isPresent() && currentTargetId.get().equals(targetId);
     }
 
     private boolean isFilterEnabled() {

@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.net.URI;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
@@ -39,7 +38,6 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -47,11 +45,11 @@ import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * Target details layout.
+ * Target details layout which is shown on the Deployment View.
  */
 public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
-    private static final long serialVersionUID = 4571732743399605843L;
+    private static final long serialVersionUID = 1L;
 
     private final TargetTagToken targetTagToken;
 
@@ -62,18 +60,19 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
     private final transient DeploymentManagement deploymentManagement;
 
     private VerticalLayout assignedDistLayout;
+
     private VerticalLayout installedDistLayout;
 
     TargetDetails(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState,
             final UINotification uiNotification, final TagManagement tagManagement,
             final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
-            final EntityFactory entityFactory) {
+            final EntityFactory entityFactory, final TargetTable targetTable) {
         super(i18n, eventBus, permissionChecker, managementUIState);
         this.targetTagToken = new TargetTagToken(permissionChecker, i18n, uiNotification, eventBus, managementUIState,
                 tagManagement, targetManagement);
         targetAddUpdateWindowLayout = new TargetAddUpdateWindowLayout(i18n, targetManagement, eventBus, uiNotification,
-                entityFactory);
+                entityFactory, targetTable);
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
         addDetailsTab();
@@ -129,11 +128,6 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
     }
 
     @Override
-    protected boolean onLoadIsTableRowSelected() {
-        return getManagementUIState().getLastSelectedTargetId() != null;
-    }
-
-    @Override
     protected boolean onLoadIsTableMaximized() {
         return getManagementUIState().isTargetTableMaximized();
     }
@@ -182,15 +176,13 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         detailsTabLayout.addComponent(lastPollDtLabel);
 
         final Label typeLabel = SPUIComponentProvider.createNameValueLabel(getI18n().getMessage("label.ip"),
-                address == null ? StringUtils.EMPTY : address.toString());
+                address == null ? "" : address.toString());
         typeLabel.setId(UIComponentIdProvider.TARGET_IP_ADDRESS);
         detailsTabLayout.addComponent(typeLabel);
 
-        if (securityToken != null) {
-            final HorizontalLayout securityTokenLayout = getSecurityTokenLayout(securityToken);
-            controllerLabel.setId(UIComponentIdProvider.TARGET_SECURITY_TOKEN);
-            detailsTabLayout.addComponent(securityTokenLayout);
-        }
+        final HorizontalLayout securityTokenLayout = getSecurityTokenLayout(securityToken);
+        controllerLabel.setId(UIComponentIdProvider.TARGET_SECURITY_TOKEN);
+        detailsTabLayout.addComponent(securityTokenLayout);
     }
 
     private HorizontalLayout getSecurityTokenLayout(final String securityToken) {
@@ -208,6 +200,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         securityTokentxt.addStyleName("targetDtls-securityToken");
         securityTokentxt.addStyleName(SPUIDefinitions.TEXT_STYLE);
         securityTokentxt.setCaption(null);
+        securityTokentxt.setNullRepresentation("");
         securityTokentxt.setValue(securityToken);
         securityTokentxt.setReadOnly(true);
 
@@ -218,15 +211,16 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
     private void populateDistributionDtls(final VerticalLayout layout, final DistributionSet distributionSet) {
         layout.removeAllComponents();
+        layout.addComponent(SPUIComponentProvider.createNameValueLabel(getI18n().getMessage("label.dist.details.name"),
+                distributionSet == null ? "" : distributionSet.getName()));
+
+        layout.addComponent(
+                SPUIComponentProvider.createNameValueLabel(getI18n().getMessage("label.dist.details.version"),
+                        distributionSet == null ? "" : distributionSet.getVersion()));
+
         if (distributionSet == null) {
             return;
         }
-        layout.addComponent(SPUIComponentProvider.createNameValueLabel(getI18n().getMessage("label.dist.details.name"),
-                distributionSet.getName()));
-
-        layout.addComponent(SPUIComponentProvider.createNameValueLabel(
-                getI18n().getMessage("label.dist.details.version"), distributionSet.getVersion()));
-
         distributionSet.getModules()
                 .forEach(module -> layout.addComponent(getSWModlabel(module.getType().getName(), module)));
     }

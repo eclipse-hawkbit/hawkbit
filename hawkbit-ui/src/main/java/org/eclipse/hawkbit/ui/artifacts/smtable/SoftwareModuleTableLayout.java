@@ -15,8 +15,8 @@ import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
 import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
@@ -24,26 +24,33 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
  */
 public class SoftwareModuleTableLayout extends AbstractTableLayout<SoftwareModuleTable> {
 
-    private static final long serialVersionUID = 6464291374980641235L;
+    private static final long serialVersionUID = 1L;
+
+    private final SoftwareModuleTable softwareModuleTable;
 
     public SoftwareModuleTableLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final ArtifactUploadState artifactUploadState, final UINotification uiNotification,
             final UIEventBus eventBus, final SoftwareManagement softwareManagement, final EntityFactory entityFactory,
             final UploadViewClientCriterion uploadViewClientCriterion) {
 
-        final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow = new SoftwareModuleAddUpdateWindow(i18n,
-                uiNotification, eventBus, softwareManagement, entityFactory);
-
         final SwMetadataPopupLayout swMetadataPopupLayout = new SwMetadataPopupLayout(i18n, uiNotification, eventBus,
                 softwareManagement, entityFactory, permChecker);
+        this.softwareModuleTable = new SoftwareModuleTable(eventBus, i18n, uiNotification, artifactUploadState,
+                softwareManagement, uploadViewClientCriterion, swMetadataPopupLayout);
+
+        final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow = new SoftwareModuleAddUpdateWindow(i18n,
+                uiNotification, eventBus, softwareManagement, entityFactory, softwareModuleTable);
 
         super.init(
                 new SoftwareModuleTableHeader(i18n, permChecker, eventBus, artifactUploadState,
                         softwareModuleAddUpdateWindow),
-                new SoftwareModuleTable(eventBus, i18n, uiNotification, artifactUploadState, softwareManagement,
-                        uploadViewClientCriterion, swMetadataPopupLayout),
+                softwareModuleTable,
                 new SoftwareModuleDetails(i18n, eventBus, permChecker, softwareModuleAddUpdateWindow,
                         artifactUploadState, softwareManagement, swMetadataPopupLayout, entityFactory));
+    }
+
+    public SoftwareModuleTable getSoftwareModuleTable() {
+        return softwareModuleTable;
     }
 
 }

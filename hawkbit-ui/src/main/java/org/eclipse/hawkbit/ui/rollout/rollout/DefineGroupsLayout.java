@@ -97,8 +97,8 @@ public class DefineGroupsLayout extends GridLayout {
 
     private final AtomicInteger runningValidationsCounter;
 
-    DefineGroupsLayout(VaadinMessageSource i18n, EntityFactory entityFactory, RolloutManagement rolloutManagement,
-            TargetFilterQueryManagement targetFilterQueryManagement) {
+    DefineGroupsLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
+            final RolloutManagement rolloutManagement, final TargetFilterQueryManagement targetFilterQueryManagement) {
         this.i18n = i18n;
         this.entityFactory = entityFactory;
         this.rolloutManagement = rolloutManagement;
@@ -467,7 +467,7 @@ public class DefineGroupsLayout extends GridLayout {
                     .id(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD)
                     .maxLengthAllowed(SPUILabelDefinitions.TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH).buildTextComponent();
 
-            filterField.setNullRepresentation(StringUtils.EMPTY);
+            filterField.setNullRepresentation("");
             filterField.setEnabled(false);
             filterField.setSizeUndefined();
             return filterField;
@@ -547,7 +547,7 @@ public class DefineGroupsLayout extends GridLayout {
          * @param rowIndex
          *            the row of the grid layout
          */
-        public void addToGridRow(GridLayout layout, int rowIndex) {
+        public void addToGridRow(final GridLayout layout, final int rowIndex) {
             layout.addComponent(groupName, 0, rowIndex);
             if (populated) {
                 layout.addComponent(targetFilterQuery, 1, rowIndex);

@@ -39,11 +39,6 @@ public class SoftwareModuleDetails extends AbstractSoftwareModuleDetails {
     }
 
     @Override
-    protected boolean onLoadIsTableRowSelected() {
-        return artifactUploadState.getSelectedBaseSoftwareModule().isPresent();
-    }
-
-    @Override
     protected boolean onLoadIsTableMaximized() {
         return artifactUploadState.isSwModuleTableMaximized();
     }

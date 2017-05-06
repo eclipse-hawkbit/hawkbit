@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.management.dstable;
 import java.util.Collections;
 import java.util.Optional;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
@@ -30,12 +29,12 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.distributions.dstable.DistributionSetTable;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -169,10 +168,8 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
                             .description(desc).type(distributionSetType).requiredMigrationStep(isMigStepReq));
 
             eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.ADD_ENTITY, newDist));
-
             notificationMessage.displaySuccess(i18n.getMessage("message.new.dist.save.success",
                     new Object[] { newDist.getName(), newDist.getVersion() }));
-
             distributionSetTable.setValue(Sets.newHashSet(newDist.getId()));
         }
 
@@ -226,16 +223,16 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         distNameTextField = createTextField("textfield.name", UIComponentIdProvider.DIST_ADD_NAME);
         distVersionTextField = createTextField("textfield.version", UIComponentIdProvider.DIST_ADD_VERSION);
 
-        distsetTypeNameComboBox = SPUIComponentProvider.getComboBox(i18n.getMessage("label.combobox.type"), "", null, "",
-                false, "", i18n.getMessage("label.combobox.type"));
+        distsetTypeNameComboBox = SPUIComponentProvider.getComboBox(i18n.getMessage("label.combobox.type"), "", null,
+                "", false, "", i18n.getMessage("label.combobox.type"));
         distsetTypeNameComboBox.setImmediate(true);
         distsetTypeNameComboBox.setNullSelectionAllowed(false);
         distsetTypeNameComboBox.setId(UIComponentIdProvider.DIST_ADD_DISTSETTYPE);
 
         descTextArea = new TextAreaBuilder().caption(i18n.getMessage("textfield.description")).style("text-area-style")
-                .prompt(i18n.getMessage("textfield.description")).immediate(true).id(UIComponentIdProvider.DIST_ADD_DESC)
-                .buildTextComponent();
-        descTextArea.setNullRepresentation(StringUtils.EMPTY);
+                .prompt(i18n.getMessage("textfield.description")).immediate(true)
+                .id(UIComponentIdProvider.DIST_ADD_DESC).buildTextComponent();
+        descTextArea.setNullRepresentation("");
 
         reqMigStepCheckbox = SPUIComponentProvider.getCheckBox(i18n.getMessage("checkbox.dist.required.migration.step"),
                 "dist-checkbox-style", null, false, "");
@@ -246,7 +243,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     private TextField createTextField(final String in18Key, final String id) {
         final TextField buildTextField = new TextFieldBuilder().caption(i18n.getMessage(in18Key)).required(true)
                 .prompt(i18n.getMessage(in18Key)).immediate(true).id(id).buildTextComponent();
-        buildTextField.setNullRepresentation(StringUtils.EMPTY);
+        buildTextField.setNullRepresentation("");
         return buildTextField;
     }
 
@@ -323,8 +320,8 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         populateDistSetTypeNameCombo();
         populateValuesOfDistribution(editDistId);
         return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
-                .caption(i18n.getMessage(UIComponentIdProvider.DIST_ADD_CAPTION)).content(this).layout(formLayout).i18n(i18n)
-                .saveDialogCloseListener(new SaveOnCloseDialogListener()).buildCommonDialogWindow();
+                .caption(i18n.getMessage(UIComponentIdProvider.DIST_ADD_CAPTION)).content(this).layout(formLayout)
+                .i18n(i18n).saveDialogCloseListener(new SaveOnCloseDialogListener()).buildCommonDialogWindow();
     }
 
     /**

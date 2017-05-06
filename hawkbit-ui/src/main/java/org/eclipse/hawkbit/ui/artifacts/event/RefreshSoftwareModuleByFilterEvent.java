@@ -8,19 +8,13 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.event;
 
+import org.eclipse.hawkbit.ui.common.table.BaseUIEvent;
+
 /**
- * Software module filter events.
- *
- *
- *
+ * Software module filter event. Is thrown when there is a filter action on a
+ * software module table on the Distribution or Upload View. It is possible to
+ * filter by text or type.
  */
-public enum SMFilterEvent {
+public class RefreshSoftwareModuleByFilterEvent extends BaseUIEvent {
 
-    FILTER_BY_TYPE,
-
-    FILTER_BY_TEXT,
-
-    REMOVER_FILTER_BY_TYPE,
-
-    REMOVER_FILTER_BY_TEXT
 }

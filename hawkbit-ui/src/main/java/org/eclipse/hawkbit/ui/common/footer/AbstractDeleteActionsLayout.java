@@ -12,11 +12,11 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -37,11 +37,10 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Parent class for footer layout.
- * 
  */
 public abstract class AbstractDeleteActionsLayout extends VerticalLayout implements DropHandler {
 
-    private static final long serialVersionUID = -6047975388519155509L;
+    private static final long serialVersionUID = 1L;
 
     protected VaadinMessageSource i18n;
 
@@ -100,17 +99,18 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
             dropHintLayout.addComponent(getCountMessageLabel());
         }
         final HorizontalLayout hLayout = new HorizontalLayout();
+        hLayout.setId(UIComponentIdProvider.ACTION_BUTTON_LAYOUT);
         hLayout.setSpacing(true);
         hLayout.setSizeUndefined();
-        if (null != deleteWrapper) {
+        if (deleteWrapper != null) {
             hLayout.addComponent(deleteWrapper);
             hLayout.setComponentAlignment(deleteWrapper, Alignment.BOTTOM_LEFT);
         }
-        if (null != noActionBtn) {
+        if (noActionBtn != null) {
             hLayout.addComponent(noActionBtn);
             hLayout.setComponentAlignment(noActionBtn, Alignment.BOTTOM_LEFT);
         }
-        if (null != bulkUploadStatusButton) {
+        if (bulkUploadStatusButton != null) {
             hLayout.addComponent(bulkUploadStatusButton);
             hLayout.setComponentAlignment(bulkUploadStatusButton, Alignment.BOTTOM_LEFT);
         }
@@ -127,13 +127,13 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
     }
 
     private DragAndDropWrapper createDeleteWrapperLayout() {
-        final Button dropToDelete = new Button("Drop here to delete");
+        final Button dropToDelete = new Button(i18n.getMessage("label.components.drop.area"));
         dropToDelete.setCaptionAsHtml(true);
         dropToDelete.setIcon(FontAwesome.TRASH_O);
         dropToDelete.addStyleName(ValoTheme.BUTTON_BORDERLESS);
         dropToDelete.addStyleName("drop-to-delete-button");
         dropToDelete.addStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
-        dropToDelete.addStyleName("del-action-button");
+        dropToDelete.addStyleName(SPUIStyleDefinitions.DEL_ACTION_BUTTON);
         dropToDelete.addStyleName("delete-icon");
 
         final DragAndDropWrapper wrapper = new DragAndDropWrapper(dropToDelete);
@@ -148,7 +148,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
         final Button button = SPUIComponentProvider.getButton(UIComponentIdProvider.PENDING_ACTION_BUTTON,
                 getNoActionsButtonLabel(), "", "", false, FontAwesome.BELL, SPUIButtonStyleSmall.class);
         button.setStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
-        button.addStyleName("del-action-button");
+        button.addStyleName(SPUIStyleDefinitions.DEL_ACTION_BUTTON);
 
         button.addClickListener(event -> actionButtonClicked());
         button.setHtmlContentAllowed(true);
@@ -255,7 +255,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
 
     /**
      * 
-     * @return true if the count label is displayed false is not displayed
+     * @return true if the count label is displayed; false is not displayed
      */
     protected boolean hasCountMessage() {
         return false;
@@ -290,7 +290,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
     }
 
     /**
-     * Check user has delete permission.
+     * Check if user has delete permission.
      * 
      * @return true if user has permission, otherwise return false.
      */
@@ -379,7 +379,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
     /**
      * Check if any unsaved actions done by the user.
      * 
-     * @return 'true' if any unsaved actions available, otherwise retrun
+     * @return 'true' if any unsaved actions available, otherwise return
      *         'false'.
      */
     protected abstract boolean hasUnsavedActions();

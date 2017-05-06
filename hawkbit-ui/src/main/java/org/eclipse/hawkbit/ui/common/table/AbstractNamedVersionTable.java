@@ -11,10 +11,10 @@ package org.eclipse.hawkbit.ui.common.table;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.data.Item;
@@ -26,14 +26,13 @@ import com.vaadin.ui.DragAndDropWrapper;
  *
  * @param <E>
  *            e is the entity class
- * @param <I>
- *            i is the id of the table
  */
-public abstract class AbstractNamedVersionTable<E extends NamedVersionedEntity, I> extends AbstractTable<E, I> {
+public abstract class AbstractNamedVersionTable<E extends NamedVersionedEntity> extends AbstractTable<E> {
 
     private static final long serialVersionUID = 780050712209750719L;
 
-    protected AbstractNamedVersionTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification notification) {
+    protected AbstractNamedVersionTable(final UIEventBus eventBus, final VaadinMessageSource i18n,
+            final UINotification notification) {
         super(eventBus, i18n, notification);
         setMultiSelect(true);
         setSelectable(true);
@@ -43,8 +42,8 @@ public abstract class AbstractNamedVersionTable<E extends NamedVersionedEntity, 
     protected List<TableColumn> getTableVisibleColumns() {
         final List<TableColumn> columnList = super.getTableVisibleColumns();
         final float versionColumnSize = isMaximized() ? 0.1F : 0.2F;
-        columnList
-                .add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.getMessage("header.version"), versionColumnSize));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.getMessage("header.version"),
+                versionColumnSize));
         return columnList;
     }
 

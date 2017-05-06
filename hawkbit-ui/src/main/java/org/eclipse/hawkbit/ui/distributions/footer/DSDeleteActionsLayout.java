@@ -29,11 +29,11 @@ import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -61,8 +61,8 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private final DistributionsViewClientCriterion distributionsViewClientCriterion;
 
-    public DSDeleteActionsLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
-            final UINotification notification, final SystemManagement systemManagement,
+    public DSDeleteActionsLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
+            final UIEventBus eventBus, final UINotification notification, final SystemManagement systemManagement,
             final ManageDistUIState manageDistUIState,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final DistributionSetManagement dsManagement, final SoftwareManagement softwareManagement) {
@@ -145,8 +145,8 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
         final String distTypeName = HawkbitCommonUtil.removePrefix(distTypeId,
                 SPUIDefinitions.DISTRIBUTION_SET_TYPE_ID_PREFIXS);
         if (isDsTypeSelected(distTypeName)) {
-            notification
-                    .displayValidationError(i18n.getMessage("message.dist.type.check.delete", new Object[] { distTypeName }));
+            notification.displayValidationError(
+                    i18n.getMessage("message.dist.type.check.delete", new Object[] { distTypeName }));
         } else if (isDefaultDsType(distTypeName)) {
             notification.displayValidationError(i18n.getMessage("message.cannot.delete.default.dstype"));
         } else {
@@ -182,7 +182,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
     }
 
     private void addInDeleteDistributionList(final Table sourceTable, final TableTransferable transferable) {
-        final AbstractTable<?, Long> table = (AbstractTable<?, Long>) sourceTable;
+        final AbstractTable<?> table = (AbstractTable<?>) sourceTable;
         final Set<Long> ids = table.getDeletedEntityByTransferable(transferable);
         final List<DistributionSet> findDistributionSetAllById = distributionSetManagement
                 .findDistributionSetAllById(ids);
@@ -207,8 +207,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
     }
 
     private void addToSWDeleteList(final Table sourceTable, final TableTransferable transferable) {
-        @SuppressWarnings("unchecked")
-        final AbstractTable<?, Long> swTable = (AbstractTable<?, Long>) sourceTable;
+        final AbstractTable<?> swTable = (AbstractTable<?>) sourceTable;
         final Set<Long> swModuleIdNameSet = swTable.getDeletedEntityByTransferable(transferable);
 
         swModuleIdNameSet.forEach(id -> {

@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
@@ -218,7 +217,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
         final VerticalLayout verticalLayout = new VerticalLayout();
         final HorizontalLayout horizontalLayout = new HorizontalLayout();
         horizontalLayout.setSizeFull();
-        final Label softwareModule = HawkbitCommonUtil.getFormatedLabel(StringUtils.EMPTY);
+        final Label softwareModule = HawkbitCommonUtil.getFormatedLabel("");
         final Button reassignSoftModule = assignSoftModuleButton(softwareModuleName);
         softwareModule.setValue(softwareModuleName);
         softwareModule.setDescription(softwareModuleName);
@@ -232,11 +231,6 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
 
     protected void populateTargetFilterQueries() {
         tfqDetailsTable.populateTableByDistributionSet(getSelectedBaseEntity());
-    }
-
-    @Override
-    protected boolean onLoadIsTableRowSelected() {
-        return manageDistUIState.getSelectedDistributions().map(selected -> !selected.isEmpty()).orElse(false);
     }
 
     @Override

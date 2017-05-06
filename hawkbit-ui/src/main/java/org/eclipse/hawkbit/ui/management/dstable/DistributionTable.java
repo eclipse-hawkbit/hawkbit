@@ -17,7 +17,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -35,10 +34,9 @@ import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.dstable.DsMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
-import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
-import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
+import org.eclipse.hawkbit.ui.management.event.RefreshDistributionTableByFilterEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.push.DistributionSetUpdatedEventContainer;
@@ -50,6 +48,7 @@ import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.eclipse.hawkbit.ui.view.filter.OnlyEventsFromDeploymentViewFilter;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -71,23 +70,31 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 
 /**
- * Distribution set table.
+ * Distribution set table which is shown on the Deployment View.
  */
-public class DistributionTable extends AbstractNamedVersionTable<DistributionSet, Long> {
+public class DistributionTable extends AbstractNamedVersionTable<DistributionSet> {
 
-    private static final long serialVersionUID = -1928335256399519494L;
+    private static final long serialVersionUID = 1L;
 
     private final SpPermissionChecker permissionChecker;
+
     private final ManagementUIState managementUIState;
+
     private final ManagementViewClientCriterion managementViewClientCriterion;
+
     private final transient TargetManagement targetManagement;
+
     private final DsMetadataPopupLayout dsMetadataPopupLayout;
+
     private final transient DistributionSetManagement distributionSetManagement;
+
     private final transient DeploymentManagement deploymentManagement;
 
     private final String notAllowedMsg;
-    private boolean isDistPinned;
-    private Button distributinPinnedBtn;
+
+    private boolean distPinned;
+
+    private Button distributionPinnedBtn;
 
     DistributionTable(final UIEventBus eventBus, final VaadinMessageSource i18n,
             final SpPermissionChecker permissionChecker, final UINotification notification,
@@ -153,7 +160,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             refreshContainer();
             if (setsThatAreVisibleButNotCompleteAnymore.stream()
                     .anyMatch(id -> id.equals(managementUIState.getLastSelectedDsIdName()))) {
-                managementUIState.setLastSelectedEntity(null);
+                managementUIState.setLastSelectedEntityId(null);
             }
 
             return true;
@@ -165,16 +172,12 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     /**
      * DistributionTableFilterEvent.
      *
-     * @param event
-     *            as instance of {@link DistributionTableFilterEvent}
+     * @param filterEvent
+     *            as instance of {@link RefreshDistributionTableByFilterEvent}
      */
-    @EventBusListenerMethod(scope = EventScope.UI)
-    void onEvent(final DistributionTableFilterEvent event) {
-        if (event == DistributionTableFilterEvent.FILTER_BY_TEXT
-                || event == DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT
-                || event == DistributionTableFilterEvent.FILTER_BY_TAG) {
-            UI.getCurrent().access(this::refreshFilter);
-        }
+    @EventBusListenerMethod(scope = EventScope.UI, filter = OnlyEventsFromDeploymentViewFilter.class)
+    void onEvent(final RefreshDistributionTableByFilterEvent filterEvent) {
+        UI.getCurrent().access(this::refreshFilter);
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -184,7 +187,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             return;
         }
         UI.getCurrent().access(() -> updateDistributionInTable(event.getEntity()));
-
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -194,21 +196,14 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
                 refreshFilter();
                 styleDistributionTableOnPinning();
                 // unstyleDistPin
-                if (distributinPinnedBtn != null) {
-                    distributinPinnedBtn.setStyleName(getPinStyle());
+                if (distributionPinnedBtn != null) {
+                    distributionPinnedBtn.setStyleName(getPinStyle());
                 }
             } else if (pinUnpinEvent == PinUnpinEvent.UNPIN_TARGET) {
                 refreshFilter();
                 restoreDistributionTableStyle();
             }
         });
-    }
-
-    @EventBusListenerMethod(scope = EventScope.UI)
-    void onEvent(final SaveActionWindowEvent event) {
-        if (event == SaveActionWindowEvent.DELETED_DISTRIBUTIONS) {
-            refreshFilter();
-        }
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -273,7 +268,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
                 iconLayout.addComponent(manageMetaDataBtn);
                 return iconLayout;
             }
-
         });
     }
 
@@ -296,12 +290,12 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     @Override
     protected boolean isFirstRowSelectedOnLoad() {
-        return managementUIState.getSelectedDsIdName().map(Set::isEmpty).orElse(true);
+        return managementUIState.getSelectedDsIdName().isEmpty();
     }
 
     @Override
     protected Object getItemIdToSelect() {
-        return managementUIState.getSelectedDsIdName().orElse(null);
+        return managementUIState.getSelectedDsIdName().isEmpty() ? null : managementUIState.getSelectedDsIdName();
     }
 
     @Override
@@ -310,15 +304,12 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     @Override
-    protected void publishEntityAfterValueChange(final DistributionSet selectedLastEntity) {
+    protected void publishSelectedEntityEvent(final DistributionSet selectedLastEntity) {
         eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, selectedLastEntity));
-        if (selectedLastEntity != null) {
-            managementUIState.setLastSelectedEntity(selectedLastEntity.getId());
-        }
     }
 
     @Override
-    protected ManagementUIState getManagmentEntityState() {
+    protected ManagementUIState getManagementEntityState() {
         return managementUIState;
     }
 
@@ -333,7 +324,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         if (isMaximized()) {
             return columnList;
         }
-        columnList.add(new TableColumn(SPUILabelDefinitions.PIN_COLUMN, StringUtils.EMPTY, 0.2F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.PIN_COLUMN, "", 0.2F));
         return columnList;
     }
 
@@ -460,7 +451,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         return false;
     }
 
-    private Boolean isNoTagButton(final String tagData, final String targetNoTagData) {
+    private boolean isNoTagButton(final String tagData, final String targetNoTagData) {
         if (tagData.equals(targetNoTagData)) {
             notification.displayValidationError(i18n.getMessage("message.tag.cannot.be.assigned",
                     new Object[] { i18n.getMessage("label.no.tag.assigned") }));
@@ -530,12 +521,10 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
         managementUIState.getDistributionTableFilters().getPinnedTarget().map(TargetIdName::getControllerId)
                 .ifPresent(controllerId -> {
-
                     final Long installedDistId = deploymentManagement.getInstalledDistributionSet(controllerId)
                             .map(DistributionSet::getId).orElse(null);
                     final Long assignedDistId = deploymentManagement.getAssignedDistributionSet(controllerId)
                             .map(DistributionSet::getId).orElse(null);
-
                     styleDistributionSetTable(installedDistId, assignedDistId);
                 });
     }
@@ -574,13 +563,13 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         final Long pinnedId = ((DistributionSetIdName) pinBtn.getData()).getId();
 
         if (managementUIState.getTargetTableFilters().getPinnedDistId().map(pinnedId::equals).orElse(false)) {
-            setDistributinPinnedBtn(pinBtn);
+            setDistributionPinnedBtn(pinBtn);
         }
     }
 
     private void addPinClickListener(final ClickEvent event) {
         checkifAlreadyPinned(event.getButton());
-        if (isDistPinned) {
+        if (distPinned) {
             pinDitribution(event.getButton());
         } else {
             unPinDistribution(event.getButton());
@@ -593,17 +582,17 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         final Long pinnedDistId = managementUIState.getTargetTableFilters().getPinnedDistId().orElse(null);
 
         if (pinnedDistId == null) {
-            isDistPinned = !isDistPinned;
+            distPinned = !distPinned;
             managementUIState.getTargetTableFilters().setPinnedDistId(newPinnedDistItemId);
         } else if (newPinnedDistItemId.equals(pinnedDistId)) {
-            isDistPinned = false;
+            distPinned = false;
         } else {
-            isDistPinned = true;
+            distPinned = true;
             managementUIState.getTargetTableFilters().setPinnedDistId(newPinnedDistItemId);
-            distributinPinnedBtn.setStyleName(getPinStyle());
+            distributionPinnedBtn.setStyleName(getPinStyle());
         }
 
-        distributinPinnedBtn = eventBtn;
+        distributionPinnedBtn = eventBtn;
     }
 
     private void unPinDistribution(final Button eventBtn) {
@@ -624,14 +613,14 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         eventBus.publish(this, PinUnpinEvent.PIN_DISTRIBUTION);
         applyPinStyle(eventBtn);
         styleDistributionSetTable();
-        isDistPinned = Boolean.FALSE;
+        distPinned = false;
     }
 
     private void rePinDistribution(final Button pinBtn, final Long distID) {
         if (managementUIState.getTargetTableFilters().getPinnedDistId().map(distID::equals).orElse(false)) {
             applyPinStyle(pinBtn);
-            isDistPinned = Boolean.TRUE;
-            distributinPinnedBtn = pinBtn;
+            distPinned = true;
+            distributionPinnedBtn = pinBtn;
             eventBus.publish(this, PinUnpinEvent.PIN_DISTRIBUTION);
         }
     }
@@ -703,8 +692,8 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
                 assignedDistTableItemId, itemId));
     }
 
-    public void setDistributinPinnedBtn(final Button distributinPinnedBtn) {
-        this.distributinPinnedBtn = distributinPinnedBtn;
+    public void setDistributionPinnedBtn(final Button distributionPinnedBtn) {
+        this.distributionPinnedBtn = distributionPinnedBtn;
     }
 
     @Override

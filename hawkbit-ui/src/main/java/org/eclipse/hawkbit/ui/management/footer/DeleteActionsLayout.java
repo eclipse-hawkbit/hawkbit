@@ -38,10 +38,10 @@ import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -56,12 +56,11 @@ import com.vaadin.ui.Table.TableTransferable;
 import com.vaadin.ui.UI;
 
 /**
- *
- *
+ * Layout for the action button footer on the Deployment View.
  */
 public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
-    private static final long serialVersionUID = -8112907467821886253L;
+    private static final long serialVersionUID = 1L;
 
     private final transient TagManagement tagManagementService;
 
@@ -77,8 +76,8 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private final transient DistributionSetManagement distributionSetManagement;
 
-    public DeleteActionsLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
-            final UINotification notification, final TagManagement tagManagementService,
+    public DeleteActionsLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
+            final UIEventBus eventBus, final UINotification notification, final TagManagement tagManagementService,
             final ManagementViewClientCriterion managementViewClientCriterion,
             final ManagementUIState managementUIState, final TargetManagement targetManagement,
             final TargetTable targetTable, final DeploymentManagement deploymentManagement,
@@ -122,9 +121,9 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final BulkUploadPopupEvent event) {
         if (BulkUploadPopupEvent.MINIMIZED == event) {
-            UI.getCurrent().access(() -> enableBulkUploadStatusButton());
+            UI.getCurrent().access(this::enableBulkUploadStatusButton);
         } else if (BulkUploadPopupEvent.CLOSED == event) {
-            UI.getCurrent().access(() -> hideBulkUploadStatusButton());
+            UI.getCurrent().access(this::hideBulkUploadStatusButton);
         }
     }
 
@@ -137,9 +136,9 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
                                 .getBulkUpload().getFailedUploadCount()
                                 + managementUIState.getTargetTableFilters().getBulkUpload().getSucessfulUploadCount()));
             } else if (TargetComponentEvent.BULK_UPLOAD_COMPLETED == event.getTargetComponentEvent()) {
-                this.getUI().access(() -> updateUploadBtnIconToComplete());
+                this.getUI().access(this::updateUploadBtnIconToComplete);
             } else if (TargetComponentEvent.BULK_TARGET_UPLOAD_STARTED == event.getTargetComponentEvent()) {
-                this.getUI().access(() -> updateUploadBtnIconToProgressIndicator());
+                this.getUI().access(this::updateUploadBtnIconToProgressIndicator);
             }
         }
     }
@@ -274,8 +273,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
     }
 
     private void addInDeleteDistributionList(final Table sourceTable, final TableTransferable transferable) {
-        @SuppressWarnings("unchecked")
-        final AbstractTable<?, Long> distTable = (AbstractTable<?, Long>) sourceTable;
+        final AbstractTable<?> distTable = (AbstractTable<?>) sourceTable;
         final Set<Long> ids = distTable.getDeletedEntityByTransferable(transferable);
 
         final Long dsInBulkUpload = managementUIState.getTargetTableFilters().getBulkUpload().getDsNameAndVersion();
@@ -345,7 +343,6 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
     }
 
     private void addInDeleteTargetList(final Table sourceTable, final TableTransferable transferable) {
-        @SuppressWarnings("unchecked")
         final TargetTable targetTable = (TargetTable) sourceTable;
         final Set<Long> targetIdSet = targetTable.getDeletedEntityByTransferable(transferable);
         final Collection<Target> findTargetAllById = targetManagement.findTargetAllById(targetIdSet);

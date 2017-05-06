@@ -40,15 +40,16 @@ import org.eclipse.hawkbit.ui.push.DistributionCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.SoftwareModuleCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.SoftwareModuleDeletedEventContainer;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.collect.Maps;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
@@ -64,8 +65,9 @@ import com.vaadin.ui.GridLayout;
 @SpringView(name = DistributionsView.VIEW_NAME, ui = HawkbitUI.class)
 public class DistributionsView extends AbstractNotificationView implements BrowserWindowResizeListener {
 
+    private static final long serialVersionUID = 1L;
+
     public static final String VIEW_NAME = "distributions";
-    private static final long serialVersionUID = 3887435076372276300L;
 
     private final SpPermissionChecker permChecker;
 
@@ -122,12 +124,20 @@ public class DistributionsView extends AbstractNotificationView implements Brows
 
     @PostConstruct
     void init() {
-        // Build the Distributions view layout with all the required components.
         buildLayout();
         restoreState();
         checkNoDataAvaialble();
         Page.getCurrent().addBrowserWindowResizeListener(this);
         showOrHideFilterButtons(Page.getCurrent().getBrowserWindowWidth());
+    }
+
+    @Override
+    public void enter(final ViewChangeEvent event) {
+        softwareModuleTableLayout.getSwModuleTable()
+                .selectEntity(manageDistUIState.getLastSelectedSoftwareModule().orElse(null));
+
+        distributionTableLayout.getDistributionSetTable()
+                .selectEntity(manageDistUIState.getLastSelectedDistribution().orElse(null));
     }
 
     @Override
@@ -145,15 +155,19 @@ public class DistributionsView extends AbstractNotificationView implements Brows
     }
 
     private void buildLayout() {
-        // Check if user has permissions
-        if (permChecker.hasUpdateDistributionPermission() || permChecker.hasCreateDistributionPermission()
-                || permChecker.hasReadDistributionPermission()) {
-            setSizeFull();
-            setStyleName("rootLayout");
-            createMainLayout();
-            addComponents(mainLayout);
-            setExpandRatio(mainLayout, 1);
+        if (!hasUserPermission()) {
+            return;
         }
+        setSizeFull();
+        setStyleName("rootLayout");
+        createMainLayout();
+        addComponents(mainLayout);
+        setExpandRatio(mainLayout, 1);
+    }
+
+    private boolean hasUserPermission() {
+        return permChecker.hasUpdateDistributionPermission() || permChecker.hasCreateDistributionPermission()
+                || permChecker.hasReadDistributionPermission();
     }
 
     private void createMainLayout() {
@@ -227,7 +241,6 @@ public class DistributionsView extends AbstractNotificationView implements Brows
 
     private void checkNoDataAvaialble() {
         if (manageDistUIState.isNoDataAvilableSwModule() && manageDistUIState.isNoDataAvailableDist()) {
-
             uiNotification.displayValidationError(i18n.getMessage("message.no.data"));
         }
     }
@@ -239,7 +252,6 @@ public class DistributionsView extends AbstractNotificationView implements Brows
 
     private void showOrHideFilterButtons(final int browserWidth) {
         if (browserWidth < SPUIDefinitions.REQ_MIN_BROWSER_WIDTH) {
-
             filterByDSTypeLayout.setVisible(false);
             distributionTableLayout.setShowFilterButtonVisible(true);
             filterBySMTypeLayout.setVisible(false);
@@ -248,7 +260,6 @@ public class DistributionsView extends AbstractNotificationView implements Brows
             if (!manageDistUIState.isDistTypeFilterClosed()) {
                 filterByDSTypeLayout.setVisible(true);
                 distributionTableLayout.setShowFilterButtonVisible(false);
-
             }
             if (!manageDistUIState.isSwTypeFilterClosed()) {
                 filterBySMTypeLayout.setVisible(true);

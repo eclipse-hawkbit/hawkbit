@@ -8,10 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtype;
 
-import java.io.Serializable;
-
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
+import org.eclipse.hawkbit.ui.artifacts.event.RefreshSoftwareModuleByFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterSingleButtonClick;
 import org.vaadin.spring.events.EventBus;
@@ -20,11 +18,12 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import com.vaadin.ui.Button;
 
 /**
- * Single button click behaviour of filter buttons layout.
+ * Single button click behavior of filter buttons layout for software module
+ * table on the Upload view.
  */
-public class SMTypeFilterButtonClick extends AbstractFilterSingleButtonClick implements Serializable {
+public class SMTypeFilterButtonClick extends AbstractFilterSingleButtonClick {
 
-    private static final long serialVersionUID = 3707945900524967887L;
+    private static final long serialVersionUID = 1L;
 
     private final transient EventBus.UIEventBus eventBus;
 
@@ -42,7 +41,7 @@ public class SMTypeFilterButtonClick extends AbstractFilterSingleButtonClick imp
     @Override
     protected void filterUnClicked(final Button clickedButton) {
         artifactUploadState.getSoftwareModuleFilters().setSoftwareModuleType(null);
-        eventBus.publish(this, SMFilterEvent.FILTER_BY_TYPE);
+        eventBus.publish(this, new RefreshSoftwareModuleByFilterEvent());
     }
 
     @Override
@@ -50,7 +49,7 @@ public class SMTypeFilterButtonClick extends AbstractFilterSingleButtonClick imp
         softwareManagement.findSoftwareModuleTypeByName(clickedButton.getData().toString())
                 .ifPresent(softwareModuleType -> {
                     artifactUploadState.getSoftwareModuleFilters().setSoftwareModuleType(softwareModuleType);
-                    eventBus.publish(this, SMFilterEvent.FILTER_BY_TYPE);
+                    eventBus.publish(this, new RefreshSoftwareModuleByFilterEvent());
                 });
     }
 

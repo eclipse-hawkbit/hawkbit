@@ -13,7 +13,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.model.AssignmentResult;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.PollStatus;
@@ -108,7 +107,7 @@ public final class HawkbitCommonUtil {
      *         null.
      */
     public static String concatStrings(final String delimiter, final String... texts) {
-        final String delim = delimiter == null ? StringUtils.EMPTY : delimiter;
+        final String delim = delimiter == null ? "" : delimiter;
         final StringBuilder conCatStrBldr = new StringBuilder();
         if (null != texts) {
             for (final String text : texts) {

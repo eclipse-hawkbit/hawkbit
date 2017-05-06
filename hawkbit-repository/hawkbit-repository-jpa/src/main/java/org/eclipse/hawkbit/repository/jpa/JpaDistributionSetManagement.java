@@ -730,12 +730,12 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         Specification<JpaDistributionSet> spec;
 
-        if (null != distributionSetFilter.getIsComplete()) {
+        if (distributionSetFilter.getIsComplete() != null) {
             spec = DistributionSetSpecification.isCompleted(distributionSetFilter.getIsComplete());
             specList.add(spec);
         }
 
-        if (null != distributionSetFilter.getIsDeleted()) {
+        if (distributionSetFilter.getIsDeleted() != null) {
             spec = DistributionSetSpecification.isDeleted(distributionSetFilter.getIsDeleted());
             specList.add(spec);
         }

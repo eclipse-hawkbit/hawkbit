@@ -13,7 +13,7 @@ import java.io.Serializable;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterSingleButtonClick;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
-import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
+import org.eclipse.hawkbit.ui.management.event.RefreshDistributionTableByFilterEvent;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -24,7 +24,7 @@ import com.vaadin.ui.Button;
  */
 public class DSTypeFilterButtonClick extends AbstractFilterSingleButtonClick implements Serializable {
 
-    private static final long serialVersionUID = -584783755917528648L;
+    private static final long serialVersionUID = 1L;
 
     private final transient EventBus.UIEventBus eventBus;
 
@@ -42,16 +42,14 @@ public class DSTypeFilterButtonClick extends AbstractFilterSingleButtonClick imp
     @Override
     protected void filterUnClicked(final Button clickedButton) {
         manageDistUIState.getManageDistFilters().setClickedDistSetType(null);
-        eventBus.publish(this, DistributionTableFilterEvent.FILTER_BY_TAG);
-
+        eventBus.publish(this, new RefreshDistributionTableByFilterEvent());
     }
 
     @Override
     protected void filterClicked(final Button clickedButton) {
         distributionSetManagement.findDistributionSetTypeByName(clickedButton.getData().toString())
                 .ifPresent(manageDistUIState.getManageDistFilters()::setClickedDistSetType);
-        eventBus.publish(this, DistributionTableFilterEvent.FILTER_BY_TAG);
-
+        eventBus.publish(this, new RefreshDistributionTableByFilterEvent());
     }
 
 }
