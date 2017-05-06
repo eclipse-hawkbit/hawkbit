@@ -113,11 +113,11 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
 
-        final Tag createdOne = tagManagement.findAllDistributionSetTags("name==thetest1", pageReq).getContent().get(0);
+        final Tag createdOne = tagManagement.findAllDistributionSetTags("name==thetest1", PAGE).getContent().get(0);
         assertThat(createdOne.getName()).isEqualTo(tagOne.getName());
         assertThat(createdOne.getDescription()).isEqualTo(tagOne.getDescription());
         assertThat(createdOne.getColour()).isEqualTo(tagOne.getColour());
-        final Tag createdTwo = tagManagement.findAllDistributionSetTags("name==thetest2", pageReq).getContent().get(0);
+        final Tag createdTwo = tagManagement.findAllDistributionSetTags("name==thetest2", PAGE).getContent().get(0);
         assertThat(createdTwo.getName()).isEqualTo(tagTwo.getName());
         assertThat(createdTwo.getDescription()).isEqualTo(tagTwo.getDescription());
         assertThat(createdTwo.getColour()).isEqualTo(tagTwo.getColour());
@@ -143,7 +143,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
 
-        final Tag updated = tagManagement.findAllDistributionSetTags("name==updatedName", pageReq).getContent().get(0);
+        final Tag updated = tagManagement.findAllDistributionSetTags("name==updatedName", PAGE).getContent().get(0);
         assertThat(updated.getName()).isEqualTo(update.getName());
         assertThat(updated.getDescription()).isEqualTo(update.getDescription());
         assertThat(updated.getColour()).isEqualTo(update.getColour());
@@ -242,7 +242,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
         // 2 DistributionSetUpdateEvent
         ResultActions result = toggle(tag, sets);
 
-        List<DistributionSet> updated = distributionSetManagement.findDistributionSetsByTag(pageReq, tag.getId())
+        List<DistributionSet> updated = distributionSetManagement.findDistributionSetsByTag(PAGE, tag.getId())
                 .getContent();
 
         assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
@@ -254,12 +254,12 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
         // 2 DistributionSetUpdateEvent
         result = toggle(tag, sets);
 
-        updated = distributionSetManagement.findDistributionSetsAll(pageReq, false).getContent();
+        updated = distributionSetManagement.findDistributionSetsAll(PAGE, false).getContent();
 
         result.andExpect(applyBaseEntityMatcherOnArrayResult(updated.get(0), "unassignedDistributionSets"))
                 .andExpect(applyBaseEntityMatcherOnArrayResult(updated.get(1), "unassignedDistributionSets"));
 
-        assertThat(distributionSetManagement.findDistributionSetsByTag(pageReq, tag.getId())).isEmpty();
+        assertThat(distributionSetManagement.findDistributionSetsByTag(PAGE, tag.getId())).isEmpty();
     }
 
     private ResultActions toggle(final DistributionSetTag tag, final List<DistributionSet> sets) throws Exception {
@@ -291,7 +291,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
 
-        final List<DistributionSet> updated = distributionSetManagement.findDistributionSetsByTag(pageReq, tag.getId())
+        final List<DistributionSet> updated = distributionSetManagement.findDistributionSetsByTag(PAGE, tag.getId())
                 .getContent();
 
         assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
@@ -319,7 +319,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
         mvc.perform(delete(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned/"
                 + unassigned.getId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        final List<DistributionSet> updated = distributionSetManagement.findDistributionSetsByTag(pageReq, tag.getId())
+        final List<DistributionSet> updated = distributionSetManagement.findDistributionSetsByTag(PAGE, tag.getId())
                 .getContent();
 
         assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))

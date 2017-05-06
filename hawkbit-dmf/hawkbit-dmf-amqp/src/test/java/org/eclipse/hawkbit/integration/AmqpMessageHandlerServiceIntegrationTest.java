@@ -200,7 +200,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         getDmfClient().send(createTargetMessage);
 
         verifyOneDeadLetterMessage();
-        assertThat(systemManagement.findTenants(pageReq)).hasSize(1);
+        assertThat(systemManagement.findTenants(PAGE)).hasSize(1);
     }
 
     @Test
@@ -604,7 +604,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         createConditionFactory().await().until(() -> {
             try {
                 securityRule.runAsPrivileged(() -> {
-                    final List<Status> status = deploymentManagement.findActionStatusByAction(pageReq, actionId)
+                    final List<Status> status = deploymentManagement.findActionStatusByAction(PAGE, actionId)
                             .getContent().stream().map(actionStatus -> actionStatus.getStatus())
                             .collect(Collectors.toList());
                     assertThat(status).containsOnly(expectedActionStates);

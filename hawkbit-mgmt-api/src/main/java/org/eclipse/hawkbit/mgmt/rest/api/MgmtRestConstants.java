@@ -25,18 +25,19 @@ public final class MgmtRestConstants {
     public static final String BASE_V1_REQUEST_MAPPING = "/rest/v1";
 
     /**
+     * String representation of
+     * {@link #REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE}.
+     */
+    public static final String REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT = "50";
+
+    /**
      * The default limit parameter in case the limit parameter is not present in
      * the request.
      *
      * @see #REQUEST_PARAMETER_PAGING_LIMIT
      */
-    public static final int REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE = 50;
-
-    /**
-     * String representation of
-     * {@link #REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE}.
-     */
-    public static final String REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT = "50";
+    public static final int REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE = Integer
+            .parseInt(REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT);
 
     /**
      * The software module URL mapping rest resource.
@@ -122,8 +123,8 @@ public final class MgmtRestConstants {
     /**
      * The deprecated tag URL mapping rest resource.
      * 
-     * @deprecated {@link #DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING} is preferred as
-     *             this resource on GET supports paging
+     * @deprecated {@link #DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING}
+     *             is preferred as this resource on GET supports paging
      */
     @Deprecated
     public static final String DEPRECATED_DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING = "/{distributionsetTagId}/distributionsets";
@@ -140,6 +141,15 @@ public final class MgmtRestConstants {
      * @see #REQUEST_PARAMETER_PAGING_OFFSET
      */
     public static final String REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET = "0";
+
+    /**
+     * The default offset parameter in case the offset parameter is not present
+     * in the request.
+     *
+     * @see #REQUEST_PARAMETER_PAGING_OFFSET
+     */
+    public static final int REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE = Integer
+            .parseInt(REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET);
 
     /**
      * Limit http parameter for the limitation of returned values for a paged

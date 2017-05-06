@@ -316,7 +316,7 @@ public class ConfigurableScenario {
 
     private void createDistributionSets(final Scenario scenario) {
         LOGGER.info("Creating {} distribution sets", scenario.getDistributionSets());
-        final int pages = (scenario.getDistributionSets() / PAGE_SIZE) >= 1
+        final int pages = (scenario.getDistributionSets() / PAGE_SIZE) >= 1.0
                 ? (scenario.getDistributionSets() / PAGE_SIZE) : 1;
 
         IntStream.range(0, pages).parallel().forEach(i -> createDistributionSetPage(scenario, i));
@@ -386,7 +386,7 @@ public class ConfigurableScenario {
 
     private void createTargets(final Scenario scenario, final List<Long> deviceGroupTags) {
         LOGGER.info("Creating {} targets", scenario.getTargets());
-        final int pages = (scenario.getTargets() / PAGE_SIZE) >= 1 ? (scenario.getTargets() / PAGE_SIZE)
+        final int pages = (scenario.getTargets() / PAGE_SIZE) >= 1.0 ? (scenario.getTargets() / PAGE_SIZE)
                 : scenario.getTargets();
         IntStream.range(0, pages).parallel().forEach(i -> createTargetPage(scenario, i, deviceGroupTags));
         LOGGER.info("Creating {} targets -> Done", scenario.getTargets());

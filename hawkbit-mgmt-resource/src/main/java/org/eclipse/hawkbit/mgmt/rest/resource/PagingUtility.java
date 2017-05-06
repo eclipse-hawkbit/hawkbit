@@ -39,14 +39,14 @@ public final class PagingUtility {
 
     static int sanitizeOffsetParam(final int offset) {
         if (offset < 0) {
-            return Integer.parseInt(MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET);
+            return MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE;
         }
         return offset;
     }
 
     static int sanitizePageLimitParam(final int pageLimit) {
         if (pageLimit < 1) {
-            return Integer.parseInt(MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT);
+            return MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE;
         } else if (pageLimit > MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT) {
             return MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT;
         }

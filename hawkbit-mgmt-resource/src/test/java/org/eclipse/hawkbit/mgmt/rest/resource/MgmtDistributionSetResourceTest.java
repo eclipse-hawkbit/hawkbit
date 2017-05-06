@@ -225,7 +225,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("$.alreadyAssigned", equalTo(1)))
                 .andExpect(jsonPath("$.total", equalTo(knownTargetIds.length)));
 
-        assertThat(targetManagement.findTargetByAssignedDistributionSet(createdDs.getId(), pageReq).getContent())
+        assertThat(targetManagement.findTargetByAssignedDistributionSet(createdDs.getId(), PAGE).getContent())
                 .as("Five targets in repository have DS assigned").hasSize(5);
     }
 
@@ -414,7 +414,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Description("Ensures that multiple DS requested are listed with expected payload.")
     public void getDistributionSets() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true))
                 .hasSize(0);
 
         DistributionSet set = testdataFactory.createDistributionSet("one");
@@ -424,7 +424,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         // load also lazy stuff
         set = distributionSetManagement.findDistributionSetByIdWithDetails(set.getId()).get();
 
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true))
                 .hasSize(1);
 
         // perform request
@@ -488,7 +488,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Ensures that multipe DS posted to API are created in the repository.")
     public void createDistributionSets() throws Exception {
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true))
                 .hasSize(0);
 
         final SoftwareModule ah = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_APP);
@@ -507,11 +507,11 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final MvcResult mvcResult = executeMgmtTargetPost(one, two, three);
 
         one = distributionSetManagement.findDistributionSetByIdWithDetails(distributionSetManagement
-                .findDistributionSetsAll("name==one", pageReq, false).getContent().get(0).getId()).get();
+                .findDistributionSetsAll("name==one", PAGE, false).getContent().get(0).getId()).get();
         two = distributionSetManagement.findDistributionSetByIdWithDetails(distributionSetManagement
-                .findDistributionSetsAll("name==two", pageReq, false).getContent().get(0).getId()).get();
+                .findDistributionSetsAll("name==two", PAGE, false).getContent().get(0).getId()).get();
         three = distributionSetManagement.findDistributionSetByIdWithDetails(distributionSetManagement
-                .findDistributionSetsAll("name==three", pageReq, false).getContent().get(0).getId()).get();
+                .findDistributionSetsAll("name==three", PAGE, false).getContent().get(0).getId()).get();
 
         assertThat(
                 JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
@@ -542,7 +542,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .isEqualTo(String.valueOf(three.getId()));
 
         // check in database
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true))
                 .hasSize(3);
         assertThat(one.isRequiredMigrationStep()).isEqualTo(false);
         assertThat(two.isRequiredMigrationStep()).isEqualTo(false);
@@ -607,12 +607,12 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Description("Ensures that DS deletion request to API is reflected by the repository.")
     public void deleteUnassignedistributionSet() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true))
                 .hasSize(0);
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true))
                 .hasSize(1);
 
         // perform request
@@ -620,7 +620,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(status().isOk());
 
         // check repository content
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true))
                 .isEmpty();
         assertThat(distributionSetManagement.countDistributionSetsAll()).isEqualTo(0);
     }
@@ -636,14 +636,14 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Description("Ensures that assigned DS deletion request to API is reflected by the repository by means of deleted flag set.")
     public void deleteAssignedDistributionSet() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true))
                 .hasSize(0);
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         testdataFactory.createTarget("test");
         assignDistributionSet(set.getId(), "test");
 
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true))
                 .hasSize(1);
 
         // perform request
@@ -651,9 +651,9 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(status().isOk());
 
         // check repository content
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true))
                 .hasSize(0);
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, true, true))
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, true, true))
                 .hasSize(1);
     }
 
@@ -662,7 +662,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     public void updateDistributionSet() throws Exception {
 
         // prepare test data
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true))
                 .hasSize(0);
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
@@ -686,7 +686,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     public void updateRequiredMigrationStepFailsIfDistributionSetisInUse() throws Exception {
 
         // prepare test data
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true))
                 .hasSize(0);
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");

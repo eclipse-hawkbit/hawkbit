@@ -56,15 +56,15 @@ public class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> rolloutGroupManagement.countTargetsOfRolloutsGroup(NOT_EXIST_IDL),
                 "RolloutGroup");
         verifyThrownExceptionBy(
-                () -> rolloutGroupManagement.findAllRolloutGroupsWithDetailedStatus(NOT_EXIST_IDL, pageReq), "Rollout");
-        verifyThrownExceptionBy(() -> rolloutGroupManagement.findAllTargetsWithActionStatus(pageReq, NOT_EXIST_IDL),
+                () -> rolloutGroupManagement.findAllRolloutGroupsWithDetailedStatus(NOT_EXIST_IDL, PAGE), "Rollout");
+        verifyThrownExceptionBy(() -> rolloutGroupManagement.findAllTargetsWithActionStatus(PAGE, NOT_EXIST_IDL),
                 "RolloutGroup");
-        verifyThrownExceptionBy(() -> rolloutGroupManagement.findRolloutGroupsAll(NOT_EXIST_IDL, "name==*", pageReq),
+        verifyThrownExceptionBy(() -> rolloutGroupManagement.findRolloutGroupsAll(NOT_EXIST_IDL, "name==*", PAGE),
                 "Rollout");
 
-        verifyThrownExceptionBy(() -> rolloutGroupManagement.findRolloutGroupTargets(NOT_EXIST_IDL, pageReq),
+        verifyThrownExceptionBy(() -> rolloutGroupManagement.findRolloutGroupTargets(NOT_EXIST_IDL, PAGE),
                 "RolloutGroup");
-        verifyThrownExceptionBy(() -> rolloutGroupManagement.findRolloutGroupTargets(NOT_EXIST_IDL, "name==*", pageReq),
+        verifyThrownExceptionBy(() -> rolloutGroupManagement.findRolloutGroupTargets(NOT_EXIST_IDL, "name==*", PAGE),
                 "RolloutGroup");
     }
 

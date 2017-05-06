@@ -23,7 +23,7 @@ import org.springframework.data.domain.Sort.Direction;
 public class JpaTestRepositoryManagement implements TestRepositoryManagement {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JpaTestRepositoryManagement.class);
-    private static final Pageable pageReq = new PageRequest(0, 400, new Sort(Direction.ASC, "id"));
+    private static final Pageable PAGE = new PageRequest(0, 400, new Sort(Direction.ASC, "id"));
 
     private final TenantAwareCacheManager cacheManager;
 
@@ -56,7 +56,7 @@ public class JpaTestRepositoryManagement implements TestRepositoryManagement {
 
     public void deleteAllRepos() {
         final List<String> tenants = systemSecurityContext
-                .runAsSystem(() -> systemManagement.findTenants(pageReq).getContent());
+                .runAsSystem(() -> systemManagement.findTenants(PAGE).getContent());
         tenants.forEach(tenant -> {
             try {
                 systemSecurityContext.runAsSystem(() -> {

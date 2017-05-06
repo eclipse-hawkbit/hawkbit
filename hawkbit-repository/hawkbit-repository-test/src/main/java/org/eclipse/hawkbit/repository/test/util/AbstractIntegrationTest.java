@@ -101,7 +101,7 @@ import com.google.common.collect.Lists;
 public abstract class AbstractIntegrationTest implements EnvironmentAware {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
-    protected static final Pageable pageReq = new PageRequest(0, 400, new Sort(Direction.ASC, "id"));
+    protected static final Pageable PAGE = new PageRequest(0, 400, new Sort(Direction.ASC, "id"));
 
     /**
      * Constant for MediaType HAL with encoding UTF-8. Necessary since Spring
@@ -262,7 +262,7 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
         Target savedTarget = testdataFactory.createTarget(controllerId);
         savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
                 .next();
-        Action savedAction = deploymentManagement.findActiveActionsByTarget(pageReq, savedTarget.getControllerId())
+        Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
                 .getContent().get(0);
 
         savedAction = controllerManagement.addUpdateActionStatus(

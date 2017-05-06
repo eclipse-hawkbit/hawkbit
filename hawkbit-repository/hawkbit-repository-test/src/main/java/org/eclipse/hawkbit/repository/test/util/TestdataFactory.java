@@ -355,7 +355,7 @@ public class TestdataFactory {
      */
     public List<DistributionSet> createDistributionSetsWithoutModules(final int number) {
 
-        final List<DistributionSet> sets = new ArrayList<>();
+        final List<DistributionSet> sets = Lists.newArrayListWithExpectedSize(number);
         for (int i = 0; i < number; i++) {
             sets.add(distributionSetManagement.createDistributionSet(
                     entityFactory.distributionSet().create().name("DS" + i).version(DEFAULT_VERSION + "." + i)

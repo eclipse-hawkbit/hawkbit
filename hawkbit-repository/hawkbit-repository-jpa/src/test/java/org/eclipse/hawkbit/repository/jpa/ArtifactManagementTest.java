@@ -76,7 +76,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
         verifyThrownExceptionBy(() -> artifactManagement.deleteArtifact(NOT_EXIST_IDL), "Artifact");
 
-        verifyThrownExceptionBy(() -> artifactManagement.findArtifactBySoftwareModule(pageReq, NOT_EXIST_IDL),
+        verifyThrownExceptionBy(() -> artifactManagement.findArtifactBySoftwareModule(PAGE, NOT_EXIST_IDL),
                 "SoftwareModule");
         assertThat(artifactManagement.findArtifactByFilename(NOT_EXIST_ID).isPresent()).isFalse();
 
@@ -260,12 +260,12 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     public void findArtifactBySoftwareModule() {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        assertThat(artifactManagement.findArtifactBySoftwareModule(pageReq, sm.getId())).isEmpty();
+        assertThat(artifactManagement.findArtifactBySoftwareModule(PAGE, sm.getId())).isEmpty();
 
         final Artifact result = artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024), sm.getId(),
                 "file1", false);
 
-        assertThat(artifactManagement.findArtifactBySoftwareModule(pageReq, sm.getId())).hasSize(1);
+        assertThat(artifactManagement.findArtifactBySoftwareModule(PAGE, sm.getId())).hasSize(1);
     }
 
     @Test

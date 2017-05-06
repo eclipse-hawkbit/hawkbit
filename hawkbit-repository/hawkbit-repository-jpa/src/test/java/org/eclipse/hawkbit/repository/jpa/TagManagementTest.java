@@ -70,7 +70,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> tagManagement.deleteDistributionSetTag(NOT_EXIST_ID), "DistributionSetTag");
         verifyThrownExceptionBy(() -> tagManagement.deleteTargetTag(NOT_EXIST_ID), "TargetTag");
 
-        verifyThrownExceptionBy(() -> tagManagement.findDistributionSetTagsByDistributionSet(pageReq, NOT_EXIST_IDL),
+        verifyThrownExceptionBy(() -> tagManagement.findDistributionSetTagsByDistributionSet(PAGE, NOT_EXIST_IDL),
                 "DistributionSet");
 
         verifyThrownExceptionBy(() -> tagManagement.updateDistributionSetTag(entityFactory.tag().update(NOT_EXIST_IDL)),
@@ -78,7 +78,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> tagManagement.updateTargetTag(entityFactory.tag().update(NOT_EXIST_IDL)),
                 "TargetTag");
 
-        verifyThrownExceptionBy(() -> tagManagement.findAllTargetTags(pageReq, NOT_EXIST_ID), "Target");
+        verifyThrownExceptionBy(() -> tagManagement.findAllTargetTags(PAGE, NOT_EXIST_ID), "Target");
     }
 
     @Test
@@ -123,7 +123,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         assertEquals("filter works not correct",
                 dsAs.spliterator().getExactSizeIfKnown() + dsABs.spliterator().getExactSizeIfKnown()
                         + dsACs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
-                distributionSetManagement.findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build())
+                distributionSetManagement.findDistributionSetsByFilters(PAGE, distributionSetFilterBuilder.build())
                         .getTotalElements());
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true)
@@ -131,7 +131,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         assertEquals("filter works not correct",
                 dsBs.spliterator().getExactSizeIfKnown() + dsABs.spliterator().getExactSizeIfKnown()
                         + dsBCs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
-                distributionSetManagement.findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build())
+                distributionSetManagement.findDistributionSetsByFilters(PAGE, distributionSetFilterBuilder.build())
                         .getTotalElements());
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true)
@@ -139,13 +139,13 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         assertEquals("filter works not correct",
                 dsCs.spliterator().getExactSizeIfKnown() + dsACs.spliterator().getExactSizeIfKnown()
                         + dsBCs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
-                distributionSetManagement.findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build())
+                distributionSetManagement.findDistributionSetsByFilters(PAGE, distributionSetFilterBuilder.build())
                         .getTotalElements());
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true)
                 .setTagNames(Lists.newArrayList(tagX.getName()));
         assertEquals("filter works not correct", 0, distributionSetManagement
-                .findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build()).getTotalElements());
+                .findDistributionSetsByFilters(PAGE, distributionSetFilterBuilder.build()).getTotalElements());
 
         assertEquals("wrong tag size", 5, distributionSetTagRepository.findAll().spliterator().getExactSizeIfKnown());
 
@@ -162,20 +162,20 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         assertEquals("filter works not correct",
                 dsAs.spliterator().getExactSizeIfKnown() + dsABs.spliterator().getExactSizeIfKnown()
                         + dsACs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
-                distributionSetManagement.findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build())
+                distributionSetManagement.findDistributionSetsByFilters(PAGE, distributionSetFilterBuilder.build())
                         .getTotalElements());
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
                 .setTagNames(Lists.newArrayList(tagB.getName()));
         assertEquals("filter works not correct", 0, distributionSetManagement
-                .findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build()).getTotalElements());
+                .findDistributionSetsByFilters(PAGE, distributionSetFilterBuilder.build()).getTotalElements());
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
                 .setTagNames(Lists.newArrayList(tagC.getName()));
         assertEquals("filter works not correct",
                 dsCs.spliterator().getExactSizeIfKnown() + dsACs.spliterator().getExactSizeIfKnown()
                         + dsBCs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
-                distributionSetManagement.findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build())
+                distributionSetManagement.findDistributionSetsByFilters(PAGE, distributionSetFilterBuilder.build())
                         .getTotalElements());
     }
 
@@ -305,7 +305,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         final TargetTag toDelete = tags.iterator().next();
 
         for (final Target target : targetRepository.findAll()) {
-            assertThat(tagManagement.findAllTargetTags(pageReq, target.getControllerId()).getContent())
+            assertThat(tagManagement.findAllTargetTags(PAGE, target.getControllerId()).getContent())
                     .contains(toDelete);
         }
 
@@ -314,7 +314,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
 
         // check
         for (final Target target : targetRepository.findAll()) {
-            assertThat(tagManagement.findAllTargetTags(pageReq, target.getControllerId()).getContent())
+            assertThat(tagManagement.findAllTargetTags(PAGE, target.getControllerId()).getContent())
                     .doesNotContain(toDelete);
         }
         assertThat(targetTagRepository.findOne(toDelete.getId())).as("No tag should be found").isNull();
@@ -379,7 +379,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
 
         // check
         assertThat(distributionSetTagRepository.findOne(toDelete.getId())).as("Deleted tag should be null").isNull();
-        assertThat(tagManagement.findAllDistributionSetTags(pageReq).getContent())
+        assertThat(tagManagement.findAllDistributionSetTags(PAGE).getContent())
                 .as("Wrong size of tags after deletion").hasSize(19);
 
         for (final DistributionSet set : distributionSetRepository.findAll()) {
@@ -455,7 +455,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         tagManagement.updateDistributionSetTag(entityFactory.tag().update(savedAssigned.getId()).name("test123"));
 
         // check data
-        assertThat(tagManagement.findAllDistributionSetTags(pageReq).getContent()).as("Wrong size of ds tags")
+        assertThat(tagManagement.findAllDistributionSetTags(PAGE).getContent()).as("Wrong size of ds tags")
                 .hasSize(tags.size());
         assertThat(distributionSetTagRepository.findOne(savedAssigned.getId()).getName()).as("Wrong ds tag found")
                 .isEqualTo("test123");
@@ -467,7 +467,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         final List<DistributionSetTag> tags = createDsSetsWithTags();
 
         // test
-        assertThat(tagManagement.findAllDistributionSetTags(pageReq).getContent()).as("Wrong size of tags")
+        assertThat(tagManagement.findAllDistributionSetTags(PAGE).getContent()).as("Wrong size of tags")
                 .hasSize(tags.size());
         assertThat(distributionSetTagRepository.findAll()).as("Wrong size of tags").hasSize(20);
     }
@@ -488,6 +488,6 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
 
         tags.forEach(tag -> toggleTagAssignment(sets, tag));
 
-        return tagManagement.findAllDistributionSetTags(pageReq).getContent();
+        return tagManagement.findAllDistributionSetTags(PAGE).getContent();
     }
 }
