@@ -27,7 +27,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * @param <T>
  *            type of the concrete table
  */
-public abstract class AbstractTableLayout<T extends AbstractTable<?, ?>> extends VerticalLayout {
+public abstract class AbstractTableLayout<T extends AbstractTable<?>> extends VerticalLayout {
 
     private static final long serialVersionUID = 1L;
 

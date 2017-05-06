@@ -22,11 +22,11 @@ import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.tag.TagIdName;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -35,16 +35,19 @@ import com.vaadin.data.Item;
 import com.vaadin.event.dd.DropHandler;
 
 /**
- *
- *
+ * Class for defining the tag buttons of the distribution sets on the Deployment
+ * View.
  */
 public class DistributionTagButtons extends AbstractFilterButtons implements RefreshableContainer {
 
-    private static final String NO_TAG = "NO TAG";
     private static final long serialVersionUID = 1L;
 
+    private static final String NO_TAG = "NO TAG";
+
     private final DistributionTagDropEvent spDistTagDropEvent;
+
     private final ManagementUIState managementUIState;
+
     private final transient EntityFactory entityFactory;
 
     DistributionTagButtons(final UIEventBus eventBus, final ManagementUIState managementUIState,
@@ -71,7 +74,6 @@ public class DistributionTagButtons extends AbstractFilterButtons implements Ref
         final BeanQueryFactory<DistributionTagBeanQuery> tagQF = new BeanQueryFactory<>(DistributionTagBeanQuery.class);
         tagQF.setQueryConfiguration(Collections.emptyMap());
         return HawkbitCommonUtil.createDSLazyQueryContainer(new BeanQueryFactory<>(DistributionTagBeanQuery.class));
-
     }
 
     @Override

@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.management.targettable;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -27,12 +26,12 @@ import org.eclipse.hawkbit.ui.management.dstable.DistributionBeanQuery;
 import org.eclipse.hawkbit.ui.management.event.BulkUploadPopupEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.state.TargetBulkUpload;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -96,11 +95,12 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     private Button minimizeButton;
     private Button closeButton;
 
-    TargetBulkUpdateWindowLayout(final VaadinMessageSource i18n, final TargetManagement targetManagement, final UIEventBus eventBus,
-            final ManagementUIState managementUIState, final DeploymentManagement deploymentManagement,
-            final UiProperties uiproperties, final SpPermissionChecker checker, final UINotification uinotification,
-            final TagManagement tagManagement, final DistributionSetManagement distributionSetManagement,
-            final EntityFactory entityFactory, final Executor uiExecutor) {
+    TargetBulkUpdateWindowLayout(final VaadinMessageSource i18n, final TargetManagement targetManagement,
+            final UIEventBus eventBus, final ManagementUIState managementUIState,
+            final DeploymentManagement deploymentManagement, final UiProperties uiproperties,
+            final SpPermissionChecker checker, final UINotification uinotification, final TagManagement tagManagement,
+            final DistributionSetManagement distributionSetManagement, final EntityFactory entityFactory,
+            final Executor uiExecutor) {
         this.i18n = i18n;
         this.targetManagement = targetManagement;
         this.eventBus = eventBus;
@@ -197,15 +197,15 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         final TextArea description = new TextAreaBuilder().caption(i18n.getMessage("textfield.description"))
                 .style("text-area-style").prompt(i18n.getMessage("textfield.description")).immediate(true)
                 .id(UIComponentIdProvider.BULK_UPLOAD_DESC).buildTextComponent();
-        description.setNullRepresentation(StringUtils.EMPTY);
+        description.setNullRepresentation("");
         description.setWidth("100%");
         return description;
     }
 
     private ComboBox getDsComboField() {
         final Container container = createContainer();
-        final ComboBox dsComboBox = SPUIComponentProvider.getComboBox(i18n.getMessage("bulkupload.ds.name"), "", null, null,
-                false, "", i18n.getMessage("bulkupload.ds.name"));
+        final ComboBox dsComboBox = SPUIComponentProvider.getComboBox(i18n.getMessage("bulkupload.ds.name"), "", null,
+                null, false, "", i18n.getMessage("bulkupload.ds.name"));
         dsComboBox.setSizeUndefined();
         dsComboBox.addStyleName(SPUIDefinitions.BULK_UPLOD_DS_COMBO_STYLE);
         dsComboBox.setImmediate(true);

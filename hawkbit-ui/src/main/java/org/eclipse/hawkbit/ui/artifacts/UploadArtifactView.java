@@ -28,9 +28,9 @@ import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.upload.UploadLayout;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -57,8 +57,9 @@ import com.vaadin.ui.VerticalLayout;
 @SpringView(name = UploadArtifactView.VIEW_NAME, ui = HawkbitUI.class)
 public class UploadArtifactView extends VerticalLayout implements View, BrowserWindowResizeListener {
 
+    private static final long serialVersionUID = 1L;
+
     public static final String VIEW_NAME = "spUpload";
-    private static final long serialVersionUID = 8754632011301553682L;
 
     private final transient EventBus.UIEventBus eventBus;
 
@@ -85,6 +86,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
     private HorizontalLayout uplaodButtonsLayout;
 
     private GridLayout mainLayout;
+
     private DragAndDropWrapper dadw;
 
     @Autowired
@@ -103,9 +105,9 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         this.smTableLayout = new SoftwareModuleTableLayout(i18n, permChecker, artifactUploadState, uiNotification,
                 eventBus, softwareManagement, entityFactory, uploadViewClientCriterion);
         this.artifactDetailsLayout = new ArtifactDetailsLayout(i18n, eventBus, artifactUploadState, uiNotification,
-                artifactManagement);
+                artifactManagement, softwareManagement);
         this.uploadLayout = new UploadLayout(i18n, uiNotification, eventBus, artifactUploadState,
-                multipartConfigElement, artifactManagement);
+                multipartConfigElement, artifactManagement, softwareManagement);
         this.deleteActionsLayout = new SMDeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
                 artifactUploadState, softwareManagement, uploadViewClientCriterion);
     }
@@ -163,7 +165,6 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
 
     private VerticalLayout createDetailsAndUploadLayout() {
         detailAndUploadLayout = new VerticalLayout();
-
         detailAndUploadLayout.addComponent(artifactDetailsLayout);
         detailAndUploadLayout.setComponentAlignment(artifactDetailsLayout, Alignment.MIDDLE_CENTER);
 
@@ -178,7 +179,6 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         detailAndUploadLayout.addStyleName("group");
         detailAndUploadLayout.setSpacing(true);
         return detailAndUploadLayout;
-
     }
 
     private GridLayout createMainLayout() {
@@ -205,7 +205,6 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         if (permChecker.hasCreateDistributionPermission()) {
             uplaodButtonsLayout = uploadLayout.getFileUploadLayout();
         }
-
     }
 
     private void minimizeSwTable() {
@@ -250,12 +249,10 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
     private void removeOtherComponents() {
         mainLayout.removeComponent(deleteActionsLayout);
         mainLayout.removeComponent(uplaodButtonsLayout);
-
     }
 
     private void checkNoDataAvaialble() {
         if (artifactUploadState.isNoDataAvilableSoftwareModule()) {
-
             uiNotification.displayValidationError(i18n.getMessage("message.no.data"));
         }
     }
@@ -267,7 +264,6 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
 
     private void showOrHideFilterButtons(final int browserWidth) {
         if (browserWidth < SPUIDefinitions.REQ_MIN_BROWSER_WIDTH) {
-
             filterByTypeLayout.setVisible(false);
             smTableLayout.setShowFilterButtonVisible(true);
         } else if (!artifactUploadState.isSwTypeFilterClosed()) {
@@ -278,7 +274,8 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
 
     @Override
     public void enter(final ViewChangeEvent event) {
-        // This view is constructed in the init() method()
+        smTableLayout.getSoftwareModuleTable()
+                .selectEntity(artifactUploadState.getSelectedBaseSwModuleId().orElse(null));
     }
 
 }

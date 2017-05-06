@@ -272,7 +272,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             if (srcGroup.getTargetFilterQuery() != null) {
                 group.setTargetFilterQuery(srcGroup.getTargetFilterQuery());
             } else {
-                group.setTargetFilterQuery(StringUtils.EMPTY);
+                group.setTargetFilterQuery("");
             }
 
             group.setSuccessCondition(srcGroup.getSuccessCondition());

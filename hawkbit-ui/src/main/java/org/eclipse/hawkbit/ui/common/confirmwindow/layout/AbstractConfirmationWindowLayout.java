@@ -14,10 +14,10 @@ import java.util.Map.Entry;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -36,7 +36,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public abstract class AbstractConfirmationWindowLayout extends VerticalLayout {
 
-    private static final long serialVersionUID = -4042317361561298155L;
+    private static final long serialVersionUID = 1L;
 
     private Label actionMessage;
 
@@ -53,6 +53,9 @@ public abstract class AbstractConfirmationWindowLayout extends VerticalLayout {
         this.eventBus = eventBus;
     }
 
+    /**
+     * Initialize the confirmation window layout
+     */
     public void initialize() {
         removeAllComponents();
         consolidatedMessage = "";
@@ -76,7 +79,7 @@ public abstract class AbstractConfirmationWindowLayout extends VerticalLayout {
     }
 
     private void buildLayout() {
-        final Map<String, ConfirmationTab> confimrationTabs = getConfimrationTabs();
+        final Map<String, ConfirmationTab> confimrationTabs = getConfirmationTabs();
         for (final Entry<String, ConfirmationTab> captionConfirmationTab : confimrationTabs.entrySet()) {
             accordion.addTab(captionConfirmationTab.getValue(), captionConfirmationTab.getKey(), null);
         }
@@ -129,7 +132,7 @@ public abstract class AbstractConfirmationWindowLayout extends VerticalLayout {
      * 
      * @return map of caption and content for each tab.
      */
-    protected abstract Map<String, ConfirmationTab> getConfimrationTabs();
+    protected abstract Map<String, ConfirmationTab> getConfirmationTabs();
 
     /**
      * @return the consolidatedMessage

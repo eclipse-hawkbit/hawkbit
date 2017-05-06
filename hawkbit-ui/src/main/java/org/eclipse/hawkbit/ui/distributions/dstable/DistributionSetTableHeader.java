@@ -15,9 +15,9 @@ import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionAddUpdateWindowLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
-import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.eclipse.hawkbit.ui.management.event.RefreshDistributionTableByFilterEvent;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -35,8 +35,9 @@ public class DistributionSetTableHeader extends AbstractDistributionSetTableHead
 
     private final DistributionAddUpdateWindowLayout addUpdateWindowLayout;
 
-    DistributionSetTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
-            final ManageDistUIState manageDistUIstate, final DistributionAddUpdateWindowLayout addUpdateWindowLayout) {
+    DistributionSetTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
+            final UIEventBus eventbus, final ManageDistUIState manageDistUIstate,
+            final DistributionAddUpdateWindowLayout addUpdateWindowLayout) {
         super(i18n, permChecker, eventbus, null, manageDistUIstate, null);
         this.addUpdateWindowLayout = addUpdateWindowLayout;
     }
@@ -50,49 +51,49 @@ public class DistributionSetTableHeader extends AbstractDistributionSetTableHead
 
     @Override
     protected String onLoadSearchBoxValue() {
-        return manageDistUIstate.getManageDistFilters().getSearchText().orElse(null);
+        return getManageDistUIstate().getManageDistFilters().getSearchText().orElse(null);
     }
 
     @Override
     protected void showFilterButtonsLayout() {
-        manageDistUIstate.setDistTypeFilterClosed(false);
+        getManageDistUIstate().setDistTypeFilterClosed(false);
         eventbus.publish(this, DistributionsUIEvent.SHOW_DIST_FILTER_BY_TYPE);
     }
 
     @Override
     protected void resetSearchText() {
-        if (manageDistUIstate.getManageDistFilters().getSearchText().isPresent()) {
-            manageDistUIstate.getManageDistFilters().setSearchText(null);
-            eventbus.publish(this, DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT);
+        if (getManageDistUIstate().getManageDistFilters().getSearchText().isPresent()) {
+            getManageDistUIstate().getManageDistFilters().setSearchText(null);
+            eventbus.publish(this, new RefreshDistributionTableByFilterEvent());
         }
     }
 
     @Override
     public void maximizeTable() {
-        manageDistUIstate.setDsTableMaximized(Boolean.TRUE);
+        getManageDistUIstate().setDsTableMaximized(Boolean.TRUE);
         eventbus.publish(this, new DistributionTableEvent(BaseEntityEventType.MAXIMIZED));
     }
 
     @Override
     public void minimizeTable() {
-        manageDistUIstate.setDsTableMaximized(Boolean.FALSE);
+        getManageDistUIstate().setDsTableMaximized(Boolean.FALSE);
         eventbus.publish(this, new DistributionTableEvent(BaseEntityEventType.MINIMIZED));
     }
 
     @Override
     public Boolean onLoadIsTableMaximized() {
-        return manageDistUIstate.isDsTableMaximized();
+        return getManageDistUIstate().isDsTableMaximized();
     }
 
     @Override
     public Boolean onLoadIsShowFilterButtonDisplayed() {
-        return manageDistUIstate.isDistTypeFilterClosed();
+        return getManageDistUIstate().isDistTypeFilterClosed();
     }
 
     @Override
     protected void searchBy(final String newSearchText) {
-        manageDistUIstate.getManageDistFilters().setSearchText(newSearchText);
-        eventbus.publish(this, DistributionTableFilterEvent.FILTER_BY_TEXT);
+        getManageDistUIstate().getManageDistFilters().setSearchText(newSearchText);
+        eventbus.publish(this, new RefreshDistributionTableByFilterEvent());
     }
 
     @Override

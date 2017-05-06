@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management.dstable;
 
-import java.util.Set;
-
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
@@ -44,11 +42,6 @@ public class DistributionDetails extends AbstractDistributionSetDetails {
     private static final SoftwareModuleDetailsTable createSoftwareModuleDetailsTable(final VaadinMessageSource i18n,
             final SpPermissionChecker permissionChecker, final UINotification uiNotification) {
         return new SoftwareModuleDetailsTable(i18n, false, permissionChecker, null, null, null, uiNotification);
-    }
-
-    @Override
-    protected boolean onLoadIsTableRowSelected() {
-        return getManagementUIState().getSelectedDsIdName().map(Set::isEmpty).orElse(true);
     }
 
     @Override

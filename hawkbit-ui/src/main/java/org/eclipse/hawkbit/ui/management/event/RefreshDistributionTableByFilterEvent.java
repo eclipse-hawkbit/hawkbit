@@ -8,10 +8,13 @@
  */
 package org.eclipse.hawkbit.ui.management.event;
 
+import org.eclipse.hawkbit.ui.common.table.BaseUIEvent;
+
 /**
- *
- *
+ * Distribution Set Filter Event. Is published when there is a filter action on
+ * a distribution set table on the Deployment or Distribution View. It is
+ * possible to filter by text or tag.
  */
-public enum DistributionTableFilterEvent {
-    FILTER_BY_TEXT, FILTER_BY_TAG, REMOVE_FILTER_BY_TEXT, REMOVE_FILTER_BY_TAG
+public class RefreshDistributionTableByFilterEvent extends BaseUIEvent {
+
 }

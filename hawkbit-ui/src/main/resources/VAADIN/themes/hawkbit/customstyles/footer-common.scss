@@ -17,6 +17,10 @@
     }
   }
 
+  .no-border {
+    border: 0px !important;
+  }
+
   //Style applied on all buttons of footer layout.Width and height of buttons can be configured
   .action-button {
     @include valo-gradient($color: $footer-button-background-color);

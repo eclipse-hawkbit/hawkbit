@@ -37,10 +37,10 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.footer.ActionTypeOptionGroupLayout.ActionTypeOption;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.google.common.collect.Maps;
@@ -51,13 +51,12 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Table.Align;
 
 /**
- * Confirmation window for target/ds delete and assignment.
- * 
- *
+ * Confirmation window for target/distributionSet delete and assignment
+ * operations on the Deployment View.
  */
 public class ManangementConfirmationWindowLayout extends AbstractConfirmationWindowLayout {
 
-    private static final long serialVersionUID = 2114943830055679554L;
+    private static final long serialVersionUID = 1L;
 
     private static final String DISCARD_CHANGES = "DiscardChanges";
 
@@ -79,7 +78,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
     private final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout;
 
-    private ConfirmationTab assignmnetTab;
+    private ConfirmationTab assignmentTab;
 
     public ManangementConfirmationWindowLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final ManagementUIState managementUIState, final TargetManagement targetManagement,
@@ -94,7 +93,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
     }
 
     @Override
-    protected Map<String, ConfirmationTab> getConfimrationTabs() {
+    protected Map<String, ConfirmationTab> getConfirmationTabs() {
         final Map<String, ConfirmationTab> tabs = Maps.newHashMapWithExpectedSize(3);
         if (!managementUIState.getDeletedDistributionList().isEmpty()) {
             tabs.put(i18n.getMessage("caption.delete.dist.accordion.tab"), createDeletedDistributionTab());
@@ -105,42 +104,41 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         if (!managementUIState.getAssignedList().isEmpty()) {
             tabs.put(i18n.getMessage("caption.assign.dist.accordion.tab"), createAssignmentTab());
         }
-
         return tabs;
     }
 
     private ConfirmationTab createAssignmentTab() {
 
-        assignmnetTab = new ConfirmationTab();
-        assignmnetTab.getConfirmAll().setId(UIComponentIdProvider.SAVE_ASSIGNMENT);
-        assignmnetTab.getConfirmAll().setIcon(FontAwesome.SAVE);
-        assignmnetTab.getConfirmAll().setCaption(i18n.getMessage("button.assign.all"));
-        assignmnetTab.getConfirmAll().addClickListener(event -> saveAllAssignments(assignmnetTab));
+        assignmentTab = new ConfirmationTab();
+        assignmentTab.getConfirmAll().setId(UIComponentIdProvider.SAVE_ASSIGNMENT);
+        assignmentTab.getConfirmAll().setIcon(FontAwesome.SAVE);
+        assignmentTab.getConfirmAll().setCaption(i18n.getMessage("button.assign.all"));
+        assignmentTab.getConfirmAll().addClickListener(event -> saveAllAssignments(assignmentTab));
 
-        assignmnetTab.getDiscardAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
-        assignmnetTab.getDiscardAll().setId(UIComponentIdProvider.DISCARD_ASSIGNMENT);
-        assignmnetTab.getDiscardAll().addClickListener(event -> discardAllAssignments(assignmnetTab));
+        assignmentTab.getDiscardAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
+        assignmentTab.getDiscardAll().setId(UIComponentIdProvider.DISCARD_ASSIGNMENT);
+        assignmentTab.getDiscardAll().addClickListener(event -> discardAllAssignments(assignmentTab));
 
         // Add items container to the table.
-        assignmnetTab.getTable().setContainerDataSource(getAssignmentsTableContainer());
+        assignmentTab.getTable().setContainerDataSource(getAssignmentsTableContainer());
 
         // Add the discard action column
-        assignmnetTab.getTable().addGeneratedColumn(DISCARD_CHANGES, (source, itemId, columnId) -> {
-            final ClickListener clickListener = event -> discardAssignment((TargetIdName) itemId, assignmnetTab);
+        assignmentTab.getTable().addGeneratedColumn(DISCARD_CHANGES, (source, itemId, columnId) -> {
+            final ClickListener clickListener = event -> discardAssignment((TargetIdName) itemId, assignmentTab);
             return createDiscardButton(itemId, clickListener);
         });
 
-        assignmnetTab.getTable().setColumnExpandRatio(TARGET_NAME, 2);
-        assignmnetTab.getTable().setColumnExpandRatio(DISTRIBUTION_NAME, 2);
-        assignmnetTab.getTable().setColumnExpandRatio(DISCARD_CHANGES, 1);
-        assignmnetTab.getTable().setVisibleColumns(TARGET_NAME, DISTRIBUTION_NAME, DISCARD_CHANGES);
-        assignmnetTab.getTable().setColumnHeaders(i18n.getMessage("header.first.assignment.table"),
+        assignmentTab.getTable().setColumnExpandRatio(TARGET_NAME, 2);
+        assignmentTab.getTable().setColumnExpandRatio(DISTRIBUTION_NAME, 2);
+        assignmentTab.getTable().setColumnExpandRatio(DISCARD_CHANGES, 1);
+        assignmentTab.getTable().setVisibleColumns(TARGET_NAME, DISTRIBUTION_NAME, DISCARD_CHANGES);
+        assignmentTab.getTable().setColumnHeaders(i18n.getMessage("header.first.assignment.table"),
                 i18n.getMessage("header.second.assignment.table"), i18n.getMessage("header.third.assignment.table"));
-        assignmnetTab.getTable().setColumnAlignment(DISCARD_CHANGES, Align.CENTER);
+        assignmentTab.getTable().setColumnAlignment(DISCARD_CHANGES, Align.CENTER);
 
         actionTypeOptionGroupLayout.selectDefaultOption();
-        assignmnetTab.addComponent(actionTypeOptionGroupLayout, 1);
-        return assignmnetTab;
+        assignmentTab.addComponent(actionTypeOptionGroupLayout, 1);
+        return assignmentTab;
 
     }
 
@@ -372,7 +370,6 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
     }
 
     private void deleteAllDistributions(final ConfirmationTab tab) {
-
         final Collection<Long> deletedIds = managementUIState.getDeletedDistributionList().stream()
                 .map(DistributionSetIdName::getId).collect(Collectors.toList());
 
@@ -388,9 +385,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
         managementUIState.getTargetTableFilters().getPinnedDistId()
                 .ifPresent(distId -> unPinDeletedDS(deletedIds, distId));
-
         managementUIState.getDeletedDistributionList().clear();
-
     }
 
     private void unPinDeletedTarget(final TargetIdName pinnedTarget) {
@@ -426,7 +421,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
     private void removeFromAssignmentTab(final Entry<TargetIdName, DistributionSetIdName> entry,
             final DistributionSetIdName value) {
         if (Objects.equals(entry.getValue(), value)) {
-            assignmnetTab.getTable().removeItem(entry.getKey().getTargetId());
+            assignmentTab.getTable().removeItem(entry.getKey().getTargetId());
         }
     }
 
@@ -454,7 +449,6 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         } else {
             eventBus.publish(this, SaveActionWindowEvent.DISCARD_DELETE_TARGET);
         }
-
     }
 
     private void discardAllTargets(final ConfirmationTab tab) {
@@ -482,14 +476,13 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         managementUIState.getDistributionTableFilters().getPinnedTarget().ifPresent(this::unPinDeletedTarget);
         eventBus.publish(this, SaveActionWindowEvent.SHOW_HIDE_TAB);
         managementUIState.getDeletedTargetList().clear();
-
     }
 
     private void removeDeletedTargetsFromAssignmentTab() {
         for (final TargetIdName targetNameId : managementUIState.getDeletedTargetList()) {
             if (managementUIState.getAssignedList().containsKey(targetNameId)) {
                 managementUIState.getAssignedList().remove(targetNameId);
-                assignmnetTab.getTable().removeItem(targetNameId.getTargetId());
+                assignmentTab.getTable().removeItem(targetNameId.getTargetId());
             }
         }
     }

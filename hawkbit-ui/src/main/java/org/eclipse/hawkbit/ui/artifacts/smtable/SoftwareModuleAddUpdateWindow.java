@@ -24,18 +24,20 @@ import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
+import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
+import com.google.common.collect.Sets;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
@@ -49,7 +51,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
-    private static final long serialVersionUID = -5217675246477211483L;
+    private static final long serialVersionUID = 1L;
 
     private final VaadinMessageSource i18n;
 
@@ -77,6 +79,8 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
     private FormLayout formLayout;
 
+    private final AbstractTable<SoftwareModule> softwareModuleTable;
+
     /**
      * Constructor for SoftwareModuleAddUpdateWindow
      * 
@@ -91,13 +95,15 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
      * @param entityFactory
      *            EntityFactory
      */
-    public SoftwareModuleAddUpdateWindow(final VaadinMessageSource i18n, final UINotification uiNotifcation, final UIEventBus eventBus,
-            final SoftwareManagement softwareManagement, final EntityFactory entityFactory) {
+    public SoftwareModuleAddUpdateWindow(final VaadinMessageSource i18n, final UINotification uiNotifcation,
+            final UIEventBus eventBus, final SoftwareManagement softwareManagement, final EntityFactory entityFactory,
+            final AbstractTable<SoftwareModule> softwareModuleTable) {
         this.i18n = i18n;
         this.uiNotifcation = uiNotifcation;
         this.eventBus = eventBus;
         this.softwareManagement = softwareManagement;
         this.entityFactory = entityFactory;
+        this.softwareModuleTable = softwareModuleTable;
 
         createRequiredComponents();
     }
@@ -133,12 +139,10 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
                     .type(softwareModuleTypeByName).name(name).version(version).description(description).vendor(vendor);
 
             final SoftwareModule newSoftwareModule = softwareManagement.createSoftwareModule(softwareModule);
-
-            if (newSoftwareModule != null) {
-                eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.ADD_ENTITY, newSoftwareModule));
-                uiNotifcation.displaySuccess(i18n.getMessage("message.save.success",
-                        new Object[] { newSoftwareModule.getName() + ":" + newSoftwareModule.getVersion() }));
-            }
+            eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.ADD_ENTITY, newSoftwareModule));
+            uiNotifcation.displaySuccess(i18n.getMessage("message.save.success",
+                    new Object[] { newSoftwareModule.getName() + ":" + newSoftwareModule.getVersion() }));
+            softwareModuleTable.setValue(Sets.newHashSet(newSoftwareModule.getId()));
         }
 
         private boolean isDuplicate() {
@@ -173,7 +177,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
     }
 
     /**
-     * Create window for new software module.
+     * Creates window for new software module.
      * 
      * @return reference of {@link com.vaadin.ui.Window} to add new software
      *         module.
@@ -183,10 +187,10 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
     }
 
     /**
-     * Create window for update software module.
+     * Creates window for update software module.
      * 
      * @param baseSwModuleId
-     *            is id of the software module to edit.
+     *            id of the software module to edit.
      * @return reference of {@link com.vaadin.ui.Window} to update software
      *         module.
      */
@@ -206,17 +210,18 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
         vendorTextField = createTextField("textfield.vendor", UIComponentIdProvider.SOFT_MODULE_VENDOR);
         vendorTextField.setRequired(false);
-        vendorTextField.setNullRepresentation(StringUtils.EMPTY);
+        vendorTextField.setNullRepresentation("");
 
         descTextArea = new TextAreaBuilder().caption(i18n.getMessage("textfield.description")).style("text-area-style")
                 .prompt(i18n.getMessage("textfield.description")).id(UIComponentIdProvider.ADD_SW_MODULE_DESCRIPTION)
                 .buildTextComponent();
-        descTextArea.setNullRepresentation(StringUtils.EMPTY);
+        descTextArea.setNullRepresentation("");
 
-        typeComboBox = SPUIComponentProvider.getComboBox(i18n.getMessage("upload.swmodule.type"), "", null, null, true, null,
-                i18n.getMessage("upload.swmodule.type"));
+        typeComboBox = SPUIComponentProvider.getComboBox(i18n.getMessage("upload.swmodule.type"), "", null, null, true,
+                null, i18n.getMessage("upload.swmodule.type"));
         typeComboBox.setId(UIComponentIdProvider.SW_MODULE_TYPE);
-        typeComboBox.setStyleName(SPUIDefinitions.COMBO_BOX_SPECIFIC_STYLE + " " + ValoTheme.COMBOBOX_TINY);
+        typeComboBox
+                .setStyleName(SPUIDefinitions.COMBO_BOX_SPECIFIC_STYLE + StringUtils.SPACE + ValoTheme.COMBOBOX_TINY);
         typeComboBox.setNewItemsAllowed(Boolean.FALSE);
         typeComboBox.setImmediate(Boolean.TRUE);
     }
@@ -233,7 +238,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
     }
 
     private void resetComponents() {
-
         vendorTextField.clear();
         nameTextField.clear();
         versionTextField.clear();
@@ -265,7 +269,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         nameTextField.setEnabled(!editSwModule);
         versionTextField.setEnabled(!editSwModule);
         typeComboBox.setEnabled(!editSwModule);
-
         typeComboBox.focus();
 
         return window;

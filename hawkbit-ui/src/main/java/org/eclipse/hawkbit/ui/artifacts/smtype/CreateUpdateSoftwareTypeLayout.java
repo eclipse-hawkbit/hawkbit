@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
@@ -28,10 +27,10 @@ import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.layouts.CreateUpdateTypeLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -110,9 +109,9 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
 
         tagDesc = new TextAreaBuilder().caption(i18n.getMessage("textfield.description"))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_DESC)
-                .prompt(i18n.getMessage("textfield.description")).immediate(true).id(SPUIDefinitions.NEW_SOFTWARE_TYPE_DESC)
-                .buildTextComponent();
-        tagDesc.setNullRepresentation(StringUtils.EMPTY);
+                .prompt(i18n.getMessage("textfield.description")).immediate(true)
+                .id(SPUIDefinitions.NEW_SOFTWARE_TYPE_DESC).buildTextComponent();
+        tagDesc.setNullRepresentation("");
 
         singleMultiOptionGroup();
     }
@@ -131,8 +130,9 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
     }
 
     private TextField createTextField(final String in18Key, final String styleName, final String id) {
-        return new TextFieldBuilder().caption(i18n.getMessage(in18Key)).styleName(ValoTheme.TEXTFIELD_TINY + " " + styleName)
-                .required(true).prompt(i18n.getMessage(in18Key)).immediate(true).id(id).buildTextComponent();
+        return new TextFieldBuilder().caption(i18n.getMessage(in18Key))
+                .styleName(ValoTheme.TEXTFIELD_TINY + " " + styleName).required(true).prompt(i18n.getMessage(in18Key))
+                .immediate(true).id(id).buildTextComponent();
     }
 
     @Override
@@ -267,7 +267,8 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
             final SoftwareModuleType newSWType = swTypeManagementService.createSoftwareModuleType(
                     entityFactory.softwareModuleType().create().key(typeKeyValue).name(typeNameValue)
                             .description(typeDescValue).colour(colorPicked).maxAssignments(assignNumber));
-            uiNotification.displaySuccess(i18n.getMessage("message.save.success", new Object[] { newSWType.getName() }));
+            uiNotification
+                    .displaySuccess(i18n.getMessage("message.save.success", new Object[] { newSWType.getName() }));
             eventBus.publish(this,
                     new SoftwareModuleTypeEvent(SoftwareModuleTypeEnum.ADD_SOFTWARE_MODULE_TYPE, newSWType));
         } else {
@@ -279,7 +280,8 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
         swTypeManagementService.updateSoftwareModuleType(
                 entityFactory.softwareModuleType().update(existingType.getId()).description(tagDesc.getValue())
                         .colour(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview())));
-        uiNotification.displaySuccess(i18n.getMessage("message.update.success", new Object[] { existingType.getName() }));
+        uiNotification
+                .displaySuccess(i18n.getMessage("message.update.success", new Object[] { existingType.getName() }));
         eventBus.publish(this,
                 new SoftwareModuleTypeEvent(SoftwareModuleTypeEnum.UPDATE_SOFTWARE_MODULE_TYPE, existingType));
     }

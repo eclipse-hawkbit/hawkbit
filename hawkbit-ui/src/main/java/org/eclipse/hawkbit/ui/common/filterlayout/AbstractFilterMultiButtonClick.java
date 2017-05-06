@@ -17,8 +17,8 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 
 /**
- *
- *
+ * Abstract class for button click behavior. It is possible to click multiple
+ * buttons.
  */
 public abstract class AbstractFilterMultiButtonClick extends AbstractFilterButtonClickBehaviour {
 

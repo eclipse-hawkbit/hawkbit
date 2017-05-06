@@ -56,9 +56,9 @@ import org.eclipse.hawkbit.ui.push.TargetDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetTagCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetTagDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetTagUpdatedEventContainer;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -66,6 +66,7 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.collect.Maps;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
@@ -82,8 +83,9 @@ import com.vaadin.ui.UI;
 @SpringView(name = DeploymentView.VIEW_NAME, ui = HawkbitUI.class)
 public class DeploymentView extends AbstractNotificationView implements BrowserWindowResizeListener {
 
+    private static final long serialVersionUID = 1L;
+
     public static final String VIEW_NAME = "deployment";
-    private static final long serialVersionUID = 1847434723456644998L;
 
     private final SpPermissionChecker permChecker;
 
@@ -170,6 +172,11 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
         Page.getCurrent().addBrowserWindowResizeListener(this);
         showOrHideFilterButtons(Page.getCurrent().getBrowserWindowWidth());
         getEventBus().publish(this, ManagementUIEvent.SHOW_COUNT_MESSAGE);
+    }
+
+    @Override
+    public void enter(final ViewChangeEvent event) {
+        distributionTableLayout.getDistributionTable().selectEntity(managementUIState.getLastSelectedDsIdName());
     }
 
     @Override

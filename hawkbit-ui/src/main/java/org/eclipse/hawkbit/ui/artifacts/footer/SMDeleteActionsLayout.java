@@ -17,10 +17,10 @@ import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -45,8 +45,8 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private final UploadViewClientCriterion uploadViewClientCriterion;
 
-    public SMDeleteActionsLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
-            final UINotification notification, final ArtifactUploadState artifactUploadState,
+    public SMDeleteActionsLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
+            final UIEventBus eventBus, final UINotification notification, final ArtifactUploadState artifactUploadState,
             final SoftwareManagement softwareManagement, final UploadViewClientCriterion uploadViewClientCriterion) {
         super(i18n, permChecker, eventBus, notification);
         this.artifactUploadState = artifactUploadState;
@@ -146,8 +146,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
     }
 
     private void addToDeleteList(final Table sourceTable, final TableTransferable transferable) {
-        @SuppressWarnings("unchecked")
-        final AbstractTable<?, Long> swTable = (AbstractTable<?, Long>) sourceTable;
+        final AbstractTable<?> swTable = (AbstractTable<?>) sourceTable;
         final Set<Long> swModuleIdNameSet = swTable.getDeletedEntityByTransferable(transferable);
 
         swModuleIdNameSet.forEach(id -> {

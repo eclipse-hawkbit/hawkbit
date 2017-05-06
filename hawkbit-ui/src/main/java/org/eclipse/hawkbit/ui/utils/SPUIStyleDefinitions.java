@@ -109,6 +109,11 @@ public final class SPUIStyleDefinitions {
     public static final String ACTION_BUTTON = "action-button";
 
     /**
+     * Width of 'drop to delete' layout and 'no actions' button
+     */
+    public static final String DEL_ACTION_BUTTON = "del-action-button";
+
+    /**
      * Confirmation window caption stle.
      */
     public static final String CONFIRMATION_WINDOW_CAPTION = "confirmation-window";

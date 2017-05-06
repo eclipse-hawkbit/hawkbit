@@ -21,6 +21,7 @@ import javax.servlet.MultipartConfigElement;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -74,9 +75,10 @@ import com.vaadin.ui.VerticalLayout;
  * Upload files layout.
  */
 public class UploadLayout extends VerticalLayout {
-    private static final String HTML_DIV = "</div>";
 
-    private static final long serialVersionUID = -566164756606779220L;
+    private static final long serialVersionUID = 1L;
+
+    private static final String HTML_DIV = "</div>";
 
     private static final Logger LOG = LoggerFactory.getLogger(UploadLayout.class);
 
@@ -110,6 +112,8 @@ public class UploadLayout extends VerticalLayout {
 
     private Button uploadStatusButton;
 
+    private final transient SoftwareManagement softwareManagement;
+
     private static AcceptCriterion acceptAllExceptBlacklisted = new Not(new ServerItemIdClientCriterion(Mode.PREFIX,
             UIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE, UIComponentIdProvider.UPLOAD_TYPE_BUTTON_PREFIX));
 
@@ -117,7 +121,7 @@ public class UploadLayout extends VerticalLayout {
 
     public UploadLayout(final VaadinMessageSource i18n, final UINotification uiNotification, final UIEventBus eventBus,
             final ArtifactUploadState artifactUploadState, final MultipartConfigElement multipartConfigElement,
-            final ArtifactManagement artifactManagement) {
+            final ArtifactManagement artifactManagement, final SoftwareManagement softwareManagement) {
         this.uploadInfoWindow = new UploadStatusInfoWindow(eventBus, artifactUploadState, i18n);
         this.i18n = i18n;
         this.uiNotification = uiNotification;
@@ -125,6 +129,7 @@ public class UploadLayout extends VerticalLayout {
         this.artifactUploadState = artifactUploadState;
         this.multipartConfigElement = multipartConfigElement;
         this.artifactManagement = artifactManagement;
+        this.softwareManagement = softwareManagement;
 
         createComponents();
         buildLayout();
@@ -173,7 +178,7 @@ public class UploadLayout extends VerticalLayout {
 
         final Upload upload = new Upload();
         final UploadHandler uploadHandler = new UploadHandler(null, 0, this, multipartConfigElement.getMaxFileSize(),
-                upload, null, null);
+                upload, null, null, softwareManagement);
         upload.setButtonCaption(i18n.getMessage("upload.file"));
         upload.setImmediate(true);
         upload.setReceiver(uploadHandler);
@@ -183,6 +188,7 @@ public class UploadLayout extends VerticalLayout {
         upload.addProgressListener(uploadHandler);
         upload.addStartedListener(uploadHandler);
         upload.addStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
+        upload.addStyleName("no-border");
 
         fileUploadLayout = new HorizontalLayout();
         fileUploadLayout.setSpacing(true);
@@ -243,11 +249,13 @@ public class UploadLayout extends VerticalLayout {
                 // selected software module at the time of file drop is
                 // considered for upload
 
-                artifactUploadState.getSelectedBaseSoftwareModule().ifPresent(selectedSw -> {
+                artifactUploadState.getSelectedBaseSwModuleId().ifPresent(selectedSwId -> {
                     // reset the flag
                     hasDirectory = false;
+                    final SoftwareModule softwareModule = softwareManagement.findSoftwareModuleById(selectedSwId)
+                            .orElse(null);
                     for (final Html5File file : files) {
-                        processFile(file, selectedSw);
+                        processFile(file, softwareModule);
                     }
                     if (artifactUploadState.getNumberOfFileUploadsExpected().get() > 0) {
                         processBtn.setEnabled(false);
@@ -296,7 +304,7 @@ public class UploadLayout extends VerticalLayout {
 
         private StreamVariable createStreamVariable(final Html5File file, final SoftwareModule selectedSw) {
             return new UploadHandler(file.getFileName(), file.getFileSize(), UploadLayout.this,
-                    multipartConfigElement.getMaxFileSize(), null, file.getType(), selectedSw);
+                    multipartConfigElement.getMaxFileSize(), null, file.getType(), selectedSw, softwareManagement);
         }
 
         private boolean isDirectory(final Html5File file) {
@@ -321,7 +329,7 @@ public class UploadLayout extends VerticalLayout {
         }
     }
 
-    private VerticalLayout createDropAreaLayout() {
+    private static VerticalLayout createDropAreaLayout() {
         final VerticalLayout dropAreaLayout = new VerticalLayout();
         final Label dropHereLabel = new Label("Drop files to upload");
         dropHereLabel.setWidth(null);
@@ -413,7 +421,6 @@ public class UploadLayout extends VerticalLayout {
             LOG.error("Upload failed {}", e);
             throw new ArtifactUploadFailedException(i18n.getMessage("message.upload.failed"));
         }
-
     }
 
     boolean checkIfSoftwareModuleIsSelected() {
@@ -425,13 +432,13 @@ public class UploadLayout extends VerticalLayout {
     }
 
     /**
-     * Check if file selected is duplicate.i,e already selected for upload for
-     * same software module.
+     * Check if the selected file is duplicate. i.e. already selected for upload
+     * for same software module.
      *
      * @param name
      *            file name
      * @param selectedSoftwareModule
-     *            the current selected sm module
+     *            the current selected software module
      * @return Boolean
      */
     Boolean checkIfFileIsDuplicate(final String name, final SoftwareModule selectedSoftwareModule) {
@@ -615,16 +622,13 @@ public class UploadLayout extends VerticalLayout {
             } else {
                 currentUploadConfirmationwindow = new UploadConfirmationWindow(this, artifactUploadState, eventBus,
                         artifactManagement);
-                UI.getCurrent().addWindow(currentUploadConfirmationwindow.getUploadConfrimationWindow());
+                UI.getCurrent().addWindow(currentUploadConfirmationwindow.getUploadConfirmationWindow());
                 setConfirmationPopupHeightWidth(Page.getCurrent().getBrowserWindowWidth(),
                         Page.getCurrent().getBrowserWindowHeight());
             }
         }
     }
 
-    /**
-     * @return
-     */
     VaadinMessageSource getI18n() {
         return i18n;
     }
@@ -654,7 +658,7 @@ public class UploadLayout extends VerticalLayout {
 
     private void onUploadStreamingFailure(final UploadStatusEvent event) {
         /**
-         * If upload interrupted because of duplicate file,do not remove the
+         * If upload interrupted because of duplicate file, do not remove the
          * file already in upload list
          **/
         if (getDuplicateFileNamesList().isEmpty()
@@ -707,7 +711,7 @@ public class UploadLayout extends VerticalLayout {
 
     private void onUploadFailure(final UploadStatusEvent event) {
         /**
-         * If upload interrupted because of duplicate file,do not remove the
+         * If upload interrupted because of duplicate file, do not remove the
          * file already in upload list
          **/
         if (getDuplicateFileNamesList().isEmpty()
@@ -726,17 +730,12 @@ public class UploadLayout extends VerticalLayout {
         }
     }
 
-    /**
-     * @param selectedBaseSoftwareModule
-     */
-    void refreshArtifactDetailsLayout(final SoftwareModule selectedBaseSoftwareModule) {
-        eventBus.publish(this,
-                new SoftwareModuleEvent(SoftwareModuleEventType.ARTIFACTS_CHANGED, selectedBaseSoftwareModule));
+    void refreshArtifactDetailsLayout(final Long selectedBaseSoftwareModuleId) {
+        final SoftwareModule softwareModule = softwareManagement.findSoftwareModuleById(selectedBaseSoftwareModuleId)
+                .orElse(null);
+        eventBus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.ARTIFACTS_CHANGED, softwareModule));
     }
 
-    /**
-     * @return the fileUploadLayout
-     */
     public HorizontalLayout getFileUploadLayout() {
         return fileUploadLayout;
     }

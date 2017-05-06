@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.upload.UploadStatusObject;
-import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
+import org.eclipse.hawkbit.ui.common.ManagementEntityState;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
@@ -29,14 +29,12 @@ import com.vaadin.spring.annotation.VaadinSessionScope;
 
 /**
  * User status of Artifact upload.
- *
- *
  */
 @VaadinSessionScope
 @SpringComponent
-public class ArtifactUploadState implements ManagmentEntityState<Long>, Serializable {
+public class ArtifactUploadState implements ManagementEntityState, Serializable {
 
-    private static final long serialVersionUID = 8273440375917450859L;
+    private static final long serialVersionUID = 1L;
 
     private final SoftwareModuleFilters softwareModuleFilters;
 
@@ -44,9 +42,7 @@ public class ArtifactUploadState implements ManagmentEntityState<Long>, Serializ
 
     private final Set<CustomFile> fileSelected = new HashSet<>();
 
-    private Long selectedBaseSwModuleId;
-
-    private SoftwareModule selectedBaseSoftwareModule;
+    private transient Optional<Long> selectedBaseSwModuleId = Optional.empty();
 
     private final Map<String, SoftwareModule> baseSwModuleList = new HashMap<>();
 
@@ -115,54 +111,33 @@ public class ArtifactUploadState implements ManagmentEntityState<Long>, Serializ
         return statusPopupMinimized;
     }
 
-    /**
-     * Set software.
-     *
-     * @return
-     */
     public SoftwareModuleFilters getSoftwareModuleFilters() {
         return softwareModuleFilters;
     }
 
-    /**
-     * @return the selectedSofwareModules
-     */
     public Map<Long, String> getDeleteSofwareModules() {
         return deleteSofwareModules;
     }
 
-    /**
-     * @return the fileSelected
-     */
     public Set<CustomFile> getFileSelected() {
         return fileSelected;
     }
 
-    /**
-     * @return the selectedBaseSwModuleId
-     */
     public Optional<Long> getSelectedBaseSwModuleId() {
-        return Optional.ofNullable(selectedBaseSwModuleId);
+        return selectedBaseSwModuleId;
     }
 
-    /**
-     * @return the baseSwModuleList
-     */
     public Map<String, SoftwareModule> getBaseSwModuleList() {
         return baseSwModuleList;
     }
 
-    /**
-     * @return the selectedSoftwareModules
-     */
     public Set<Long> getSelectedSoftwareModules() {
         return selectedSoftwareModules;
     }
 
     @Override
-    public void setLastSelectedEntity(final Long value) {
-        this.selectedBaseSwModuleId = value;
-
+    public void setLastSelectedEntityId(final Long value) {
+        this.selectedBaseSwModuleId = Optional.ofNullable(value);
     }
 
     @Override
@@ -170,32 +145,18 @@ public class ArtifactUploadState implements ManagmentEntityState<Long>, Serializ
         this.selectedSoftwareModules = values;
     }
 
-    /**
-     * @return the swTypeFilterClosed
-     */
     public boolean isSwTypeFilterClosed() {
         return swTypeFilterClosed;
     }
 
-    /**
-     * @param swTypeFilterClosed
-     *            the swTypeFilterClosed to set
-     */
     public void setSwTypeFilterClosed(final boolean swTypeFilterClosed) {
         this.swTypeFilterClosed = swTypeFilterClosed;
     }
 
-    /**
-     * @return the isSwModuleTableMaximized
-     */
     public boolean isSwModuleTableMaximized() {
         return swModuleTableMaximized;
     }
 
-    /**
-     * @param isSwModuleTableMaximized
-     *            the isSwModuleTableMaximized to set
-     */
     public void setSwModuleTableMaximized(final boolean swModuleTableMaximized) {
         this.swModuleTableMaximized = swModuleTableMaximized;
     }
@@ -204,41 +165,19 @@ public class ArtifactUploadState implements ManagmentEntityState<Long>, Serializ
         return selectedDeleteSWModuleTypes;
     }
 
-    /**
-     * @return the isArtifactDetailsMaximized
-     */
     public boolean isArtifactDetailsMaximized() {
         return artifactDetailsMaximized;
     }
 
-    /**
-     * @param isArtifactDetailsMaximized
-     *            the isArtifactDetailsMaximized to set
-     */
     public void setArtifactDetailsMaximized(final boolean artifactDetailsMaximized) {
         this.artifactDetailsMaximized = artifactDetailsMaximized;
     }
 
-    /**
-     * @return the noDataAvilableSoftwareModule
-     */
     public boolean isNoDataAvilableSoftwareModule() {
         return noDataAvilableSoftwareModule;
     }
 
-    /**
-     * @param noDataAvilableSoftwareModule
-     *            the noDataAvilableSoftwareModule to set
-     */
     public void setNoDataAvilableSoftwareModule(final boolean noDataAvilableSoftwareModule) {
         this.noDataAvilableSoftwareModule = noDataAvilableSoftwareModule;
-    }
-
-    public Optional<SoftwareModule> getSelectedBaseSoftwareModule() {
-        return Optional.ofNullable(selectedBaseSoftwareModule);
-    }
-
-    public void setSelectedBaseSoftwareModule(final SoftwareModule selectedBaseSoftwareModule) {
-        this.selectedBaseSoftwareModule = selectedBaseSoftwareModule;
     }
 }

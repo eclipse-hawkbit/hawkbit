@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.management.actionhistory;
 
+import java.util.Optional;
+
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
@@ -71,11 +73,12 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final TargetTableEvent targetUIEvent) {
+        final Optional<Long> targetId = managementUIState.getLastSelectedTargetId();
         if (BaseEntityEventType.SELECTED_ENTITY == targetUIEvent.getEventType()) {
             setData(SPUIDefinitions.DATA_AVAILABLE);
             UI.getCurrent().access(() -> populateActionHistoryDetails(targetUIEvent.getEntity()));
-        } else if (BaseEntityEventType.REMOVE_ENTITY == targetUIEvent.getEventType()
-                && targetUIEvent.getEntityIds().contains(managementUIState.getLastSelectedTargetId())) {
+        } else if (BaseEntityEventType.REMOVE_ENTITY == targetUIEvent.getEventType() && targetId.isPresent()
+                && targetUIEvent.getEntityIds().contains(targetId.get())) {
             setData(SPUIDefinitions.NO_DATA);
             UI.getCurrent().access(this::populateActionHistoryDetails);
         }

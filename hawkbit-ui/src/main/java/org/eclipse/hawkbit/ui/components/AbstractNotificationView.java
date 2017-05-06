@@ -37,6 +37,7 @@ import com.vaadin.ui.VerticalLayout;
 public abstract class AbstractNotificationView extends VerticalLayout implements View {
 
     private static final long serialVersionUID = 1L;
+
     private final transient Cache<BaseUIEntityEvent<?>, Object> skipUiEventsCache;
 
     private final transient EventBus.UIEventBus eventBus;
@@ -116,8 +117,6 @@ public abstract class AbstractNotificationView extends VerticalLayout implements
 
     /**
      * Refresh the view by event container changes.
-     * 
-     * 
      */
     public void refreshView() {
         if (viewUnreadNotifcations.get() <= 0) {
@@ -163,7 +162,6 @@ public abstract class AbstractNotificationView extends VerticalLayout implements
     protected abstract Map<Class<?>, RefreshableContainer> getSupportedPushEvents();
 
     /**
-     * 
      * @return the related dashboard menu item for this view.
      */
     protected abstract DashboardMenuItem getDashboardMenuItem();

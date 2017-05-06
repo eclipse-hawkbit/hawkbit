@@ -62,7 +62,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public class UploadConfirmationWindow implements Button.ClickListener {
 
-    private static final long serialVersionUID = -1679035890140031740L;
+    private static final long serialVersionUID = 1L;
 
     private static final Logger LOG = LoggerFactory.getLogger(UploadConfirmationWindow.class);
 
@@ -138,8 +138,8 @@ public class UploadConfirmationWindow implements Button.ClickListener {
     }
 
     private boolean checkIfArtifactDetailsDisplayed(final Long bSoftwareModuleId) {
-        return artifactUploadState.getSelectedBaseSoftwareModule()
-                .map(module -> module.getId().equals(bSoftwareModuleId)).orElse(false);
+        return artifactUploadState.getSelectedBaseSwModuleId().map(moduleId -> moduleId.equals(bSoftwareModuleId))
+                .orElse(false);
     }
 
     private Boolean preUploadValidation(final List<String> itemIds) {
@@ -178,7 +178,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
 
     /**
      * Warning icon is displayed, if an artifact exists with same provided file
-     * name. Error icon is displayed ,if file name entered is duplicate.
+     * name. Error icon is displayed, if file name entered is duplicate.
      *
      * @param warningIconLabel
      *            warning/error label
@@ -344,7 +344,6 @@ public class UploadConfirmationWindow implements Button.ClickListener {
                 }
             }
         }
-
     }
 
     /**
@@ -354,7 +353,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
      *            label
      * @return Boolean
      */
-    private static Boolean isWarningIcon(final Label icon) {
+    private static boolean isWarningIcon(final Label icon) {
         return !isErrorIcon(icon);
     }
 
@@ -365,7 +364,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
      *            label
      * @return Boolean
      */
-    private static Boolean isErrorIcon(final Label icon) {
+    private static boolean isErrorIcon(final Label icon) {
         return icon.isVisible() && icon.getStyleName().contains(SPUIStyleDefinitions.ERROR_LABEL);
     }
 
@@ -532,7 +531,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
         return footer;
     }
 
-    public Window getUploadConfrimationWindow() {
+    public Window getUploadConfirmationWindow() {
         return window;
     }
 
@@ -568,9 +567,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
                 window.close();
                 uploadLayout.clearUploadedFileDetails();
             }
-
         }
-
     }
 
     // Exception squid:S3655 - Optional access is checked in
@@ -598,7 +595,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             }
 
             if (refreshArtifactDetailsLayout) {
-                uploadLayout.refreshArtifactDetailsLayout(artifactUploadState.getSelectedBaseSoftwareModule().get());
+                uploadLayout.refreshArtifactDetailsLayout(artifactUploadState.getSelectedBaseSwModuleId().get());
             }
             uploadLayout.clearFileList();
             window.close();
@@ -612,7 +609,6 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             uploadLayout.getUINotification()
                     .displayValidationError(uploadLayout.getI18n().getMessage("message.error.noProvidedName"));
         }
-
     }
 
     private void onResultDetailsPopupClose() {
@@ -661,7 +657,6 @@ public class UploadConfirmationWindow implements Button.ClickListener {
         result.setUploadResult(status);
         result.setReason(message);
         uploadResultList.add(result);
-
     }
 
     public Table getUploadDetailsTable() {

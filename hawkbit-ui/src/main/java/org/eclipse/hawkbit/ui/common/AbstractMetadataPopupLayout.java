@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.common;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -245,7 +244,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         valueTextArea = new TextAreaBuilder().caption(i18n.getMessage("textfield.value")).required(true)
                 .prompt(i18n.getMessage("textfield.value")).immediate(true).id(UIComponentIdProvider.METADATA_VALUE_ID)
                 .maxLengthAllowed(4000).buildTextComponent();
-        valueTextArea.setNullRepresentation(StringUtils.EMPTY);
+        valueTextArea.setNullRepresentation("");
         valueTextArea.setSizeFull();
         valueTextArea.setHeight(100, Unit.PERCENTAGE);
         valueTextArea.addTextChangeListener(this::onValueChange);

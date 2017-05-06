@@ -24,11 +24,11 @@ import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.tag.TagIdName;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -135,8 +135,8 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
     private Boolean isNoTagAssigned(final DragAndDropEvent event) {
         final String tagName = ((DragAndDropWrapper) (event.getTargetDetails().getTarget())).getData().toString();
         if (tagName.equals(SPUIDefinitions.TARGET_TAG_BUTTON)) {
-            notification.displayValidationError(
-                    i18n.getMessage("message.tag.cannot.be.assigned", new Object[] { i18n.getMessage("label.no.tag.assigned") }));
+            notification.displayValidationError(i18n.getMessage("message.tag.cannot.be.assigned",
+                    new Object[] { i18n.getMessage("label.no.tag.assigned") }));
             return false;
         }
         return true;
@@ -159,13 +159,13 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
 
         final TableTransferable tabletransferable = (TableTransferable) transferable;
 
-        final AbstractTable<?, ?> source = (AbstractTable<?, ?>) tabletransferable.getSourceComponent();
+        final AbstractTable<?> source = (AbstractTable<?>) tabletransferable.getSourceComponent();
 
         if (!validateIfSourceisTargetTable(source) && !checkForTargetUpdatePermission()) {
             return false;
         }
 
-        final Set<?> deletedEntityByTransferable = source.getDeletedEntityByTransferable(tabletransferable);
+        final Set<Long> deletedEntityByTransferable = source.getDeletedEntityByTransferable(tabletransferable);
         if (deletedEntityByTransferable.isEmpty()) {
             final String actionDidNotWork = i18n.getMessage("message.action.did.not.work", new Object[] {});
             notification.displayValidationError(actionDidNotWork);

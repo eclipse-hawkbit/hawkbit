@@ -15,16 +15,18 @@ import java.util.Set;
 
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.state.CustomFile;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.AbstractConfirmationWindowLayout;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.google.common.collect.Maps;
@@ -37,11 +39,11 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Table.Align;
 
 /**
- * Abstract layout of confirm actions window.
+ * Layout of confirm actions window on the Upload View.
  */
 public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWindowLayout {
 
-    private static final long serialVersionUID = 1804036019105286988L;
+    private static final long serialVersionUID = 1L;
 
     private static final String SW_MODULE_NAME_MSG = "SW MOdule Name";
 
@@ -63,13 +65,14 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
     }
 
     @Override
-    protected Map<String, ConfirmationTab> getConfimrationTabs() {
+    protected Map<String, ConfirmationTab> getConfirmationTabs() {
         final Map<String, ConfirmationTab> tabs = Maps.newHashMapWithExpectedSize(2);
         if (!artifactUploadState.getDeleteSofwareModules().isEmpty()) {
             tabs.put(i18n.getMessage("caption.delete.swmodule.accordion.tab"), createSMDeleteConfirmationTab());
         }
         if (!artifactUploadState.getSelectedDeleteSWModuleTypes().isEmpty()) {
-            tabs.put(i18n.getMessage("caption.delete.sw.module.type.accordion.tab"), createSMtypeDeleteConfirmationTab());
+            tabs.put(i18n.getMessage("caption.delete.sw.module.type.accordion.tab"),
+                    createSMtypeDeleteConfirmationTab());
         }
         return tabs;
     }
@@ -144,6 +147,8 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
     private void deleteSMAll(final ConfirmationTab tab) {
         final Set<Long> swmoduleIds = artifactUploadState.getDeleteSofwareModules().keySet();
         softwareManagement.deleteSoftwareModules(swmoduleIds);
+        eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.REMOVE_ENTITY, swmoduleIds));
+
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.getMessage("message.swModule.deleted", artifactUploadState.getDeleteSofwareModules().size()));
         /*

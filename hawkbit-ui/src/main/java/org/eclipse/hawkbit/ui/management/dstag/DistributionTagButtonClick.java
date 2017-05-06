@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ui.management.dstag;
 
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterMultiButtonClick;
-import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
+import org.eclipse.hawkbit.ui.management.event.RefreshDistributionTableByFilterEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.vaadin.spring.events.EventBus;
@@ -18,13 +18,15 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import com.vaadin.ui.Button;
 
 /**
- *
- *
+ * Abstract class for button click behavior of the distribution set's tag
+ * buttons. Filters the distribution sets according to the active tags.
  */
 public class DistributionTagButtonClick extends AbstractFilterMultiButtonClick {
-    private static final long serialVersionUID = 4120296456125178019L;
+
+    private static final long serialVersionUID = 1L;
 
     private final transient EventBus.UIEventBus eventBus;
+
     private final ManagementUIState managementUIState;
 
     DistributionTagButtonClick(final UIEventBus eventBus, final ManagementUIState managementUIState) {
@@ -39,7 +41,7 @@ public class DistributionTagButtonClick extends AbstractFilterMultiButtonClick {
         } else {
             managementUIState.getDistributionTableFilters().getDistSetTags().remove(clickedButton.getId());
         }
-        eventBus.publish(this, DistributionTableFilterEvent.FILTER_BY_TAG);
+        eventBus.publish(this, new RefreshDistributionTableByFilterEvent());
     }
 
     @Override
@@ -49,8 +51,7 @@ public class DistributionTagButtonClick extends AbstractFilterMultiButtonClick {
         } else {
             managementUIState.getDistributionTableFilters().getDistSetTags().add(clickedButton.getId());
         }
-
-        eventBus.publish(this, DistributionTableFilterEvent.FILTER_BY_TAG);
+        eventBus.publish(this, new RefreshDistributionTableByFilterEvent());
     }
 
 }
