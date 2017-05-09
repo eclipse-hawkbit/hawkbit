@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -831,36 +830,35 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         allDs.forEach(ds -> ds.addTag(distributionSetTag));
 
-        return Collections
+        final List<DistributionSet> result = Collections
                 .unmodifiableList(allDs.stream().map(distributionSetRepository::save).collect(Collectors.toList()));
+
+        // No reason to save the tag
+        entityManager.detach(distributionSetTag);
+        return result;
     }
 
     @Override
     @Transactional
     public DistributionSet unAssignTag(final Long dsId, final Long dsTagId) {
-        final List<JpaDistributionSet> allDs = findDistributionSetListWithDetails(Arrays.asList(dsId));
-
-        if (allDs.isEmpty()) {
-            throw new EntityNotFoundException(DistributionSet.class, dsId);
-        }
+        final JpaDistributionSet set = (JpaDistributionSet) findDistributionSetByIdWithDetails(dsId)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, dsId));
 
         final DistributionSetTag distributionSetTag = tagManagement.findDistributionSetTagById(dsTagId)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, dsTagId));
-        final List<JpaDistributionSet> unAssignTag = unAssignTag(allDs, distributionSetTag);
-        return unAssignTag.isEmpty() ? null : unAssignTag.get(0);
-    }
 
-    private List<JpaDistributionSet> unAssignTag(final Collection<JpaDistributionSet> distributionSets,
-            final DistributionSetTag tag) {
-        distributionSets.forEach(ds -> ds.removeTag(tag));
-        return Collections.unmodifiableList(
-                distributionSets.stream().map(distributionSetRepository::save).collect(Collectors.toList()));
+        set.removeTag(distributionSetTag);
+
+        final JpaDistributionSet result = distributionSetRepository.save(set);
+
+        // No reason to save the tag
+        entityManager.detach(distributionSetTag);
+        return result;
     }
 
     @Override
     @Transactional
     public List<DistributionSetType> createDistributionSetTypes(final Collection<DistributionSetTypeCreate> types) {
-
         return types.stream().map(this::createDistributionSetType).collect(Collectors.toList());
     }
 

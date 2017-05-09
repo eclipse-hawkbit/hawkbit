@@ -372,8 +372,13 @@ public class JpaTargetManagement implements TargetManagement {
                 .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, tagId));
 
         allTargets.forEach(target -> target.addTag(tag));
-        return Collections
+
+        final List<Target> result = Collections
                 .unmodifiableList(allTargets.stream().map(targetRepository::save).collect(Collectors.toList()));
+
+        // No reason to save the tag
+        entityManager.detach(tag);
+        return result;
     }
 
     @Override
@@ -387,7 +392,11 @@ public class JpaTargetManagement implements TargetManagement {
 
         target.removeTag(tag);
 
-        return targetRepository.save(target);
+        final Target result = targetRepository.save(target);
+
+        // No reason to save the tag
+        entityManager.detach(tag);
+        return result;
     }
 
     @Override
