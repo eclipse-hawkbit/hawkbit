@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.mgmt.client.scenarios;
 
+import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Random;
@@ -316,10 +317,10 @@ public class ConfigurableScenario {
 
     private void createDistributionSets(final Scenario scenario) {
         LOGGER.info("Creating {} distribution sets", scenario.getDistributionSets());
-        final int pages = (scenario.getDistributionSets() / PAGE_SIZE) >= 1.0
-                ? (scenario.getDistributionSets() / PAGE_SIZE) : 1;
+        final BigDecimal pages = new BigDecimal(scenario.getDistributionSets())
+                .divide(new BigDecimal(PAGE_SIZE), BigDecimal.ROUND_UP).max(new BigDecimal(1));
 
-        IntStream.range(0, pages).parallel().forEach(i -> createDistributionSetPage(scenario, i));
+        IntStream.range(0, pages.intValue()).parallel().forEach(i -> createDistributionSetPage(scenario, i));
         LOGGER.info("Creating {} distribution sets -> Done", scenario.getDistributionSets());
     }
 
@@ -386,9 +387,10 @@ public class ConfigurableScenario {
 
     private void createTargets(final Scenario scenario, final List<Long> deviceGroupTags) {
         LOGGER.info("Creating {} targets", scenario.getTargets());
-        final int pages = (scenario.getTargets() / PAGE_SIZE) >= 1.0 ? (scenario.getTargets() / PAGE_SIZE)
-                : scenario.getTargets();
-        IntStream.range(0, pages).parallel().forEach(i -> createTargetPage(scenario, i, deviceGroupTags));
+        final BigDecimal pages = new BigDecimal(scenario.getTargets())
+                .divide(new BigDecimal(PAGE_SIZE), BigDecimal.ROUND_UP).max(new BigDecimal(1));
+
+        IntStream.range(0, pages.intValue()).parallel().forEach(i -> createTargetPage(scenario, i, deviceGroupTags));
         LOGGER.info("Creating {} targets -> Done", scenario.getTargets());
     }
 
