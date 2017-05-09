@@ -26,8 +26,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
-import org.eclipse.hawkbit.ui.push.event.RolloutChangeEvent;
-import org.eclipse.hawkbit.ui.push.event.RolloutGroupChangeEvent;
+import org.eclipse.hawkbit.ui.push.event.RolloutChangedEvent;
+import org.eclipse.hawkbit.ui.push.event.RolloutGroupChangedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEvent;
@@ -295,10 +295,10 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
             return;
         }
 
-        offerEventIfNotContains(new RolloutChangeEvent(event.getTenant(), rolloutId));
+        offerEventIfNotContains(new RolloutChangedEvent(event.getTenant(), rolloutId));
 
         if (rolloutGroupId != null) {
-            offerEventIfNotContains(new RolloutGroupChangeEvent(event.getTenant(), rolloutId, rolloutGroupId));
+            offerEventIfNotContains(new RolloutGroupChangedEvent(event.getTenant(), rolloutId, rolloutGroupId));
         }
     }
 }

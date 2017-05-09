@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.rollout.groupschart.client;
 
+import java.util.List;
+
 import com.github.gwtd3.api.D3;
 import com.github.gwtd3.api.arrays.Array;
 import com.github.gwtd3.api.core.Selection;
@@ -19,8 +21,6 @@ import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
-
-import java.util.List;
 
 /**
  * Draws a pie chart using D3. The slices are based on the list of Longs and on

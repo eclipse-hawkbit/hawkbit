@@ -82,7 +82,7 @@ public interface RolloutGroupManagement {
      * Retrieves a page of {@link RolloutGroup}s filtered by a given
      * {@link Rollout} and the an rsql filter.
      * 
-     * @param rollout
+     * @param rolloutId
      *            the rollout to filter the {@link RolloutGroup}s
      * @param rsqlParam
      *            the specification to filter the result set based on attributes
@@ -98,7 +98,7 @@ public interface RolloutGroupManagement {
      *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<RolloutGroup> findRolloutGroupsAll(@NotNull Long rollout, @NotNull String rsqlParam,
+    Page<RolloutGroup> findRolloutGroupsAll(@NotNull Long rolloutId, @NotNull String rsqlParam,
             @NotNull Pageable pageable);
 
     /**
@@ -113,6 +113,19 @@ public interface RolloutGroupManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     Page<RolloutGroup> findRolloutGroupsByRolloutId(@NotNull Long rolloutId, @NotNull Pageable pageable);
+
+    /**
+     * Retrieves a page of {@link RolloutGroup}s filtered by a given
+     * {@link Rollout}.
+     * 
+     * @param rolloutId
+     *            the ID of the rollout to filter the {@link RolloutGroup}s
+     * @param pageable
+     *            the page request to sort and limit the result
+     * @return a page of found {@link RolloutGroup}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
+    long countRolloutGroupsByRolloutId(@NotNull Long rolloutId);
 
     /**
      * Get targets of specified rollout group.

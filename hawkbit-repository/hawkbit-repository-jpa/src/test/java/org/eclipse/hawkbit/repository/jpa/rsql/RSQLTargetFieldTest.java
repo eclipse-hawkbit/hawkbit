@@ -25,7 +25,6 @@ import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -181,7 +180,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long expcetedTargets) {
-        final Page<Target> findTargetPage = targetManagement.findTargetsAll(rsqlParam, new PageRequest(0, 100));
+        final Page<Target> findTargetPage = targetManagement.findTargetsAll(rsqlParam, PAGE);
         final long countTargetsAll = findTargetPage.getTotalElements();
         assertThat(findTargetPage).isNotNull();
         assertThat(countTargetsAll).isEqualTo(expcetedTargets);

@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ListJoin;
 import javax.persistence.criteria.Root;
@@ -43,13 +42,10 @@ import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecuto
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus_;
-import org.eclipse.hawkbit.repository.jpa.model.JpaActionWithStatusCount;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
@@ -58,7 +54,6 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
-import org.eclipse.hawkbit.repository.model.ActionWithStatusCount;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -539,31 +534,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    public List<ActionWithStatusCount> findActionsWithStatusCountByTargetOrderByIdDesc(final String controllerId) {
-        throwExceptionIfTargetDoesNotExist(controllerId);
-
-        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        final CriteriaQuery<JpaActionWithStatusCount> query = cb.createQuery(JpaActionWithStatusCount.class);
-        final Root<JpaAction> actionRoot = query.from(JpaAction.class);
-        final ListJoin<JpaAction, JpaActionStatus> actionStatusJoin = actionRoot.join(JpaAction_.actionStatus,
-                JoinType.LEFT);
-        final Join<JpaAction, JpaDistributionSet> actionDsJoin = actionRoot.join(JpaAction_.distributionSet);
-        final Join<JpaAction, JpaRollout> actionRolloutJoin = actionRoot.join(JpaAction_.rollout, JoinType.LEFT);
-
-        final CriteriaQuery<JpaActionWithStatusCount> multiselect = query.distinct(true).multiselect(
-                actionRoot.get(JpaAction_.id), actionRoot.get(JpaAction_.actionType), actionRoot.get(JpaAction_.active),
-                actionRoot.get(JpaAction_.forcedTime), actionRoot.get(JpaAction_.status),
-                actionRoot.get(JpaAction_.createdAt), actionRoot.get(JpaAction_.lastModifiedAt),
-                actionDsJoin.get(JpaDistributionSet_.id), actionDsJoin.get(JpaDistributionSet_.name),
-                actionDsJoin.get(JpaDistributionSet_.version), cb.count(actionStatusJoin),
-                actionRolloutJoin.get(JpaRollout_.name));
-        multiselect.where(cb.equal(actionRoot.get(JpaAction_.target).get(JpaTarget_.controllerId), controllerId));
-        multiselect.orderBy(cb.desc(actionRoot.get(JpaAction_.id)));
-        multiselect.groupBy(actionRoot.get(JpaAction_.id));
-        return Collections.unmodifiableList(entityManager.createQuery(multiselect).getResultList());
-    }
-
-    @Override
     public Page<Action> findActionsByTarget(final String rsqlParam, final String controllerId,
             final Pageable pageable) {
         throwExceptionIfTargetDoesNotExist(controllerId);
@@ -584,17 +554,17 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    public List<Action> findActiveActionsByTarget(final String controllerId) {
+    public Page<Action> findActiveActionsByTarget(final Pageable pageable, final String controllerId) {
         throwExceptionIfTargetDoesNotExist(controllerId);
 
-        return actionRepository.findByActiveAndTarget(controllerId, true);
+        return actionRepository.findByActiveAndTarget(pageable, controllerId, true);
     }
 
     @Override
-    public List<Action> findInActiveActionsByTarget(final String controllerId) {
+    public Page<Action> findInActiveActionsByTarget(final Pageable pageable, final String controllerId) {
         throwExceptionIfTargetDoesNotExist(controllerId);
 
-        return actionRepository.findByActiveAndTarget(controllerId, false);
+        return actionRepository.findByActiveAndTarget(pageable, controllerId, false);
     }
 
     @Override
@@ -643,15 +613,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         }
 
         return actionStatusRepository.findByActionId(pageReq, actionId);
-    }
-
-    @Override
-    public Page<ActionStatus> findActionStatusByActionWithMessages(final Pageable pageReq, final Long actionId) {
-        if (!actionRepository.exists(actionId)) {
-            throw new EntityNotFoundException(Action.class, actionId);
-        }
-
-        return actionStatusRepository.getByActionId(pageReq, actionId);
     }
 
     @Override

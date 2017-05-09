@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
@@ -100,7 +101,7 @@ import com.google.common.collect.Lists;
 public abstract class AbstractIntegrationTest implements EnvironmentAware {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
-    protected static final Pageable pageReq = new PageRequest(0, 400, new Sort(Direction.ASC, "id"));
+    protected static final Pageable PAGE = new PageRequest(0, 400, new Sort(Direction.ASC, "id"));
 
     /**
      * Constant for MediaType HAL with encoding UTF-8. Necessary since Spring
@@ -175,6 +176,9 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
     @Autowired
     protected TenantAwareCacheManager cacheManager;
+
+    @Autowired
+    protected QuotaManagement quotaManagement;
 
     protected MockMvc mvc;
 
@@ -258,7 +262,8 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
         Target savedTarget = testdataFactory.createTarget(controllerId);
         savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
                 .next();
-        Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId()).get(0);
+        Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
+                .getContent().get(0);
 
         savedAction = controllerManagement.addUpdateActionStatus(
                 entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.RUNNING));

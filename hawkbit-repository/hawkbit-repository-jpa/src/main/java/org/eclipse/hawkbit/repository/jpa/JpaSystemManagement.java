@@ -9,7 +9,9 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
@@ -32,6 +34,10 @@ import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.interceptor.KeyGenerator;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
@@ -47,6 +53,8 @@ import org.springframework.validation.annotation.Validated;
 @Transactional(readOnly = true)
 @Validated
 public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, SystemManagement {
+    private static final int MAX_TENANTS_QUERY = 500;
+
     @Autowired
     private EntityManager entityManager;
 
@@ -135,7 +143,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     private void usageStatsPerTenant(final SystemUsageReport report) {
-        final List<String> tenants = findTenants();
+        final List<String> tenants = findTenants(new PageRequest(0, MAX_TENANTS_QUERY)).getContent();
 
         tenants.forEach(tenant -> tenantAware.runAsTenant(tenant, () -> {
             report.addTenantData(systemStatsManagement.getStatsOfTenant());
@@ -192,8 +200,13 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    public List<String> findTenants() {
-        return tenantMetaDataRepository.findAll().stream().map(TenantMetaData::getTenant).collect(Collectors.toList());
+    public Page<String> findTenants(final Pageable pageable) {
+        final Page<JpaTenantMetaData> result = tenantMetaDataRepository.findAll(pageable);
+
+        return new PageImpl<>(
+                Collections.unmodifiableList(
+                        result.getContent().stream().map(TenantMetaData::getTenant).collect(Collectors.toList())),
+                pageable, result.getTotalElements());
     }
 
     @Override
@@ -270,5 +283,21 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     @Override
     public TenantMetaData getTenantMetadata(final Long tenantId) {
         return tenantMetaDataRepository.findOne(tenantId);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public void forEachTenant(final Consumer<String> consumer) {
+
+        Page<String> tenants;
+        Pageable query = new PageRequest(0, MAX_TENANTS_QUERY);
+        do {
+            tenants = findTenants(query);
+            tenants.forEach(tenant -> tenantAware.runAsTenant(tenant, () -> {
+                consumer.accept(tenant);
+                return null;
+            }));
+        } while (tenants.hasNext() && (query = tenants.nextPageable()) != null);
+
     }
 }

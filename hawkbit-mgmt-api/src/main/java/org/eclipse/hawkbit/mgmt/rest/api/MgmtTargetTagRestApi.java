@@ -98,7 +98,7 @@ public interface MgmtTargetTagRestApi {
     @RequestMapping(method = RequestMethod.PUT, value = "/{targetTagId}", consumes = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtTag> updateTagretTag(@PathVariable("targetTagId") final Long targetTagId,
+    ResponseEntity<MgmtTag> updateTargetTag(@PathVariable("targetTagId") final Long targetTagId,
             final MgmtTagRequestBodyPut restTargetTagRest);
 
     /**
@@ -120,10 +120,45 @@ public interface MgmtTargetTagRestApi {
      *            the ID of the target tag to retrieve
      *
      * @return the list of assigned targets.
+     * 
+     * @deprecated please use
+     *             {@link #getAssignedTargets(Long, int, int, String, String)}
+     *             instead as this variant does not include paging and as result
+     *             returns only a limited list of targets
+     */
+    @Deprecated
+    @RequestMapping(method = RequestMethod.GET, value = MgmtRestConstants.DEPRECATAED_TARGET_TAG_TARGETS_REQUEST_MAPPING, produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<List<MgmtTarget>> getAssignedTargets(@PathVariable("targetTagId") final Long targetTagId);
+
+    /**
+     * Handles the GET request of retrieving all assigned targets by the given
+     * tag id.
+     *
+     * @param targetTagId
+     *            the ID of the target tag to retrieve
+     * @param pagingOffsetParam
+     *            the offset of list of target tags for pagination, might not be
+     *            present in the rest request then default value will be applied
+     * @param pagingLimitParam
+     *            the limit of the paged request, might not be present in the
+     *            rest request then default value will be applied
+     * @param sortParam
+     *            the sorting parameter in the request URL, syntax
+     *            {@code field:direction, field:direction}
+     * @param rsqlParam
+     *            the search parameter in the request URL, syntax
+     *            {@code q=name==abc}
+     *
+     * @return the list of assigned targets.
      */
     @RequestMapping(method = RequestMethod.GET, value = MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING, produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtTarget>> getAssignedTargets(@PathVariable("targetTagId") final Long targetTagId);
+    ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(@PathVariable("targetTagId") final Long targetTagId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam);
 
     /**
      * Handles the POST request to toggle the assignment of targets by the given
@@ -145,6 +180,27 @@ public interface MgmtTargetTagRestApi {
             final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies);
 
     /**
+     * Handles the POST request to toggle the assignment of targets by the given
+     * tag id.
+     *
+     * @param targetTagId
+     *            the ID of the target tag to retrieve
+     * @param assignedTargetRequestBodies
+     *            list of controller ids to be toggled
+     *
+     * @return the list of assigned targets and unassigned targets.
+     * @deprecated please use {@link MgmtTargetTagRestApi#toggleTagAssignment}
+     */
+    @Deprecated
+    @RequestMapping(method = RequestMethod.POST, value = MgmtRestConstants.DEPRECATAED_TARGET_TAG_TARGETS_REQUEST_MAPPING
+            + "/toggleTagAssignment", consumes = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                            MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<MgmtTargetTagAssigmentResult> toggleTagAssignmentUnpaged(
+            @PathVariable("targetTagId") final Long targetTagId,
+            final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies);
+
+    /**
      * Handles the POST request to assign targets to the given tag id.
      *
      * @param targetTagId
@@ -161,14 +217,23 @@ public interface MgmtTargetTagRestApi {
             final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies);
 
     /**
-     * Handles the DELETE request to unassign all targets from the given tag id.
+     * Handles the POST request to assign targets to the given tag id.
      *
      * @param targetTagId
      *            the ID of the target tag to retrieve
-     * @return http status code
+     * @param assignedTargetRequestBodies
+     *            list of controller ids to be assigned
+     *
+     * @return the list of assigned targets.
+     * 
+     * @deprecated please use {@link MgmtTargetTagRestApi#assignTargets}
      */
-    @RequestMapping(method = RequestMethod.DELETE, value = MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING)
-    ResponseEntity<Void> unassignTargets(@PathVariable("targetTagId") final Long targetTagId);
+    @Deprecated
+    @RequestMapping(method = RequestMethod.POST, value = MgmtRestConstants.DEPRECATAED_TARGET_TAG_TARGETS_REQUEST_MAPPING, consumes = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<List<MgmtTarget>> assignTargetsUnpaged(@PathVariable("targetTagId") final Long targetTagId,
+            final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies);
 
     /**
      * Handles the DELETE request to unassign one target from the given tag id.
@@ -182,5 +247,22 @@ public interface MgmtTargetTagRestApi {
     @RequestMapping(method = RequestMethod.DELETE, value = MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING
             + "/{controllerId}")
     ResponseEntity<Void> unassignTarget(@PathVariable("targetTagId") final Long targetTagId,
+            @PathVariable("controllerId") final String controllerId);
+
+    /**
+     * Handles the DELETE request to unassign one target from the given tag id.
+     *
+     * @param targetTagId
+     *            the ID of the target tag
+     * @param controllerId
+     *            the ID of the target to unassign
+     * @return http status code
+     * 
+     * @deprecated please use {@link MgmtTargetTagRestApi#unassignTarget}
+     */
+    @Deprecated
+    @RequestMapping(method = RequestMethod.DELETE, value = MgmtRestConstants.DEPRECATAED_TARGET_TAG_TARGETS_REQUEST_MAPPING
+            + "/{controllerId}")
+    ResponseEntity<Void> unassignTargetUnpaged(@PathVariable("targetTagId") final Long targetTagId,
             @PathVariable("controllerId") final String controllerId);
 }

@@ -12,12 +12,10 @@ package org.eclipse.hawkbit.ui.push.event;
  * TenantAwareEvent declaration for the UI to notify the UI that a rollout has
  * been changed.
  * 
- *
  */
-public class RolloutGroupChangeEvent extends TenantAwareUiEvent {
+public class RolloutChangedEvent extends TenantAwareUiEvent {
 
     private final Long rolloutId;
-    private final Long rolloutGroupId;
 
     /**
      * Constructor.
@@ -26,34 +24,25 @@ public class RolloutGroupChangeEvent extends TenantAwareUiEvent {
      *            the tenant of the event
      * @param rolloutId
      *            the ID of the rollout which has been changed
-     * @param rolloutGroupId
-     *            the ID of the rollout group which has been changed
      */
-    public RolloutGroupChangeEvent(final String tenant, final Long rolloutId, final Long rolloutGroupId) {
+    public RolloutChangedEvent(final String tenant, final Long rolloutId) {
         super(tenant);
         this.rolloutId = rolloutId;
-        this.rolloutGroupId = rolloutGroupId;
     }
 
     public Long getRolloutId() {
         return rolloutId;
     }
 
-    public Long getRolloutGroupId() {
-        return rolloutGroupId;
-    }
-
     @Override
     public String toString() {
-        return "RolloutGroupChangeEvent [rolloutId=" + rolloutId + ", rolloutGroupId=" + rolloutGroupId
-                + ", getTenant()=" + getTenant() + "]";
+        return "RolloutChangeEvent [rolloutId=" + rolloutId + ", getTenant()=" + getTenant() + "]";
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((rolloutGroupId == null) ? 0 : rolloutGroupId.hashCode());
         result = prime * result + ((rolloutId == null) ? 0 : rolloutId.hashCode());
         return result;
     }
@@ -69,14 +58,7 @@ public class RolloutGroupChangeEvent extends TenantAwareUiEvent {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final RolloutGroupChangeEvent other = (RolloutGroupChangeEvent) obj;
-        if (rolloutGroupId == null) {
-            if (other.rolloutGroupId != null) {
-                return false;
-            }
-        } else if (!rolloutGroupId.equals(other.rolloutGroupId)) {
-            return false;
-        }
+        final RolloutChangedEvent other = (RolloutChangedEvent) obj;
         if (rolloutId == null) {
             if (other.rolloutId != null) {
                 return false;

@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.AbstractRolloutManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RolloutFields;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutHelper;
@@ -77,6 +78,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.scheduling.annotation.Async;
@@ -129,6 +132,9 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Autowired
     private EntityManager entityManager;
 
+    @Autowired
+    private QuotaManagement quotaManagement;
+
     JpaRolloutManagement(final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
             final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
@@ -175,7 +181,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Transactional
     public Rollout createRollout(final RolloutCreate rollout, final int amountGroup,
             final RolloutGroupConditions conditions) {
-        RolloutHelper.verifyRolloutGroupParameter(amountGroup);
+        RolloutHelper.verifyRolloutGroupParameter(amountGroup, quotaManagement);
         final JpaRollout savedRollout = createRollout((JpaRollout) rollout.build());
         return createRolloutGroups(amountGroup, conditions, savedRollout);
     }
@@ -184,7 +190,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Transactional
     public Rollout createRollout(final RolloutCreate rollout, final List<RolloutGroupCreate> groups,
             final RolloutGroupConditions conditions) {
-        RolloutHelper.verifyRolloutGroupParameter(groups.size());
+        RolloutHelper.verifyRolloutGroupParameter(groups.size(), quotaManagement);
         final JpaRollout savedRollout = createRollout((JpaRollout) rollout.build());
         return createRolloutGroups(groups, conditions, savedRollout);
     }
@@ -297,7 +303,10 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     private void handleCreateRollout(final JpaRollout rollout) {
         LOGGER.debug("handleCreateRollout called for rollout {}", rollout.getId());
 
-        final List<RolloutGroup> rolloutGroups = RolloutHelper.getOrderedGroups(rollout);
+        final List<RolloutGroup> rolloutGroups = rolloutGroupManagement.findRolloutGroupsByRolloutId(rollout.getId(),
+                new PageRequest(0, quotaManagement.getMaxRolloutGroupsPerRollout(), new Sort(Direction.ASC, "id")))
+                .getContent();
+
         int readyGroups = 0;
         int totalTargets = 0;
         for (final RolloutGroup group : rolloutGroups) {
@@ -325,7 +334,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         }
     }
 
-    private RolloutGroup fillRolloutGroupWithTargets(final Rollout rollout, final RolloutGroup group1) {
+    private RolloutGroup fillRolloutGroupWithTargets(final JpaRollout rollout, final RolloutGroup group1) {
         RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.CREATING);
 
         final JpaRolloutGroup group = (JpaRolloutGroup) group1;
@@ -338,8 +347,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             groupTargetFilter = baseFilter + ";" + group.getTargetFilterQuery();
         }
 
-        final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout, RolloutGroupStatus.READY,
-                group);
+        final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout.getRolloutGroups(),
+                RolloutGroupStatus.READY, group);
 
         final long targetsInGroupFilter = runInNewTransaction("countAllTargetsByTargetFilterQueryAndNotInRolloutGroups",
                 count -> targetManagement.countAllTargetsByTargetFilterQueryAndNotInRolloutGroups(readyGroups,
@@ -376,12 +385,12 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         }
     }
 
-    private Long assignTargetsToGroupInNewTransaction(final Rollout rollout, final RolloutGroup group,
+    private Long assignTargetsToGroupInNewTransaction(final JpaRollout rollout, final RolloutGroup group,
             final String targetFilter, final long limit) {
 
         return runInNewTransaction("assignTargetsToRolloutGroup", status -> {
             final PageRequest pageRequest = new PageRequest(0, Math.toIntExact(limit));
-            final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout,
+            final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout.getRolloutGroups(),
                     RolloutGroupStatus.READY, group);
             final Page<Target> targets = targetManagement
                     .findAllTargetsByTargetFilterQueryAndNotInRolloutGroups(pageRequest, readyGroups, targetFilter);

@@ -8,9 +8,10 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.rolloutgroup;
 
+import org.eclipse.hawkbit.mgmt.json.model.rollout.AbstractMgmtRolloutConditionsEntity;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.eclipse.hawkbit.mgmt.json.model.rollout.AbstractMgmtRolloutConditionsEntity;
 
 /**
  * Model for defining the Attributes of a Rollout Group

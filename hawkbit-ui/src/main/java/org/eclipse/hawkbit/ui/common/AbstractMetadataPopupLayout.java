@@ -71,6 +71,8 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     private static final String KEY = "key";
 
+    protected static final int MAX_METADATA_QUERY = 500;
+
     protected VaadinMessageSource i18n;
 
     private final UINotification uiNotification;

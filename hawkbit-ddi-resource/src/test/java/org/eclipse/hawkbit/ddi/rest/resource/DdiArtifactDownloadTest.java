@@ -161,7 +161,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
     public void downloadArtifactThroughFileName() throws Exception {
         downLoadProgress = 1;
         shippedBytes = 0;
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
+        assertThat(softwareManagement.findSoftwareModulesAll(PAGE)).hasSize(0);
 
         // create target
         final Target target = testdataFactory.createTarget();

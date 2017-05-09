@@ -252,13 +252,12 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeActionStatusSortParam(sortParam);
 
-        final Page<ActionStatus> statusList = this.deploymentManagement.findActionStatusByActionWithMessages(
+        final Page<ActionStatus> statusList = this.deploymentManagement.findActionStatusByAction(
                 new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting), action.getId());
 
-        return new ResponseEntity<>(
-                new PagedList<>(MgmtTargetMapper.toActionStatusRestResponse(statusList.getContent()),
-                        statusList.getTotalElements()),
-                HttpStatus.OK);
+        return new ResponseEntity<>(new PagedList<>(
+                MgmtTargetMapper.toActionStatusRestResponse(statusList.getContent(), deploymentManagement),
+                statusList.getTotalElements()), HttpStatus.OK);
 
     }
 

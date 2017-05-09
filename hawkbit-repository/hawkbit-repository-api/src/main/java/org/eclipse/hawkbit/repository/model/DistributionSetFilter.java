@@ -15,11 +15,7 @@ import java.util.Collection;
  */
 public final class DistributionSetFilter {
     /**
-     *
      * Distribution set filter builder.
-     *
-     *
-     *
      */
     public static class DistributionSetFilterBuilder {
         private Boolean isDeleted;
@@ -81,6 +77,7 @@ public final class DistributionSetFilter {
         }
 
     }
+
     private final Boolean isDeleted;
     private final Boolean isComplete;
     private final DistributionSetType type;

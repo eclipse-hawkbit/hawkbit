@@ -20,16 +20,16 @@ import org.eclipse.hawkbit.repository.event.remote.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdateEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
-import org.eclipse.hawkbit.ui.push.event.RolloutChangeEvent;
-import org.eclipse.hawkbit.ui.push.event.RolloutGroupChangeEvent;
+import org.eclipse.hawkbit.ui.push.event.RolloutChangedEvent;
+import org.eclipse.hawkbit.ui.push.event.RolloutGroupChangedEvent;
 
 import com.google.common.collect.Maps;
 
@@ -44,23 +44,23 @@ public class HawkbitEventProvider implements UIEventProvider {
 
         EVENTS.put(TargetTagDeletedEvent.class, TargetTagDeletedEventContainer.class);
         EVENTS.put(TargetTagCreatedEvent.class, TargetTagCreatedEventContainer.class);
-        EVENTS.put(TargetTagUpdateEvent.class, TargetTagUpdatedEventContainer.class);
+        EVENTS.put(TargetTagUpdatedEvent.class, TargetTagUpdatedEventContainer.class);
 
         EVENTS.put(DistributionSetTagCreatedEvent.class, DistributionSetTagCreatedEventContainer.class);
         EVENTS.put(DistributionSetTagDeletedEvent.class, DistributionSetTagDeletedEventContainer.class);
-        EVENTS.put(DistributionSetTagUpdateEvent.class, DistributionSetTagUpdatedEventContainer.class);
+        EVENTS.put(DistributionSetTagUpdatedEvent.class, DistributionSetTagUpdatedEventContainer.class);
 
         EVENTS.put(TargetCreatedEvent.class, TargetCreatedEventContainer.class);
         EVENTS.put(TargetDeletedEvent.class, TargetDeletedEventContainer.class);
         EVENTS.put(TargetUpdatedEvent.class, TargetUpdatedEventContainer.class);
         EVENTS.put(CancelTargetAssignmentEvent.class, CancelTargetAssignmentEventContainer.class);
 
-        EVENTS.put(DistributionSetUpdateEvent.class, DistributionSetUpdatedEventContainer.class);
+        EVENTS.put(DistributionSetUpdatedEvent.class, DistributionSetUpdatedEventContainer.class);
         EVENTS.put(DistributionSetDeletedEvent.class, DistributionDeletedEventContainer.class);
         EVENTS.put(DistributionSetCreatedEvent.class, DistributionCreatedEventContainer.class);
 
-        EVENTS.put(RolloutGroupChangeEvent.class, RolloutGroupChangeEventContainer.class);
-        EVENTS.put(RolloutChangeEvent.class, RolloutChangeEventContainer.class);
+        EVENTS.put(RolloutGroupChangedEvent.class, RolloutGroupChangedEventContainer.class);
+        EVENTS.put(RolloutChangedEvent.class, RolloutChangeEventContainer.class);
         EVENTS.put(RolloutDeletedEvent.class, RolloutDeletedEventContainer.class);
 
         EVENTS.put(SoftwareModuleCreatedEvent.class, SoftwareModuleCreatedEventContainer.class);

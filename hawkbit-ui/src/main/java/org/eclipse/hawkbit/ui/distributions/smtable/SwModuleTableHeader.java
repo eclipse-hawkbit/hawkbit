@@ -9,8 +9,8 @@
 package org.eclipse.hawkbit.ui.distributions.smtable;
 
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.RefreshSoftwareModuleByFilterEvent;
+import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.common.table.AbstractSoftwareModuleTableHeader;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;

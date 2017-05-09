@@ -18,10 +18,10 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.tokenfield.TokenField;
@@ -50,6 +50,8 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
     private static final String NAME_PROPERTY = "name";
     private static final String COLOR_PROPERTY = "color";
 
+    protected static final int MAX_TAG_QUERY = 500;
+
     private static final long serialVersionUID = 6599386705285184783L;
 
     protected TokenField tokenField;
@@ -77,8 +79,8 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
     @SuppressWarnings("squid:S1948")
     protected T selectedEntity;
 
-    protected AbstractTagToken(final SpPermissionChecker checker, final VaadinMessageSource i18n, final UINotification uinotification,
-            final UIEventBus eventBus, final ManagementUIState managementUIState) {
+    protected AbstractTagToken(final SpPermissionChecker checker, final VaadinMessageSource i18n,
+            final UINotification uinotification, final UIEventBus eventBus, final ManagementUIState managementUIState) {
         this.checker = checker;
         this.i18n = i18n;
         this.uinotification = uinotification;

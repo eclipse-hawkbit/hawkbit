@@ -142,7 +142,6 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
         }
     }
 
-    @Override
     public List<String> getMessages() {
         if (messages == null) {
             messages = Collections.emptyList();

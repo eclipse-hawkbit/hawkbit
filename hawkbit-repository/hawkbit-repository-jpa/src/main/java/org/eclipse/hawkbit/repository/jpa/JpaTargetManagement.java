@@ -113,7 +113,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public List<Target> findTargetByControllerID(final Collection<String> controllerIDs) {
+    public List<Target> findTargetsByControllerID(final Collection<String> controllerIDs) {
         return Collections.unmodifiableList(
                 targetRepository.findAll(TargetSpecifications.byControllerIdWithAssignedDsInJoin(controllerIDs)));
     }
@@ -376,41 +376,18 @@ public class JpaTargetManagement implements TargetManagement {
                 .unmodifiableList(allTargets.stream().map(targetRepository::save).collect(Collectors.toList()));
     }
 
-    private List<Target> unAssignTag(final Collection<Target> targets, final TargetTag tag) {
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        final Collection<JpaTarget> toUnassign = (Collection) targets;
-
-        toUnassign.forEach(target -> target.removeTag(tag));
-
-        return Collections
-                .unmodifiableList(toUnassign.stream().map(targetRepository::save).collect(Collectors.toList()));
-    }
-
-    @Override
-    @Transactional
-    public List<Target> unAssignAllTargetsByTag(final Long targetTagId) {
-
-        final TargetTag tag = targetTagRepository.findById(targetTagId)
-                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagId));
-
-        if (tag.getAssignedToTargets().isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return unAssignTag(tag.getAssignedToTargets(), tag);
-    }
-
     @Override
     @Transactional
     public Target unAssignTag(final String controllerID, final Long targetTagId) {
-        final Target target = targetRepository.findByControllerId(controllerID)
+        final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerID)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerID));
 
         final TargetTag tag = targetTagRepository.findById(targetTagId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagId));
 
-        final List<Target> unAssignTag = unAssignTag(Lists.newArrayList(target), tag);
-        return unAssignTag.isEmpty() ? null : unAssignTag.get(0);
+        target.removeTag(tag);
+
+        return targetRepository.save(target);
     }
 
     @Override
@@ -559,13 +536,28 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public List<Target> findTargetsByTag(final String tagName) {
-        final Optional<TargetTag> tag = targetTagRepository.findByNameEquals(tagName);
-        if (!tag.isPresent()) {
-            return Collections.emptyList();
-        }
+    public Page<Target> findTargetsByTag(final Pageable pageable, final Long tagId) {
+        throwEntityNotFoundExceptionIfTagDoesNotExist(tagId);
 
-        return Collections.unmodifiableList(targetRepository.findByTag(tag.get().getId()));
+        return convertPage(targetRepository.findByTag(pageable, tagId), pageable);
+    }
+
+    private void throwEntityNotFoundExceptionIfTagDoesNotExist(final Long tagId) {
+        if (!targetTagRepository.exists(tagId)) {
+            throw new EntityNotFoundException(TargetTag.class, tagId);
+        }
+    }
+
+    @Override
+    public Page<Target> findTargetsByTag(final Pageable pageable, final String rsqlParam, final Long tagId) {
+
+        throwEntityNotFoundExceptionIfTagDoesNotExist(tagId);
+
+        final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class, virtualPropertyReplacer);
+
+        return convertPage(targetRepository.findAll((Specification<JpaTarget>) (root, query, cb) -> cb.and(
+                TargetSpecifications.hasTag(tagId).toPredicate(root, query, cb), spec.toPredicate(root, query, cb)),
+                pageable), pageable);
     }
 
     @Override
@@ -594,7 +586,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public List<Target> findTargetAllById(final Collection<Long> ids) {
+    public List<Target> findTargetsById(final Collection<Long> ids) {
         return Collections.unmodifiableList(targetRepository.findAll(ids));
     }
 

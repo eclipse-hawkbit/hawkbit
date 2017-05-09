@@ -52,6 +52,16 @@ public interface DistributionSetTagRepository
     Optional<DistributionSetTag> findByNameEquals(final String tagName);
 
     /**
+     * Checks if tag with given name exists.
+     * 
+     * @param tagName
+     *            to check for
+     * @return <code>true</code> is tag with given name exists
+     */
+    @Query("SELECT CASE WHEN COUNT(t)>0 THEN 'true' ELSE 'false' END FROM JpaDistributionSetTag t WHERE t.name=:tagName")
+    boolean existsByName(@Param("tagName") String tagName);
+
+    /**
      * Returns all instances of the type.
      *
      * @return all entities

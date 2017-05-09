@@ -110,9 +110,10 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 entityFactory.actionStatus().create(actions.get(0).getId()).status(Status.FINISHED).message("test"));
 
         final PageRequest pageRequest = new PageRequest(0, 1000, Direction.ASC, ActionFields.ID.getFieldName());
-        final ActionStatus status = deploymentManagement.findActionsByTarget(knownTargetId, pageRequest).getContent()
-                .get(0).getActionStatus().stream().sorted((e1, e2) -> Long.compare(e2.getId(), e1.getId()))
-                .collect(Collectors.toList()).get(0);
+        final Action action = deploymentManagement.findActionsByTarget(knownTargetId, pageRequest).getContent().get(0);
+
+        final ActionStatus status = deploymentManagement.findActionStatusByAction(PAGE, action.getId()).getContent()
+                .stream().sorted((e1, e2) -> Long.compare(e2.getId(), e1.getId())).collect(Collectors.toList()).get(0);
 
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
                 + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actions.get(0).getId() + "/status")
@@ -224,12 +225,12 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         // test - cancel the active action
         mvc.perform(
                 delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}",
-                        tA.getControllerId(), deploymentManagement.findActionsByTarget(tA.getControllerId(), pageReq)
+                        tA.getControllerId(), deploymentManagement.findActionsByTarget(tA.getControllerId(), PAGE)
                                 .getContent().get(0).getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNoContent());
 
         final Action action = deploymentManagement.findAction(
-                deploymentManagement.findActionsByTarget(tA.getControllerId(), pageReq).getContent().get(0).getId())
+                deploymentManagement.findActionsByTarget(tA.getControllerId(), PAGE).getContent().get(0).getId())
                 .get();
         // still active because in "canceling" state and waiting for controller
         // feedback
@@ -250,10 +251,10 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
 
         // cancel the active action
         deploymentManagement.cancelAction(
-                deploymentManagement.findActionsByTarget(tA.getControllerId(), pageReq).getContent().get(0).getId());
+                deploymentManagement.findActionsByTarget(tA.getControllerId(), PAGE).getContent().get(0).getId());
 
         // find the current active action
-        final List<Action> cancelActions = deploymentManagement.findActionsByTarget(tA.getControllerId(), pageReq)
+        final List<Action> cancelActions = deploymentManagement.findActionsByTarget(tA.getControllerId(), PAGE)
                 .getContent().stream().filter(Action::isCancelingOrCanceled).collect(Collectors.toList());
         assertThat(cancelActions).hasSize(1);
 
@@ -271,10 +272,10 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
 
         // cancel the active action
         deploymentManagement.cancelAction(
-                deploymentManagement.findActionsByTarget(tA.getControllerId(), pageReq).getContent().get(0).getId());
+                deploymentManagement.findActionsByTarget(tA.getControllerId(), PAGE).getContent().get(0).getId());
 
         // find the current active action
-        final List<Action> cancelActions = deploymentManagement.findActionsByTarget(tA.getControllerId(), pageReq)
+        final List<Action> cancelActions = deploymentManagement.findActionsByTarget(tA.getControllerId(), PAGE)
                 .getContent().stream().filter(Action::isCancelingOrCanceled).collect(Collectors.toList());
         assertThat(cancelActions).hasSize(1);
         assertThat(cancelActions.get(0).isCancelingOrCanceled()).isTrue();
@@ -294,7 +295,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         // test - cancel an cancel action returns forbidden
         mvc.perform(
                 delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}?force=true",
-                        tA.getControllerId(), deploymentManagement.findActionsByTarget(tA.getControllerId(), pageReq)
+                        tA.getControllerId(), deploymentManagement.findActionsByTarget(tA.getControllerId(), PAGE)
                                 .getContent().get(0).getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isMethodNotAllowed());
     }
@@ -876,8 +877,9 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final String knownTargetId = "targetId";
         final Action action = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId).get(0);
         // retrieve list in default descending order for actionstaus entries
-        final List<ActionStatus> actionStatus = action.getActionStatus().stream()
-                .sorted((e1, e2) -> Long.compare(e2.getId(), e1.getId())).collect(Collectors.toList());
+        final List<ActionStatus> actionStatus = deploymentManagement.findActionStatusByAction(PAGE, action.getId())
+                .getContent().stream().sorted((e1, e2) -> Long.compare(e2.getId(), e1.getId()))
+                .collect(Collectors.toList());
 
         // sort is default descending order, latest status first
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
@@ -902,8 +904,9 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     public void getMultipleActionStatusSortedByReportedAt() throws Exception {
         final String knownTargetId = "targetId";
         final Action action = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId).get(0);
-        final List<ActionStatus> actionStatus = action.getActionStatus().stream()
-                .sorted((e1, e2) -> Long.compare(e1.getId(), e2.getId())).collect(Collectors.toList());
+        final List<ActionStatus> actionStatus = deploymentManagement.findActionStatusByAction(PAGE, action.getId())
+                .getContent().stream().sorted((e1, e2) -> Long.compare(e1.getId(), e2.getId()))
+                .collect(Collectors.toList());
 
         // descending order
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
@@ -948,8 +951,9 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final String knownTargetId = "targetId";
 
         final Action action = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId).get(0);
-        final List<ActionStatus> actionStatus = action.getActionStatus().stream()
-                .sorted((e1, e2) -> Long.compare(e1.getId(), e2.getId())).collect(Collectors.toList());
+        final List<ActionStatus> actionStatus = deploymentManagement.findActionStatusByAction(PAGE, action.getId())
+                .getContent().stream().sorted((e1, e2) -> Long.compare(e1.getId(), e2.getId()))
+                .collect(Collectors.toList());
 
         // Page 1
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
@@ -1054,7 +1058,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         assignDistributionSet(two, updatedTargets);
 
         // two updates, one cancellation
-        final List<Action> actions = deploymentManagement.findActionsByTarget(target.getControllerId(), pageReq)
+        final List<Action> actions = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE)
                 .getContent();
 
         assertThat(actions).hasSize(2);
@@ -1118,7 +1122,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(status().isOk());
 
         final List<Action> findActiveActionsByTarget = deploymentManagement
-                .findActiveActionsByTarget(target.getControllerId());
+                .findActiveActionsByTarget(PAGE, target.getControllerId()).getContent();
         assertThat(findActiveActionsByTarget).hasSize(1);
         assertThat(findActiveActionsByTarget.get(0).getActionType()).isEqualTo(ActionType.TIMEFORCED);
         assertThat(findActiveActionsByTarget.get(0).getForcedTime()).isEqualTo(forceTime);
@@ -1298,7 +1302,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         // assign a distribution set so we get an active update action
         assignDistributionSet(dsA, Lists.newArrayList(tA));
         // verify active action
-        final Slice<Action> actionsByTarget = deploymentManagement.findActionsByTarget(tA.getControllerId(), pageReq);
+        final Slice<Action> actionsByTarget = deploymentManagement.findActionsByTarget(tA.getControllerId(), PAGE);
         assertThat(actionsByTarget.getContent()).hasSize(1);
         return targetManagement.findTargetByControllerID(tA.getControllerId()).get();
     }

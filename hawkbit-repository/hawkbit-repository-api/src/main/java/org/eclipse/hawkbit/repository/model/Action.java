@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -44,11 +43,6 @@ public interface Action extends TenantAwareBaseEntity {
      * @return the {@link ActionType}
      */
     ActionType getActionType();
-
-    /**
-     * @return list of {@link ActionStatus} entries.
-     */
-    List<ActionStatus> getActionStatus();
 
     /**
      * @return {@link Target} of this {@link Action}.

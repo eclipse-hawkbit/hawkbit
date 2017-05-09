@@ -25,7 +25,9 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.TagSpecification;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,17 +87,12 @@ public class JpaTagManagement implements TagManagement {
     @Override
     @Transactional
     public void deleteTargetTag(final String targetTagName) {
-        final TargetTag tag = targetTagRepository.findByNameEquals(targetTagName)
-                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagName));
-
-        targetRepository.findByTag(tag.getId()).forEach(set -> {
-            set.removeTag(tag);
-            targetRepository.save(set);
-        });
+        if (!targetTagRepository.existsByName(targetTagName)) {
+            throw new EntityNotFoundException(TargetTag.class, targetTagName);
+        }
 
         // finally delete the tag itself
         targetTagRepository.deleteByName(targetTagName);
-
     }
 
     @Override
@@ -177,20 +174,11 @@ public class JpaTagManagement implements TagManagement {
     @Override
     @Transactional
     public void deleteDistributionSetTag(final String tagName) {
-        final DistributionSetTag tag = distributionSetTagRepository.findByNameEquals(tagName)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, tagName));
-
-        distributionSetRepository.findByTag(tag).forEach(set -> {
-            set.removeTag(tag);
-            distributionSetRepository.save(set);
-        });
+        if (!distributionSetTagRepository.existsByName(tagName)) {
+            throw new EntityNotFoundException(DistributionSetTag.class, tagName);
+        }
 
         distributionSetTagRepository.deleteByName(tagName);
-    }
-
-    @Override
-    public List<DistributionSetTag> findAllDistributionSetTags() {
-        return Collections.unmodifiableList(distributionSetTagRepository.findAll());
     }
 
     @Override
@@ -223,7 +211,21 @@ public class JpaTagManagement implements TagManagement {
 
     @Override
     public Page<TargetTag> findAllTargetTags(final Pageable pageable, final String controllerId) {
+        if (!targetRepository.existsByControllerId(controllerId)) {
+            throw new EntityNotFoundException(Target.class, controllerId);
+        }
+
         return convertTPage(targetTagRepository.findAll(TagSpecification.ofTarget(controllerId), pageable), pageable);
     }
 
+    @Override
+    public Page<DistributionSetTag> findDistributionSetTagsByDistributionSet(final Pageable pageable,
+            final Long setId) {
+        if (!distributionSetRepository.exists(setId)) {
+            throw new EntityNotFoundException(DistributionSet.class, setId);
+        }
+
+        return convertDsPage(distributionSetTagRepository.findAll(TagSpecification.ofDistributionSet(setId), pageable),
+                pageable);
+    }
 }

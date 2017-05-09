@@ -339,7 +339,7 @@ public interface TargetManagement {
      * @return List of found{@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<Target> findTargetByControllerID(@NotEmpty Collection<String> controllerIDs);
+    List<Target> findTargetsByControllerID(@NotEmpty Collection<String> controllerIDs);
 
     /**
      * Find a {@link Target} based a given ID.
@@ -533,13 +533,41 @@ public interface TargetManagement {
 
     /**
      * Find targets by tag name.
-     *
-     * @param tagName
-     *            tag name
+     * 
+     * @param pageable
+     *            the page request parameter for paging and sorting the result
+     * @param tagId
+     *            tag ID
      * @return list of matching targets
+     * 
+     * @throws EntityNotFoundException
+     *             if target tag with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<Target> findTargetsByTag(@NotEmpty String tagName);
+    Page<Target> findTargetsByTag(@NotNull Pageable pageable, @NotNull Long tagId);
+
+    /**
+     * Find targets by tag name.
+     * 
+     * @param pageable
+     *            the page request parameter for paging and sorting the result
+     * @param tagId
+     *            tag ID
+     * @param rsqlParam
+     *            in RSQL notation
+     * 
+     * @return list of matching targets
+     * 
+     * @throws EntityNotFoundException
+     *             if target tag with given ID does not exist
+     * @throws RSQLParameterUnsupportedFieldException
+     *             if a field in the RSQL string is used but not provided by the
+     *             given {@code fieldNameProvider}
+     * @throws RSQLParameterSyntaxException
+     *             if the RSQL syntax is wrong
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Page<Target> findTargetsByTag(@NotNull Pageable pageable, @NotNull String rsqlParam, @NotNull Long tagId);
 
     /**
      * Toggles {@link TargetTag} assignment to given {@link Target}s by means
@@ -558,19 +586,6 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     TargetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<String> controllerIds, @NotEmpty String tagName);
-
-    /**
-     * Un-assign all {@link Target} from a given {@link TargetTag} .
-     *
-     * @param targetTagId
-     *            to un-assign all targets
-     * @return list of unassigned targets
-     * 
-     * @throws EntityNotFoundException
-     *             if TAG with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    List<Target> unAssignAllTargetsByTag(@NotNull Long targetTagId);
 
     /**
      * Un-assign a {@link TargetTag} assignment to given {@link Target}.
@@ -623,7 +638,7 @@ public interface TargetManagement {
      * @return the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<Target> findTargetAllById(@NotNull Collection<Long> ids);
+    List<Target> findTargetsById(@NotNull Collection<Long> ids);
 
     /**
      * Get controller attributes of given {@link Target}.

@@ -11,14 +11,14 @@ package org.eclipse.hawkbit.ui.common.tagdetails;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.TagManagement;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.push.TargetTagCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetTagDeletedEventContainer;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -57,8 +57,8 @@ public abstract class AbstractTargetTagToken<T extends BaseEntity> extends Abstr
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
-    void onTargetTagUpdateEvent(final List<TargetTagUpdateEvent> events) {
-        events.stream().map(TargetTagUpdateEvent::getEntity).forEach(entity -> {
+    void onTargetTagUpdateEvent(final List<TargetTagUpdatedEvent> events) {
+        events.stream().map(TargetTagUpdatedEvent::getEntity).forEach(entity -> {
             final Item item = container.getItem(entity.getId());
             if (item != null) {
                 updateItem(entity.getName(), entity.getColour(), item);

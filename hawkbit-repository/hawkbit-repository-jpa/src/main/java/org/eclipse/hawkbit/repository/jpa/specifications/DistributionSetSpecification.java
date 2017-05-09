@@ -78,7 +78,6 @@ public final class DistributionSetSpecification {
         return (targetRoot, query, cb) -> {
             final Predicate predicate = cb.equal(targetRoot.<Long> get(JpaDistributionSet_.id), distid);
             targetRoot.fetch(JpaDistributionSet_.modules, JoinType.LEFT);
-            targetRoot.fetch(JpaDistributionSet_.tags, JoinType.LEFT);
             targetRoot.fetch(JpaDistributionSet_.type, JoinType.LEFT);
             query.distinct(true);
 
@@ -215,6 +214,22 @@ public final class DistributionSetSpecification {
             final ListJoin<JpaDistributionSet, JpaTarget> assignedTargetJoin = dsRoot
                     .join(JpaDistributionSet_.assignedToTargets, JoinType.INNER);
             return cb.equal(assignedTargetJoin.get(JpaTarget_.controllerId), assignedTargetId);
+        };
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link DistributionSet}s by tag.
+     *
+     * @param tagId
+     *            the ID of the distribution set which must be assigned
+     * @return the {@link DistributionSet} {@link Specification}
+     */
+    public static Specification<JpaDistributionSet> hasTag(final Long tagId) {
+
+        return (targetRoot, query, cb) -> {
+            final SetJoin<JpaDistributionSet, JpaDistributionSetTag> tags = targetRoot.join(JpaDistributionSet_.tags,
+                    JoinType.LEFT);
+            return cb.equal(tags.get(JpaDistributionSetTag_.id), tagId);
         };
     }
 

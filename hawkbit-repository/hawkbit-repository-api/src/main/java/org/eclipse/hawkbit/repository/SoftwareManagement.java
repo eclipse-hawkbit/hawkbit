@@ -335,6 +335,23 @@ public interface SoftwareManagement {
             @NotNull String rsqlParam, @NotNull Pageable pageable);
 
     /**
+     * Finds all meta data by the given software module id.
+     * 
+     * @param pageable
+     *            pagination parameter
+     *
+     * @param moduleId
+     *            the software module id to retrieve the meta data from
+     * @return page with found software module metadata
+     * 
+     * @throws EntityNotFoundException
+     *             of software module with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Page<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(@NotNull Pageable pageable,
+            @NotNull Long moduleId);
+
+    /**
      * Filter {@link SoftwareModule}s with given
      * {@link SoftwareModule#getName()} or {@link SoftwareModule#getVersion()}
      * search text and {@link SoftwareModule#getType()} that are not marked as
@@ -522,25 +539,4 @@ public interface SoftwareManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     SoftwareModuleType updateSoftwareModuleType(@NotNull SoftwareModuleTypeUpdate update);
-
-    /**
-     * Finds all meta data by the given software module id.
-     *
-     * @param moduleId
-     *            the software module id to retrieve the meta data from
-     * 
-     * 
-     * @throws RSQLParameterUnsupportedFieldException
-     *             if a field in the RSQL string is used but not provided by the
-     *             given {@code fieldNameProvider}
-     * @throws RSQLParameterSyntaxException
-     *             if the RSQL syntax is wrong
-     * @return result of all meta data entries for a given software module id.
-     * 
-     * @throws EntityNotFoundException
-     *             of software module with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    List<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(@NotNull Long moduleId);
-
 }

@@ -94,13 +94,16 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
 
     /**
      * Finds {@link Target}s by assigned {@link Tag}.
+     * 
+     * @param page
+     *            pages query and sorting information
      *
      * @param tagId
      *            to be found
-     * @return list of found targets
+     * @return page of found targets
      */
     @Query(value = "SELECT DISTINCT t FROM JpaTarget t JOIN t.tags tt WHERE tt.id = :tag")
-    List<JpaTarget> findByTag(@Param("tag") final Long tagId);
+    Page<JpaTarget> findByTag(Pageable page, @Param("tag") final Long tagId);
 
     /**
      * Finds all {@link Target}s based on given {@link Target#getControllerId()}

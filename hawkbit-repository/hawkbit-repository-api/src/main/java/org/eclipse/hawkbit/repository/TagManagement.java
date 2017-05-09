@@ -123,13 +123,6 @@ public interface TagManagement {
     void deleteTargetTag(@NotEmpty String targetTagName);
 
     /**
-     * 
-     * @return all {@link DistributionSetTag}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    List<DistributionSetTag> findAllDistributionSetTags();
-
-    /**
      * returns all {@link DistributionSetTag}s.
      *
      * @param pageReq
@@ -240,6 +233,22 @@ public interface TagManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Optional<TargetTag> findTargetTagById(@NotNull Long id);
+
+    /**
+     * Finds all {@link TargetTag} assigned to given {@link Target}.
+     * 
+     * @param pageable
+     *            information for page size, offset and sort order.
+     *
+     * @param setId
+     *            of the {@link DistributionSet}
+     * @return page of the found {@link TargetTag}s
+     * 
+     * @throws EntityNotFoundException
+     *             if {@link DistributionSet} with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Page<DistributionSetTag> findDistributionSetTagsByDistributionSet(@NotNull Pageable pageable, @NotNull Long setId);
 
     /**
      * Updates an existing {@link DistributionSetTag}.

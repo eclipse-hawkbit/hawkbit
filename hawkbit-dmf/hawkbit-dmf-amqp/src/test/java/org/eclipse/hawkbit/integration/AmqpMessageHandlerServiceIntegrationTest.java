@@ -12,7 +12,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -32,7 +31,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreated
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
-import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
@@ -202,7 +200,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         getDmfClient().send(createTargetMessage);
 
         verifyOneDeadLetterMessage();
-        assertThat(systemManagement.findTenants()).hasSize(1);
+        assertThat(systemManagement.findTenants(PAGE)).hasSize(1);
     }
 
     @Test
@@ -606,20 +604,16 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         createConditionFactory().await().until(() -> {
             try {
                 securityRule.runAsPrivileged(() -> {
-                    final Optional<Action> findActionWithDetails = controllerManagement.findActionWithDetails(actionId);
-                    assertThat(findActionWithDetails).isPresent();
-                    assertThat(convertStatusList(findActionWithDetails.get())).containsOnly(expectedActionStates);
+                    final List<Status> status = deploymentManagement.findActionStatusByAction(PAGE, actionId)
+                            .getContent().stream().map(actionStatus -> actionStatus.getStatus())
+                            .collect(Collectors.toList());
+                    assertThat(status).containsOnly(expectedActionStates);
                     return null;
                 });
             } catch (final Exception e) {
                 fail(e.getMessage());
             }
         });
-    }
-
-    private List<Status> convertStatusList(Action action) {
-        return action.getActionStatus().stream().map(actionStatus -> actionStatus.getStatus())
-                .collect(Collectors.toList());
     }
 
     private Message createEventMessage(final String tenant, final EventTopic eventTopic, final Object payload) {

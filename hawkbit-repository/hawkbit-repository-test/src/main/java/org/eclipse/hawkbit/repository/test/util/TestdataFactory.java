@@ -346,6 +346,26 @@ public class TestdataFactory {
     }
 
     /**
+     * Create a list of {@link DistributionSet}s without modules, i.e.
+     * incomplete.
+     * 
+     * @param number
+     *            of {@link DistributionSet}s to create
+     * @return {@link List} of {@link DistributionSet} entities
+     */
+    public List<DistributionSet> createDistributionSetsWithoutModules(final int number) {
+
+        final List<DistributionSet> sets = Lists.newArrayListWithExpectedSize(number);
+        for (int i = 0; i < number; i++) {
+            sets.add(distributionSetManagement.createDistributionSet(
+                    entityFactory.distributionSet().create().name("DS" + i).version(DEFAULT_VERSION + "." + i)
+                            .description(LOREM.words(10)).type(findOrCreateDefaultTestDsType())));
+        }
+
+        return sets;
+    }
+
+    /**
      * Creates {@link DistributionSet}s in repository including three
      * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT}
      * , {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} followed by an

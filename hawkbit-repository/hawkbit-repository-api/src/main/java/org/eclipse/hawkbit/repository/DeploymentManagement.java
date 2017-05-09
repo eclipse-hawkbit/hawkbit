@@ -9,8 +9,8 @@
 package org.eclipse.hawkbit.repository;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 
@@ -24,7 +24,6 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
-import org.eclipse.hawkbit.repository.model.ActionWithStatusCount;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -70,6 +69,7 @@ public interface DeploymentManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     DistributionSetAssignmentResult assignDistributionSet(@NotNull Long dsID, @NotNull ActionType actionType,
             long forcedTimestamp, @NotEmpty Collection<String> controllerIDs);
+
 
     /**
      * method assigns the {@link DistributionSet} to all {@link Target}s by
@@ -275,22 +275,6 @@ public interface DeploymentManagement {
     Page<ActionStatus> findActionStatusByAction(@NotNull Pageable pageReq, @NotNull Long actionId);
 
     /**
-     * Retrieves all {@link ActionStatus} inclusive their messages by a specific
-     * {@link Action}.
-     * 
-     * @param pageable
-     *            the page request parameter for paging and sorting the result
-     * @param actionId
-     *            the {@link Action} to retrieve the {@link ActionStatus} from
-     * @return a page of {@link ActionStatus} by a speciifc {@link Action}
-     * 
-     * @throws EntityNotFoundException
-     *             if action with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<ActionStatus> findActionStatusByActionWithMessages(@NotNull Pageable pageable, @NotNull Long actionId);
-
-    /**
      * Retrieves all messages for an {@link ActionStatus}.
      *
      *
@@ -302,20 +286,6 @@ public interface DeploymentManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<String> findMessagesByActionStatusId(@NotNull Pageable pageable, @NotNull Long actionStatusId);
-
-    /**
-     * Retrieves all {@link Action}s of a specific target ordered by action ID.
-     *
-     * @param controllerId
-     *            the target associated with the actions
-     * @return a list of actions associated with the given target ordered by
-     *         action ID
-     *
-     * @throws EntityNotFoundException
-     *             if target with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<ActionWithStatusCount> findActionsWithStatusCountByTargetOrderByIdDesc(@NotNull String controllerId);
 
     /**
      * Get the {@link Action} entity for given actionId with all lazy attributes
@@ -331,7 +301,9 @@ public interface DeploymentManagement {
     /**
      * Retrieves all active {@link Action}s of a specific target ordered by
      * action ID.
-     *
+     * 
+     * @param pageable
+     *            the page request parameter for paging and sorting the result
      * @param controllerId
      *            the target associated with the actions
      * @return a list of actions associated with the given target
@@ -340,12 +312,14 @@ public interface DeploymentManagement {
      *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<Action> findActiveActionsByTarget(@NotEmpty String controllerId);
+    Page<Action> findActiveActionsByTarget(@NotNull Pageable pageable, @NotEmpty String controllerId);
 
     /**
      * Retrieves all inactive {@link Action}s of a specific target ordered by
      * action ID.
      *
+     * @param pageable
+     *            the page request parameter for paging and sorting the result
      * @param controllerId
      *            the target associated with the actions
      * @return a list of actions associated with the given target
@@ -354,7 +328,7 @@ public interface DeploymentManagement {
      *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<Action> findInActiveActionsByTarget(@NotEmpty String controllerId);
+    Page<Action> findInActiveActionsByTarget(@NotNull Pageable pageable, @NotEmpty String controllerId);
 
     /**
      * Force cancels given {@link Action} for given {@link Target}. Force

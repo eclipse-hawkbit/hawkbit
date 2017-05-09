@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.rest.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,6 +21,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,21 +35,68 @@ import org.json.JSONObject;
  */
 public abstract class JsonBuilder {
 
+    public static String ids(final Collection<Long> ids) {
+        final JSONArray list = new JSONArray();
+        for (final Long smID : ids) {
+            list.put(new JSONObject().put("id", smID));
+        }
+
+        return list.toString();
+    }
+
+    public static String controllerIds(final Collection<String> ids) {
+        final JSONArray list = new JSONArray();
+        for (final String smID : ids) {
+            list.put(new JSONObject().put("controllerId", smID));
+        }
+
+        return list.toString();
+    }
+
+    public static String tags(final List<Tag> tags) throws JSONException {
+        final StringBuilder builder = new StringBuilder();
+
+        builder.append("[");
+        int i = 0;
+        for (final Tag tag : tags) {
+            createTagLine(builder, tag);
+
+            if (++i < tags.size()) {
+                builder.append(",");
+            }
+        }
+
+        builder.append("]");
+
+        return builder.toString();
+
+    }
+
+    private static void createTagLine(final StringBuilder builder, final Tag tag) {
+        builder.append(new JSONObject().put("name", tag.getName()).put("description", tag.getDescription())
+                .put("colour", tag.getColour()).put("createdAt", "0").put("updatedAt", "0")
+                .put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh").toString());
+    }
+
+    public static String tag(final Tag tag) throws JSONException {
+        final StringBuilder builder = new StringBuilder();
+
+        createTagLine(builder, tag);
+
+        return builder.toString();
+
+    }
+
     public static String softwareModules(final List<SoftwareModule> modules) throws JSONException {
         final StringBuilder builder = new StringBuilder();
 
         builder.append("[");
         int i = 0;
         for (final SoftwareModule module : modules) {
-            try {
-                builder.append(new JSONObject().put("name", module.getName())
-                        .put("description", module.getDescription()).put("type", module.getType().getKey())
-                        .put("id", Long.MAX_VALUE).put("vendor", module.getVendor()).put("version", module.getVersion())
-                        .put("createdAt", "0").put("updatedAt", "0").put("createdBy", "fghdfkjghdfkjh")
-                        .put("updatedBy", "fghdfkjghdfkjh").toString());
-            } catch (final Exception e) {
-                e.printStackTrace();
-            }
+            builder.append(new JSONObject().put("name", module.getName()).put("description", module.getDescription())
+                    .put("type", module.getType().getKey()).put("id", Long.MAX_VALUE).put("vendor", module.getVendor())
+                    .put("version", module.getVersion()).put("createdAt", "0").put("updatedAt", "0")
+                    .put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh").toString());
 
             if (++i < modules.size()) {
                 builder.append(",");
@@ -66,13 +115,9 @@ public abstract class JsonBuilder {
         builder.append("[");
         int i = 0;
         for (final SoftwareModule module : modules) {
-            try {
-                builder.append(new JSONObject().put("name", module.getName())
-                        .put("description", module.getDescription()).put("type", module.getType().getKey())
-                        .put("vendor", module.getVendor()).put("version", module.getVersion()).toString());
-            } catch (final Exception e) {
-                e.printStackTrace();
-            }
+            builder.append(new JSONObject().put("name", module.getName()).put("description", module.getDescription())
+                    .put("type", module.getType().getKey()).put("vendor", module.getVendor())
+                    .put("version", module.getVersion()).toString());
 
             if (++i < modules.size()) {
                 builder.append(",");
@@ -101,15 +146,10 @@ public abstract class JsonBuilder {
         builder.append("[");
         int i = 0;
         for (final SoftwareModuleType module : types) {
-            try {
-                builder.append(new JSONObject().put("name", module.getName())
-                        .put("description", module.getDescription()).put("id", Long.MAX_VALUE)
-                        .put("key", module.getKey()).put("maxAssignments", module.getMaxAssignments())
-                        .put("createdAt", "0").put("updatedAt", "0").put("createdBy", "fghdfkjghdfkjh")
-                        .put("updatedBy", "fghdfkjghdfkjh").toString());
-            } catch (final Exception e) {
-                e.printStackTrace();
-            }
+            builder.append(new JSONObject().put("name", module.getName()).put("description", module.getDescription())
+                    .put("id", Long.MAX_VALUE).put("key", module.getKey())
+                    .put("maxAssignments", module.getMaxAssignments()).put("createdAt", "0").put("updatedAt", "0")
+                    .put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh").toString());
 
             if (++i < types.size()) {
                 builder.append(",");
@@ -129,13 +169,8 @@ public abstract class JsonBuilder {
         builder.append("[");
         int i = 0;
         for (final SoftwareModuleType module : types) {
-            try {
-                builder.append(new JSONObject().put("name", module.getName())
-                        .put("description", module.getDescription()).put("key", module.getKey())
-                        .put("maxAssignments", module.getMaxAssignments()).toString());
-            } catch (final Exception e) {
-                e.printStackTrace();
-            }
+            builder.append(new JSONObject().put("name", module.getName()).put("description", module.getDescription())
+                    .put("key", module.getKey()).put("maxAssignments", module.getMaxAssignments()).toString());
 
             if (++i < types.size()) {
                 builder.append(",");
@@ -249,22 +284,16 @@ public abstract class JsonBuilder {
         int i = 0;
         for (final DistributionSetType module : types) {
 
-            try {
+            final JSONArray osmTypes = new JSONArray();
+            module.getOptionalModuleTypes().forEach(smt -> osmTypes.put(new JSONObject().put("id", smt.getId())));
 
-                final JSONArray osmTypes = new JSONArray();
-                module.getOptionalModuleTypes().forEach(smt -> osmTypes.put(new JSONObject().put("id", smt.getId())));
+            final JSONArray msmTypes = new JSONArray();
+            module.getMandatoryModuleTypes().forEach(smt -> msmTypes.put(new JSONObject().put("id", smt.getId())));
 
-                final JSONArray msmTypes = new JSONArray();
-                module.getMandatoryModuleTypes().forEach(smt -> msmTypes.put(new JSONObject().put("id", smt.getId())));
-
-                builder.append(new JSONObject().put("name", module.getName())
-                        .put("description", module.getDescription()).put("id", Long.MAX_VALUE)
-                        .put("key", module.getKey()).put("createdAt", "0").put("updatedAt", "0")
-                        .put("createdBy", "fghdfkjghdfkjh").put("optionalmodules", osmTypes)
-                        .put("mandatorymodules", msmTypes).put("updatedBy", "fghdfkjghdfkjh").toString());
-            } catch (final Exception e) {
-                e.printStackTrace();
-            }
+            builder.append(new JSONObject().put("name", module.getName()).put("description", module.getDescription())
+                    .put("id", Long.MAX_VALUE).put("key", module.getKey()).put("createdAt", "0").put("updatedAt", "0")
+                    .put("createdBy", "fghdfkjghdfkjh").put("optionalmodules", osmTypes)
+                    .put("mandatorymodules", msmTypes).put("updatedBy", "fghdfkjghdfkjh").toString());
 
             if (++i < types.size()) {
                 builder.append(",");
@@ -283,20 +312,15 @@ public abstract class JsonBuilder {
         int i = 0;
         for (final DistributionSetType module : types) {
 
-            try {
+            final JSONArray osmTypes = new JSONArray();
+            module.getOptionalModuleTypes().forEach(smt -> osmTypes.put(new JSONObject().put("id", smt.getId())));
 
-                final JSONArray osmTypes = new JSONArray();
-                module.getOptionalModuleTypes().forEach(smt -> osmTypes.put(new JSONObject().put("id", smt.getId())));
+            final JSONArray msmTypes = new JSONArray();
+            module.getMandatoryModuleTypes().forEach(smt -> msmTypes.put(new JSONObject().put("id", smt.getId())));
 
-                final JSONArray msmTypes = new JSONArray();
-                module.getMandatoryModuleTypes().forEach(smt -> msmTypes.put(new JSONObject().put("id", smt.getId())));
-
-                builder.append(new JSONObject().put("name", module.getName())
-                        .put("description", module.getDescription()).put("key", module.getKey())
-                        .put("optionalmodules", osmTypes).put("mandatorymodules", msmTypes).toString());
-            } catch (final Exception e) {
-                e.printStackTrace();
-            }
+            builder.append(new JSONObject().put("name", module.getName()).put("description", module.getDescription())
+                    .put("key", module.getKey()).put("optionalmodules", osmTypes).put("mandatorymodules", msmTypes)
+                    .toString());
 
             if (++i < types.size()) {
                 builder.append(",");
@@ -314,11 +338,7 @@ public abstract class JsonBuilder {
         builder.append("[");
         int i = 0;
         for (final DistributionSet set : sets) {
-            try {
-                builder.append(distributionSet(set));
-            } catch (final Exception e) {
-                e.printStackTrace();
-            }
+            builder.append(distributionSet(set));
 
             if (++i < sets.size()) {
                 builder.append(",");
@@ -337,12 +357,7 @@ public abstract class JsonBuilder {
         builder.append("[");
         int i = 0;
         for (final DistributionSet set : sets) {
-            try {
-                builder.append(distributionSetCreateValidFieldsOnly(set));
-            } catch (final Exception e) {
-                e.printStackTrace();
-            }
-
+            builder.append(distributionSetCreateValidFieldsOnly(set));
             if (++i < sets.size()) {
                 builder.append(",");
             }
@@ -356,15 +371,8 @@ public abstract class JsonBuilder {
 
     public static String distributionSetCreateValidFieldsOnly(final DistributionSet set) throws JSONException {
 
-        final List<JSONObject> modules = set.getModules().stream().map(module -> {
-            try {
-                return new JSONObject().put("id", module.getId());
-            } catch (final Exception e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }).collect(Collectors.toList());
+        final List<JSONObject> modules = set.getModules().stream()
+                .map(module -> new JSONObject().put("id", module.getId())).collect(Collectors.toList());
 
         return new JSONObject().put("name", set.getName()).put("description", set.getDescription())
                 .put("type", set.getType() == null ? null : set.getType().getKey()).put("version", set.getVersion())
@@ -374,15 +382,8 @@ public abstract class JsonBuilder {
 
     public static String distributionSetUpdateValidFieldsOnly(final DistributionSet set) throws JSONException {
 
-        final List<JSONObject> modules = set.getModules().stream().map(module -> {
-            try {
-                return new JSONObject().put("id", module.getId());
-            } catch (final Exception e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }).collect(Collectors.toList());
+        final List<JSONObject> modules = set.getModules().stream()
+                .map(module -> new JSONObject().put("id", module.getId())).collect(Collectors.toList());
 
         return new JSONObject().put("name", set.getName()).put("description", set.getDescription())
                 .put("version", set.getVersion()).put("requiredMigrationStep", set.isRequiredMigrationStep())
@@ -392,15 +393,8 @@ public abstract class JsonBuilder {
 
     public static String distributionSet(final DistributionSet set) throws JSONException {
 
-        final List<JSONObject> modules = set.getModules().stream().map(module -> {
-            try {
-                return new JSONObject().put("id", module.getId());
-            } catch (final Exception e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }).collect(Collectors.toList());
+        final List<JSONObject> modules = set.getModules().stream()
+                .map(module -> new JSONObject().put("id", module.getId())).collect(Collectors.toList());
 
         return new JSONObject().put("name", set.getName()).put("description", set.getDescription())
                 .put("type", set.getType() == null ? null : set.getType().getKey()).put("id", Long.MAX_VALUE)
@@ -416,18 +410,14 @@ public abstract class JsonBuilder {
         builder.append("[");
         int i = 0;
         for (final Target target : targets) {
-            try {
-                final String address = target.getAddress() != null ? target.getAddress().toString() : null;
+            final String address = target.getAddress() != null ? target.getAddress().toString() : null;
 
-                final String token = withToken ? target.getSecurityToken() : null;
+            final String token = withToken ? target.getSecurityToken() : null;
 
-                builder.append(new JSONObject().put("controllerId", target.getControllerId())
-                        .put("description", target.getDescription()).put("name", target.getName()).put("createdAt", "0")
-                        .put("updatedAt", "0").put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh")
-                        .put("address", address).put("securityToken", token).toString());
-            } catch (final Exception e) {
-                e.printStackTrace();
-            }
+            builder.append(new JSONObject().put("controllerId", target.getControllerId())
+                    .put("description", target.getDescription()).put("name", target.getName()).put("createdAt", "0")
+                    .put("updatedAt", "0").put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh")
+                    .put("address", address).put("securityToken", token).toString());
 
             if (++i < targets.size()) {
                 builder.append(",");

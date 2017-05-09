@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.management.actionhistory;
 import java.io.Serializable;
 
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.ActionStatus;
 
 /**
  * Proxy for {@link ActionStatus}

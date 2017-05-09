@@ -145,7 +145,7 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
             final int count) {
         final List<Long> targetIds = targets.stream().map(Target::getId).collect(Collectors.toList());
 
-        final Slice<Target> targetsAll = targetManagement.findTargetsAll(pageReq);
+        final Slice<Target> targetsAll = targetManagement.findTargetsAll(PAGE);
         assertThat(targetsAll).as("Count of targets").hasSize(count);
 
         for (final Target target : targetsAll) {

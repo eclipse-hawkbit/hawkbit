@@ -100,4 +100,7 @@ $ java -jar ./examples/hawkbit-example-mgmt-simulator/target/hawkbit-example-mgm
 
 hawkBit is currently in '0.X' semantic version. That is due to the need that there is still content in hawkBit that is in need for refactoring. That includes the maven module structure, Spring Boot Properties, Spring Boot auto configuration as well as internal Java APIs (e.g. the [repository API](https://github.com/eclipse/hawkbit/issues/197) ).
 
-However, the external APIs (i.e. [Management API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-mgmt-api), [DDI API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-ddi-api), [DDI Artifact Download API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-ddi-dl-api) and [DMF API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api) are on major version 'v1' and will be kept stable.
+However, the device facing [DDI API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-ddi-api) is on major version 'v1' and will be kept stable.
+
+Server facing and [DMF API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api) are [Management API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-mgmt-api) are on v1 as well. However, we cannot fully guarantee the same stability during hawkBit's 0.X development but we will try as best we can.
+

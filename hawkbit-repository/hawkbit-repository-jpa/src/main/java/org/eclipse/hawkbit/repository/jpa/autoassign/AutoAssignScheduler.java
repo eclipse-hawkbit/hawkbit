@@ -8,12 +8,10 @@
  */
 package org.eclipse.hawkbit.repository.jpa.autoassign;
 
-import java.util.List;
 import java.util.concurrent.locks.Lock;
 
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.integration.support.locks.LockRegistry;
@@ -27,8 +25,6 @@ public class AutoAssignScheduler {
 
     private static final String PROP_SCHEDULER_DELAY_PLACEHOLDER = "${hawkbit.autoassign.scheduler.fixedDelay:2000}";
 
-    private final TenantAware tenantAware;
-
     private final SystemManagement systemManagement;
 
     private final SystemSecurityContext systemSecurityContext;
@@ -40,8 +36,6 @@ public class AutoAssignScheduler {
     /**
      * Instantiates a new AutoAssignScheduler
      * 
-     * @param tenantAware
-     *            to run as specific tenant
      * @param systemManagement
      *            to find all tenants
      * @param systemSecurityContext
@@ -51,10 +45,9 @@ public class AutoAssignScheduler {
      * @param lockRegistry
      *            to acquire a lock per tenant
      */
-    public AutoAssignScheduler(final TenantAware tenantAware, final SystemManagement systemManagement,
+    public AutoAssignScheduler(final SystemManagement systemManagement,
             final SystemSecurityContext systemSecurityContext, final AutoAssignChecker autoAssignChecker,
             final LockRegistry lockRegistry) {
-        this.tenantAware = tenantAware;
         this.systemManagement = systemManagement;
         this.systemSecurityContext = systemSecurityContext;
         this.autoAssignChecker = autoAssignChecker;
@@ -82,24 +75,17 @@ public class AutoAssignScheduler {
         // https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So
         // iterate through all tenants and execute the rollout check for
         // each tenant separately.
-        final List<String> tenants = systemManagement.findTenants();
-        LOGGER.info("Checking target filter queries for tenants: {}", tenants.size());
-
         final Lock lock = lockRegistry.obtain("autoassign");
         if (!lock.tryLock()) {
             return null;
         }
 
         try {
-            for (final String tenant : tenants) {
-                tenantAware.runAsTenant(tenant, () -> {
-                    autoAssignChecker.check();
-                    return null;
-                });
-            }
+            systemManagement.forEachTenant(tenant -> autoAssignChecker.check());
         } finally {
             lock.unlock();
         }
+
         return null;
     }
 }

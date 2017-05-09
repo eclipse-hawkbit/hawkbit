@@ -71,7 +71,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
     @Before
     public void assertPreparationOfRepo() {
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("no softwaremodule should be founded")
+        assertThat(softwareManagement.findSoftwareModulesAll(PAGE)).as("no softwaremodule should be founded")
                 .hasSize(0);
     }
 
@@ -182,7 +182,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     @Test
     @Description("Verfies that the system does not accept empty artifact uploads. Expected response: BAD REQUEST")
     public void emptyUploadArtifact() throws Exception {
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
+        assertThat(softwareManagement.findSoftwareModulesAll(PAGE)).hasSize(0);
         assertThat(artifactManagement.countArtifactsAll()).isEqualTo(0);
 
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
@@ -313,7 +313,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         assertTrue("Response has wrong response content",
                 Arrays.equals(result2.getResponse().getContentAsByteArray(), random));
 
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("Softwaremodule size is wrong").hasSize(1);
+        assertThat(softwareManagement.findSoftwareModulesAll(PAGE)).as("Softwaremodule size is wrong").hasSize(1);
         assertThat(artifactManagement.countArtifactsAll()).isEqualTo(2);
     }
 
@@ -551,7 +551,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(jsonPath("$.content.[?(@.id==" + app.getId() + ")]._links.self.href",
                         contains("http://localhost/rest/v1/softwaremodules/" + app.getId())));
 
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("Softwaremodule size is wrong").hasSize(2);
+        assertThat(softwareManagement.findSoftwareModulesAll(PAGE)).as("Softwaremodule size is wrong").hasSize(2);
     }
 
     @Test
@@ -562,7 +562,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         testdataFactory.createSoftwareModuleOs("2");
         final SoftwareModule app2 = testdataFactory.createSoftwareModuleApp("2");
 
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(4);
+        assertThat(softwareManagement.findSoftwareModulesAll(PAGE)).hasSize(4);
 
         // only by name, only one exists per name
         mvc.perform(get("/rest/v1/softwaremodules?q=name==" + os1.getName()).accept(MediaType.APPLICATION_JSON))
@@ -652,7 +652,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(jsonPath("$._links.artifacts.href",
                         equalTo("http://localhost/rest/v1/softwaremodules/" + os.getId() + "/artifacts")));
 
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("Softwaremodule size is wrong").hasSize(1);
+        assertThat(softwareManagement.findSoftwareModulesAll(PAGE)).as("Softwaremodule size is wrong").hasSize(1);
     }
 
     @Test
@@ -707,14 +707,14 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .toString()).as("Response contains invalid artifacts href")
                         .isEqualTo("http://localhost/rest/v1/softwaremodules/" + appCreated.getId() + "/artifacts");
 
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("Wrong softwaremodule size").hasSize(2);
-        assertThat(softwareManagement.findSoftwareModulesByType(pageReq, osType.getId()).getContent().get(0).getName())
+        assertThat(softwareManagement.findSoftwareModulesAll(PAGE)).as("Wrong softwaremodule size").hasSize(2);
+        assertThat(softwareManagement.findSoftwareModulesByType(PAGE, osType.getId()).getContent().get(0).getName())
                 .as("Softwaremoudle name is wrong").isEqualTo(os.getName());
-        assertThat(softwareManagement.findSoftwareModulesByType(pageReq, osType.getId()).getContent().get(0)
+        assertThat(softwareManagement.findSoftwareModulesByType(PAGE, osType.getId()).getContent().get(0)
                 .getCreatedBy()).as("Softwaremoudle created by is wrong").isEqualTo("uploadTester");
-        assertThat(softwareManagement.findSoftwareModulesByType(pageReq, osType.getId()).getContent().get(0)
+        assertThat(softwareManagement.findSoftwareModulesByType(PAGE, osType.getId()).getContent().get(0)
                 .getCreatedAt()).as("Softwaremoudle created at is wrong").isGreaterThanOrEqualTo(current);
-        assertThat(softwareManagement.findSoftwareModulesByType(pageReq, appType.getId()).getContent().get(0).getName())
+        assertThat(softwareManagement.findSoftwareModulesByType(PAGE, appType.getId()).getContent().get(0).getName())
                 .as("Softwaremoudle name is wrong").isEqualTo(ah.getName());
     }
 
@@ -728,13 +728,13 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(), "file1", false);
 
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("Softwaremoudle size is wrong").hasSize(1);
+        assertThat(softwareManagement.findSoftwareModulesAll(PAGE)).as("Softwaremoudle size is wrong").hasSize(1);
         assertThat(artifactManagement.countArtifactsAll()).isEqualTo(1);
 
         mvc.perform(delete("/rest/v1/softwaremodules/{smId}", sm.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq))
+        assertThat(softwareManagement.findSoftwareModulesAll(PAGE))
                 .as("After delete no softwarmodule should be available").isEmpty();
         assertThat(artifactManagement.countArtifactsAll()).isEqualTo(0);
     }
@@ -749,7 +749,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         artifactManagement.createArtifact(new ByteArrayInputStream(random),
                 ds1.findFirstModuleByType(appType).get().getId(), "file1", false);
 
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(3);
+        assertThat(softwareManagement.findSoftwareModulesAll(PAGE)).hasSize(3);
         assertThat(artifactManagement.countArtifactsAll()).isEqualTo(1);
 
         mvc.perform(delete("/rest/v1/softwaremodules/{smId}", ds1.findFirstModuleByType(appType).get().getId()))
@@ -760,7 +760,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         // all 3 are now marked as deleted
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq).getNumber())
+        assertThat(softwareManagement.findSoftwareModulesAll(PAGE).getNumber())
                 .as("After delete no softwarmodule should be available").isEqualTo(0);
         assertThat(artifactManagement.countArtifactsAll()).isEqualTo(1);
     }
@@ -779,7 +779,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(), "file2", false);
 
         // check repo before delete
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(1);
+        assertThat(softwareManagement.findSoftwareModulesAll(PAGE)).hasSize(1);
 
         assertThat(softwareManagement.findSoftwareModuleById(sm.getId()).get().getArtifacts()).hasSize(2);
         assertThat(artifactManagement.countArtifactsAll()).isEqualTo(2);
@@ -789,7 +789,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         // check that only one artifact is still alive and still assigned
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("After the sm should be marked as deleted")
+        assertThat(softwareManagement.findSoftwareModulesAll(PAGE)).as("After the sm should be marked as deleted")
                 .hasSize(1);
         assertThat(artifactManagement.countArtifactsAll()).isEqualTo(1);
         assertThat(softwareManagement.findSoftwareModuleById(sm.getId()).get().getArtifacts())

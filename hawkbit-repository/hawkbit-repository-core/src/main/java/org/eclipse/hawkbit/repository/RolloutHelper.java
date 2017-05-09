@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
  * A collection of static helper methods for the {@link RolloutManagement}
  */
 public final class RolloutHelper {
+
     private RolloutHelper() {
     }
 
@@ -68,12 +69,14 @@ public final class RolloutHelper {
      * 
      * @param amountGroup
      *            amount of groups
+     * @param quotaManagement
+     *            to retrieve maximum number of groups allowed
      */
-    public static void verifyRolloutGroupParameter(final int amountGroup) {
+    public static void verifyRolloutGroupParameter(final int amountGroup, final QuotaManagement quotaManagement) {
         if (amountGroup <= 0) {
-            throw new ConstraintViolationException("the amountGroup must be greater than zero");
-        } else if (amountGroup > 500) {
-            throw new ConstraintViolationException("the amountGroup must not be greater than 500");
+            throw new ConstraintViolationException("the amount of groups cannot be lower than zero");
+        } else if (amountGroup > quotaManagement.getMaxRolloutGroupsPerRollout()) {
+            throw new ConstraintViolationException("the amount of groups cannot be greater than 500");
         }
     }
 
@@ -144,30 +147,10 @@ public final class RolloutHelper {
      *            the group to add
      * @return list of groups
      */
-    public static List<Long> getGroupsByStatusIncludingGroup(final Rollout rollout,
+    public static List<Long> getGroupsByStatusIncludingGroup(final List<RolloutGroup> groups,
             final RolloutGroup.RolloutGroupStatus status, final RolloutGroup group) {
-        return rollout.getRolloutGroups().stream()
-                .filter(innerGroup -> innerGroup.getStatus().equals(status) || innerGroup.equals(group))
+        return groups.stream().filter(innerGroup -> innerGroup.getStatus().equals(status) || innerGroup.equals(group))
                 .map(RolloutGroup::getId).collect(Collectors.toList());
-    }
-
-    /**
-     * Returns the groups of a rollout by their Ids order
-     * 
-     * @param rollout
-     *            the rollout
-     * @return ordered list of groups
-     */
-    public static List<RolloutGroup> getOrderedGroups(final Rollout rollout) {
-        return rollout.getRolloutGroups().stream().sorted((group1, group2) -> {
-            if (group1.getId() < group2.getId()) {
-                return -1;
-            }
-            if (group1.getId() > group2.getId()) {
-                return 1;
-            }
-            return 0;
-        }).collect(Collectors.toList());
     }
 
     /**

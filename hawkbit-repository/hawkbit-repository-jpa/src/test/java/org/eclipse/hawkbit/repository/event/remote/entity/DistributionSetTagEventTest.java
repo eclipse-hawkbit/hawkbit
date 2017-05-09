@@ -31,7 +31,7 @@ public class DistributionSetTagEventTest extends AbstractRemoteEntityEventTest<D
     @Test
     @Description("Verifies that the distribution set tag entity reloading by remote updated event works")
     public void testDistributionSetTagUpdateEvent() {
-        assertAndCreateRemoteEvent(DistributionSetTagUpdateEvent.class);
+        assertAndCreateRemoteEvent(DistributionSetTagUpdatedEvent.class);
     }
 
     @Override

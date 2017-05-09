@@ -76,6 +76,8 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     protected static final String TAG_DYNAMIC_STYLE = "tag-color-preview";
     protected static final String MESSAGE_ERROR_MISSING_TAGNAME = "message.error.missing.tagname";
 
+    protected static final int MAX_TAGS = 500;
+
     protected VaadinMessageSource i18n;
 
     protected transient TagManagement tagManagement;

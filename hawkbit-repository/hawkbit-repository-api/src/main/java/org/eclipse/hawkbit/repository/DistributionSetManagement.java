@@ -364,17 +364,6 @@ public interface DistributionSetManagement {
             @NotNull String rsqlParam, @NotNull Pageable pageable);
 
     /**
-     * Retrieves {@link DistributionSet} List for overview purposes (no
-     * {@link SoftwareModule}s and {@link DistributionSetTag}s).
-     *
-     * @param dist
-     *            List of {@link DistributionSet} IDs to be found
-     * @return the found {@link DistributionSet}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    List<DistributionSet> findDistributionSetsAll(Collection<Long> dist);
-
-    /**
      * finds all {@link DistributionSet}s.
      *
      * @param pageReq
@@ -421,6 +410,21 @@ public interface DistributionSetManagement {
             Boolean deleted);
 
     /**
+     * finds all {@link DistributionSet}s.
+     *
+     * @param pageReq
+     *            the pagination parameter
+     * @param deleted
+     *            if TRUE, {@link DistributionSet}s marked as deleted are
+     *            returned. If FALSE, on {@link DistributionSet}s not marked as
+     *            deleted are returned. <code>null</code> if both are to be
+     *            returned
+     * @return all found {@link DistributionSet}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Page<DistributionSet> findDistributionSetsAll(@NotNull Pageable pageReq, Boolean deleted);
+
+    /**
      * method retrieves all {@link DistributionSet}s from the repository in the
      * following order:
      * <p>
@@ -457,6 +461,45 @@ public interface DistributionSetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<DistributionSet> findDistributionSetsByFilters(@NotNull Pageable pageable,
             @NotNull DistributionSetFilter distributionSetFilter);
+
+    /**
+     * retrieves {@link DistributionSet}s by filtering on the given parameters.
+     *
+     * @param pageable
+     *            page parameter
+     * @param tagId
+     *            of the tag the DS are assigned to
+     * @return the page of found {@link DistributionSet}
+     * 
+     * @throws RSQLParameterUnsupportedFieldException
+     *             if a field in the RSQL string is used but not provided by the
+     *             given {@code fieldNameProvider}
+     * @throws RSQLParameterSyntaxException
+     *             if the RSQL syntax is wrong
+     * 
+     * @throws EntityNotFoundException
+     *             of distribution set tag with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Page<DistributionSet> findDistributionSetsByTag(@NotNull final Pageable pageable, @NotNull final Long tagId);
+
+    /**
+     * retrieves {@link DistributionSet}s by filtering on the given parameters.
+     *
+     * @param pageable
+     *            page parameter
+     * @param rsqlParam
+     *            rsql query string
+     * @param tagId
+     *            of the tag the DS are assigned to
+     * @return the page of found {@link DistributionSet}
+     * 
+     * @throws EntityNotFoundException
+     *             of distribution set tag with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Page<DistributionSet> findDistributionSetsByTag(@NotNull final Pageable pageable, @NotNull String rsqlParam,
+            @NotNull final Long tagId);
 
     /**
      * @param id
@@ -555,20 +598,6 @@ public interface DistributionSetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     DistributionSetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<Long> dsIds, @NotNull String tagName);
-
-    /**
-     * Unassign all {@link DistributionSet} from a given
-     * {@link DistributionSetTag} .
-     *
-     * @param tagId
-     *            to unassign all ds
-     * @return list of unassigned ds
-     * 
-     * @throws EntityNotFoundException
-     *             if tag with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    List<DistributionSet> unAssignAllDistributionSetsByTag(@NotNull Long tagId);
 
     /**
      * Unassigns a {@link SoftwareModule} form an existing
@@ -731,6 +760,6 @@ public interface DistributionSetManagement {
      * @return the found {@link DistributionSet}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    List<DistributionSet> findDistributionSetAllById(@NotEmpty Collection<Long> ids);
+    List<DistributionSet> findDistributionSetsById(@NotEmpty Collection<Long> ids);
 
 }

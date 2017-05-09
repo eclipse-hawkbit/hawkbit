@@ -287,4 +287,19 @@ public final class TargetSpecifications {
         return (targetRoot, query, cb) -> cb.equal(
                 targetRoot.get(JpaTarget_.installedDistributionSet).get(JpaDistributionSet_.id), distributionSetId);
     }
+
+    /**
+     * {@link Specification} for retrieving {@link Target}s by tag.
+     *
+     * @param tagId
+     *            the ID of the distribution set which must be assigned
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> hasTag(final Long tagId) {
+
+        return (targetRoot, query, cb) -> {
+            final SetJoin<JpaTarget, JpaTargetTag> tags = targetRoot.join(JpaTarget_.tags, JoinType.LEFT);
+            return cb.equal(tags.get(JpaTargetTag_.id), tagId);
+        };
+    }
 }

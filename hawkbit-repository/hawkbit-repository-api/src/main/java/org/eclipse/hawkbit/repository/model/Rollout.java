@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -36,11 +35,6 @@ public interface Rollout extends NamedEntity {
      * @return {@link DistributionSet} that is rolled out
      */
     DistributionSet getDistributionSet();
-
-    /**
-     * @return immutable list of deployment groups of the rollout.
-     */
-    List<RolloutGroup> getRolloutGroups();
 
     /**
      * @return rsql query that identifies the targets that are part of this

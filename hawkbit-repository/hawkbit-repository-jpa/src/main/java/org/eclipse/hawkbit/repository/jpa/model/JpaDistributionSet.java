@@ -35,7 +35,7 @@ import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.DistributionSetTypeUndefinedException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -174,7 +174,6 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         this(name, version, description, type, moduleList, false);
     }
 
-    @Override
     public Set<DistributionSetTag> getTags() {
         if (tags == null) {
             return Collections.emptySet();
@@ -339,7 +338,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
 
         publishEventWithEventPublisher(
-                new DistributionSetUpdateEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+                new DistributionSetUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
 
         if (isSoftDeleted(descriptorEvent)) {
             publishEventWithEventPublisher(new DistributionSetDeletedEvent(getTenant(), getId(), getClass().getName(),

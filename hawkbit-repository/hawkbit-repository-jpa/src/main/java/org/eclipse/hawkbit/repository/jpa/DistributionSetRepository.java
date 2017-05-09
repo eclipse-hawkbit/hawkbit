@@ -17,11 +17,12 @@ import javax.persistence.EntityManager;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -38,13 +39,29 @@ public interface DistributionSetRepository
 
     /**
      * Finds {@link DistributionSet}s by assigned {@link Tag}.
+     * 
+     * @param pageable
+     *            paging and sorting information
      *
-     * @param tag
+     * @param tagId
      *            to be found
      * @return list of found {@link DistributionSet}s
      */
-    @Query(value = "Select Distinct ds from JpaDistributionSet ds join ds.tags dst where dst = :tag")
-    List<JpaDistributionSet> findByTag(@Param("tag") final DistributionSetTag tag);
+    @Query(value = "Select Distinct ds from JpaDistributionSet ds join ds.tags dst where dst.id = :tag")
+    Page<JpaDistributionSet> findByTag(Pageable pageable, @Param("tag") final Long tagId);
+
+    /**
+     * Finds {@link DistributionSet}s by assigned {@link Tag}.
+     * 
+     * @param pageable
+     *            paging and sorting information
+     *
+     * @param tagId
+     *            to be found
+     * @return page of found {@link DistributionSet}s
+     */
+    @Query(value = "Select Distinct ds from JpaDistributionSet ds join ds.tags dst where dst.id = :tagId")
+    Page<JpaDistributionSet> findByTagId(Pageable pageable, @Param("tagId") final Long tagId);
 
     /**
      * deletes the {@link DistributionSet}s with the given IDs.
@@ -147,9 +164,9 @@ public interface DistributionSetRepository
 
     /**
      * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety
-     * reasons (this is a "delete everything" query after all) we add the tenant manually to
-     * query even if this will by done by {@link EntityManager} anyhow. The DB
-     * should take care of optimizing this away.
+     * reasons (this is a "delete everything" query after all) we add the tenant
+     * manually to query even if this will by done by {@link EntityManager}
+     * anyhow. The DB should take care of optimizing this away.
      *
      * @param tenant
      *            to delete data from

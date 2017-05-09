@@ -112,7 +112,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
 
         verifyThrownExceptionBy(() -> softwareManagement.deleteSoftwareModuleType(NOT_EXIST_IDL), "SoftwareModuleType");
 
-        verifyThrownExceptionBy(() -> softwareManagement.findSoftwareModuleByAssignedTo(pageReq, NOT_EXIST_IDL),
+        verifyThrownExceptionBy(() -> softwareManagement.findSoftwareModuleByAssignedTo(PAGE, NOT_EXIST_IDL),
                 "DistributionSet");
 
         verifyThrownExceptionBy(
@@ -122,11 +122,12 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> softwareManagement.findSoftwareModuleMetadata(NOT_EXIST_IDL, NOT_EXIST_ID),
                 "SoftwareModule");
 
-        verifyThrownExceptionBy(() -> softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(NOT_EXIST_IDL),
+        verifyThrownExceptionBy(
+                () -> softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(PAGE, NOT_EXIST_IDL),
                 "SoftwareModule");
         verifyThrownExceptionBy(() -> softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(NOT_EXIST_IDL,
-                "name==*", pageReq), "SoftwareModule");
-        verifyThrownExceptionBy(() -> softwareManagement.findSoftwareModulesByType(pageReq, NOT_EXIST_IDL),
+                "name==*", PAGE), "SoftwareModule");
+        verifyThrownExceptionBy(() -> softwareManagement.findSoftwareModulesByType(PAGE, NOT_EXIST_IDL),
                 "SoftwareModule");
 
         verifyThrownExceptionBy(
@@ -241,29 +242,29 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         ds = (JpaDistributionSet) assignSet(target, ds).getDistributionSet();
 
         // standard searches
-        assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "poky", osType.getId()).getContent())
+        assertThat(softwareManagement.findSoftwareModuleByFilters(PAGE, "poky", osType.getId()).getContent())
                 .hasSize(1);
-        assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "poky", osType.getId()).getContent().get(0))
+        assertThat(softwareManagement.findSoftwareModuleByFilters(PAGE, "poky", osType.getId()).getContent().get(0))
                 .isEqualTo(os);
-        assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "oracle%", runtimeType.getId()).getContent())
+        assertThat(softwareManagement.findSoftwareModuleByFilters(PAGE, "oracle%", runtimeType.getId()).getContent())
                 .hasSize(1);
-        assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "oracle%", runtimeType.getId()).getContent()
+        assertThat(softwareManagement.findSoftwareModuleByFilters(PAGE, "oracle%", runtimeType.getId()).getContent()
                 .get(0)).isEqualTo(jvm);
-        assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "1.0.1", appType.getId()).getContent())
+        assertThat(softwareManagement.findSoftwareModuleByFilters(PAGE, "1.0.1", appType.getId()).getContent())
                 .hasSize(1);
         assertThat(
-                softwareManagement.findSoftwareModuleByFilters(pageReq, "1.0.1", appType.getId()).getContent().get(0))
+                softwareManagement.findSoftwareModuleByFilters(PAGE, "1.0.1", appType.getId()).getContent().get(0))
                         .isEqualTo(ah);
-        assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "1.0%", appType.getId()).getContent())
+        assertThat(softwareManagement.findSoftwareModuleByFilters(PAGE, "1.0%", appType.getId()).getContent())
                 .hasSize(2);
 
         // no we search with on entity marked as deleted
         softwareManagement.deleteSoftwareModule(
-                softwareModuleRepository.findByAssignedToAndType(pageReq, ds, appType).getContent().get(0).getId());
+                softwareModuleRepository.findByAssignedToAndType(PAGE, ds, appType).getContent().get(0).getId());
 
-        assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "1.0%", appType.getId()).getContent())
+        assertThat(softwareManagement.findSoftwareModuleByFilters(PAGE, "1.0%", appType.getId()).getContent())
                 .hasSize(1);
-        assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "1.0%", appType.getId()).getContent().get(0))
+        assertThat(softwareManagement.findSoftwareModuleByFilters(PAGE, "1.0%", appType.getId()).getContent().get(0))
                 .isEqualTo(ah);
     }
 
@@ -272,7 +273,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.PENDING);
         assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get()).isEqualTo(ds);
-        final Action action = actionRepository.findByTargetAndDistributionSet(pageReq, target, ds).getContent().get(0);
+        final Action action = actionRepository.findByTargetAndDistributionSet(PAGE, target, ds).getContent().get(0);
         assertThat(action).isNotNull();
         return action;
     }
@@ -297,7 +298,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         softwareManagement.deleteSoftwareModule(testdataFactory.createSoftwareModuleOs("deleted").getId());
         testdataFactory.createSoftwareModuleApp();
 
-        assertThat(softwareManagement.findSoftwareModulesByType(pageReq, osType.getId()).getContent())
+        assertThat(softwareManagement.findSoftwareModulesByType(PAGE, osType.getId()).getContent())
                 .as("Expected to find the following number of modules:").hasSize(2).as("with the following elements")
                 .contains(two, one);
     }
@@ -319,18 +320,18 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests the successfull deletion of software module types. Both unused (hard delete) and used ones (soft delete).")
     public void deleteAssignedAndUnassignedSoftwareModuleTypes() {
-        assertThat(softwareManagement.findSoftwareModuleTypesAll(pageReq)).hasSize(3).contains(osType, runtimeType,
+        assertThat(softwareManagement.findSoftwareModuleTypesAll(PAGE)).hasSize(3).contains(osType, runtimeType,
                 appType);
 
         SoftwareModuleType type = softwareManagement.createSoftwareModuleType(
                 entityFactory.softwareModuleType().create().key("bundle").name("OSGi Bundle"));
 
-        assertThat(softwareManagement.findSoftwareModuleTypesAll(pageReq)).hasSize(4).contains(osType, runtimeType,
+        assertThat(softwareManagement.findSoftwareModuleTypesAll(PAGE)).hasSize(4).contains(osType, runtimeType,
                 appType, type);
 
         // delete unassigned
         softwareManagement.deleteSoftwareModuleType(type.getId());
-        assertThat(softwareManagement.findSoftwareModuleTypesAll(pageReq)).hasSize(3).contains(osType, runtimeType,
+        assertThat(softwareManagement.findSoftwareModuleTypesAll(PAGE)).hasSize(3).contains(osType, runtimeType,
                 appType);
         assertThat(softwareModuleTypeRepository.findAll()).hasSize(3).contains((JpaSoftwareModuleType) osType,
                 (JpaSoftwareModuleType) runtimeType, (JpaSoftwareModuleType) appType);
@@ -338,7 +339,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         type = softwareManagement.createSoftwareModuleType(
                 entityFactory.softwareModuleType().create().key("bundle2").name("OSGi Bundle2"));
 
-        assertThat(softwareManagement.findSoftwareModuleTypesAll(pageReq)).hasSize(4).contains(osType, runtimeType,
+        assertThat(softwareManagement.findSoftwareModuleTypesAll(PAGE)).hasSize(4).contains(osType, runtimeType,
                 appType, type);
 
         softwareManagement.createSoftwareModule(
@@ -346,7 +347,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
 
         // delete assigned
         softwareManagement.deleteSoftwareModuleType(type.getId());
-        assertThat(softwareManagement.findSoftwareModuleTypesAll(pageReq)).hasSize(3).contains(osType, runtimeType,
+        assertThat(softwareManagement.findSoftwareModuleTypesAll(PAGE)).hasSize(3).contains(osType, runtimeType,
                 appType);
 
         assertThat(softwareModuleTypeRepository.findAll()).hasSize(4).contains((JpaSoftwareModuleType) osType,
@@ -397,7 +398,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         // verify: assignedModule is marked as deleted
         assignedModule = softwareManagement.findSoftwareModuleById(assignedModule.getId()).get();
         assertTrue("The module should be flagged as deleted", assignedModule.isDeleted());
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
+        assertThat(softwareManagement.findSoftwareModulesAll(PAGE)).hasSize(0);
         assertThat(softwareModuleRepository.findAll()).hasSize(1);
 
         // verify: binary data is deleted
@@ -437,7 +438,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         // verify: assignedModule is marked as deleted
         assignedModule = softwareManagement.findSoftwareModuleById(assignedModule.getId()).get();
         assertTrue("The found module should be flagged deleted", assignedModule.isDeleted());
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
+        assertThat(softwareManagement.findSoftwareModulesAll(PAGE)).hasSize(0);
         assertThat(softwareModuleRepository.findAll()).hasSize(1);
 
         // verify: binary data is deleted
@@ -538,7 +539,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         assertThat(moduleY).isNotNull();
         assertTrue("The module should be flagged deleted", moduleX.isDeleted());
         assertTrue("The module should be flagged deleted", moduleY.isDeleted());
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
+        assertThat(softwareManagement.findSoftwareModulesAll(PAGE)).hasSize(0);
         assertThat(softwareModuleRepository.findAll()).hasSize(2);
 
         // verify: binary data of artifact is deleted
@@ -621,21 +622,21 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         softwareManagement.deleteSoftwareModule(deleted.getId());
 
         // with filter on name, version and module type
-        assertThat(softwareManagement.findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(pageReq,
+        assertThat(softwareManagement.findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(PAGE,
                 set.getId(), "%found%", testType.getId()).getContent())
                         .as("Found modules with given name, given module type and the assigned ones first")
                         .containsExactly(new AssignedSoftwareModule(one, true), new AssignedSoftwareModule(two, true),
                                 new AssignedSoftwareModule(unassigned, false));
 
         // with filter on module type only
-        assertThat(softwareManagement.findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(pageReq,
+        assertThat(softwareManagement.findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(PAGE,
                 set.getId(), null, testType.getId()).getContent())
                         .as("Found modules with given module type and the assigned ones first").containsExactly(
                                 new AssignedSoftwareModule(differentName, true), new AssignedSoftwareModule(one, true),
                                 new AssignedSoftwareModule(two, true), new AssignedSoftwareModule(unassigned, false));
 
         // without any filter
-        assertThat(softwareManagement.findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(pageReq,
+        assertThat(softwareManagement.findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(PAGE,
                 set.getId(), null, null).getContent()).as("Found modules with the assigned ones first").containsExactly(
                         new AssignedSoftwareModule(differentName, true), new AssignedSoftwareModule(one, true),
                         new AssignedSoftwareModule(two, true), new AssignedSoftwareModule(four, true),
@@ -773,7 +774,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
                 .create().name("set").version("1").modules(Lists.newArrayList(one.getId(), deleted.getId())));
         softwareManagement.deleteSoftwareModule(deleted.getId());
 
-        assertThat(softwareManagement.findSoftwareModuleByAssignedTo(pageReq, set.getId()).getContent())
+        assertThat(softwareManagement.findSoftwareModuleByAssignedTo(PAGE, set.getId()).getContent())
                 .as("Found this number of modules").hasSize(2);
     }
 
@@ -882,13 +883,13 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
                 .createSoftwareModuleMetadata(ah.getId(), entityFactory.generateMetadata(knownKey1, knownValue1))
                 .getSoftwareModule();
 
-        assertThat(softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(ah.getId()))
-                .as("Contains the created metadata element")
-                .containsExactly(new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue1));
+        assertThat(softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(new PageRequest(0, 100), ah.getId())
+                .getContent()).as("Contains the created metadata element")
+                        .containsExactly(new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue1));
 
         softwareManagement.deleteSoftwareModuleMetadata(ah.getId(), knownKey1);
-        assertThat(softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(ah.getId()))
-                .as("Metadata elemenets are").isEmpty();
+        assertThat(softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(new PageRequest(0, 100), ah.getId())
+                .getContent()).as("Metadata elemenets are").isEmpty();
     }
 
     @Test

@@ -15,10 +15,15 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 
 public class JpaTestRepositoryManagement implements TestRepositoryManagement {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JpaTestRepositoryManagement.class);
+    private static final Pageable PAGE = new PageRequest(0, 400, new Sort(Direction.ASC, "id"));
 
     private final TenantAwareCacheManager cacheManager;
 
@@ -50,7 +55,8 @@ public class JpaTestRepositoryManagement implements TestRepositoryManagement {
     }
 
     public void deleteAllRepos() {
-        final List<String> tenants = systemSecurityContext.runAsSystem(() -> systemManagement.findTenants());
+        final List<String> tenants = systemSecurityContext
+                .runAsSystem(() -> systemManagement.findTenants(PAGE).getContent());
         tenants.forEach(tenant -> {
             try {
                 systemSecurityContext.runAsSystem(() -> {

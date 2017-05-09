@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.jpa.aspects;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,16 +24,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
-import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.TransactionSystemException;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 /**
@@ -54,8 +54,7 @@ public class ExceptionMappingAspectHandler implements Ordered {
      * most specific mappable exception according to the type hierarchy of the
      * exception.
      */
-    private static final List<Class<?>> MAPPED_EXCEPTION_ORDER = new ArrayList<>(4);
-
+    private static final List<Class<?>> MAPPED_EXCEPTION_ORDER = Lists.newArrayListWithExpectedSize(4);
     @Autowired
     private JpaVendorAdapter jpaVendorAdapter;
 
@@ -65,14 +64,14 @@ public class ExceptionMappingAspectHandler implements Ordered {
 
         MAPPED_EXCEPTION_ORDER.add(DuplicateKeyException.class);
         MAPPED_EXCEPTION_ORDER.add(DataIntegrityViolationException.class);
-        MAPPED_EXCEPTION_ORDER.add(ConcurrencyFailureException.class);
+        MAPPED_EXCEPTION_ORDER.add(OptimisticLockingFailureException.class);
         MAPPED_EXCEPTION_ORDER.add(AccessDeniedException.class);
 
         EXCEPTION_MAPPING.put(DuplicateKeyException.class.getName(), EntityAlreadyExistsException.class.getName());
         EXCEPTION_MAPPING.put(DataIntegrityViolationException.class.getName(),
                 EntityAlreadyExistsException.class.getName());
 
-        EXCEPTION_MAPPING.put(ConcurrencyFailureException.class.getName(),
+        EXCEPTION_MAPPING.put(OptimisticLockingFailureException.class.getName(),
                 ConcurrentModificationException.class.getName());
         EXCEPTION_MAPPING.put(AccessDeniedException.class.getName(), InsufficientPermissionException.class.getName());
     }
@@ -86,10 +85,7 @@ public class ExceptionMappingAspectHandler implements Ordered {
      * @throws Throwable
      */
     @AfterThrowing(pointcut = "( execution( * org.springframework.transaction..*.*(..)) "
-            + " || execution( * org.eclipse.hawkbit.repository.*.*(..)) "
-            + " || execution( * org.eclipse.hawkbit.controller.*.*(..)) "
-            + " || execution( * org.eclipse.hawkbit.rest.resource.*.*(..)) "
-            + " || execution( * org.eclipse.hawkbit.service.*.*(..)) )", throwing = "ex")
+            + " || execution( * org.eclipse.hawkbit.repository.*.*(..)) )", throwing = "ex")
     // Exception for squid:S00112, squid:S1162
     // It is a AspectJ proxy which deals with exceptions.
     @SuppressWarnings({ "squid:S00112", "squid:S1162" })

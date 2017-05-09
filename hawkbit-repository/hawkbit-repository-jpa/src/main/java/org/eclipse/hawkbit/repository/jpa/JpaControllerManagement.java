@@ -20,6 +20,7 @@ import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -47,7 +48,6 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
@@ -92,7 +92,7 @@ public class JpaControllerManagement implements ControllerManagement {
     private ActionStatusRepository actionStatusRepository;
 
     @Autowired
-    private HawkbitSecurityProperties securityProperties;
+    private QuotaManagement quotaManagement;
 
     @Autowired
     private RepositoryProperties repositoryProperties;
@@ -313,15 +313,14 @@ public class JpaControllerManagement implements ControllerManagement {
     private Action handleAddUpdateActionStatus(final JpaActionStatus actionStatus, final JpaAction action) {
         LOG.debug("addUpdateActionStatus for action {}", action.getId());
 
-        JpaTarget target = (JpaTarget) action.getTarget();
-
         switch (actionStatus.getStatus()) {
         case ERROR:
-            target = DeploymentHelper.updateTargetInfo(target, TargetUpdateStatus.ERROR, false);
+            final JpaTarget target = DeploymentHelper.updateTargetInfo((JpaTarget) action.getTarget(),
+                    TargetUpdateStatus.ERROR, false);
             handleErrorOnAction(action, target);
             break;
         case FINISHED:
-            handleFinishedAndStoreInTargetStatus(target, action);
+            handleFinishedAndStoreInTargetStatus(action);
             break;
         default:
             // information status entry - check for a potential DOS attack
@@ -332,7 +331,7 @@ public class JpaControllerManagement implements ControllerManagement {
         actionStatus.setAction(action);
         actionStatusRepository.save(actionStatus);
 
-        LOG.debug("addUpdateActionStatus {} for target {} is finished.", action, target.getId());
+        LOG.debug("addUpdateActionStatus for action {} isfinished.", action.getId());
 
         return actionRepository.save(action);
     }
@@ -346,21 +345,21 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     private void checkForToManyStatusEntries(final JpaAction action) {
-        if (securityProperties.getDos().getMaxStatusEntriesPerAction() > 0) {
+        if (quotaManagement.getMaxStatusEntriesPerAction() > 0) {
 
             final Long statusCount = actionStatusRepository.countByAction(action);
 
-            if (statusCount >= securityProperties.getDos().getMaxStatusEntriesPerAction()) {
+            if (statusCount >= quotaManagement.getMaxStatusEntriesPerAction()) {
                 LOG_DOS.error(
                         "Potential denial of service (DOS) attack identfied. More status entries in the system than permitted ({})!",
-                        securityProperties.getDos().getMaxStatusEntriesPerAction());
-                throw new TooManyStatusEntriesException(
-                        String.valueOf(securityProperties.getDos().getMaxStatusEntriesPerAction()));
+                        quotaManagement.getMaxStatusEntriesPerAction());
+                throw new TooManyStatusEntriesException(String.valueOf(quotaManagement.getMaxStatusEntriesPerAction()));
             }
         }
     }
 
-    private void handleFinishedAndStoreInTargetStatus(final JpaTarget target, final JpaAction action) {
+    private void handleFinishedAndStoreInTargetStatus(final JpaAction action) {
+        final JpaTarget target = (JpaTarget) action.getTarget();
         action.setActive(false);
         action.setStatus(Status.FINISHED);
         final JpaDistributionSet ds = (JpaDistributionSet) entityManager.merge(action.getDistributionSet());
@@ -388,11 +387,11 @@ public class JpaControllerManagement implements ControllerManagement {
 
         target.getControllerAttributes().putAll(data);
 
-        if (target.getControllerAttributes().size() > securityProperties.getDos().getMaxAttributeEntriesPerTarget()) {
+        if (target.getControllerAttributes().size() > quotaManagement.getMaxAttributeEntriesPerTarget()) {
             LOG_DOS.info("Target tries to insert more than the allowed number of entries ({}). DOS attack anticipated!",
-                    securityProperties.getDos().getMaxAttributeEntriesPerTarget());
+                    quotaManagement.getMaxAttributeEntriesPerTarget());
             throw new ToManyAttributeEntriesException(
-                    String.valueOf(securityProperties.getDos().getMaxAttributeEntriesPerTarget()));
+                    String.valueOf(quotaManagement.getMaxAttributeEntriesPerTarget()));
         }
 
         target.setRequestControllerAttributes(false);

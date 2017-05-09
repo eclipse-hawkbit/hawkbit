@@ -8,9 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.specifications;
 
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
-
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType_;
@@ -29,24 +26,6 @@ public final class SoftwareModuleSpecification {
     }
 
     /**
-     * {@link Specification} for retrieving {@link SoftwareModule}s by its ID
-     * attribute.
-     * 
-     * @param moduleId
-     *            to search for
-     * @return the {@link SoftwareModule} {@link Specification}
-     */
-    public static Specification<JpaSoftwareModule> byId(final Long moduleId) {
-        return (targetRoot, query, cb) -> {
-            final Predicate predicate = cb.equal(targetRoot.<Long> get(JpaSoftwareModule_.id), moduleId);
-            targetRoot.fetch(JpaSoftwareModule_.type);
-            targetRoot.fetch(JpaSoftwareModule_.metadata, JoinType.LEFT);
-            query.distinct(true);
-            return predicate;
-        };
-    }
-
-    /**
      * {@link Specification} for retrieving {@link SoftwareModule}s where its
      * DELETED attribute is false.
      * 
@@ -57,8 +36,8 @@ public final class SoftwareModuleSpecification {
     }
 
     /**
-     * {@link Specification} for retrieving {@link SoftwareModule}s by
-     * "like name or like version".
+     * {@link Specification} for retrieving {@link SoftwareModule}s by "like
+     * name or like version".
      * 
      * @param subString
      *            to be filtered on
@@ -71,8 +50,8 @@ public final class SoftwareModuleSpecification {
     }
 
     /**
-     * {@link Specification} for retrieving {@link SoftwareModule}s by
-     * "like name or like version".
+     * {@link Specification} for retrieving {@link SoftwareModule}s by "like
+     * name or like version".
      * 
      * @param type
      *            to be filtered on

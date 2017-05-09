@@ -172,7 +172,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      */
     @EntityGraph(value = "Action.ds", type = EntityGraphType.LOAD)
     @Query("Select a from JpaAction a where a.target.controllerId = :target and a.active= :active order by a.id")
-    List<Action> findByActiveAndTarget(@Param("target") String target, @Param("active") boolean active);
+    Page<Action> findByActiveAndTarget(Pageable pageable, @Param("target") String target,
+            @Param("active") boolean active);
 
     /**
      * Switches the status of actions from one specific status into another,

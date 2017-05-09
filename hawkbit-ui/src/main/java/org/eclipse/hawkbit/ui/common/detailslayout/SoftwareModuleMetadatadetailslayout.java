@@ -18,9 +18,10 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.data.domain.PageRequest;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
@@ -42,6 +43,8 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
     private static final long serialVersionUID = 2913758299611838818L;
 
     private static final String METADATA_KEY = "Key";
+
+    private static final int MAX_METADATA_QUERY = 500;
 
     private SpPermissionChecker permissionChecker;
 
@@ -93,7 +96,9 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
         }
         selectedSWModuleId = swModule.getId();
         final List<SoftwareModuleMetadata> swMetadataList = softwareManagement
-                .findSoftwareModuleMetadataBySoftwareModuleId(selectedSWModuleId);
+                .findSoftwareModuleMetadataBySoftwareModuleId(selectedSWModuleId,
+                        new PageRequest(0, MAX_METADATA_QUERY))
+                .getContent();
         if (null != swMetadataList && !swMetadataList.isEmpty()) {
             swMetadataList.forEach(this::setSWMetadataProperties);
         }

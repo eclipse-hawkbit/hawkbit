@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.mgmt.client.scenarios;
 
+import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Random;
@@ -316,31 +317,38 @@ public class ConfigurableScenario {
 
     private void createDistributionSets(final Scenario scenario) {
         LOGGER.info("Creating {} distribution sets", scenario.getDistributionSets());
+        final BigDecimal pages = new BigDecimal(scenario.getDistributionSets())
+                .divide(new BigDecimal(PAGE_SIZE), BigDecimal.ROUND_UP).max(new BigDecimal(1));
+
+        IntStream.range(0, pages.intValue()).parallel().forEach(i -> createDistributionSetPage(scenario, i));
+        LOGGER.info("Creating {} distribution sets -> Done", scenario.getDistributionSets());
+    }
+
+    private void createDistributionSetPage(final Scenario scenario, final int page) {
 
         final List<MgmtDistributionSet> sets = distributionSetResource
                 .createDistributionSets(new DistributionSetBuilder().name(scenario.getDsName()).type("os_app")
-                        .version("1.0.").buildAsList(scenario.getDistributionSets()))
+                        .version("1.0.").buildAsList(calculateOffset(page),
+                                (page + 1) * PAGE_SIZE > scenario.getDistributionSets()
+                                        ? (scenario.getDistributionSets() - calculateOffset(page)) : PAGE_SIZE))
                 .getBody();
 
         assignSoftwareModulesTo(scenario, sets);
 
-        tagDistributionSets(scenario, sets);
+        tagDistributionSets(page, sets);
 
-        LOGGER.info("Creating {} distribution sets -> Done", scenario.getDistributionSets());
     }
 
-    private void tagDistributionSets(final Scenario scenario, final List<MgmtDistributionSet> sets) {
-        for (int i = 0; i < scenario.getDsTags(); i++) {
-            final MgmtTag tag = distributionSetTagResource
-                    .createDistributionSetTags(
-                            new TagBuilder().name("DS Tag" + i).description("DS tag for DS " + i).build())
-                    .getBody().get(0);
+    private void tagDistributionSets(final int page, final List<MgmtDistributionSet> sets) {
+        final MgmtTag tag = distributionSetTagResource
+                .createDistributionSetTags(
+                        new TagBuilder().name("Page " + page).description("DS tag for DS page" + page).build())
+                .getBody().get(0);
 
-            distributionSetTagResource.assignDistributionSets(tag.getTagId(),
-                    sets.stream().map(
-                            set -> new MgmtAssignedDistributionSetRequestBody().setDistributionSetId(set.getDsId()))
-                            .collect(Collectors.toList()));
-        }
+        distributionSetTagResource.assignDistributionSets(tag.getTagId(),
+                sets.stream()
+                        .map(set -> new MgmtAssignedDistributionSetRequestBody().setDistributionSetId(set.getDsId()))
+                        .collect(Collectors.toList()));
     }
 
     private void assignSoftwareModulesTo(final Scenario scenario, final List<MgmtDistributionSet> sets) {
@@ -379,8 +387,10 @@ public class ConfigurableScenario {
 
     private void createTargets(final Scenario scenario, final List<Long> deviceGroupTags) {
         LOGGER.info("Creating {} targets", scenario.getTargets());
-        IntStream.range(0, scenario.getTargets() / PAGE_SIZE).parallel()
-                .forEach(i -> createTargetPage(scenario, i, deviceGroupTags));
+        final BigDecimal pages = new BigDecimal(scenario.getTargets())
+                .divide(new BigDecimal(PAGE_SIZE), BigDecimal.ROUND_UP).max(new BigDecimal(1));
+
+        IntStream.range(0, pages.intValue()).parallel().forEach(i -> createTargetPage(scenario, i, deviceGroupTags));
         LOGGER.info("Creating {} targets -> Done", scenario.getTargets());
     }
 

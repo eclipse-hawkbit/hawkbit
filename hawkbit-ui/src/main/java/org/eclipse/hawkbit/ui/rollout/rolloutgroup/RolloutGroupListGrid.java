@@ -25,17 +25,17 @@ import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
 import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.RolloutRenderer;
-import org.eclipse.hawkbit.ui.push.RolloutGroupChangeEventContainer;
+import org.eclipse.hawkbit.ui.push.RolloutGroupChangedEventContainer;
 import org.eclipse.hawkbit.ui.rollout.DistributionBarHelper;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -43,7 +43,6 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.data.Container;
 import com.vaadin.data.util.converter.Converter;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
@@ -125,7 +124,7 @@ public class RolloutGroupListGrid extends AbstractGrid<LazyQueryContainer> {
      *            change
      */
     @EventBusListenerMethod(scope = EventScope.UI)
-    public void onRolloutGroupChangeEvent(final RolloutGroupChangeEventContainer eventContainer) {
+    public void onRolloutGroupChangeEvent(final RolloutGroupChangedEventContainer eventContainer) {
         if (!rolloutUIState.isShowRolloutGroups()) {
             return;
         }

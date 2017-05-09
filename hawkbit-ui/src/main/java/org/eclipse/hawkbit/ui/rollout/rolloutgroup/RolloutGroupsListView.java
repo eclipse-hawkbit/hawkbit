@@ -17,8 +17,6 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.ui.Label;
-
 /**
  * Groups List View.
  */

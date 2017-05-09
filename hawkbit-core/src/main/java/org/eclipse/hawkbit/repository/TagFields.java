@@ -15,6 +15,11 @@ package org.eclipse.hawkbit.repository;
  */
 public enum TagFields implements FieldNameProvider {
     /**
+     * The id field.
+     */
+    ID("id"),
+
+    /**
      * The name field.
      */
     NAME("name"),

@@ -34,7 +34,6 @@ public enum TargetFilterQueryFields implements FieldNameProvider {
      */
     AUTOASSIGNDISTRIBUTIONSET("autoAssignDistributionSet", "name", "version");
 
-
     private final String fieldName;
     private List<String> subEntityAttributes;
     private boolean mapField;

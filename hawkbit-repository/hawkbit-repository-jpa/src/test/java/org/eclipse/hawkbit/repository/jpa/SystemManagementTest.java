@@ -33,11 +33,11 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Ensures that findTenants returns all tenants and not only restricted to the tenant which currently is logged in")
     public void findTenantsReturnsAllTenantsNotOnlyWhichLoggedIn() throws Exception {
-        assertThat(systemManagement.findTenants()).hasSize(1);
+        assertThat(systemManagement.findTenants(PAGE).getContent()).hasSize(1);
 
         createTestTenantsForSystemStatistics(2, 0, 0, 0);
 
-        assertThat(systemManagement.findTenants()).hasSize(3);
+        assertThat(systemManagement.findTenants(PAGE).getContent()).hasSize(3);
     }
 
     @Test

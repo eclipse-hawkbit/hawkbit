@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
 import org.eclipse.hawkbit.repository.ActionFields;
+import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -37,6 +38,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.data.ResponseList;
 import org.eclipse.hawkbit.rest.data.SortDirection;
 import org.eclipse.hawkbit.util.IpUtil;
+import org.springframework.data.domain.PageRequest;
 
 /**
  * A mapper which maps repository model to RESTful model representation and
@@ -161,12 +163,17 @@ public final class MgmtTargetMapper {
                 .address(targetRest.getAddress());
     }
 
-    static List<MgmtActionStatus> toActionStatusRestResponse(final Collection<ActionStatus> actionStatus) {
+    static List<MgmtActionStatus> toActionStatusRestResponse(final Collection<ActionStatus> actionStatus,
+            final DeploymentManagement deploymentManagement) {
         if (actionStatus == null) {
             return Collections.emptyList();
         }
 
-        return actionStatus.stream().map(MgmtTargetMapper::toResponse).collect(Collectors.toList());
+        return actionStatus.stream().map(status -> toResponse(status,
+                deploymentManagement.findMessagesByActionStatusId(
+                        new PageRequest(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT), status.getId())
+                        .getContent()))
+                .collect(Collectors.toList());
     }
 
     static MgmtAction toResponse(final String targetId, final Action action, final boolean isActive) {
@@ -207,10 +214,10 @@ public final class MgmtTargetMapper {
         return null;
     }
 
-    private static MgmtActionStatus toResponse(final ActionStatus actionStatus) {
+    private static MgmtActionStatus toResponse(final ActionStatus actionStatus, final List<String> messages) {
         final MgmtActionStatus result = new MgmtActionStatus();
 
-        result.setMessages(actionStatus.getMessages());
+        result.setMessages(messages);
         result.setReportedAt(actionStatus.getCreatedAt());
         result.setStatusId(actionStatus.getId());
         result.setType(actionStatus.getStatus().name().toLowerCase());

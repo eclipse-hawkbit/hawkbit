@@ -19,8 +19,9 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -49,6 +50,9 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.view.filter.OnlyEventsFromDeploymentViewFilter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -83,7 +87,9 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     private final ManagementViewClientCriterion managementViewClientCriterion;
 
     private final transient TargetManagement targetManagement;
-
+    
+    private final transient TagManagement tagManagement;
+    
     private final DsMetadataPopupLayout dsMetadataPopupLayout;
 
     private final transient DistributionSetManagement distributionSetManagement;
@@ -101,13 +107,14 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             final ManagementUIState managementUIState,
             final ManagementViewClientCriterion managementViewClientCriterion, final TargetManagement targetManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout,
-            final DistributionSetManagement distributionSetManagement,
-            final DeploymentManagement deploymentManagement) {
+            final DistributionSetManagement distributionSetManagement, final DeploymentManagement deploymentManagement,
+            final TagManagement tagManagement) {
         super(eventBus, i18n, notification);
         this.permissionChecker = permissionChecker;
         this.managementUIState = managementUIState;
         this.managementViewClientCriterion = managementViewClientCriterion;
         this.targetManagement = targetManagement;
+        this.tagManagement = tagManagement;
         this.dsMetadataPopupLayout = dsMetadataPopupLayout;
         this.distributionSetManagement = distributionSetManagement;
         this.deploymentManagement = deploymentManagement;
@@ -136,13 +143,13 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     }
 
-    private static boolean allOfThemAffectCompletedSetsThatAreNotVisible(final List<DistributionSetUpdateEvent> events,
+    private static boolean allOfThemAffectCompletedSetsThatAreNotVisible(final List<DistributionSetUpdatedEvent> events,
             final List<Long> visibleItemIds) {
         return events.stream()
                 .allMatch(event -> !visibleItemIds.contains(event.getEntityId()) && event.getEntity().isComplete());
     }
 
-    private void updateVisableTableEntries(final List<DistributionSetUpdateEvent> events,
+    private void updateVisableTableEntries(final List<DistributionSetUpdatedEvent> events,
             final List<Long> visibleItemIds) {
         events.stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
                 .filter(event -> event.getEntity().isComplete())
@@ -150,10 +157,10 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     private boolean checkAndHandleIfVisibleDsSwitchesFromCompleteToIncomplete(
-            final List<DistributionSetUpdateEvent> events, final List<Long> visibleItemIds) {
+            final List<DistributionSetUpdatedEvent> events, final List<Long> visibleItemIds) {
         final List<Long> setsThatAreVisibleButNotCompleteAnymore = events.stream()
                 .filter(event -> visibleItemIds.contains(event.getEntityId()))
-                .filter(event -> !event.getEntity().isComplete()).map(DistributionSetUpdateEvent::getEntityId)
+                .filter(event -> !event.getEntity().isComplete()).map(DistributionSetUpdatedEvent::getEntityId)
                 .collect(Collectors.toList());
 
         if (!setsThatAreVisibleButNotCompleteAnymore.isEmpty()) {
@@ -387,13 +394,25 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
                 event.getTransferable().getSourceComponent().getId(), SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
         // get all the targets assigned to the tag
         // assign dist to those targets
-        final List<Target> assignedTargets = targetManagement.findTargetsByTag(targetTagName);
-        if (!assignedTargets.isEmpty()) {
-            assignTargetToDs(getItem(distItemId), assignedTargets);
-        } else {
-            notification.displaySuccess(
-                    i18n.getMessage("message.no.targets.assiged.fortag", new Object[] { targetTagName }));
-        }
+
+        tagManagement.findTargetTag(targetTagName).ifPresent(tag -> {
+            Pageable query = new PageRequest(0, 500);
+            Page<Target> assignedTargets;
+            boolean assigned = false;
+            do {
+                assignedTargets = targetManagement.findTargetsByTag(query, tag.getId());
+
+                if (assignedTargets.hasContent()) {
+                    assignTargetToDs(getItem(distItemId), assignedTargets.getContent());
+                    assigned = true;
+                }
+            } while (assignedTargets.hasNext() && (query = assignedTargets.nextPageable()) != null);
+
+            if (assigned) {
+                notification.displaySuccess(
+                        i18n.getMessage("message.no.targets.assiged.fortag", new Object[] { targetTagName }));
+            }
+        });
     }
 
     private void assignTargetToDs(final DragAndDropEvent event) {
@@ -404,7 +423,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
 
         final Object distItemId = dropData.getItemIdOver();
-        assignTargetToDs(getItem(distItemId), targetManagement.findTargetAllById(targetIdSet));
+        assignTargetToDs(getItem(distItemId), targetManagement.findTargetsById(targetIdSet));
 
     }
 

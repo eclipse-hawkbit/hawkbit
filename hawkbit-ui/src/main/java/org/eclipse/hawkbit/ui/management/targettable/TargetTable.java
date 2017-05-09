@@ -519,7 +519,7 @@ public class TargetTable extends AbstractTable<Target> {
      * @return TagAssigmentResult with all meta data of the assignment outcome.
      */
     public TargetTagAssignmentResult toggleTagAssignment(final Collection<Long> targetIds, final String targTagName) {
-        final List<String> controllerIds = targetManagement.findTargetAllById(targetIds).stream()
+        final List<String> controllerIds = targetManagement.findTargetsById(targetIds).stream()
                 .map(Target::getControllerId).collect(Collectors.toList());
         if (controllerIds.isEmpty()) {
             notification.displayWarning(i18n.getMessage("targets.not.exists"));
@@ -588,7 +588,7 @@ public class TargetTable extends AbstractTable<Target> {
         final TargetIdName createTargetIdName = new TargetIdName(target.get());
 
         final List<DistributionSet> findDistributionSetAllById = distributionSetManagement
-                .findDistributionSetAllById(ids);
+                .findDistributionSetsById(ids);
 
         if (findDistributionSetAllById.isEmpty()) {
             notification.displayWarning(i18n.getMessage("distributionsets.not.exists"));

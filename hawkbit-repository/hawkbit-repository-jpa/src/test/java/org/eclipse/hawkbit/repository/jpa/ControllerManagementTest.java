@@ -138,7 +138,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 Action.Status.FINISHED, Action.Status.FINISHED, false);
 
         assertThat(actionStatusRepository.count()).isEqualTo(6);
-        assertThat(deploymentManagement.findActionStatusByAction(pageReq, actionId).getNumberOfElements()).isEqualTo(6);
+        assertThat(deploymentManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(6);
     }
 
     @Test
@@ -161,7 +161,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 Action.Status.FINISHED, Action.Status.FINISHED, false);
 
         assertThat(actionStatusRepository.count()).isEqualTo(3);
-        assertThat(deploymentManagement.findActionStatusByAction(pageReq, actionId).getNumberOfElements()).isEqualTo(3);
+        assertThat(deploymentManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(3);
     }
 
     @Test
@@ -186,7 +186,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 Action.Status.RUNNING, Action.Status.RUNNING, true);
 
         assertThat(actionStatusRepository.count()).isEqualTo(1);
-        assertThat(deploymentManagement.findActionStatusByAction(pageReq, actionId).getNumberOfElements()).isEqualTo(1);
+        assertThat(deploymentManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(1);
 
     }
 
@@ -214,7 +214,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 Action.Status.CANCELED, Action.Status.FINISHED, false);
 
         assertThat(actionStatusRepository.count()).isEqualTo(7);
-        assertThat(deploymentManagement.findActionStatusByAction(pageReq, actionId).getNumberOfElements()).isEqualTo(7);
+        assertThat(deploymentManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(7);
     }
 
     @Test
@@ -241,7 +241,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 Action.Status.CANCELED, Action.Status.CANCELED, false);
 
         assertThat(actionStatusRepository.count()).isEqualTo(7);
-        assertThat(deploymentManagement.findActionStatusByAction(pageReq, actionId).getNumberOfElements()).isEqualTo(7);
+        assertThat(deploymentManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(7);
     }
 
     @Test
@@ -269,7 +269,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 Action.Status.RUNNING, Action.Status.CANCEL_REJECTED, true);
 
         assertThat(actionStatusRepository.count()).isEqualTo(7);
-        assertThat(deploymentManagement.findActionStatusByAction(pageReq, actionId).getNumberOfElements()).isEqualTo(7);
+        assertThat(deploymentManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(7);
     }
 
     @Test
@@ -297,7 +297,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 Action.Status.RUNNING, Action.Status.ERROR, true);
 
         assertThat(actionStatusRepository.count()).isEqualTo(7);
-        assertThat(deploymentManagement.findActionStatusByAction(pageReq, actionId).getNumberOfElements()).isEqualTo(7);
+        assertThat(deploymentManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(7);
     }
 
     @Step
@@ -308,7 +308,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
                 .getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
 
-        return deploymentManagement.findActiveActionsByTarget(TestdataFactory.DEFAULT_CONTROLLER_ID).get(0).getId();
+        return deploymentManagement.findActiveActionsByTarget(PAGE, TestdataFactory.DEFAULT_CONTROLLER_ID)
+                .getContent().get(0).getId();
     }
 
     @Step
@@ -366,7 +367,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Action action = deploymentManagement.findAction(actionId).get();
         assertThat(action.getStatus()).isEqualTo(expectedActionActionStatus);
         assertThat(action.isActive()).isEqualTo(actionActive);
-        final List<ActionStatus> actionStatusList = deploymentManagement.findActionStatusByAction(pageReq, actionId)
+        final List<ActionStatus> actionStatusList = deploymentManagement.findActionStatusByAction(PAGE, actionId)
                 .getContent();
         assertThat(actionStatusList.get(actionStatusList.size() - 1).getStatus()).isEqualTo(expectedActionStatus);
         if (actionActive) {
@@ -472,7 +473,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 Action.Status.ERROR, Action.Status.ERROR, false);
 
         assertThat(actionStatusRepository.count()).isEqualTo(3);
-        assertThat(deploymentManagement.findActionStatusByAction(pageReq, actionId).getNumberOfElements()).isEqualTo(3);
+        assertThat(deploymentManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(3);
 
     }
 
@@ -507,7 +508,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 Action.Status.FINISHED, Action.Status.FINISHED, false);
 
         assertThat(actionStatusRepository.count()).isEqualTo(3);
-        assertThat(deploymentManagement.findActionStatusByAction(pageReq, actionId).getNumberOfElements()).isEqualTo(3);
+        assertThat(deploymentManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(3);
 
     }
 
@@ -533,7 +534,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 .getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         assertThat(actionStatusRepository.count()).isEqualTo(3);
-        assertThat(deploymentManagement.findActionStatusByAction(pageReq, action.getId()).getNumberOfElements())
+        assertThat(deploymentManagement.findActionStatusByAction(PAGE, action.getId()).getNumberOfElements())
                 .isEqualTo(3);
     }
 
@@ -558,8 +559,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 .getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         // however, additional action status has been stored
-        assertThat(actionStatusRepository.findAll(pageReq).getNumberOfElements()).isEqualTo(4);
-        assertThat(deploymentManagement.findActionStatusByAction(pageReq, action.getId()).getNumberOfElements())
+        assertThat(actionStatusRepository.findAll(PAGE).getNumberOfElements()).isEqualTo(4);
+        assertThat(deploymentManagement.findActionStatusByAction(PAGE, action.getId()).getNumberOfElements())
                 .isEqualTo(4);
     }
 

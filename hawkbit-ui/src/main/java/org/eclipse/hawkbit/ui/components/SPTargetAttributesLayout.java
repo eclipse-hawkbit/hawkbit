@@ -11,9 +11,9 @@ package org.eclipse.hawkbit.ui.components;
 import java.util.Map;
 
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Label;

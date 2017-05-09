@@ -20,7 +20,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.eclipse.hawkbit.repository.event.remote.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
@@ -61,7 +61,6 @@ public class JpaTargetTag extends JpaTag implements TargetTag, EventAwareEntity 
         // Default constructor for JPA.
     }
 
-    @Override
     public List<Target> getAssignedToTargets() {
         if (assignedToTargets == null) {
             return Collections.emptyList();
@@ -80,7 +79,7 @@ public class JpaTargetTag extends JpaTag implements TargetTag, EventAwareEntity 
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new TargetTagUpdateEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+                .publishEvent(new TargetTagUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override

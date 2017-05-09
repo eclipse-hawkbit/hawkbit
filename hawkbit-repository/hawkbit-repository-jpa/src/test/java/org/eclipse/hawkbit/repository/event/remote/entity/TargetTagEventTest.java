@@ -31,7 +31,7 @@ public class TargetTagEventTest extends AbstractRemoteEntityEventTest<TargetTag>
     @Test
     @Description("Verifies that the target tag entity reloading by remote updated event works")
     public void testTargetTagUpdateEventt() {
-        assertAndCreateRemoteEvent(TargetTagUpdateEvent.class);
+        assertAndCreateRemoteEvent(TargetTagUpdatedEvent.class);
     }
 
     @Override

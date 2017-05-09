@@ -98,7 +98,7 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
 
     @Transactional(readOnly = true)
     protected List<Action> findActionsByRolloutAndStatus(final Rollout rollout, final Action.Status actionStatus) {
-        return Lists.newArrayList(actionRepository.findByRolloutIdAndStatus(pageReq, rollout.getId(), actionStatus));
+        return Lists.newArrayList(actionRepository.findByRolloutIdAndStatus(PAGE, rollout.getId(), actionStatus));
     }
 
     protected static void verifyThrownExceptionBy(final ThrowingCallable tc, final String objectType) {
