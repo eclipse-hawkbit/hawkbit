@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.io.Serializable;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
@@ -125,7 +126,8 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     @Override
     @CacheEvict(value = "tenantConfiguration", key = "#configurationKeyName")
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public <T extends Serializable> TenantConfigurationValue<T> addOrUpdateConfiguration(
             final String configurationKeyName, final T value) {
 
@@ -164,7 +166,8 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     @Override
     @CacheEvict(value = "tenantConfiguration", key = "#configurationKeyName")
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteConfiguration(final String configurationKeyName) {
         tenantConfigurationRepository.deleteByKey(configurationKeyName);
     }

@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetCreate;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetUpdate;
+import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
@@ -152,7 +153,8 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target updateTarget(final TargetUpdate u) {
         final JpaTargetUpdate update = (JpaTargetUpdate) u;
 
@@ -169,7 +171,8 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteTargets(final Collection<Long> targetIDs) {
         final List<JpaTarget> targets = targetRepository.findAll(targetIDs);
 
@@ -188,7 +191,8 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteTarget(final String controllerID) {
         final Target target = targetRepository.findByControllerId(controllerID)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerID));
@@ -328,7 +332,8 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public TargetTagAssignmentResult toggleTagAssignment(final Collection<String> controllerIds, final String tagName) {
         final TargetTag tag = targetTagRepository.findByNameEquals(tagName)
                 .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, tagName));
@@ -366,7 +371,8 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<Target> assignTag(final Collection<String> controllerIds, final Long tagId) {
 
         final List<JpaTarget> allTargets = targetRepository
@@ -392,7 +398,8 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target unAssignTag(final String controllerID, final Long targetTagId) {
         final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerID)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerID));
@@ -543,7 +550,8 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target createTarget(final TargetCreate c) {
         final JpaTargetCreate create = (JpaTargetCreate) c;
         return targetRepository.save(create.build());
@@ -551,7 +559,8 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<Target> createTargets(final Collection<TargetCreate> targets) {
         return targets.stream().map(this::createTarget).collect(Collectors.toList());
     }

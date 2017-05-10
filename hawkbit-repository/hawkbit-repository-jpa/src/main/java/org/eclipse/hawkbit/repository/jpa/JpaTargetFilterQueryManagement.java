@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryCreate;
+import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
@@ -70,7 +71,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public TargetFilterQuery createTargetFilterQuery(final TargetFilterQueryCreate c) {
         final JpaTargetFilterQueryCreate create = (JpaTargetFilterQueryCreate) c;
 
@@ -79,7 +81,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteTargetFilterQuery(final Long targetFilterQueryId) {
         findTargetFilterQueryById(targetFilterQueryId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));

@@ -42,6 +42,7 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleTypeCreate;
+import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
@@ -120,7 +121,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public SoftwareModule updateSoftwareModule(final SoftwareModuleUpdate u) {
         final GenericSoftwareModuleUpdate update = (GenericSoftwareModuleUpdate) u;
 
@@ -135,7 +137,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public SoftwareModuleType updateSoftwareModuleType(final SoftwareModuleTypeUpdate u) {
         final GenericSoftwareModuleTypeUpdate update = (GenericSoftwareModuleTypeUpdate) u;
 
@@ -150,7 +153,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public SoftwareModule createSoftwareModule(final SoftwareModuleCreate c) {
         final JpaSoftwareModuleCreate create = (JpaSoftwareModuleCreate) c;
 
@@ -159,7 +163,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<SoftwareModule> createSoftwareModule(final Collection<SoftwareModuleCreate> swModules) {
         return swModules.stream().map(this::createSoftwareModule).collect(Collectors.toList());
     }
@@ -232,7 +237,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteSoftwareModules(final Collection<Long> ids) {
         final List<JpaSoftwareModule> swModulesToDelete = softwareModuleRepository.findByIdIn(ids);
 
@@ -491,7 +497,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public SoftwareModuleType createSoftwareModuleType(final SoftwareModuleTypeCreate c) {
         final JpaSoftwareModuleTypeCreate create = (JpaSoftwareModuleTypeCreate) c;
 
@@ -500,7 +507,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteSoftwareModuleType(final Long typeId) {
         final JpaSoftwareModuleType toDelete = softwareModuleTypeRepository.findById(typeId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, typeId));
@@ -525,7 +533,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public SoftwareModuleMetadata createSoftwareModuleMetadata(final Long moduleId, final MetaData md) {
 
         checkAndThrowAlreadyIfSoftwareModuleMetadataExists(moduleId, md);
@@ -542,7 +551,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<SoftwareModuleMetadata> createSoftwareModuleMetadata(final Long moduleId,
             final Collection<MetaData> md) {
         md.forEach(meta -> checkAndThrowAlreadyIfSoftwareModuleMetadataExists(moduleId, meta));
@@ -557,7 +567,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public SoftwareModuleMetadata updateSoftwareModuleMetadata(final Long moduleId, final MetaData md) {
 
         // check if exists otherwise throw entity not found exception
@@ -602,7 +613,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteSoftwareModuleMetadata(final Long moduleId, final String key) {
         final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) findSoftwareModuleMetadata(moduleId, key)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleMetadata.class, moduleId, key));
@@ -667,14 +679,16 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteSoftwareModule(final Long moduleId) {
         deleteSoftwareModules(Sets.newHashSet(moduleId));
     }
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<SoftwareModuleType> createSoftwareModuleType(final Collection<SoftwareModuleTypeCreate> creates) {
         return creates.stream().map(this::createSoftwareModuleType).collect(Collectors.toList());
     }

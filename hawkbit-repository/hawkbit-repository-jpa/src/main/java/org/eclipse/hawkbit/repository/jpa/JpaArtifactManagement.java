@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
+import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -74,7 +75,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Artifact createArtifact(final InputStream stream, final Long moduleId, final String filename,
             final String providedMd5Sum, final String providedSha1Sum, final boolean overrideExisting,
             final String contentType) {
@@ -105,7 +107,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public boolean clearArtifactBinary(final String sha1Hash, final Long moduleId) {
 
         if (localArtifactRepository.existsWithSha1HashAndSoftwareModuleIdIsNot(sha1Hash, moduleId)) {
@@ -124,7 +127,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteArtifact(final Long id) {
         final JpaArtifact existing = (JpaArtifact) findArtifact(id)
                 .orElseThrow(() -> new EntityNotFoundException(Artifact.class, id));
@@ -192,7 +196,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     @Override
     @Transactional
-    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Artifact createArtifact(final InputStream inputStream, final Long moduleId, final String filename,
             final boolean overrideExisting) {
         return createArtifact(inputStream, moduleId, filename, null, null, overrideExisting, null);
