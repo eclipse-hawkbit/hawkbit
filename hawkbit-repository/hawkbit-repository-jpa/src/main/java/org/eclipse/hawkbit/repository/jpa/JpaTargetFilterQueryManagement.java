@@ -31,11 +31,14 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -65,8 +68,9 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         this.distributionSetManagement = distributionSetManagement;
     }
 
-    @Transactional
     @Override
+    @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public TargetFilterQuery createTargetFilterQuery(final TargetFilterQueryCreate c) {
         final JpaTargetFilterQueryCreate create = (JpaTargetFilterQueryCreate) c;
 
@@ -75,6 +79,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public void deleteTargetFilterQuery(final Long targetFilterQueryId) {
         findTargetFilterQueryById(targetFilterQueryId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));

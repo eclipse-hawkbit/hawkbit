@@ -30,8 +30,11 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -71,6 +74,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     @Override
     @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public Artifact createArtifact(final InputStream stream, final Long moduleId, final String filename,
             final String providedMd5Sum, final String providedSha1Sum, final boolean overrideExisting,
             final String contentType) {
@@ -101,6 +105,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     @Override
     @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public boolean clearArtifactBinary(final String sha1Hash, final Long moduleId) {
 
         if (localArtifactRepository.existsWithSha1HashAndSoftwareModuleIdIsNot(sha1Hash, moduleId)) {
@@ -119,6 +124,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     @Override
     @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public void deleteArtifact(final Long id) {
         final JpaArtifact existing = (JpaArtifact) findArtifact(id)
                 .orElseThrow(() -> new EntityNotFoundException(Artifact.class, id));
@@ -186,6 +192,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     @Override
     @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public Artifact createArtifact(final InputStream inputStream, final Long moduleId, final String filename,
             final boolean overrideExisting) {
         return createArtifact(inputStream, moduleId, filename, null, null, overrideExisting, null);

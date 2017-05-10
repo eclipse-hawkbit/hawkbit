@@ -23,6 +23,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -122,6 +125,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     @Override
     @CacheEvict(value = "tenantConfiguration", key = "#configurationKeyName")
     @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public <T extends Serializable> TenantConfigurationValue<T> addOrUpdateConfiguration(
             final String configurationKeyName, final T value) {
 
@@ -160,6 +164,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     @Override
     @CacheEvict(value = "tenantConfiguration", key = "#configurationKeyName")
     @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public void deleteConfiguration(final String configurationKeyName) {
         tenantConfigurationRepository.deleteByKey(configurationKeyName);
     }

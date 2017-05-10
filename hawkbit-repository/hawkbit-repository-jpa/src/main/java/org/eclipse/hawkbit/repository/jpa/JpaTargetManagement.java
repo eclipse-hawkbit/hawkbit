@@ -55,12 +55,15 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -149,6 +152,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public Target updateTarget(final TargetUpdate u) {
         final JpaTargetUpdate update = (JpaTargetUpdate) u;
 
@@ -165,6 +169,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public void deleteTargets(final Collection<Long> targetIDs) {
         final List<JpaTarget> targets = targetRepository.findAll(targetIDs);
 
@@ -183,6 +188,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public void deleteTarget(final String controllerID) {
         final Target target = targetRepository.findByControllerId(controllerID)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerID));
@@ -322,6 +328,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public TargetTagAssignmentResult toggleTagAssignment(final Collection<String> controllerIds, final String tagName) {
         final TargetTag tag = targetTagRepository.findByNameEquals(tagName)
                 .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, tagName));
@@ -359,7 +366,9 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public List<Target> assignTag(final Collection<String> controllerIds, final Long tagId) {
+
         final List<JpaTarget> allTargets = targetRepository
                 .findAll(TargetSpecifications.byControllerIdWithTagsInJoin(controllerIds));
 
@@ -383,6 +392,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public Target unAssignTag(final String controllerID, final Long targetTagId) {
         final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerID)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerID));
@@ -533,6 +543,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public Target createTarget(final TargetCreate c) {
         final JpaTargetCreate create = (JpaTargetCreate) c;
         return targetRepository.save(create.build());
@@ -540,6 +551,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public List<Target> createTargets(final Collection<TargetCreate> targets) {
         return targets.stream().map(this::createTarget).collect(Collectors.toList());
     }

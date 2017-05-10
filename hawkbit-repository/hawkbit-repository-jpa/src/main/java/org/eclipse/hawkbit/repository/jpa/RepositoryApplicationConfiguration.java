@@ -90,6 +90,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -111,6 +112,7 @@ import com.google.common.collect.Maps;
 @EnableConfigurationProperties({ RepositoryProperties.class, ControllerPollProperties.class,
         TenantConfigurationProperties.class })
 @EnableScheduling
+@EnableRetry
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 

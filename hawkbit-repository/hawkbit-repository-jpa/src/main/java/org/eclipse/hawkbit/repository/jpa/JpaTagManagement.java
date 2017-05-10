@@ -31,10 +31,13 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -68,6 +71,7 @@ public class JpaTagManagement implements TagManagement {
 
     @Override
     @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public TargetTag createTargetTag(final TagCreate c) {
         final JpaTagCreate create = (JpaTagCreate) c;
 
@@ -76,6 +80,7 @@ public class JpaTagManagement implements TagManagement {
 
     @Override
     @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public List<TargetTag> createTargetTags(final Collection<TagCreate> tt) {
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final Collection<JpaTagCreate> targetTags = (Collection) tt;
@@ -86,6 +91,7 @@ public class JpaTagManagement implements TagManagement {
 
     @Override
     @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public void deleteTargetTag(final String targetTagName) {
         if (!targetTagRepository.existsByName(targetTagName)) {
             throw new EntityNotFoundException(TargetTag.class, targetTagName);
@@ -118,6 +124,7 @@ public class JpaTagManagement implements TagManagement {
 
     @Override
     @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public TargetTag updateTargetTag(final TagUpdate u) {
         final GenericTagUpdate update = (GenericTagUpdate) u;
 
@@ -132,8 +139,8 @@ public class JpaTagManagement implements TagManagement {
     }
 
     @Override
-
     @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public DistributionSetTag updateDistributionSetTag(final TagUpdate u) {
         final GenericTagUpdate update = (GenericTagUpdate) u;
 
@@ -154,6 +161,7 @@ public class JpaTagManagement implements TagManagement {
 
     @Override
     @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public DistributionSetTag createDistributionSetTag(final TagCreate c) {
         final JpaTagCreate create = (JpaTagCreate) c;
         return distributionSetTagRepository.save(create.buildDistributionSetTag());
@@ -161,6 +169,7 @@ public class JpaTagManagement implements TagManagement {
 
     @Override
     @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public List<DistributionSetTag> createDistributionSetTags(final Collection<TagCreate> dst) {
 
         @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -173,6 +182,7 @@ public class JpaTagManagement implements TagManagement {
 
     @Override
     @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public void deleteDistributionSetTag(final String tagName) {
         if (!distributionSetTagRepository.existsByName(tagName)) {
             throw new EntityNotFoundException(DistributionSetTag.class, tagName);

@@ -34,10 +34,13 @@ import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.interceptor.KeyGenerator;
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
@@ -211,6 +214,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Override
     @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public void deleteTenant(final String t) {
         final String tenant = t.toUpperCase();
         cacheManager.evictCaches(tenant);
@@ -254,6 +258,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Override
     @Transactional
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = 10, backoff = @Backoff(delay = 100))
     public TenantMetaData updateTenantMetadata(final Long defaultDsType) {
         final JpaTenantMetaData data = (JpaTenantMetaData) getTenantMetadata();
 
