@@ -95,10 +95,13 @@ public class SpReceiverService extends ReceiverService {
         if (MessageType.EVENT.equals(messageType)) {
             handleEventMessage(message, thingId);
             return;
-        } else if (MessageType.THING_DELETED.equals(messageType)) {
+        }
+
+        if (MessageType.THING_DELETED.equals(messageType)) {
             repository.remove(tenant, thingId);
             return;
         }
+
         LOGGER.info("No valid message type property.");
     }
 
