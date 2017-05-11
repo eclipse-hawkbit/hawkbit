@@ -67,6 +67,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -74,6 +75,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
@@ -136,6 +139,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     // Exception squid:S2095: see
     // https://jira.sonarsource.com/browse/SONARJAVA-1478
     @SuppressWarnings({ "squid:S2095" })
@@ -147,6 +152,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
             final Collection<TargetWithActionType> targets) {
         return assignDistributionSet(dsID, targets, null);
@@ -154,6 +161,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
             final Collection<TargetWithActionType> targets, final String actionMessage) {
         final JpaDistributionSet set = distributionSetRepository.findOne(dsID);
@@ -348,6 +357,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action cancelAction(final Long actionId) {
         LOG.debug("cancelAction({})", actionId);
 
@@ -390,6 +401,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action forceQuitAction(final Long actionId) {
         final JpaAction action = actionRepository.findById(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
@@ -595,6 +608,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action forceTargetAction(final Long actionId) {
         final JpaAction action = actionRepository.findById(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));

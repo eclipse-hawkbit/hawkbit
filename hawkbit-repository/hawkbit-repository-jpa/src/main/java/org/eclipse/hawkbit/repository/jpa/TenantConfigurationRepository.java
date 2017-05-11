@@ -46,9 +46,9 @@ public interface TenantConfigurationRepository extends BaseEntityRepository<JpaT
 
     /**
      * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety
-     * reasons (this is a "delete everything" query after all) we add the tenant manually to
-     * query even if this will by done by {@link EntityManager} anyhow. The DB
-     * should take care of optimizing this away.
+     * reasons (this is a "delete everything" query after all) we add the tenant
+     * manually to query even if this will by done by {@link EntityManager}
+     * anyhow. The DB should take care of optimizing this away.
      *
      * @param tenant
      *            to delete data from

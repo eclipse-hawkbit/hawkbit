@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -36,6 +35,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetCreate;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetTypeCreate;
+import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.DsMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
@@ -64,10 +64,13 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
@@ -140,6 +143,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetTagAssignmentResult toggleTagAssignment(final Collection<Long> dsIds, final String tagName) {
         final List<JpaDistributionSet> sets = findDistributionSetListWithDetails(dsIds);
 
@@ -187,6 +192,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSet updateDistributionSet(final DistributionSetUpdate u) {
         final GenericDistributionSetUpdate update = (GenericDistributionSetUpdate) u;
 
@@ -237,6 +244,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteDistributionSet(final Collection<Long> distributionSetIDs) {
         final List<DistributionSet> setsFound = findDistributionSetsById(distributionSetIDs);
 
@@ -274,6 +283,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSet createDistributionSet(final DistributionSetCreate c) {
         final JpaDistributionSetCreate create = (JpaDistributionSetCreate) c;
         if (create.getType() == null) {
@@ -285,12 +296,16 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<DistributionSet> createDistributionSets(final Collection<DistributionSetCreate> creates) {
         return creates.stream().map(this::createDistributionSet).collect(Collectors.toList());
     }
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSet assignSoftwareModules(final Long setId, final Collection<Long> moduleIds) {
 
         final Collection<JpaSoftwareModule> modules = softwareModuleRepository.findByIdIn(moduleIds);
@@ -310,6 +325,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSet unassignSoftwareModule(final Long setId, final Long moduleId) {
         final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(setId);
         final JpaSoftwareModule module = findSoftwareModuleAndThrowExceptionIfNotFound(moduleId);
@@ -323,6 +340,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetType updateDistributionSetType(final DistributionSetTypeUpdate u) {
         final GenericDistributionSetTypeUpdate update = (GenericDistributionSetTypeUpdate) u;
 
@@ -349,6 +368,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetType assignMandatorySoftwareModuleTypes(final Long dsTypeId,
             final Collection<Long> softwareModulesTypeIds) {
         final Collection<JpaSoftwareModuleType> modules = softwareModuleTypeRepository
@@ -369,6 +390,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetType assignOptionalSoftwareModuleTypes(final Long dsTypeId,
             final Collection<Long> softwareModulesTypeIds) {
 
@@ -397,6 +420,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetType unassignSoftwareModuleType(final Long dsTypeId, final Long softwareModuleTypeId) {
         final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(dsTypeId);
 
@@ -581,6 +606,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetType createDistributionSetType(final DistributionSetTypeCreate c) {
         final JpaDistributionSetTypeCreate create = (JpaDistributionSetTypeCreate) c;
 
@@ -589,6 +616,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteDistributionSetType(final Long typeId) {
 
         final JpaDistributionSetType toDelete = distributionSetTypeRepository.findById(typeId)
@@ -604,6 +633,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<DistributionSetMetadata> createDistributionSetMetadata(final Long dsId, final Collection<MetaData> md) {
 
         md.forEach(meta -> checkAndThrowAlreadyIfDistributionSetMetadataExists(
@@ -619,6 +650,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetMetadata updateDistributionSetMetadata(final Long dsId, final MetaData md) {
 
         // check if exists otherwise throw entity not found exception
@@ -634,6 +667,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteDistributionSetMetadata(final Long distributionSetId, final String key) {
         final JpaDistributionSetMetadata metadata = (JpaDistributionSetMetadata) findDistributionSetMetadata(
                 distributionSetId, key).orElseThrow(
@@ -818,6 +853,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<DistributionSet> assignTag(final Collection<Long> dsIds, final Long dsTagId) {
         final List<JpaDistributionSet> allDs = findDistributionSetListWithDetails(dsIds);
 
@@ -831,41 +868,46 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         allDs.forEach(ds -> ds.addTag(distributionSetTag));
 
-        return Collections
+        final List<DistributionSet> result = Collections
                 .unmodifiableList(allDs.stream().map(distributionSetRepository::save).collect(Collectors.toList()));
+
+        // No reason to save the tag
+        entityManager.detach(distributionSetTag);
+        return result;
     }
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSet unAssignTag(final Long dsId, final Long dsTagId) {
-        final List<JpaDistributionSet> allDs = findDistributionSetListWithDetails(Arrays.asList(dsId));
-
-        if (allDs.isEmpty()) {
-            throw new EntityNotFoundException(DistributionSet.class, dsId);
-        }
+        final JpaDistributionSet set = (JpaDistributionSet) findDistributionSetByIdWithDetails(dsId)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, dsId));
 
         final DistributionSetTag distributionSetTag = tagManagement.findDistributionSetTagById(dsTagId)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, dsTagId));
-        final List<JpaDistributionSet> unAssignTag = unAssignTag(allDs, distributionSetTag);
-        return unAssignTag.isEmpty() ? null : unAssignTag.get(0);
-    }
 
-    private List<JpaDistributionSet> unAssignTag(final Collection<JpaDistributionSet> distributionSets,
-            final DistributionSetTag tag) {
-        distributionSets.forEach(ds -> ds.removeTag(tag));
-        return Collections.unmodifiableList(
-                distributionSets.stream().map(distributionSetRepository::save).collect(Collectors.toList()));
+        set.removeTag(distributionSetTag);
+
+        final JpaDistributionSet result = distributionSetRepository.save(set);
+
+        // No reason to save the tag
+        entityManager.detach(distributionSetTag);
+        return result;
     }
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<DistributionSetType> createDistributionSetTypes(final Collection<DistributionSetTypeCreate> types) {
-
         return types.stream().map(this::createDistributionSetType).collect(Collectors.toList());
     }
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteDistributionSet(final Long setId) {
         throwExceptionIfDistributionSetDoesNotExist(setId);
 

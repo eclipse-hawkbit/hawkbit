@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryCreate;
+import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
@@ -31,11 +32,14 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -65,8 +69,10 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         this.distributionSetManagement = distributionSetManagement;
     }
 
-    @Transactional
     @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public TargetFilterQuery createTargetFilterQuery(final TargetFilterQueryCreate c) {
         final JpaTargetFilterQueryCreate create = (JpaTargetFilterQueryCreate) c;
 
@@ -75,6 +81,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteTargetFilterQuery(final Long targetFilterQueryId) {
         findTargetFilterQueryById(targetFilterQueryId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));

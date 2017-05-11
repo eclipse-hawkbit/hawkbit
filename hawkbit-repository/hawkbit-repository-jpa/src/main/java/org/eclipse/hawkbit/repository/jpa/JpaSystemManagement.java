@@ -17,9 +17,9 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
-import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
+import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
@@ -34,10 +34,13 @@ import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.interceptor.KeyGenerator;
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
@@ -211,6 +214,8 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteTenant(final String t) {
         final String tenant = t.toUpperCase();
         cacheManager.evictCaches(tenant);
@@ -254,6 +259,8 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public TenantMetaData updateTenantMetadata(final Long defaultDsType) {
         final JpaTenantMetaData data = (JpaTenantMetaData) getTenantMetadata();
 
@@ -264,20 +271,26 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     private DistributionSetType createStandardSoftwareDataSetup() {
         final SoftwareModuleType app = softwareModuleTypeRepository
-                .save(new JpaSoftwareModuleType(Constants.SMT_DEFAULT_APP_KEY, Constants.SMT_DEFAULT_APP_NAME,
-                        "Application Addons", Integer.MAX_VALUE));
+                .save(new JpaSoftwareModuleType(org.eclipse.hawkbit.repository.Constants.SMT_DEFAULT_APP_KEY,
+                        org.eclipse.hawkbit.repository.Constants.SMT_DEFAULT_APP_NAME, "Application Addons",
+                        Integer.MAX_VALUE));
         final SoftwareModuleType os = softwareModuleTypeRepository.save(new JpaSoftwareModuleType(
-                Constants.SMT_DEFAULT_OS_KEY, Constants.SMT_DEFAULT_OS_NAME, "Core firmware or operationg system", 1));
+                org.eclipse.hawkbit.repository.Constants.SMT_DEFAULT_OS_KEY,
+                org.eclipse.hawkbit.repository.Constants.SMT_DEFAULT_OS_NAME, "Core firmware or operationg system", 1));
 
         // make sure the module types get their IDs
         entityManager.flush();
 
-        distributionSetTypeRepository.save(new JpaDistributionSetType(Constants.DST_DEFAULT_OS_ONLY_KEY,
-                Constants.DST_DEFAULT_OS_ONLY_NAME, "Default type with Firmware/OS only.").addMandatoryModuleType(os));
+        distributionSetTypeRepository
+                .save(new JpaDistributionSetType(org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_OS_ONLY_KEY,
+                        org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_OS_ONLY_NAME,
+                        "Default type with Firmware/OS only.").addMandatoryModuleType(os));
 
-        return distributionSetTypeRepository.save(new JpaDistributionSetType(Constants.DST_DEFAULT_OS_WITH_APPS_KEY,
-                Constants.DST_DEFAULT_OS_WITH_APPS_NAME, "Default type with Firmware/OS and optional app(s).")
-                        .addMandatoryModuleType(os).addOptionalModuleType(app));
+        return distributionSetTypeRepository
+                .save(new JpaDistributionSetType(org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_OS_WITH_APPS_KEY,
+                        org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_OS_WITH_APPS_NAME,
+                        "Default type with Firmware/OS and optional app(s).").addMandatoryModuleType(os)
+                                .addOptionalModuleType(app));
     }
 
     @Override

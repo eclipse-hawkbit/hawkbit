@@ -40,6 +40,7 @@ import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
+import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
@@ -74,6 +75,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -82,6 +84,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.integration.support.locks.LockRegistry;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -179,6 +183,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout createRollout(final RolloutCreate rollout, final int amountGroup,
             final RolloutGroupConditions conditions) {
         RolloutHelper.verifyRolloutGroupParameter(amountGroup, quotaManagement);
@@ -188,6 +194,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout createRollout(final RolloutCreate rollout, final List<RolloutGroupCreate> groups,
             final RolloutGroupConditions conditions) {
         RolloutHelper.verifyRolloutGroupParameter(groups.size(), quotaManagement);
@@ -422,6 +430,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout startRollout(final Long rolloutId) {
         LOGGER.debug("startRollout called for rollout {}", rolloutId);
 
@@ -552,6 +562,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void pauseRollout(final Long rolloutId) {
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
         if (!RolloutStatus.RUNNING.equals(rollout.getStatus())) {
@@ -569,6 +581,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void resumeRollout(final Long rolloutId) {
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
         if (!(RolloutStatus.PAUSED.equals(rollout.getStatus()))) {
@@ -795,6 +809,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteRollout(final long rolloutId) {
         final JpaRollout jpaRollout = rolloutRepository.findOne(rolloutId);
 
@@ -903,6 +919,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout updateRollout(final RolloutUpdate u) {
         final GenericRolloutUpdate update = (GenericRolloutUpdate) u;
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(update.getId());

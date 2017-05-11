@@ -19,12 +19,12 @@ import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.PropertiesQuotaManagement;
 import org.eclipse.hawkbit.repository.ReportManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.PropertiesQuotaManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
@@ -69,6 +69,7 @@ import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
+import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -89,6 +90,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -110,6 +112,7 @@ import com.google.common.collect.Maps;
 @EnableConfigurationProperties({ RepositoryProperties.class, ControllerPollProperties.class,
         TenantConfigurationProperties.class })
 @EnableScheduling
+@EnableRetry
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
@@ -283,17 +286,22 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Override
     protected Map<String, Object> getVendorProperties() {
 
-        final Map<String, Object> properties = Maps.newHashMapWithExpectedSize(5);
+        final Map<String, Object> properties = Maps.newHashMapWithExpectedSize(7);
         // Turn off dynamic weaving to disable LTW lookup in static weaving mode
-        properties.put("eclipselink.weaving", "false");
+        properties.put(PersistenceUnitProperties.WEAVING, "false");
         // needed for reports
-        properties.put("eclipselink.jdbc.allow-native-sql-queries", "true");
+        properties.put(PersistenceUnitProperties.ALLOW_NATIVE_SQL_QUERIES, "true");
         // flyway
-        properties.put("eclipselink.ddl-generation", "none");
+        properties.put(PersistenceUnitProperties.DDL_GENERATION, "none");
         // Embeed into hawkBit logging
-        properties.put("eclipselink.logging.logger", "JavaLogger");
+        properties.put(PersistenceUnitProperties.LOGGING_LOGGER, "JavaLogger");
         // Ensure that we flush only at the end of the transaction
-        properties.put("eclipselink.persistence-context.flush-mode", "COMMIT");
+        properties.put(PersistenceUnitProperties.PERSISTENCE_CONTEXT_FLUSH_MODE, "COMMIT");
+
+        // Enable batch writing
+        properties.put(PersistenceUnitProperties.BATCH_WRITING, "JDBC");
+        // Batch size
+        properties.put(PersistenceUnitProperties.BATCH_WRITING_SIZE, "500");
 
         return properties;
     }
