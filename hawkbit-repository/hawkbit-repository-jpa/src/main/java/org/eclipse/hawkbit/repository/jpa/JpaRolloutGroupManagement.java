@@ -79,6 +79,9 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     @Autowired
     private VirtualPropertyReplacer virtualPropertyReplacer;
 
+    @Autowired
+    private RolloutStatusCache rolloutStatusCache;
+
     @Override
     public Optional<RolloutGroup> findRolloutGroupById(final Long rolloutGroupId) {
         return Optional.ofNullable(rolloutGroupRepository.findOne(rolloutGroupId));
@@ -159,8 +162,13 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
         final JpaRolloutGroup jpaRolloutGroup = (JpaRolloutGroup) rolloutGroup.get();
 
-        final List<TotalTargetCountActionStatus> rolloutStatusCountItems = actionRepository
-                .getStatusCountByRolloutGroupId(rolloutGroupId);
+        List<TotalTargetCountActionStatus> rolloutStatusCountItems = rolloutStatusCache
+                .getRolloutGroupStatus(rolloutGroupId);
+
+        if (rolloutStatusCountItems == null) {
+            rolloutStatusCountItems = actionRepository.getStatusCountByRolloutGroupId(rolloutGroupId);
+            rolloutStatusCache.putRolloutGroupStatus(rolloutGroupId, rolloutStatusCountItems);
+        }
 
         final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(rolloutStatusCountItems,
                 Long.valueOf(jpaRolloutGroup.getTotalTargets()));
@@ -169,11 +177,25 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
     }
 
-    private Map<Long, List<TotalTargetCountActionStatus>> getStatusCountItemForRolloutGroup(
-            final List<Long> rolloutGroupIds) {
-        final List<TotalTargetCountActionStatus> resultList = actionRepository
-                .getStatusCountByRolloutGroupId(rolloutGroupIds);
-        return resultList.stream().collect(Collectors.groupingBy(TotalTargetCountActionStatus::getId));
+    private Map<Long, List<TotalTargetCountActionStatus>> getStatusCountItemForRolloutGroup(final List<Long> groupIds) {
+        final Map<Long, List<TotalTargetCountActionStatus>> fromCache = rolloutStatusCache
+                .getRolloutGroupStatus(groupIds);
+
+        final List<Long> rolloutGroupIds = groupIds.stream().filter(id -> !fromCache.containsKey(id))
+                .collect(Collectors.toList());
+
+        if (!rolloutGroupIds.isEmpty()) {
+            final List<TotalTargetCountActionStatus> resultList = actionRepository
+                    .getStatusCountByRolloutGroupId(rolloutGroupIds);
+            final Map<Long, List<TotalTargetCountActionStatus>> fromDb = resultList.stream()
+                    .collect(Collectors.groupingBy(TotalTargetCountActionStatus::getId));
+
+            rolloutStatusCache.putRolloutGroupStatus(fromDb);
+
+            fromCache.putAll(fromDb);
+        }
+
+        return fromCache;
     }
 
     @Override

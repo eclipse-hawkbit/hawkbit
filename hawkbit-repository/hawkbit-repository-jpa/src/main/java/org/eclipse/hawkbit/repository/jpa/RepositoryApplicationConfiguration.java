@@ -133,6 +133,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         return new PropertiesQuotaManagement(securityProperties);
     }
 
+    @Bean
+    RolloutStatusCache rolloutStatusCache(final TenantAware tenantAware) {
+        return new RolloutStatusCache(tenantAware);
+    }
+
     /**
      * @param distributionSetManagement
      *            to loading the {@link DistributionSetType}
