@@ -9,7 +9,15 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.net.URI;
+import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.Collection;
+import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +37,7 @@ import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
@@ -175,6 +184,142 @@ public class JpaControllerManagement implements ControllerManagement {
     public String getPollingTime() {
         return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
                 .getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class).getValue());
+    }
+
+    /**
+     * Returns the configured minimum polling interval.
+     *
+     * @return current {@link TenantConfigurationKey#MIN_POLLING_TIME_INTERVAL}.
+     */
+    @Override
+    public String getMinPollingTime() {
+        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
+                .getConfigurationValue(TenantConfigurationKey.MIN_POLLING_TIME_INTERVAL, String.class).getValue());
+    }
+
+    /**
+     * Returns the count to be used for reducing polling interval while calling
+     * {@link ControllerManagement#getPollingTimeForAction()}.
+     *
+     * @return configured value of
+     *         {@link TenantConfigurationKey#MAINTENANCE_WINDOW_POLL_COUNT}.
+     */
+    @Override
+    public int getMaintenanceWindowPollCount() {
+        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
+                .getConfigurationValue(TenantConfigurationKey.MAINTENANCE_WINDOW_POLL_COUNT, Integer.class).getValue());
+    }
+
+    /**
+     * Returns polling time based on the maintenance window for an action.
+     * Server will reduce the polling interval as the start time for maintenance
+     * window approaches, so that at least these many attempts are made between
+     * current polling until start of maintenance window. Poll time keeps
+     * reducing with MinPollingTime as lower limit
+     * {@link TenantConfigurationKey#MIN_POLLING_TIME_INTERVAL}. After the start
+     * of maintenance window, it resets to default
+     * {@link TenantConfigurationKey#POLLING_TIME_INTERVAL}.
+     *
+     * @param action
+     *            id the {@link Action} for which polling time is calculated
+     *            based on it having maintenance window or not
+     *
+     * @return current {@link TenantConfigurationKey#POLLING_TIME_INTERVAL}.
+     */
+    @Override
+    public String getPollingTimeForAction(final Action action) {
+        if (action == null || !action.hasMaintenanceSchedule() || action.isMaintenanceScheduleLapsed()) {
+            return getPollingTime();
+        }
+
+        JpaAction jpaAction = getActionAndThrowExceptionIfNotFound(action.getId());
+        return (new EventTimer(getPollingTime(), getMinPollingTime(), ChronoUnit.SECONDS))
+                .timeToNextEvent(getMaintenanceWindowPollCount(), jpaAction.getMaintenanceWindowStartTime().get());
+    }
+
+    /**
+     * EventTimer to handle reduction of polling interval based on maintenance
+     * window start time. Class models the next polling time as an event to be
+     * raised and time to next polling as a timer. The event, in this case the
+     * polling, should happen when timer expires. Class makes use of java.time
+     * package to manipulate and calculate timer duration.
+     */
+    private class EventTimer {
+
+        private final String defaultEventInterval;
+        private final Duration defaultEventIntervalDuration;
+
+        private final String minimumEventInterval;
+        private final Duration minimumEventIntervalDuration;
+
+        private final TemporalUnit timeUnit;
+
+        /**
+         * Constructor.
+         *
+         * @param defaultEventInterval
+         *            default timer value to use for interval between events.
+         *            This puts an upper bound for the timer value
+         * @param minimumEventInterval
+         *            for loading {@link DistributionSet#getModules()}. This
+         *            puts a lower bound to the timer value
+         * @param timerUnit
+         *            representing the unit of time to be used for timer.
+         */
+        EventTimer(String defaultEventInterval, String minimumEventInterval, TemporalUnit timeUnit) {
+            this.defaultEventInterval = defaultEventInterval;
+            this.defaultEventIntervalDuration = Duration
+                    .parse(MaintenanceScheduleHelper.convertToISODuration(defaultEventInterval));
+
+            this.minimumEventInterval = minimumEventInterval;
+            this.minimumEventIntervalDuration = Duration
+                    .parse(MaintenanceScheduleHelper.convertToISODuration(minimumEventInterval));
+
+            this.timeUnit = timeUnit;
+        }
+
+        /**
+         * This method calculates the time interval until the next event based
+         * on the desired number of events before the time when interval is
+         * reset to default. The return value is bounded by
+         * {@link EventTimer#defaultEventInterval} and
+         * {@link EventTimer#minimumEventInterval}.
+         *
+         * @param eventCount
+         *            number of events desired until the interval is reset to
+         *            default. This is not guaranteed as the interval between
+         *            events cannot be less than the minimum interval
+         * @param timerResetTime
+         *            time when exponential forwarding should reset to default
+         *
+         * @return String in HH:mm:ss format for time to next event.
+         */
+        String timeToNextEvent(int eventCount, ZonedDateTime timerResetTime) {
+            ZonedDateTime currentTime = ZonedDateTime.now();
+
+            // If there is no reset time, or if we already past the reset time,
+            // return the default interval.
+            if (timerResetTime == null || currentTime.compareTo(timerResetTime) > 0) {
+                return defaultEventInterval;
+            }
+
+            // Calculate the interval timer based on desired event count.
+            Duration currentIntervalDuration = Duration.of(currentTime.until(timerResetTime, timeUnit), timeUnit)
+                    .dividedBy(eventCount);
+
+            // Need not return interval greater than the default.
+            if (currentIntervalDuration.compareTo(defaultEventIntervalDuration) > 0) {
+                return defaultEventInterval;
+            }
+
+            // Should not return interval less than minimum.
+            if (currentIntervalDuration.compareTo(minimumEventIntervalDuration) < 0) {
+                return minimumEventInterval;
+            }
+
+            return String.format("%02d:%02d:%02d", currentIntervalDuration.toHours(),
+                    currentIntervalDuration.toMinutes() % 60, currentIntervalDuration.getSeconds() % 60);
+        }
     }
 
     @Override

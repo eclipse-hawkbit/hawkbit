@@ -93,6 +93,18 @@ public class TenantConfigurationProperties {
 
         /**
          * See system default in
+         * {@link ControllerPollProperties#getMinPollingTime()}.
+         */
+        public static final String MIN_POLLING_TIME_INTERVAL = "minPollingTime";
+
+        /**
+         * See system default in
+         * {@link ControllerPollProperties#getMaintenanceWindowPollCount()}.
+         */
+        public static final String MAINTENANCE_WINDOW_POLL_COUNT = "maintenanceWindowPollCount";
+
+        /**
+         * See system default in
          * {@link ControllerPollProperties#getPollingOverdueTime()}.
          */
         public static final String POLLING_OVERDUE_TIME_INTERVAL = "pollingOverdueTime";

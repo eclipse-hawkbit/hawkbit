@@ -500,6 +500,57 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     }
 
     @Test
+    @Description("Test the polling time based on different maintenance window start and end time.")
+    public void testSleepTimeResponseForDifferentMaintenanceWindowParameters() throws Exception {
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+
+        securityRule.runAs(WithSpringAuthorityRule.withUser("tenantadmin", HAS_AUTH_TENANT_CONFIGURATION), () -> {
+            tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME_INTERVAL,
+                    "00:05:00");
+            tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.MIN_POLLING_TIME_INTERVAL,
+                    "00:01:00");
+            return null;
+        });
+
+        Target savedTarget = testdataFactory.createTarget("1911");
+        assignDistributionSetWithMaintenanceWindow(ds.getId(), savedTarget.getControllerId(),
+                AbstractIntegrationTest.getTestSchedule(16), AbstractIntegrationTest.getTestDuration(10),
+                AbstractIntegrationTest.getTestTimeZone()).getAssignedEntity().iterator().next();
+
+        mvc.perform(get("/default-tenant/controller/v1/1911/")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.config.polling.sleep", greaterThanOrEqualTo("00:05:00")));
+
+        Target savedTarget1 = testdataFactory.createTarget("2911");
+        final DistributionSet ds1 = testdataFactory.createDistributionSet("1");
+        assignDistributionSetWithMaintenanceWindow(ds1.getId(), savedTarget1.getControllerId(),
+                AbstractIntegrationTest.getTestSchedule(10), AbstractIntegrationTest.getTestDuration(10),
+                AbstractIntegrationTest.getTestTimeZone()).getAssignedEntity().iterator().next();
+
+        mvc.perform(get("/default-tenant/controller/v1/2911/")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.config.polling.sleep", lessThan("00:05:00")))
+                .andExpect(jsonPath("$.config.polling.sleep", greaterThanOrEqualTo("00:03:00")));
+
+        Target savedTarget2 = testdataFactory.createTarget("3911");
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("2");
+        assignDistributionSetWithMaintenanceWindow(ds2.getId(), savedTarget2.getControllerId(),
+                AbstractIntegrationTest.getTestSchedule(5), AbstractIntegrationTest.getTestDuration(5),
+                AbstractIntegrationTest.getTestTimeZone()).getAssignedEntity().iterator().next();
+
+        mvc.perform(get("/default-tenant/controller/v1/3911/")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.config.polling.sleep", lessThan("00:02:00")));
+
+        Target savedTarget3 = testdataFactory.createTarget("4911");
+        final DistributionSet ds3 = testdataFactory.createDistributionSet("3");
+        assignDistributionSetWithMaintenanceWindow(ds3.getId(), savedTarget3.getControllerId(),
+                AbstractIntegrationTest.getTestSchedule(-5), AbstractIntegrationTest.getTestDuration(15),
+                AbstractIntegrationTest.getTestTimeZone()).getAssignedEntity().iterator().next();
+
+        mvc.perform(get("/default-tenant/controller/v1/4911/")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:05:00")));
+
+    }
+
+    @Test
     @Description("Test download and update values before maintenance window start time.")
     public void testDownloadAndUpdateStatusBeforeMaintenaceWindowStartTime() throws Exception {
         Target savedTarget = testdataFactory.createTarget("1911");
