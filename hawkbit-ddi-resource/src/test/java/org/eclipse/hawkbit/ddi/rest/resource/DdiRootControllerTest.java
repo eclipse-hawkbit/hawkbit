@@ -16,6 +16,9 @@ import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpre
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -40,6 +43,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
+import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
@@ -493,5 +497,45 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                         hasItem(containsString(TARGET_PROCEEDING_INSTALLATION_MSG))))
                 .andExpect(jsonPath("$.actionHistory.messages",
                         hasItem(containsString(TARGET_COMPLETED_INSTALLATION_MSG))));
+    }
+
+    @Test
+    @Description("Test download and update values before maintenance window start time.")
+    public void testDownloadAndUpdateStatusBeforeMaintenaceWindowStartTime() throws Exception {
+        Target savedTarget = testdataFactory.createTarget("1911");
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+        savedTarget = assignDistributionSetWithMaintenanceWindow(ds.getId(), savedTarget.getControllerId(),
+                AbstractIntegrationTest.getTestSchedule(2), AbstractIntegrationTest.getTestDuration(1),
+                AbstractIntegrationTest.getTestTimeZone()).getAssignedEntity().iterator().next();
+
+        mvc.perform(get("/default-tenant/controller/v1/1911/")).andExpect(status().isOk());
+
+        final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
+                .getContent().get(0);
+
+        mvc.perform(get("/{tenant}/controller/v1/1911/deploymentBase/{actionId}", tenantAware.getCurrentTenant(),
+                action.getId()).accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.deployment.download", equalTo("forced")))
+                .andExpect(jsonPath("$.deployment.update", equalTo("skip")));
+    }
+
+    @Test
+    @Description("Test download and update values after maintenance window start time.")
+    public void testDownloadAndUpdateStatusDuringMaintenaceWindow() throws Exception {
+        Target savedTarget = testdataFactory.createTarget("1911");
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+        savedTarget = assignDistributionSetWithMaintenanceWindow(ds.getId(), savedTarget.getControllerId(),
+                AbstractIntegrationTest.getTestSchedule(-5), AbstractIntegrationTest.getTestDuration(10),
+                AbstractIntegrationTest.getTestTimeZone()).getAssignedEntity().iterator().next();
+
+        mvc.perform(get("/default-tenant/controller/v1/1911/")).andExpect(status().isOk());
+
+        final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
+                .getContent().get(0);
+
+        mvc.perform(get("/{tenant}/controller/v1/1911/deploymentBase/{actionId}", tenantAware.getCurrentTenant(),
+                action.getId()).accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.deployment.download", equalTo("forced")))
+                .andExpect(jsonPath("$.deployment.update", equalTo("forced")));
     }
 }

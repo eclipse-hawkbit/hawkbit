@@ -48,6 +48,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
@@ -62,6 +63,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.hateoas.MediaTypes;
 
 import com.jayway.jsonpath.JsonPath;
 
@@ -1216,6 +1218,74 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         assertThat(findActiveActionsByTarget.get(0).getActionType()).isEqualTo(ActionType.TIMEFORCED);
         assertThat(findActiveActionsByTarget.get(0).getForcedTime()).isEqualTo(forceTime);
         assertThat(deploymentManagement.getAssignedDistributionSet("fsdfsd").get()).isEqualTo(set);
+    }
+
+    @Test
+    @Description("Assigns distribution set to target with only maintenance schedule.")
+    public void assignDistributionSetToTargetWithMaintenanceWindowStartTimeOnly() throws Exception {
+
+        final Target target = testdataFactory.createTarget("fsdfsd");
+        final DistributionSet set = testdataFactory.createDistributionSet("one");
+
+        final String body = new JSONObject().put("id", set.getId()).put("type", "forced").put("maintenanceWindow",
+                AbstractIntegrationTest.getMaintenanceWindow(AbstractIntegrationTest.getTestSchedule(0), "", ""))
+                .toString();
+
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
+                .content(body).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Description("Assigns distribution set to target with only maintenance window duration.")
+    public void assignDistributionSetToTargetWithMaintenanceWindowEndTimeOnly() throws Exception {
+
+        final Target target = testdataFactory.createTarget("fsdfsd");
+        final DistributionSet set = testdataFactory.createDistributionSet("one");
+
+        final String body = new JSONObject().put("id", set.getId()).put("type", "forced").put("maintenanceWindow",
+                AbstractIntegrationTest.getMaintenanceWindow("", AbstractIntegrationTest.getTestDuration(10), ""))
+                .toString();
+
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
+                .content(body).contentType(MediaTypes.HAL_JSON_VALUE)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Description("Assigns distribution set to target with valid maintenance window.")
+    public void assignDistributionSetToTargetWithValidMaintenanceWindow() throws Exception {
+
+        final Target target = testdataFactory.createTarget("fsdfsd");
+        final DistributionSet set = testdataFactory.createDistributionSet("one");
+
+        final String body = new JSONObject().put("id", set.getId()).put("type", "forced").put("forcetime", "0")
+                .put("maintenanceWindow",
+                        AbstractIntegrationTest.getMaintenanceWindow(AbstractIntegrationTest.getTestSchedule(10),
+                                AbstractIntegrationTest.getTestDuration(10), AbstractIntegrationTest.getTestTimeZone()))
+                .toString();
+
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
+                .content(body).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @Description("Assigns distribution set to target with last maintenance window scheduled before current time.")
+    public void assignDistributionSetToTargetWithMaintenanceWindowEndTimeBeforeStartTime() throws Exception {
+
+        final Target target = testdataFactory.createTarget("fsdfsd");
+        final DistributionSet set = testdataFactory.createDistributionSet("one");
+
+        final String body = new JSONObject().put("id", set.getId()).put("type", "forced")
+                .put("maintenanceWindow",
+                        AbstractIntegrationTest.getMaintenanceWindow(AbstractIntegrationTest.getTestSchedule(-30),
+                                AbstractIntegrationTest.getTestDuration(5), AbstractIntegrationTest.getTestTimeZone()))
+                .toString();
+
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
+                .content(body).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
     }
 
     @Test
