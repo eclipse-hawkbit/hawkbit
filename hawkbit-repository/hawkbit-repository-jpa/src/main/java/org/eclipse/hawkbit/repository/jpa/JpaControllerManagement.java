@@ -19,6 +19,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
@@ -58,6 +59,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
@@ -97,6 +100,9 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Autowired
     private QuotaManagement quotaManagement;
+
+    @Autowired
+    private DeploymentManagement deploymentManagement;
 
     @Autowired
     private RepositoryProperties repositoryProperties;
@@ -509,6 +515,11 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     public Optional<Target> findByTargetId(final Long targetId) {
         return Optional.ofNullable(targetRepository.findOne(targetId));
+    }
+
+    @Override
+    public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final Long actionId) {
+        return deploymentManagement.findActionStatusByAction(pageReq, actionId);
     }
 
 }

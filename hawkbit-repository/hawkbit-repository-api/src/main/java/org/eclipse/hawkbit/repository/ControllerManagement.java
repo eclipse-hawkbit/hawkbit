@@ -29,6 +29,8 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.hibernate.validator.constraints.NotEmpty;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -137,6 +139,22 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     Optional<Action> findActionWithDetails(@NotNull Long actionId);
+
+    /**
+     * Retrieves all the {@link ActionStatus} entries of the given
+     * {@link Action}.
+     *
+     * @param pageReq
+     *            pagination parameter
+     * @param actionId
+     *            to be filtered on
+     * @return the corresponding {@link Page} of {@link ActionStatus}
+     * 
+     * @throws EntityNotFoundException
+     *             if action with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    Page<ActionStatus> findActionStatusByAction(@NotNull Pageable pageReq, @NotNull Long actionId);
 
     /**
      * register new target in the repository (plug-and-play).
