@@ -65,6 +65,20 @@ public class DeviceSimulatorRepository {
     }
 
     /**
+     * Removes a device from the simulation.
+     * 
+     * @param tenant
+     *            the tenant of the simulated device
+     * @param id
+     *            the ID of the device
+     * @return the simulated device or <code>null</code> if it was not in the
+     *         repository
+     */
+    public AbstractSimulatedDevice remove(final String tenant, final String id) {
+        return devices.remove(new DeviceKey(tenant.toLowerCase(), id));
+    }
+
+    /**
      * Clears all stored devices.
      */
     public void clear() {
