@@ -19,8 +19,10 @@ import org.eclipse.hawkbit.repository.event.remote.entity.AbstractActionEvent;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.cache.Cache;
-import org.springframework.cache.caffeine.CaffeineCacheManager;
+import org.springframework.cache.guava.GuavaCacheManager;
 import org.springframework.context.event.EventListener;
+
+import com.google.common.cache.CacheBuilder;
 
 /**
  * Internal cache for Rollout status.
@@ -29,12 +31,22 @@ import org.springframework.context.event.EventListener;
 public class RolloutStatusCache {
     private static final String CACHE_RO_NAME = "RolloutStatus";
     private static final String CACHE_GR_NAME = "RolloutGroupStatus";
+    private static final long DEFAULT_SIZE = 50_000;
     private final TenancyCacheManager cacheManager;
     private final TenantAware tenantAware;
 
-    RolloutStatusCache(final TenantAware tenantAware) {
+    RolloutStatusCache(final TenantAware tenantAware, final long size) {
         this.tenantAware = tenantAware;
-        this.cacheManager = new TenantAwareCacheManager(new CaffeineCacheManager(), tenantAware);
+
+        final CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder().maximumSize(size);
+        final GuavaCacheManager cacheManager = new GuavaCacheManager();
+        cacheManager.setCacheBuilder(cacheBuilder);
+
+        this.cacheManager = new TenantAwareCacheManager(cacheManager, tenantAware);
+    }
+
+    RolloutStatusCache(final TenantAware tenantAware) {
+        this(tenantAware, DEFAULT_SIZE);
     }
 
     Map<Long, List<TotalTargetCountActionStatus>> getRolloutStatus(final List<Long> rollouts) {

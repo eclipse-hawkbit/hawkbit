@@ -134,6 +134,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     RolloutStatusCache rolloutStatusCache(final TenantAware tenantAware) {
         return new RolloutStatusCache(tenantAware);
     }
