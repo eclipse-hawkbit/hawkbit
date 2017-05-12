@@ -198,7 +198,7 @@ public class RolloutStatusCache {
     }
 
     @EventListener(classes = AbstractActionEvent.class)
-    private void invalidateCachedTotalTargetCountActionStatus(final AbstractActionEvent event) {
+    void invalidateCachedTotalTargetCountActionStatus(final AbstractActionEvent event) {
         if (event.getRolloutId() == null) {
             return;
         }
