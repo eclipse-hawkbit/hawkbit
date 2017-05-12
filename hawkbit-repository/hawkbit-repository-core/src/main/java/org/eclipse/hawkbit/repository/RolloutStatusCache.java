@@ -211,7 +211,7 @@ public class RolloutStatusCache {
         }
 
         cache = tenantAware.runAsTenant(event.getTenant(), () -> cacheManager.getCache(CACHE_GR_NAME));
-        cache.evict(event.getRolloutId());
+        cache.evict(event.getRolloutGroupId());
     }
 
     private static class CachedTotalTargetCountActionStatus {
