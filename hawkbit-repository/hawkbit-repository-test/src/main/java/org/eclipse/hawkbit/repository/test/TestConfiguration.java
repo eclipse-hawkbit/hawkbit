@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.cache.DefaultDownloadIdCache;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.event.BusProtoStuffMessageConverter;
+import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
@@ -74,6 +75,14 @@ import org.springframework.util.AntPathMatcher;
 @Profile("test")
 @EnableAutoConfiguration
 public class TestConfiguration implements AsyncConfigurer {
+
+    /**
+     * Disables caching during test to avoid concurrency failures during test.
+     */
+    @Bean
+    RolloutStatusCache rolloutStatusCache(final TenantAware tenantAware) {
+        return new RolloutStatusCache(tenantAware, 0);
+    }
 
     @Bean
     public LockRegistry lockRegistry() {

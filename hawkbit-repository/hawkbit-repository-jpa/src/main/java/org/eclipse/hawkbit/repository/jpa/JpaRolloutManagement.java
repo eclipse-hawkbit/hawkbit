@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.repository.RolloutFields;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutHelper;
 import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.builder.GenericRolloutUpdate;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
@@ -975,7 +976,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
         List<TotalTargetCountActionStatus> rolloutStatusCountItems = rolloutStatusCache.getRolloutStatus(rolloutId);
 
-        if (rolloutStatusCountItems == null) {
+        if (rolloutStatusCountItems.isEmpty()) {
             rolloutStatusCountItems = actionRepository.getStatusCountByRolloutId(rolloutId);
             rolloutStatusCache.putRolloutStatus(rolloutId, rolloutStatusCountItems);
         }

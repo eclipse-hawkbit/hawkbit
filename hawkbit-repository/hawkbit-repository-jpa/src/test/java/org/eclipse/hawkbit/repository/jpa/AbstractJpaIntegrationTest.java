@@ -35,8 +35,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 
-@SpringApplicationConfiguration(classes = { org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration.class,
-        JpaTestConfiguration.class })
+@SpringApplicationConfiguration(classes = {
+        org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration.class })
 public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest {
 
     protected static final String NOT_EXIST_ID = "1234";

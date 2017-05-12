@@ -25,6 +25,7 @@ import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.RolloutGroupFields;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
+import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -165,7 +166,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
         List<TotalTargetCountActionStatus> rolloutStatusCountItems = rolloutStatusCache
                 .getRolloutGroupStatus(rolloutGroupId);
 
-        if (rolloutStatusCountItems == null) {
+        if (rolloutStatusCountItems.isEmpty()) {
             rolloutStatusCountItems = actionRepository.getStatusCountByRolloutGroupId(rolloutGroupId);
             rolloutStatusCache.putRolloutGroupStatus(rolloutGroupId, rolloutStatusCountItems);
         }
