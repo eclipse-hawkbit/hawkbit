@@ -58,6 +58,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
@@ -509,6 +511,15 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     public Optional<Target> findByTargetId(final Long targetId) {
         return Optional.ofNullable(targetRepository.findOne(targetId));
+    }
+
+    @Override
+    public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final Long actionId) {
+        if (!actionRepository.exists(actionId)) {
+            throw new EntityNotFoundException(Action.class, actionId);
+        }
+
+        return actionStatusRepository.findByActionId(pageReq, actionId);
     }
 
 }
