@@ -19,7 +19,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.repository.ControllerManagement;
-import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
@@ -100,9 +99,6 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Autowired
     private QuotaManagement quotaManagement;
-
-    @Autowired
-    private DeploymentManagement deploymentManagement;
 
     @Autowired
     private RepositoryProperties repositoryProperties;
@@ -519,7 +515,11 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Override
     public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final Long actionId) {
-        return deploymentManagement.findActionStatusByAction(pageReq, actionId);
+        if (!actionRepository.exists(actionId)) {
+            throw new EntityNotFoundException(Action.class, actionId);
+        }
+
+        return actionStatusRepository.findByActionId(pageReq, actionId);
     }
 
 }
