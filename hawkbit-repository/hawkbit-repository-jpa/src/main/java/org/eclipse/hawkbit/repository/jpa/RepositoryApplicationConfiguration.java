@@ -20,7 +20,6 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.PropertiesQuotaManagement;
-import org.eclipse.hawkbit.repository.ReportManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
@@ -327,17 +326,6 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnMissingBean
     SystemManagement systemManagement() {
         return new JpaSystemManagement();
-    }
-
-    /**
-     * {@link JpaReportManagement} bean.
-     *
-     * @return a new {@link ReportManagement}
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    ReportManagement reportManagement() {
-        return new JpaReportManagement();
     }
 
     /**
