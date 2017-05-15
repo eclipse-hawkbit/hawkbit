@@ -141,7 +141,7 @@
       <!-- Vaadin versions - START -->
       <vaadin.spring.version>1.1.1</vaadin.spring.version>
       <vaadin.spring.addon.version>0.0.6.RELEASE</vaadin.spring.addon.version>
-      <vaadin.version>7.7.7</vaadin.version>
+      <vaadin.version>7.7.9</vaadin.version>
       <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
       <vaadin.addon.vaadin-lazyquerycontainer.version>7.6.1.3</vaadin.addon.vaadin-lazyquerycontainer.version>
       <vaadin.addon.flexibleoptiongroup.version>2.2.0</vaadin.addon.flexibleoptiongroup.version>
@@ -211,7 +211,10 @@
             <artifactId>license-maven-plugin</artifactId>
             <version>2.11</version>
             <configuration>
-               <header>LICENCE_HEADER_TEMPLATE.txt</header>
+               <header>licenses/LICENSE_HEADER_TEMPLATE_BOSCH.txt</header>
+               <validHeaders>
+                   <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS.txt</validHeader>
+               </validHeaders>
                <excludes>
                   <exclude>**/README</exclude>
                   <exclude>3rd-dependencies/**</exclude>
@@ -226,6 +229,7 @@
                   <exclude>**/Dockerfile</exclude>
                   <exclude>**/.sonar/**</exclude>
                   <exclude>docs/src/main/resources/**</exclude>
+                  <exclude>**/LICENSE*</exclude>
                </excludes>
                <mapping>
                   <scss>JAVADOC_STYLE</scss>

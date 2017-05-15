@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
+import org.eclipse.hawkbit.simulator.DeviceSimulatorRepository;
 import org.eclipse.hawkbit.simulator.DeviceSimulatorUpdater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,8 @@ public class SpReceiverService extends ReceiverService {
 
     private final DeviceSimulatorUpdater deviceUpdater;
 
+    private final DeviceSimulatorRepository repository;
+
     /**
      * Constructor.
      * 
@@ -52,13 +55,17 @@ public class SpReceiverService extends ReceiverService {
      *            to send messages
      * @param deviceUpdater
      *            simulator service for updates
+     * @param repository
+     *            to manage simulated devices
      */
     @Autowired
     public SpReceiverService(final RabbitTemplate rabbitTemplate, final AmqpProperties amqpProperties,
-            final SpSenderService spSenderService, final DeviceSimulatorUpdater deviceUpdater) {
+            final SpSenderService spSenderService, final DeviceSimulatorUpdater deviceUpdater,
+            final DeviceSimulatorRepository repository) {
         super(rabbitTemplate, amqpProperties);
         this.spSenderService = spSenderService;
         this.deviceUpdater = deviceUpdater;
+        this.repository = repository;
     }
 
     /**
@@ -71,21 +78,30 @@ public class SpReceiverService extends ReceiverService {
      *            the action type
      * @param thingId
      *            the thing id in message header
+     * @param tenant
+     *            the device belongs to
      */
     @RabbitListener(queues = "${hawkbit.device.simulator.amqp.receiverConnectorQueueFromSp}", containerFactory = "listenerContainerFactory")
     public void recieveMessageSp(final Message message, @Header(MessageHeaderKey.TYPE) final String type,
-            @Header(MessageHeaderKey.THING_ID) final String thingId) {
+            @Header(MessageHeaderKey.THING_ID) final String thingId,
+            @Header(MessageHeaderKey.TENANT) final String tenant) {
         checkContentTypeJson(message);
-        delegateMessage(message, type, thingId);
+        delegateMessage(message, type, thingId, tenant);
     }
 
-    private void delegateMessage(final Message message, final String type, final String thingId) {
+    private void delegateMessage(final Message message, final String type, final String thingId, final String tenant) {
         final MessageType messageType = MessageType.valueOf(type);
 
         if (MessageType.EVENT.equals(messageType)) {
             handleEventMessage(message, thingId);
             return;
         }
+
+        if (MessageType.THING_DELETED.equals(messageType)) {
+            repository.remove(tenant, thingId);
+            return;
+        }
+
         LOGGER.info("No valid message type property.");
     }
 
