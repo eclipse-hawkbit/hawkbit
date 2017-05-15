@@ -48,10 +48,10 @@ public class RolloutStatusCache {
         this.tenantAware = tenantAware;
 
         final CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder().maximumSize(size);
-        final GuavaCacheManager cacheManager = new GuavaCacheManager();
-        cacheManager.setCacheBuilder(cacheBuilder);
+        final GuavaCacheManager guavaCacheManager = new GuavaCacheManager();
+        guavaCacheManager.setCacheBuilder(cacheBuilder);
 
-        this.cacheManager = new TenantAwareCacheManager(cacheManager, tenantAware);
+        this.cacheManager = new TenantAwareCacheManager(guavaCacheManager, tenantAware);
     }
 
     /**
@@ -214,7 +214,7 @@ public class RolloutStatusCache {
         cache.evict(event.getRolloutGroupId());
     }
 
-    private static class CachedTotalTargetCountActionStatus {
+    private static final class CachedTotalTargetCountActionStatus {
         private final long rolloutId;
         private final List<TotalTargetCountActionStatus> status;
 
