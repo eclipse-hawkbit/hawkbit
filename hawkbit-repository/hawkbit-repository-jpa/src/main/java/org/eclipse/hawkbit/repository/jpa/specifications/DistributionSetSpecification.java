@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Specifications class for {@link DistributionSet}s. The class provides Spring
@@ -145,7 +146,7 @@ public final class DistributionSetSpecification {
         tags.get(JpaDistributionSetTag_.name);
         final Path<String> exp = tags.get(JpaDistributionSetTag_.name);
         if (selectDSWithNoTag != null && selectDSWithNoTag) {
-            if (tagNames != null) {
+            if (!CollectionUtils.isEmpty(tagNames)) {
                 return cb.or(exp.isNull(), exp.in(tagNames));
             } else {
                 return exp.isNull();
