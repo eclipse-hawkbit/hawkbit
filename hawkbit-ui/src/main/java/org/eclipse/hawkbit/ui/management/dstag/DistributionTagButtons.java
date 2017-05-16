@@ -27,7 +27,6 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -95,7 +94,7 @@ public class DistributionTagButtons extends AbstractFilterButtons implements Ref
 
     @Override
     protected String createButtonId(final String name) {
-        return StringUtils.trimAllWhitespace(name);
+        return name;
     }
 
     @Override
