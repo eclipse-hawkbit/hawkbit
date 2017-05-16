@@ -29,7 +29,7 @@ import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
-import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
+import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
@@ -119,7 +119,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
 
         final Message sendMessage = getCaptureAdressEvent(targetAssignDistributionSetEvent);
-        final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage, 1L);
+        final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage, 1L);
         assertThat(downloadAndUpdateRequest.getTargetSecurityToken()).isEqualTo(TEST_TOKEN);
         assertTrue("No softwaremmodule should be contained in the request",
                 downloadAndUpdateRequest.getSoftwareModules().isEmpty());
@@ -147,11 +147,11 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
                 action, serviceMatcher.getServiceId());
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
         final Message sendMessage = getCaptureAdressEvent(targetAssignDistributionSetEvent);
-        final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage,
+        final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage,
                 action.getId());
         assertThat(createDistributionSet.getModules()).hasSameSizeAs(downloadAndUpdateRequest.getSoftwareModules());
         assertThat(downloadAndUpdateRequest.getTargetSecurityToken()).isEqualTo(TEST_TOKEN);
-        for (final org.eclipse.hawkbit.dmf.json.model.SoftwareModule softwareModule : downloadAndUpdateRequest
+        for (final org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule softwareModule : downloadAndUpdateRequest
                 .getSoftwareModules()) {
             assertTrue("Artifact list for softwaremodule should be empty", softwareModule.getArtifacts().isEmpty());
             for (final SoftwareModule softwareModule2 : action.getDistributionSet().getModules()) {
@@ -189,14 +189,14 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
                 action, serviceMatcher.getServiceId());
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
         final Message sendMessage = getCaptureAdressEvent(targetAssignDistributionSetEvent);
-        final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage,
+        final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage,
                 action.getId());
 
         assertEquals("DownloadAndUpdateRequest event should contains 3 software modules", 3,
                 downloadAndUpdateRequest.getSoftwareModules().size());
         assertThat(downloadAndUpdateRequest.getTargetSecurityToken()).isEqualTo(TEST_TOKEN);
 
-        for (final org.eclipse.hawkbit.dmf.json.model.SoftwareModule softwareModule : downloadAndUpdateRequest
+        for (final org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule softwareModule : downloadAndUpdateRequest
                 .getSoftwareModules()) {
             if (!softwareModule.getModuleId().equals(module.getId())) {
                 continue;
@@ -204,7 +204,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
             assertThat(softwareModule.getArtifacts().size()).isEqualTo(module.getArtifacts().size()).isGreaterThan(0);
 
             module.getArtifacts().forEach(dbArtifact -> {
-                final Optional<org.eclipse.hawkbit.dmf.json.model.Artifact> found = softwareModule.getArtifacts()
+                final Optional<org.eclipse.hawkbit.dmf.json.model.DmfArtifact> found = softwareModule.getArtifacts()
                         .stream().filter(dmfartifact -> dmfartifact.getFilename().equals(dbArtifact.getFilename()))
                         .findAny();
 
@@ -296,10 +296,10 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
                 .isEqualTo(MessageType.THING_DELETED);
     }
 
-    private DownloadAndUpdateRequest assertDownloadAndInstallMessage(final Message sendMessage, final Long action) {
+    private DmfDownloadAndUpdateRequest assertDownloadAndInstallMessage(final Message sendMessage, final Long action) {
         assertEventMessage(sendMessage);
-        final DownloadAndUpdateRequest downloadAndUpdateRequest = convertMessage(sendMessage,
-                DownloadAndUpdateRequest.class);
+        final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = convertMessage(sendMessage,
+                DmfDownloadAndUpdateRequest.class);
         assertEquals(downloadAndUpdateRequest.getActionId(), action);
         assertEquals("The topic of the event shuold contain DOWNLOAD_AND_INSTALL", EventTopic.DOWNLOAD_AND_INSTALL,
                 sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC));

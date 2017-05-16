@@ -16,9 +16,9 @@ import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
-import org.eclipse.hawkbit.dmf.json.model.ActionStatus;
-import org.eclipse.hawkbit.dmf.json.model.ActionUpdateStatus;
-import org.eclipse.hawkbit.dmf.json.model.AttributeUpdate;
+import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
+import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
+import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
 import org.eclipse.hawkbit.simulator.SimulationProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +66,7 @@ public class SpSenderService extends SenderService {
      *            a description according the update process
      */
     public void finishUpdateProcess(final SimulatedUpdate update, final List<String> updateResultMessages) {
-        final Message updateResultMessage = createUpdateResultMessage(update, ActionStatus.FINISHED,
+        final Message updateResultMessage = createUpdateResultMessage(update, DmfActionStatus.FINISHED,
                 updateResultMessages);
         sendMessage(spExchange, updateResultMessage);
     }
@@ -96,7 +96,7 @@ public class SpSenderService extends SenderService {
      *            the ID of the action for the error message
      */
     public void sendErrorMessage(final String tenant, final List<String> updateResultMessages, final Long actionId) {
-        final Message message = createActionStatusMessage(tenant, ActionStatus.ERROR, updateResultMessages, actionId);
+        final Message message = createActionStatusMessage(tenant, DmfActionStatus.ERROR, updateResultMessages, actionId);
         sendMessage(spExchange, message);
     }
 
@@ -109,7 +109,7 @@ public class SpSenderService extends SenderService {
      *            a warning description
      */
     public void sendWarningMessage(final SimulatedUpdate update, final List<String> updateResultMessages) {
-        final Message message = createActionStatusMessage(update, updateResultMessages, ActionStatus.WARNING);
+        final Message message = createActionStatusMessage(update, updateResultMessages, DmfActionStatus.WARNING);
         sendMessage(spExchange, message);
     }
 
@@ -125,7 +125,7 @@ public class SpSenderService extends SenderService {
      * @param actionId
      *            the cached value
      */
-    public void sendActionStatusMessage(final String tenant, final ActionStatus actionStatus,
+    public void sendActionStatusMessage(final String tenant, final DmfActionStatus actionStatus,
             final List<String> updateResultMessages, final Long actionId) {
         final Message message = createActionStatusMessage(tenant, actionStatus, updateResultMessages, actionId);
         sendMessage(message);
@@ -179,7 +179,7 @@ public class SpSenderService extends SenderService {
         messagePropertiesForSP.setHeader(MessageHeaderKey.THING_ID, targetId);
         messagePropertiesForSP.setContentType(MessageProperties.CONTENT_TYPE_JSON);
         messagePropertiesForSP.setReplyTo(amqpProperties.getSenderForSpExchange());
-        final AttributeUpdate attributeUpdate = new AttributeUpdate();
+        final DmfAttributeUpdate attributeUpdate = new DmfAttributeUpdate();
 
         attributeUpdate.getAttributes().putAll(simulationProperties.getAttributes().stream().collect(
                 Collectors.toMap(SimulationProperties.Attribute::getKey, SimulationProperties.Attribute::getValue)));
@@ -206,7 +206,7 @@ public class SpSenderService extends SenderService {
      *            a list of descriptions according the update process
      */
     private void sendErrorgMessage(final SimulatedUpdate update, final List<String> updateResultMessages) {
-        final Message message = createActionStatusMessage(update, updateResultMessages, ActionStatus.ERROR);
+        final Message message = createActionStatusMessage(update, updateResultMessages, DmfActionStatus.ERROR);
         sendMessage(spExchange, message);
     }
 
@@ -222,11 +222,11 @@ public class SpSenderService extends SenderService {
      * @param cacheValue
      *            the cacheValue value
      */
-    private Message createActionStatusMessage(final String tenant, final ActionStatus actionStatus,
+    private Message createActionStatusMessage(final String tenant, final DmfActionStatus actionStatus,
             final List<String> updateResultMessages, final Long actionId) {
         final MessageProperties messageProperties = new MessageProperties();
         final Map<String, Object> headers = messageProperties.getHeaders();
-        final ActionUpdateStatus actionUpdateStatus = new ActionUpdateStatus(actionId, actionStatus);
+        final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(actionId, actionStatus);
         headers.put(MessageHeaderKey.TYPE, MessageType.EVENT.name());
         headers.put(MessageHeaderKey.TENANT, tenant);
         headers.put(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
@@ -236,11 +236,11 @@ public class SpSenderService extends SenderService {
         return convertMessage(actionUpdateStatus, messageProperties);
     }
 
-    private Message createUpdateResultMessage(final SimulatedUpdate cacheValue, final ActionStatus actionStatus,
+    private Message createUpdateResultMessage(final SimulatedUpdate cacheValue, final DmfActionStatus actionStatus,
             final List<String> updateResultMessages) {
         final MessageProperties messageProperties = new MessageProperties();
         final Map<String, Object> headers = messageProperties.getHeaders();
-        final ActionUpdateStatus actionUpdateStatus = new ActionUpdateStatus(cacheValue.getActionId(), actionStatus);
+        final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(cacheValue.getActionId(), actionStatus);
         headers.put(MessageHeaderKey.TYPE, MessageType.EVENT.name());
         headers.put(MessageHeaderKey.TENANT, cacheValue.getTenant());
         headers.put(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
@@ -250,7 +250,7 @@ public class SpSenderService extends SenderService {
     }
 
     private Message createActionStatusMessage(final SimulatedUpdate update, final List<String> updateResultMessages,
-            final ActionStatus status) {
+            final DmfActionStatus status) {
         return createActionStatusMessage(update.getTenant(), status, updateResultMessages, update.getActionId());
     }
 

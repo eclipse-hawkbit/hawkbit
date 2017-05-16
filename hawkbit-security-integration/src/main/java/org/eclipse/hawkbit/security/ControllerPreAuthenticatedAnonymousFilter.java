@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.security;
 
-import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
+import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken;
 
 /**
  * An anonymous controller filter which is only enabled in case of anonymous
@@ -30,17 +30,17 @@ public class ControllerPreAuthenticatedAnonymousFilter implements PreAuthentific
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedPrincipal(final TenantSecurityToken secruityToken) {
+    public HeaderAuthentication getPreAuthenticatedPrincipal(final DmfTenantSecurityToken secruityToken) {
         return new HeaderAuthentication(secruityToken.getControllerId(), secruityToken.getControllerId());
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedCredentials(final TenantSecurityToken secruityToken) {
+    public HeaderAuthentication getPreAuthenticatedCredentials(final DmfTenantSecurityToken secruityToken) {
         return new HeaderAuthentication(secruityToken.getControllerId(), secruityToken.getControllerId());
     }
 
     @Override
-    public boolean isEnable(final TenantSecurityToken secruityToken) {
+    public boolean isEnable(final DmfTenantSecurityToken secruityToken) {
         return ddiSecurityConfiguration.getAuthentication().getAnonymous().isEnabled();
     }
 

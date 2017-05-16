@@ -19,7 +19,7 @@ import org.hamcrest.Factory;
 
 /**
  * Set matcher for {@link SoftwareModule} and a list of
- * {@link org.eclipse.hawkbit.dmf.json.model.SoftwareModule}.
+ * {@link org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule}.
  */
 public final class SoftwareModuleJsonMatcher {
 
@@ -45,20 +45,20 @@ public final class SoftwareModuleJsonMatcher {
      */
     @Factory
     public static SoftwareModulesMatcher containsExactly(
-            final List<org.eclipse.hawkbit.dmf.json.model.SoftwareModule> expectedModules) {
+            final List<org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule> expectedModules) {
         return new SoftwareModulesMatcher(expectedModules);
     }
 
     private static class SoftwareModulesMatcher extends BaseMatcher<Set<SoftwareModule>> {
 
-        private final List<org.eclipse.hawkbit.dmf.json.model.SoftwareModule> expectedModules;
+        private final List<org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule> expectedModules;
 
-        public SoftwareModulesMatcher(List<org.eclipse.hawkbit.dmf.json.model.SoftwareModule> expectedModules) {
+        public SoftwareModulesMatcher(List<org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule> expectedModules) {
             this.expectedModules = expectedModules;
         }
 
         static boolean containsExactly(Object actual,
-                List<org.eclipse.hawkbit.dmf.json.model.SoftwareModule> expected) {
+                List<org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule> expected) {
             if (actual == null) {
                 return expected == null;
             }
@@ -73,7 +73,7 @@ public final class SoftwareModuleJsonMatcher {
             for (final SoftwareModule repoSoftwareModule : modules) {
                 boolean containsElement = false;
 
-                for (final org.eclipse.hawkbit.dmf.json.model.SoftwareModule jsonSoftwareModule : expected) {
+                for (final org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule jsonSoftwareModule : expected) {
                     if (!jsonSoftwareModule.getModuleId().equals(repoSoftwareModule.getId())) {
                         continue;
                     }
