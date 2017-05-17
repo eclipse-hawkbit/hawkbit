@@ -24,8 +24,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 
-import com.google.common.base.Throwables;
-
 /**
  * A Service which provide to run system code.
  */
@@ -100,7 +98,7 @@ public class SystemSecurityContext {
                     // The callable API throws a Exception and not a specific
                     // one
                 } catch (@SuppressWarnings("squid:S2221") final Exception e) {
-                    throw Throwables.propagate(e);
+                    throw new RuntimeException(e);
                 }
             });
 

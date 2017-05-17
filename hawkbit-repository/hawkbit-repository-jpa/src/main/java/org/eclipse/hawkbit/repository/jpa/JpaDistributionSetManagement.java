@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -21,6 +22,7 @@ import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
 import org.eclipse.hawkbit.repository.DistributionSetTypeFields;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
@@ -73,9 +75,9 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
 /**
@@ -84,7 +86,7 @@ import com.google.common.collect.Lists;
  */
 @Transactional(readOnly = true)
 @Validated
-public class JpaDistributionSetManagement implements DistributionSetManagement {
+public class JpaDistributionSetManagement implements DistributionSetManagement, DistributionSetTypeManagement {
 
     @Autowired
     private EntityManager entityManager;
@@ -579,7 +581,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public Long countDistributionSetsAll() {
         final Specification<JpaDistributionSet> spec = DistributionSetSpecification.isDeleted(Boolean.FALSE);
 
-        return distributionSetRepository.count(SpecificationsBuilder.combineWithAnd(Lists.newArrayList(spec)));
+        return distributionSetRepository.count(SpecificationsBuilder.combineWithAnd(Arrays.asList(spec)));
     }
 
     @Override
@@ -788,7 +790,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             specList.add(spec);
         }
 
-        if (!Strings.isNullOrEmpty(distributionSetFilter.getSearchText())) {
+        if (!StringUtils.isEmpty(distributionSetFilter.getSearchText())) {
             spec = DistributionSetSpecification.likeNameOrDescriptionOrVersion(distributionSetFilter.getSearchText());
             specList.add(spec);
         }
@@ -911,7 +913,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public void deleteDistributionSet(final Long setId) {
         throwExceptionIfDistributionSetDoesNotExist(setId);
 
-        deleteDistributionSet(Lists.newArrayList(setId));
+        deleteDistributionSet(Arrays.asList(setId));
     }
 
     private void throwExceptionIfDistributionSetDoesNotExist(final Long setId) {

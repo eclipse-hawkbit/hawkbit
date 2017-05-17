@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -46,8 +47,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.MediaType;
-
-import com.google.common.collect.Lists;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -144,7 +143,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         final float percentTargetsInGroup1 = 20;
         final float percentTargetsInGroup2 = 100;
 
-        final List<RolloutGroup> rolloutGroups = Lists.newArrayList(
+        final List<RolloutGroup> rolloutGroups = Arrays.asList(
                 entityFactory.rolloutGroup().create().name("Group1").description("Group1desc")
                         .targetPercentage(percentTargetsInGroup1).build(),
                 entityFactory.rolloutGroup().create().name("Group2").description("Group2desc")
@@ -168,7 +167,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         final int amountTargets = 10;
         testdataFactory.createTargets(amountTargets, "ro-target", "rollout");
 
-        final List<RolloutGroup> rolloutGroups = Lists.newArrayList(
+        final List<RolloutGroup> rolloutGroups = Arrays.asList(
                 entityFactory.rolloutGroup().create().name("Group1").description("Group1desc").targetPercentage(0F)
                         .build(),
                 entityFactory.rolloutGroup().create().name("Group2").description("Group2desc").targetPercentage(100F)
@@ -193,7 +192,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         final int amountTargets = 10;
         testdataFactory.createTargets(amountTargets, "ro-target", "rollout");
 
-        final List<RolloutGroup> rolloutGroups = Lists.newArrayList(
+        final List<RolloutGroup> rolloutGroups = Arrays.asList(
                 entityFactory.rolloutGroup().create().name("Group1").description("Group1desc").targetPercentage(1F)
                         .build(),
                 entityFactory.rolloutGroup().create().name("Group2").description("Group2desc").targetPercentage(101F)

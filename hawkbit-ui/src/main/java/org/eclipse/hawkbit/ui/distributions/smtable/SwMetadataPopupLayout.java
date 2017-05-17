@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
@@ -32,12 +32,12 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
 
     private static final long serialVersionUID = -1252090014161012563L;
 
-    private final transient SoftwareManagement softwareManagement;
+    private final transient SoftwareModuleManagement softwareManagement;
 
     private final transient EntityFactory entityFactory;
 
     public SwMetadataPopupLayout(final VaadinMessageSource i18n, final UINotification uiNotification,
-            final UIEventBus eventBus, final SoftwareManagement softwareManagement, final EntityFactory entityFactory,
+            final UIEventBus eventBus, final SoftwareModuleManagement softwareManagement, final EntityFactory entityFactory,
             final SpPermissionChecker permChecker) {
         super(i18n, uiNotification, eventBus, permChecker);
         this.softwareManagement = softwareManagement;

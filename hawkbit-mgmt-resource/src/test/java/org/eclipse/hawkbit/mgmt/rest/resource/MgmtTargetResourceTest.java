@@ -24,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -59,7 +60,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
-import com.google.common.collect.Lists;
 import com.jayway.jsonpath.JsonPath;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -192,7 +192,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         final Target createTarget = testdataFactory.createTarget("knownTargetId");
 
-        assignDistributionSet(dsA, Lists.newArrayList(createTarget));
+        assignDistributionSet(dsA, Arrays.asList(createTarget));
 
         final String rsqlPendingStatus = "status==pending";
         final String rsqlFinishedStatus = "status==finished";
@@ -230,8 +230,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNoContent());
 
         final Action action = deploymentManagement.findAction(
-                deploymentManagement.findActionsByTarget(tA.getControllerId(), PAGE).getContent().get(0).getId())
-                .get();
+                deploymentManagement.findActionsByTarget(tA.getControllerId(), PAGE).getContent().get(0).getId()).get();
         // still active because in "canceling" state and waiting for controller
         // feedback
         assertThat(action.isActive()).isTrue();
@@ -695,7 +694,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .build();
 
         final MvcResult mvcResult = mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING)
-                .content(JsonBuilder.targets(Lists.newArrayList(test1), true)).contentType(MediaType.APPLICATION_JSON))
+                .content(JsonBuilder.targets(Arrays.asList(test1), true)).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest()).andReturn();
 
         assertThat(targetManagement.countTargetsAll()).isEqualTo(0);
@@ -717,7 +716,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final Target test3 = entityFactory.target().create().controllerId("id3").name("testname3")
                 .description("testid3").build();
 
-        final List<Target> targets = Lists.newArrayList(test1, test2, test3);
+        final List<Target> targets = Arrays.asList(test1, test2, test3);
 
         final MvcResult mvcResult = mvc
                 .perform(post("/rest/v1/targets/").content(JsonBuilder.targets(targets, true))
@@ -1044,7 +1043,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
             throws InterruptedException {
 
         final Target target = testdataFactory.createTarget(knownTargetId);
-        final List<Target> targets = Lists.newArrayList(target);
+        final List<Target> targets = Arrays.asList(target);
 
         final Iterator<DistributionSet> sets = testdataFactory.createDistributionSets(2).iterator();
         final DistributionSet one = sets.next();
@@ -1300,7 +1299,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         final Target tA = testdataFactory.createTarget("target-id-A");
         // assign a distribution set so we get an active update action
-        assignDistributionSet(dsA, Lists.newArrayList(tA));
+        assignDistributionSet(dsA, Arrays.asList(tA));
         // verify active action
         final Slice<Action> actionsByTarget = deploymentManagement.findActionsByTarget(tA.getControllerId(), PAGE);
         assertThat(actionsByTarget.getContent()).hasSize(1);

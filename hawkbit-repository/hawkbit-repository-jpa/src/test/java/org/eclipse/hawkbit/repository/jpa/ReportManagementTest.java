@@ -45,8 +45,6 @@ import org.springframework.data.auditing.DateTimeProvider;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 
-import com.google.common.collect.Lists;
-
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
@@ -137,7 +135,7 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
             dynamicDateTimeProvider.nowMinusMonths(month);
             final Target createTarget = testdataFactory.createTarget("t" + month);
             final DistributionSetAssignmentResult result = assignDistributionSet(distributionSet,
-                    Lists.newArrayList(createTarget));
+                    Arrays.asList(createTarget));
             controllerManagement.registerRetrieved(result.getActions().get(0),
                     "Controller retrieved update action and should start now the download.");
         }
@@ -158,7 +156,7 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
             dynamicDateTimeProvider.nowMinusMonths(month);
             final Target createTarget = testdataFactory.createTarget("t2" + month);
             final DistributionSetAssignmentResult result = assignDistributionSet(distributionSet,
-                    Lists.newArrayList(createTarget));
+                    Arrays.asList(createTarget));
             controllerManagement.registerRetrieved(result.getActions().get(0),
                     "Controller retrieved update action and should start now the download.");
         }
@@ -183,13 +181,13 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
         final SoftwareModule os = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_OS);
 
         final DistributionSet distributionSet1 = testdataFactory.createDistributionSet("ds1", "0.0.0", standardDsType,
-                Lists.newArrayList(os, jvm, ah));
+                Arrays.asList(os, jvm, ah));
         final DistributionSet distributionSet11 = testdataFactory.createDistributionSet("ds1", "0.0.1", standardDsType,
-                Lists.newArrayList(os, jvm, ah));
+                Arrays.asList(os, jvm, ah));
         final DistributionSet distributionSet2 = testdataFactory.createDistributionSet("ds2", "0.0.2", standardDsType,
-                Lists.newArrayList(os, jvm, ah));
+                Arrays.asList(os, jvm, ah));
         final DistributionSet distributionSet3 = testdataFactory.createDistributionSet("ds3", "0.0.3", standardDsType,
-                Lists.newArrayList(os, jvm, ah));
+                Arrays.asList(os, jvm, ah));
 
         // ds1(0.0.0)=[target1,target2], ds1(0.0.1)=[target3]
         assignDistributionSet(distributionSet1.getId(), knownTarget1.getControllerId());
@@ -204,7 +202,7 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
 
         // set installed status
         testdataFactory.sendUpdateActionStatusToTargets(
-                Lists.newArrayList(knownTarget1, knownTarget2, knownTarget3, knownTarget4), Status.FINISHED,
+                Arrays.asList(knownTarget1, knownTarget2, knownTarget3, knownTarget4), Status.FINISHED,
                 Collections.singletonList(TEST_MESSAGE));
 
         List<InnerOuterDataReportSeries<String>> distributionUsage = reportManagement.distributionUsageInstalled(100);
@@ -244,7 +242,7 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
         // Test cache evict
         final Target knownTarget6 = testdataFactory.createTarget("t6");
         assignDistributionSet(distributionSet1.getId(), knownTarget6.getControllerId());
-        testdataFactory.sendUpdateActionStatusToTargets(Lists.newArrayList(knownTarget6), Status.FINISHED,
+        testdataFactory.sendUpdateActionStatusToTargets(Arrays.asList(knownTarget6), Status.FINISHED,
                 Collections.singletonList(TEST_MESSAGE));
         distributionUsage = reportManagement.distributionUsageInstalled(100);
         for (final InnerOuterDataReportSeries<String> innerOuterDataReportSeries : distributionUsage) {
@@ -350,13 +348,13 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
         final SoftwareModule os = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_OS);
 
         final DistributionSet distributionSet1 = testdataFactory.createDistributionSet("ds1", "0.0.0", standardDsType,
-                Lists.newArrayList(os, jvm, ah));
+                Arrays.asList(os, jvm, ah));
         final DistributionSet distributionSet11 = testdataFactory.createDistributionSet("ds1", "0.0.1", standardDsType,
-                Lists.newArrayList(os, jvm, ah));
+                Arrays.asList(os, jvm, ah));
         final DistributionSet distributionSet2 = testdataFactory.createDistributionSet("ds2", "0.0.2", standardDsType,
-                Lists.newArrayList(os, jvm, ah));
+                Arrays.asList(os, jvm, ah));
         final DistributionSet distributionSet3 = testdataFactory.createDistributionSet("ds3", "0.0.3", standardDsType,
-                Lists.newArrayList(os, jvm, ah));
+                Arrays.asList(os, jvm, ah));
 
         // ds1(0.0.0)=[target1,target2], ds1(0.0.1)=[target3]
         assignDistributionSet(distributionSet1.getId(), knownTarget1.getControllerId());

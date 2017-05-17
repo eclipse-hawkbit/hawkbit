@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.decorators;
 
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.StringUtils;
 
 import com.vaadin.server.Resource;
 import com.vaadin.ui.Button;

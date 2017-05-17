@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.ui.management.actionhistory.ProxyAction.IsActiveDecoration;
@@ -61,7 +60,7 @@ public class ActionBeanQuery extends AbstractBeanQuery<ProxyAction> {
             currentSelectedConrollerId = (String) queryConfig.get(SPUIDefinitions.ACTIONS_BY_TARGET);
         }
 
-        if (ArrayUtils.isEmpty(sortStates)) {
+        if (sortStates == null || sortStates.length <= 0) {
             return;
         }
 

@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.tenancy.configuration;
 
-import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
+import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
  * The {@link #InvalidTenantConfigurationKeyException} is thrown when an invalid

@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.common;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -39,7 +39,7 @@ public class DistributionSetTypeBeanQuery extends AbstractBeanQuery<Distribution
 
     private final Sort sort = new Sort(Direction.ASC, "name");
     private transient Page<DistributionSetType> firstPageDistSetType;
-    private transient DistributionSetManagement distributionSetManagement;
+    private transient DistributionSetTypeManagement distributionSetTypeManagement;
 
     /**
      * Parametric constructor.
@@ -71,11 +71,11 @@ public class DistributionSetTypeBeanQuery extends AbstractBeanQuery<Distribution
         return (int) size;
     }
 
-    private DistributionSetManagement getDistributionSetManagement() {
-        if (distributionSetManagement == null) {
-            distributionSetManagement = SpringContextHelper.getBean(DistributionSetManagement.class);
+    private DistributionSetTypeManagement getDistributionSetManagement() {
+        if (distributionSetTypeManagement == null) {
+            distributionSetTypeManagement = SpringContextHelper.getBean(DistributionSetTypeManagement.class);
         }
-        return distributionSetManagement;
+        return distributionSetTypeManagement;
     }
 
     @Override

@@ -12,6 +12,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -20,8 +22,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
-
-import com.google.common.collect.Lists;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -47,8 +47,8 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
     public void principalAndCredentialsNotTheSameThrowsAuthenticationException() {
         final String principal = "controllerIdURL";
         final String credentials = "controllerIdHeader";
-        final PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(
-                principal, Lists.newArrayList(credentials));
+        final PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(principal,
+                Arrays.asList(credentials));
         token.setDetails(webAuthenticationDetailsMock);
 
         // test, should throw authentication exception
@@ -66,12 +66,11 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
     public void principalAndCredentialsAreTheSameWithNoSourceIpCheckIsSuccessful() {
         final String principal = "controllerId";
         final String credentials = "controllerId";
-        final PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(
-                principal, Lists.newArrayList(credentials));
+        final PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(principal,
+                Arrays.asList(credentials));
         token.setDetails(webAuthenticationDetailsMock);
 
-        final Authentication authenticate = underTestWithoutSourceIpCheck
-                .authenticate(token);
+        final Authentication authenticate = underTestWithoutSourceIpCheck.authenticate(token);
         assertThat(authenticate.isAuthenticated()).isTrue();
     }
 
@@ -81,8 +80,8 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
         final String remoteAddress = "192.168.1.1";
         final String principal = "controllerId";
         final String credentials = "controllerId";
-        final PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(
-                principal, Lists.newArrayList(credentials));
+        final PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(principal,
+                Arrays.asList(credentials));
         token.setDetails(webAuthenticationDetailsMock);
 
         when(webAuthenticationDetailsMock.getRemoteAddress()).thenReturn(remoteAddress);
@@ -102,15 +101,14 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
     public void priniciapAndCredentialsAreTheSameAndSourceIpIsTrusted() {
         final String principal = "controllerId";
         final String credentials = "controllerId";
-        final PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(
-                principal, Lists.newArrayList(credentials));
+        final PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(principal,
+                Arrays.asList(credentials));
         token.setDetails(webAuthenticationDetailsMock);
 
         when(webAuthenticationDetailsMock.getRemoteAddress()).thenReturn(REQUEST_SOURCE_IP);
 
         // test, should throw authentication exception
-        final Authentication authenticate = underTestWithSourceIpCheck
-                .authenticate(token);
+        final Authentication authenticate = underTestWithSourceIpCheck.authenticate(token);
         assertThat(authenticate.isAuthenticated()).isTrue();
     }
 
@@ -120,8 +118,8 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
                 "192.168.1.3" };
         final String principal = "controllerId";
         final String credentials = "controllerId";
-        final PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(
-                principal, Lists.newArrayList(credentials));
+        final PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(principal,
+                Arrays.asList(credentials));
         token.setDetails(webAuthenticationDetailsMock);
 
         when(webAuthenticationDetailsMock.getRemoteAddress()).thenReturn(REQUEST_SOURCE_IP);
@@ -139,8 +137,8 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
         final String[] trustedIPAddresses = new String[] { "192.168.1.1", "192.168.1.2", "192.168.1.3" };
         final String principal = "controllerId";
         final String credentials = "controllerId";
-        final PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(
-                principal, Lists.newArrayList(credentials));
+        final PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(principal,
+                Arrays.asList(credentials));
         token.setDetails(webAuthenticationDetailsMock);
 
         when(webAuthenticationDetailsMock.getRemoteAddress()).thenReturn(REQUEST_SOURCE_IP);

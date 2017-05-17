@@ -14,7 +14,7 @@ import javax.servlet.MultipartConfigElement;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -93,7 +93,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
     UploadArtifactView(final UIEventBus eventBus, final SpPermissionChecker permChecker, final VaadinMessageSource i18n,
             final UINotification uiNotification, final ArtifactUploadState artifactUploadState,
             final TagManagement tagManagement, final EntityFactory entityFactory,
-            final SoftwareManagement softwareManagement, final UploadViewClientCriterion uploadViewClientCriterion,
+            final SoftwareModuleManagement softwareManagement, final UploadViewClientCriterion uploadViewClientCriterion,
             final MultipartConfigElement multipartConfigElement, final ArtifactManagement artifactManagement) {
         this.eventBus = eventBus;
         this.permChecker = permChecker;

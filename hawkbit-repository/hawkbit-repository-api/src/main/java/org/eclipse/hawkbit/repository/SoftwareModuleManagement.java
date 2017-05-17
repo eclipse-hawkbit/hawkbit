@@ -39,7 +39,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
  * Service for managing {@link SoftwareModule}s.
  *
  */
-public interface SoftwareManagement {
+public interface SoftwareModuleManagement {
 
     /**
      * Counts {@link SoftwareModule}s with given

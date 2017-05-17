@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.distributions.disttype;
 
 import java.io.Serializable;
 
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterSingleButtonClick;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.RefreshDistributionTableByFilterEvent;
@@ -30,13 +30,13 @@ public class DSTypeFilterButtonClick extends AbstractFilterSingleButtonClick imp
 
     private final ManageDistUIState manageDistUIState;
 
-    private final transient DistributionSetManagement distributionSetManagement;
+    private final transient DistributionSetTypeManagement distributionSetTypeManagement;
 
     DSTypeFilterButtonClick(final UIEventBus eventBus, final ManageDistUIState manageDistUIState,
-            final DistributionSetManagement distributionSetManagement) {
+            final DistributionSetTypeManagement distributionSetManagement) {
         this.eventBus = eventBus;
         this.manageDistUIState = manageDistUIState;
-        this.distributionSetManagement = distributionSetManagement;
+        this.distributionSetTypeManagement = distributionSetManagement;
     }
 
     @Override
@@ -47,7 +47,7 @@ public class DSTypeFilterButtonClick extends AbstractFilterSingleButtonClick imp
 
     @Override
     protected void filterClicked(final Button clickedButton) {
-        distributionSetManagement.findDistributionSetTypeByName(clickedButton.getData().toString())
+        distributionSetTypeManagement.findDistributionSetTypeByName(clickedButton.getData().toString())
                 .ifPresent(manageDistUIState.getManageDistFilters()::setClickedDistSetType);
         eventBus.publish(this, new RefreshDistributionTableByFilterEvent());
     }

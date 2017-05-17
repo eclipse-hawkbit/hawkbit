@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.common.detailslayout;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -48,7 +48,7 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
 
     private SpPermissionChecker permissionChecker;
 
-    private transient SoftwareManagement softwareManagement;
+    private transient SoftwareModuleManagement softwareManagement;
 
     private SwMetadataPopupLayout swMetadataPopupLayout;
 
@@ -73,7 +73,7 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
      *            the entity factory service
      */
     public void init(final VaadinMessageSource i18n, final SpPermissionChecker permissionChecker,
-            final SoftwareManagement softwareManagement, final SwMetadataPopupLayout swMetadataPopupLayout,
+            final SoftwareModuleManagement softwareManagement, final SwMetadataPopupLayout swMetadataPopupLayout,
             final EntityFactory entityFactory) {
         this.i18n = i18n;
         this.permissionChecker = permissionChecker;

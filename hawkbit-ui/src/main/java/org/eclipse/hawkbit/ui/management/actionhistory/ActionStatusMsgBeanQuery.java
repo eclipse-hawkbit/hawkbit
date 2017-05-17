@@ -22,10 +22,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
-
-import com.google.common.base.Strings;
 
 /**
  * Simple implementation of generic bean query which dynamically loads
@@ -62,7 +61,7 @@ public class ActionStatusMsgBeanQuery extends AbstractBeanQuery<ProxyMessage> {
             noMessageText = (String) queryConfig.get(SPUIDefinitions.NO_MSG_PROXY);
         }
 
-        if (sortStates.length > 0) {
+        if (sortStates != null && sortStates.length > 0) {
             // Initialize sort
             sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortPropertyIds[0]);
             // Add sort
@@ -111,23 +110,16 @@ public class ActionStatusMsgBeanQuery extends AbstractBeanQuery<ProxyMessage> {
             proxyMsgs.add(proxyMsg);
         }
 
-        if (messages.getTotalElements() == 1L && Strings.isNullOrEmpty(proxyMsgs.get(0).getMessage())) {
+        if (messages.getTotalElements() == 1L && StringUtils.isEmpty(proxyMsgs.get(0).getMessage())) {
             proxyMsgs.get(0).setMessage(noMessageText);
         }
 
         return proxyMsgs;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery#saveBeans(java
-     * .util.List, java.util.List, java.util.List)
-     */
     @Override
-    protected void saveBeans(List<ProxyMessage> addedBeans, List<ProxyMessage> modifiedBeans,
-            List<ProxyMessage> removedBeans) {
+    protected void saveBeans(final List<ProxyMessage> addedBeans, final List<ProxyMessage> modifiedBeans,
+            final List<ProxyMessage> removedBeans) {
         // CRUD operations on Target will be done through repository methods
     }
 

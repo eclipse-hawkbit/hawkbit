@@ -17,7 +17,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -83,7 +83,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     private final transient DistributionSetManagement distributionSetManagement;
 
-    private final transient SoftwareManagement softwareManagement;
+    private final transient SoftwareModuleManagement softwareManagement;
 
     private final DistributionsViewClientCriterion distributionsViewClientCriterion;
 
@@ -93,7 +93,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     DistributionSetTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification notification,
             final SpPermissionChecker permissionChecker, final ManageDistUIState manageDistUIState,
-            final DistributionSetManagement distributionSetManagement, final SoftwareManagement softwareManagement,
+            final DistributionSetManagement distributionSetManagement, final SoftwareModuleManagement softwareManagement,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final TargetManagement targetManagement, final DsMetadataPopupLayout dsMetadataPopupLayout) {
         super(eventBus, i18n, notification);

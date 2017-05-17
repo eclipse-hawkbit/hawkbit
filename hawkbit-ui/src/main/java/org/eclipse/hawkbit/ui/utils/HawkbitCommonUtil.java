@@ -19,12 +19,12 @@ import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
+import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 
-import com.google.common.base.Strings;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -511,10 +511,10 @@ public final class HawkbitCommonUtil {
      */
     public static String getStatusLabelDetailsInString(final String value, final String style, final String id) {
         final StringBuilder val = new StringBuilder();
-        if (!Strings.isNullOrEmpty(value)) {
+        if (!StringUtils.isEmpty(value)) {
             val.append("value:").append(value).append(",");
         }
-        if (!Strings.isNullOrEmpty(style)) {
+        if (!StringUtils.isEmpty(style)) {
             val.append("style:").append(style).append(",");
         }
         return val.append("id:").append(id).toString();

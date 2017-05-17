@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.builder;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.AbstractDistributionSetTypeUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -26,9 +26,9 @@ import org.springframework.util.CollectionUtils;
 public class JpaDistributionSetTypeCreate extends AbstractDistributionSetTypeUpdateCreate<DistributionSetTypeCreate>
         implements DistributionSetTypeCreate {
 
-    private final SoftwareManagement softwareManagement;
+    private final SoftwareModuleManagement softwareManagement;
 
-    JpaDistributionSetTypeCreate(final SoftwareManagement softwareManagement) {
+    JpaDistributionSetTypeCreate(final SoftwareModuleManagement softwareManagement) {
         this.softwareManagement = softwareManagement;
     }
 

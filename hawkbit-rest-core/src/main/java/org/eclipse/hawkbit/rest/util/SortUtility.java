@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.rest.util;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -17,8 +18,6 @@ import org.eclipse.hawkbit.rest.exception.SortParameterUnsupportedDirectionExcep
 import org.eclipse.hawkbit.rest.exception.SortParameterUnsupportedFieldException;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
-
-import com.google.common.collect.Lists;
 
 /**
  * A utility class for parsing query parameters which define the sorting of
@@ -69,7 +68,7 @@ public final class SortUtility {
      */
     public static <T extends Enum<T> & FieldNameProvider> List<Order> parse(final Class<T> enumType,
             final String sortString) throws SortParameterSyntaxErrorException {
-        final List<Order> parsedSortings = Lists.newArrayList();
+        final List<Order> parsedSortings = new ArrayList<>();
         // scan the sort tuples e.g. field:direction
         if (sortString != null) {
             final StringTokenizer tupleTokenizer = new StringTokenizer(sortString, DELIMITER_SORT_TUPLE);

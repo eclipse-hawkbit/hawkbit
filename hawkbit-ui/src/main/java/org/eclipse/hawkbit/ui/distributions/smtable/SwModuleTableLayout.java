@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.distributions.smtable;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
@@ -31,7 +31,7 @@ public class SwModuleTableLayout extends AbstractTableLayout<SwModuleTable> {
     private final SwModuleTable swModuleTable;
 
     public SwModuleTableLayout(final VaadinMessageSource i18n, final UINotification uiNotification,
-            final UIEventBus eventBus, final SoftwareManagement softwareManagement, final EntityFactory entityFactory,
+            final UIEventBus eventBus, final SoftwareModuleManagement softwareManagement, final EntityFactory entityFactory,
             final ManageDistUIState manageDistUIState, final SpPermissionChecker permChecker,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final ArtifactUploadState artifactUploadState, final ArtifactManagement artifactManagement) {

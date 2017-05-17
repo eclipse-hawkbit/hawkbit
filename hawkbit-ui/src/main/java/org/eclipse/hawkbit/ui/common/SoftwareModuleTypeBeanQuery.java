@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
@@ -30,7 +30,7 @@ public class SoftwareModuleTypeBeanQuery extends AbstractBeanQuery<SoftwareModul
     private static final long serialVersionUID = 7824925429198339644L;
     private final Sort sort = new Sort(Direction.ASC, "name");
     private transient Page<SoftwareModuleType> firstPageSwModuleType;
-    private transient SoftwareManagement softwareManagement;
+    private transient SoftwareModuleManagement softwareManagement;
 
     /**
      * Parametric constructor.
@@ -61,9 +61,9 @@ public class SoftwareModuleTypeBeanQuery extends AbstractBeanQuery<SoftwareModul
         return (int) size;
     }
 
-    private SoftwareManagement getSoftwareManagement() {
+    private SoftwareModuleManagement getSoftwareManagement() {
         if (softwareManagement == null) {
-            softwareManagement = SpringContextHelper.getBean(SoftwareManagement.class);
+            softwareManagement = SpringContextHelper.getBean(SoftwareModuleManagement.class);
         }
         return softwareManagement;
     }

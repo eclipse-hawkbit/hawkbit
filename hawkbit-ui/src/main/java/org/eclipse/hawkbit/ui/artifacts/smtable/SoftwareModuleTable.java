@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.RefreshSoftwareModuleByFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -60,14 +60,14 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     private final ArtifactUploadState artifactUploadState;
 
-    private final transient SoftwareManagement softwareManagement;
+    private final transient SoftwareModuleManagement softwareManagement;
 
     private final UploadViewClientCriterion uploadViewClientCriterion;
 
     private final SwMetadataPopupLayout swMetadataPopupLayout;
 
     SoftwareModuleTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification uiNotification,
-            final ArtifactUploadState artifactUploadState, final SoftwareManagement softwareManagement,
+            final ArtifactUploadState artifactUploadState, final SoftwareModuleManagement softwareManagement,
             final UploadViewClientCriterion uploadViewClientCriterion,
             final SwMetadataPopupLayout swMetadataPopupLayout) {
         super(eventBus, i18n, uiNotification);

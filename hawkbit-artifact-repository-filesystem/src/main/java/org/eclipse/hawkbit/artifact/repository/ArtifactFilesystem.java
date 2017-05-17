@@ -16,8 +16,6 @@ import java.io.InputStream;
 
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 
-import com.google.common.base.Throwables;
-
 /**
  * A {@link DbArtifact} implementation which dynamically creates a
  * {@link FileInputStream} on calling {@link #getFileInputStream()}.
@@ -38,7 +36,7 @@ public class ArtifactFilesystem extends DbArtifact {
         try {
             return new BufferedInputStream(new FileInputStream(file));
         } catch (final FileNotFoundException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 }

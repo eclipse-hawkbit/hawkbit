@@ -10,9 +10,8 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import java.util.Optional;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -59,7 +58,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
     private final transient EventBus.UIEventBus eventBus;
 
-    private final transient SoftwareManagement softwareManagement;
+    private final transient SoftwareModuleManagement softwareManagement;
 
     private final transient EntityFactory entityFactory;
 
@@ -96,7 +95,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
      *            EntityFactory
      */
     public SoftwareModuleAddUpdateWindow(final VaadinMessageSource i18n, final UINotification uiNotifcation,
-            final UIEventBus eventBus, final SoftwareManagement softwareManagement, final EntityFactory entityFactory,
+            final UIEventBus eventBus, final SoftwareModuleManagement softwareManagement, final EntityFactory entityFactory,
             final AbstractTable<SoftwareModule> softwareModuleTable) {
         this.i18n = i18n;
         this.uiNotifcation = uiNotifcation;
@@ -220,8 +219,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         typeComboBox = SPUIComponentProvider.getComboBox(i18n.getMessage("upload.swmodule.type"), "", null, null, true,
                 null, i18n.getMessage("upload.swmodule.type"));
         typeComboBox.setId(UIComponentIdProvider.SW_MODULE_TYPE);
-        typeComboBox
-                .setStyleName(SPUIDefinitions.COMBO_BOX_SPECIFIC_STYLE + StringUtils.SPACE + ValoTheme.COMBOBOX_TINY);
+        typeComboBox.setStyleName(SPUIDefinitions.COMBO_BOX_SPECIFIC_STYLE + " " + ValoTheme.COMBOBOX_TINY);
         typeComboBox.setNewItemsAllowed(Boolean.FALSE);
         typeComboBox.setImmediate(Boolean.TRUE);
     }

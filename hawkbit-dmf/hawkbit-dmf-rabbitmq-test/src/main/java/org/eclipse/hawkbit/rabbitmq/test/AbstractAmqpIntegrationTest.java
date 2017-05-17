@@ -61,7 +61,7 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
     }
 
     protected ConditionFactory createConditionFactory() {
-        return Awaitility.await().atMost(2, SECONDS);
+        return Awaitility.await().atMost(2000, SECONDS);
     }
 
     protected Message createMessage(final Object payload, final MessageProperties messageProperties) {
@@ -72,7 +72,7 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
         return getDmfClient().getMessageConverter().toMessage(payload, messageProperties);
     }
 
-    protected int getQueueMessageCount(String queueName) {
+    protected int getQueueMessageCount(final String queueName) {
         return Integer
                 .parseInt(rabbitAdmin.getQueueProperties(queueName).get(RabbitAdmin.QUEUE_MESSAGE_COUNT).toString());
     }

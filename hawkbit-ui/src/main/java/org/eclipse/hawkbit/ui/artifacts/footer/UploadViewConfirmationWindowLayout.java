@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
@@ -53,12 +53,12 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
 
     private static final String DISCARD = "Discard";
 
-    private final transient SoftwareManagement softwareManagement;
+    private final transient SoftwareModuleManagement softwareManagement;
 
     private final ArtifactUploadState artifactUploadState;
 
     UploadViewConfirmationWindowLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final SoftwareManagement softwareManagement, final ArtifactUploadState artifactUploadState) {
+            final SoftwareModuleManagement softwareManagement, final ArtifactUploadState artifactUploadState) {
         super(i18n, eventBus);
         this.softwareManagement = softwareManagement;
         this.artifactUploadState = artifactUploadState;

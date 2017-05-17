@@ -28,7 +28,7 @@ import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleMetadataFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeFields;
@@ -75,19 +75,19 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 /**
- * JPA implementation of {@link SoftwareManagement}.
+ * JPA implementation of {@link SoftwareModuleManagement}.
  *
  */
 @Transactional(readOnly = true)
 @Validated
-public class JpaSoftwareManagement implements SoftwareManagement {
+public class JpaSoftwareManagement implements SoftwareModuleManagement {
 
     @Autowired
     private EntityManager entityManager;
@@ -294,7 +294,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     public Long countSoftwareModulesAll() {
         final Specification<JpaSoftwareModule> spec = SoftwareModuleSpecification.isDeletedFalse();
 
-        return countSwModuleByCriteriaAPI(Lists.newArrayList(spec));
+        return countSwModuleByCriteriaAPI(Arrays.asList(spec));
     }
 
     @Override
@@ -334,7 +334,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
         Specification<JpaSoftwareModule> spec = SoftwareModuleSpecification.isDeletedFalse();
         specList.add(spec);
 
-        if (!Strings.isNullOrEmpty(searchText)) {
+        if (!StringUtils.isEmpty(searchText)) {
             spec = SoftwareModuleSpecification.likeNameOrVersion(searchText);
             specList.add(spec);
         }
@@ -427,7 +427,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     private List<Specification<JpaSoftwareModule>> buildSpecificationList(final String searchText, final Long typeId) {
         final List<Specification<JpaSoftwareModule>> specList = Lists.newArrayListWithExpectedSize(3);
-        if (!Strings.isNullOrEmpty(searchText)) {
+        if (!StringUtils.isEmpty(searchText)) {
             specList.add(SoftwareModuleSpecification.likeNameOrVersion(searchText));
         }
         if (typeId != null) {
@@ -455,7 +455,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
         Specification<JpaSoftwareModule> spec = SoftwareModuleSpecification.isDeletedFalse();
         specList.add(spec);
 
-        if (!Strings.isNullOrEmpty(searchText)) {
+        if (!StringUtils.isEmpty(searchText)) {
             spec = SoftwareModuleSpecification.likeNameOrVersion(searchText);
             specList.add(spec);
         }

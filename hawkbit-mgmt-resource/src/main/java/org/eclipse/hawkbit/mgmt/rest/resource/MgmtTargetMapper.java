@@ -19,7 +19,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtPollStatus;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionStatus;
@@ -67,7 +66,7 @@ public final class MgmtTargetMapper {
         response.add(linkTo(methodOn(MgmtTargetRestApi.class).getActionHistory(response.getControllerId(), 0,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE,
                 ActionFields.ID.getFieldName() + ":" + SortDirection.DESC, null))
-                        .withRel(MgmtRestConstants.TARGET_V1_ACTIONS).expand(ArrayUtils.toArray()));
+                        .withRel(MgmtRestConstants.TARGET_V1_ACTIONS).expand());
     }
 
     static void addPollStatus(final Target target, final MgmtTarget targetRest) {

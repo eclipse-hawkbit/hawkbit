@@ -33,7 +33,7 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
@@ -82,7 +82,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     private ControllerManagement controllerManagement;
 
     @Autowired
-    private SoftwareManagement softwareManagement;
+    private SoftwareModuleManagement softwareManagement;
 
     @Autowired
     private ArtifactManagement artifactManagement;

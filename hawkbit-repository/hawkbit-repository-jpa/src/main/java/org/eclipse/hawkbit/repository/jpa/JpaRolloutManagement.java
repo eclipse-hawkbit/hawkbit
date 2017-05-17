@@ -20,7 +20,7 @@ import java.util.stream.StreamSupport;
 import javax.persistence.EntityManager;
 import javax.validation.ConstraintDeclarationException;
 
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.StringUtils;
 import org.eclipse.hawkbit.repository.AbstractRolloutManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -907,7 +907,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     public Slice<Rollout> findRolloutWithDetailedStatusByFilters(final Pageable pageable, final String searchText,
             final boolean deleted) {
         final Slice<JpaRollout> findAll = findByCriteriaAPI(pageable,
-                Lists.newArrayList(JpaRolloutHelper.likeNameOrDescription(searchText, deleted)));
+                Arrays.asList(JpaRolloutHelper.likeNameOrDescription(searchText, deleted)));
         setRolloutStatusDetails(findAll);
         return JpaRolloutHelper.convertPage(findAll, pageable);
     }

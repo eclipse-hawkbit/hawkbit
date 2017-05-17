@@ -27,9 +27,10 @@ import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RolloutManagement;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
@@ -114,10 +115,13 @@ public class TestdataFactory {
     private ControllerManagement controllerManagament;
 
     @Autowired
-    private SoftwareManagement softwareManagement;
+    private SoftwareModuleManagement softwareManagement;
 
     @Autowired
     private DistributionSetManagement distributionSetManagement;
+
+    @Autowired
+    private DistributionSetTypeManagement distributionSetTypeManagement;
 
     @Autowired
     private TargetManagement targetManagement;
@@ -269,7 +273,7 @@ public class TestdataFactory {
         return distributionSetManagement.createDistributionSet(
                 entityFactory.distributionSet().create().name(prefix != null && prefix.length() > 0 ? prefix : "DS")
                         .version(version).description(LOREM.words(10)).type(findOrCreateDefaultTestDsType())
-                        .modules(Lists.newArrayList(osMod.getId(), runtimeMod.getId(), appMod.getId()))
+                        .modules(Arrays.asList(osMod.getId(), runtimeMod.getId(), appMod.getId()))
                         .requiredMigrationStep(isRequiredMigrationStep));
     }
 
@@ -595,8 +599,8 @@ public class TestdataFactory {
      * @return persisted {@link DistributionSetType}
      */
     public DistributionSetType findOrCreateDistributionSetType(final String dsTypeKey, final String dsTypeName) {
-        return distributionSetManagement.findDistributionSetTypeByKey(dsTypeKey)
-                .orElseGet(() -> distributionSetManagement.createDistributionSetType(entityFactory.distributionSetType()
+        return distributionSetTypeManagement.findDistributionSetTypeByKey(dsTypeKey).orElseGet(
+                () -> distributionSetTypeManagement.createDistributionSetType(entityFactory.distributionSetType()
                         .create().key(dsTypeKey).name(dsTypeName).description(LOREM.words(10)).colour("black")));
     }
 
@@ -617,9 +621,10 @@ public class TestdataFactory {
      */
     public DistributionSetType findOrCreateDistributionSetType(final String dsTypeKey, final String dsTypeName,
             final Collection<SoftwareModuleType> mandatory, final Collection<SoftwareModuleType> optional) {
-        return distributionSetManagement.findDistributionSetTypeByKey(dsTypeKey)
-                .orElseGet(() -> distributionSetManagement.createDistributionSetType(entityFactory.distributionSetType()
-                        .create().key(dsTypeKey).name(dsTypeName).description(LOREM.words(10)).colour("black")
+        return distributionSetTypeManagement.findDistributionSetTypeByKey(dsTypeKey)
+                .orElseGet(() -> distributionSetTypeManagement.createDistributionSetType(entityFactory
+                        .distributionSetType().create().key(dsTypeKey).name(dsTypeName).description(LOREM.words(10))
+                        .colour("black")
                         .optional(optional.stream().map(SoftwareModuleType::getId).collect(Collectors.toList()))
                         .mandatory(mandatory.stream().map(SoftwareModuleType::getId).collect(Collectors.toList()))));
     }
@@ -904,7 +909,7 @@ public class TestdataFactory {
      */
     public List<Action> sendUpdateActionStatusToTargets(final Collection<Target> targets, final Status status,
             final String message) {
-        return sendUpdateActionStatusToTargets(targets, status, Lists.newArrayList(message));
+        return sendUpdateActionStatusToTargets(targets, status, Arrays.asList(message));
     }
 
     /**

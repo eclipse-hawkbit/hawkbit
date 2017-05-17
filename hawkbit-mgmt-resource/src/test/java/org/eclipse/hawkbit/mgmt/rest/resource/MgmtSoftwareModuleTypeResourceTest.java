@@ -22,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -35,7 +36,6 @@ import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
-import com.google.common.collect.Lists;
 import com.jayway.jsonpath.JsonPath;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -162,7 +162,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes POST requests.")
     public void createSoftwareModuleTypes() throws Exception {
 
-        final List<SoftwareModuleType> types = Lists.newArrayList(
+        final List<SoftwareModuleType> types = Arrays.asList(
                 entityFactory.softwareModuleType().create().key("test1").name("TestName1").description("Desc1")
                         .colour("col1‚").maxAssignments(1).build(),
                 entityFactory.softwareModuleType().create().key("test2").name("TestName2").description("Desc2")
@@ -321,7 +321,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     public void invalidRequestsOnSoftwaremoduleTypesResource() throws Exception {
         final SoftwareModuleType testType = createTestType();
 
-        final List<SoftwareModuleType> types = Lists.newArrayList(testType);
+        final List<SoftwareModuleType> types = Arrays.asList(testType);
 
         // SM does not exist
         mvc.perform(get("/rest/v1/softwaremoduletypes/12345678")).andDo(MockMvcResultPrinter.print())
@@ -347,10 +347,10 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
 
         final SoftwareModuleType toLongName = entityFactory.softwareModuleType().create().key("test123")
                 .name(RandomStringUtils.randomAscii(80)).build();
-        mvc.perform(post("/rest/v1/softwaremoduletypes")
-                .content(JsonBuilder.softwareModuleTypes(Lists.newArrayList(toLongName)))
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isBadRequest());
+        mvc.perform(
+                post("/rest/v1/softwaremoduletypes").content(JsonBuilder.softwareModuleTypes(Arrays.asList(toLongName)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
 
         // unsupported media type
         mvc.perform(post("/rest/v1/softwaremoduletypes").content(JsonBuilder.softwareModuleTypes(types))

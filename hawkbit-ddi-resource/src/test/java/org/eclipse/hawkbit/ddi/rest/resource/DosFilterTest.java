@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.Action;
@@ -25,7 +26,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
 
-import com.google.common.collect.Lists;
 import com.google.common.net.HttpHeaders;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -147,7 +147,7 @@ public class DosFilterTest extends AbstractDDiApiIntegrationTest {
     private Long prepareDeploymentBase() {
         final DistributionSet ds = testdataFactory.createDistributionSet("test");
         final Target target = testdataFactory.createTarget("4711");
-        final List<Target> toAssign = Lists.newArrayList(target);
+        final List<Target> toAssign = Arrays.asList(target);
 
         final Iterable<Target> saved = assignDistributionSet(ds, toAssign).getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId())).hasSize(1);

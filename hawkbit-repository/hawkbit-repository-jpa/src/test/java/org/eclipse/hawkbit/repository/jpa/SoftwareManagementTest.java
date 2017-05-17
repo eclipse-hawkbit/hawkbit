@@ -14,6 +14,7 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -85,7 +86,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
 
         verifyThrownExceptionBy(
                 () -> softwareManagement.createSoftwareModule(
-                        Lists.newArrayList(entityFactory.softwareModule().create().name("xxx").type(NOT_EXIST_ID))),
+                        Arrays.asList(entityFactory.softwareModule().create().name("xxx").type(NOT_EXIST_ID))),
                 "SoftwareModuleType");
         verifyThrownExceptionBy(
                 () -> softwareManagement
@@ -95,10 +96,10 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> softwareManagement.createSoftwareModuleMetadata(NOT_EXIST_IDL,
                 entityFactory.generateMetadata("xxx", "xxx")), "SoftwareModule");
         verifyThrownExceptionBy(() -> softwareManagement.createSoftwareModuleMetadata(NOT_EXIST_IDL,
-                Lists.newArrayList(entityFactory.generateMetadata("xxx", "xxx"))), "SoftwareModule");
+                Arrays.asList(entityFactory.generateMetadata("xxx", "xxx"))), "SoftwareModule");
 
         verifyThrownExceptionBy(() -> softwareManagement.deleteSoftwareModule(NOT_EXIST_IDL), "SoftwareModule");
-        verifyThrownExceptionBy(() -> softwareManagement.deleteSoftwareModules(Lists.newArrayList(NOT_EXIST_IDL)),
+        verifyThrownExceptionBy(() -> softwareManagement.deleteSoftwareModules(Arrays.asList(NOT_EXIST_IDL)),
                 "SoftwareModule");
         verifyThrownExceptionBy(() -> softwareManagement.deleteSoftwareModuleMetadata(NOT_EXIST_IDL, "xxx"),
                 "SoftwareModule");
@@ -125,8 +126,9 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(
                 () -> softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(PAGE, NOT_EXIST_IDL),
                 "SoftwareModule");
-        verifyThrownExceptionBy(() -> softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(NOT_EXIST_IDL,
-                "name==*", PAGE), "SoftwareModule");
+        verifyThrownExceptionBy(
+                () -> softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(NOT_EXIST_IDL, "name==*", PAGE),
+                "SoftwareModule");
         verifyThrownExceptionBy(() -> softwareManagement.findSoftwareModulesByType(PAGE, NOT_EXIST_IDL),
                 "SoftwareModule");
 
@@ -209,7 +211,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Create Software Module Types call fails when called for existing entities.")
     public void createModuleTypesCallFailsForExistingTypes() {
-        final List<SoftwareModuleTypeCreate> created = Lists.newArrayList(
+        final List<SoftwareModuleTypeCreate> created = Arrays.asList(
                 entityFactory.softwareModuleType().create().key("test-key").name("test-name"),
                 entityFactory.softwareModuleType().create().key("test-key2").name("test-name2"));
 
@@ -236,7 +238,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
                 entityFactory.softwareModule().create().type(appType).name("agent-hub").version("1.0.2"));
         JpaDistributionSet ds = (JpaDistributionSet) distributionSetManagement
                 .createDistributionSet(entityFactory.distributionSet().create().name("ds-1").version("1.0.1")
-                        .type(standardDsType).modules(Lists.newArrayList(os.getId(), jvm.getId(), ah2.getId())));
+                        .type(standardDsType).modules(Arrays.asList(os.getId(), jvm.getId(), ah2.getId())));
 
         final JpaTarget target = (JpaTarget) testdataFactory.createTarget();
         ds = (JpaDistributionSet) assignSet(target, ds).getDistributionSet();
@@ -252,9 +254,8 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
                 .get(0)).isEqualTo(jvm);
         assertThat(softwareManagement.findSoftwareModuleByFilters(PAGE, "1.0.1", appType.getId()).getContent())
                 .hasSize(1);
-        assertThat(
-                softwareManagement.findSoftwareModuleByFilters(PAGE, "1.0.1", appType.getId()).getContent().get(0))
-                        .isEqualTo(ah);
+        assertThat(softwareManagement.findSoftwareModuleByFilters(PAGE, "1.0.1", appType.getId()).getContent().get(0))
+                .isEqualTo(ah);
         assertThat(softwareManagement.findSoftwareModuleByFilters(PAGE, "1.0%", appType.getId()).getContent())
                 .hasSize(2);
 
@@ -282,7 +283,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     @Description("Searches for software modules based on a list of IDs.")
     public void findSoftwareModulesById() {
 
-        final List<Long> modules = Lists.newArrayList(testdataFactory.createSoftwareModuleOs().getId(),
+        final List<Long> modules = Arrays.asList(testdataFactory.createSoftwareModuleOs().getId(),
                 testdataFactory.createSoftwareModuleApp().getId(), 624355263L);
 
         assertThat(softwareManagement.findSoftwareModulesById(modules)).hasSize(2);
@@ -426,7 +427,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet disSet = testdataFactory.createDistributionSet(Sets.newHashSet(assignedModule));
 
         // [STEP3]: Assign DistributionSet to a Device
-        assignDistributionSet(disSet, Lists.newArrayList(target));
+        assignDistributionSet(disSet, Arrays.asList(target));
 
         // [STEP4]: Delete the DistributionSet
         distributionSetManagement.deleteDistributionSet(disSet.getId());
@@ -518,11 +519,11 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
 
         // [STEP3]: Assign SoftwareModuleX to DistributionSetX and to target
         final DistributionSet disSetX = testdataFactory.createDistributionSet(Sets.newHashSet(moduleX), "X");
-        assignDistributionSet(disSetX, Lists.newArrayList(target));
+        assignDistributionSet(disSetX, Arrays.asList(target));
 
         // [STEP4]: Assign SoftwareModuleY to DistributionSet and to target
         final DistributionSet disSetY = testdataFactory.createDistributionSet(Sets.newHashSet(moduleY), "Y");
-        assignDistributionSet(disSetY, Lists.newArrayList(target));
+        assignDistributionSet(disSetY, Arrays.asList(target));
 
         // [STEP5]: Delete SoftwareModuleX
         softwareManagement.deleteSoftwareModule(moduleX.getId());
@@ -598,13 +599,13 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         // test meta data
         final SoftwareModuleType testType = softwareManagement.createSoftwareModuleType(
                 entityFactory.softwareModuleType().create().key("thetype").name("thename").maxAssignments(100));
-        DistributionSetType testDsType = distributionSetManagement
+        DistributionSetType testDsType = distributionSetTypeManagement
                 .createDistributionSetType(entityFactory.distributionSetType().create().key("key").name("name"));
 
-        distributionSetManagement.assignMandatorySoftwareModuleTypes(testDsType.getId(),
-                Lists.newArrayList(osType.getId()));
-        testDsType = distributionSetManagement.assignOptionalSoftwareModuleTypes(testDsType.getId(),
-                Lists.newArrayList(testType.getId()));
+        distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(testDsType.getId(),
+                Arrays.asList(osType.getId()));
+        testDsType = distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(testDsType.getId(),
+                Arrays.asList(testType.getId()));
 
         // found in test
         final SoftwareModule unassigned = testdataFactory.createSoftwareModule("thetype", "unassignedfound");
@@ -636,8 +637,9 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
                                 new AssignedSoftwareModule(two, true), new AssignedSoftwareModule(unassigned, false));
 
         // without any filter
-        assertThat(softwareManagement.findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(PAGE,
-                set.getId(), null, null).getContent()).as("Found modules with the assigned ones first").containsExactly(
+        assertThat(softwareManagement
+                .findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(PAGE, set.getId(), null, null)
+                .getContent()).as("Found modules with the assigned ones first").containsExactly(
                         new AssignedSoftwareModule(differentName, true), new AssignedSoftwareModule(one, true),
                         new AssignedSoftwareModule(two, true), new AssignedSoftwareModule(four, true),
                         new AssignedSoftwareModule(unassigned, false));
@@ -649,13 +651,13 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         // test meta data
         final SoftwareModuleType testType = softwareManagement.createSoftwareModuleType(
                 entityFactory.softwareModuleType().create().key("thetype").name("thename").maxAssignments(100));
-        DistributionSetType testDsType = distributionSetManagement
+        DistributionSetType testDsType = distributionSetTypeManagement
                 .createDistributionSetType(entityFactory.distributionSetType().create().key("key").name("name"));
 
-        distributionSetManagement.assignMandatorySoftwareModuleTypes(testDsType.getId(),
-                Lists.newArrayList(osType.getId()));
-        testDsType = distributionSetManagement.assignOptionalSoftwareModuleTypes(testDsType.getId(),
-                Lists.newArrayList(testType.getId()));
+        distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(testDsType.getId(),
+                Arrays.asList(osType.getId()));
+        testDsType = distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(testDsType.getId(),
+                Arrays.asList(testType.getId()));
 
         // found in test
         testdataFactory.createSoftwareModule("thetype", "unassignedfound");
@@ -688,7 +690,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
 
         // one soft deleted
         final SoftwareModule deleted = testdataFactory.createSoftwareModuleApp();
-        testdataFactory.createDistributionSet(Lists.newArrayList(deleted));
+        testdataFactory.createDistributionSet(Arrays.asList(deleted));
         softwareManagement.deleteSoftwareModule(deleted.getId());
 
         assertThat(softwareManagement.countSoftwareModulesAll()).as("Number of undeleted modules").isEqualTo(1);
@@ -730,7 +732,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
                 .createSoftwareModuleType(entityFactory.softwareModuleType().create().key("thetype").name("thename"));
         try {
             softwareManagement.createSoftwareModuleType(
-                    Lists.newArrayList(entityFactory.softwareModuleType().create().key("thetype").name("thename"),
+                    Arrays.asList(entityFactory.softwareModuleType().create().key("thetype").name("thename"),
                             entityFactory.softwareModuleType().create().key("anothertype").name("anothername")));
             fail("should not have worked as module type already exists");
         } catch (final EntityAlreadyExistsException e) {
@@ -754,7 +756,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verfies that multiple types are created as requested.")
     public void createMultipleSoftwareModuleTypes() {
         final List<SoftwareModuleType> created = softwareManagement.createSoftwareModuleType(
-                Lists.newArrayList(entityFactory.softwareModuleType().create().key("thetype").name("thename"),
+                Arrays.asList(entityFactory.softwareModuleType().create().key("thetype").name("thename"),
                         entityFactory.softwareModuleType().create().key("thetype2").name("thename2")));
 
         assertThat(created.size()).as("Number of created types").isEqualTo(2);
@@ -771,7 +773,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         // one soft deleted
         final SoftwareModule deleted = testdataFactory.createSoftwareModuleApp();
         final DistributionSet set = distributionSetManagement.createDistributionSet(entityFactory.distributionSet()
-                .create().name("set").version("1").modules(Lists.newArrayList(one.getId(), deleted.getId())));
+                .create().name("set").version("1").modules(Arrays.asList(one.getId(), deleted.getId())));
         softwareManagement.deleteSoftwareModule(deleted.getId());
 
         assertThat(softwareManagement.findSoftwareModuleByAssignedTo(PAGE, set.getId()).getContent())
@@ -797,7 +799,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         final SoftwareModuleMetadata swMetadata2 = new JpaSoftwareModuleMetadata(knownKey2, ah, knownValue2);
 
         final List<SoftwareModuleMetadata> softwareModuleMetadata = softwareManagement
-                .createSoftwareModuleMetadata(ah.getId(), Lists.newArrayList(swMetadata1, swMetadata2));
+                .createSoftwareModuleMetadata(ah.getId(), Arrays.asList(swMetadata1, swMetadata2));
 
         final SoftwareModule changedLockRevisionModule = softwareManagement.findSoftwareModuleById(ah.getId()).get();
         assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(2);

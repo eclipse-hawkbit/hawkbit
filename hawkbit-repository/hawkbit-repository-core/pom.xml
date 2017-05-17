@@ -25,6 +25,10 @@
          <version>${project.version}</version>
       </dependency>
       <dependency>
+         <groupId>org.apache.commons</groupId>
+         <artifactId>commons-lang3</artifactId>
+      </dependency>
+      <dependency>
          <groupId>io.protostuff</groupId>
          <artifactId>protostuff-core</artifactId>
          <optional>true</optional>

@@ -8,12 +8,11 @@
  */
 package org.eclipse.hawkbit.mgmt.client.resource.builder;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
-
-import com.google.common.collect.Lists;
 
 /**
  * 
@@ -76,7 +75,7 @@ public class TargetBuilder {
      * @return a single entry list of {@link MgmtTargetRequestBody}
      */
     public List<MgmtTargetRequestBody> build() {
-        return Lists.newArrayList(doBuild(""));
+        return Arrays.asList(doBuild(""));
     }
 
     /**
@@ -106,7 +105,7 @@ public class TargetBuilder {
      * @return a list of {@link MgmtSoftwareModuleTypeRequestBodyPost}
      */
     public List<MgmtTargetRequestBody> buildAsList(final int offset, final int count) {
-        final List<MgmtTargetRequestBody> bodyList = Lists.newArrayList();
+        final List<MgmtTargetRequestBody> bodyList = Arrays.asList();
         for (int index = offset; index < count + offset; index++) {
             bodyList.add(doBuild(String.format("%06d", index)));
         }

@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management.dstag;
 
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +28,7 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.util.StringUtils;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.UI;
@@ -90,10 +89,10 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
         super.createNewTag();
         final String tagNameValueTrimmed = HawkbitCommonUtil.trimAndNullIfEmpty(tagNameValue);
         final String tagDescriptionTrimmed = HawkbitCommonUtil.trimAndNullIfEmpty(tagDescValue);
-        if (isNotEmpty(tagNameValueTrimmed)) {
+        if (!StringUtils.isEmpty(tagNameValueTrimmed)) {
 
             String colour = ColorPickerConstants.START_COLOR.getCSS();
-            if (isNotEmpty(getColorPicked())) {
+            if (!StringUtils.isEmpty(getColorPicked())) {
                 colour = getColorPicked();
             }
 

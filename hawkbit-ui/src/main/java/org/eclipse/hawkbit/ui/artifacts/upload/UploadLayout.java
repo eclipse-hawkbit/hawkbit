@@ -21,7 +21,7 @@ import javax.servlet.MultipartConfigElement;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -51,7 +51,6 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.google.common.base.Strings;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
@@ -112,7 +111,7 @@ public class UploadLayout extends VerticalLayout {
 
     private Button uploadStatusButton;
 
-    private final transient SoftwareManagement softwareManagement;
+    private final transient SoftwareModuleManagement softwareManagement;
 
     private static AcceptCriterion acceptAllExceptBlacklisted = new Not(new ServerItemIdClientCriterion(Mode.PREFIX,
             UIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE, UIComponentIdProvider.UPLOAD_TYPE_BUTTON_PREFIX));
@@ -121,7 +120,7 @@ public class UploadLayout extends VerticalLayout {
 
     public UploadLayout(final VaadinMessageSource i18n, final UINotification uiNotification, final UIEventBus eventBus,
             final ArtifactUploadState artifactUploadState, final MultipartConfigElement multipartConfigElement,
-            final ArtifactManagement artifactManagement, final SoftwareManagement softwareManagement) {
+            final ArtifactManagement artifactManagement, final SoftwareModuleManagement softwareManagement) {
         this.uploadInfoWindow = new UploadStatusInfoWindow(eventBus, artifactUploadState, i18n);
         this.i18n = i18n;
         this.uiNotification = uiNotification;
@@ -308,14 +307,14 @@ public class UploadLayout extends VerticalLayout {
         }
 
         private boolean isDirectory(final Html5File file) {
-            return Strings.isNullOrEmpty(file.getType()) && file.getFileSize() % 4096 == 0;
+            return StringUtils.isEmpty(file.getType()) && file.getFileSize() % 4096 == 0;
         }
     }
 
     private void displayCompositeMessage() {
         final String duplicateMessage = getDuplicateFileValidationMessage();
         final StringBuilder compositeMessage = new StringBuilder();
-        if (!Strings.isNullOrEmpty(duplicateMessage)) {
+        if (!StringUtils.isEmpty(duplicateMessage)) {
             compositeMessage.append(duplicateMessage);
         }
         if (hasDirectory) {

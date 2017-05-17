@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -54,7 +55,6 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
-import com.google.common.collect.Lists;
 import com.jayway.jsonpath.JsonPath;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -124,7 +124,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(0);
 
         List<Target> saved = deploymentManagement.assignDistributionSet(ds.getId(), ActionType.FORCED,
-                RepositoryModelConstants.NO_FORCE_TIME, Lists.newArrayList(savedTarget.getControllerId()))
+                RepositoryModelConstants.NO_FORCE_TIME, Arrays.asList(savedTarget.getControllerId()))
                 .getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
 
@@ -232,8 +232,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
 
         final DistributionSetAssignmentResult result = deploymentManagement.assignDistributionSet(ds.getId(),
-                ActionType.TIMEFORCED, System.currentTimeMillis() + 1_000,
-                Lists.newArrayList(target.getControllerId()));
+                ActionType.TIMEFORCED, System.currentTimeMillis() + 1_000, Arrays.asList(target.getControllerId()));
 
         final Action action = deploymentManagement
                 .findActiveActionsByTarget(PAGE, result.getAssignedEntity().get(0).getControllerId()).getContent()
@@ -286,7 +285,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(0);
 
         List<Target> saved = deploymentManagement.assignDistributionSet(ds.getId(), ActionType.SOFT,
-                RepositoryModelConstants.NO_FORCE_TIME, Lists.newArrayList(savedTarget.getControllerId()))
+                RepositoryModelConstants.NO_FORCE_TIME, Arrays.asList(savedTarget.getControllerId()))
                 .getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
 
@@ -401,7 +400,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(0);
 
         List<Target> saved = deploymentManagement.assignDistributionSet(ds.getId(), ActionType.TIMEFORCED,
-                System.currentTimeMillis(), Lists.newArrayList(savedTarget.getControllerId())).getAssignedEntity();
+                System.currentTimeMillis(), Arrays.asList(savedTarget.getControllerId())).getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
 
         final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
@@ -657,8 +656,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(targetManagement.findTargetByControllerID("4712").get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.UNKNOWN);
         assignDistributionSet(ds, toAssign);
-        final Action action = deploymentManagement.findActionsByDistributionSet(PAGE, ds.getId()).getContent()
-                .get(0);
+        final Action action = deploymentManagement.findActionsByDistributionSet(PAGE, ds.getId()).getContent().get(0);
 
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action.getId() + "/feedback",
                 tenantAware.getCurrentTenant())
@@ -684,9 +682,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         // redo
         ds = distributionSetManagement.findDistributionSetByIdWithDetails(ds.getId()).get();
-        assignDistributionSet(ds, Lists.newArrayList(targetManagement.findTargetByControllerID("4712").get()));
-        final Action action2 = deploymentManagement.findActiveActionsByTarget(PAGE, myT.getControllerId())
-                .getContent().get(0);
+        assignDistributionSet(ds, Arrays.asList(targetManagement.findTargetByControllerID("4712").get()));
+        final Action action2 = deploymentManagement.findActiveActionsByTarget(PAGE, myT.getControllerId()).getContent()
+                .get(0);
 
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action2.getId() + "/feedback",
                 tenantAware.getCurrentTenant())
@@ -719,13 +717,12 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         final Target savedTarget = testdataFactory.createTarget("4712");
 
-        final List<Target> toAssign = Lists.newArrayList(savedTarget);
+        final List<Target> toAssign = Arrays.asList(savedTarget);
 
         Target myT = targetManagement.findTargetByControllerID("4712").get();
         assertThat(myT.getUpdateStatus()).isEqualTo(TargetUpdateStatus.UNKNOWN);
         assignDistributionSet(ds, toAssign);
-        final Action action = deploymentManagement.findActionsByDistributionSet(PAGE, ds.getId()).getContent()
-                .get(0);
+        final Action action = deploymentManagement.findActionsByDistributionSet(PAGE, ds.getId()).getContent().get(0);
 
         myT = targetManagement.findTargetByControllerID("4712").get();
         assertThat(myT.getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
@@ -875,14 +872,14 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
-        final List<Target> toAssign = Lists.newArrayList(savedTarget);
-        final List<Target> toAssign2 = Lists.newArrayList(savedTarget2);
+        final List<Target> toAssign = Arrays.asList(savedTarget);
+        final List<Target> toAssign2 = Arrays.asList(savedTarget2);
 
         savedTarget = assignDistributionSet(savedSet, toAssign).getAssignedEntity().iterator().next();
         assignDistributionSet(savedSet2, toAssign2);
 
-        final Action updateAction = deploymentManagement
-                .findActiveActionsByTarget(PAGE, savedTarget.getControllerId()).getContent().get(0);
+        final Action updateAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
+                .getContent().get(0);
 
         // action exists but is not assigned to this target
         mvc.perform(post("/{tenant}/controller/v1/4713/deploymentBase/" + updateAction.getId() + "/feedback",

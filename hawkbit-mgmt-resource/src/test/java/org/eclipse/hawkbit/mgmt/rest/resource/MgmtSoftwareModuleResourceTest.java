@@ -54,7 +54,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.common.collect.Lists;
 import com.jayway.jsonpath.JsonPath;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -420,7 +419,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     public void invalidRequestsOnSoftwaremodulesResource() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        final List<SoftwareModule> modules = Lists.newArrayList(sm);
+        final List<SoftwareModule> modules = Arrays.asList(sm);
 
         // SM does not exist
         mvc.perform(get("/rest/v1/softwaremodules/12345678")).andDo(MockMvcResultPrinter.print())
@@ -446,7 +445,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final SoftwareModule toLongName = entityFactory.softwareModule().create().type(osType)
                 .name(RandomStringUtils.randomAscii(80)).build();
         mvc.perform(
-                post("/rest/v1/softwaremodules").content(JsonBuilder.softwareModules(Lists.newArrayList(toLongName)))
+                post("/rest/v1/softwaremodules").content(JsonBuilder.softwareModules(Arrays.asList(toLongName)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
 
@@ -664,7 +663,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final SoftwareModule ah = entityFactory.softwareModule().create().name("name3").type(appType)
                 .version("version3").vendor("vendor3").description("description3").build();
 
-        final List<SoftwareModule> modules = Lists.newArrayList(os, ah);
+        final List<SoftwareModule> modules = Arrays.asList(os, ah);
 
         final long current = System.currentTimeMillis();
 

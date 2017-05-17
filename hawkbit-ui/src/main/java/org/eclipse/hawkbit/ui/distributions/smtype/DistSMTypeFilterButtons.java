@@ -15,7 +15,7 @@ import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.SW_MODULE_TYPE_
 
 import java.util.Collections;
 
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
@@ -48,7 +48,7 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
 
     DistSMTypeFilterButtons(final UIEventBus eventBus, final ManageDistUIState manageDistUIState,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
-            final SoftwareManagement softwareManagement) {
+            final SoftwareModuleManagement softwareManagement) {
         super(eventBus, new DistSMTypeFilterButtonClick(eventBus, manageDistUIState, softwareManagement));
         this.manageDistUIState = manageDistUIState;
         this.distributionsViewClientCriterion = distributionsViewClientCriterion;

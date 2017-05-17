@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
@@ -30,7 +30,7 @@ public class SoftwareModuleTableLayout extends AbstractTableLayout<SoftwareModul
 
     public SoftwareModuleTableLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final ArtifactUploadState artifactUploadState, final UINotification uiNotification,
-            final UIEventBus eventBus, final SoftwareManagement softwareManagement, final EntityFactory entityFactory,
+            final UIEventBus eventBus, final SoftwareModuleManagement softwareManagement, final EntityFactory entityFactory,
             final UploadViewClientCriterion uploadViewClientCriterion) {
 
         final SwMetadataPopupLayout swMetadataPopupLayout = new SwMetadataPopupLayout(i18n, uiNotification, eventBus,

@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -57,7 +57,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     private ArtifactManagement artifactManagement;
 
     @Autowired
-    private SoftwareManagement softwareManagement;
+    private SoftwareModuleManagement softwareManagement;
 
     @Autowired
     private EntityFactory entityFactory;

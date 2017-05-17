@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.builder;
 
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.AbstractSoftwareModuleUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
@@ -23,9 +23,9 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 public class JpaSoftwareModuleCreate extends AbstractSoftwareModuleUpdateCreate<SoftwareModuleCreate>
         implements SoftwareModuleCreate {
 
-    private final SoftwareManagement softwareManagement;
+    private final SoftwareModuleManagement softwareManagement;
 
-    JpaSoftwareModuleCreate(final SoftwareManagement softwareManagement) {
+    JpaSoftwareModuleCreate(final SoftwareModuleManagement softwareManagement) {
         this.softwareManagement = softwareManagement;
     }
 

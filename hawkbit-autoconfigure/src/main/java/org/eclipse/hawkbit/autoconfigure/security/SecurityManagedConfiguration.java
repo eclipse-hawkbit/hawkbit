@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.autoconfigure.security;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.Filter;
@@ -85,8 +86,6 @@ import org.vaadin.spring.security.web.VaadinDefaultRedirectStrategy;
 import org.vaadin.spring.security.web.VaadinRedirectStrategy;
 import org.vaadin.spring.security.web.authentication.VaadinAuthenticationSuccessHandler;
 import org.vaadin.spring.security.web.authentication.VaadinUrlAuthenticationSuccessHandler;
-
-import com.google.common.collect.Lists;
 
 /**
  * All configurations related to HawkBit's authentication and authorization
@@ -217,7 +216,7 @@ public class SecurityManagedConfiguration {
 
                 final AnonymousAuthenticationFilter anoymousFilter = new AnonymousAuthenticationFilter(
                         "controllerAnonymousFilter", "anonymous",
-                        Lists.newArrayList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS),
+                        Arrays.asList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS),
                                 new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_DOWNLOAD_ROLE)));
                 anoymousFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
                 httpSec.requestMatchers().antMatchers("/*/controller/v1/**", "/*/controller/artifacts/v1/**").and()

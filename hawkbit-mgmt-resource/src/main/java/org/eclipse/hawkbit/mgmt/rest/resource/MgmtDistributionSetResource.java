@@ -29,7 +29,7 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -63,7 +63,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     private static final Logger LOG = LoggerFactory.getLogger(MgmtDistributionSetResource.class);
 
     @Autowired
-    private SoftwareManagement softwareManagement;
+    private SoftwareModuleManagement softwareManagement;
 
     @Autowired
     private TargetManagement targetManagement;

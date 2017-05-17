@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.builder;
 
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.GenericSoftwareModuleUpdate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleBuilder;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
@@ -21,9 +21,9 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
  */
 public class JpaSoftwareModuleBuilder implements SoftwareModuleBuilder {
 
-    private final SoftwareManagement softwareManagement;
+    private final SoftwareModuleManagement softwareManagement;
 
-    public JpaSoftwareModuleBuilder(final SoftwareManagement softwareManagement) {
+    public JpaSoftwareModuleBuilder(final SoftwareModuleManagement softwareManagement) {
         this.softwareManagement = softwareManagement;
     }
 

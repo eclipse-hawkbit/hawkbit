@@ -27,10 +27,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
-
-import com.google.common.base.Strings;
 
 /**
  *
@@ -57,7 +56,7 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
         super(definition, queryConfig, sortPropertyIds, sortStates);
         if (HawkbitCommonUtil.isNotNullOrEmpty(queryConfig)) {
             searchText = (String) queryConfig.get(SPUIDefinitions.FILTER_BY_TEXT);
-            if (!Strings.isNullOrEmpty(searchText)) {
+            if (!StringUtils.isEmpty(searchText)) {
                 searchText = String.format("%%%s%%", searchText);
             }
         }
@@ -82,7 +81,7 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
         final List<ProxyTargetFilter> proxyTargetFilter = new ArrayList<>();
         if (startIndex == 0 && firstPageTargetFilter != null) {
             targetFilterQuery = firstPageTargetFilter;
-        } else if (Strings.isNullOrEmpty(searchText)) {
+        } else if (StringUtils.isEmpty(searchText)) {
             // if no search filters available
             targetFilterQuery = getTargetFilterQueryManagement().findAllTargetFilterQuery(
                     new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
@@ -119,7 +118,7 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
 
     @Override
     public int size() {
-        if (Strings.isNullOrEmpty(searchText)) {
+        if (StringUtils.isEmpty(searchText)) {
             firstPageTargetFilter = getTargetFilterQueryManagement()
                     .findAllTargetFilterQuery(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
         } else {

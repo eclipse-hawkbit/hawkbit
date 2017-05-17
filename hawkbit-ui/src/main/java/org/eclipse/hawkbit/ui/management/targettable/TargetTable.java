@@ -62,6 +62,7 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -69,7 +70,6 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
@@ -826,7 +826,7 @@ public class TargetTable extends AbstractTable<Target> {
                 .map(DistributionSetIdName::getId).orElse(null);
         final Long pinnedDistId = managementUIState.getTargetTableFilters().getPinnedDistId().orElse(null);
         final String searchText = managementUIState.getTargetTableFilters().getSearchText().map(text -> {
-            if (Strings.isNullOrEmpty(text)) {
+            if (StringUtils.isEmpty(text)) {
                 return null;
             }
             return String.format("%%%s%%", text);
@@ -877,7 +877,7 @@ public class TargetTable extends AbstractTable<Target> {
 
     private static boolean noFilterSelected(final Collection<TargetUpdateStatus> status, final Long distributionId,
             final Boolean noTagClicked, final String[] targetTags, final String searchText) {
-        return CollectionUtils.isEmpty(status) && distributionId == null && Strings.isNullOrEmpty(searchText)
+        return CollectionUtils.isEmpty(status) && distributionId == null && StringUtils.isEmpty(searchText)
                 && !isTagSelected(targetTags, noTagClicked);
     }
 

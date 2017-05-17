@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import org.apache.commons.lang3.ClassUtils;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
 import org.eclipse.hawkbit.repository.event.remote.RemoteIdEvent;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
@@ -63,7 +62,7 @@ public class RemoteEntityEvent<E extends TenantAwareBaseEntity> extends RemoteId
     @SuppressWarnings("unchecked")
     private E reloadEntityFromRepository() {
         try {
-            final Class<E> clazz = (Class<E>) ClassUtils.getClass(getEntityClass());
+            final Class<E> clazz = (Class<E>) Class.forName(getEntityClass());
             return EventEntityManagerHolder.getInstance().getEventEntityManager().findEntity(getTenant(), getEntityId(),
                     clazz);
         } catch (final ClassNotFoundException e) {

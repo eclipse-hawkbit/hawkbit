@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDownloadArtifactRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -39,7 +39,7 @@ import org.springframework.web.context.WebApplicationContext;
 public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi {
 
     @Autowired
-    private SoftwareManagement softwareManagement;
+    private SoftwareModuleManagement softwareManagement;
 
     @Autowired
     private ArtifactManagement artifactManagement;

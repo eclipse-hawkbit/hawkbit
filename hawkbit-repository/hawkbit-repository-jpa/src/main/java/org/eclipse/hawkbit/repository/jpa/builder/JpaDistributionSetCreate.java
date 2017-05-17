@@ -12,8 +12,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.AbstractDistributionSetUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -29,12 +29,12 @@ import org.springframework.util.CollectionUtils;
 public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreate<DistributionSetCreate>
         implements DistributionSetCreate {
 
-    private final DistributionSetManagement distributionSetManagement;
-    private final SoftwareManagement softwareManagement;
+    private final DistributionSetTypeManagement distributionSetTypeManagement;
+    private final SoftwareModuleManagement softwareManagement;
 
-    JpaDistributionSetCreate(final DistributionSetManagement distributionSetManagement,
-            final SoftwareManagement softwareManagement) {
-        this.distributionSetManagement = distributionSetManagement;
+    JpaDistributionSetCreate(final DistributionSetTypeManagement distributionSetTypeManagement,
+            final SoftwareModuleManagement softwareManagement) {
+        this.distributionSetTypeManagement = distributionSetTypeManagement;
         this.softwareManagement = softwareManagement;
     }
 
@@ -47,7 +47,7 @@ public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreat
     }
 
     private DistributionSetType findDistributionSetTypeWithExceptionIfNotFound(final String distributionSetTypekey) {
-        return distributionSetManagement.findDistributionSetTypeByKey(distributionSetTypekey)
+        return distributionSetTypeManagement.findDistributionSetTypeByKey(distributionSetTypekey)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, distributionSetTypekey));
     }
 

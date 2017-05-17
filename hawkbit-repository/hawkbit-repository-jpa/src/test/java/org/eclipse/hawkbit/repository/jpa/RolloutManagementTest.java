@@ -67,8 +67,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
-import com.google.common.collect.Lists;
-
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Step;
@@ -280,12 +278,12 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         // finish group one by finishing targets and deleting targets
         final Slice<JpaAction> runningActionsSlice = actionRepository.findByRolloutIdAndStatus(PAGE,
                 createdRollout.getId(), Status.RUNNING);
-        final List<JpaAction> runningActions = Lists.newArrayList(runningActionsSlice.iterator());
+        final List<JpaAction> runningActions = runningActionsSlice.getContent();
         finishAction(runningActions.get(0));
         finishAction(runningActions.get(1));
         finishAction(runningActions.get(2));
-        targetManagement.deleteTargets(Lists.newArrayList(runningActions.get(3).getTarget().getId(),
-                runningActions.get(4).getTarget().getId()));
+        targetManagement.deleteTargets(
+                Arrays.asList(runningActions.get(3).getTarget().getId(), runningActions.get(4).getTarget().getId()));
     }
 
     @Step("Check the status of the rollout groups, second group should be in running status")
@@ -302,10 +300,10 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     private void finishActionAndDeleteTargetsOfSecondRunningGroup(final Rollout createdRollout) {
         final Slice<JpaAction> runningActionsSlice = actionRepository.findByRolloutIdAndStatus(PAGE,
                 createdRollout.getId(), Status.RUNNING);
-        final List<JpaAction> runningActions = Lists.newArrayList(runningActionsSlice.iterator());
+        final List<JpaAction> runningActions = runningActionsSlice.getContent();
         finishAction(runningActions.get(0));
         targetManagement.deleteTargets(
-                Lists.newArrayList(runningActions.get(1).getTarget().getId(), runningActions.get(2).getTarget().getId(),
+                Arrays.asList(runningActions.get(1).getTarget().getId(), runningActions.get(2).getTarget().getId(),
                         runningActions.get(3).getTarget().getId(), runningActions.get(4).getTarget().getId()));
 
     }
@@ -314,8 +312,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     private void deleteAllTargetsFromThirdGroup(final Rollout createdRollout) {
         final Slice<JpaAction> runningActionsSlice = actionRepository.findByRolloutIdAndStatus(PAGE,
                 createdRollout.getId(), Status.SCHEDULED);
-        final List<JpaAction> runningActions = Lists.newArrayList(runningActionsSlice.iterator());
-        targetManagement.deleteTargets(Lists.newArrayList(runningActions.get(0).getTarget().getId(),
+        final List<JpaAction> runningActions = runningActionsSlice.getContent();
+        targetManagement.deleteTargets(Arrays.asList(runningActions.get(0).getTarget().getId(),
                 runningActions.get(1).getTarget().getId(), runningActions.get(2).getTarget().getId(),
                 runningActions.get(3).getTarget().getId(), runningActions.get(4).getTarget().getId()));
     }
@@ -630,8 +628,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         // 5 targets are in the group and the DS has been assigned
         final List<RolloutGroup> rolloutGroups = rolloutGroupManagement
                 .findRolloutGroupsByRolloutId(createdRollout.getId(), PAGE).getContent();
-        final Page<Target> targets = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroups.get(0).getId(),
-                PAGE);
+        final Page<Target> targets = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroups.get(0).getId(), PAGE);
         final List<Target> targetList = targets.getContent();
         assertThat(targetList.size()).isEqualTo(5);
 
@@ -1128,8 +1125,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.READY);
 
-        final List<RolloutGroup> groups = rolloutGroupManagement
-                .findRolloutGroupsByRolloutId(myRollout.getId(), PAGE).getContent();
+        final List<RolloutGroup> groups = rolloutGroupManagement.findRolloutGroupsByRolloutId(myRollout.getId(), PAGE)
+                .getContent();
 
         assertThat(groups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.READY);
         assertThat(groups.get(0).getTotalTargets()).isEqualTo(1);
@@ -1301,8 +1298,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.READY);
         assertThat(myRollout.getTotalTargets()).isEqualTo(amountTargetsInGroup1and2 + amountTargetsInGroup1);
 
-        final List<RolloutGroup> groups = rolloutGroupManagement
-                .findRolloutGroupsByRolloutId(myRollout.getId(), PAGE).getContent();
+        final List<RolloutGroup> groups = rolloutGroupManagement.findRolloutGroupsByRolloutId(myRollout.getId(), PAGE)
+                .getContent();
         ;
         assertThat(groups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.READY);
         assertThat(groups.get(0).getTotalTargets()).isEqualTo(amountTargetsInGroup1);

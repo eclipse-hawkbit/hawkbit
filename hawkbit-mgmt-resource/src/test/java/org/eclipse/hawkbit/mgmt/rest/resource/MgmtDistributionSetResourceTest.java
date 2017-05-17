@@ -21,6 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -45,7 +46,6 @@ import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.jayway.jsonpath.JsonPath;
 
@@ -167,7 +167,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$.size", equalTo(disSet.getModules().size())));
         // create Software Modules
-        final List<Long> smIDs = Lists.newArrayList(testdataFactory.createSoftwareModuleOs().getId(),
+        final List<Long> smIDs = Arrays.asList(testdataFactory.createSoftwareModuleOs().getId(),
                 testdataFactory.createSoftwareModuleApp().getId());
 
         // post assignment
@@ -270,7 +270,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         // assign knownTargetId to distribution set
         assignDistributionSet(createdDs.getId(), knownTargetId);
         // make it in install state
-        testdataFactory.sendUpdateActionStatusToTargets(Lists.newArrayList(createTarget), Status.FINISHED,
+        testdataFactory.sendUpdateActionStatusToTargets(Arrays.asList(createTarget), Status.FINISHED,
                 Collections.singletonList("some message"));
 
         mvc.perform(get(
@@ -414,8 +414,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Description("Ensures that multiple DS requested are listed with expected payload.")
     public void getDistributionSets() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true))
-                .hasSize(0);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true)).hasSize(0);
 
         DistributionSet set = testdataFactory.createDistributionSet("one");
         set = distributionSetManagement.updateDistributionSet(entityFactory.distributionSet().update(set.getId())
@@ -424,8 +423,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         // load also lazy stuff
         set = distributionSetManagement.findDistributionSetByIdWithDetails(set.getId()).get();
 
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true))
-                .hasSize(1);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true)).hasSize(1);
 
         // perform request
         mvc.perform(get("/rest/v1/distributionsets").accept(MediaType.APPLICATION_JSON))
@@ -488,28 +486,29 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Ensures that multipe DS posted to API are created in the repository.")
     public void createDistributionSets() throws Exception {
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true))
-                .hasSize(0);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true)).hasSize(0);
 
         final SoftwareModule ah = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_APP);
         final SoftwareModule jvm = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_RT);
         final SoftwareModule os = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_OS);
 
         DistributionSet one = testdataFactory.generateDistributionSet("one", "one", standardDsType,
-                Lists.newArrayList(os, jvm, ah));
+                Arrays.asList(os, jvm, ah));
         DistributionSet two = testdataFactory.generateDistributionSet("two", "two", standardDsType,
-                Lists.newArrayList(os, jvm, ah));
+                Arrays.asList(os, jvm, ah));
         DistributionSet three = testdataFactory.generateDistributionSet("three", "three", standardDsType,
-                Lists.newArrayList(os, jvm, ah), true);
+                Arrays.asList(os, jvm, ah), true);
 
         final long current = System.currentTimeMillis();
 
         final MvcResult mvcResult = executeMgmtTargetPost(one, two, three);
 
-        one = distributionSetManagement.findDistributionSetByIdWithDetails(distributionSetManagement
-                .findDistributionSetsAll("name==one", PAGE, false).getContent().get(0).getId()).get();
-        two = distributionSetManagement.findDistributionSetByIdWithDetails(distributionSetManagement
-                .findDistributionSetsAll("name==two", PAGE, false).getContent().get(0).getId()).get();
+        one = distributionSetManagement.findDistributionSetByIdWithDetails(
+                distributionSetManagement.findDistributionSetsAll("name==one", PAGE, false).getContent().get(0).getId())
+                .get();
+        two = distributionSetManagement.findDistributionSetByIdWithDetails(
+                distributionSetManagement.findDistributionSetsAll("name==two", PAGE, false).getContent().get(0).getId())
+                .get();
         three = distributionSetManagement.findDistributionSetByIdWithDetails(distributionSetManagement
                 .findDistributionSetsAll("name==three", PAGE, false).getContent().get(0).getId()).get();
 
@@ -542,8 +541,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .isEqualTo(String.valueOf(three.getId()));
 
         // check in database
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true))
-                .hasSize(3);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true)).hasSize(3);
         assertThat(one.isRequiredMigrationStep()).isEqualTo(false);
         assertThat(two.isRequiredMigrationStep()).isEqualTo(false);
         assertThat(three.isRequiredMigrationStep()).isEqualTo(true);
@@ -558,7 +556,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
             final DistributionSet three) throws Exception {
         return mvc
                 .perform(post("/rest/v1/distributionsets/")
-                        .content(JsonBuilder.distributionSets(Lists.newArrayList(one, two, three)))
+                        .content(JsonBuilder.distributionSets(Arrays.asList(one, two, three)))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -607,21 +605,18 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Description("Ensures that DS deletion request to API is reflected by the repository.")
     public void deleteUnassignedistributionSet() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true))
-                .hasSize(0);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true)).hasSize(0);
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true))
-                .hasSize(1);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true)).hasSize(1);
 
         // perform request
         mvc.perform(delete("/rest/v1/distributionsets/{smId}", set.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         // check repository content
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true))
-                .isEmpty();
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true)).isEmpty();
         assertThat(distributionSetManagement.countDistributionSetsAll()).isEqualTo(0);
     }
 
@@ -636,25 +631,21 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Description("Ensures that assigned DS deletion request to API is reflected by the repository by means of deleted flag set.")
     public void deleteAssignedDistributionSet() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true))
-                .hasSize(0);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true)).hasSize(0);
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         testdataFactory.createTarget("test");
         assignDistributionSet(set.getId(), "test");
 
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true))
-                .hasSize(1);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true)).hasSize(1);
 
         // perform request
         mvc.perform(delete("/rest/v1/distributionsets/{smId}", set.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         // check repository content
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true))
-                .hasSize(0);
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, true, true))
-                .hasSize(1);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true)).hasSize(0);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, true, true)).hasSize(1);
     }
 
     @Test
@@ -662,8 +653,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     public void updateDistributionSet() throws Exception {
 
         // prepare test data
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true))
-                .hasSize(0);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true)).hasSize(0);
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
@@ -686,12 +676,11 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     public void updateRequiredMigrationStepFailsIfDistributionSetisInUse() throws Exception {
 
         // prepare test data
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true))
-                .hasSize(0);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(PAGE, false, true)).hasSize(0);
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         deploymentManagement.assignDistributionSet(set.getId(),
-                Lists.newArrayList(new TargetWithActionType(testdataFactory.createTarget().getControllerId())));
+                Arrays.asList(new TargetWithActionType(testdataFactory.createTarget().getControllerId())));
 
         assertThat(distributionSetManagement.countDistributionSetsAll()).isEqualTo(1);
 
@@ -732,16 +721,14 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(status().isBadRequest());
 
         final DistributionSet missingName = entityFactory.distributionSet().create().build();
-        mvc.perform(
-                post("/rest/v1/distributionsets").content(JsonBuilder.distributionSets(Lists.newArrayList(missingName)))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+        mvc.perform(post("/rest/v1/distributionsets").content(JsonBuilder.distributionSets(Arrays.asList(missingName)))
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
 
         final DistributionSet toLongName = testdataFactory.generateDistributionSet(RandomStringUtils.randomAscii(80));
-        mvc.perform(
-                post("/rest/v1/distributionsets").content(JsonBuilder.distributionSets(Lists.newArrayList(toLongName)))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+        mvc.perform(post("/rest/v1/distributionsets").content(JsonBuilder.distributionSets(Arrays.asList(toLongName)))
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
 
         // unsupported media type
         mvc.perform(post("/rest/v1/distributionsets").content(JsonBuilder.distributionSets(sets))
@@ -929,7 +916,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
         final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
         // prepare targets
-        final Collection<String> knownTargetIds = Lists.newArrayList("1", "2", "3", "4", "5");
+        final Collection<String> knownTargetIds = Arrays.asList("1", "2", "3", "4", "5");
 
         knownTargetIds.forEach(controllerId -> targetManagement
                 .createTarget(entityFactory.target().create().controllerId(controllerId)));

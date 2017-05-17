@@ -36,8 +36,6 @@ import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.Test;
 
-import com.google.common.collect.Lists;
-
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
@@ -119,7 +117,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
 
         // search for not deleted
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true)
-                .setTagNames(Lists.newArrayList(tagA.getName()));
+                .setTagNames(Arrays.asList(tagA.getName()));
         assertEquals("filter works not correct",
                 dsAs.spliterator().getExactSizeIfKnown() + dsABs.spliterator().getExactSizeIfKnown()
                         + dsACs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
@@ -127,7 +125,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
                         .getTotalElements());
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true)
-                .setTagNames(Lists.newArrayList(tagB.getName()));
+                .setTagNames(Arrays.asList(tagB.getName()));
         assertEquals("filter works not correct",
                 dsBs.spliterator().getExactSizeIfKnown() + dsABs.spliterator().getExactSizeIfKnown()
                         + dsBCs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
@@ -135,7 +133,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
                         .getTotalElements());
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true)
-                .setTagNames(Lists.newArrayList(tagC.getName()));
+                .setTagNames(Arrays.asList(tagC.getName()));
         assertEquals("filter works not correct",
                 dsCs.spliterator().getExactSizeIfKnown() + dsACs.spliterator().getExactSizeIfKnown()
                         + dsBCs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
@@ -143,7 +141,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
                         .getTotalElements());
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true)
-                .setTagNames(Lists.newArrayList(tagX.getName()));
+                .setTagNames(Arrays.asList(tagX.getName()));
         assertEquals("filter works not correct", 0, distributionSetManagement
                 .findDistributionSetsByFilters(PAGE, distributionSetFilterBuilder.build()).getTotalElements());
 
@@ -158,7 +156,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         assertEquals("wrong tag size", 2, distributionSetTagRepository.findAll().spliterator().getExactSizeIfKnown());
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
-                .setTagNames(Lists.newArrayList(tagA.getName()));
+                .setTagNames(Arrays.asList(tagA.getName()));
         assertEquals("filter works not correct",
                 dsAs.spliterator().getExactSizeIfKnown() + dsABs.spliterator().getExactSizeIfKnown()
                         + dsACs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
@@ -166,12 +164,12 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
                         .getTotalElements());
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
-                .setTagNames(Lists.newArrayList(tagB.getName()));
+                .setTagNames(Arrays.asList(tagB.getName()));
         assertEquals("filter works not correct", 0, distributionSetManagement
                 .findDistributionSetsByFilters(PAGE, distributionSetFilterBuilder.build()).getTotalElements());
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
-                .setTagNames(Lists.newArrayList(tagC.getName()));
+                .setTagNames(Arrays.asList(tagC.getName()));
         assertEquals("filter works not correct",
                 dsCs.spliterator().getExactSizeIfKnown() + dsACs.spliterator().getExactSizeIfKnown()
                         + dsBCs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),

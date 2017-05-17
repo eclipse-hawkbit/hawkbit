@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -53,7 +53,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = LoggerFactory.getLogger(CreateUpdateSoftwareTypeLayout.class);
 
-    private final transient SoftwareManagement swTypeManagementService;
+    private final transient SoftwareModuleManagement swTypeManagementService;
 
     private String singleAssignStr;
     private String multiAssignStr;
@@ -81,7 +81,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
      */
     public CreateUpdateSoftwareTypeLayout(final VaadinMessageSource i18n, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
-            final UINotification uiNotification, final SoftwareManagement swTypeManagementService) {
+            final UINotification uiNotification, final SoftwareModuleManagement swTypeManagementService) {
         super(i18n, tagManagement, entityFactory, eventBus, permChecker, uiNotification);
         this.swTypeManagementService = swTypeManagementService;
     }

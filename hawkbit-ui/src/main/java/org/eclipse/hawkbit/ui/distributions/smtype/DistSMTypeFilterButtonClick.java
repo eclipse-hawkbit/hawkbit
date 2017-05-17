@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.distributions.smtype;
 
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.ui.artifacts.event.RefreshSoftwareModuleByFilterEvent;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterSingleButtonClick;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
@@ -28,10 +28,10 @@ public class DistSMTypeFilterButtonClick extends AbstractFilterSingleButtonClick
 
     private final ManageDistUIState manageDistUIState;
 
-    private final transient SoftwareManagement softwareManagement;
+    private final transient SoftwareModuleManagement softwareManagement;
 
     DistSMTypeFilterButtonClick(final UIEventBus eventBus, final ManageDistUIState manageDistUIState,
-            final SoftwareManagement softwareManagement) {
+            final SoftwareModuleManagement softwareManagement) {
         this.eventBus = eventBus;
         this.manageDistUIState = manageDistUIState;
         this.softwareManagement = softwareManagement;
