@@ -8,11 +8,8 @@
  */
 package org.eclipse.hawkbit.amqp;
 
-import java.security.GeneralSecurityException;
 import java.time.Duration;
 import java.util.Map;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.api.HostnameResolver;
@@ -34,7 +31,6 @@ import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
-import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -43,14 +39,11 @@ import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.util.ErrorHandler;
@@ -90,63 +83,6 @@ public class AmqpConfiguration {
     public ErrorHandler errorHandler() {
         return new ConditionalRejectingErrorHandler(
                 new DelayedRequeueExceptionStrategy(amqpProperties.getRequeueDelay()));
-    }
-
-    @Configuration
-    @ConditionalOnMissingBean(ConnectionFactory.class)
-    @ConditionalOnProperty(prefix = "hawkbit.dmf.rabbitmq", name = "enabled", matchIfMissing = true)
-    protected static class RabbitConnectionFactoryCreator {
-
-        @Autowired
-        private AmqpProperties amqpProperties;
-
-        @Autowired
-        @Qualifier("asyncExecutor")
-        private Executor threadPoolExecutor;
-
-        @Autowired
-        private ScheduledExecutorService scheduledExecutorService;
-
-        /**
-         * {@link ConnectionFactory} with enabled publisher confirms and
-         * heartbeat.
-         *
-         * @param config
-         *            with standard {@link RabbitProperties}
-         * @return {@link ConnectionFactory}
-         * @throws GeneralSecurityException
-         *             in case of problems with enabled SSL connections
-         */
-        @Bean
-        public ConnectionFactory rabbitConnectionFactory(final RabbitProperties config)
-                throws GeneralSecurityException {
-            final CachingConnectionFactory factory = new CachingConnectionFactory();
-            factory.setRequestedHeartBeat(amqpProperties.getRequestedHeartBeat());
-            factory.setExecutor(threadPoolExecutor);
-            factory.getRabbitConnectionFactory().setHeartbeatExecutor(scheduledExecutorService);
-            factory.setPublisherConfirms(true);
-
-            if (config.getSsl().isEnabled()) {
-                factory.getRabbitConnectionFactory().useSslProtocol();
-            }
-
-            final String addresses = config.getAddresses();
-            factory.setAddresses(addresses);
-            if (config.getHost() != null) {
-                factory.setHost(config.getHost());
-                factory.setPort(config.getPort());
-            }
-            if (config.getUsername() != null) {
-                factory.setUsername(config.getUsername());
-            }
-            if (config.getPassword() != null) {
-                factory.setPassword(config.getPassword());
-            }
-            if (config.getVirtualHost() != null) {
-                factory.setVirtualHost(config.getVirtualHost());
-            }
-            return factory;
-        }
     }
 
     /**
