@@ -354,6 +354,17 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
+     * {@link JpaDistributionSetManagement} bean.
+     *
+     * @return a new {@link DistributionSetManagement}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    DistributionSetTypeManagement distributionSetTypeManagement() {
+        return new JpaDistributionSetManagement();
+    }
+
+    /**
      * {@link JpaTenantStatsManagement} bean.
      *
      * @return a new {@link TenantStatsManagement}
@@ -426,7 +437,18 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    SoftwareModuleManagement softwareManagement() {
+    SoftwareModuleManagement softwareModuleManagement() {
+        return new JpaSoftwareManagement();
+    }
+
+    /**
+     * {@link JpaSoftwareManagement} bean.
+     *
+     * @return a new {@link SoftwareModuleManagement}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    SoftwareModuleTypeManagement softwareModuleTypeManagement() {
         return new JpaSoftwareManagement();
     }
 
