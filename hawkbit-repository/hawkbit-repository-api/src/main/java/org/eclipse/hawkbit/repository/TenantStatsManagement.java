@@ -24,7 +24,8 @@ public interface TenantStatsManagement {
      *
      * @return collected statistics
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN + SpringEvalExpressions.HAS_AUTH_OR
+            + SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
