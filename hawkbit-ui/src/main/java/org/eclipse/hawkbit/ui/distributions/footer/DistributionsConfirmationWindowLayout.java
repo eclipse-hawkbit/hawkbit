@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.AbstractConfirmationWindowLayout;
@@ -83,18 +84,23 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
     private final transient DistributionSetTypeManagement distributionSetTypeManagement;
 
-    private final transient SoftwareModuleManagement softwareManagement;
+    private final transient SoftwareModuleManagement softwareModuleManagement;
+
+    private final transient SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
     private final ManageDistUIState manageDistUIState;
 
     DistributionsConfirmationWindowLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final DistributionSetManagement dsManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement,
-            final SoftwareModuleManagement softwareManagement, final ManageDistUIState manageDistUIState) {
+            final SoftwareModuleManagement softwareModuleManagement,
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement,
+            final ManageDistUIState manageDistUIState) {
         super(i18n, eventBus);
         this.distributionSetManagement = dsManagement;
         this.distributionSetTypeManagement = distributionSetTypeManagement;
-        this.softwareManagement = softwareManagement;
+        this.softwareModuleTypeManagement = softwareModuleTypeManagement;
+        this.softwareModuleManagement = softwareModuleManagement;
         this.manageDistUIState = manageDistUIState;
     }
 
@@ -169,7 +175,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
             removeAssignedSoftwareModules();
         }
 
-        softwareManagement.deleteSoftwareModules(swmoduleIds);
+        softwareModuleManagement.deleteSoftwareModules(swmoduleIds);
         eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.REMOVE_ENTITY, swmoduleIds));
 
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
@@ -285,8 +291,8 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         final int deleteSWModuleTypeCount = manageDistUIState.getSelectedDeleteSWModuleTypes().size();
         for (final String swModuleTypeName : manageDistUIState.getSelectedDeleteSWModuleTypes()) {
 
-            softwareManagement.findSoftwareModuleTypeByName(swModuleTypeName).map(SoftwareModuleType::getId)
-                    .ifPresent(softwareManagement::deleteSoftwareModuleType);
+            softwareModuleTypeManagement.findSoftwareModuleTypeByName(swModuleTypeName).map(SoftwareModuleType::getId)
+                    .ifPresent(softwareModuleTypeManagement::deleteSoftwareModuleType);
         }
         addToConsolitatedMsg(FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.getMessage("message.sw.module.type.delete", new Object[] { deleteSWModuleTypeCount }));

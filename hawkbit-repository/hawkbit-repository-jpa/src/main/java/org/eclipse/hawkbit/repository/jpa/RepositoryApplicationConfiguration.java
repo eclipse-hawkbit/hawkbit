@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
@@ -160,13 +161,13 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * @param softwareManagement
+     * @param softwareModuleTypeManagement
      *            for loading {@link SoftwareModule#getType()}
      * @return SoftwareModuleBuilder bean
      */
     @Bean
-    SoftwareModuleBuilder softwareModuleBuilder(final SoftwareModuleManagement softwareManagement) {
-        return new JpaSoftwareModuleBuilder(softwareManagement);
+    SoftwareModuleBuilder softwareModuleBuilder(final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
+        return new JpaSoftwareModuleBuilder(softwareModuleTypeManagement);
     }
 
     /**

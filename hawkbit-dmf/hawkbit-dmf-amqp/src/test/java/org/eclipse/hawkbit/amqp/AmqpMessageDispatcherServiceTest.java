@@ -177,7 +177,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         for (final Artifact artifact : testdataFactory.createArtifacts(module.getId())) {
             receivedList.add(new DbArtifact());
         }
-        module = softwareManagement.findSoftwareModuleById(module.getId()).get();
+        module = softwareModuleManagement.findSoftwareModuleById(module.getId()).get();
         dsA = distributionSetManagement.findDistributionSetById(dsA.getId()).get();
 
         final Action action = createAction(dsA);

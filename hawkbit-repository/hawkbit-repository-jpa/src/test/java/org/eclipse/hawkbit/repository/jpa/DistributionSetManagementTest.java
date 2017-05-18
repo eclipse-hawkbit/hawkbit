@@ -317,7 +317,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                                                 .key("test").name("test").mandatory(Arrays.asList(osType.getId())))
                                         .getKey()));
 
-        final SoftwareModule module = softwareManagement.createSoftwareModule(
+        final SoftwareModule module = softwareModuleManagement.createSoftwareModule(
                 entityFactory.softwareModule().create().name("agent-hub2").version("1.0.5").type(appType.getKey()));
 
         // update data

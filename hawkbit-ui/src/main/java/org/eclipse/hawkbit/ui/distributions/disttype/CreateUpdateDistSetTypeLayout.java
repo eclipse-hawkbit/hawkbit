@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -69,7 +69,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
     private static final String DIST_TYPE_MANDATORY = "mandatory";
     private static final String STAR = " * ";
 
-    private final transient SoftwareModuleManagement softwareManagement;
+    private final transient SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
     private final transient DistributionSetTypeManagement distributionSetTypeManagement;
 
@@ -97,17 +97,17 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
      *            SpPermissionChecker
      * @param uiNotification
      *            UINotification
-     * @param softwareManagement
-     *            SoftwareManagement
+     * @param softwareModuleTypeManagement
+     *            management for {@link SoftwareModuleType}s
      * @param distributionSetTypeManagement
      *            DistributionSetManagement
      */
     public CreateUpdateDistSetTypeLayout(final VaadinMessageSource i18n, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
-            final UINotification uiNotification, final SoftwareModuleManagement softwareManagement,
+            final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement) {
         super(i18n, tagManagement, entityFactory, eventBus, permChecker, uiNotification);
-        this.softwareManagement = softwareManagement;
+        this.softwareModuleTypeManagement = softwareModuleTypeManagement;
         this.distributionSetTypeManagement = distributionSetTypeManagement;
     }
 
@@ -315,7 +315,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
     private void getSourceTableData() {
 
         sourceTableContainer.removeAllItems();
-        final Iterable<SoftwareModuleType> moduleTypeBeans = softwareManagement
+        final Iterable<SoftwareModuleType> moduleTypeBeans = softwareModuleTypeManagement
                 .findSoftwareModuleTypesAll(new PageRequest(0, 1_000));
         Item saveTblitem;
         for (final SoftwareModuleType swTypeTag : moduleTypeBeans) {

@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.artifacts.footer;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
@@ -47,11 +48,13 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     public SMDeleteActionsLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final UIEventBus eventBus, final UINotification notification, final ArtifactUploadState artifactUploadState,
-            final SoftwareModuleManagement softwareManagement, final UploadViewClientCriterion uploadViewClientCriterion) {
+            final SoftwareModuleManagement softwareModuleManagement,
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement,
+            final UploadViewClientCriterion uploadViewClientCriterion) {
         super(i18n, permChecker, eventBus, notification);
         this.artifactUploadState = artifactUploadState;
         this.uploadViewConfirmationWindowLayout = new UploadViewConfirmationWindowLayout(i18n, eventBus,
-                softwareManagement, artifactUploadState);
+                softwareModuleManagement, softwareModuleTypeManagement, artifactUploadState);
         this.uploadViewClientCriterion = uploadViewClientCriterion;
 
         init();

@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
-import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.SoftwareModuleTypeNotInDistributionSetTypeException;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -49,7 +49,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeRestApi {
 
     @Autowired
-    private SoftwareModuleManagement softwareManagement;
+    private SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
     @Autowired
     private DistributionSetTypeManagement distributionSetTypeManagement;
@@ -213,7 +213,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
 
     private SoftwareModuleType findSoftwareModuleTypeWithExceptionIfNotFound(final Long softwareModuleTypeId) {
 
-        return softwareManagement.findSoftwareModuleTypeById(softwareModuleTypeId)
+        return softwareModuleTypeManagement.findSoftwareModuleTypeById(softwareModuleTypeId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, softwareModuleTypeId));
     }
 }

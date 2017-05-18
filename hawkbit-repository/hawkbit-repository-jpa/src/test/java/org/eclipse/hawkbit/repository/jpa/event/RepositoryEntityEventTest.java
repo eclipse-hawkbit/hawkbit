@@ -155,7 +155,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     @Description("Verifies that the software module update event is published when a software module has been updated")
     public void softwareModuleUpdateEventIsPublished() throws InterruptedException {
         final SoftwareModule softwareModule = testdataFactory.createSoftwareModuleApp();
-        softwareManagement
+        softwareModuleManagement
                 .updateSoftwareModule(entityFactory.softwareModule().update(softwareModule.getId()).description("New"));
 
         final SoftwareModuleUpdatedEvent softwareModuleUpdatedEvent = eventListener
@@ -168,7 +168,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     @Description("Verifies that the software module deleted event is published when a software module has been deleted")
     public void softwareModuleDeletedEventIsPublished() throws InterruptedException {
         final SoftwareModule softwareModule = testdataFactory.createSoftwareModuleApp();
-        softwareManagement.deleteSoftwareModule(softwareModule.getId());
+        softwareModuleManagement.deleteSoftwareModule(softwareModule.getId());
 
         final SoftwareModuleDeletedEvent softwareModuleDeletedEvent = eventListener
                 .waitForEvent(SoftwareModuleDeletedEvent.class, 1, TimeUnit.SECONDS);

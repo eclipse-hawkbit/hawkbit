@@ -28,10 +28,11 @@ import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleMetadataFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeFields;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.builder.GenericSoftwareModuleTypeUpdate;
 import org.eclipse.hawkbit.repository.builder.GenericSoftwareModuleUpdate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
@@ -87,7 +88,7 @@ import com.google.common.collect.Sets;
  */
 @Transactional(readOnly = true)
 @Validated
-public class JpaSoftwareManagement implements SoftwareModuleManagement {
+public class JpaSoftwareManagement implements SoftwareModuleManagement, SoftwareModuleTypeManagement {
 
     @Autowired
     private EntityManager entityManager;

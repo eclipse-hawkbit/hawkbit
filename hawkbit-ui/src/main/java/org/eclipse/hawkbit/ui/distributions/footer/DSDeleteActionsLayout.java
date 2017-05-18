@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -68,12 +69,14 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final DistributionSetManagement distributionSetManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement,
-            final SoftwareModuleManagement softwareManagement) {
+            final SoftwareModuleManagement softwareModuleManagement,
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
         super(i18n, permChecker, eventBus, notification);
         this.systemManagement = systemManagement;
         this.manageDistUIState = manageDistUIState;
-        this.distConfirmationWindowLayout = new DistributionsConfirmationWindowLayout(i18n, eventBus, distributionSetManagement,
-                distributionSetTypeManagement, softwareManagement, manageDistUIState);
+        this.distConfirmationWindowLayout = new DistributionsConfirmationWindowLayout(i18n, eventBus,
+                distributionSetManagement, distributionSetTypeManagement, softwareModuleManagement,
+                softwareModuleTypeManagement, manageDistUIState);
         this.distributionsViewClientCriterion = distributionsViewClientCriterion;
         this.distributionSetManagement = distributionSetManagement;
         init();

@@ -510,7 +510,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
         // .createDistributionSetType(entityFactory.distributionSetType().create().key("test123")
         // .name("TestName123").description("Desc123").colour("col"));
 
-        final SoftwareModuleType testSmType = softwareManagement.createSoftwareModuleType(
+        final SoftwareModuleType testSmType = softwareModuleTypeManagement.createSoftwareModuleType(
                 entityFactory.softwareModuleType().create().key("test123").name("TestName123"));
 
         // DST does not exist
@@ -615,7 +615,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
         char character = 'a';
         for (int index = 0; index < amount; index++) {
             final String str = String.valueOf(character);
-            softwareManagement.createSoftwareModule(
+            softwareModuleManagement.createSoftwareModule(
                     entityFactory.softwareModule().create().name(str).description(str).vendor(str).version(str));
             character++;
         }
