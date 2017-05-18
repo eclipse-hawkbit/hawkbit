@@ -87,6 +87,8 @@ public class SystemSecurityContext {
      *            the tenant to act as system code
      * @return the return value of the {@link Callable#call()} method.
      */
+    // The callable API throws a Exception and not a specific one
+    @SuppressWarnings({ "squid:S2221", "squid:S00112" })
     public <T> T runAsSystemAsTenant(final Callable<T> callable, final String tenant) {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         try {
@@ -95,9 +97,8 @@ public class SystemSecurityContext {
                 try {
                     setSystemContext(SecurityContextHolder.getContext());
                     return callable.call();
-                    // The callable API throws a Exception and not a specific
-                    // one
-                } catch (@SuppressWarnings({ "squid:S2221", "squid:S00112" }) final Exception e) {
+
+                } catch (final Exception e) {
                     throw new RuntimeException(e);
                 }
             });
