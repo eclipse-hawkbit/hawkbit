@@ -97,7 +97,7 @@ public class SystemSecurityContext {
                     return callable.call();
                     // The callable API throws a Exception and not a specific
                     // one
-                } catch (@SuppressWarnings("squid:S2221") final Exception e) {
+                } catch (@SuppressWarnings({ "squid:S2221", "squid:S00112" }) final Exception e) {
                     throw new RuntimeException(e);
                 }
             });

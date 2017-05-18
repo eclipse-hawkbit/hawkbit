@@ -41,6 +41,8 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
+import com.google.common.base.Throwables;
+
 /**
  * The Spring-Auto-Configuration implementation for integrating the UAA
  * (https://github.com/cloudfoundry/uaa) as an identity management.
@@ -112,7 +114,7 @@ public class UaaOAuthAutoConfiguration extends WebSecurityConfigurerAdapter {
         try {
             jwtTokenEnhancer.afterPropertiesSet();
         } catch (final Exception e) {
-            throw new RuntimeException(e);
+            throw Throwables.propagate(e);
         }
         return new JwtTokenStore(jwtTokenEnhancer);
     }
