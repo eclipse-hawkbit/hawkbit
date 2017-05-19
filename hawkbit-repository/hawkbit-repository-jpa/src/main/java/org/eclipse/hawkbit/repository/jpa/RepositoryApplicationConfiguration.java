@@ -360,8 +360,13 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    DistributionSetTypeManagement distributionSetTypeManagement() {
-        return new JpaDistributionSetManagement();
+    DistributionSetTypeManagement distributionSetTypeManagement(
+            final DistributionSetTypeRepository distributionSetTypeRepository,
+            final SoftwareModuleTypeRepository softwareModuleTypeRepository,
+            final DistributionSetRepository distributionSetRepository,
+            final VirtualPropertyReplacer virtualPropertyReplacer) {
+        return new JpaDistributionSetTypeManagement(distributionSetTypeRepository, softwareModuleTypeRepository,
+                distributionSetRepository, virtualPropertyReplacer);
     }
 
     /**
@@ -431,25 +436,30 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * {@link JpaSoftwareManagement} bean.
+     * {@link JpaSoftwareModuleManagement} bean.
      *
      * @return a new {@link SoftwareModuleManagement}
      */
     @Bean
     @ConditionalOnMissingBean
     SoftwareModuleManagement softwareModuleManagement() {
-        return new JpaSoftwareManagement();
+        return new JpaSoftwareModuleManagement();
     }
 
     /**
-     * {@link JpaSoftwareManagement} bean.
+     * {@link JpaSoftwareModuleManagement} bean.
      *
      * @return a new {@link SoftwareModuleManagement}
      */
     @Bean
     @ConditionalOnMissingBean
-    SoftwareModuleTypeManagement softwareModuleTypeManagement() {
-        return new JpaSoftwareManagement();
+    SoftwareModuleTypeManagement softwareModuleTypeManagement(
+            final DistributionSetTypeRepository distributionSetTypeRepository,
+            final SoftwareModuleTypeRepository softwareModuleTypeRepository,
+            final VirtualPropertyReplacer virtualPropertyReplacer,
+            final SoftwareModuleRepository softwareModuleRepository) {
+        return new JpaSoftwareModuleTypeManagement(distributionSetTypeRepository, softwareModuleTypeRepository,
+                virtualPropertyReplacer, softwareModuleRepository);
     }
 
     @Bean

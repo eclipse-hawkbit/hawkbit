@@ -31,25 +31,18 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleMetadataFields;
-import org.eclipse.hawkbit.repository.SoftwareModuleTypeFields;
-import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
-import org.eclipse.hawkbit.repository.builder.GenericSoftwareModuleTypeUpdate;
 import org.eclipse.hawkbit.repository.builder.GenericSoftwareModuleUpdate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeUpdate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleCreate;
-import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleTypeCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata_;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule_;
 import org.eclipse.hawkbit.repository.jpa.model.SwMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
@@ -88,16 +81,13 @@ import com.google.common.collect.Sets;
  */
 @Transactional(readOnly = true)
 @Validated
-public class JpaSoftwareManagement implements SoftwareModuleManagement, SoftwareModuleTypeManagement {
+public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     @Autowired
     private EntityManager entityManager;
 
     @Autowired
     private DistributionSetRepository distributionSetRepository;
-
-    @Autowired
-    private DistributionSetTypeRepository distributionSetTypeRepository;
 
     @Autowired
     private SoftwareModuleRepository softwareModuleRepository;
@@ -134,22 +124,6 @@ public class JpaSoftwareManagement implements SoftwareModuleManagement, Software
         update.getVendor().ifPresent(module::setVendor);
 
         return softwareModuleRepository.save(module);
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public SoftwareModuleType updateSoftwareModuleType(final SoftwareModuleTypeUpdate u) {
-        final GenericSoftwareModuleTypeUpdate update = (GenericSoftwareModuleTypeUpdate) u;
-
-        final JpaSoftwareModuleType type = (JpaSoftwareModuleType) findSoftwareModuleTypeById(update.getId())
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, update.getId()));
-
-        update.getDescription().ifPresent(type::setDescription);
-        update.getColour().ifPresent(type::setColour);
-
-        return softwareModuleTypeRepository.save(type);
     }
 
     @Override
@@ -307,20 +281,6 @@ public class JpaSoftwareManagement implements SoftwareModuleManagement, Software
     }
 
     @Override
-    public Page<SoftwareModuleType> findSoftwareModuleTypesAll(final String rsqlParam, final Pageable pageable) {
-
-        final Specification<JpaSoftwareModuleType> spec = RSQLUtility.parse(rsqlParam, SoftwareModuleTypeFields.class,
-                virtualPropertyReplacer);
-
-        return convertSmTPage(softwareModuleTypeRepository.findAll(spec, pageable), pageable);
-    }
-
-    private static Page<SoftwareModuleType> convertSmTPage(final Page<JpaSoftwareModuleType> findAll,
-            final Pageable pageable) {
-        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
-    }
-
-    @Override
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public List<SoftwareModule> findSoftwareModulesById(final Collection<Long> ids) {
         return Collections.unmodifiableList(softwareModuleRepository.findByIdIn(ids));
@@ -469,58 +429,6 @@ public class JpaSoftwareManagement implements SoftwareModuleManagement, Software
         }
 
         return countSwModuleByCriteriaAPI(specList);
-    }
-
-    @Override
-    public Page<SoftwareModuleType> findSoftwareModuleTypesAll(final Pageable pageable) {
-        return softwareModuleTypeRepository.findByDeleted(pageable, false);
-    }
-
-    @Override
-    public Long countSoftwareModuleTypesAll() {
-        return softwareModuleTypeRepository.countByDeleted(false);
-    }
-
-    @Override
-    public Optional<SoftwareModuleType> findSoftwareModuleTypeByKey(final String key) {
-        return softwareModuleTypeRepository.findByKey(key);
-    }
-
-    @Override
-    public Optional<SoftwareModuleType> findSoftwareModuleTypeById(final Long smTypeId) {
-        return Optional.ofNullable(softwareModuleTypeRepository.findOne(smTypeId));
-    }
-
-    @Override
-    public Optional<SoftwareModuleType> findSoftwareModuleTypeByName(final String name) {
-        return softwareModuleTypeRepository.findByName(name);
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public SoftwareModuleType createSoftwareModuleType(final SoftwareModuleTypeCreate c) {
-        final JpaSoftwareModuleTypeCreate create = (JpaSoftwareModuleTypeCreate) c;
-
-        return softwareModuleTypeRepository.save(create.build());
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void deleteSoftwareModuleType(final Long typeId) {
-        final JpaSoftwareModuleType toDelete = softwareModuleTypeRepository.findById(typeId)
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, typeId));
-
-        if (softwareModuleRepository.countByType(toDelete) > 0
-                || distributionSetTypeRepository.countByElementsSmType(toDelete) > 0) {
-            toDelete.setDeleted(true);
-            softwareModuleTypeRepository.save(toDelete);
-        } else {
-            softwareModuleTypeRepository.delete(toDelete);
-        }
     }
 
     @Override
@@ -684,14 +592,6 @@ public class JpaSoftwareManagement implements SoftwareModuleManagement, Software
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteSoftwareModule(final Long moduleId) {
         deleteSoftwareModules(Sets.newHashSet(moduleId));
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public List<SoftwareModuleType> createSoftwareModuleType(final Collection<SoftwareModuleTypeCreate> creates) {
-        return creates.stream().map(this::createSoftwareModuleType).collect(Collectors.toList());
     }
 
     @Override
