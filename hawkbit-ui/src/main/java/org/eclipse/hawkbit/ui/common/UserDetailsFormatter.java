@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.common;
 import java.util.Collections;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.im.authentication.UserPrincipal;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
@@ -20,7 +21,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.util.StringUtils;
 
 import com.vaadin.server.VaadinService;
 
@@ -123,14 +123,13 @@ public final class UserDetailsFormatter {
 
         final UserPrincipal userPrincipal = (UserPrincipal) userDetails;
 
-        String firstname = userPrincipal.getFirstname() != null ? userPrincipal.getFirstname() : "";
+        String firstname = StringUtils.defaultIfEmpty(userPrincipal.getFirstname(), "");
 
         if (!StringUtils.isEmpty(firstname)) {
             firstname += DETAIL_SEPERATOR;
         }
 
-        final String firstAndLastname = firstname
-                + (userPrincipal.getLastname() != null ? userPrincipal.getLastname() : "");
+        final String firstAndLastname = firstname + StringUtils.defaultIfEmpty(userPrincipal.getLastname(), "");
 
         final String trimmedUsername = trimAndFormatDetail(firstAndLastname, expectedNameLength);
 
@@ -177,9 +176,9 @@ public final class UserDetailsFormatter {
     }
 
     private static String trimAndFormatDetail(final String formatString, final int expectedDetailLength) {
-        final String detail = formatString != null ? formatString : "";
-        final String trimmedDetail = detail.substring(0, expectedDetailLength);
-        if (detail.length() > expectedDetailLength) {
+        final String detail = StringUtils.defaultIfEmpty(formatString, "");
+        final String trimmedDetail = StringUtils.substring(detail, 0, expectedDetailLength);
+        if (StringUtils.length(detail) > expectedDetailLength) {
             return trimmedDetail + TRIM_APPENDIX;
         }
         return trimmedDetail;
