@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public enum ActionStatus {
+public enum DmfActionStatus {
     /**
      * Action requests download by this target which has now started.
      */

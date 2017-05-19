@@ -17,9 +17,9 @@ import java.util.List;
 import org.eclipse.hawkbit.amqp.AmqpProperties;
 import org.eclipse.hawkbit.amqp.DmfApiConfiguration;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
-import org.eclipse.hawkbit.dmf.json.model.DownloadResponse;
-import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
-import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken.FileResource;
+import org.eclipse.hawkbit.dmf.json.model.DmfDownloadResponse;
+import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken;
+import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.rabbitmq.test.AbstractAmqpIntegrationTest;
 import org.eclipse.hawkbit.rabbitmq.test.AmqpTestConfiguration;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
@@ -82,7 +82,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     @Test
     @Description("Tenant in the message is null. This message is invalid and should not be requeued. Additional the receive message is null")
     public void securityTokenTenantIsNull() {
-        final TenantSecurityToken securityToken = createTenantSecurityToken(null, TARGET,
+        final DmfTenantSecurityToken securityToken = createTenantSecurityToken(null, TARGET,
                 FileResource.createFileResourceBySha1(TARGET_SECRUITY_TOKEN));
         final Message createAndSendMessage = sendAndReceiveAuthenticationMessage(securityToken);
         assertThat(createAndSendMessage).isNull();
@@ -93,7 +93,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     @Description("Target in the message is null.This message is invalid and should not requeued. Additional the receive message is null")
     public void securityTokenFileResourceIsNull() {
         enableAnonymousAuthentification();
-        final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET, null);
+        final DmfTenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET, null);
         final Message returnMessage = sendAndReceiveAuthenticationMessage(securityToken);
         verifyResult(returnMessage, HttpStatus.NOT_FOUND, null);
     }
@@ -103,7 +103,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     public void loginFailedBadCredentials() {
         tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED,
                 false);
-        final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
+        final DmfTenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
                 FileResource.createFileResourceBySha1(TARGET_SECRUITY_TOKEN));
         final Message createAndSendMessage = sendAndReceiveAuthenticationMessage(securityToken);
 
@@ -115,7 +115,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     @Description("Verify that the receive message contains a 404 code,if the artifact could not found")
     public void fileResourceGetSha1InSecurityTokenIsNull() {
         enableAnonymousAuthentification();
-        final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
+        final DmfTenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
                 FileResource.createFileResourceBySha1(null));
 
         final Message returnMessage = sendAndReceiveAuthenticationMessage(securityToken);
@@ -132,7 +132,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
         final DistributionSet distributionSet = createDistributionSet();
         final List<Artifact> artifacts = createArtifacts(distributionSet);
         final String sha1Hash = artifacts.get(0).getSha1Hash();
-        final TenantSecurityToken securityToken = createTenantSecurityToken(target.getTenant(), target.getId(), null,
+        final DmfTenantSecurityToken securityToken = createTenantSecurityToken(target.getTenant(), target.getId(), null,
                 FileResource.createFileResourceBySha1(sha1Hash));
 
         final Message returnMessage = sendAndReceiveAuthenticationMessage(securityToken);
@@ -144,7 +144,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     @Description("Verify that the receive message contains a 404 code, if there is no artifact for the given sha1")
     public void artifactForFileResourceSHA1NotFound() {
         enableAnonymousAuthentification();
-        final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
+        final DmfTenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
                 FileResource.createFileResourceBySha1(TARGET_SECRUITY_TOKEN));
 
         final Message returnMessage = sendAndReceiveAuthenticationMessage(securityToken);
@@ -160,7 +160,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
         final DistributionSet distributionSet = createDistributionSet();
         final List<Artifact> artifacts = createArtifacts(distributionSet);
         final String sha1Hash = artifacts.get(0).getSha1Hash();
-        final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
+        final DmfTenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
                 FileResource.createFileResourceBySha1(sha1Hash));
 
         final Message returnMessage = sendAndReceiveAuthenticationMessage(securityToken);
@@ -176,7 +176,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
 
         final DistributionSet distributionSet = createDistributionSet();
         final List<Artifact> artifacts = createArtifacts(distributionSet);
-        final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
+        final DmfTenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
                 FileResource.createFileResourceBySha1(artifacts.get(0).getSha1Hash()));
 
         final Message returnMessage = sendAndReceiveAuthenticationMessage(securityToken);
@@ -193,7 +193,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
         final DistributionSet distributionSet = createDistributionSet();
         final List<Artifact> artifacts = createArtifacts(distributionSet);
         final Artifact artifact = artifacts.get(0);
-        final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
+        final DmfTenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
                 FileResource.createFileResourceBySha1(artifact.getSha1Hash()));
 
         deploymentManagement.assignDistributionSet(distributionSet.getId(),
@@ -212,7 +212,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
         final DistributionSet distributionSet = createDistributionSet();
         final List<Artifact> artifacts = createArtifacts(distributionSet);
         final Artifact artifact = artifacts.get(0);
-        final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, target.getId(), null,
+        final DmfTenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, target.getId(), null,
                 FileResource.createFileResourceBySha1(artifact.getSha1Hash()));
 
         deploymentManagement.assignDistributionSet(distributionSet.getId(),
@@ -230,7 +230,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
         final DistributionSet distributionSet = createDistributionSet();
         final List<Artifact> artifacts = createArtifacts(distributionSet);
         final Artifact artifact = artifacts.get(0);
-        final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, null, null,
+        final DmfTenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, null, null,
                 FileResource.createFileResourceBySha1(artifact.getSha1Hash()));
 
         final Message returnMessage = sendAndReceiveAuthenticationMessage(securityToken);
@@ -246,7 +246,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
         final DistributionSet distributionSet = createDistributionSet();
         final List<Artifact> artifacts = createArtifacts(distributionSet);
         final Artifact artifact = artifacts.get(0);
-        final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
+        final DmfTenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
                 FileResource.createFileResourceBySha1(artifact.getSha1Hash()));
 
         deploymentManagement.assignDistributionSet(distributionSet.getId(),
@@ -261,7 +261,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     @Description("Verify that the receive message contains a 404, if there is no artifact to the given filename")
     public void artifactForFileResourceFileNameNotFound() {
         enableAnonymousAuthentification();
-        final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
+        final DmfTenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
                 FileResource.createFileResourceByFilename("Test.txt"));
 
         final Message returnMessage = sendAndReceiveAuthenticationMessage(securityToken);
@@ -277,7 +277,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
 
         final DistributionSet distributionSet = createDistributionSet();
         final List<Artifact> artifacts = createArtifacts(distributionSet);
-        final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
+        final DmfTenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
                 FileResource.createFileResourceByFilename(artifacts.get(0).getFilename()));
 
         final Message returnMessage = sendAndReceiveAuthenticationMessage(securityToken);
@@ -293,7 +293,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
         final DistributionSet distributionSet = createDistributionSet();
         final List<Artifact> artifacts = createArtifacts(distributionSet);
         final FileResource fileResource = FileResource.createFileResourceByArtifactId(artifacts.get(0).getId());
-        final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET, fileResource);
+        final DmfTenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET, fileResource);
 
         final Message returnMessage = sendAndReceiveAuthenticationMessage(securityToken);
         verifyResult(returnMessage, HttpStatus.NOT_FOUND, "Artifact for resource FileResource [sha1=null, artifactId="
@@ -310,7 +310,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
         final List<Artifact> artifacts = createArtifacts(distributionSet);
         final Artifact artifact = artifacts.get(0);
         final FileResource fileResource = FileResource.createFileResourceByArtifactId(artifact.getId());
-        final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET, fileResource);
+        final DmfTenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET, fileResource);
 
         deploymentManagement.assignDistributionSet(distributionSet.getId(),
                 Arrays.asList(new TargetWithActionType(TARGET)));
@@ -324,7 +324,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     @Description("Verify that the receive message contains a 404, if there is no artifact to the given softwareModuleFilename")
     public void artifactForFileResourceSoftwareModuleFilenameNotFound() {
         enableAnonymousAuthentification();
-        final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
+        final DmfTenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
                 FileResource.softwareModuleFilename(1L, "Test.txt"));
 
         final Message returnMessage = sendAndReceiveAuthenticationMessage(securityToken);
@@ -345,7 +345,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
 
         final FileResource fileResource = FileResource.softwareModuleFilename(softwareModule.getId(),
                 softwareModule.getArtifact(artifact.getId()).get().getFilename());
-        final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET, fileResource);
+        final DmfTenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET, fileResource);
 
         final Message returnMessage = sendAndReceiveAuthenticationMessage(securityToken);
         verifyResult(returnMessage, HttpStatus.NOT_FOUND,
@@ -366,7 +366,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
 
         final FileResource fileResource = FileResource.softwareModuleFilename(softwareModule.getId(),
                 softwareModule.getArtifact(artifact.getId()).get().getFilename());
-        final TenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET, fileResource);
+        final DmfTenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET, fileResource);
 
         deploymentManagement.assignDistributionSet(distributionSet.getId(),
                 Arrays.asList(new TargetWithActionType(TARGET)));
@@ -377,7 +377,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     }
 
     private void verifyOkResult(Message returnMessage, Artifact artifact) {
-        final DownloadResponse convertedMessage = verifyResult(returnMessage, HttpStatus.OK, null);
+        final DmfDownloadResponse convertedMessage = verifyResult(returnMessage, HttpStatus.OK, null);
         assertThat(convertedMessage.getDownloadUrl()).isNotNull();
         assertThat(convertedMessage.getArtifact()).isNotNull();
         assertThat(convertedMessage.getArtifact().getHashes().getSha1()).isEqualTo(artifact.getSha1Hash());
@@ -403,18 +403,18 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
                 entityFactory.target().create().controllerId(controllerId).securityToken(TARGET_SECRUITY_TOKEN));
     }
 
-    private TenantSecurityToken createTenantSecurityToken(final String tenant, final String controllerId,
+    private DmfTenantSecurityToken createTenantSecurityToken(final String tenant, final String controllerId,
             final FileResource fileResource) {
-        final TenantSecurityToken tenantSecurityToken = new TenantSecurityToken(tenant, controllerId, fileResource);
-        tenantSecurityToken.putHeader(TenantSecurityToken.AUTHORIZATION_HEADER, TARGET_TOKEN_HEADER);
+        final DmfTenantSecurityToken tenantSecurityToken = new DmfTenantSecurityToken(tenant, controllerId, fileResource);
+        tenantSecurityToken.putHeader(DmfTenantSecurityToken.AUTHORIZATION_HEADER, TARGET_TOKEN_HEADER);
         return tenantSecurityToken;
     }
 
-    private TenantSecurityToken createTenantSecurityToken(final String tenant, final Long targetId,
+    private DmfTenantSecurityToken createTenantSecurityToken(final String tenant, final Long targetId,
             final String controllerId, final FileResource fileResource) {
-        final TenantSecurityToken tenantSecurityToken = new TenantSecurityToken(tenant, null, controllerId, targetId,
+        final DmfTenantSecurityToken tenantSecurityToken = new DmfTenantSecurityToken(tenant, null, controllerId, targetId,
                 fileResource);
-        tenantSecurityToken.putHeader(TenantSecurityToken.AUTHORIZATION_HEADER, TARGET_TOKEN_HEADER);
+        tenantSecurityToken.putHeader(DmfTenantSecurityToken.AUTHORIZATION_HEADER, TARGET_TOKEN_HEADER);
         return tenantSecurityToken;
     }
 
@@ -430,9 +430,9 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
         return artifacts;
     }
 
-    private DownloadResponse verifyResult(final Message returnMessage, final HttpStatus expectedStatus,
+    private DmfDownloadResponse verifyResult(final Message returnMessage, final HttpStatus expectedStatus,
             final String expectedMessage) {
-        final DownloadResponse convertedMessage = (DownloadResponse) getDmfClient().getMessageConverter()
+        final DmfDownloadResponse convertedMessage = (DmfDownloadResponse) getDmfClient().getMessageConverter()
                 .fromMessage(returnMessage);
         assertThat(convertedMessage.getResponseCode()).isEqualTo(expectedStatus.value());
 
@@ -442,7 +442,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
         return convertedMessage;
     }
 
-    private Message sendAndReceiveAuthenticationMessage(final TenantSecurityToken securityToken) {
+    private Message sendAndReceiveAuthenticationMessage(final DmfTenantSecurityToken securityToken) {
         return getDmfClient().sendAndReceive(createMessage(securityToken, new MessageProperties()));
     }
 

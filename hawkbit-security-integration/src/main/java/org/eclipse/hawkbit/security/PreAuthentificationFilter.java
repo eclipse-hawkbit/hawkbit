@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.security;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
+import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -27,7 +27,7 @@ public interface PreAuthentificationFilter {
      *            the secruity info
      * @return <true> is enabled <false> diabled
      */
-    boolean isEnable(TenantSecurityToken secruityToken);
+    boolean isEnable(DmfTenantSecurityToken secruityToken);
 
     /**
      * Extract the principal information from the current secruityToken.
@@ -36,7 +36,7 @@ public interface PreAuthentificationFilter {
      *            the secruityToken
      * @return the extracted tenant and controller id
      */
-    HeaderAuthentication getPreAuthenticatedPrincipal(TenantSecurityToken secruityToken);
+    HeaderAuthentication getPreAuthenticatedPrincipal(DmfTenantSecurityToken secruityToken);
 
     /**
      * Extract the principal credentials from the current secruityToken.
@@ -45,7 +45,7 @@ public interface PreAuthentificationFilter {
      *            the secruityToken
      * @return the extracted tenant and controller id
      */
-    Object getPreAuthenticatedCredentials(TenantSecurityToken secruityToken);
+    Object getPreAuthenticatedCredentials(DmfTenantSecurityToken secruityToken);
 
     /**
      * Allows to add additional authorities to the successful authenticated

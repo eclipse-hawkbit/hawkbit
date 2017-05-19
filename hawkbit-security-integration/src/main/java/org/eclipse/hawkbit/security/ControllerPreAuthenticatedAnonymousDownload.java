@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.security;
 
 import java.util.Collection;
 
-import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
+import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -48,12 +48,12 @@ public class ControllerPreAuthenticatedAnonymousDownload extends AbstractControl
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedPrincipal(final TenantSecurityToken secruityToken) {
+    public HeaderAuthentication getPreAuthenticatedPrincipal(final DmfTenantSecurityToken secruityToken) {
         return new HeaderAuthentication(secruityToken.getControllerId(), secruityToken.getControllerId());
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedCredentials(final TenantSecurityToken secruityToken) {
+    public HeaderAuthentication getPreAuthenticatedCredentials(final DmfTenantSecurityToken secruityToken) {
         return new HeaderAuthentication(secruityToken.getControllerId(), secruityToken.getControllerId());
     }
 

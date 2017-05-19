@@ -18,14 +18,15 @@ import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.eclipse.hawkbit.cache.DownloadArtifactCache;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.cache.DownloadType;
-import org.eclipse.hawkbit.dmf.json.model.Artifact;
-import org.eclipse.hawkbit.dmf.json.model.ArtifactHash;
-import org.eclipse.hawkbit.dmf.json.model.DownloadResponse;
-import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
-import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken.FileResource;
+import org.eclipse.hawkbit.dmf.json.model.DmfArtifact;
+import org.eclipse.hawkbit.dmf.json.model.DmfArtifactHash;
+import org.eclipse.hawkbit.dmf.json.model.DmfDownloadResponse;
+import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken;
+import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.model.Artifact;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
@@ -120,7 +121,7 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
      *            of the artifact to verify if the given target is allowed to
      *            download it
      */
-    private void checkIfArtifactIsAssignedToTarget(final TenantSecurityToken secruityToken, final String sha1Hash) {
+    private void checkIfArtifactIsAssignedToTarget(final DmfTenantSecurityToken secruityToken, final String sha1Hash) {
 
         if (secruityToken.getControllerId() != null) {
             checkByControllerId(sha1Hash, secruityToken.getControllerId());
@@ -154,8 +155,7 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
         LOG.info("download security check for target {} and artifact {} granted", controllerId, sha1Hash);
     }
 
-    private Optional<org.eclipse.hawkbit.repository.model.Artifact> findArtifactByFileResource(
-            final FileResource fileResource) {
+    private Optional<Artifact> findArtifactByFileResource(final FileResource fileResource) {
 
         if (fileResource == null) {
             return Optional.empty();
@@ -182,29 +182,28 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
         return Optional.empty();
     }
 
-    private static Artifact convertDbArtifact(final DbArtifact dbArtifact) {
-        final Artifact artifact = new Artifact();
+    private static DmfArtifact convertDbArtifact(final DbArtifact dbArtifact) {
+        final DmfArtifact artifact = new DmfArtifact();
         artifact.setSize(dbArtifact.getSize());
         final DbArtifactHash dbArtifactHash = dbArtifact.getHashes();
-        artifact.setHashes(new ArtifactHash(dbArtifactHash.getSha1(), dbArtifactHash.getMd5()));
+        artifact.setHashes(new DmfArtifactHash(dbArtifactHash.getSha1(), dbArtifactHash.getMd5()));
         return artifact;
     }
 
     private Message handleAuthenticationMessage(final Message message) {
-        final DownloadResponse authentificationResponse = new DownloadResponse();
-        final TenantSecurityToken secruityToken = convertMessage(message, TenantSecurityToken.class);
+        final DmfDownloadResponse authentificationResponse = new DmfDownloadResponse();
+        final DmfTenantSecurityToken secruityToken = convertMessage(message, DmfTenantSecurityToken.class);
         final FileResource fileResource = secruityToken.getFileResource();
         try {
             SecurityContextHolder.getContext().setAuthentication(authenticationManager.doAuthenticate(secruityToken));
 
-            final String sha1Hash = findArtifactByFileResource(fileResource)
-                    .map(org.eclipse.hawkbit.repository.model.Artifact::getSha1Hash)
-                    .orElseThrow(() -> new EntityNotFoundException());
+            final String sha1Hash = findArtifactByFileResource(fileResource).map(Artifact::getSha1Hash)
+                    .orElseThrow(EntityNotFoundException::new);
 
             checkIfArtifactIsAssignedToTarget(secruityToken, sha1Hash);
 
-            final Artifact artifact = convertDbArtifact(artifactManagement.loadArtifactBinary(sha1Hash).orElseThrow(
-                    () -> new EntityNotFoundException(org.eclipse.hawkbit.repository.model.Artifact.class, sha1Hash)));
+            final DmfArtifact artifact = convertDbArtifact(artifactManagement.loadArtifactBinary(sha1Hash)
+                    .orElseThrow(() -> new EntityNotFoundException(Artifact.class, sha1Hash)));
 
             authentificationResponse.setArtifact(artifact);
             final String downloadId = UUID.randomUUID().toString();
