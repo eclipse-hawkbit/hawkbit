@@ -31,8 +31,8 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.eclipse.hawkbit.dmf.json.model.Artifact;
-import org.eclipse.hawkbit.dmf.json.model.SoftwareModule;
+import org.eclipse.hawkbit.dmf.json.model.DmfArtifact;
+import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
 import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice.Protocol;
 import org.eclipse.hawkbit.simulator.UpdateStatus.ResponseStatus;
 import org.eclipse.hawkbit.simulator.amqp.SpSenderService;
@@ -94,7 +94,7 @@ public class DeviceSimulatorUpdater {
      *            process has been finished
      */
     public void startUpdate(final String tenant, final String id, final long actionId, final String swVersion,
-            final List<SoftwareModule> modules, final String targetSecurityToken, final UpdaterCallback callback) {
+            final List<DmfSoftwareModule> modules, final String targetSecurityToken, final UpdaterCallback callback) {
         AbstractSimulatedDevice device = repository.get(tenant, id);
 
         // plug and play - non existing device will be auto created
@@ -109,7 +109,7 @@ public class DeviceSimulatorUpdater {
             device.setSwversion(swVersion);
         } else {
             device.setSwversion(
-                    modules.stream().map(SoftwareModule::getModuleVersion).collect(Collectors.joining(", ")));
+                    modules.stream().map(DmfSoftwareModule::getModuleVersion).collect(Collectors.joining(", ")));
         }
         device.setTargetSecurityToken(targetSecurityToken);
         eventbus.post(new InitUpdate(device));
@@ -134,11 +134,11 @@ public class DeviceSimulatorUpdater {
         private final EventBus eventbus;
         private final ScheduledExecutorService threadPool;
         private final UpdaterCallback callback;
-        private final List<SoftwareModule> modules;
+        private final List<DmfSoftwareModule> modules;
 
         private DeviceSimulatorUpdateThread(final AbstractSimulatedDevice device, final SpSenderService spSenderService,
                 final long actionId, final EventBus eventbus, final ScheduledExecutorService threadPool,
-                final UpdaterCallback callback, final List<SoftwareModule> modules) {
+                final UpdaterCallback callback, final List<DmfSoftwareModule> modules) {
             this.device = device;
             this.spSenderService = spSenderService;
             this.actionId = actionId;
@@ -204,7 +204,7 @@ public class DeviceSimulatorUpdater {
         }
 
         private static void handleArtifact(final String targetToken, final List<UpdateStatus> status,
-                final Artifact artifact) {
+                final DmfArtifact artifact) {
 
             if (artifact.getUrls().containsKey("HTTPS")) {
                 status.add(downloadUrl(artifact.getUrls().get("HTTPS"), targetToken, artifact.getHashes().getSha1(),

@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DownloadAndUpdateRequest {
+public class DmfDownloadAndUpdateRequest {
     @JsonProperty
     private Long actionId;
 
@@ -31,7 +31,7 @@ public class DownloadAndUpdateRequest {
     private String targetSecurityToken;
 
     @JsonProperty
-    private List<SoftwareModule> softwareModules;
+    private List<DmfSoftwareModule> softwareModules;
 
     public Long getActionId() {
         return actionId;
@@ -49,7 +49,7 @@ public class DownloadAndUpdateRequest {
         this.targetSecurityToken = targetSecurityToken;
     }
 
-    public List<SoftwareModule> getSoftwareModules() {
+    public List<DmfSoftwareModule> getSoftwareModules() {
         if (softwareModules == null) {
             return Collections.emptyList();
         }
@@ -63,7 +63,7 @@ public class DownloadAndUpdateRequest {
      * @param createSoftwareModule
      *            the module
      */
-    public void addSoftwareModule(final SoftwareModule createSoftwareModule) {
+    public void addSoftwareModule(final DmfSoftwareModule createSoftwareModule) {
         if (softwareModules == null) {
             softwareModules = new ArrayList<>();
         }

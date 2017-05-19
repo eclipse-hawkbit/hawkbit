@@ -40,8 +40,7 @@ public class HawkbitSecurityProperties {
         private String blacklist = "";
 
         /**
-         * Name of the http header from which the remote ip is extracted for DDI
-         * connected clients.
+         * Name of the http header from which the remote ip is extracted.
          */
         private String remoteIpHeader = "X-Forwarded-For";
 
@@ -98,6 +97,11 @@ public class HawkbitSecurityProperties {
         private int maxRolloutGroupsPerRollout = 500;
 
         private final Filter filter = new Filter();
+        private final Filter uiFilter = new Filter();
+
+        public Filter getUiFilter() {
+            return uiFilter;
+        }
 
         public Filter getFilter() {
             return filter;

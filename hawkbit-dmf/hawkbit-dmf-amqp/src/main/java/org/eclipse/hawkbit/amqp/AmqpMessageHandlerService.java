@@ -18,8 +18,8 @@ import java.util.UUID;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
-import org.eclipse.hawkbit.dmf.json.model.ActionUpdateStatus;
-import org.eclipse.hawkbit.dmf.json.model.AttributeUpdate;
+import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
+import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -222,7 +222,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private void updateAttributes(final Message message) {
-        final AttributeUpdate attributeUpdate = convertMessage(message, AttributeUpdate.class);
+        final DmfAttributeUpdate attributeUpdate = convertMessage(message, DmfAttributeUpdate.class);
         final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, "ThingId is null");
 
         controllerManagement.updateControllerAttributes(thingId, attributeUpdate.getAttributes());
@@ -235,7 +235,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      *            the object form the ampq message
      */
     private void updateActionStatus(final Message message) {
-        final ActionUpdateStatus actionUpdateStatus = convertMessage(message, ActionUpdateStatus.class);
+        final DmfActionUpdateStatus actionUpdateStatus = convertMessage(message, DmfActionUpdateStatus.class);
         final Action action = checkActionExist(message, actionUpdateStatus);
 
         final List<String> messages = actionUpdateStatus.getMessage();
@@ -257,7 +257,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
     }
 
-    private Status mapStatus(final Message message, final ActionUpdateStatus actionUpdateStatus, final Action action) {
+    private Status mapStatus(final Message message, final DmfActionUpdateStatus actionUpdateStatus, final Action action) {
         Status status = null;
         switch (actionUpdateStatus.getActionStatus()) {
         case DOWNLOAD:
@@ -315,7 +315,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     // Exception squid:S3655 - logAndThrowMessageError throws exception, i.e.
     // get will not be called
     @SuppressWarnings("squid:S3655")
-    private Action checkActionExist(final Message message, final ActionUpdateStatus actionUpdateStatus) {
+    private Action checkActionExist(final Message message, final DmfActionUpdateStatus actionUpdateStatus) {
         final Long actionId = actionUpdateStatus.getActionId();
 
         LOG.debug("Target notifies intermediate about action {} with status {}.", actionId,

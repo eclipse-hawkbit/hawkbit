@@ -19,9 +19,9 @@ import org.eclipse.hawkbit.amqp.AmqpProperties;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
-import org.eclipse.hawkbit.dmf.json.model.ActionStatus;
-import org.eclipse.hawkbit.dmf.json.model.ActionUpdateStatus;
-import org.eclipse.hawkbit.dmf.json.model.AttributeUpdate;
+import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
+import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
+import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
@@ -329,7 +329,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     @Description("Tests invalid topic message header. This message should forwarded to the deadletter queue")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void updateActionStatusWithInvalidActionId() {
-        final ActionUpdateStatus actionUpdateStatus = new ActionUpdateStatus(1L, ActionStatus.RUNNING);
+        final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(1L, DmfActionStatus.RUNNING);
         final Message eventMessage = createEventMessage(TENANT_EXIST, EventTopic.UPDATE_ACTION_STATUS,
                 actionUpdateStatus);
         getDmfClient().send(eventMessage);
@@ -345,7 +345,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 2), @Expect(type = TargetPollEvent.class, count = 1) })
     public void finishActionStatus() {
-        registerTargetAndSendAndAssertUpdateActionStatus(ActionStatus.FINISHED, Status.FINISHED);
+        registerTargetAndSendAndAssertUpdateActionStatus(DmfActionStatus.FINISHED, Status.FINISHED);
     }
 
     @Test
@@ -357,7 +357,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
     public void runningActionStatus() {
-        registerTargetAndSendAndAssertUpdateActionStatus(ActionStatus.RUNNING, Status.RUNNING);
+        registerTargetAndSendAndAssertUpdateActionStatus(DmfActionStatus.RUNNING, Status.RUNNING);
     }
 
     @Test
@@ -369,7 +369,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
     public void downloadActionStatus() {
-        registerTargetAndSendAndAssertUpdateActionStatus(ActionStatus.DOWNLOAD, Status.DOWNLOAD);
+        registerTargetAndSendAndAssertUpdateActionStatus(DmfActionStatus.DOWNLOAD, Status.DOWNLOAD);
     }
 
     @Test
@@ -381,7 +381,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 2), @Expect(type = TargetPollEvent.class, count = 1) })
     public void errorActionStatus() {
-        registerTargetAndSendAndAssertUpdateActionStatus(ActionStatus.ERROR, Status.ERROR);
+        registerTargetAndSendAndAssertUpdateActionStatus(DmfActionStatus.ERROR, Status.ERROR);
     }
 
     @Test
@@ -393,7 +393,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
     public void warningActionStatus() {
-        registerTargetAndSendAndAssertUpdateActionStatus(ActionStatus.WARNING, Status.WARNING);
+        registerTargetAndSendAndAssertUpdateActionStatus(DmfActionStatus.WARNING, Status.WARNING);
     }
 
     @Test
@@ -405,7 +405,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
     public void retrievedActionStatus() {
-        registerTargetAndSendAndAssertUpdateActionStatus(ActionStatus.RETRIEVED, Status.RETRIEVED);
+        registerTargetAndSendAndAssertUpdateActionStatus(DmfActionStatus.RETRIEVED, Status.RETRIEVED);
     }
 
     @Test
@@ -417,7 +417,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
     public void cancelNotAllowActionStatus() {
-        registerTargetAndSendActionStatus(ActionStatus.CANCELED);
+        registerTargetAndSendActionStatus(DmfActionStatus.CANCELED);
         verifyOneDeadLetterMessage();
     }
 
@@ -484,7 +484,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         final Long actionId = registerTargetAndCancelActionId();
         final Long actionNotExist = actionId + 1;
 
-        sendActionUpdateStatus(new ActionUpdateStatus(actionNotExist, ActionStatus.CANCELED));
+        sendActionUpdateStatus(new DmfActionUpdateStatus(actionNotExist, DmfActionStatus.CANCELED));
         verifyOneDeadLetterMessage();
     }
 
@@ -497,7 +497,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
     public void canceledRejectedNotAllowActionStatus() {
-        registerTargetAndSendActionStatus(ActionStatus.CANCEL_REJECTED);
+        registerTargetAndSendActionStatus(DmfActionStatus.CANCEL_REJECTED);
         verifyOneDeadLetterMessage();
     }
 
@@ -513,7 +513,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     public void canceledRejectedActionStatus() {
         final Long actionId = registerTargetAndCancelActionId();
 
-        sendActionUpdateStatus(new ActionUpdateStatus(actionId, ActionStatus.CANCEL_REJECTED));
+        sendActionUpdateStatus(new DmfActionUpdateStatus(actionId, DmfActionStatus.CANCEL_REJECTED));
         assertAction(actionId, 1, Status.RUNNING, Status.CANCELING, Status.CANCEL_REJECTED);
     }
 
@@ -526,7 +526,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         // setup
         final String target = "ControllerAttributeTestTarget";
         registerAndAssertTargetWithExistingTenant(target, 1);
-        final AttributeUpdate controllerAttribute = new AttributeUpdate();
+        final DmfAttributeUpdate controllerAttribute = new DmfAttributeUpdate();
         controllerAttribute.getAttributes().put("test1", "testA");
         controllerAttribute.getAttributes().put("test2", "testB");
 
@@ -546,7 +546,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         // setup
         final String target = "ControllerAttributeTestTarget";
         registerAndAssertTargetWithExistingTenant(target, 1);
-        final AttributeUpdate controllerAttribute = new AttributeUpdate();
+        final DmfAttributeUpdate controllerAttribute = new DmfAttributeUpdate();
         controllerAttribute.getAttributes().put("test1", "testA");
         controllerAttribute.getAttributes().put("test2", "testB");
         final Message createUpdateAttributesMessage = createUpdateAttributesMessage(null, TENANT_EXIST,
@@ -558,7 +558,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
 
         // verify
         verifyOneDeadLetterMessage();
-        final AttributeUpdate controllerAttributeEmpty = new AttributeUpdate();
+        final DmfAttributeUpdate controllerAttributeEmpty = new DmfAttributeUpdate();
         assertUpdateAttributes(target, controllerAttributeEmpty.getAttributes());
     }
 
@@ -571,7 +571,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         // setup
         final String target = "ControllerAttributeTestTarget";
         registerAndAssertTargetWithExistingTenant(target, 1);
-        final AttributeUpdate controllerAttribute = new AttributeUpdate();
+        final DmfAttributeUpdate controllerAttribute = new DmfAttributeUpdate();
         controllerAttribute.getAttributes().put("test1", "testA");
         controllerAttribute.getAttributes().put("test2", "testB");
         final Message createUpdateAttributesMessageWrongBody = createUpdateAttributesMessageWrongBody(target,
@@ -584,19 +584,19 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         verifyOneDeadLetterMessage();
     }
 
-    private Long registerTargetAndSendActionStatus(final ActionStatus sendActionStatus) {
+    private Long registerTargetAndSendActionStatus(final DmfActionStatus sendActionStatus) {
         final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet();
         final Long actionId = assignmentResult.getActions().get(0);
-        sendActionUpdateStatus(new ActionUpdateStatus(actionId, sendActionStatus));
+        sendActionUpdateStatus(new DmfActionUpdateStatus(actionId, sendActionStatus));
         return actionId;
     }
 
-    private void sendActionUpdateStatus(final ActionUpdateStatus actionStatus) {
+    private void sendActionUpdateStatus(final DmfActionUpdateStatus actionStatus) {
         final Message eventMessage = createEventMessage(TENANT_EXIST, EventTopic.UPDATE_ACTION_STATUS, actionStatus);
         getDmfClient().send(eventMessage);
     }
 
-    private void registerTargetAndSendAndAssertUpdateActionStatus(final ActionStatus sendActionStatus,
+    private void registerTargetAndSendAndAssertUpdateActionStatus(final DmfActionStatus sendActionStatus,
             final Status expectedActionStatus) {
         final Long actionId = registerTargetAndSendActionStatus(sendActionStatus);
         assertAction(actionId, 1, Status.RUNNING, expectedActionStatus);
@@ -643,7 +643,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     }
 
     private void sendUpdateAttributeMessage(final String target, final String tenant,
-            final AttributeUpdate attributeUpdate) {
+            final DmfAttributeUpdate attributeUpdate) {
         final Message updateMessage = createUpdateAttributesMessage(target, tenant, attributeUpdate);
         getDmfClient().send(updateMessage);
     }

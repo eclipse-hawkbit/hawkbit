@@ -50,8 +50,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
-import org.springframework.boot.context.embedded.FilterRegistrationBean;
-import org.springframework.boot.context.embedded.ServletListenerRegistrationBean;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -99,11 +99,13 @@ public class SecurityManagedConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(SecurityManagedConfiguration.class);
 
+    private static final int DOS_FILTER_ORDER = 1;
+
     @Autowired
     private AuthenticationConfiguration configuration;
 
     /**
-     * @return the {@link UserAuthenticationFilter} to include into the SP
+     * @return the {@link UserAuthenticationFilter} to include into the hawkBit
      *         security configuration.
      * @throws Exception
      *             lazy bean exception maybe if the authentication manager
@@ -166,8 +168,11 @@ public class SecurityManagedConfiguration {
         @ConditionalOnClass(DdiApiConfiguration.class)
         public FilterRegistrationBean dosDDiFilter(final HawkbitSecurityProperties securityProperties) {
 
-            final FilterRegistrationBean filterRegBean = dosFilter(securityProperties);
-            filterRegBean.addUrlPatterns("/{tenant}/controller/v1/**");
+            final FilterRegistrationBean filterRegBean = dosFilter(securityProperties.getDos().getFilter(),
+                    securityProperties.getClients());
+            filterRegBean.addUrlPatterns("/{tenant}/controller/v1/*");
+            filterRegBean.setOrder(DOS_FILTER_ORDER);
+            filterRegBean.setName("dosDDiFilter");
 
             return filterRegBean;
         }
@@ -252,23 +257,25 @@ public class SecurityManagedConfiguration {
      *         service protection filter in the filter chain
      */
     @Bean
-    @Order(52)
     public FilterRegistrationBean dosSystemFilter(final HawkbitSecurityProperties securityProperties) {
 
-        final FilterRegistrationBean filterRegBean = dosFilter(securityProperties);
-        filterRegBean.addUrlPatterns("/system/*");
+        final FilterRegistrationBean filterRegBean = dosFilter(securityProperties.getDos().getFilter(),
+                securityProperties.getClients());
+        filterRegBean.setUrlPatterns(Arrays.asList("/system/*"));
+        filterRegBean.setOrder(DOS_FILTER_ORDER);
+        filterRegBean.setName("dosSystemFilter");
 
         return filterRegBean;
     }
 
-    private static FilterRegistrationBean dosFilter(final HawkbitSecurityProperties securityProperties) {
+    private static FilterRegistrationBean dosFilter(final HawkbitSecurityProperties.Dos.Filter filterProperties,
+            final HawkbitSecurityProperties.Clients clientProperties) {
 
         final FilterRegistrationBean filterRegBean = new FilterRegistrationBean();
 
-        filterRegBean.setFilter(new DosFilter(securityProperties.getDos().getFilter().getMaxRead(),
-                securityProperties.getDos().getFilter().getMaxWrite(),
-                securityProperties.getDos().getFilter().getWhitelist(), securityProperties.getClients().getBlacklist(),
-                securityProperties.getClients().getRemoteIpHeader()));
+        filterRegBean.setFilter(new DosFilter(filterProperties.getMaxRead(), filterProperties.getMaxWrite(),
+                filterProperties.getWhitelist(), clientProperties.getBlacklist(),
+                clientProperties.getRemoteIpHeader()));
 
         return filterRegBean;
     }
@@ -329,8 +336,11 @@ public class SecurityManagedConfiguration {
         @Bean
         public FilterRegistrationBean dosMgmtFilter(final HawkbitSecurityProperties securityProperties) {
 
-            final FilterRegistrationBean filterRegBean = dosFilter(securityProperties);
-            filterRegBean.addUrlPatterns("/rest/**");
+            final FilterRegistrationBean filterRegBean = dosFilter(securityProperties.getDos().getFilter(),
+                    securityProperties.getClients());
+            filterRegBean.setUrlPatterns(Arrays.asList("/rest/*", "/api/*"));
+            filterRegBean.setOrder(DOS_FILTER_ORDER);
+            filterRegBean.setName("dosMgmtFilter");
 
             return filterRegBean;
         }
@@ -382,11 +392,34 @@ public class SecurityManagedConfiguration {
     @EnableVaadinSecurity
     @ConditionalOnClass(MgmtUiConfiguration.class)
     public static class UISecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
+
         @Autowired
         private VaadinSecurityContext vaadinSecurityContext;
 
         @Autowired
         private SecurityProperties springSecurityProperties;
+
+        /**
+         * Filter to protect the hawkBit management UI against to many requests.
+         * 
+         * @param securityProperties
+         *            for filter configuration
+         *
+         * @return the spring filter registration bean for registering a denial
+         *         of service protection filter in the filter chain
+         */
+        @Bean
+        public FilterRegistrationBean dosMgmtUiFilter(final HawkbitSecurityProperties securityProperties) {
+
+            final FilterRegistrationBean filterRegBean = dosFilter(securityProperties.getDos().getUiFilter(),
+                    securityProperties.getClients());
+            // All URLs that can be called anonymous
+            filterRegBean.setUrlPatterns(Arrays.asList("/UI/login", "/UI/login/*", "/UI/logout", "/UI/logout/*"));
+            filterRegBean.setOrder(DOS_FILTER_ORDER);
+            filterRegBean.setName("dosMgmtUiFilter");
+
+            return filterRegBean;
+        }
 
         /**
          * post construct for setting the authentication success handler for the

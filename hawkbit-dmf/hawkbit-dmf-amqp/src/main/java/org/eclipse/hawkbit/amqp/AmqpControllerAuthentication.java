@@ -12,7 +12,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
+import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
@@ -121,7 +121,7 @@ public class AmqpControllerAuthentication {
      *            the authentication request object
      * @return the authentication object
      */
-    public Authentication doAuthenticate(final TenantSecurityToken securityToken) {
+    public Authentication doAuthenticate(final DmfTenantSecurityToken securityToken) {
         resolveTenant(securityToken);
         PreAuthenticatedAuthenticationToken authentication = new PreAuthenticatedAuthenticationToken(null, null);
         for (final PreAuthentificationFilter filter : filterChain) {
@@ -136,7 +136,7 @@ public class AmqpControllerAuthentication {
 
     }
 
-    private void resolveTenant(final TenantSecurityToken securityToken) {
+    private void resolveTenant(final DmfTenantSecurityToken securityToken) {
         if (securityToken.getTenant() == null) {
             securityToken.setTenant(systemSecurityContext
                     .runAsSystem(() -> systemManagement.getTenantMetadata(securityToken.getTenantId()).getTenant()));
@@ -145,7 +145,7 @@ public class AmqpControllerAuthentication {
     }
 
     private static PreAuthenticatedAuthenticationToken createAuthentication(final PreAuthentificationFilter filter,
-            final TenantSecurityToken secruityToken) {
+            final DmfTenantSecurityToken secruityToken) {
 
         if (!filter.isEnable(secruityToken)) {
             return null;

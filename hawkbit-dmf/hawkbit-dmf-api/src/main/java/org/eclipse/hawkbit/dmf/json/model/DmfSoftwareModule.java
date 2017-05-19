@@ -26,7 +26,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SoftwareModule {
+public class DmfSoftwareModule {
 
     @JsonProperty
     private Long moduleId;
@@ -35,7 +35,7 @@ public class SoftwareModule {
     @JsonProperty
     private String moduleVersion;
     @JsonProperty
-    private List<Artifact> artifacts;
+    private List<DmfArtifact> artifacts;
 
     public String getModuleType() {
         return moduleType;
@@ -53,7 +53,7 @@ public class SoftwareModule {
         this.moduleVersion = moduleVersion;
     }
 
-    public List<Artifact> getArtifacts() {
+    public List<DmfArtifact> getArtifacts() {
         if (artifacts == null) {
             return Collections.emptyList();
         }
@@ -70,7 +70,7 @@ public class SoftwareModule {
         this.moduleId = moduleId;
     }
 
-    public void setArtifacts(final List<Artifact> artifacts) {
+    public void setArtifacts(final List<DmfArtifact> artifacts) {
         this.artifacts = artifacts;
     }
 

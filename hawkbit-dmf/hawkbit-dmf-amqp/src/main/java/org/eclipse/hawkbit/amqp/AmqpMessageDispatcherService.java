@@ -22,15 +22,17 @@ import org.eclipse.hawkbit.api.URLPlaceholder.SoftwareData;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
-import org.eclipse.hawkbit.dmf.json.model.Artifact;
-import org.eclipse.hawkbit.dmf.json.model.ArtifactHash;
-import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
-import org.eclipse.hawkbit.dmf.json.model.SoftwareModule;
+import org.eclipse.hawkbit.dmf.json.model.DmfArtifact;
+import org.eclipse.hawkbit.dmf.json.model.DmfArtifactHash;
+import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
+import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.model.Artifact;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.util.IpUtil;
@@ -117,21 +119,21 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     void sendUpdateMessageToTarget(final String tenant, final Target target, final Long actionId,
-            final Collection<org.eclipse.hawkbit.repository.model.SoftwareModule> modules) {
+            final Collection<SoftwareModule> modules) {
 
         final URI targetAdress = target.getAddress();
         if (!IpUtil.isAmqpUri(targetAdress)) {
             return;
         }
 
-        final DownloadAndUpdateRequest downloadAndUpdateRequest = new DownloadAndUpdateRequest();
+        final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = new DmfDownloadAndUpdateRequest();
         downloadAndUpdateRequest.setActionId(actionId);
 
         final String targetSecurityToken = systemSecurityContext.runAsSystem(target::getSecurityToken);
         downloadAndUpdateRequest.setTargetSecurityToken(targetSecurityToken);
 
-        for (final org.eclipse.hawkbit.repository.model.SoftwareModule softwareModule : modules) {
-            final SoftwareModule amqpSoftwareModule = convertToAmqpSoftwareModule(target, softwareModule);
+        for (final SoftwareModule softwareModule : modules) {
+            final DmfSoftwareModule amqpSoftwareModule = convertToAmqpSoftwareModule(target, softwareModule);
             downloadAndUpdateRequest.addSoftwareModule(amqpSoftwareModule);
         }
 
@@ -228,20 +230,18 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         return messageProperties;
     }
 
-    private SoftwareModule convertToAmqpSoftwareModule(final Target target,
-            final org.eclipse.hawkbit.repository.model.SoftwareModule softwareModule) {
-        final SoftwareModule amqpSoftwareModule = new SoftwareModule();
+    private DmfSoftwareModule convertToAmqpSoftwareModule(final Target target, final SoftwareModule softwareModule) {
+        final DmfSoftwareModule amqpSoftwareModule = new DmfSoftwareModule();
         amqpSoftwareModule.setModuleId(softwareModule.getId());
         amqpSoftwareModule.setModuleType(softwareModule.getType().getKey());
         amqpSoftwareModule.setModuleVersion(softwareModule.getVersion());
 
-        final List<Artifact> artifacts = convertArtifacts(target, softwareModule.getArtifacts());
+        final List<DmfArtifact> artifacts = convertArtifacts(target, softwareModule.getArtifacts());
         amqpSoftwareModule.setArtifacts(artifacts);
         return amqpSoftwareModule;
     }
 
-    private List<Artifact> convertArtifacts(final Target target,
-            final List<org.eclipse.hawkbit.repository.model.Artifact> localArtifacts) {
+    private List<DmfArtifact> convertArtifacts(final Target target, final List<Artifact> localArtifacts) {
         if (localArtifacts.isEmpty()) {
             return Collections.emptyList();
         }
@@ -250,9 +250,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 .collect(Collectors.toList());
     }
 
-    private Artifact convertArtifact(final Target target,
-            final org.eclipse.hawkbit.repository.model.Artifact localArtifact) {
-        final Artifact artifact = new Artifact();
+    private DmfArtifact convertArtifact(final Target target, final Artifact localArtifact) {
+        final DmfArtifact artifact = new DmfArtifact();
 
         artifact.setUrls(artifactUrlHandler
                 .getUrls(new URLPlaceholder(systemManagement.getTenantMetadata().getTenant(),
@@ -263,7 +262,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 .stream().collect(Collectors.toMap(ArtifactUrl::getProtocol, ArtifactUrl::getRef)));
 
         artifact.setFilename(localArtifact.getFilename());
-        artifact.setHashes(new ArtifactHash(localArtifact.getSha1Hash(), localArtifact.getMd5Hash()));
+        artifact.setHashes(new DmfArtifactHash(localArtifact.getSha1Hash(), localArtifact.getMd5Hash()));
         artifact.setSize(localArtifact.getSize());
         return artifact;
     }

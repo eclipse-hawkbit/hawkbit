@@ -47,15 +47,6 @@ public class SpPermissionChecker implements Serializable {
     }
 
     /**
-     * Gets the SP administration retrieval Permission.
-     * 
-     * @return SYSTEM_ADMIN boolean value
-     */
-    public boolean hasSpAdminViewPermission() {
-        return permissionService.hasPermission(SpPermission.SYSTEM_ADMIN);
-    }
-
-    /**
      * Gets the SP read Target & Dist Permission.
      * 
      * @return TARGET_REPOSITORY_READ boolean value

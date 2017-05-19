@@ -21,13 +21,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DownloadResponse {
+public class DmfDownloadResponse {
 
     @JsonProperty
     private String downloadUrl;
 
     @JsonProperty
-    private Artifact artifact;
+    private DmfArtifact artifact;
 
     @JsonProperty
     private int responseCode;
@@ -59,11 +59,11 @@ public class DownloadResponse {
         this.downloadUrl = downloadUrl;
     }
 
-    public Artifact getArtifact() {
+    public DmfArtifact getArtifact() {
         return artifact;
     }
 
-    public void setArtifact(final Artifact artifact) {
+    public void setArtifact(final DmfArtifact artifact) {
         this.artifact = artifact;
     }
 }
