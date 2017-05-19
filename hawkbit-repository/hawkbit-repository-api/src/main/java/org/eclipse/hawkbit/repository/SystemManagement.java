@@ -60,7 +60,7 @@ public interface SystemManagement {
      * @param consumer
      *            to run as teanant
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
+    @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
     void forEachTenant(Consumer<String> consumer);
 
     /**

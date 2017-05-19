@@ -20,8 +20,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
-import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken.FileResource;
+import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken;
+import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
@@ -97,7 +97,7 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
             return;
         }
 
-        final TenantSecurityToken secruityToken = createTenantSecruityTokenVariables((HttpServletRequest) request);
+        final DmfTenantSecurityToken secruityToken = createTenantSecruityTokenVariables((HttpServletRequest) request);
         if (secruityToken == null) {
             chain.doFilter(request, response);
             return;
@@ -134,7 +134,7 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
      *         request does not match the pattern and no variables could be
      *         extracted
      */
-    protected TenantSecurityToken createTenantSecruityTokenVariables(final HttpServletRequest request) {
+    protected DmfTenantSecurityToken createTenantSecruityTokenVariables(final HttpServletRequest request) {
         final String requestURI = request.getRequestURI();
 
         if (pathExtractor.match(request.getContextPath() + CONTROLLER_REQUEST_ANT_PATTERN, requestURI)) {
@@ -166,9 +166,9 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
         }
     }
 
-    private TenantSecurityToken createTenantSecruityTokenVariables(final HttpServletRequest request,
+    private DmfTenantSecurityToken createTenantSecruityTokenVariables(final HttpServletRequest request,
             final String tenant, final String controllerId) {
-        final TenantSecurityToken secruityToken = new TenantSecurityToken(tenant, null, controllerId, null,
+        final DmfTenantSecurityToken secruityToken = new DmfTenantSecurityToken(tenant, null, controllerId, null,
                 FileResource.createFileResourceBySha1(""));
         final UnmodifiableIterator<String> forEnumeration = Iterators.forEnumeration(request.getHeaderNames());
         forEnumeration.forEachRemaining(header -> secruityToken.putHeader(header, request.getHeader(header)));
@@ -177,7 +177,7 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
 
     @Override
     protected Object getPreAuthenticatedPrincipal(final HttpServletRequest request) {
-        final TenantSecurityToken secruityToken = createTenantSecruityTokenVariables(request);
+        final DmfTenantSecurityToken secruityToken = createTenantSecruityTokenVariables(request);
         if (secruityToken == null) {
             return null;
         }
@@ -186,7 +186,7 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
 
     @Override
     protected Object getPreAuthenticatedCredentials(final HttpServletRequest request) {
-        final TenantSecurityToken secruityToken = createTenantSecruityTokenVariables(request);
+        final DmfTenantSecurityToken secruityToken = createTenantSecruityTokenVariables(request);
         if (secruityToken == null) {
             return null;
         }

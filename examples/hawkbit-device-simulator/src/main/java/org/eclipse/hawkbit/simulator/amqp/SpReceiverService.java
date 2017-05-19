@@ -13,7 +13,7 @@ import java.util.Map;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
-import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
+import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.simulator.DeviceSimulatorRepository;
 import org.eclipse.hawkbit.simulator.DeviceSimulatorUpdater;
 import org.slf4j.Logger;
@@ -141,8 +141,8 @@ public class SpReceiverService extends ReceiverService {
         final Map<String, Object> headers = messageProperties.getHeaders();
         final String tenant = (String) headers.get(MessageHeaderKey.TENANT);
 
-        final DownloadAndUpdateRequest downloadAndUpdateRequest = convertMessage(message,
-                DownloadAndUpdateRequest.class);
+        final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = convertMessage(message,
+                DmfDownloadAndUpdateRequest.class);
         final Long actionId = downloadAndUpdateRequest.getActionId();
         final String targetSecurityToken = downloadAndUpdateRequest.getTargetSecurityToken();
 

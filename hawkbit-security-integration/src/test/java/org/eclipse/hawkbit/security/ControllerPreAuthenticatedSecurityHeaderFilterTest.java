@@ -15,8 +15,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 
-import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
-import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken.FileResource;
+import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken;
+import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
@@ -41,7 +41,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
     private TenantConfigurationManagement tenantConfigurationManagementMock;
 
     @Mock
-    private TenantSecurityToken tenantSecurityTokenMock;
+    private DmfTenantSecurityToken tenantSecurityTokenMock;
 
     private final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware();
 
@@ -71,7 +71,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
     @Test
     @Description("Tests the filter for issuer hash based authentication with a single known hash")
     public void testIssuerHashBasedAuthenticationWithSingleKnownHash() {
-        final TenantSecurityToken securityToken = prepareSecurityToken(SINGLE_HASH);
+        final DmfTenantSecurityToken securityToken = prepareSecurityToken(SINGLE_HASH);
         // use single known hash
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME), eq(String.class)))
@@ -82,7 +82,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
     @Test
     @Description("Tests the filter for issuer hash based authentication with multiple known hashes")
     public void testIssuerHashBasedAuthenticationWithMultipleKnownHashes() {
-        final TenantSecurityToken securityToken = prepareSecurityToken(SINGLE_HASH);
+        final DmfTenantSecurityToken securityToken = prepareSecurityToken(SINGLE_HASH);
         // use multiple known hashes
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME), eq(String.class)))
@@ -93,7 +93,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
     @Test
     @Description("Tests the filter for issuer hash based authentication with unknown hash")
     public void testIssuerHashBasedAuthenticationWithUnknownHash() {
-        final TenantSecurityToken securityToken = prepareSecurityToken(UNKNOWN_HASH);
+        final DmfTenantSecurityToken securityToken = prepareSecurityToken(UNKNOWN_HASH);
         // use single known hash
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME), eq(String.class)))
@@ -104,8 +104,8 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
     @Test
     @Description("Tests different values for issuer hash header and inspects the credentials")
     public void useDifferentValuesForIssuerHashHeader() {
-        final TenantSecurityToken securityToken1 = prepareSecurityToken(SINGLE_HASH);
-        final TenantSecurityToken securityToken2 = prepareSecurityToken(SECOND_HASH);
+        final DmfTenantSecurityToken securityToken1 = prepareSecurityToken(SINGLE_HASH);
+        final DmfTenantSecurityToken securityToken2 = prepareSecurityToken(SECOND_HASH);
 
         final HeaderAuthentication expected1 = new HeaderAuthentication(CA_COMMON_NAME_VALUE, SINGLE_HASH);
         final HeaderAuthentication expected2 = new HeaderAuthentication(CA_COMMON_NAME_VALUE, SECOND_HASH);
@@ -130,8 +130,8 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
 
     }
 
-    private static TenantSecurityToken prepareSecurityToken(final String issuerHashHeaderValue) {
-        final TenantSecurityToken securityToken = new TenantSecurityToken("DEFAULT", CA_COMMON_NAME_VALUE,
+    private static DmfTenantSecurityToken prepareSecurityToken(final String issuerHashHeaderValue) {
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken("DEFAULT", CA_COMMON_NAME_VALUE,
                 FileResource.createFileResourceBySha1("12345"));
         securityToken.putHeader(CA_COMMON_NAME, CA_COMMON_NAME_VALUE);
         securityToken.putHeader(X_SSL_ISSUER_HASH_1, issuerHashHeaderValue);

@@ -48,8 +48,8 @@ public class DosFilter extends OncePerRequestFilter {
     private final Cache<String, AtomicInteger> writeCountCache = CacheBuilder.newBuilder()
             .expireAfterAccess(1, TimeUnit.SECONDS).build();
 
-    private final Integer maxRead;
-    private final Integer maxWrite;
+    private final int maxRead;
+    private final int maxWrite;
 
     private final Pattern whitelist;
 
@@ -73,7 +73,7 @@ public class DosFilter extends OncePerRequestFilter {
      *            the header containing the forwarded IP address e.g.
      *            {@code x-forwarded-for}
      */
-    public DosFilter(final Integer maxRead, final Integer maxWrite, final String ipDosWhiteListPattern,
+    public DosFilter(final int maxRead, final int maxWrite, final String ipDosWhiteListPattern,
             final String ipBlackListPattern, final String forwardHeader) {
 
         this.maxRead = maxRead;

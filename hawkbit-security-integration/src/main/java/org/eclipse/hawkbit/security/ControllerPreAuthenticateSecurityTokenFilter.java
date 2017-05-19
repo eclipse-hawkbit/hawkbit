@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.security;
 
 import java.util.Optional;
 
-import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
+import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -62,9 +62,9 @@ public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractContro
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedPrincipal(final TenantSecurityToken secruityToken) {
+    public HeaderAuthentication getPreAuthenticatedPrincipal(final DmfTenantSecurityToken secruityToken) {
         final String controllerId = resolveControllerId(secruityToken);
-        final String authHeader = secruityToken.getHeader(TenantSecurityToken.AUTHORIZATION_HEADER);
+        final String authHeader = secruityToken.getHeader(DmfTenantSecurityToken.AUTHORIZATION_HEADER);
         if ((authHeader != null) && authHeader.startsWith(TARGET_SECURITY_TOKEN_AUTH_SCHEME)) {
             LOGGER.debug("found authorization header with scheme {} using target security token for authentication",
                     TARGET_SECURITY_TOKEN_AUTH_SCHEME);
@@ -77,7 +77,7 @@ public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractContro
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedCredentials(final TenantSecurityToken securityToken) {
+    public HeaderAuthentication getPreAuthenticatedCredentials(final DmfTenantSecurityToken securityToken) {
         final Optional<Target> target = systemSecurityContext.runAsSystemAsTenant(() -> {
             if (securityToken.getTargetId() != null) {
                 return controllerManagement.findByTargetId(securityToken.getTargetId());
@@ -90,7 +90,7 @@ public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractContro
                 .orElse(null);
     }
 
-    private String resolveControllerId(final TenantSecurityToken securityToken) {
+    private String resolveControllerId(final DmfTenantSecurityToken securityToken) {
         if (securityToken.getControllerId() != null) {
             return securityToken.getControllerId();
         }
