@@ -19,7 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
+import org.assertj.core.api.Condition;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
@@ -1025,7 +1027,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verify that the expected targets in the expected order are returned for the rollout groups.")
+    @Description("Verify that the expected targets are returned for the rollout groups.")
     public void findRolloutGroupTargetsWithRsqlParam() {
 
         final int amountTargetsForRollout = 15;
@@ -1046,27 +1048,33 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         // Run here, because scheduler is disabled during tests
         rolloutManagement.handleRollouts();
 
+        final Condition<String> targetBelongsInRollout = new Condition<>(s -> s.startsWith(rolloutName),
+                "Target belongs into rollout");
+
         myRollout = rolloutManagement.findRolloutById(myRollout.getId()).get();
         final List<RolloutGroup> rolloutGroups = rolloutGroupManagement
                 .findRolloutGroupsByRolloutId(myRollout.getId(), PAGE).getContent();
 
         Page<Target> targetPage = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroups.get(0).getId(),
-                rsqlParam, new OffsetBasedPageRequest(0, 100, new Sort(Direction.ASC, "controllerId")));
+                rsqlParam, new OffsetBasedPageRequest(0, 100));
         final List<Target> targetlistGroup1 = targetPage.getContent();
         assertThat(targetlistGroup1.size()).isEqualTo(5);
-        assertThat(targetlistGroup1.get(0).getControllerId()).isEqualTo("MyRollout--00000");
+        assertThat(targetlistGroup1.stream().map(Target::getControllerId).collect(Collectors.toList()))
+                .are(targetBelongsInRollout);
 
         targetPage = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroups.get(1).getId(), rsqlParam,
-                new OffsetBasedPageRequest(0, 100, new Sort(Direction.DESC, "controllerId")));
+                new OffsetBasedPageRequest(0, 100));
         final List<Target> targetlistGroup2 = targetPage.getContent();
         assertThat(targetlistGroup2.size()).isEqualTo(5);
-        assertThat(targetlistGroup2.get(0).getControllerId()).isEqualTo("MyRollout--00009");
+        assertThat(targetlistGroup2.stream().map(Target::getControllerId).collect(Collectors.toList()))
+                .are(targetBelongsInRollout);
 
         targetPage = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroups.get(2).getId(), rsqlParam,
-                new OffsetBasedPageRequest(0, 100, new Sort(Direction.ASC, "controllerId")));
+                new OffsetBasedPageRequest(0, 100));
         final List<Target> targetlistGroup3 = targetPage.getContent();
         assertThat(targetlistGroup3.size()).isEqualTo(5);
-        assertThat(targetlistGroup3.get(0).getControllerId()).isEqualTo("MyRollout--00010");
+        assertThat(targetlistGroup3.stream().map(Target::getControllerId).collect(Collectors.toList()))
+                .are(targetBelongsInRollout);
 
     }
 
