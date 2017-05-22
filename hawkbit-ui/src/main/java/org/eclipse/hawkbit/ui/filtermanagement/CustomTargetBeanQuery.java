@@ -69,7 +69,7 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             filterQuery = (String) queryConfig.get(FILTER_BY_QUERY);
         }
 
-        if (!StringUtils.isEmpty(sortStates)) {
+        if (sortStates != null && sortStates.length > 0) {
 
             sort = new Sort(sortStates[0] ? ASC : DESC, (String) sortIds[0]);
 

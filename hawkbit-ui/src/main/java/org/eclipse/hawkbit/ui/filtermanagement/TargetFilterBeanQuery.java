@@ -60,7 +60,8 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
                 searchText = String.format("%%%s%%", searchText);
             }
         }
-        if (sortStates.length > 0) {
+        
+        if (sortStates!= null && sortStates.length > 0) {
             // Initalize sort
             sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortPropertyIds[0]);
             // Add sort
