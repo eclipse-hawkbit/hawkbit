@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.repository.PropertiesQuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
@@ -130,6 +131,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     PropertiesQuotaManagement staticQuotaManagement(final HawkbitSecurityProperties securityProperties) {
         return new PropertiesQuotaManagement(securityProperties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    RolloutStatusCache rolloutStatusCache(final TenantAware tenantAware) {
+        return new RolloutStatusCache(tenantAware);
     }
 
     /**

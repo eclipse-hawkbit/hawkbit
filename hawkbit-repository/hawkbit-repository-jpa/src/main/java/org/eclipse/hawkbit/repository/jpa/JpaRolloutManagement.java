@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.repository.RolloutFields;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutHelper;
 import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.builder.GenericRolloutUpdate;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
@@ -138,6 +139,9 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Autowired
     private QuotaManagement quotaManagement;
+
+    @Autowired
+    private RolloutStatusCache rolloutStatusCache;
 
     JpaRolloutManagement(final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
             final RolloutGroupManagement rolloutGroupManagement,
@@ -970,21 +974,41 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             return rollout;
         }
 
-        final List<TotalTargetCountActionStatus> rolloutStatusCountItems = actionRepository
-                .getStatusCountByRolloutId(rolloutId);
+        List<TotalTargetCountActionStatus> rolloutStatusCountItems = rolloutStatusCache.getRolloutStatus(rolloutId);
+
+        if (rolloutStatusCountItems.isEmpty()) {
+            rolloutStatusCountItems = actionRepository.getStatusCountByRolloutId(rolloutId);
+            rolloutStatusCache.putRolloutStatus(rolloutId, rolloutStatusCountItems);
+        }
+
         final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(rolloutStatusCountItems,
                 rollout.get().getTotalTargets());
         ((JpaRollout) rollout.get()).setTotalTargetCountStatus(totalTargetCountStatus);
         return rollout;
     }
 
-    private Map<Long, List<TotalTargetCountActionStatus>> getStatusCountItemForRollout(final List<Long> rolloutIds) {
+    private Map<Long, List<TotalTargetCountActionStatus>> getStatusCountItemForRollout(final List<Long> rollouts) {
+        if (rollouts.isEmpty()) {
+            return null;
+        }
+
+        final Map<Long, List<TotalTargetCountActionStatus>> fromCache = rolloutStatusCache.getRolloutStatus(rollouts);
+
+        final List<Long> rolloutIds = rollouts.stream().filter(id -> !fromCache.containsKey(id))
+                .collect(Collectors.toList());
+
         if (!rolloutIds.isEmpty()) {
             final List<TotalTargetCountActionStatus> resultList = actionRepository
                     .getStatusCountByRolloutId(rolloutIds);
-            return resultList.stream().collect(Collectors.groupingBy(TotalTargetCountActionStatus::getId));
+            final Map<Long, List<TotalTargetCountActionStatus>> fromDb = resultList.stream()
+                    .collect(Collectors.groupingBy(TotalTargetCountActionStatus::getId));
+
+            rolloutStatusCache.putRolloutStatus(fromDb);
+
+            fromCache.putAll(fromDb);
         }
-        return null;
+
+        return fromCache;
     }
 
     private void setRolloutStatusDetails(final Slice<JpaRollout> rollouts) {
