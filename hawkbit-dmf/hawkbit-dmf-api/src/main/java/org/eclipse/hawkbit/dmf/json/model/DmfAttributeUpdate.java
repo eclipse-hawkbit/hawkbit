@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AttributeUpdate {
+public class DmfAttributeUpdate {
     @JsonProperty
     private final Map<String, String> attributes = new HashMap<>();
 

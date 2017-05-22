@@ -21,8 +21,8 @@ import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
-import org.eclipse.hawkbit.dmf.json.model.AttributeUpdate;
-import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
+import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
+import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.integration.listener.DeadletterListener;
 import org.eclipse.hawkbit.integration.listener.ReplyToListener;
 import org.eclipse.hawkbit.matcher.SoftwareModuleJsonMatcher;
@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.rabbitmq.test.AmqpTestConfiguration;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.util.IpUtil;
@@ -111,8 +112,7 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
     }
 
     protected DistributionSetAssignmentResult registerTargetAndAssignDistributionSet(final Long assignDs,
-            final TargetUpdateStatus expectedStatus,
-            final Set<org.eclipse.hawkbit.repository.model.SoftwareModule> expectedSoftwareModulesInMessage) {
+            final TargetUpdateStatus expectedStatus, final Set<SoftwareModule> expectedSoftwareModulesInMessage) {
         registerAndAssertTargetWithExistingTenant(REGISTER_TARGET, 1, expectedStatus, CREATED_BY);
 
         final DistributionSetAssignmentResult assignmentResult = assignDistributionSet(assignDs, REGISTER_TARGET);
@@ -138,12 +138,11 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         assertThat(headers.get(MessageHeaderKey.TYPE)).isEqualTo(MessageType.THING_DELETED.toString());
     }
 
-    protected void assertDownloadAndInstallMessage(
-            final Set<org.eclipse.hawkbit.repository.model.SoftwareModule> dsModules) {
+    protected void assertDownloadAndInstallMessage(final Set<SoftwareModule> dsModules) {
         final Message replyMessage = assertReplyMessageHeader(EventTopic.DOWNLOAD_AND_INSTALL);
         assertAllTargetsCount(1);
 
-        final DownloadAndUpdateRequest downloadAndUpdateRequest = (DownloadAndUpdateRequest) getDmfClient()
+        final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = (DmfDownloadAndUpdateRequest) getDmfClient()
                 .getMessageConverter().fromMessage(replyMessage);
 
         Assert.assertThat(dsModules,
@@ -255,7 +254,7 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
     }
 
     protected Message createUpdateAttributesMessage(final String target, final String tenant,
-            final AttributeUpdate attributeUpdate) {
+            final DmfAttributeUpdate attributeUpdate) {
         final MessageProperties messageProperties = createMessagePropertiesWithTenant(tenant);
         messageProperties.getHeaders().put(MessageHeaderKey.THING_ID, target);
         messageProperties.getHeaders().put(MessageHeaderKey.TYPE, MessageType.EVENT.toString());

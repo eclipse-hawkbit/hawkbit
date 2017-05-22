@@ -25,9 +25,9 @@ import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
-import org.eclipse.hawkbit.dmf.json.model.DownloadResponse;
-import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
-import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken.FileResource;
+import org.eclipse.hawkbit.dmf.json.model.DmfDownloadResponse;
+import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken;
+import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
@@ -181,7 +181,7 @@ public class AmqpControllerAuthenticationTest {
     @Test
     @Description("Tests authentication manager without principal")
     public void testAuthenticationeBadCredantialsWithoutPricipal() {
-        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID, TARGET_ID,
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID, TARGET_ID,
                 FileResource.createFileResourceBySha1(SHA1));
         try {
             authenticationManager.doAuthenticate(securityToken);
@@ -195,12 +195,12 @@ public class AmqpControllerAuthenticationTest {
     @Test
     @Description("Tests authentication manager without wrong credential")
     public void testAuthenticationBadCredantialsWithWrongCredential() {
-        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID, TARGET_ID,
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID, TARGET_ID,
                 FileResource.createFileResourceBySha1(SHA1));
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
-        securityToken.putHeader(TenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken 12" + CONTROLLER_ID);
+        securityToken.putHeader(DmfTenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken 12" + CONTROLLER_ID);
         try {
             authenticationManager.doAuthenticate(securityToken);
             fail("BadCredentialsException was excepeted due to wrong credential");
@@ -213,12 +213,12 @@ public class AmqpControllerAuthenticationTest {
     @Test
     @Description("Tests authentication successfull")
     public void testSuccessfullAuthentication() {
-        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID, TARGET_ID,
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID, TARGET_ID,
                 FileResource.createFileResourceBySha1(SHA1));
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
-        securityToken.putHeader(TenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken " + CONTROLLER_ID);
+        securityToken.putHeader(DmfTenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken " + CONTROLLER_ID);
         final Authentication authentication = authenticationManager.doAuthenticate(securityToken);
         assertThat(authentication).isNotNull();
     }
@@ -228,7 +228,7 @@ public class AmqpControllerAuthenticationTest {
     public void testAuthenticationMessageBadCredantialsWithoutPricipal() {
         final MessageProperties messageProperties = createMessageProperties(null);
 
-        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID, TARGET_ID,
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID, TARGET_ID,
                 FileResource.createFileResourceBySha1(SHA1));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
@@ -237,7 +237,7 @@ public class AmqpControllerAuthenticationTest {
         final Message onMessage = amqpAuthenticationMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
-        final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
+        final DmfDownloadResponse downloadResponse = (DmfDownloadResponse) messageConverter.fromMessage(onMessage);
         assertThat(downloadResponse).isNotNull();
         assertThat(downloadResponse.getResponseCode()).isEqualTo(HttpStatus.FORBIDDEN.value());
     }
@@ -246,12 +246,12 @@ public class AmqpControllerAuthenticationTest {
     @Description("Tests authentication message without wrong credential")
     public void testAuthenticationMessageBadCredantialsWithWrongCredential() {
         final MessageProperties messageProperties = createMessageProperties(null);
-        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID, TARGET_ID,
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID, TARGET_ID,
                 FileResource.createFileResourceBySha1(SHA1));
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
-        securityToken.putHeader(TenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken 12" + CONTROLLER_ID);
+        securityToken.putHeader(DmfTenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken 12" + CONTROLLER_ID);
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
 
@@ -259,7 +259,7 @@ public class AmqpControllerAuthenticationTest {
         final Message onMessage = amqpAuthenticationMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
-        final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
+        final DmfDownloadResponse downloadResponse = (DmfDownloadResponse) messageConverter.fromMessage(onMessage);
         assertThat(downloadResponse).isNotNull();
         assertThat(downloadResponse.getResponseCode()).isEqualTo(HttpStatus.FORBIDDEN.value());
     }
@@ -268,12 +268,12 @@ public class AmqpControllerAuthenticationTest {
     @Description("Tests authentication message successfull")
     public void successfullMessageAuthentication() {
         final MessageProperties messageProperties = createMessageProperties(null);
-        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, null, CONTROLLER_ID, null,
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, null, CONTROLLER_ID, null,
                 FileResource.createFileResourceBySha1(SHA1));
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
-        securityToken.putHeader(TenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken " + CONTROLLER_ID);
+        securityToken.putHeader(DmfTenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken " + CONTROLLER_ID);
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
 
@@ -281,7 +281,7 @@ public class AmqpControllerAuthenticationTest {
         final Message onMessage = amqpAuthenticationMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
-        final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
+        final DmfDownloadResponse downloadResponse = (DmfDownloadResponse) messageConverter.fromMessage(onMessage);
         assertThat(downloadResponse).isNotNull();
         assertThat(downloadResponse.getDownloadUrl()).isNotNull();
         assertThat(downloadResponse.getResponseCode()).isEqualTo(HttpStatus.OK.value());
@@ -296,12 +296,12 @@ public class AmqpControllerAuthenticationTest {
     @Description("Tests authentication message successfull with targetId intead of controllerId provided and artifactId instead of SHA1.")
     public void successfullMessageAuthenticationWithTargetIdAndArtifactId() {
         final MessageProperties messageProperties = createMessageProperties(null);
-        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, null, null, TARGET_ID,
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, null, null, TARGET_ID,
                 FileResource.createFileResourceByArtifactId(ARTIFACT_ID));
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
-        securityToken.putHeader(TenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken " + CONTROLLER_ID);
+        securityToken.putHeader(DmfTenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken " + CONTROLLER_ID);
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
 
@@ -309,7 +309,7 @@ public class AmqpControllerAuthenticationTest {
         final Message onMessage = amqpAuthenticationMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
-        final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
+        final DmfDownloadResponse downloadResponse = (DmfDownloadResponse) messageConverter.fromMessage(onMessage);
         assertThat(downloadResponse).isNotNull();
         assertThat(downloadResponse.getDownloadUrl()).isNotNull();
         assertThat(downloadResponse.getResponseCode()).isEqualTo(HttpStatus.OK.value());
@@ -324,12 +324,12 @@ public class AmqpControllerAuthenticationTest {
     @Description("Tests authentication message successfull")
     public void successfullMessageAuthenticationWithTenantid() {
         final MessageProperties messageProperties = createMessageProperties(null);
-        final TenantSecurityToken securityToken = new TenantSecurityToken(null, TENANT_ID, CONTROLLER_ID, TARGET_ID,
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(null, TENANT_ID, CONTROLLER_ID, TARGET_ID,
                 FileResource.createFileResourceBySha1(SHA1));
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
-        securityToken.putHeader(TenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken " + CONTROLLER_ID);
+        securityToken.putHeader(DmfTenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken " + CONTROLLER_ID);
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
 
@@ -337,7 +337,7 @@ public class AmqpControllerAuthenticationTest {
         final Message onMessage = amqpAuthenticationMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
-        final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
+        final DmfDownloadResponse downloadResponse = (DmfDownloadResponse) messageConverter.fromMessage(onMessage);
         assertThat(downloadResponse).isNotNull();
         assertThat(downloadResponse.getDownloadUrl()).isNotNull();
         assertThat(downloadResponse.getResponseCode()).isEqualTo(HttpStatus.OK.value());

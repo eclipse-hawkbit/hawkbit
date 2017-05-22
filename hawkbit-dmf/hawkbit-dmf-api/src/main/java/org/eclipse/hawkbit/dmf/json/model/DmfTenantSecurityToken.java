@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TenantSecurityToken {
+public class DmfTenantSecurityToken {
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
 
@@ -58,7 +58,7 @@ public class TenantSecurityToken {
      *            the file to obtain
      */
     @JsonCreator
-    public TenantSecurityToken(@JsonProperty("tenant") final String tenant,
+    public DmfTenantSecurityToken(@JsonProperty("tenant") final String tenant,
             @JsonProperty("tenantId") final Long tenantId, @JsonProperty("controllerId") final String controllerId,
             @JsonProperty("targetId") final Long targetId,
             @JsonProperty("fileResource") final FileResource fileResource) {
@@ -79,7 +79,7 @@ public class TenantSecurityToken {
      * @param fileResource
      *            the file to obtain
      */
-    public TenantSecurityToken(final String tenant, final String controllerId, final FileResource fileResource) {
+    public DmfTenantSecurityToken(final String tenant, final String controllerId, final FileResource fileResource) {
         this(tenant, null, controllerId, null, fileResource);
     }
 
@@ -93,7 +93,7 @@ public class TenantSecurityToken {
      * @param fileResource
      *            the file to obtain
      */
-    public TenantSecurityToken(final Long tenantId, final Long targetId, final FileResource fileResource) {
+    public DmfTenantSecurityToken(final Long tenantId, final Long targetId, final FileResource fileResource) {
         this(null, tenantId, null, targetId, fileResource);
     }
 

@@ -34,12 +34,12 @@ import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
-import org.eclipse.hawkbit.dmf.json.model.ActionStatus;
-import org.eclipse.hawkbit.dmf.json.model.ActionUpdateStatus;
-import org.eclipse.hawkbit.dmf.json.model.AttributeUpdate;
-import org.eclipse.hawkbit.dmf.json.model.DownloadResponse;
-import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
-import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken.FileResource;
+import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
+import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
+import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
+import org.eclipse.hawkbit.dmf.json.model.DmfDownloadResponse;
+import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken;
+import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -181,7 +181,7 @@ public class AmqpMessageHandlerServiceTest {
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.THING_ID, "1");
         messageProperties.setHeader(MessageHeaderKey.TOPIC, "UPDATE_ATTRIBUTES");
-        final AttributeUpdate attributeUpdate = new AttributeUpdate();
+        final DmfAttributeUpdate attributeUpdate = new DmfAttributeUpdate();
         attributeUpdate.getAttributes().put("testKey1", "testValue1");
         attributeUpdate.getAttributes().put("testKey2", "testValue2");
 
@@ -279,7 +279,7 @@ public class AmqpMessageHandlerServiceTest {
         when(controllerManagementMock.findActionWithDetails(any())).thenReturn(Optional.empty());
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
-        final ActionUpdateStatus actionUpdateStatus = new ActionUpdateStatus(1L, ActionStatus.DOWNLOAD);
+        final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(1L, DmfActionStatus.DOWNLOAD);
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(actionUpdateStatus,
                 messageProperties);
 
@@ -298,7 +298,7 @@ public class AmqpMessageHandlerServiceTest {
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
         when(controllerManagementMock.findActionWithDetails(any())).thenReturn(Optional.empty());
 
-        final ActionUpdateStatus actionUpdateStatus = createActionUpdateStatus(ActionStatus.DOWNLOAD);
+        final DmfActionUpdateStatus actionUpdateStatus = createActionUpdateStatus(DmfActionStatus.DOWNLOAD);
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(actionUpdateStatus,
                 messageProperties);
 
@@ -315,7 +315,7 @@ public class AmqpMessageHandlerServiceTest {
     @Description("Tests that an download request is denied for an artifact which does not exists")
     public void authenticationRequestDeniedForArtifactWhichDoesNotExists() {
         final MessageProperties messageProperties = createMessageProperties(null);
-        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, TENANT_ID, CONTROLLLER_ID, TARGET_ID,
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLLER_ID, TARGET_ID,
                 FileResource.createFileResourceBySha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
@@ -324,7 +324,7 @@ public class AmqpMessageHandlerServiceTest {
         final Message onMessage = amqpAuthenticationMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
-        final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
+        final DmfDownloadResponse downloadResponse = (DmfDownloadResponse) messageConverter.fromMessage(onMessage);
         assertThat(downloadResponse).as("Message body should not null").isNotNull();
         assertThat(downloadResponse.getResponseCode()).as("Message body response code is wrong")
                 .isEqualTo(HttpStatus.NOT_FOUND.value());
@@ -334,7 +334,7 @@ public class AmqpMessageHandlerServiceTest {
     @Description("Tests that an download request is denied for an artifact which is not assigned to the requested target")
     public void authenticationRequestDeniedForArtifactWhichIsNotAssignedToTarget() {
         final MessageProperties messageProperties = createMessageProperties(null);
-        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, TENANT_ID, CONTROLLLER_ID, TARGET_ID,
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLLER_ID, TARGET_ID,
                 FileResource.createFileResourceBySha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
@@ -348,7 +348,7 @@ public class AmqpMessageHandlerServiceTest {
         final Message onMessage = amqpAuthenticationMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
-        final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
+        final DmfDownloadResponse downloadResponse = (DmfDownloadResponse) messageConverter.fromMessage(onMessage);
         assertThat(downloadResponse).as("Message body should not null").isNotNull();
         assertThat(downloadResponse.getResponseCode()).as("Message body response code is wrong")
                 .isEqualTo(HttpStatus.NOT_FOUND.value());
@@ -358,7 +358,7 @@ public class AmqpMessageHandlerServiceTest {
     @Description("Tests that an download request is allowed for an artifact which exists and assigned to the requested target")
     public void authenticationRequestAllowedForArtifactWhichExistsAndAssignedToTarget() throws MalformedURLException {
         final MessageProperties messageProperties = createMessageProperties(null);
-        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, TENANT_ID, CONTROLLLER_ID, TARGET_ID,
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLLER_ID, TARGET_ID,
                 FileResource.createFileResourceBySha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
@@ -381,7 +381,7 @@ public class AmqpMessageHandlerServiceTest {
         final Message onMessage = amqpAuthenticationMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
-        final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
+        final DmfDownloadResponse downloadResponse = (DmfDownloadResponse) messageConverter.fromMessage(onMessage);
         assertThat(downloadResponse).as("Message body should not null").isNotNull();
         assertThat(downloadResponse.getResponseCode()).as("Message body response code is wrong")
                 .isEqualTo(HttpStatus.OK.value());
@@ -410,7 +410,7 @@ public class AmqpMessageHandlerServiceTest {
 
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
-        final ActionUpdateStatus actionUpdateStatus = createActionUpdateStatus(ActionStatus.FINISHED, 23L);
+        final DmfActionUpdateStatus actionUpdateStatus = createActionUpdateStatus(DmfActionStatus.FINISHED, 23L);
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(actionUpdateStatus,
                 messageProperties);
 
@@ -433,12 +433,12 @@ public class AmqpMessageHandlerServiceTest {
 
     }
 
-    private ActionUpdateStatus createActionUpdateStatus(final ActionStatus status) {
+    private DmfActionUpdateStatus createActionUpdateStatus(final DmfActionStatus status) {
         return createActionUpdateStatus(status, 2L);
     }
 
-    private ActionUpdateStatus createActionUpdateStatus(final ActionStatus status, final Long id) {
-        final ActionUpdateStatus actionUpdateStatus = new ActionUpdateStatus(id, status);
+    private DmfActionUpdateStatus createActionUpdateStatus(final DmfActionStatus status, final Long id) {
+        final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(id, status);
         actionUpdateStatus.setSoftwareModuleId(Long.valueOf(2));
         return actionUpdateStatus;
     }

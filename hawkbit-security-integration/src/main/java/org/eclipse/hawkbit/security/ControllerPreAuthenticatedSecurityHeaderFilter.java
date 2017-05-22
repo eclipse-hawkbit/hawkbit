@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
+import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 /**
  * An pre-authenticated processing filter which extracts the principal from a
  * request URI and the credential from a request header in a the
- * {@link TenantSecurityToken}.
+ * {@link DmfTenantSecurityToken}.
  *
  */
 public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractControllerAuthenticationFilter {
@@ -77,7 +77,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedPrincipal(final TenantSecurityToken secruityToken) {
+    public HeaderAuthentication getPreAuthenticatedPrincipal(final DmfTenantSecurityToken secruityToken) {
         // retrieve the common name header and the authority name header from
         // the http request and combine them together
         final String commonNameValue = secruityToken.getHeader(caCommonNameHeader);
@@ -98,7 +98,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
     }
 
     @Override
-    public Object getPreAuthenticatedCredentials(final TenantSecurityToken secruityToken) {
+    public Object getPreAuthenticatedCredentials(final DmfTenantSecurityToken secruityToken) {
         final String authorityNameConfigurationValue = tenantAware.runAsTenant(secruityToken.getTenant(),
                 sslIssuerNameConfigTenantRunner);
         String controllerId = secruityToken.getControllerId();
@@ -121,7 +121,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
      * It's ok if we find the the hash in any the trusted CA chain to accept
      * this request for this tenant.
      */
-    private String getIssuerHashHeader(final TenantSecurityToken secruityToken, final String knownIssuerHashes) {
+    private String getIssuerHashHeader(final DmfTenantSecurityToken secruityToken, final String knownIssuerHashes) {
         // there may be several knownIssuerHashes configured for the tenant
         final List<String> knownHashes = splitMultiHashBySemicolon(knownIssuerHashes);
 

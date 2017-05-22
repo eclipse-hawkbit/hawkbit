@@ -24,12 +24,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Artifact {
+public class DmfArtifact {
     @JsonProperty
     private String filename;
 
     @JsonProperty
-    private ArtifactHash hashes;
+    private DmfArtifactHash hashes;
 
     @JsonProperty
     private Long size;
@@ -57,11 +57,11 @@ public class Artifact {
         this.filename = filename;
     }
 
-    public ArtifactHash getHashes() {
+    public DmfArtifactHash getHashes() {
         return hashes;
     }
 
-    public void setHashes(final ArtifactHash hashes) {
+    public void setHashes(final DmfArtifactHash hashes) {
         this.hashes = hashes;
     }
 
