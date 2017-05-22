@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.mgmt.client.resource.builder;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -105,7 +106,7 @@ public class TargetBuilder {
      * @return a list of {@link MgmtSoftwareModuleTypeRequestBodyPost}
      */
     public List<MgmtTargetRequestBody> buildAsList(final int offset, final int count) {
-        final List<MgmtTargetRequestBody> bodyList = Arrays.asList();
+        final List<MgmtTargetRequestBody> bodyList = new ArrayList<>();
         for (int index = offset; index < count + offset; index++) {
             bodyList.add(doBuild(String.format("%06d", index)));
         }

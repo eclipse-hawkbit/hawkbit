@@ -27,8 +27,8 @@ public class DistributionSetTypeBuilder {
     private String key;
     private String name;
     private String description;
-    private final List<MgmtSoftwareModuleTypeAssigment> mandatorymodules = Arrays.asList();
-    private final List<MgmtSoftwareModuleTypeAssigment> optionalmodules = Arrays.asList();
+    private final List<MgmtSoftwareModuleTypeAssigment> mandatorymodules = new ArrayList<>();
+    private final List<MgmtSoftwareModuleTypeAssigment> optionalmodules = new ArrayList<>();
 
     /**
      * @param key
