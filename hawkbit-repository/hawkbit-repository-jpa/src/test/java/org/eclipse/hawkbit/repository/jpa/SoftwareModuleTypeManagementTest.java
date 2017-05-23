@@ -20,7 +20,6 @@ import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
@@ -48,10 +47,8 @@ public class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest
     @Test
     @Description("Verifies that management queries react as specfied on calls for non existing entities "
             + " by means of throwing EntityNotFoundException.")
-    @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 1) })
+    @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 0) })
     public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
-        final SoftwareModule module = testdataFactory.createSoftwareModuleApp();
-
         verifyThrownExceptionBy(() -> softwareModuleTypeManagement.deleteSoftwareModuleType(NOT_EXIST_IDL),
                 "SoftwareModuleType");
 

@@ -240,8 +240,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
         final List<String> messages = actionUpdateStatus.getMessage();
 
-        if (message.getMessageProperties().getCorrelationId() != null
-                && message.getMessageProperties().getCorrelationId().length > 0) {
+        if (isCorrelationIdNotEmpty(message)) {
             messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "DMF message correlation-id "
                     + convertCorrelationId(message));
         }
@@ -257,7 +256,13 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
     }
 
-    private Status mapStatus(final Message message, final DmfActionUpdateStatus actionUpdateStatus, final Action action) {
+    private static boolean isCorrelationIdNotEmpty(final Message message) {
+        return message.getMessageProperties().getCorrelationId() != null
+                && message.getMessageProperties().getCorrelationId().length > 0;
+    }
+
+    private Status mapStatus(final Message message, final DmfActionUpdateStatus actionUpdateStatus,
+            final Action action) {
         Status status = null;
         switch (actionUpdateStatus.getActionStatus()) {
         case DOWNLOAD:

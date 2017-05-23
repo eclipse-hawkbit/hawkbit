@@ -76,7 +76,7 @@ public class TagBuilder {
      * @return a list of {@link MgmtTagRequestBodyPut}
      */
     public List<MgmtTagRequestBodyPut> buildAsList(final int count) {
-        final ArrayList<MgmtTagRequestBodyPut> bodyList = new ArrayList<>();
+        final List<MgmtTagRequestBodyPut> bodyList = new ArrayList<>();
         for (int index = 0; index < count; index++) {
             bodyList.add(doBuild(name + index));
         }

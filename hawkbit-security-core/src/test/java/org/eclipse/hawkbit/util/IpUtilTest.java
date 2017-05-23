@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.util;
 
+import static com.google.common.net.HttpHeaders.X_FORWARDED_FOR;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -53,7 +54,7 @@ public class IpUtilTest {
     public void getRemoteAddrFromRequestIfForwaredHeaderNotPresent() {
 
         final URI knownRemoteClientIP = IpUtil.createHttpUri("127.0.0.1");
-        when(requestMock.getHeader("X-Forwarded-For")).thenReturn(null);
+        when(requestMock.getHeader(X_FORWARDED_FOR)).thenReturn(null);
         when(requestMock.getRemoteAddr()).thenReturn(knownRemoteClientIP.getHost());
 
         final URI remoteAddr = IpUtil.getClientIpFromRequest(requestMock, KNOWN_REQUEST_HEADER);
@@ -70,7 +71,7 @@ public class IpUtilTest {
     public void maskRemoteAddrIfDisabled() {
 
         final URI knownRemoteClientIP = IpUtil.createHttpUri("***");
-        when(requestMock.getHeader("X-Forwarded-For")).thenReturn(null);
+        when(requestMock.getHeader(X_FORWARDED_FOR)).thenReturn(null);
         when(requestMock.getRemoteAddr()).thenReturn(knownRemoteClientIP.getHost());
         when(securityPropertyMock.getClients()).thenReturn(clientMock);
         when(clientMock.getRemoteIpHeader()).thenReturn(KNOWN_REQUEST_HEADER);
@@ -89,14 +90,14 @@ public class IpUtilTest {
     public void getRemoteAddrFromXForwardedForHeader() {
 
         final URI knownRemoteClientIP = IpUtil.createHttpUri("10.99.99.1");
-        when(requestMock.getHeader("X-Forwarded-For")).thenReturn(knownRemoteClientIP.getHost());
+        when(requestMock.getHeader(X_FORWARDED_FOR)).thenReturn(knownRemoteClientIP.getHost());
         when(requestMock.getRemoteAddr()).thenReturn(null);
 
         final URI remoteAddr = IpUtil.getClientIpFromRequest(requestMock, "X-Forwarded-For");
 
         assertThat(remoteAddr).as("The remote address should be as the known client IP address")
                 .isEqualTo(knownRemoteClientIP);
-        verify(requestMock, times(1)).getHeader("X-Forwarded-For");
+        verify(requestMock, times(1)).getHeader(X_FORWARDED_FOR);
         verify(requestMock, times(0)).getRemoteAddr();
     }
 

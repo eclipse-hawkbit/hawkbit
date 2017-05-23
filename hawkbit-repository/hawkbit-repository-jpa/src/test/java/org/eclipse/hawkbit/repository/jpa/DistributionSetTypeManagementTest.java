@@ -15,10 +15,8 @@ import java.util.Arrays;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
@@ -40,11 +38,8 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
     @Test
     @Description("Verifies that management get access react as specfied on calls for non existing entities by means "
             + "of Optional not present.")
-    @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 0) })
     public void nonExistingEntityAccessReturnsNotPresent() {
-        final DistributionSet set = testdataFactory.createDistributionSet();
-
         assertThat(distributionSetTypeManagement.findDistributionSetTypeById(NOT_EXIST_IDL)).isNotPresent();
         assertThat(distributionSetTypeManagement.findDistributionSetTypeByKey(NOT_EXIST_ID)).isNotPresent();
         assertThat(distributionSetTypeManagement.findDistributionSetTypeByName(NOT_EXIST_ID)).isNotPresent();

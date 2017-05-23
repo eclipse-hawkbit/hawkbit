@@ -113,7 +113,7 @@ public class DistributionSetBuilder {
      * @return a list of {@link MgmtDistributionSetRequestBodyPost}
      */
     public List<MgmtDistributionSetRequestBodyPost> buildAsList(final int offset, final int count) {
-        final ArrayList<MgmtDistributionSetRequestBodyPost> bodyList = new ArrayList<>();
+        final List<MgmtDistributionSetRequestBodyPost> bodyList = new ArrayList<>();
         for (int index = offset; index < count + offset; index++) {
             bodyList.add(doBuild(String.valueOf(index)));
         }

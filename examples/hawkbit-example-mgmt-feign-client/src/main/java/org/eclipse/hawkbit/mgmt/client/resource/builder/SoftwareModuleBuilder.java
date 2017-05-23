@@ -103,7 +103,7 @@ public class SoftwareModuleBuilder {
      * @return a list of {@link MgmtDistributionSetTypeRequestBodyPost}
      */
     public List<MgmtSoftwareModuleRequestBodyPost> buildAsList(final int count) {
-        final ArrayList<MgmtSoftwareModuleRequestBodyPost> bodyList = new ArrayList<>();
+        final List<MgmtSoftwareModuleRequestBodyPost> bodyList = new ArrayList<>();
         for (int index = 0; index < count; index++) {
             bodyList.add(doBuild(String.valueOf(index)));
         }

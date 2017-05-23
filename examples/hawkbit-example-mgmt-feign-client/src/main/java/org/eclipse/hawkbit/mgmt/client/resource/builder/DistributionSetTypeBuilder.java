@@ -115,7 +115,7 @@ public class DistributionSetTypeBuilder {
      * @return a list of {@link MgmtDistributionSetTypeRequestBodyPost}
      */
     public List<MgmtDistributionSetTypeRequestBodyPost> buildAsList(final int count) {
-        final ArrayList<MgmtDistributionSetTypeRequestBodyPost> bodyList = new ArrayList<>();
+        final List<MgmtDistributionSetTypeRequestBodyPost> bodyList = new ArrayList<>();
         for (int index = 0; index < count; index++) {
             bodyList.add(doBuild(String.valueOf(index)));
         }
