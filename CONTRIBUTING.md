@@ -40,7 +40,7 @@ Note that the guava project for instance often documents where they thing that J
 Examples:
 
 * Prefer `Arrays.asList(...)` from JDK over guava's `Lists.newArrayList(...)`
-* Prefer `StringUtils` from Spring over Apache's
+* Prefer `StringUtils` from Spring over guava's `Strings` Apache's `StringUtils`
 
 ### Test documentation
 
