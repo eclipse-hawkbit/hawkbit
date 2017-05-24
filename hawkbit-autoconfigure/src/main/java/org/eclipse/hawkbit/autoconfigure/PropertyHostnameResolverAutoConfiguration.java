@@ -20,6 +20,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 
 import com.google.common.base.Throwables;
 
@@ -29,6 +30,7 @@ import com.google.common.base.Throwables;
  */
 @Configuration
 @EnableConfigurationProperties({ HawkbitServerProperties.class, ArtifactUrlHandlerProperties.class })
+@PropertySource("classpath:/hawkbit-artifactdl-defaults.properties")
 public class PropertyHostnameResolverAutoConfiguration {
 
     /**

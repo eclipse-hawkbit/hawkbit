@@ -16,9 +16,9 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.hawkbit.repository.exception.InvalidTenantConfigurationKeyException;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
-import org.eclipse.hawkbit.tenancy.configuration.InvalidTenantConfigurationKeyException;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationValidatorException;
 import org.junit.Assert;

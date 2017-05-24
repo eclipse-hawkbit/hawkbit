@@ -10,8 +10,10 @@ package org.eclipse.hawkbit.ddi.rest.resource;
 
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.test.context.TestPropertySource;
 
 @SpringApplicationConfiguration(classes = { DdiApiConfiguration.class })
+@TestPropertySource(locations = "classpath:/ddi-test.properties")
 public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrationTest {
 
 }

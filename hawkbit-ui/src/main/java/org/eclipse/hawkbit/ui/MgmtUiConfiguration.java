@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.PropertySource;
 
 /**
  * Enables UI components for the Management UI.
@@ -26,6 +27,7 @@ import org.springframework.context.annotation.Import;
 @ComponentScan
 @Import(AsyncVaadinServletConfiguration.class)
 @EnableConfigurationProperties(UiProperties.class)
+@PropertySource("classpath:/hawkbit-ui-defaults.properties")
 public class MgmtUiConfiguration {
 
     @Bean

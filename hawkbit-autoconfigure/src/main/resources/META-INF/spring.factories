@@ -14,5 +14,4 @@ org.eclipse.hawkbit.autoconfigure.scheduling.ExecutorAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.security.SecurityAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.security.InMemoryUserManagementAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.web.WebMvcAutoConfiguration,\
-org.eclipse.hawkbit.autoconfigure.DefaultPropertiesAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.PropertyHostnameResolverAutoConfiguration

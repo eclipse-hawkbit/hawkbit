@@ -55,6 +55,7 @@ import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -97,6 +98,7 @@ import com.google.common.collect.Lists;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, mode = AdviceMode.ASPECTJ, proxyTargetClass = true, securedEnabled = true)
 @Order(value = Ordered.HIGHEST_PRECEDENCE)
+@PropertySource("classpath:/hawkbit-security-defaults.properties")
 public class SecurityManagedConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(SecurityManagedConfiguration.class);

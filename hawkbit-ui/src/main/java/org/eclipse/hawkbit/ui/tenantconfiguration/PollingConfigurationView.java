@@ -27,7 +27,7 @@ import com.vaadin.ui.VerticalLayout;
  * View to configure the polling interval and the overdue time.
  */
 public class PollingConfigurationView extends BaseConfigurationView
-        implements ConfigurationGroup, ConfigurationItem.ConfigurationItemChangeListener {
+        implements ConfigurationItem.ConfigurationItemChangeListener {
 
     private static final long serialVersionUID = 1L;
 
