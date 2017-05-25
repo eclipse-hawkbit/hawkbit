@@ -8,35 +8,31 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
+import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionStatus;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtDistributionSetAssigment;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAttributes;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
-import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.rest.data.SortDirection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -189,23 +185,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        final MgmtAction result = MgmtTargetMapper.toResponse(controllerId, action, action.isActive());
-
-        if (!action.isCancelingOrCanceled()) {
-            result.add(linkTo(
-                    methodOn(MgmtDistributionSetRestApi.class).getDistributionSet(action.getDistributionSet().getId()))
-                            .withRel("distributionset"));
-        } else if (action.isCancelingOrCanceled()) {
-            result.add(linkTo(methodOn(MgmtTargetRestApi.class).getAction(controllerId, action.getId()))
-                    .withRel(MgmtRestConstants.TARGET_V1_CANCELED_ACTION));
-        }
-
-        result.add(linkTo(methodOn(MgmtTargetRestApi.class).getActionStatusList(controllerId, action.getId(), 0,
-                MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE,
-                ActionStatusFields.ID.getFieldName() + ":" + SortDirection.DESC))
-                        .withRel(MgmtRestConstants.TARGET_V1_ACTION_STATUS));
-
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return new ResponseEntity<>(MgmtTargetMapper.toResponseWithLinks(controllerId, action), HttpStatus.OK);
     }
 
     @Override
@@ -301,6 +281,26 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     private Target findTargetWithExceptionIfNotFound(final String controllerId) {
         return targetManagement.findTargetByControllerID(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+    }
+
+    @Override
+    public ResponseEntity<MgmtAction> updateAction(@PathVariable("controllerId") final String controllerId,
+            @PathVariable("actionId") final Long actionId, @RequestBody final MgmtActionRequestBodyPut actionUpdate) {
+
+        Action action = deploymentManagement.findAction(actionId)
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
+        if (!action.getTarget().getControllerId().equals(controllerId)) {
+            LOG.warn("given action ({}) is not assigned to given target ({}).", action.getId(), controllerId);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        if (!actionUpdate.isForced()) {
+            throw new ConstraintViolationException("Resource supports only switch to FORCED.");
+        }
+
+        action = deploymentManagement.forceTargetAction(actionId);
+
+        return new ResponseEntity<>(MgmtTargetMapper.toResponseWithLinks(controllerId, action), HttpStatus.OK);
     }
 
 }

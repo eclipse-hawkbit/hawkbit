@@ -56,10 +56,10 @@ public interface MgmtDistributionSetTypeRestApi {
     @RequestMapping(method = RequestMethod.GET, produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtDistributionSetType>> getDistributionSetTypes(
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam);
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) String rsqlParam);
 
     /**
      * Handles the GET request of retrieving a single DistributionSetType
@@ -73,7 +73,7 @@ public interface MgmtDistributionSetTypeRestApi {
     @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetTypeId}", produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSetType> getDistributionSetType(
-            @PathVariable("distributionSetTypeId") final Long distributionSetTypeId);
+            @PathVariable("distributionSetTypeId") Long distributionSetTypeId);
 
     /**
      * Handles the DELETE request for a single Distribution Set Type.
@@ -84,8 +84,7 @@ public interface MgmtDistributionSetTypeRestApi {
      *
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "/{distributionSetTypeId}")
-    ResponseEntity<Void> deleteDistributionSetType(
-            @PathVariable("distributionSetTypeId") final Long distributionSetTypeId);
+    ResponseEntity<Void> deleteDistributionSetType(@PathVariable("distributionSetTypeId") Long distributionSetTypeId);
 
     /**
      * Handles the PUT request of updating a Distribution Set Type.
@@ -100,8 +99,8 @@ public interface MgmtDistributionSetTypeRestApi {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSetType> updateDistributionSetType(
-            @PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
-            final MgmtDistributionSetTypeRequestBodyPut restDistributionSetType);
+            @PathVariable("distributionSetTypeId") Long distributionSetTypeId,
+            MgmtDistributionSetTypeRequestBodyPut restDistributionSetType);
 
     /**
      * Handles the POST request of creating new DistributionSetTypes. The
@@ -118,7 +117,7 @@ public interface MgmtDistributionSetTypeRestApi {
             MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtDistributionSetType>> createDistributionSetTypes(
-            final List<MgmtDistributionSetTypeRequestBodyPost> distributionSetTypes);
+            List<MgmtDistributionSetTypeRequestBodyPost> distributionSetTypes);
 
     /**
      * Handles the GET request of retrieving the list of mandatory software
@@ -132,7 +131,7 @@ public interface MgmtDistributionSetTypeRestApi {
             + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtSoftwareModuleType>> getMandatoryModules(
-            @PathVariable("distributionSetTypeId") final Long distributionSetTypeId);
+            @PathVariable("distributionSetTypeId") Long distributionSetTypeId);
 
     /**
      * Handles the GET request of retrieving the single mandatory software
@@ -148,8 +147,8 @@ public interface MgmtDistributionSetTypeRestApi {
             + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES
             + "/{softwareModuleTypeId}", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModuleType> getMandatoryModule(
-            @PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
-            @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId);
+            @PathVariable("distributionSetTypeId") Long distributionSetTypeId,
+            @PathVariable("softwareModuleTypeId") Long softwareModuleTypeId);
 
     /**
      * Handles the GET request of retrieving the single optional software module
@@ -165,8 +164,8 @@ public interface MgmtDistributionSetTypeRestApi {
             + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES
             + "/{softwareModuleTypeId}", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModuleType> getOptionalModule(
-            @PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
-            @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId);
+            @PathVariable("distributionSetTypeId") Long distributionSetTypeId,
+            @PathVariable("softwareModuleTypeId") Long softwareModuleTypeId);
 
     /**
      * Handles the GET request of retrieving the list of optional software
@@ -180,7 +179,7 @@ public interface MgmtDistributionSetTypeRestApi {
             + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtSoftwareModuleType>> getOptionalModules(
-            @PathVariable("distributionSetTypeId") final Long distributionSetTypeId);
+            @PathVariable("distributionSetTypeId") Long distributionSetTypeId);
 
     /**
      * Handles DELETE request for removing a mandatory module from the
@@ -195,8 +194,8 @@ public interface MgmtDistributionSetTypeRestApi {
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "/{distributionSetTypeId}/"
             + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES + "/{softwareModuleTypeId}")
-    ResponseEntity<Void> removeMandatoryModule(@PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
-            @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId);
+    ResponseEntity<Void> removeMandatoryModule(@PathVariable("distributionSetTypeId") Long distributionSetTypeId,
+            @PathVariable("softwareModuleTypeId") Long softwareModuleTypeId);
 
     /**
      * Handles DELETE request for removing an optional module from the
@@ -211,8 +210,8 @@ public interface MgmtDistributionSetTypeRestApi {
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "/{distributionSetTypeId}/"
             + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES + "/{softwareModuleTypeId}")
-    ResponseEntity<Void> removeOptionalModule(@PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
-            @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId);
+    ResponseEntity<Void> removeOptionalModule(@PathVariable("distributionSetTypeId") Long distributionSetTypeId,
+            @PathVariable("softwareModuleTypeId") Long softwareModuleTypeId);
 
     /**
      * Handles the POST request for adding a mandatory software module type to a
@@ -228,8 +227,8 @@ public interface MgmtDistributionSetTypeRestApi {
     @RequestMapping(method = RequestMethod.POST, value = "/{distributionSetTypeId}/"
             + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES, consumes = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<Void> addMandatoryModule(@PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
-            final MgmtId smtId);
+    ResponseEntity<Void> addMandatoryModule(@PathVariable("distributionSetTypeId") Long distributionSetTypeId,
+            MgmtId smtId);
 
     /**
      * Handles the POST request for adding an optional software module type to a
@@ -245,7 +244,7 @@ public interface MgmtDistributionSetTypeRestApi {
     @RequestMapping(method = RequestMethod.POST, value = "/{distributionSetTypeId}/"
             + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES, consumes = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<Void> addOptionalModule(@PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
-            final MgmtId smtId);
+    ResponseEntity<Void> addOptionalModule(@PathVariable("distributionSetTypeId") Long distributionSetTypeId,
+            MgmtId smtId);
 
 }

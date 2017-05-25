@@ -52,10 +52,10 @@ public interface MgmtSoftwareModuleTypeRestApi {
     @RequestMapping(method = RequestMethod.GET, produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtSoftwareModuleType>> getTypes(
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam);
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) String rsqlParam);
 
     /**
      * Handles the GET request of retrieving a single software module type .
@@ -68,7 +68,7 @@ public interface MgmtSoftwareModuleTypeRestApi {
     @RequestMapping(method = RequestMethod.GET, value = "/{softwareModuleTypeId}", produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModuleType> getSoftwareModuleType(
-            @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId);
+            @PathVariable("softwareModuleTypeId") Long softwareModuleTypeId);
 
     /**
      * Handles the DELETE request for a single software module type .
@@ -79,8 +79,7 @@ public interface MgmtSoftwareModuleTypeRestApi {
      *
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "/{softwareModuleTypeId}")
-    ResponseEntity<Void> deleteSoftwareModuleType(
-            @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId);
+    ResponseEntity<Void> deleteSoftwareModuleType(@PathVariable("softwareModuleTypeId") Long softwareModuleTypeId);
 
     /**
      * Handles the PUT request of updating a software module type .
@@ -95,8 +94,8 @@ public interface MgmtSoftwareModuleTypeRestApi {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModuleType> updateSoftwareModuleType(
-            @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId,
-            final MgmtSoftwareModuleTypeRequestBodyPut restSoftwareModuleType);
+            @PathVariable("softwareModuleTypeId") Long softwareModuleTypeId,
+            MgmtSoftwareModuleTypeRequestBodyPut restSoftwareModuleType);
 
     /**
      * Handles the POST request of creating new SoftwareModuleTypes. The request
@@ -113,6 +112,6 @@ public interface MgmtSoftwareModuleTypeRestApi {
             MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtSoftwareModuleType>> createSoftwareModuleTypes(
-            final List<MgmtSoftwareModuleTypeRequestBodyPost> softwareModuleTypes);
+            List<MgmtSoftwareModuleTypeRequestBodyPost> softwareModuleTypes);
 
 }

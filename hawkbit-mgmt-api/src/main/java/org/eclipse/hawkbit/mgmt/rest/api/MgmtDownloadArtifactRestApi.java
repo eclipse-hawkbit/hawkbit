@@ -39,7 +39,7 @@ public interface MgmtDownloadArtifactRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{softwareModuleId}/artifacts/{artifactId}/download")
     @ResponseBody
-    ResponseEntity<InputStream> downloadArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
-            @PathVariable("artifactId") final Long artifactId);
+    ResponseEntity<InputStream> downloadArtifact(@PathVariable("softwareModuleId") Long softwareModuleId,
+            @PathVariable("artifactId") Long artifactId);
 
 }
