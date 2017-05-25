@@ -198,7 +198,7 @@ public final class SPUIComponentProvider {
      * @return Label
      */
     public static Label createNameValueLabel(final String label, final String... values) {
-        final String valueStr = StringUtils.arrayToCommaDelimitedString(values);
+        final String valueStr = StringUtils.arrayToDelimitedString(values, " ");
         final Label nameValueLabel = new Label(getBoldHTMLText(label) + valueStr, ContentMode.HTML);
         nameValueLabel.setSizeFull();
         nameValueLabel.addStyleName(SPUIDefinitions.TEXT_STYLE);

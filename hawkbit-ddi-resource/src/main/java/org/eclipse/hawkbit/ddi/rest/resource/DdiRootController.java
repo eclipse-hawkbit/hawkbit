@@ -82,7 +82,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     private ControllerManagement controllerManagement;
 
     @Autowired
-    private SoftwareModuleManagement softwareManagement;
+    private SoftwareModuleManagement softwareModuleManagement;
 
     @Autowired
     private ArtifactManagement artifactManagement;
@@ -114,7 +114,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         final Target target = controllerManagement.findByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
-        final SoftwareModule softwareModule = softwareManagement.findSoftwareModuleById(softwareModuleId)
+        final SoftwareModule softwareModule = softwareModuleManagement.findSoftwareModuleById(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
 
         return new ResponseEntity<>(
@@ -144,7 +144,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         final Target target = controllerManagement.findByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
-        final SoftwareModule module = softwareManagement.findSoftwareModuleById(softwareModuleId)
+        final SoftwareModule module = softwareModuleManagement.findSoftwareModuleById(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
 
         if (checkModule(fileName, module)) {
@@ -208,7 +208,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         controllerManagement.findByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
-        final SoftwareModule module = softwareManagement.findSoftwareModuleById(softwareModuleId)
+        final SoftwareModule module = softwareModuleManagement.findSoftwareModuleById(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
 
         if (checkModule(fileName, module)) {

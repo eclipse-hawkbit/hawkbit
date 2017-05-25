@@ -57,7 +57,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
 
     private final ManageDistUIState manageDistUIState;
 
-    private final transient SoftwareModuleManagement softwareManagement;
+    private final transient SoftwareModuleManagement softwareModuleManagement;
 
     private final transient TargetManagement targetManagement;
 
@@ -78,7 +78,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
                 createSoftwareModuleDetailsTable(i18n, permissionChecker, distributionSetManagement, eventBus,
                         manageDistUIState, uiNotification));
         this.manageDistUIState = manageDistUIState;
-        this.softwareManagement = softwareManagement;
+        this.softwareModuleManagement = softwareManagement;
         this.targetManagement = targetManagement;
 
         tfqDetailsTable = new TargetFilterQueryDetailsTable(i18n);
@@ -127,7 +127,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
             }
 
             softwareModuleIdNameList.stream().map(SoftwareModuleIdName::getId)
-                    .map(softwareManagement::findSoftwareModuleById)
+                    .map(softwareModuleManagement::findSoftwareModuleById)
                     .forEach(found -> found.ifPresent(softwareModule -> {
 
                         if (assignedSWModule.containsKey(softwareModule.getType().getName())) {

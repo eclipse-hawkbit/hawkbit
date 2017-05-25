@@ -45,7 +45,7 @@ public abstract class AbstractSoftwareModuleDetails
 
     private final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow;
 
-    private final transient SoftwareModuleManagement softwareManagement;
+    private final transient SoftwareModuleManagement softwareModuleManagement;
 
     private final SwMetadataPopupLayout swMetadataPopupLayout;
 
@@ -55,7 +55,7 @@ public abstract class AbstractSoftwareModuleDetails
             final EntityFactory entityFactory, final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow) {
         super(i18n, eventBus, permissionChecker, managementUIState);
         this.softwareModuleAddUpdateWindow = softwareModuleAddUpdateWindow;
-        this.softwareManagement = softwareManagement;
+        this.softwareModuleManagement = softwareManagement;
         this.swMetadataPopupLayout = swMetadataPopupLayout;
 
         swmMetadataTable = new SoftwareModuleMetadatadetailslayout();
@@ -139,7 +139,7 @@ public abstract class AbstractSoftwareModuleDetails
 
     @Override
     protected void showMetadata(final ClickEvent event) {
-        softwareManagement.findSoftwareModuleById(getSelectedBaseEntityId())
+        softwareModuleManagement.findSoftwareModuleById(getSelectedBaseEntityId())
                 .ifPresent(swmodule -> UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null)));
     }
 

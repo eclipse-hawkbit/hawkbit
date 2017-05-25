@@ -21,10 +21,10 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
  */
 public class JpaDistributionSetTypeBuilder implements DistributionSetTypeBuilder {
 
-    private final SoftwareModuleManagement softwareManagement;
+    private final SoftwareModuleManagement softwareModuleManagement;
 
     public JpaDistributionSetTypeBuilder(final SoftwareModuleManagement softwareManagement) {
-        this.softwareManagement = softwareManagement;
+        this.softwareModuleManagement = softwareManagement;
     }
 
     @Override
@@ -34,7 +34,7 @@ public class JpaDistributionSetTypeBuilder implements DistributionSetTypeBuilder
 
     @Override
     public DistributionSetTypeCreate create() {
-        return new JpaDistributionSetTypeCreate(softwareManagement);
+        return new JpaDistributionSetTypeCreate(softwareModuleManagement);
     }
 
 }

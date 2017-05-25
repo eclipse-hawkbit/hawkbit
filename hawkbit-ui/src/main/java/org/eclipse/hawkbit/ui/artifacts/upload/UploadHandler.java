@@ -73,7 +73,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     private SoftwareModule selectedSwForUpload;
     private final ArtifactUploadState artifactUploadState;
 
-    private final transient SoftwareModuleManagement softwareManagement;
+    private final transient SoftwareModuleManagement softwareModuleManagement;
 
     UploadHandler(final String fileName, final long fileSize, final UploadLayout view, final long maxSize,
             final Upload upload, final String mimeType, final SoftwareModule selectedSw,
@@ -90,7 +90,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         this.i18n = SpringContextHelper.getBean(VaadinMessageSource.class);
         this.eventBus = SpringContextHelper.getBean(EventBus.UIEventBus.class);
         this.artifactUploadState = SpringContextHelper.getBean(ArtifactUploadState.class);
-        this.softwareManagement = softwareManagement;
+        this.softwareModuleManagement = softwareManagement;
         eventBus.subscribe(this);
     }
 
@@ -217,7 +217,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
 
         final Optional<Long> selectedBaseSwModuleId = artifactUploadState.getSelectedBaseSwModuleId();
         if (selectedBaseSwModuleId.isPresent()) {
-            selectedSwForUpload = softwareManagement.findSoftwareModuleById(selectedBaseSwModuleId.get()).orElse(null);
+            selectedSwForUpload = softwareModuleManagement.findSoftwareModuleById(selectedBaseSwModuleId.get()).orElse(null);
         }
 
         if (selectedSwForUpload != null && view.checkIfSoftwareModuleIsSelected()

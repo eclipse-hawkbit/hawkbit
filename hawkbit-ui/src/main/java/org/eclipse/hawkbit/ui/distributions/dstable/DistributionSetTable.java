@@ -83,7 +83,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     private final transient DistributionSetManagement distributionSetManagement;
 
-    private final transient SoftwareModuleManagement softwareManagement;
+    private final transient SoftwareModuleManagement softwareModuleManagement;
 
     private final DistributionsViewClientCriterion distributionsViewClientCriterion;
 
@@ -100,7 +100,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         this.permissionChecker = permissionChecker;
         this.manageDistUIState = manageDistUIState;
         this.distributionSetManagement = distributionSetManagement;
-        this.softwareManagement = softwareManagement;
+        this.softwareModuleManagement = softwareManagement;
         this.distributionsViewClientCriterion = distributionsViewClientCriterion;
         this.targetManagement = targetManagement;
         this.dsMetadataPopupLayout = dsMetadataPopupLayout;
@@ -259,7 +259,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             final String name = (String) softwareItem.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
             final String swVersion = (String) softwareItem.getItemProperty(SPUILabelDefinitions.VAR_VERSION).getValue();
 
-            final Optional<SoftwareModule> softwareModule = softwareManagement.findSoftwareModuleById(softwareModuleId);
+            final Optional<SoftwareModule> softwareModule = softwareModuleManagement.findSoftwareModuleById(softwareModuleId);
 
             if (softwareModule.isPresent() && validSoftwareModule((Long) distId, softwareModule.get())) {
                 final SoftwareModuleIdName softwareModuleIdName = new SoftwareModuleIdName(softwareModuleId,

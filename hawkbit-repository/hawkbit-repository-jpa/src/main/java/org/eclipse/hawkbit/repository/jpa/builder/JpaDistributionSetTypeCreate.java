@@ -26,10 +26,10 @@ import org.springframework.util.CollectionUtils;
 public class JpaDistributionSetTypeCreate extends AbstractDistributionSetTypeUpdateCreate<DistributionSetTypeCreate>
         implements DistributionSetTypeCreate {
 
-    private final SoftwareModuleManagement softwareManagement;
+    private final SoftwareModuleManagement softwareModuleManagement;
 
     JpaDistributionSetTypeCreate(final SoftwareModuleManagement softwareManagement) {
-        this.softwareManagement = softwareManagement;
+        this.softwareModuleManagement = softwareManagement;
     }
 
     @Override
@@ -48,7 +48,7 @@ public class JpaDistributionSetTypeCreate extends AbstractDistributionSetTypeUpd
             return Collections.emptyList();
         }
 
-        final Collection<SoftwareModuleType> module = softwareManagement
+        final Collection<SoftwareModuleType> module = softwareModuleManagement
                 .findSoftwareModuleTypesById(softwareModuleTypeId);
         if (module.size() < softwareModuleTypeId.size()) {
             throw new EntityNotFoundException(SoftwareModuleType.class, softwareModuleTypeId);

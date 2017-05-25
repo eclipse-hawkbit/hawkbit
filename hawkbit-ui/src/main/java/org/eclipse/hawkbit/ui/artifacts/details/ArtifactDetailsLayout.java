@@ -104,7 +104,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private final transient ArtifactManagement artifactManagement;
 
-    private final transient SoftwareModuleManagement softwareManagement;
+    private final transient SoftwareModuleManagement softwareModuleManagement;
 
     /**
      * Constructor for ArtifactDetailsLayout
@@ -130,7 +130,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         this.artifactUploadState = artifactUploadState;
         this.uINotification = uINotification;
         this.artifactManagement = artifactManagement;
-        this.softwareManagement = softwareManagement;
+        this.softwareModuleManagement = softwareManagement;
 
         final Optional<SoftwareModule> selectedSoftwareModule = findSelectedSoftwareModule();
 
@@ -155,7 +155,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     private Optional<SoftwareModule> findSelectedSoftwareModule() {
         final Optional<Long> selectedBaseSwModuleId = artifactUploadState.getSelectedBaseSwModuleId();
         if (selectedBaseSwModuleId.isPresent()) {
-            return softwareManagement.findSoftwareModuleById(selectedBaseSwModuleId.get());
+            return softwareModuleManagement.findSoftwareModuleById(selectedBaseSwModuleId.get());
         }
         return Optional.empty();
     }

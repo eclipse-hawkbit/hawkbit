@@ -71,7 +71,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
 
     private final ManageDistUIState manageDistUIState;
 
-    private final transient SoftwareModuleManagement softwareManagement;
+    private final transient SoftwareModuleManagement softwareModuleManagement;
 
     private final DistributionsViewClientCriterion distributionsViewClientCriterion;
 
@@ -86,7 +86,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
             final ArtifactUploadState artifactUploadState) {
         super(eventBus, i18n, uiNotification);
         this.manageDistUIState = manageDistUIState;
-        this.softwareManagement = softwareManagement;
+        this.softwareModuleManagement = softwareManagement;
         this.distributionsViewClientCriterion = distributionsViewClientCriterion;
         this.artifactDetailsLayout = new ArtifactDetailsLayout(i18n, eventBus, artifactUploadState, uiNotification,
                 artifactManagement, softwareManagement);
@@ -252,7 +252,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
 
     @Override
     protected Optional<SoftwareModule> findEntityByTableValue(final Long lastSelectedId) {
-        return softwareManagement.findSoftwareModuleById(lastSelectedId);
+        return softwareModuleManagement.findSoftwareModuleById(lastSelectedId);
     }
 
     @Override
@@ -414,7 +414,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
     }
 
     private void showMetadataDetails(final Long itemId) {
-        softwareManagement.findSoftwareModuleById(itemId)
+        softwareModuleManagement.findSoftwareModuleById(itemId)
                 .ifPresent(swmodule -> UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null)));
     }
 

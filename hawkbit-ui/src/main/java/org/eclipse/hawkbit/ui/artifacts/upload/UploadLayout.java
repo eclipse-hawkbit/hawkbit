@@ -111,7 +111,7 @@ public class UploadLayout extends VerticalLayout {
 
     private Button uploadStatusButton;
 
-    private final transient SoftwareModuleManagement softwareManagement;
+    private final transient SoftwareModuleManagement softwareModuleManagement;
 
     private static AcceptCriterion acceptAllExceptBlacklisted = new Not(new ServerItemIdClientCriterion(Mode.PREFIX,
             UIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE, UIComponentIdProvider.UPLOAD_TYPE_BUTTON_PREFIX));
@@ -128,7 +128,7 @@ public class UploadLayout extends VerticalLayout {
         this.artifactUploadState = artifactUploadState;
         this.multipartConfigElement = multipartConfigElement;
         this.artifactManagement = artifactManagement;
-        this.softwareManagement = softwareManagement;
+        this.softwareModuleManagement = softwareManagement;
 
         createComponents();
         buildLayout();
@@ -177,7 +177,7 @@ public class UploadLayout extends VerticalLayout {
 
         final Upload upload = new Upload();
         final UploadHandler uploadHandler = new UploadHandler(null, 0, this, multipartConfigElement.getMaxFileSize(),
-                upload, null, null, softwareManagement);
+                upload, null, null, softwareModuleManagement);
         upload.setButtonCaption(i18n.getMessage("upload.file"));
         upload.setImmediate(true);
         upload.setReceiver(uploadHandler);
@@ -251,7 +251,7 @@ public class UploadLayout extends VerticalLayout {
                 artifactUploadState.getSelectedBaseSwModuleId().ifPresent(selectedSwId -> {
                     // reset the flag
                     hasDirectory = false;
-                    final SoftwareModule softwareModule = softwareManagement.findSoftwareModuleById(selectedSwId)
+                    final SoftwareModule softwareModule = softwareModuleManagement.findSoftwareModuleById(selectedSwId)
                             .orElse(null);
                     for (final Html5File file : files) {
                         processFile(file, softwareModule);
@@ -303,7 +303,7 @@ public class UploadLayout extends VerticalLayout {
 
         private StreamVariable createStreamVariable(final Html5File file, final SoftwareModule selectedSw) {
             return new UploadHandler(file.getFileName(), file.getFileSize(), UploadLayout.this,
-                    multipartConfigElement.getMaxFileSize(), null, file.getType(), selectedSw, softwareManagement);
+                    multipartConfigElement.getMaxFileSize(), null, file.getType(), selectedSw, softwareModuleManagement);
         }
 
         private boolean isDirectory(final Html5File file) {
@@ -730,7 +730,7 @@ public class UploadLayout extends VerticalLayout {
     }
 
     void refreshArtifactDetailsLayout(final Long selectedBaseSoftwareModuleId) {
-        final SoftwareModule softwareModule = softwareManagement.findSoftwareModuleById(selectedBaseSoftwareModuleId)
+        final SoftwareModule softwareModule = softwareModuleManagement.findSoftwareModuleById(selectedBaseSoftwareModuleId)
                 .orElse(null);
         eventBus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.ARTIFACTS_CHANGED, softwareModule));
     }

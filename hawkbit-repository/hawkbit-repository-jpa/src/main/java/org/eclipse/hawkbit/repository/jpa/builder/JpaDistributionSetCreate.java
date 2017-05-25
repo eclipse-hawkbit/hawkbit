@@ -30,12 +30,12 @@ public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreat
         implements DistributionSetCreate {
 
     private final DistributionSetTypeManagement distributionSetTypeManagement;
-    private final SoftwareModuleManagement softwareManagement;
+    private final SoftwareModuleManagement softwareModuleManagement;
 
     JpaDistributionSetCreate(final DistributionSetTypeManagement distributionSetTypeManagement,
             final SoftwareModuleManagement softwareManagement) {
         this.distributionSetTypeManagement = distributionSetTypeManagement;
-        this.softwareManagement = softwareManagement;
+        this.softwareModuleManagement = softwareManagement;
     }
 
     @Override
@@ -57,7 +57,7 @@ public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreat
             return Collections.emptyList();
         }
 
-        final Collection<SoftwareModule> module = softwareManagement.findSoftwareModulesById(softwareModuleId);
+        final Collection<SoftwareModule> module = softwareModuleManagement.findSoftwareModulesById(softwareModuleId);
         if (module.size() < softwareModuleId.size()) {
             throw new EntityNotFoundException(SoftwareModule.class, softwareModuleId);
         }

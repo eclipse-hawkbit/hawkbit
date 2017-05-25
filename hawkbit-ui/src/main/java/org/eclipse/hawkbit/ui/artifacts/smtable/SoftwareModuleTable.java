@@ -60,7 +60,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     private final ArtifactUploadState artifactUploadState;
 
-    private final transient SoftwareModuleManagement softwareManagement;
+    private final transient SoftwareModuleManagement softwareModuleManagement;
 
     private final UploadViewClientCriterion uploadViewClientCriterion;
 
@@ -72,7 +72,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
             final SwMetadataPopupLayout swMetadataPopupLayout) {
         super(eventBus, i18n, uiNotification);
         this.artifactUploadState = artifactUploadState;
-        this.softwareManagement = softwareManagement;
+        this.softwareModuleManagement = softwareManagement;
         this.uploadViewClientCriterion = uploadViewClientCriterion;
         this.swMetadataPopupLayout = swMetadataPopupLayout;
 
@@ -145,7 +145,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     @Override
     protected Optional<SoftwareModule> findEntityByTableValue(final Long entityTableId) {
-        return softwareManagement.findSoftwareModuleById(entityTableId);
+        return softwareModuleManagement.findSoftwareModuleById(entityTableId);
     }
 
     @Override
@@ -253,7 +253,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     }
 
     private void showMetadataDetails(final Long itemId) {
-        softwareManagement.findSoftwareModuleById(itemId)
+        softwareModuleManagement.findSoftwareModuleById(itemId)
                 .ifPresent(swmodule -> UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null)));
     }
 

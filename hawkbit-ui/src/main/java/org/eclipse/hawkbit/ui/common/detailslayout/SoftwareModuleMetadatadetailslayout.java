@@ -48,7 +48,7 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
 
     private SpPermissionChecker permissionChecker;
 
-    private transient SoftwareModuleManagement softwareManagement;
+    private transient SoftwareModuleManagement softwareModuleManagement;
 
     private SwMetadataPopupLayout swMetadataPopupLayout;
 
@@ -77,7 +77,7 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
             final EntityFactory entityFactory) {
         this.i18n = i18n;
         this.permissionChecker = permissionChecker;
-        this.softwareManagement = softwareManagement;
+        this.softwareModuleManagement = softwareManagement;
         this.swMetadataPopupLayout = swMetadataPopupLayout;
         this.entityFactory = entityFactory;
         createSWMMetadataTable();
@@ -95,7 +95,7 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
             return;
         }
         selectedSWModuleId = swModule.getId();
-        final List<SoftwareModuleMetadata> swMetadataList = softwareManagement
+        final List<SoftwareModuleMetadata> swMetadataList = softwareModuleManagement
                 .findSoftwareModuleMetadataBySoftwareModuleId(selectedSWModuleId,
                         new PageRequest(0, MAX_METADATA_QUERY))
                 .getContent();
@@ -177,7 +177,7 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
     }
 
     private void showMetadataDetails(final Long selectedSWModuleId, final String metadataKey) {
-        softwareManagement.findSoftwareModuleById(selectedSWModuleId).ifPresent(swmodule -> UI.getCurrent()
+        softwareModuleManagement.findSoftwareModuleById(selectedSWModuleId).ifPresent(swmodule -> UI.getCurrent()
                 .addWindow(swMetadataPopupLayout.getWindow(swmodule, entityFactory.generateMetadata(metadataKey, ""))));
     }
 

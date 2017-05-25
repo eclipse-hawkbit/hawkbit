@@ -80,7 +80,7 @@ public class SwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSwModuleItem> 
 
     @Override
     protected List<ProxyBaseSwModuleItem> loadBeans(final int startIndex, final int count) {
-        return getSoftwareManagement()
+        return getSoftwareModuleManagement()
                 .findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(
                         new OffsetBasedPageRequest(startIndex, count), orderByDistId, searchText, type)
                 .getContent().stream().map(SwModuleBeanQuery::getProxyBean).collect(Collectors.toList());
@@ -110,9 +110,9 @@ public class SwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSwModuleItem> 
     public int size() {
         long size;
         if (type == null && StringUtils.isEmpty(searchText)) {
-            size = getSoftwareManagement().countSoftwareModulesAll();
+            size = getSoftwareModuleManagement().countSoftwareModulesAll();
         } else {
-            size = getSoftwareManagement().countSoftwareModuleByFilters(searchText, type);
+            size = getSoftwareModuleManagement().countSoftwareModuleByFilters(searchText, type);
         }
 
         if (size > Integer.MAX_VALUE) {
@@ -128,7 +128,7 @@ public class SwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSwModuleItem> 
         // save of the entity not required from this method
     }
 
-    private SoftwareModuleManagement getSoftwareManagement() {
+    private SoftwareModuleManagement getSoftwareModuleManagement() {
         if (softwareManagementService == null) {
             softwareManagementService = SpringContextHelper.getBean(SoftwareModuleManagement.class);
         }
