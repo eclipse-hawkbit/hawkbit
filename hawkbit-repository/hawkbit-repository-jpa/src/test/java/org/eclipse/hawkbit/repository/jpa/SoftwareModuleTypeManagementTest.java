@@ -172,7 +172,7 @@ public class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest
     @Test
     @Description("Verfies that it is not possible to create a list of types where one already exists.")
     public void createSoftwareModuleTypesFailsWithExistingEntity() {
-        final SoftwareModuleType created = softwareModuleTypeManagement
+        softwareModuleTypeManagement
                 .createSoftwareModuleType(entityFactory.softwareModuleType().create().key("thetype").name("thename"));
         try {
             softwareModuleTypeManagement.createSoftwareModuleType(
