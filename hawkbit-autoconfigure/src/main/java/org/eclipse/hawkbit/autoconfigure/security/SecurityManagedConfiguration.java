@@ -441,6 +441,9 @@ public class SecurityManagedConfiguration {
         @Autowired
         private SecurityProperties springSecurityProperties;
 
+        @Autowired
+        private HawkbitSecurityProperties hawkbitSecurityProperties;
+
         /**
          * Filter to protect the hawkBit management UI against to many requests.
          * 
@@ -524,14 +527,16 @@ public class SecurityManagedConfiguration {
                     // disable as CSRF is handled by Vaadin
                     .csrf().disable();
 
-            // FIXME: disable JSF
-            // FIXME: cookie
             if (springSecurityProperties.isRequireSsl()) {
                 httpSec = httpSec.requiresChannel().anyRequest().requiresSecure().and();
             } else {
 
                 LOG.info(
                         "\"******************\\n** Requires HTTPS Security has been disabled for UI, should only be used for developing purposes **\\n******************\"");
+            }
+
+            if (hawkbitSecurityProperties.getContentSecurityPolicy() != null) {
+                httpSec.headers().contentSecurityPolicy(hawkbitSecurityProperties.getContentSecurityPolicy());
             }
 
             httpSec
