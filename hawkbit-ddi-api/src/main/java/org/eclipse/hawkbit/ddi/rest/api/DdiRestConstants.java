@@ -43,6 +43,13 @@ public final class DdiRestConstants {
      */
     public static final String CONFIG_DATA_ACTION = "configData";
 
+    /**
+     * Default value specifying that no action history to be sent as part of
+     * response to deploymentBase
+     * {@link DdiRootControllerRestApi#getControllerBasedeploymentAction}.
+     */
+    public static final String NO_ACTION_HISTORY = "0";
+
     private DdiRestConstants() {
         // constant class, private constructor.
     }

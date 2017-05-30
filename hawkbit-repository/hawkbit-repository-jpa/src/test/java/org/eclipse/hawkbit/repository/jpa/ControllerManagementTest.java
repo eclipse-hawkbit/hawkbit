@@ -46,6 +46,7 @@ import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -619,5 +620,26 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         testData.put("test2", "testdata20");
         assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong")
                 .isEqualTo(testData);
+    }
+
+    @Test
+    @Description("Test to verify the storage and retrieval of action history.")
+    public void findMessagesByActionStatusId() {
+        final DistributionSet testDs = testdataFactory.createDistributionSet("1");
+        final List<Target> testTarget = testdataFactory.createTargets(1);
+
+        final Long actionId = assignDistributionSet(testDs, testTarget).getActions().get(0);
+
+        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
+                .status(Action.Status.RUNNING).messages(Lists.newArrayList("proceeding message 1")));
+        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
+                .status(Action.Status.RUNNING).messages(Lists.newArrayList("proceeding message 2")));
+
+        final List<String> messages = controllerManagement.getActionHistoryMessages(actionId, 2);
+
+        assertThat(deploymentManagement.findActionStatusByAction(PAGE, actionId).getTotalElements())
+                .as("Two action-states in total").isEqualTo(3L);
+        assertThat(messages.get(0)).as("Message of action-status").isEqualTo("proceeding message 2");
+        assertThat(messages.get(1)).as("Message of action-status").isEqualTo("proceeding message 1");
     }
 }

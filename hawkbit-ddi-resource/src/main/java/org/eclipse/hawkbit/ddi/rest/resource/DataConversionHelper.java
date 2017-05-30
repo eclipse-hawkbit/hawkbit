@@ -118,7 +118,7 @@ public final class DataConversionHelper {
                 result.add(ControllerLinkBuilder
                         .linkTo(ControllerLinkBuilder.methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
                                 .getControllerBasedeploymentAction(tenantAware.getCurrentTenant(),
-                                        target.getControllerId(), action.getId(), calculateEtag(action)))
+                                        target.getControllerId(), action.getId(), calculateEtag(action), null))
                         .withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION));
             }
         }

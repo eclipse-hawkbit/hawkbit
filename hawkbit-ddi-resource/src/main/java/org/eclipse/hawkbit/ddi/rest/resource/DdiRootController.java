@@ -19,6 +19,7 @@ import javax.validation.Valid;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
+import org.eclipse.hawkbit.ddi.json.model.DdiActionHistory;
 import org.eclipse.hawkbit.ddi.json.model.DdiCancel;
 import org.eclipse.hawkbit.ddi.json.model.DdiCancelActionToStop;
 import org.eclipse.hawkbit.ddi.json.model.DdiChunk;
@@ -28,6 +29,7 @@ import org.eclipse.hawkbit.ddi.json.model.DdiDeployment;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeployment.HandlingType;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeploymentBase;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult.FinalResult;
+import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -231,7 +233,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
     public ResponseEntity<DdiDeploymentBase> getControllerBasedeploymentAction(
             @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId,
             @PathVariable("actionId") final Long actionId,
-            @RequestParam(value = "c", required = false, defaultValue = "-1") final int resource) {
+            @RequestParam(value = "c", required = false, defaultValue = "-1") final int resource,
+            @RequestParam(value = "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) final Integer actionHistoryMessageCount) {
         LOG.debug("getControllerBasedeploymentAction({},{})", controllerId, resource);
 
         final Target target = controllerManagement.findByControllerId(controllerId)
@@ -251,8 +254,15 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
             final HandlingType handlingType = action.isForce() ? HandlingType.FORCED : HandlingType.ATTEMPT;
 
+            List<String> actionHistoryMsgs = controllerManagement.getActionHistoryMessages(action.getId(),
+                    actionHistoryMessageCount == null ? Integer.parseInt(DdiRestConstants.NO_ACTION_HISTORY)
+                            : actionHistoryMessageCount);
+
+            DdiActionHistory actionHistory = actionHistoryMsgs.isEmpty() ? null
+                    : new DdiActionHistory(action.getStatus().name(), actionHistoryMsgs);
+
             final DdiDeploymentBase base = new DdiDeploymentBase(Long.toString(action.getId()),
-                    new DdiDeployment(handlingType, handlingType, chunks));
+                    new DdiDeployment(handlingType, handlingType, chunks), actionHistory);
 
             LOG.debug("Found an active UpdateAction for target {}. returning deyploment: {}", controllerId, base);
 
