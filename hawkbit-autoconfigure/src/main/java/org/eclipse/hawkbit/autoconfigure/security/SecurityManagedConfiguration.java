@@ -81,6 +81,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationEn
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.session.SessionManagementFilter;
+import org.springframework.util.StringUtils;
 import org.vaadin.spring.security.VaadinSecurityContext;
 import org.vaadin.spring.security.annotation.EnableVaadinSecurity;
 import org.vaadin.spring.security.web.VaadinDefaultRedirectStrategy;
@@ -103,7 +104,6 @@ public class SecurityManagedConfiguration {
     private static final Logger LOG = LoggerFactory.getLogger(SecurityManagedConfiguration.class);
 
     private static final int DOS_FILTER_ORDER = -200;
-    private static final int ETAG_FILTER_ORDER = 500;
 
     @Autowired
     private AuthenticationConfiguration configuration;
@@ -535,7 +535,7 @@ public class SecurityManagedConfiguration {
                         "\"******************\\n** Requires HTTPS Security has been disabled for UI, should only be used for developing purposes **\\n******************\"");
             }
 
-            if (hawkbitSecurityProperties.getContentSecurityPolicy() != null) {
+            if (!StringUtils.isEmpty(hawkbitSecurityProperties.getContentSecurityPolicy())) {
                 httpSec.headers().contentSecurityPolicy(hawkbitSecurityProperties.getContentSecurityPolicy());
             }
 
