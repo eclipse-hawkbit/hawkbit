@@ -94,6 +94,9 @@ public class DistributionTagButtons extends AbstractFilterButtons implements Ref
 
     @Override
     protected String createButtonId(final String name) {
+        if (NO_TAG.equals(name)) {
+            return UIComponentIdProvider.NO_TAG_DISTRIBUTION_SET;
+        }
         return name;
     }
 

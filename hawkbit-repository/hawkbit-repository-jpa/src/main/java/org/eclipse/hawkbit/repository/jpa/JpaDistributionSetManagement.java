@@ -33,6 +33,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
+import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.DsMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
@@ -121,6 +122,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Autowired
     private DistributionSetTagRepository distributionSetTagRepository;
+
+    @Autowired
+    private AfterTransactionCommitExecutor afterCommit;
 
     @Override
     public Optional<DistributionSet> findDistributionSetByIdWithDetails(final Long distid) {
@@ -262,9 +266,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             distributionSetRepository.deleteByIdIn(toHardDelete);
         }
 
-        distributionSetIDs.forEach(
+        afterCommit.afterCommit(() -> distributionSetIDs.forEach(
                 dsId -> eventPublisher.publishEvent(new DistributionSetDeletedEvent(tenantAware.getCurrentTenant(),
-                        dsId, JpaDistributionSet.class.getName(), applicationContext.getId())));
+                        dsId, JpaDistributionSet.class.getName(), applicationContext.getId()))));
     }
 
     @Override
