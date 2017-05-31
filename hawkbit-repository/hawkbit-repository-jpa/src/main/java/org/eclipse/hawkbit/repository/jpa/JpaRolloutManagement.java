@@ -35,6 +35,7 @@ import org.eclipse.hawkbit.repository.builder.GenericRolloutUpdate;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
+import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
@@ -142,6 +143,9 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Autowired
     private RolloutStatusCache rolloutStatusCache;
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     JpaRolloutManagement(final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
             final RolloutGroupManagement rolloutGroupManagement,
@@ -869,9 +873,19 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         rollout.setStatus(RolloutStatus.DELETED);
         rollout.setDeleted(true);
         rolloutRepository.save(rollout);
+
+        sendRolloutGroupDeletedEvents(rollout);
+    }
+
+    private void sendRolloutGroupDeletedEvents(final JpaRollout rollout) {
+        afterCommit.afterCommit(() -> rollout.getRolloutGroups().stream().map(RolloutGroup::getId)
+                .forEach(rolloutGroupId -> eventPublisher
+                        .publishEvent(new RolloutGroupDeletedEvent(tenantAware.getCurrentTenant(), rolloutGroupId,
+                                JpaRolloutGroup.class.getName(), applicationContext.getId()))));
     }
 
     private void hardDeleteRollout(final JpaRollout rollout) {
+        sendRolloutGroupDeletedEvents(rollout);
         rolloutRepository.delete(rollout);
     }
 

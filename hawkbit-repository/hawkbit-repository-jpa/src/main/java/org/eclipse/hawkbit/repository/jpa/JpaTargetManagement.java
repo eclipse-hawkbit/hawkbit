@@ -37,6 +37,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetCreate;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetUpdate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
+import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
@@ -107,6 +108,9 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Autowired
     private TenantAware tenantAware;
+
+    @Autowired
+    private AfterTransactionCommitExecutor afterCommit;
 
     @Autowired
     private VirtualPropertyReplacer virtualPropertyReplacer;
@@ -183,10 +187,10 @@ public class JpaTargetManagement implements TargetManagement {
 
         targetRepository.deleteByIdIn(targetIDs);
 
-        targets.forEach(target -> eventPublisher.publishEvent(
+        afterCommit.afterCommit(() -> targets.forEach(target -> eventPublisher.publishEvent(
                 new TargetDeletedEvent(tenantAware.getCurrentTenant(), target.getId(), target.getControllerId(),
                         Optional.ofNullable(target.getAddress()).map(URI::toString).orElse(null),
-                        JpaTarget.class.getName(), applicationContext.getId())));
+                        JpaTarget.class.getName(), applicationContext.getId()))));
     }
 
     @Override
