@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.autoconfigure.security;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.Filter;
@@ -263,8 +264,8 @@ public class SecurityManagedConfiguration {
     @Bean
     public FilterRegistrationBean dosSystemFilter(final HawkbitSecurityProperties securityProperties) {
 
-        final FilterRegistrationBean filterRegBean = dosFilter(null, securityProperties.getDos().getFilter(),
-                securityProperties.getClients());
+        final FilterRegistrationBean filterRegBean = dosFilter(Collections.emptyList(),
+                securityProperties.getDos().getFilter(), securityProperties.getClients());
         filterRegBean.setUrlPatterns(Arrays.asList("/system/*"));
         filterRegBean.setOrder(DOS_FILTER_ORDER);
         filterRegBean.setName("dosSystemFilter");

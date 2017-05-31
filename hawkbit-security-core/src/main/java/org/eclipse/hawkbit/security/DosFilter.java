@@ -62,6 +62,9 @@ public class DosFilter extends OncePerRequestFilter {
 
     /**
      * Filter constructor including configuration.
+     * 
+     * @param includeAntPaths
+     *            paths where filter should hit
      *
      * @param maxRead
      *            Maximum number of allowed REST read/GET requests per second
@@ -100,7 +103,7 @@ public class DosFilter extends OncePerRequestFilter {
     }
 
     private boolean shouldInclude(final HttpServletRequest request) {
-        if (includeAntPaths == null) {
+        if (includeAntPaths == null || includeAntPaths.isEmpty()) {
             return true;
         }
 
