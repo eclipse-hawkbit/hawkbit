@@ -20,7 +20,6 @@ import java.util.stream.StreamSupport;
 import javax.persistence.EntityManager;
 import javax.validation.ConstraintDeclarationException;
 
-import org.springframework.util.StringUtils;
 import org.eclipse.hawkbit.repository.AbstractRolloutManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -94,6 +93,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.validation.annotation.Validated;
 
@@ -878,10 +878,12 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private void sendRolloutGroupDeletedEvents(final JpaRollout rollout) {
-        afterCommit.afterCommit(() -> rollout.getRolloutGroups().stream().map(RolloutGroup::getId)
-                .forEach(rolloutGroupId -> eventPublisher
-                        .publishEvent(new RolloutGroupDeletedEvent(tenantAware.getCurrentTenant(), rolloutGroupId,
-                                JpaRolloutGroup.class.getName(), applicationContext.getId()))));
+        final List<Long> groupIds = rollout.getRolloutGroups().stream().map(RolloutGroup::getId)
+                .collect(Collectors.toList());
+
+        afterCommit.afterCommit(() -> groupIds.forEach(rolloutGroupId -> eventPublisher
+                .publishEvent(new RolloutGroupDeletedEvent(tenantAware.getCurrentTenant(), rolloutGroupId,
+                        JpaRolloutGroup.class.getName(), applicationContext.getId()))));
     }
 
     private void hardDeleteRollout(final JpaRollout rollout) {
