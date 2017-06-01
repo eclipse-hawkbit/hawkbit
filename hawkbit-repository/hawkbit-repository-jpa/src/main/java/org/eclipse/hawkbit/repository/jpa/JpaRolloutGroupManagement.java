@@ -53,6 +53,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -166,7 +167,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
         List<TotalTargetCountActionStatus> rolloutStatusCountItems = rolloutStatusCache
                 .getRolloutGroupStatus(rolloutGroupId);
 
-        if (rolloutStatusCountItems.isEmpty()) {
+        if (CollectionUtils.isEmpty(rolloutStatusCountItems)) {
             rolloutStatusCountItems = actionRepository.getStatusCountByRolloutGroupId(rolloutGroupId);
             rolloutStatusCache.putRolloutGroupStatus(rolloutGroupId, rolloutStatusCountItems);
         }

@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.util.CollectionUtils;
 
 import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.RSQLParserException;
@@ -169,7 +170,7 @@ public final class RSQLUtility {
                     virtualPropertyReplacer);
             final List<Predicate> accept = rootNode.<List<Predicate>, String> accept(jpqQueryRSQLVisitor);
 
-            if (accept != null && !accept.isEmpty()) {
+            if (!CollectionUtils.isEmpty(accept)) {
                 return cb.and(accept.toArray(new Predicate[accept.size()]));
             }
             return cb.conjunction();
@@ -652,7 +653,7 @@ public final class RSQLUtility {
             final List<Predicate> childs = new ArrayList<>();
             for (final Node node2 : children) {
                 final List<Predicate> accept = node2.accept(this);
-                if (accept != null && !accept.isEmpty()) {
+                if (!CollectionUtils.isEmpty(accept)) {
                     childs.addAll(accept);
                 } else {
                     LOGGER.debug("visit logical node children but could not parse it, ignoring {}", node2);

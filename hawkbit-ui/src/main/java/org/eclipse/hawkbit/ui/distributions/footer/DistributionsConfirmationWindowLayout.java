@@ -38,6 +38,7 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.util.CollectionUtils;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -324,8 +325,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
     private void discardSoftwareTypeDelete(final String discardSWModuleType, final Object itemId,
             final ConfirmationTab tab) {
-        if (null != manageDistUIState.getSelectedDeleteSWModuleTypes()
-                && !manageDistUIState.getSelectedDeleteSWModuleTypes().isEmpty()
+        if (!CollectionUtils.isEmpty(manageDistUIState.getSelectedDeleteSWModuleTypes())
                 && manageDistUIState.getSelectedDeleteSWModuleTypes().contains(discardSWModuleType)) {
             manageDistUIState.getSelectedDeleteSWModuleTypes().remove(discardSWModuleType);
         }
@@ -420,8 +420,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     private void discardDistDelete(final Button.ClickEvent event, final Object itemId, final ConfirmationTab tab) {
 
         final DistributionSetIdName distId = (DistributionSetIdName) ((Button) event.getComponent()).getData();
-        if (null != manageDistUIState.getDeletedDistributionList()
-                && !manageDistUIState.getDeletedDistributionList().isEmpty()
+        if (!CollectionUtils.isEmpty(manageDistUIState.getDeletedDistributionList())
                 && manageDistUIState.getDeletedDistributionList().contains(distId)) {
             manageDistUIState.getDeletedDistributionList().remove(distId);
         }
@@ -509,8 +508,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
     private void discardDistTypeDelete(final String discardDSType, final Object itemId, final ConfirmationTab tab) {
 
-        if (null != manageDistUIState.getSelectedDeleteDistSetTypes()
-                && !manageDistUIState.getSelectedDeleteDistSetTypes().isEmpty()
+        if (!CollectionUtils.isEmpty(manageDistUIState.getSelectedDeleteDistSetTypes())
                 && manageDistUIState.getSelectedDeleteDistSetTypes().contains(discardDSType)) {
             manageDistUIState.getSelectedDeleteDistSetTypes().remove(discardDSType);
         }

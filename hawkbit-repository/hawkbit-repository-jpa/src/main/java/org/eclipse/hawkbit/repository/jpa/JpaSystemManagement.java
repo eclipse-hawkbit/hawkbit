@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
+import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -111,6 +112,9 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Autowired
     private PlatformTransactionManager txManager;
+
+    @Autowired
+    private RolloutStatusCache rolloutStatusCache;
 
     @Override
     public SystemUsageReport getSystemUsageStatistics() {
@@ -219,6 +223,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     public void deleteTenant(final String t) {
         final String tenant = t.toUpperCase();
         cacheManager.evictCaches(tenant);
+        rolloutStatusCache.evictCaches(tenant);
         tenantAware.runAsTenant(tenant, () -> {
             entityManager.setProperty(PersistenceUnitProperties.MULTITENANT_PROPERTY_DEFAULT, tenant);
             tenantMetaDataRepository.deleteByTenantIgnoreCase(tenant);

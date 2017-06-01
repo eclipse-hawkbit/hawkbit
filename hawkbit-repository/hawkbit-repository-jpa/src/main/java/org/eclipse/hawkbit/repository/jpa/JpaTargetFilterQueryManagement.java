@@ -41,6 +41,7 @@ import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
@@ -157,7 +158,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     private Page<JpaTargetFilterQuery> findTargetFilterQueryByCriteriaAPI(final Pageable pageable,
             final List<Specification<JpaTargetFilterQuery>> specList) {
-        if (specList == null || specList.isEmpty()) {
+        if (CollectionUtils.isEmpty(specList)) {
             return targetFilterQueryRepository.findAll(pageable);
         }
 
