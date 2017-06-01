@@ -223,6 +223,17 @@ public class RolloutStatusCache {
         cache.evict(event.getEntityId());
     }
 
+    /**
+     * Evicts all caches for a given tenant. All caches under a certain tenant
+     * gets evicted.
+     *
+     * @param tenant
+     *            the tenant to evict caches
+     */
+    public void evictCaches(final String tenant) {
+        cacheManager.evictCaches(tenant);
+    }
+
     private static final class CachedTotalTargetCountActionStatus {
         private final long id;
         private final List<TotalTargetCountActionStatus> status;
