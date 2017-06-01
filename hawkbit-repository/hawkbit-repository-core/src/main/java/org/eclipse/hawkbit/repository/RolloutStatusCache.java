@@ -24,10 +24,10 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.cache.Cache;
-import org.springframework.cache.guava.GuavaCacheManager;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.event.EventListener;
 
-import com.google.common.cache.CacheBuilder;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
 /**
  * Internal cache for Rollout status.
@@ -49,11 +49,11 @@ public class RolloutStatusCache {
     public RolloutStatusCache(final TenantAware tenantAware, final long size) {
         this.tenantAware = tenantAware;
 
-        final CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder().maximumSize(size);
-        final GuavaCacheManager guavaCacheManager = new GuavaCacheManager();
-        guavaCacheManager.setCacheBuilder(cacheBuilder);
+        final Caffeine<Object, Object> cacheBuilder = Caffeine.newBuilder().maximumSize(size);
+        final CaffeineCacheManager cacheManager = new CaffeineCacheManager();
+        cacheManager.setCaffeine(cacheBuilder);
 
-        this.cacheManager = new TenantAwareCacheManager(guavaCacheManager, tenantAware);
+        this.cacheManager = new TenantAwareCacheManager(cacheManager, tenantAware);
     }
 
     /**
@@ -175,7 +175,7 @@ public class RolloutStatusCache {
 
     private Map<Long, List<TotalTargetCountActionStatus>> retrieveFromCache(final List<Long> ids, final Cache cache) {
         return ids.stream().map(rolloutId -> cache.get(rolloutId, CachedTotalTargetCountActionStatus.class))
-                .filter(Objects::nonNull).collect(Collectors.toMap(CachedTotalTargetCountActionStatus::getRolloutId,
+                .filter(Objects::nonNull).collect(Collectors.toMap(CachedTotalTargetCountActionStatus::getId,
                         CachedTotalTargetCountActionStatus::getStatus));
     }
 
@@ -189,9 +189,8 @@ public class RolloutStatusCache {
         return cacheItem.getStatus();
     }
 
-    private void putIntoCache(final Long rolloutId, final List<TotalTargetCountActionStatus> status,
-            final Cache cache) {
-        cache.put(rolloutId, new CachedTotalTargetCountActionStatus(rolloutId, status));
+    private void putIntoCache(final Long id, final List<TotalTargetCountActionStatus> status, final Cache cache) {
+        cache.put(id, new CachedTotalTargetCountActionStatus(id, status));
     }
 
     private void putIntoCache(final Map<Long, List<TotalTargetCountActionStatus>> put, final Cache cache) {
@@ -201,19 +200,15 @@ public class RolloutStatusCache {
 
     @EventListener(classes = AbstractActionEvent.class)
     void invalidateCachedTotalTargetCountActionStatus(final AbstractActionEvent event) {
-        if (event.getRolloutId() == null) {
-            return;
+        if (event.getRolloutId() != null) {
+            final Cache cache = tenantAware.runAsTenant(event.getTenant(), () -> cacheManager.getCache(CACHE_RO_NAME));
+            cache.evict(event.getRolloutId());
         }
 
-        Cache cache = tenantAware.runAsTenant(event.getTenant(), () -> cacheManager.getCache(CACHE_RO_NAME));
-        cache.evict(event.getRolloutId());
-
-        if (event.getRolloutGroupId() == null) {
-            return;
+        if (event.getRolloutGroupId() != null) {
+            final Cache cache = tenantAware.runAsTenant(event.getTenant(), () -> cacheManager.getCache(CACHE_GR_NAME));
+            cache.evict(event.getRolloutGroupId());
         }
-
-        cache = tenantAware.runAsTenant(event.getTenant(), () -> cacheManager.getCache(CACHE_GR_NAME));
-        cache.evict(event.getRolloutGroupId());
     }
 
     @EventListener(classes = RolloutDeletedEvent.class)
@@ -229,17 +224,16 @@ public class RolloutStatusCache {
     }
 
     private static final class CachedTotalTargetCountActionStatus {
-        private final long rolloutId;
+        private final long id;
         private final List<TotalTargetCountActionStatus> status;
 
-        private CachedTotalTargetCountActionStatus(final long rolloutId,
-                final List<TotalTargetCountActionStatus> status) {
-            this.rolloutId = rolloutId;
+        private CachedTotalTargetCountActionStatus(final long id, final List<TotalTargetCountActionStatus> status) {
+            this.id = id;
             this.status = status;
         }
 
-        public long getRolloutId() {
-            return rolloutId;
+        public long getId() {
+            return id;
         }
 
         public List<TotalTargetCountActionStatus> getStatus() {
