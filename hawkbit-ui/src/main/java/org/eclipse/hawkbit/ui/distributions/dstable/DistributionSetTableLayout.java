@@ -9,8 +9,9 @@
 package org.eclipse.hawkbit.ui.distributions.dstable;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -34,9 +35,9 @@ public class DistributionSetTableLayout extends AbstractTableLayout<Distribution
 
     public DistributionSetTableLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManageDistUIState manageDistUIState,
-            final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
-            final TargetManagement targetManagement, final EntityFactory entityFactory,
-            final UINotification uiNotification, final TagManagement tagManagement,
+            final SoftwareModuleManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
+            final DistributionSetTypeManagement distributionSetTypeManagement, final TargetManagement targetManagement,
+            final EntityFactory entityFactory, final UINotification uiNotification, final TagManagement tagManagement,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final SystemManagement systemManagement) {
 
@@ -48,8 +49,8 @@ public class DistributionSetTableLayout extends AbstractTableLayout<Distribution
                 targetManagement, popupLayout);
 
         final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout = new DistributionAddUpdateWindowLayout(
-                i18n, uiNotification, eventBus, distributionSetManagement, systemManagement, entityFactory,
-                distributionSetTable);
+                i18n, uiNotification, eventBus, distributionSetManagement, distributionSetTypeManagement,
+                systemManagement, entityFactory, distributionSetTable);
 
         super.init(
                 new DistributionSetTableHeader(i18n, permissionChecker, eventBus, manageDistUIState,

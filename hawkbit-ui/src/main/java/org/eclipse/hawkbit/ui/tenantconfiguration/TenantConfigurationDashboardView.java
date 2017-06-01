@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.ControllerPollProperties;
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
@@ -77,12 +77,12 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
     @Autowired
     TenantConfigurationDashboardView(final VaadinMessageSource i18n, final UiProperties uiProperties,
             final UINotification uINotification, final SystemManagement systemManagement,
-            final DistributionSetManagement distributionSetManagement,
+            final DistributionSetTypeManagement distributionSetTypeManagement,
             final TenantConfigurationManagement tenantConfigurationManagement,
             final SecurityTokenGenerator securityTokenGenerator,
             final ControllerPollProperties controllerPollProperties, final SpPermissionChecker permChecker) {
         this.defaultDistributionSetTypeLayout = new DefaultDistributionSetTypeLayout(systemManagement,
-                distributionSetManagement, i18n, permChecker);
+                distributionSetTypeManagement, i18n, permChecker);
         this.authenticationConfigurationView = new AuthenticationConfigurationView(i18n, tenantConfigurationManagement,
                 securityTokenGenerator);
         this.pollingConfigurationView = new PollingConfigurationView(i18n, controllerPollProperties,

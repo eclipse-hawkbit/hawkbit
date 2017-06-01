@@ -103,10 +103,10 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
 
     private void executeDeleteAndAssertCallbackResult(final AbstractEntityListener entityInterceptor) {
         EntityInterceptorHolder.getInstance().getEntityInterceptors().add(entityInterceptor);
-        final SoftwareModuleType type = softwareManagement
+        final SoftwareModuleType type = softwareModuleTypeManagement
                 .createSoftwareModuleType(entityFactory.softwareModuleType().create().name("test").key("test"));
 
-        softwareManagement.deleteSoftwareModuleType(type.getId());
+        softwareModuleTypeManagement.deleteSoftwareModuleType(type.getId());
         assertThat(entityInterceptor.getEntity()).isNotNull();
         assertThat(entityInterceptor.getEntity()).isEqualTo(type);
     }

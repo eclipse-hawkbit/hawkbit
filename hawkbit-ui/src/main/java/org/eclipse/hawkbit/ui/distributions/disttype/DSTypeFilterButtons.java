@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.distributions.disttype;
 
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
@@ -41,8 +41,8 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
 
     DSTypeFilterButtons(final UIEventBus eventBus, final ManageDistUIState manageDistUIState,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
-            final DistributionSetManagement distributionSetManagement) {
-        super(eventBus, new DSTypeFilterButtonClick(eventBus, manageDistUIState, distributionSetManagement));
+            final DistributionSetTypeManagement distributionSetTypeManagement) {
+        super(eventBus, new DSTypeFilterButtonClick(eventBus, manageDistUIState, distributionSetTypeManagement));
         this.manageDistUIState = manageDistUIState;
         this.distributionsViewClientCriterion = distributionsViewClientCriterion;
     }

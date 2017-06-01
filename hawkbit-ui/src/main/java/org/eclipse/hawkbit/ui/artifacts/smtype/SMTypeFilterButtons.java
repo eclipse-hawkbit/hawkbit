@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtype;
 
 import java.util.EnumSet;
 
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
@@ -43,8 +43,9 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
     private final UploadViewClientCriterion uploadViewClientCriterion;
 
     SMTypeFilterButtons(final UIEventBus eventBus, final ArtifactUploadState artifactUploadState,
-            final UploadViewClientCriterion uploadViewClientCriterion, final SoftwareManagement softwareManagement) {
-        super(eventBus, new SMTypeFilterButtonClick(eventBus, artifactUploadState, softwareManagement));
+            final UploadViewClientCriterion uploadViewClientCriterion,
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
+        super(eventBus, new SMTypeFilterButtonClick(eventBus, artifactUploadState, softwareModuleTypeManagement));
         this.artifactUploadState = artifactUploadState;
         this.uploadViewClientCriterion = uploadViewClientCriterion;
     }

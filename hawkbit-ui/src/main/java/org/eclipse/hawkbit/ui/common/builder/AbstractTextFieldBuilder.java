@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.common.builder;
 
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.StringUtils;
 
 import com.vaadin.ui.AbstractTextField;
 
@@ -144,18 +144,18 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
         textComponent.setReadOnly(readOnly);
         textComponent.setEnabled(enabled);
 
-        if (StringUtils.isNotEmpty(caption)) {
+        if (!StringUtils.isEmpty(caption)) {
             textComponent.setCaption(caption);
         }
 
-        if (StringUtils.isNotEmpty(style)) {
+        if (!StringUtils.isEmpty(style)) {
             textComponent.setStyleName(style);
         }
 
-        if (StringUtils.isNotEmpty(styleName)) {
+        if (!StringUtils.isEmpty(styleName)) {
             textComponent.addStyleName(styleName);
         }
-        if (StringUtils.isNotEmpty(prompt)) {
+        if (!StringUtils.isEmpty(prompt)) {
             textComponent.setInputPrompt(prompt);
         }
 
@@ -163,7 +163,7 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
             textComponent.setMaxLength(maxLengthAllowed);
         }
 
-        if (StringUtils.isNotEmpty(id)) {
+        if (!StringUtils.isEmpty(id)) {
             textComponent.setId(id);
         }
 

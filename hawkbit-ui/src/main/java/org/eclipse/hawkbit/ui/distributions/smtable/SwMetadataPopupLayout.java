@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
@@ -32,21 +32,21 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
 
     private static final long serialVersionUID = -1252090014161012563L;
 
-    private final transient SoftwareManagement softwareManagement;
+    private final transient SoftwareModuleManagement softwareModuleManagement;
 
     private final transient EntityFactory entityFactory;
 
     public SwMetadataPopupLayout(final VaadinMessageSource i18n, final UINotification uiNotification,
-            final UIEventBus eventBus, final SoftwareManagement softwareManagement, final EntityFactory entityFactory,
+            final UIEventBus eventBus, final SoftwareModuleManagement softwareManagement, final EntityFactory entityFactory,
             final SpPermissionChecker permChecker) {
         super(i18n, uiNotification, eventBus, permChecker);
-        this.softwareManagement = softwareManagement;
+        this.softwareModuleManagement = softwareManagement;
         this.entityFactory = entityFactory;
     }
 
     @Override
     protected boolean checkForDuplicate(final SoftwareModule entity, final String value) {
-        return softwareManagement.findSoftwareModuleMetadata(entity.getId(), value).isPresent();
+        return softwareModuleManagement.findSoftwareModuleMetadata(entity.getId(), value).isPresent();
     }
 
     /**
@@ -54,7 +54,7 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
      */
     @Override
     protected SoftwareModuleMetadata createMetadata(final SoftwareModule entity, final String key, final String value) {
-        final SoftwareModuleMetadata swMetadata = softwareManagement.createSoftwareModuleMetadata(entity.getId(),
+        final SoftwareModuleMetadata swMetadata = softwareModuleManagement.createSoftwareModuleMetadata(entity.getId(),
                 entityFactory.generateMetadata(key, value));
         setSelectedEntity(swMetadata.getSoftwareModule());
         eventBus.publish(this, new MetadataEvent(MetadataUIEvent.CREATE_SOFTWARE_MODULE_METADATA, swMetadata, entity));
@@ -66,7 +66,7 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
      */
     @Override
     protected SoftwareModuleMetadata updateMetadata(final SoftwareModule entity, final String key, final String value) {
-        final SoftwareModuleMetadata swMetadata = softwareManagement.updateSoftwareModuleMetadata(entity.getId(),
+        final SoftwareModuleMetadata swMetadata = softwareModuleManagement.updateSoftwareModuleMetadata(entity.getId(),
                 entityFactory.generateMetadata(key, value));
         setSelectedEntity(swMetadata.getSoftwareModule());
         return swMetadata;
@@ -74,7 +74,7 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
 
     @Override
     protected List<MetaData> getMetadataList() {
-        return Collections.unmodifiableList(softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(
+        return Collections.unmodifiableList(softwareModuleManagement.findSoftwareModuleMetadataBySoftwareModuleId(
                 new PageRequest(0, MAX_METADATA_QUERY), getSelectedEntity().getId()).getContent());
     }
 
@@ -83,7 +83,7 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
      */
     @Override
     protected void deleteMetadata(final SoftwareModule entity, final String key, final String value) {
-        softwareManagement.deleteSoftwareModuleMetadata(entity.getId(), key);
+        softwareModuleManagement.deleteSoftwareModuleMetadata(entity.getId(), key);
         eventBus.publish(this, new MetadataEvent(MetadataUIEvent.DELETE_SOFTWARE_MODULE_METADATA,
                 entityFactory.generateMetadata(key, value), entity));
     }

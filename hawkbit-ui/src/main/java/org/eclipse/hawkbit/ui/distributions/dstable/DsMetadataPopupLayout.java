@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.distributions.dstable;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -23,8 +24,6 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.PageRequest;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.google.common.collect.Lists;
-
 /**
  * Pop up layout to display distribution metadata.
  */
@@ -36,9 +35,9 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
 
     private final transient EntityFactory entityFactory;
 
-    public DsMetadataPopupLayout(final VaadinMessageSource i18n, final UINotification uiNotification, final UIEventBus eventBus,
-            final DistributionSetManagement distributionSetManagement, final EntityFactory entityFactory,
-            final SpPermissionChecker permChecker) {
+    public DsMetadataPopupLayout(final VaadinMessageSource i18n, final UINotification uiNotification,
+            final UIEventBus eventBus, final DistributionSetManagement distributionSetManagement,
+            final EntityFactory entityFactory, final SpPermissionChecker permChecker) {
         super(i18n, uiNotification, eventBus, permChecker);
         this.distributionSetManagement = distributionSetManagement;
         this.entityFactory = entityFactory;
@@ -53,7 +52,7 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
     protected DistributionSetMetadata createMetadata(final DistributionSet entity, final String key,
             final String value) {
         final DistributionSetMetadata dsMetaData = distributionSetManagement.createDistributionSetMetadata(
-                entity.getId(), Lists.newArrayList(entityFactory.generateMetadata(key, value))).get(0);
+                entity.getId(), Arrays.asList(entityFactory.generateMetadata(key, value))).get(0);
         setSelectedEntity(dsMetaData.getDistributionSet());
         return dsMetaData;
     }

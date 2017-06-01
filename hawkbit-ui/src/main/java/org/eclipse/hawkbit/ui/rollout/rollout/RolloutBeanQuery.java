@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
-import static org.apache.commons.lang3.ArrayUtils.isEmpty;
-
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,10 +27,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
-
-import com.google.common.base.Strings;
 
 /**
  *
@@ -70,7 +67,7 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
 
         searchText = getSearchText();
 
-        if (!isEmpty(sortStates)) {
+        if (sortStates != null && sortStates.length > 0) {
 
             sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortIds[0]);
 
@@ -94,7 +91,7 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
         final Slice<Rollout> rolloutBeans;
         final PageRequest pageRequest = new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE,
                 SPUIDefinitions.PAGE_SIZE, sort);
-        if (Strings.isNullOrEmpty(searchText)) {
+        if (StringUtils.isEmpty(searchText)) {
             rolloutBeans = getRolloutManagement().findAllRolloutsWithDetailedStatus(pageRequest, false);
         } else {
             rolloutBeans = getRolloutManagement().findRolloutWithDetailedStatusByFilters(pageRequest, searchText,
@@ -141,7 +138,7 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
     @Override
     public int size() {
         int size = getRolloutManagement().countRolloutsAll().intValue();
-        if (!Strings.isNullOrEmpty(searchText)) {
+        if (!StringUtils.isEmpty(searchText)) {
             size = getRolloutManagement().countRolloutsAllByFilters(searchText).intValue();
         }
         return size;

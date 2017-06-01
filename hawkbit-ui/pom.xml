@@ -224,6 +224,14 @@
          <groupId>com.github.gwtd3</groupId>
          <artifactId>gwt-d3-api</artifactId>
       </dependency>
+      <dependency>
+         <groupId>com.google.guava</groupId>
+         <artifactId>guava</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.apache.commons</groupId>
+         <artifactId>commons-lang3</artifactId>
+      </dependency>
 
       <!-- Test -->
       <dependency>

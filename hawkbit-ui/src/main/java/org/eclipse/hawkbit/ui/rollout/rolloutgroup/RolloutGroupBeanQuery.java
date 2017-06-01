@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rolloutgroup;
 
-import static org.apache.commons.lang3.ArrayUtils.isEmpty;
 import static org.springframework.data.domain.Sort.Direction.ASC;
 import static org.springframework.data.domain.Sort.Direction.DESC;
 
@@ -79,7 +78,7 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
 
         rolloutId = getRolloutId();
 
-        if (!isEmpty(sortStates)) {
+        if (sortStates != null && sortStates.length > 0) {
 
             sort = new Sort(sortStates[0] ? ASC : DESC, (String) sortPropertyIds[0]);
 

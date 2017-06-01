@@ -46,7 +46,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
 import com.google.common.base.Charsets;
-import com.google.common.collect.Lists;
 import com.google.common.net.HttpHeaders;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -78,7 +77,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
     public void invalidRequestsOnArtifactResource() throws Exception {
         // create target
         final Target target = testdataFactory.createTarget();
-        final List<Target> targets = Lists.newArrayList(target);
+        final List<Target> targets = Arrays.asList(target);
 
         // create ds
         final DistributionSet ds = testdataFactory.createDistributionSet("");
@@ -161,11 +160,11 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
     public void downloadArtifactThroughFileName() throws Exception {
         downLoadProgress = 1;
         shippedBytes = 0;
-        assertThat(softwareManagement.findSoftwareModulesAll(PAGE)).hasSize(0);
+        assertThat(softwareModuleManagement.findSoftwareModulesAll(PAGE)).hasSize(0);
 
         // create target
         final Target target = testdataFactory.createTarget();
-        final List<Target> targets = Lists.newArrayList(target);
+        final List<Target> targets = Arrays.asList(target);
 
         // create ds
         final DistributionSet ds = testdataFactory.createDistributionSet("");
@@ -224,8 +223,8 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
                         "attachment;filename=" + artifact.getFilename() + ".MD5SUM"))
                 .andReturn();
 
-        assertThat(result.getResponse().getContentAsByteArray()).isEqualTo(
-                new String(artifact.getMd5Hash() + "  " + artifact.getFilename()).getBytes(Charsets.US_ASCII));
+        assertThat(result.getResponse().getContentAsByteArray())
+                .isEqualTo((artifact.getMd5Hash() + "  " + artifact.getFilename()).getBytes(Charsets.US_ASCII));
     }
 
     @Test
@@ -234,7 +233,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
     public void rangeDownloadArtifact() throws Exception {
         // create target
         final Target target = testdataFactory.createTarget();
-        final List<Target> targets = Lists.newArrayList(target);
+        final List<Target> targets = Arrays.asList(target);
 
         // create ds
         final DistributionSet ds = testdataFactory.createDistributionSet("");

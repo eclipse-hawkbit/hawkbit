@@ -21,6 +21,27 @@ Please read this if you intend to contribute to the project.
 * Sonarqube:
   * Our rule set can be found [here](https://sonar.ops.bosch-iot-rollouts.com/projects) with navigating to the tab "Quality Profiles", selecting "hawkBit", and then selecting "Actions" - "Back up"
 
+### Utility library usage
+
+hawkBit has currently both [guava](https://github.com/google/guava) and [Apache commons lang](https://commons.apache.org/proper/commons-lang/) on the classpath in several of its modules. However, we see introducing too many utility libraries problematic as we force these as transitive dependencies on hawkBit users. We in fact are looking into reducing them in future not adding new ones.
+
+So we kindly ask contributors:
+
+* not introduce extra utility library dependencies
+* keep them out of the core modules (e.g. hawkbit-core, hawkbit-rest-core, hawkbit-http-security) to avoid that all modules have them as transitive dependency
+* use utility functions in general based in the following priority:
+  * use utility functions from JDK if feasible
+  * use Spring utility classes if feasible
+  * use [guava](https://github.com/google/guava) if feasible
+  * use [Apache commons lang](https://commons.apache.org/proper/commons-lang/) if feasible
+
+Note that the guava project for instance often documents where they think that JDK is having a similar functionality (e.g. their thoughts on  [Throwables.propagate](https://github.com/google/guava/wiki/Why-we-deprecated-Throwables.propagate)).
+
+Examples:
+
+* Prefer `Arrays.asList(...)` from JDK over guava's `Lists.newArrayList(...)`
+* Prefer `StringUtils` from Spring over guava's `Strings` Apache's `StringUtils`
+
 ### Test documentation
 
 Please documented the test cases that you contribute by means of [Allure](http://allure.qatools.ru) annotations and proper test method naming.

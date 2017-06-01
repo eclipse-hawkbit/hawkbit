@@ -15,7 +15,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -65,14 +67,18 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
             final UIEventBus eventBus, final UINotification notification, final SystemManagement systemManagement,
             final ManageDistUIState manageDistUIState,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
-            final DistributionSetManagement dsManagement, final SoftwareManagement softwareManagement) {
+            final DistributionSetManagement distributionSetManagement,
+            final DistributionSetTypeManagement distributionSetTypeManagement,
+            final SoftwareModuleManagement softwareModuleManagement,
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
         super(i18n, permChecker, eventBus, notification);
         this.systemManagement = systemManagement;
         this.manageDistUIState = manageDistUIState;
-        this.distConfirmationWindowLayout = new DistributionsConfirmationWindowLayout(i18n, eventBus, dsManagement,
-                softwareManagement, manageDistUIState);
+        this.distConfirmationWindowLayout = new DistributionsConfirmationWindowLayout(i18n, eventBus,
+                distributionSetManagement, distributionSetTypeManagement, softwareModuleManagement,
+                softwareModuleTypeManagement, manageDistUIState);
         this.distributionsViewClientCriterion = distributionsViewClientCriterion;
-        this.distributionSetManagement = dsManagement;
+        this.distributionSetManagement = distributionSetManagement;
         init();
     }
 

@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.builder;
 
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.builder.AbstractSoftwareModuleUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
@@ -23,10 +23,10 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 public class JpaSoftwareModuleCreate extends AbstractSoftwareModuleUpdateCreate<SoftwareModuleCreate>
         implements SoftwareModuleCreate {
 
-    private final SoftwareManagement softwareManagement;
+    private final SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
-    JpaSoftwareModuleCreate(final SoftwareManagement softwareManagement) {
-        this.softwareManagement = softwareManagement;
+    JpaSoftwareModuleCreate(final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
+        this.softwareModuleTypeManagement = softwareModuleTypeManagement;
     }
 
     @Override
@@ -39,7 +39,7 @@ public class JpaSoftwareModuleCreate extends AbstractSoftwareModuleUpdateCreate<
             throw new ConstraintViolationException("type cannot be null");
         }
 
-        return softwareManagement.findSoftwareModuleTypeByKey(type.trim())
+        return softwareModuleTypeManagement.findSoftwareModuleTypeByKey(type.trim())
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, type.trim()));
     }
 }

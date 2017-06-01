@@ -8,14 +8,13 @@
  */
 package org.eclipse.hawkbit.api;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-
-import com.google.common.collect.Lists;
 
 /**
  * Artifact handler properties class for holding all supported protocols with
@@ -85,7 +84,7 @@ public class ArtifactUrlHandlerProperties {
         /**
          * Support for the following hawkBit API.
          */
-        private List<ApiType> supports = Lists.newArrayList(ApiType.DDI, ApiType.DMF);
+        private List<ApiType> supports = Arrays.asList(ApiType.DDI, ApiType.DMF);
 
         public boolean isEnabled() {
             return enabled;

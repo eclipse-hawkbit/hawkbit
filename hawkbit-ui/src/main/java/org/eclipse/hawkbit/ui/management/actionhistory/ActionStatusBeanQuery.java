@@ -58,7 +58,7 @@ public class ActionStatusBeanQuery extends AbstractBeanQuery<ProxyActionStatus> 
             currentSelectedActionId = (Long) queryConfig.get(SPUIDefinitions.ACTIONSTATES_BY_ACTION);
         }
 
-        if (sortStates.length > 0) {
+        if (sortStates!= null && sortStates.length > 0) {
             // Initialize sort
             sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortPropertyIds[0]);
             // Add sort

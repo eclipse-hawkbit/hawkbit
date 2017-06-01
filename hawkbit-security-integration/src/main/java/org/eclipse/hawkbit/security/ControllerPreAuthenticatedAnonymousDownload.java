@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.security;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken;
@@ -17,8 +18,6 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
-import com.google.common.collect.Lists;
 
 /**
  * An pre-authenticated processing filter which add the
@@ -64,6 +63,6 @@ public class ControllerPreAuthenticatedAnonymousDownload extends AbstractControl
 
     @Override
     public Collection<GrantedAuthority> getSuccessfulAuthenticationAuthorities() {
-        return Lists.newArrayList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_DOWNLOAD_ROLE));
+        return Arrays.asList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_DOWNLOAD_ROLE));
     }
 }

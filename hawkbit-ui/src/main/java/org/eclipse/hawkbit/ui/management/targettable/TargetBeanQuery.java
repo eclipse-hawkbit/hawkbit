@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
@@ -33,10 +32,9 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
-
-import com.google.common.base.Strings;
 
 /**
  * Simple implementation of generics bean query which dynamically loads a batch
@@ -85,13 +83,13 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             distributionId = (Long) queryConfig.get(SPUIDefinitions.FILTER_BY_DISTRIBUTION);
             searchText = (String) queryConfig.get(SPUIDefinitions.FILTER_BY_TEXT);
             targetFilterQueryId = (Long) queryConfig.get(SPUIDefinitions.FILTER_BY_TARGET_FILTER_QUERY);
-            if (!Strings.isNullOrEmpty(searchText)) {
+            if (!StringUtils.isEmpty(searchText)) {
                 searchText = String.format("%%%s%%", searchText);
             }
             pinnedDistId = (Long) queryConfig.get(SPUIDefinitions.ORDER_BY_DISTRIBUTION);
         }
 
-        if (!ArrayUtils.isEmpty(sortStates)) {
+        if (sortStates != null && sortStates.length > 0) {
 
             sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortIds[0]);
 
@@ -204,7 +202,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
     private boolean isAnyFilterSelected() {
         final boolean isFilterSelected = isTagSelected() || isOverdueFilterEnabled();
         return isFilterSelected || !CollectionUtils.isEmpty(status) || distributionId != null
-                || !Strings.isNullOrEmpty(searchText);
+                || !StringUtils.isEmpty(searchText);
     }
 
     private TargetManagement getTargetManagement() {

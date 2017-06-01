@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.rest.util;
 
-import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
+import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
  * Thrown if artifact content streaming to client failed.

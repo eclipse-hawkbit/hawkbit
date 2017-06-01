@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.ArtifactDetailsEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -35,6 +35,7 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -43,7 +44,6 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
 import com.vaadin.server.FontAwesome;
@@ -104,7 +104,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private final transient ArtifactManagement artifactManagement;
 
-    private final transient SoftwareManagement softwareManagement;
+    private final transient SoftwareModuleManagement softwareModuleManagement;
 
     /**
      * Constructor for ArtifactDetailsLayout
@@ -124,13 +124,13 @@ public class ArtifactDetailsLayout extends VerticalLayout {
      */
     public ArtifactDetailsLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final ArtifactUploadState artifactUploadState, final UINotification uINotification,
-            final ArtifactManagement artifactManagement, final SoftwareManagement softwareManagement) {
+            final ArtifactManagement artifactManagement, final SoftwareModuleManagement softwareManagement) {
         this.i18n = i18n;
         this.eventBus = eventBus;
         this.artifactUploadState = artifactUploadState;
         this.uINotification = uINotification;
         this.artifactManagement = artifactManagement;
-        this.softwareManagement = softwareManagement;
+        this.softwareModuleManagement = softwareManagement;
 
         final Optional<SoftwareModule> selectedSoftwareModule = findSelectedSoftwareModule();
 
@@ -155,7 +155,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     private Optional<SoftwareModule> findSelectedSoftwareModule() {
         final Optional<Long> selectedBaseSwModuleId = artifactUploadState.getSelectedBaseSwModuleId();
         if (selectedBaseSwModuleId.isPresent()) {
-            return softwareManagement.findSoftwareModuleById(selectedBaseSwModuleId.get());
+            return softwareModuleManagement.findSoftwareModuleById(selectedBaseSwModuleId.get());
         }
         return Optional.empty();
     }
@@ -424,7 +424,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
      */
     public void populateArtifactDetails(final Long baseSwModuleId, final String swModuleName) {
         if (!readOnly) {
-            if (Strings.isNullOrEmpty(swModuleName)) {
+            if (StringUtils.isEmpty(swModuleName)) {
                 setTitleOfLayoutHeader();
             } else {
                 titleOfArtifactDetails.setValue(HawkbitCommonUtil.getArtifactoryDetailsLabelId(swModuleName));

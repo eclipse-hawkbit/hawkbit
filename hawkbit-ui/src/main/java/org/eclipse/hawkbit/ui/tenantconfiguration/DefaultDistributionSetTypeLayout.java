@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration;
 
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Alignment;
@@ -47,7 +46,7 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView {
     private final Label changeIcon;
 
     DefaultDistributionSetTypeLayout(final SystemManagement systemManagement,
-            final DistributionSetManagement distributionSetManagement, final VaadinMessageSource i18n,
+            final DistributionSetTypeManagement distributionSetTypeManagement, final VaadinMessageSource i18n,
             final SpPermissionChecker permChecker) {
         this.systemManagement = systemManagement;
         combobox = SPUIComponentProvider.getComboBox(null, "330", null, null, false, "", "label.combobox.tag");
@@ -75,13 +74,13 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView {
         hlayout.setSpacing(true);
         hlayout.setStyleName("config-h-panel");
 
-        final Label configurationLabel = new Label(i18n.getMessage("configuration.defaultdistributionset.select.label"));
+        final Label configurationLabel = new Label(
+                i18n.getMessage("configuration.defaultdistributionset.select.label"));
         hlayout.addComponent(configurationLabel);
         hlayout.setComponentAlignment(configurationLabel, Alignment.MIDDLE_LEFT);
 
-        final Pageable pageReq = new PageRequest(0, 100);
-        final Iterable<DistributionSetType> distributionSetTypeCollection = distributionSetManagement
-                .findDistributionSetTypesAll(pageReq);
+        final Iterable<DistributionSetType> distributionSetTypeCollection = distributionSetTypeManagement
+                .findDistributionSetTypesAll(new PageRequest(0, 100));
 
         combobox.setId(UIComponentIdProvider.SYSTEM_CONFIGURATION_DEFAULTDIS_COMBOBOX);
         combobox.setNullSelectionAllowed(false);

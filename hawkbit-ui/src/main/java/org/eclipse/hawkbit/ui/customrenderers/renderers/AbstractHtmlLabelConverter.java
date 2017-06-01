@@ -12,8 +12,8 @@ import java.io.Serializable;
 import java.util.Locale;
 
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
+import org.springframework.util.StringUtils;
 
-import com.google.common.base.Strings;
 import com.vaadin.data.util.converter.Converter;
 
 /**
@@ -52,7 +52,7 @@ public abstract class AbstractHtmlLabelConverter<T> implements Converter<String,
      *            label-adapter that converts from model to label-presentation.
      * @return self for method-chaining
      */
-    public AbstractHtmlLabelConverter<T> addAdapter(LabelAdapter<T> adapter) {
+    public AbstractHtmlLabelConverter<T> addAdapter(final LabelAdapter<T> adapter) {
         this.adapter = adapter;
         return this;
     }
@@ -97,15 +97,15 @@ public abstract class AbstractHtmlLabelConverter<T> implements Converter<String,
      * @return string representation of key:value map
      */
     private static String getStatusLabelDetailsInString(final String value, final String style, final String title,
-            final String id, boolean disabled) {
+            final String id, final boolean disabled) {
         final StringBuilder val = new StringBuilder();
-        if (!Strings.isNullOrEmpty(value)) {
+        if (!StringUtils.isEmpty(value)) {
             val.append("value:").append(value).append(",");
         }
-        if (!Strings.isNullOrEmpty(style)) {
+        if (!StringUtils.isEmpty(style)) {
             val.append("style:").append(style).append(",");
         }
-        if (!Strings.isNullOrEmpty(title)) {
+        if (!StringUtils.isEmpty(title)) {
             val.append("title:").append(title).append(",");
         }
         if (disabled) {

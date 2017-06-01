@@ -27,9 +27,11 @@ import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RolloutManagement;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
@@ -114,10 +116,16 @@ public class TestdataFactory {
     private ControllerManagement controllerManagament;
 
     @Autowired
-    private SoftwareManagement softwareManagement;
+    private SoftwareModuleManagement softwareModuleManagement;
+
+    @Autowired
+    private SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
     @Autowired
     private DistributionSetManagement distributionSetManagement;
+
+    @Autowired
+    private DistributionSetTypeManagement distributionSetTypeManagement;
 
     @Autowired
     private TargetManagement targetManagement;
@@ -253,15 +261,15 @@ public class TestdataFactory {
     public DistributionSet createDistributionSet(final String prefix, final String version,
             final boolean isRequiredMigrationStep) {
 
-        final SoftwareModule appMod = softwareManagement.createSoftwareModule(entityFactory.softwareModule().create()
-                .type(findOrCreateSoftwareModuleType(SM_TYPE_APP, Integer.MAX_VALUE)).name(prefix + SM_TYPE_APP)
-                .version(version + "." + new SecureRandom().nextInt(100)).description(LOREM.words(20))
-                .vendor(prefix + " vendor Limited, California"));
-        final SoftwareModule runtimeMod = softwareManagement.createSoftwareModule(
+        final SoftwareModule appMod = softwareModuleManagement.createSoftwareModule(entityFactory.softwareModule()
+                .create().type(findOrCreateSoftwareModuleType(SM_TYPE_APP, Integer.MAX_VALUE))
+                .name(prefix + SM_TYPE_APP).version(version + "." + new SecureRandom().nextInt(100))
+                .description(LOREM.words(20)).vendor(prefix + " vendor Limited, California"));
+        final SoftwareModule runtimeMod = softwareModuleManagement.createSoftwareModule(
                 entityFactory.softwareModule().create().type(findOrCreateSoftwareModuleType(SM_TYPE_RT))
                         .name(prefix + "app runtime").version(version + "." + new SecureRandom().nextInt(100))
                         .description(LOREM.words(20)).vendor(prefix + " vendor GmbH, Stuttgart, Germany"));
-        final SoftwareModule osMod = softwareManagement.createSoftwareModule(
+        final SoftwareModule osMod = softwareModuleManagement.createSoftwareModule(
                 entityFactory.softwareModule().create().type(findOrCreateSoftwareModuleType(SM_TYPE_OS))
                         .name(prefix + " Firmware").version(version + "." + new SecureRandom().nextInt(100))
                         .description(LOREM.words(20)).vendor(prefix + " vendor Limited Inc, California"));
@@ -269,7 +277,7 @@ public class TestdataFactory {
         return distributionSetManagement.createDistributionSet(
                 entityFactory.distributionSet().create().name(prefix != null && prefix.length() > 0 ? prefix : "DS")
                         .version(version).description(LOREM.words(10)).type(findOrCreateDefaultTestDsType())
-                        .modules(Lists.newArrayList(osMod.getId(), runtimeMod.getId(), appMod.getId()))
+                        .modules(Arrays.asList(osMod.getId(), runtimeMod.getId(), appMod.getId()))
                         .requiredMigrationStep(isRequiredMigrationStep));
     }
 
@@ -513,7 +521,7 @@ public class TestdataFactory {
      * @return persisted {@link SoftwareModule}.
      */
     public SoftwareModule createSoftwareModule(final String typeKey, final String prefix) {
-        return softwareManagement.createSoftwareModule(entityFactory.softwareModule().create()
+        return softwareModuleManagement.createSoftwareModule(entityFactory.softwareModule().create()
                 .type(findOrCreateSoftwareModuleType(typeKey)).name(prefix + typeKey).version(prefix + DEFAULT_VERSION)
                 .description(LOREM.words(10)).vendor(DEFAULT_VENDOR));
     }
@@ -560,7 +568,7 @@ public class TestdataFactory {
         set = distributionSetManagement.updateDistributionSet(
                 entityFactory.distributionSet().update(set.getId()).description("Updated " + DEFAULT_DESCRIPTION));
 
-        set.getModules().forEach(module -> softwareManagement.updateSoftwareModule(
+        set.getModules().forEach(module -> softwareModuleManagement.updateSoftwareModule(
                 entityFactory.softwareModule().update(module.getId()).description("Updated " + DEFAULT_DESCRIPTION)));
 
         // load also lazy stuff
@@ -595,8 +603,8 @@ public class TestdataFactory {
      * @return persisted {@link DistributionSetType}
      */
     public DistributionSetType findOrCreateDistributionSetType(final String dsTypeKey, final String dsTypeName) {
-        return distributionSetManagement.findDistributionSetTypeByKey(dsTypeKey)
-                .orElseGet(() -> distributionSetManagement.createDistributionSetType(entityFactory.distributionSetType()
+        return distributionSetTypeManagement.findDistributionSetTypeByKey(dsTypeKey).orElseGet(
+                () -> distributionSetTypeManagement.createDistributionSetType(entityFactory.distributionSetType()
                         .create().key(dsTypeKey).name(dsTypeName).description(LOREM.words(10)).colour("black")));
     }
 
@@ -617,9 +625,10 @@ public class TestdataFactory {
      */
     public DistributionSetType findOrCreateDistributionSetType(final String dsTypeKey, final String dsTypeName,
             final Collection<SoftwareModuleType> mandatory, final Collection<SoftwareModuleType> optional) {
-        return distributionSetManagement.findDistributionSetTypeByKey(dsTypeKey)
-                .orElseGet(() -> distributionSetManagement.createDistributionSetType(entityFactory.distributionSetType()
-                        .create().key(dsTypeKey).name(dsTypeName).description(LOREM.words(10)).colour("black")
+        return distributionSetTypeManagement.findDistributionSetTypeByKey(dsTypeKey)
+                .orElseGet(() -> distributionSetTypeManagement.createDistributionSetType(entityFactory
+                        .distributionSetType().create().key(dsTypeKey).name(dsTypeName).description(LOREM.words(10))
+                        .colour("black")
                         .optional(optional.stream().map(SoftwareModuleType::getId).collect(Collectors.toList()))
                         .mandatory(mandatory.stream().map(SoftwareModuleType::getId).collect(Collectors.toList()))));
     }
@@ -650,8 +659,8 @@ public class TestdataFactory {
      * @return persisted {@link SoftwareModuleType}
      */
     public SoftwareModuleType findOrCreateSoftwareModuleType(final String key, final int maxAssignments) {
-        return softwareManagement.findSoftwareModuleTypeByKey(key)
-                .orElseGet(() -> softwareManagement.createSoftwareModuleType(entityFactory.softwareModuleType().create()
+        return softwareModuleTypeManagement.findSoftwareModuleTypeByKey(key).orElseGet(
+                () -> softwareModuleTypeManagement.createSoftwareModuleType(entityFactory.softwareModuleType().create()
                         .key(key).name(key).description(LOREM.words(10)).maxAssignments(maxAssignments)));
     }
 
@@ -904,7 +913,7 @@ public class TestdataFactory {
      */
     public List<Action> sendUpdateActionStatusToTargets(final Collection<Target> targets, final Status status,
             final String message) {
-        return sendUpdateActionStatusToTargets(targets, status, Lists.newArrayList(message));
+        return sendUpdateActionStatusToTargets(targets, status, Arrays.asList(message));
     }
 
     /**

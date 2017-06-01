@@ -15,6 +15,8 @@ import static org.junit.Assert.fail;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +52,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -79,14 +80,11 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final Target target = testdataFactory.createTarget();
 
         verifyThrownExceptionBy(
-                () -> targetManagement.assignTag(Lists.newArrayList(target.getControllerId()), NOT_EXIST_IDL),
-                "TargetTag");
-        verifyThrownExceptionBy(() -> targetManagement.assignTag(Lists.newArrayList(NOT_EXIST_ID), tag.getId()),
-                "Target");
+                () -> targetManagement.assignTag(Arrays.asList(target.getControllerId()), NOT_EXIST_IDL), "TargetTag");
+        verifyThrownExceptionBy(() -> targetManagement.assignTag(Arrays.asList(NOT_EXIST_ID), tag.getId()), "Target");
 
         verifyThrownExceptionBy(() -> targetManagement.findTargetsByTag(PAGE, NOT_EXIST_IDL), "TargetTag");
-        verifyThrownExceptionBy(() -> targetManagement.findTargetsByTag(PAGE, "name==*", NOT_EXIST_IDL),
-                "TargetTag");
+        verifyThrownExceptionBy(() -> targetManagement.findTargetsByTag(PAGE, "name==*", NOT_EXIST_IDL), "TargetTag");
 
         verifyThrownExceptionBy(() -> targetManagement.countTargetByAssignedDistributionSet(NOT_EXIST_IDL),
                 "DistributionSet");
@@ -100,13 +98,12 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
                 "DistributionSet");
 
         verifyThrownExceptionBy(() -> targetManagement.deleteTarget(NOT_EXIST_ID), "Target");
-        verifyThrownExceptionBy(() -> targetManagement.deleteTargets(Lists.newArrayList(NOT_EXIST_IDL)), "Target");
+        verifyThrownExceptionBy(() -> targetManagement.deleteTargets(Arrays.asList(NOT_EXIST_IDL)), "Target");
 
         verifyThrownExceptionBy(
                 () -> targetManagement.findAllTargetsByTargetFilterQueryAndNonDS(PAGE, NOT_EXIST_IDL, "name==*"),
                 "DistributionSet");
-        verifyThrownExceptionBy(
-                () -> targetManagement.findAllTargetsInRolloutGroupWithoutAction(PAGE, NOT_EXIST_IDL),
+        verifyThrownExceptionBy(() -> targetManagement.findAllTargetsInRolloutGroupWithoutAction(PAGE, NOT_EXIST_IDL),
                 "RolloutGroup");
         verifyThrownExceptionBy(() -> targetManagement.findTargetByAssignedDistributionSet(NOT_EXIST_IDL, PAGE),
                 "DistributionSet");
@@ -121,10 +118,10 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
                 "DistributionSet");
 
         verifyThrownExceptionBy(
-                () -> targetManagement.toggleTagAssignment(Lists.newArrayList(target.getControllerId()), NOT_EXIST_ID),
+                () -> targetManagement.toggleTagAssignment(Arrays.asList(target.getControllerId()), NOT_EXIST_ID),
                 "TargetTag");
-        verifyThrownExceptionBy(
-                () -> targetManagement.toggleTagAssignment(Lists.newArrayList(NOT_EXIST_ID), tag.getName()), "Target");
+        verifyThrownExceptionBy(() -> targetManagement.toggleTagAssignment(Arrays.asList(NOT_EXIST_ID), tag.getName()),
+                "Target");
 
         verifyThrownExceptionBy(() -> targetManagement.unAssignTag(NOT_EXIST_ID, tag.getId()), "Target");
         verifyThrownExceptionBy(() -> targetManagement.unAssignTag(target.getControllerId(), NOT_EXIST_IDL),
@@ -302,12 +299,12 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     public void deleteAndCreateTargets() {
         Target target = targetManagement.createTarget(entityFactory.target().create().controllerId("targetId123"));
         assertThat(targetManagement.countTargetsAll()).as("target count is wrong").isEqualTo(1);
-        targetManagement.deleteTargets(Lists.newArrayList(target.getId()));
+        targetManagement.deleteTargets(Arrays.asList(target.getId()));
         assertThat(targetManagement.countTargetsAll()).as("target count is wrong").isEqualTo(0);
 
         target = createTargetWithAttributes("4711");
         assertThat(targetManagement.countTargetsAll()).as("target count is wrong").isEqualTo(1);
-        targetManagement.deleteTargets(Lists.newArrayList(target.getId()));
+        targetManagement.deleteTargets(Arrays.asList(target.getId()));
         assertThat(targetManagement.countTargetsAll()).as("target count is wrong").isEqualTo(0);
 
         final List<Long> targets = new ArrayList<>();
@@ -546,10 +543,9 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         targetManagement.deleteTarget(extra.getControllerId());
 
         final int numberToDelete = 50;
-        final Iterable<Target> targetsToDelete = Iterables.limit(firstList, numberToDelete);
+        final Collection<Target> targetsToDelete = firstList.subList(0, numberToDelete);
         final Target[] deletedTargets = Iterables.toArray(targetsToDelete, Target.class);
-        final List<Long> targetsIdsToDelete = Lists.newArrayList(targetsToDelete.iterator()).stream().map(Target::getId)
-                .collect(Collectors.toList());
+        final List<Long> targetsIdsToDelete = targetsToDelete.stream().map(Target::getId).collect(Collectors.toList());
 
         targetManagement.deleteTargets(targetsIdsToDelete);
 
@@ -571,11 +567,11 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final int noT1Tags = 3;
         final List<TargetTag> t1Tags = testdataFactory.createTargetTags(noT1Tags, "tag1");
 
-        t1Tags.forEach(tag -> targetManagement.assignTag(Lists.newArrayList(t1.getControllerId()), tag.getId()));
+        t1Tags.forEach(tag -> targetManagement.assignTag(Arrays.asList(t1.getControllerId()), tag.getId()));
 
         final Target t2 = testdataFactory.createTarget("id-2");
         final List<TargetTag> t2Tags = testdataFactory.createTargetTags(noT2Tags, "tag2");
-        t2Tags.forEach(tag -> targetManagement.assignTag(Lists.newArrayList(t2.getControllerId()), tag.getId()));
+        t2Tags.forEach(tag -> targetManagement.assignTag(Arrays.asList(t2.getControllerId()), tag.getId()));
 
         final Target t11 = targetManagement.findTargetByControllerID(t1.getControllerId()).get();
         assertThat(tagManagement.findAllTargetTags(PAGE, t11.getControllerId()).getContent()).as("Tag size is wrong")
@@ -777,7 +773,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verify that the find all targets by ids method contains the entities that we are looking for")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 12) })
     public void verifyFindTargetAllById() {
-        final List<Long> searchIds = Lists.newArrayList(testdataFactory.createTarget("target-4").getId(),
+        final List<Long> searchIds = Arrays.asList(testdataFactory.createTarget("target-4").getId(),
                 testdataFactory.createTarget("target-5").getId(), testdataFactory.createTarget("target-6").getId());
         for (int i = 0; i < 9; i++) {
             testdataFactory.createTarget("test" + i);

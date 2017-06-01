@@ -12,7 +12,6 @@ import static org.junit.Assert.fail;
 
 import java.util.Map;
 
-import org.apache.commons.lang3.ClassUtils;
 import org.eclipse.hawkbit.event.BusProtoStuffMessageConverter;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
@@ -27,6 +26,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.AbstractMessageConverter;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
