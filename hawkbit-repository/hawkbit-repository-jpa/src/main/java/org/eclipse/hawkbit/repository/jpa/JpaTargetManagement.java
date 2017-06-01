@@ -67,6 +67,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
@@ -317,7 +318,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     private Slice<Target> findByCriteriaAPI(final Pageable pageable, final List<Specification<JpaTarget>> specList) {
-        if (specList == null || specList.isEmpty()) {
+        if (CollectionUtils.isEmpty(specList)) {
             return convertPage(criteriaNoCountDao.findAll(pageable, JpaTarget.class), pageable);
         }
         return convertPage(
@@ -326,7 +327,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     private Long countByCriteriaAPI(final List<Specification<JpaTarget>> specList) {
-        if (specList == null || specList.isEmpty()) {
+        if (CollectionUtils.isEmpty(specList)) {
             return targetRepository.count();
         }
 

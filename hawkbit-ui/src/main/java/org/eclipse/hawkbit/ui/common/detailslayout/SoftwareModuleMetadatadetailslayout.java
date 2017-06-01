@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.util.CollectionUtils;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
@@ -99,7 +100,7 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
                 .findSoftwareModuleMetadataBySoftwareModuleId(selectedSWModuleId,
                         new PageRequest(0, MAX_METADATA_QUERY))
                 .getContent();
-        if (null != swMetadataList && !swMetadataList.isEmpty()) {
+        if (!CollectionUtils.isEmpty(swMetadataList)) {
             swMetadataList.forEach(this::setSWMetadataProperties);
         }
     }

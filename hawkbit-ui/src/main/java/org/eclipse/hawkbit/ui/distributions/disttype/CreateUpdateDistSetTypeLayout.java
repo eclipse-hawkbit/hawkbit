@@ -38,6 +38,7 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.util.CollectionUtils;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -388,7 +389,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
         final String typeKeyValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeKey.getValue());
         final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
         final List<Long> itemIds = (List<Long>) selectedTable.getItemIds();
-        if (null != typeNameValue && null != typeKeyValue && null != itemIds && !itemIds.isEmpty()) {
+        if (null != typeNameValue && null != typeKeyValue && !CollectionUtils.isEmpty(itemIds)) {
 
             final List<Long> mandatory = itemIds.stream()
                     .filter(itemId -> isMandatoryModuleType(selectedTable.getItem(itemId)))
@@ -429,8 +430,8 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
         final DistributionSetTypeUpdate update = entityFactory.distributionSetType().update(existingType.getId())
                 .description(tagDesc.getValue())
                 .colour(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview()));
-        if (distributionSetTypeManagement.countDistributionSetsByType(existingType.getId()) <= 0 && null != itemIds
-                && !itemIds.isEmpty()) {
+        if (distributionSetTypeManagement.countDistributionSetsByType(existingType.getId()) <= 0
+                && !CollectionUtils.isEmpty(itemIds)) {
 
             update.mandatory(itemIds.stream().filter(itemId -> isMandatoryModuleType(selectedTable.getItem(itemId)))
                     .collect(Collectors.toList()))

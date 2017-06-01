@@ -50,10 +50,10 @@ public class RolloutStatusCache {
         this.tenantAware = tenantAware;
 
         final Caffeine<Object, Object> cacheBuilder = Caffeine.newBuilder().maximumSize(size);
-        final CaffeineCacheManager cacheManager = new CaffeineCacheManager();
-        cacheManager.setCaffeine(cacheBuilder);
+        final CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
+        caffeineCacheManager.setCaffeine(cacheBuilder);
 
-        this.cacheManager = new TenantAwareCacheManager(cacheManager, tenantAware);
+        this.cacheManager = new TenantAwareCacheManager(caffeineCacheManager, tenantAware);
     }
 
     /**
@@ -174,8 +174,8 @@ public class RolloutStatusCache {
     }
 
     private Map<Long, List<TotalTargetCountActionStatus>> retrieveFromCache(final List<Long> ids, final Cache cache) {
-        return ids.stream().map(rolloutId -> cache.get(rolloutId, CachedTotalTargetCountActionStatus.class))
-                .filter(Objects::nonNull).collect(Collectors.toMap(CachedTotalTargetCountActionStatus::getId,
+        return ids.stream().map(id -> cache.get(id, CachedTotalTargetCountActionStatus.class)).filter(Objects::nonNull)
+                .collect(Collectors.toMap(CachedTotalTargetCountActionStatus::getId,
                         CachedTotalTargetCountActionStatus::getStatus));
     }
 
