@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.amqp;
 
-import java.util.concurrent.TimeUnit;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -19,8 +17,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @ConfigurationProperties("hawkbit.dmf.rabbitmq")
 public class AmqpProperties {
-
-    private static final int ONE_MINUTE = 60;
 
     private static final int DEFAULT_QUEUE_DECLARATION_RETRIES = 50;
 
@@ -62,11 +58,6 @@ public class AmqpProperties {
      * Missing queue fatal.
      */
     private boolean missingQueuesFatal;
-
-    /**
-     * Requested heartbeat interval from broker in {@link TimeUnit#SECONDS}.
-     */
-    private int requestedHeartBeat = (int) TimeUnit.SECONDS.toSeconds(ONE_MINUTE);
 
     /**
      * Sets an upper limit to the number of consumers.
@@ -172,14 +163,6 @@ public class AmqpProperties {
 
     public String getReceiverQueue() {
         return receiverQueue;
-    }
-
-    public int getRequestedHeartBeat() {
-        return requestedHeartBeat;
-    }
-
-    public void setRequestedHeartBeat(final int requestedHeartBeat) {
-        this.requestedHeartBeat = requestedHeartBeat;
     }
 
     public void setReceiverQueue(final String receiverQueue) {
