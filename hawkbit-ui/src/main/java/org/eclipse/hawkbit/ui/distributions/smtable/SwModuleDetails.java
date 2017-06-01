@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ui.distributions.smtable;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
@@ -32,7 +32,7 @@ public class SwModuleDetails extends AbstractSoftwareModuleDetails {
     SwModuleDetails(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker,
             final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow,
-            final ManageDistUIState manageDistUIState, final SoftwareManagement softwareManagement,
+            final ManageDistUIState manageDistUIState, final SoftwareModuleManagement softwareManagement,
             final SwMetadataPopupLayout swMetadataPopupLayout, final EntityFactory entityFactory) {
         super(i18n, eventBus, permissionChecker, null, softwareManagement, swMetadataPopupLayout, entityFactory,
                 softwareModuleAddUpdateWindow);

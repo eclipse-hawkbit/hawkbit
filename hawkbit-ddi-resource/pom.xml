@@ -39,6 +39,10 @@
       <dependency>
          <groupId>org.springframework.plugin</groupId>
          <artifactId>spring-plugin-core</artifactId>
+      </dependency>      
+      <dependency>
+         <groupId>com.google.guava</groupId>
+         <artifactId>guava</artifactId>
       </dependency>
       <dependency>
          <groupId>javax.servlet</groupId>

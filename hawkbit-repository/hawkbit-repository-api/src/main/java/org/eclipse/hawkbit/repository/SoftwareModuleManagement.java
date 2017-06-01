@@ -16,8 +16,6 @@ import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeUpdate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -39,7 +37,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
  * Service for managing {@link SoftwareModule}s.
  *
  */
-public interface SoftwareManagement {
+public interface SoftwareModuleManagement {
 
     /**
      * Counts {@link SoftwareModule}s with given
@@ -66,12 +64,6 @@ public interface SoftwareManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Long countSoftwareModulesAll();
-
-    /**
-     * @return number of {@link SoftwareModuleType}s in the repository.
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Long countSoftwareModuleTypesAll();
 
     /**
      * Create {@link SoftwareModule}s in the repository.
@@ -138,26 +130,6 @@ public interface SoftwareManagement {
     SoftwareModuleMetadata createSoftwareModuleMetadata(@NotNull Long moduleId, @NotNull MetaData metadata);
 
     /**
-     * Creates multiple {@link SoftwareModuleType}s.
-     *
-     * @param creates
-     *            to create
-     * @return created Entity
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    List<SoftwareModuleType> createSoftwareModuleType(@NotNull Collection<SoftwareModuleTypeCreate> creates);
-
-    /**
-     * Creates new {@link SoftwareModuleType}.
-     *
-     * @param create
-     *            to create
-     * @return created Entity
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    SoftwareModuleType createSoftwareModuleType(@NotNull SoftwareModuleTypeCreate create);
-
-    /**
      * Deletes the given {@link SoftwareModule} Entity.
      *
      * @param moduleId
@@ -191,18 +163,6 @@ public interface SoftwareManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     void deleteSoftwareModules(@NotNull Collection<Long> moduleIds);
-
-    /**
-     * Deletes or marks as delete in case the type is in use.
-     *
-     * @param typeId
-     *            to delete
-     * 
-     * @throws EntityNotFoundException
-     *             not found is type with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
-    void deleteSoftwareModuleType(@NotNull Long typeId);
 
     /**
      * @param pageable
@@ -434,62 +394,6 @@ public interface SoftwareManagement {
     Slice<SoftwareModule> findSoftwareModulesByType(@NotNull Pageable pageable, @NotNull Long typeId);
 
     /**
-     *
-     * @param id
-     *            to search for
-     * @return {@link SoftwareModuleType} in the repository with given
-     *         {@link SoftwareModuleType#getId()}
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Optional<SoftwareModuleType> findSoftwareModuleTypeById(@NotNull Long id);
-
-    /**
-     *
-     * @param key
-     *            to search for
-     * @return {@link SoftwareModuleType} in the repository with given
-     *         {@link SoftwareModuleType#getKey()}
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Optional<SoftwareModuleType> findSoftwareModuleTypeByKey(@NotEmpty String key);
-
-    /**
-     *
-     * @param name
-     *            to search for
-     * @return all {@link SoftwareModuleType}s in the repository with given
-     *         {@link SoftwareModuleType#getName()}
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Optional<SoftwareModuleType> findSoftwareModuleTypeByName(@NotEmpty String name);
-
-    /**
-     * @param pageable
-     *            parameter
-     * @return all {@link SoftwareModuleType}s in the repository.
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<SoftwareModuleType> findSoftwareModuleTypesAll(@NotNull Pageable pageable);
-
-    /**
-     * Retrieves all {@link SoftwareModuleType}s with a given specification.
-     *
-     * @param rsqlParam
-     *            filter definition in RSQL syntax
-     * @param pageable
-     *            pagination parameter
-     * @return the found {@link SoftwareModuleType}s
-     * 
-     * @throws RSQLParameterUnsupportedFieldException
-     *             if a field in the RSQL string is used but not provided by the
-     *             given {@code fieldNameProvider}
-     * @throws RSQLParameterSyntaxException
-     *             if the RSQL syntax is wrong
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<SoftwareModuleType> findSoftwareModuleTypesAll(@NotNull String rsqlParam, @NotNull Pageable pageable);
-
-    /**
      * Updates existing {@link SoftwareModule}. Update-able values are
      * {@link SoftwareModule#getDescription()}
      * {@link SoftwareModule#getVendor()}.
@@ -524,19 +428,4 @@ public interface SoftwareManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     SoftwareModuleMetadata updateSoftwareModuleMetadata(@NotNull Long moduleId, @NotNull MetaData metadata);
-
-    /**
-     * Updates existing {@link SoftwareModuleType}.
-     *
-     * @param update
-     *            to update
-     * 
-     * @return updated Entity
-     * 
-     * @throws EntityNotFoundException
-     *             in case the {@link SoftwareModuleType} does not exists and
-     *             cannot be updated
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    SoftwareModuleType updateSoftwareModuleType(@NotNull SoftwareModuleTypeUpdate update);
 }

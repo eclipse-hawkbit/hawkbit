@@ -14,7 +14,7 @@ import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -57,7 +57,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
 
     private final ManageDistUIState manageDistUIState;
 
-    private final transient SoftwareManagement softwareManagement;
+    private final transient SoftwareModuleManagement softwareModuleManagement;
 
     private final transient TargetManagement targetManagement;
 
@@ -69,7 +69,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
             final SpPermissionChecker permissionChecker, final ManageDistUIState manageDistUIState,
             final ManagementUIState managementUIState,
             final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout,
-            final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
+            final SoftwareModuleManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
             final TargetManagement targetManagement, final EntityFactory entityFactory,
             final UINotification uiNotification, final TagManagement tagManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout) {
@@ -78,7 +78,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
                 createSoftwareModuleDetailsTable(i18n, permissionChecker, distributionSetManagement, eventBus,
                         manageDistUIState, uiNotification));
         this.manageDistUIState = manageDistUIState;
-        this.softwareManagement = softwareManagement;
+        this.softwareModuleManagement = softwareManagement;
         this.targetManagement = targetManagement;
 
         tfqDetailsTable = new TargetFilterQueryDetailsTable(i18n);
@@ -127,7 +127,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
             }
 
             softwareModuleIdNameList.stream().map(SoftwareModuleIdName::getId)
-                    .map(softwareManagement::findSoftwareModuleById)
+                    .map(softwareModuleManagement::findSoftwareModuleById)
                     .forEach(found -> found.ifPresent(softwareModule -> {
 
                         if (assignedSWModule.containsKey(softwareModule.getType().getName())) {

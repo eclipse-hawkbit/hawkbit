@@ -72,7 +72,7 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
         return getDmfClient().getMessageConverter().toMessage(payload, messageProperties);
     }
 
-    protected int getQueueMessageCount(String queueName) {
+    protected int getQueueMessageCount(final String queueName) {
         return Integer
                 .parseInt(rabbitAdmin.getQueueProperties(queueName).get(RabbitAdmin.QUEUE_MESSAGE_COUNT).toString());
     }

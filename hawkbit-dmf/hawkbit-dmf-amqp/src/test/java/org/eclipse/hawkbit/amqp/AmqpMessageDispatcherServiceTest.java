@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -53,8 +54,6 @@ import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.ActiveProfiles;
-
-import com.google.common.collect.Lists;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -96,7 +95,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
         final ArtifactUrlHandler artifactUrlHandlerMock = Mockito.mock(ArtifactUrlHandler.class);
         when(artifactUrlHandlerMock.getUrls(anyObject(), anyObject()))
-                .thenReturn(Lists.newArrayList(new ArtifactUrl("http", "download", "http://mockurl")));
+                .thenReturn(Arrays.asList(new ArtifactUrl("http", "download", "http://mockurl")));
 
         systemManagement = Mockito.mock(SystemManagement.class);
         final TenantMetaData tenantMetaData = Mockito.mock(TenantMetaData.class);
@@ -178,7 +177,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         for (final Artifact artifact : testdataFactory.createArtifacts(module.getId())) {
             receivedList.add(new DbArtifact());
         }
-        module = softwareManagement.findSoftwareModuleById(module.getId()).get();
+        module = softwareModuleManagement.findSoftwareModuleById(module.getId()).get();
         dsA = distributionSetManagement.findDistributionSetById(dsA.getId()).get();
 
         final Action action = createAction(dsA);

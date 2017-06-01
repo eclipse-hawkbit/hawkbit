@@ -36,7 +36,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.jpa.JpaSystemException;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 import cz.jirutka.rsql.parser.ParseException;
@@ -166,7 +165,7 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
                             nextTokenBeginColumn + currentTokenImageName.length(), currentTokenImageName));
         } else if (shouldSuggestDotToken(currentTokenImageName, containsDot)) {
             return Optional.of(
-                    Lists.newArrayList(new SuggestToken(currentTokenEndColumn, nextTokenBeginColumn + 1, null, ".")));
+                    Arrays.asList(new SuggestToken(currentTokenEndColumn, nextTokenBeginColumn + 1, null, ".")));
         } else if (shouldSuggestSubTokenFieldNames(currentTokenImageName, containsDot)) {
             return handleSubtokenSuggestion(currentTokenImageName, nextTokenBeginColumn);
         }

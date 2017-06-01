@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.RefreshSoftwareModuleByFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -60,19 +60,19 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     private final ArtifactUploadState artifactUploadState;
 
-    private final transient SoftwareManagement softwareManagement;
+    private final transient SoftwareModuleManagement softwareModuleManagement;
 
     private final UploadViewClientCriterion uploadViewClientCriterion;
 
     private final SwMetadataPopupLayout swMetadataPopupLayout;
 
     SoftwareModuleTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification uiNotification,
-            final ArtifactUploadState artifactUploadState, final SoftwareManagement softwareManagement,
+            final ArtifactUploadState artifactUploadState, final SoftwareModuleManagement softwareManagement,
             final UploadViewClientCriterion uploadViewClientCriterion,
             final SwMetadataPopupLayout swMetadataPopupLayout) {
         super(eventBus, i18n, uiNotification);
         this.artifactUploadState = artifactUploadState;
-        this.softwareManagement = softwareManagement;
+        this.softwareModuleManagement = softwareManagement;
         this.uploadViewClientCriterion = uploadViewClientCriterion;
         this.swMetadataPopupLayout = swMetadataPopupLayout;
 
@@ -145,7 +145,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     @Override
     protected Optional<SoftwareModule> findEntityByTableValue(final Long entityTableId) {
-        return softwareManagement.findSoftwareModuleById(entityTableId);
+        return softwareModuleManagement.findSoftwareModuleById(entityTableId);
     }
 
     @Override
@@ -253,7 +253,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     }
 
     private void showMetadataDetails(final Long itemId) {
-        softwareManagement.findSoftwareModuleById(itemId)
+        softwareModuleManagement.findSoftwareModuleById(itemId)
                 .ifPresent(swmodule -> UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null)));
     }
 

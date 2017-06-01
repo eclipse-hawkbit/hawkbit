@@ -9,12 +9,11 @@
 package org.eclipse.hawkbit.mgmt.client.resource.builder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssigment;
-
-import com.google.common.collect.Lists;
 
 /**
  * Builder pattern for building {@link MgmtDistributionSetRequestBodyPost}.
@@ -84,7 +83,7 @@ public class DistributionSetBuilder {
      * @return a single entry list of {@link MgmtDistributionSetRequestBodyPost}
      */
     public List<MgmtDistributionSetRequestBodyPost> build() {
-        return Lists.newArrayList(doBuild(""));
+        return Arrays.asList(doBuild(""));
     }
 
     /**
@@ -114,7 +113,7 @@ public class DistributionSetBuilder {
      * @return a list of {@link MgmtDistributionSetRequestBodyPost}
      */
     public List<MgmtDistributionSetRequestBodyPost> buildAsList(final int offset, final int count) {
-        final ArrayList<MgmtDistributionSetRequestBodyPost> bodyList = Lists.newArrayList();
+        final List<MgmtDistributionSetRequestBodyPost> bodyList = new ArrayList<>();
         for (int index = offset; index < count + offset; index++) {
             bodyList.add(doBuild(String.valueOf(index)));
         }

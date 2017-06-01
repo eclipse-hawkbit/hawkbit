@@ -36,12 +36,8 @@
          <artifactId>spring-web</artifactId>
       </dependency>
       <dependency>
-         <groupId>org.apache.commons</groupId>
-         <artifactId>commons-lang3</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>com.google.guava</groupId>
-         <artifactId>guava</artifactId>
+         <groupId>com.github.ben-manes.caffeine</groupId>
+         <artifactId>caffeine</artifactId>
       </dependency>
       <dependency>
          <groupId>org.slf4j</groupId>
@@ -69,6 +65,11 @@
       <dependency>
          <groupId>ru.yandex.qatools.allure</groupId>
          <artifactId>allure-junit-adaptor</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>com.google.guava</groupId>
+         <artifactId>guava</artifactId>
          <scope>test</scope>
       </dependency>
    </dependencies>

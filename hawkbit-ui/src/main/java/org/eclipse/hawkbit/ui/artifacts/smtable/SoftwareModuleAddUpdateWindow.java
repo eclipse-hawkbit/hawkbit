@@ -10,9 +10,9 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import java.util.Optional;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -59,7 +59,9 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
     private final transient EventBus.UIEventBus eventBus;
 
-    private final transient SoftwareManagement softwareManagement;
+    private final transient SoftwareModuleManagement softwareModuleManagement;
+
+    private final transient SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
     private final transient EntityFactory entityFactory;
 
@@ -90,18 +92,22 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
      *            UINotification
      * @param eventBus
      *            UIEventBus
-     * @param softwareManagement
-     *            SoftwareManagement
+     * @param softwareModuleManagement
+     *            management for {@link SoftwareModule}s
+     * @param softwareModuleTypeManagement
+     *            management for {@link SoftwareModuleType}s
      * @param entityFactory
      *            EntityFactory
      */
     public SoftwareModuleAddUpdateWindow(final VaadinMessageSource i18n, final UINotification uiNotifcation,
-            final UIEventBus eventBus, final SoftwareManagement softwareManagement, final EntityFactory entityFactory,
+            final UIEventBus eventBus, final SoftwareModuleManagement softwareModuleManagement,
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement, final EntityFactory entityFactory,
             final AbstractTable<SoftwareModule> softwareModuleTable) {
         this.i18n = i18n;
         this.uiNotifcation = uiNotifcation;
         this.eventBus = eventBus;
-        this.softwareManagement = softwareManagement;
+        this.softwareModuleManagement = softwareModuleManagement;
+        this.softwareModuleTypeManagement = softwareModuleTypeManagement;
         this.entityFactory = entityFactory;
         this.softwareModuleTable = softwareModuleTable;
 
@@ -133,12 +139,13 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
             final String description = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
             final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
 
-            final SoftwareModuleType softwareModuleTypeByName = softwareManagement.findSoftwareModuleTypeByName(type)
+            final SoftwareModuleType softwareModuleTypeByName = softwareModuleTypeManagement
+                    .findSoftwareModuleTypeByName(type)
                     .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, type));
             final SoftwareModuleCreate softwareModule = entityFactory.softwareModule().create()
                     .type(softwareModuleTypeByName).name(name).version(version).description(description).vendor(vendor);
 
-            final SoftwareModule newSoftwareModule = softwareManagement.createSoftwareModule(softwareModule);
+            final SoftwareModule newSoftwareModule = softwareModuleManagement.createSoftwareModule(softwareModule);
             eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.ADD_ENTITY, newSoftwareModule));
             uiNotifcation.displaySuccess(i18n.getMessage("message.save.success",
                     new Object[] { newSoftwareModule.getName() + ":" + newSoftwareModule.getVersion() }));
@@ -150,9 +157,9 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
             final String version = versionTextField.getValue();
             final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
 
-            final Optional<Long> moduleType = softwareManagement.findSoftwareModuleTypeByName(type)
+            final Optional<Long> moduleType = softwareModuleTypeManagement.findSoftwareModuleTypeByName(type)
                     .map(SoftwareModuleType::getId);
-            if (moduleType.isPresent() && softwareManagement
+            if (moduleType.isPresent() && softwareModuleManagement
                     .findSoftwareModuleByNameAndVersion(name, version, moduleType.get()).isPresent()) {
                 uiNotifcation.displayValidationError(
                         i18n.getMessage("message.duplicate.softwaremodule", new Object[] { name, version }));
@@ -165,8 +172,9 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
          * updates a softwareModule
          */
         private void updateSwModule() {
-            final SoftwareModule newSWModule = softwareManagement.updateSoftwareModule(entityFactory.softwareModule()
-                    .update(baseSwModuleId).description(descTextArea.getValue()).vendor(vendorTextField.getValue()));
+            final SoftwareModule newSWModule = softwareModuleManagement
+                    .updateSoftwareModule(entityFactory.softwareModule().update(baseSwModuleId)
+                            .description(descTextArea.getValue()).vendor(vendorTextField.getValue()));
             if (newSWModule != null) {
                 uiNotifcation.displaySuccess(i18n.getMessage("message.save.success",
                         new Object[] { newSWModule.getName() + ":" + newSWModule.getVersion() }));
@@ -220,8 +228,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         typeComboBox = SPUIComponentProvider.getComboBox(i18n.getMessage("upload.swmodule.type"), "", null, null, true,
                 null, i18n.getMessage("upload.swmodule.type"));
         typeComboBox.setId(UIComponentIdProvider.SW_MODULE_TYPE);
-        typeComboBox
-                .setStyleName(SPUIDefinitions.COMBO_BOX_SPECIFIC_STYLE + StringUtils.SPACE + ValoTheme.COMBOBOX_TINY);
+        typeComboBox.setStyleName(SPUIDefinitions.COMBO_BOX_SPECIFIC_STYLE + " " + ValoTheme.COMBOBOX_TINY);
         typeComboBox.setNewItemsAllowed(Boolean.FALSE);
         typeComboBox.setImmediate(Boolean.TRUE);
     }
@@ -282,7 +289,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
             return;
         }
         editSwModule = Boolean.TRUE;
-        softwareManagement.findSoftwareModuleById(baseSwModuleId).ifPresent(swModule -> {
+        softwareModuleManagement.findSoftwareModuleById(baseSwModuleId).ifPresent(swModule -> {
             nameTextField.setValue(swModule.getName());
             versionTextField.setValue(swModule.getVersion());
             vendorTextField.setValue(HawkbitCommonUtil.trimAndNullIfEmpty(swModule.getVendor()));

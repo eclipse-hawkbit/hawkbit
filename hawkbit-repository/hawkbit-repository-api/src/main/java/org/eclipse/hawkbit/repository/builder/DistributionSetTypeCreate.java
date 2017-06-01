@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -15,8 +16,6 @@ import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.hibernate.validator.constraints.NotEmpty;
-
-import com.google.common.collect.Lists;
 
 /**
  * Builder to create a new {@link DistributionSetType} entry. Defines all fields
@@ -67,7 +66,7 @@ public interface DistributionSetTypeCreate {
      * @return updated builder instance
      */
     default DistributionSetTypeCreate mandatory(final Long mandatory) {
-        return mandatory(Lists.newArrayList(mandatory));
+        return mandatory(Arrays.asList(mandatory));
     }
 
     /**
@@ -92,7 +91,7 @@ public interface DistributionSetTypeCreate {
      * @return updated builder instance
      */
     default DistributionSetTypeCreate optional(final Long optional) {
-        return optional(Lists.newArrayList(optional));
+        return optional(Arrays.asList(optional));
     }
 
     /**

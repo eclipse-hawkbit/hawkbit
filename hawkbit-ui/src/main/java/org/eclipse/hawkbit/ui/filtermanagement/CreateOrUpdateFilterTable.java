@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -33,7 +34,6 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.vaadin.data.Item;
@@ -130,7 +130,7 @@ public class CreateOrUpdateFilterTable extends Table {
 
     private Map<String, Object> prepareQueryConfigFilters() {
         final Map<String, Object> queryConfig = Maps.newHashMapWithExpectedSize(2);
-        if (!Strings.isNullOrEmpty(filterManagementUIState.getFilterQueryValue())) {
+        if (!StringUtils.isEmpty(filterManagementUIState.getFilterQueryValue())) {
             queryConfig.put(SPUIDefinitions.FILTER_BY_QUERY, filterManagementUIState.getFilterQueryValue());
         }
         queryConfig.put(SPUIDefinitions.FILTER_BY_INVALID_QUERY,
@@ -182,10 +182,12 @@ public class CreateOrUpdateFilterTable extends Table {
         final List<TableColumn> columnList = Lists.newArrayListWithExpectedSize(7);
         columnList.add(new TableColumn(SPUILabelDefinitions.NAME, i18n.getMessage("header.name"), 0.15F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.getMessage("header.createdBy"), 0.1F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.getMessage("header.createdDate"), 0.1F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.getMessage("header.modifiedBy"), 0.1F));
         columnList.add(
-                new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.getMessage("header.modifiedDate"), 0.1F));
+                new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.getMessage("header.createdDate"), 0.1F));
+        columnList.add(
+                new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.getMessage("header.modifiedBy"), 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE,
+                i18n.getMessage("header.modifiedDate"), 0.1F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.getMessage("header.description"), 0.1F));
         columnList.add(new TableColumn(SPUILabelDefinitions.STATUS_ICON, i18n.getMessage("header.status"), 0.1F));
 

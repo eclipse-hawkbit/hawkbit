@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
@@ -18,10 +19,10 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionS
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.SoftwareModuleTypeNotInDistributionSetTypeException;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -40,8 +41,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.common.collect.Lists;
-
 /**
  * REST Resource handling for {@link SoftwareModule} and related
  * {@link Artifact} CRUD operations.
@@ -50,10 +49,10 @@ import com.google.common.collect.Lists;
 public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeRestApi {
 
     @Autowired
-    private SoftwareManagement softwareManagement;
+    private SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
     @Autowired
-    private DistributionSetManagement distributionSetManagement;
+    private DistributionSetTypeManagement distributionSetTypeManagement;
 
     @Autowired
     private EntityFactory entityFactory;
@@ -73,11 +72,11 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
         final Slice<DistributionSetType> findModuleTypessAll;
         Long countModulesAll;
         if (rsqlParam != null) {
-            findModuleTypessAll = distributionSetManagement.findDistributionSetTypesAll(rsqlParam, pageable);
+            findModuleTypessAll = distributionSetTypeManagement.findDistributionSetTypesAll(rsqlParam, pageable);
             countModulesAll = ((Page<DistributionSetType>) findModuleTypessAll).getTotalElements();
         } else {
-            findModuleTypessAll = distributionSetManagement.findDistributionSetTypesAll(pageable);
-            countModulesAll = distributionSetManagement.countDistributionSetTypesAll();
+            findModuleTypessAll = distributionSetTypeManagement.findDistributionSetTypesAll(pageable);
+            countModulesAll = distributionSetTypeManagement.countDistributionSetTypesAll();
         }
 
         final List<MgmtDistributionSetType> rest = MgmtDistributionSetTypeMapper
@@ -96,7 +95,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     @Override
     public ResponseEntity<Void> deleteDistributionSetType(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId) {
-        distributionSetManagement.deleteDistributionSetType(distributionSetTypeId);
+        distributionSetTypeManagement.deleteDistributionSetType(distributionSetTypeId);
 
         return ResponseEntity.ok().build();
     }
@@ -107,7 +106,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
             @RequestBody final MgmtDistributionSetTypeRequestBodyPut restDistributionSetType) {
 
         return ResponseEntity.ok(MgmtDistributionSetTypeMapper
-                .toResponse(distributionSetManagement.updateDistributionSetType(entityFactory.distributionSetType()
+                .toResponse(distributionSetTypeManagement.updateDistributionSetType(entityFactory.distributionSetType()
                         .update(distributionSetTypeId).description(restDistributionSetType.getDescription())
                         .colour(restDistributionSetType.getColour()))));
     }
@@ -116,15 +115,16 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     public ResponseEntity<List<MgmtDistributionSetType>> createDistributionSetTypes(
             @RequestBody final List<MgmtDistributionSetTypeRequestBodyPost> distributionSetTypes) {
 
-        final List<DistributionSetType> createdSoftwareModules = distributionSetManagement.createDistributionSetTypes(
-                MgmtDistributionSetTypeMapper.smFromRequest(entityFactory, distributionSetTypes));
+        final List<DistributionSetType> createdSoftwareModules = distributionSetTypeManagement
+                .createDistributionSetTypes(
+                        MgmtDistributionSetTypeMapper.smFromRequest(entityFactory, distributionSetTypes));
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(MgmtDistributionSetTypeMapper.toTypesResponse(createdSoftwareModules));
     }
 
     private DistributionSetType findDistributionSetTypeWithExceptionIfNotFound(final Long distributionSetTypeId) {
-        return distributionSetManagement.findDistributionSetTypeById(distributionSetTypeId)
+        return distributionSetTypeManagement.findDistributionSetTypeById(distributionSetTypeId)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, distributionSetTypeId));
     }
 
@@ -178,7 +178,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     public ResponseEntity<Void> removeMandatoryModule(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
             @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId) {
-        distributionSetManagement.unassignSoftwareModuleType(distributionSetTypeId, softwareModuleTypeId);
+        distributionSetTypeManagement.unassignSoftwareModuleType(distributionSetTypeId, softwareModuleTypeId);
 
         return ResponseEntity.ok().build();
     }
@@ -195,8 +195,8 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     public ResponseEntity<Void> addMandatoryModule(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId, @RequestBody final MgmtId smtId) {
 
-        distributionSetManagement.assignMandatorySoftwareModuleTypes(distributionSetTypeId,
-                Lists.newArrayList(smtId.getId()));
+        distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(distributionSetTypeId,
+                Arrays.asList(smtId.getId()));
 
         return ResponseEntity.ok().build();
     }
@@ -205,15 +205,15 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     public ResponseEntity<Void> addOptionalModule(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId, @RequestBody final MgmtId smtId) {
 
-        distributionSetManagement.assignOptionalSoftwareModuleTypes(distributionSetTypeId,
-                Lists.newArrayList(smtId.getId()));
+        distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(distributionSetTypeId,
+                Arrays.asList(smtId.getId()));
 
         return ResponseEntity.ok().build();
     }
 
     private SoftwareModuleType findSoftwareModuleTypeWithExceptionIfNotFound(final Long softwareModuleTypeId) {
 
-        return softwareManagement.findSoftwareModuleTypeById(softwareModuleTypeId)
+        return softwareModuleTypeManagement.findSoftwareModuleTypeById(softwareModuleTypeId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, softwareModuleTypeId));
     }
 }

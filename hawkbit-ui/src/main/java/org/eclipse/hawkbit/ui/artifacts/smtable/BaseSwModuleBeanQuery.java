@@ -14,7 +14,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
@@ -25,10 +25,9 @@ import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
-
-import com.google.common.base.Strings;
 
 /**
  * Simple implementation of generics bean query which dynamically loads a batch
@@ -37,7 +36,7 @@ import com.google.common.base.Strings;
  */
 public class BaseSwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSoftwareModuleItem> {
     private static final long serialVersionUID = 4362142538539335466L;
-    private transient SoftwareManagement softwareManagementService;
+    private transient SoftwareModuleManagement softwareManagementService;
     private Long type;
     private String searchText;
     private final Sort sort = new Sort(Direction.ASC, "name", "version");
@@ -61,7 +60,7 @@ public class BaseSwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSoftwareMo
             type = Optional.ofNullable((SoftwareModuleType) queryConfig.get(SPUIDefinitions.BY_SOFTWARE_MODULE_TYPE))
                     .map(SoftwareModuleType::getId).orElse(null);
             searchText = (String) queryConfig.get(SPUIDefinitions.FILTER_BY_TEXT);
-            if (!Strings.isNullOrEmpty(searchText)) {
+            if (!StringUtils.isEmpty(searchText)) {
                 searchText = String.format("%%%s%%", searchText);
             }
         }
@@ -76,7 +75,7 @@ public class BaseSwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSoftwareMo
     protected List<ProxyBaseSoftwareModuleItem> loadBeans(final int startIndex, final int count) {
         final Slice<SoftwareModule> swModuleBeans;
 
-        if (type == null && Strings.isNullOrEmpty(searchText)) {
+        if (type == null && StringUtils.isEmpty(searchText)) {
             swModuleBeans = getSoftwareManagementService()
                     .findSoftwareModulesAll(new OffsetBasedPageRequest(startIndex, count, sort));
 
@@ -107,7 +106,7 @@ public class BaseSwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSoftwareMo
     @Override
     public int size() {
         long size;
-        if (type == null && Strings.isNullOrEmpty(searchText)) {
+        if (type == null && StringUtils.isEmpty(searchText)) {
             size = getSoftwareManagementService().countSoftwareModulesAll();
         } else {
             size = getSoftwareManagementService().countSoftwareModuleByFilters(searchText, type);
@@ -127,9 +126,9 @@ public class BaseSwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSoftwareMo
         // save of the entity not required from this method
     }
 
-    private SoftwareManagement getSoftwareManagementService() {
+    private SoftwareModuleManagement getSoftwareManagementService() {
         if (softwareManagementService == null) {
-            softwareManagementService = SpringContextHelper.getBean(SoftwareManagement.class);
+            softwareManagementService = SpringContextHelper.getBean(SoftwareModuleManagement.class);
         }
         return softwareManagementService;
     }

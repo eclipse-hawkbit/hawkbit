@@ -13,7 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
@@ -53,14 +54,19 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
 
     private static final String DISCARD = "Discard";
 
-    private final transient SoftwareManagement softwareManagement;
+    private final transient SoftwareModuleTypeManagement softwareModuleTypeManagement;
+
+    private final transient SoftwareModuleManagement softwareModuleManagement;
 
     private final ArtifactUploadState artifactUploadState;
 
     UploadViewConfirmationWindowLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final SoftwareManagement softwareManagement, final ArtifactUploadState artifactUploadState) {
+            final SoftwareModuleManagement softwareModuleManagement,
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement,
+            final ArtifactUploadState artifactUploadState) {
         super(i18n, eventBus);
-        this.softwareManagement = softwareManagement;
+        this.softwareModuleTypeManagement = softwareModuleTypeManagement;
+        this.softwareModuleManagement = softwareModuleManagement;
         this.artifactUploadState = artifactUploadState;
     }
 
@@ -146,7 +152,7 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
 
     private void deleteSMAll(final ConfirmationTab tab) {
         final Set<Long> swmoduleIds = artifactUploadState.getDeleteSofwareModules().keySet();
-        softwareManagement.deleteSoftwareModules(swmoduleIds);
+        softwareModuleManagement.deleteSoftwareModules(swmoduleIds);
         eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.REMOVE_ENTITY, swmoduleIds));
 
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
@@ -244,8 +250,8 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
     private void deleteSMtypeAll(final ConfirmationTab tab) {
         final int deleteSWModuleTypeCount = artifactUploadState.getSelectedDeleteSWModuleTypes().size();
         for (final String swModuleTypeName : artifactUploadState.getSelectedDeleteSWModuleTypes()) {
-            softwareManagement.findSoftwareModuleTypeByName(swModuleTypeName).map(SoftwareModuleType::getId)
-                    .ifPresent(softwareManagement::deleteSoftwareModuleType);
+            softwareModuleTypeManagement.findSoftwareModuleTypeByName(swModuleTypeName).map(SoftwareModuleType::getId)
+                    .ifPresent(softwareModuleTypeManagement::deleteSoftwareModuleType);
         }
         addToConsolitatedMsg(FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.getMessage("message.sw.module.type.delete", new Object[] { deleteSWModuleTypeCount }));

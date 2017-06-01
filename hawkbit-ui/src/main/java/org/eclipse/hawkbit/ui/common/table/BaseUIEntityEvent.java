@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.common.table;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.apache.commons.lang3.ClassUtils;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.eclipse.hawkbit.repository.event.remote.RemoteIdEvent;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
@@ -96,7 +95,7 @@ public class BaseUIEntityEvent<T extends BaseEntity> {
         }
         final RemoteIdEvent remoteIdEvent = (RemoteIdEvent) tenantAwareEvent;
         try {
-            final Class<?> remoteEntityClass = ClassUtils.getClass(remoteIdEvent.getEntityClass());
+            final Class<?> remoteEntityClass = Class.forName(remoteIdEvent.getEntityClass());
             return entityClass.isAssignableFrom(remoteEntityClass) && entityIds.contains(remoteIdEvent.getEntityId());
         } catch (final ClassNotFoundException e) {
             LOG.error("Entity Class of remoteIdEvent cannot be found", e);

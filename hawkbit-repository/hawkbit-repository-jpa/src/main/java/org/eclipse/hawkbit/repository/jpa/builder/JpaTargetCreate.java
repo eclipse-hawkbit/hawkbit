@@ -8,11 +8,11 @@
  */
 package org.eclipse.hawkbit.repository.jpa.builder;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.builder.AbstractTargetUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.springframework.util.StringUtils;
 
 /**
  * Create/build implementation.

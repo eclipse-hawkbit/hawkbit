@@ -8,10 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.colorpicker;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.ui.management.tag.SpColorPickerPreview;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.ui.Slider.ValueOutOfBoundsException;
@@ -50,7 +50,7 @@ public final class ColorPickerHelper {
      */
     public static Color rgbToColorConverter(final String value) {
 
-        if (StringUtils.isEmpty(value) || (StringUtils.isNotEmpty(value) && !value.startsWith("rgb"))) {
+        if (StringUtils.isEmpty(value) || (!StringUtils.isEmpty(value) && !value.startsWith("rgb"))) {
             throw new IllegalArgumentException(
                     "String to convert is empty or of invalid format - value: '" + value + "'");
         }

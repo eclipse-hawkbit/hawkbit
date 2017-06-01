@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Optional;
 
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadFileStatus;
@@ -73,11 +73,11 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     private SoftwareModule selectedSwForUpload;
     private final ArtifactUploadState artifactUploadState;
 
-    private final transient SoftwareManagement softwareManagement;
+    private final transient SoftwareModuleManagement softwareModuleManagement;
 
     UploadHandler(final String fileName, final long fileSize, final UploadLayout view, final long maxSize,
             final Upload upload, final String mimeType, final SoftwareModule selectedSw,
-            final SoftwareManagement softwareManagement) {
+            final SoftwareModuleManagement softwareManagement) {
         super();
         this.aborted = false;
         this.fileName = fileName;
@@ -90,7 +90,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         this.i18n = SpringContextHelper.getBean(VaadinMessageSource.class);
         this.eventBus = SpringContextHelper.getBean(EventBus.UIEventBus.class);
         this.artifactUploadState = SpringContextHelper.getBean(ArtifactUploadState.class);
-        this.softwareManagement = softwareManagement;
+        this.softwareModuleManagement = softwareManagement;
         eventBus.subscribe(this);
     }
 
@@ -217,7 +217,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
 
         final Optional<Long> selectedBaseSwModuleId = artifactUploadState.getSelectedBaseSwModuleId();
         if (selectedBaseSwModuleId.isPresent()) {
-            selectedSwForUpload = softwareManagement.findSoftwareModuleById(selectedBaseSwModuleId.get()).orElse(null);
+            selectedSwForUpload = softwareModuleManagement.findSoftwareModuleById(selectedBaseSwModuleId.get()).orElse(null);
         }
 
         if (selectedSwForUpload != null && view.checkIfSoftwareModuleIsSelected()

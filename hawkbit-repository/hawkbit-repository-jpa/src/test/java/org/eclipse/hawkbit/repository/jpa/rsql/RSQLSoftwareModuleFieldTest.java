@@ -31,21 +31,21 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
 
     @Before
     public void setupBeforeTest() {
-        final SoftwareModule ah = softwareManagement.createSoftwareModule(entityFactory.softwareModule().create()
+        final SoftwareModule ah = softwareModuleManagement.createSoftwareModule(entityFactory.softwareModule().create()
                 .type(appType).name("agent-hub").version("1.0.1").description("agent-hub"));
-        softwareManagement.createSoftwareModule(entityFactory.softwareModule().create().type(runtimeType)
+        softwareModuleManagement.createSoftwareModule(entityFactory.softwareModule().create().type(runtimeType)
                 .name("oracle-jre").version("1.7.2").description("aa"));
-        softwareManagement.createSoftwareModule(
+        softwareModuleManagement.createSoftwareModule(
                 entityFactory.softwareModule().create().type(osType).name("poky").version("3.0.2").description("aa"));
 
-        final JpaSoftwareModule ah2 = (JpaSoftwareModule) softwareManagement.createSoftwareModule(entityFactory
+        final JpaSoftwareModule ah2 = (JpaSoftwareModule) softwareModuleManagement.createSoftwareModule(entityFactory
                 .softwareModule().create().type(appType).name("agent-hub2").version("1.0.1").description("agent-hub2"));
 
         final MetaData softwareModuleMetadata = entityFactory.generateMetadata("metaKey", "metaValue");
-        softwareManagement.createSoftwareModuleMetadata(ah.getId(), softwareModuleMetadata);
+        softwareModuleManagement.createSoftwareModuleMetadata(ah.getId(), softwareModuleMetadata);
 
         final MetaData softwareModuleMetadata2 = entityFactory.generateMetadata("metaKey", "value");
-        softwareManagement.createSoftwareModuleMetadata(ah2.getId(), softwareModuleMetadata2);
+        softwareModuleManagement.createSoftwareModuleMetadata(ah2.getId(), softwareModuleMetadata2);
     }
 
     @Test
@@ -105,7 +105,7 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long excpectedEntity) {
-        final Page<SoftwareModule> find = softwareManagement.findSoftwareModulesByPredicate(rsqlParam,
+        final Page<SoftwareModule> find = softwareModuleManagement.findSoftwareModulesByPredicate(rsqlParam,
                 new PageRequest(0, 100));
         final long countAll = find.getTotalElements();
         assertThat(find).isNotNull();

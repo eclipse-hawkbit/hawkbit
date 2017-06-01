@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -25,7 +26,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -37,6 +37,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetCreate;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetUpdate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
+import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
@@ -66,9 +67,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
-
-import com.google.common.collect.Lists;
 
 /**
  * JPA implementation of {@link TargetManagement}.
@@ -107,6 +107,9 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Autowired
     private TenantAware tenantAware;
+
+    @Autowired
+    private AfterTransactionCommitExecutor afterCommit;
 
     @Autowired
     private VirtualPropertyReplacer virtualPropertyReplacer;
@@ -183,10 +186,10 @@ public class JpaTargetManagement implements TargetManagement {
 
         targetRepository.deleteByIdIn(targetIDs);
 
-        targets.forEach(target -> eventPublisher.publishEvent(
+        afterCommit.afterCommit(() -> targets.forEach(target -> eventPublisher.publishEvent(
                 new TargetDeletedEvent(tenantAware.getCurrentTenant(), target.getId(), target.getControllerId(),
                         Optional.ofNullable(target.getAddress()).map(URI::toString).orElse(null),
-                        JpaTarget.class.getName(), applicationContext.getId())));
+                        JpaTarget.class.getName(), applicationContext.getId()))));
     }
 
     @Override
@@ -298,7 +301,7 @@ public class JpaTargetManagement implements TargetManagement {
             specList.add(TargetSpecifications
                     .hasInstalledOrAssignedDistributionSet(filterParams.getFilterByDistributionId()));
         }
-        if (StringUtils.isNotEmpty(filterParams.getFilterBySearchText())) {
+        if (!StringUtils.isEmpty(filterParams.getFilterBySearchText())) {
             specList.add(TargetSpecifications.likeIdOrNameOrDescription(filterParams.getFilterBySearchText()));
         }
         if (isHasTagsFilterActive(filterParams)) {
@@ -529,7 +532,7 @@ public class JpaTargetManagement implements TargetManagement {
             final String targetFilterQuery) {
         final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery, TargetFields.class,
                 virtualPropertyReplacer);
-        final List<Specification<JpaTarget>> specList = Lists.newArrayList(spec,
+        final List<Specification<JpaTarget>> specList = Arrays.asList(spec,
                 TargetSpecifications.isNotInRolloutGroups(groups));
 
         return countByCriteriaAPI(specList);

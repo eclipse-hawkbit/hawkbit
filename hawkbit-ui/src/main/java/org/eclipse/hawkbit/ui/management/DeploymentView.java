@@ -15,6 +15,7 @@ import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
@@ -120,7 +121,8 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
             final UINotification uiNotification, final ManagementUIState managementUIState,
             final DeploymentManagement deploymentManagement, final UIEventBus eventBus,
             final DistributionTableFilters distFilterParameters,
-            final DistributionSetManagement distributionSetManagement, final TargetManagement targetManagement,
+            final DistributionSetManagement distributionSetManagement,
+            final DistributionSetTypeManagement distributionSetTypeManagement, final TargetManagement targetManagement,
             final EntityFactory entityFactory, final UiProperties uiproperties,
             final ManagementViewClientCriterion managementViewClientCriterion, final TagManagement tagManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement,
@@ -152,8 +154,8 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
                 tagManagement, entityFactory, uiNotification, distFilterParameters, distributionSetManagement,
                 managementViewClientCriterion);
         this.distributionTableLayout = new DistributionTableLayout(i18n, eventBus, permChecker, managementUIState,
-                distributionSetManagement, managementViewClientCriterion, entityFactory, uiNotification, tagManagement,
-                systemManagement, targetManagement, deploymentManagement);
+                distributionSetManagement, distributionSetTypeManagement, managementViewClientCriterion, entityFactory,
+                uiNotification, tagManagement, systemManagement, targetManagement, deploymentManagement);
         this.deleteAndActionsLayout = new DeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
                 tagManagement, managementViewClientCriterion, managementUIState, targetManagement, targetTable,
                 deploymentManagement, distributionSetManagement);

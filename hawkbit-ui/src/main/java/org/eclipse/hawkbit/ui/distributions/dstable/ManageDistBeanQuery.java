@@ -28,10 +28,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
-
-import com.google.common.base.Strings;
 
 /**
  * Manage Distributions table bean query.
@@ -61,7 +60,7 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
 
         if (HawkbitCommonUtil.isNotNullOrEmpty(queryConfig)) {
             searchText = (String) queryConfig.get(SPUIDefinitions.FILTER_BY_TEXT);
-            if (!Strings.isNullOrEmpty(searchText)) {
+            if (!StringUtils.isEmpty(searchText)) {
                 searchText = String.format("%%%s%%", searchText);
             }
             if (queryConfig.get(SPUIDefinitions.FILTER_BY_DISTRIBUTION_SET_TYPE) != null) {
@@ -73,7 +72,7 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
             }
         }
 
-        if (sortStates.length > 0) {
+        if (sortStates!= null && sortStates.length > 0) {
             // Initialize sort
             sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortPropertyIds[0]);
             // Add sort
@@ -95,7 +94,7 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
         final List<ProxyDistribution> proxyDistributions = new ArrayList<>();
         if (startIndex == 0 && firstPageDistributionSets != null) {
             distBeans = firstPageDistributionSets;
-        } else if (Strings.isNullOrEmpty(searchText)) {
+        } else if (StringUtils.isEmpty(searchText)) {
             // if no search filters available
             distBeans = getDistributionSetManagement().findDistributionSetsByDeletedAndOrCompleted(
                     new OffsetBasedPageRequest(startIndex, count, sort), false, dsComplete);
@@ -121,7 +120,7 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
 
     @Override
     public int size() {
-        if (Strings.isNullOrEmpty(searchText) && null == distributionSetType) {
+        if (StringUtils.isEmpty(searchText) && null == distributionSetType) {
             // if no search filters available
             firstPageDistributionSets = getDistributionSetManagement().findDistributionSetsByDeletedAndOrCompleted(
                     new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), false, dsComplete);
