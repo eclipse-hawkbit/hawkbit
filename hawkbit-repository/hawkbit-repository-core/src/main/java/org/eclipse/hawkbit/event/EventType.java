@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
@@ -99,6 +100,7 @@ public class EventType {
 
         TYPES.put(24, TargetPollEvent.class);
         TYPES.put(25, RolloutDeletedEvent.class);
+        TYPES.put(26, RolloutGroupDeletedEvent.class);
     }
 
     private int value;

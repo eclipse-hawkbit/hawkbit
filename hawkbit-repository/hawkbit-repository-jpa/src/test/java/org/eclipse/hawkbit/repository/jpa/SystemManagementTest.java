@@ -140,7 +140,7 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("deleted garbage", true);
         ds.getModules().stream().forEach(module -> {
             artifactManagement.createArtifact(new ByteArrayInputStream(random), module.getId(), "file1", false);
-            softwareManagement.deleteSoftwareModule(module.getId());
+            softwareModuleManagement.deleteSoftwareModule(module.getId());
         });
     }
 

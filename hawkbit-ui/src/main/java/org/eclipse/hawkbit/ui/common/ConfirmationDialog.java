@@ -12,8 +12,8 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleTiny;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.springframework.util.StringUtils;
 
-import com.google.common.base.Strings;
 import com.vaadin.server.Resource;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
@@ -120,7 +120,7 @@ public class ConfirmationDialog implements Button.ClickListener {
     public ConfirmationDialog(final String caption, final String question, final String okLabel,
             final String cancelLabel, final ConfirmationDialogCallback callback, final Resource icon, final String id) {
         window = new Window(caption);
-        if (!Strings.isNullOrEmpty(id)) {
+        if (!StringUtils.isEmpty(id)) {
             window.setId(id);
         }
         window.addStyleName(SPUIStyleDefinitions.CONFIRMATION_WINDOW_CAPTION);

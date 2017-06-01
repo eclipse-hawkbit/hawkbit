@@ -29,10 +29,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
-
-import com.google.common.base.Strings;
 
 /**
  * Simple implementation of generics bean query which dynamically loads a batch
@@ -71,12 +70,12 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
             searchText = (String) queryConfig.get(SPUIDefinitions.FILTER_BY_TEXT);
             noTagClicked = (Boolean) queryConfig.get(SPUIDefinitions.FILTER_BY_NO_TAG);
             pinnedTarget = (TargetIdName) queryConfig.get(SPUIDefinitions.ORDER_BY_PINNED_TARGET);
-            if (!Strings.isNullOrEmpty(searchText)) {
+            if (!StringUtils.isEmpty(searchText)) {
                 searchText = String.format("%%%s%%", searchText);
             }
         }
 
-        if (sortStates.length > 0) {
+        if (sortStates!= null && sortStates.length > 0) {
             // Initalize sort
             sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortPropertyIds[0]);
             // Add sort
@@ -109,7 +108,7 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
             distBeans = getDistributionSetManagement().findDistributionSetsAllOrderedByLinkTarget(
                     new OffsetBasedPageRequest(startIndex, count, sort), distributionSetFilterBuilder,
                     pinnedTarget.getControllerId());
-        } else if (distributionTags.isEmpty() && Strings.isNullOrEmpty(searchText) && !noTagClicked) {
+        } else if (distributionTags.isEmpty() && StringUtils.isEmpty(searchText) && !noTagClicked) {
             // if no search filters available
             distBeans = getDistributionSetManagement().findDistributionSetsByDeletedAndOrCompleted(
                     new OffsetBasedPageRequest(startIndex, count, sort), false, true);
@@ -150,7 +149,7 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
             firstPageDistributionSets = getDistributionSetManagement().findDistributionSetsAllOrderedByLinkTarget(
                     new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilterBuilder,
                     pinnedTarget.getControllerId());
-        } else if (distributionTags.isEmpty() && Strings.isNullOrEmpty(searchText) && !noTagClicked) {
+        } else if (distributionTags.isEmpty() && StringUtils.isEmpty(searchText) && !noTagClicked) {
             // if no search filters available
             firstPageDistributionSets = getDistributionSetManagement().findDistributionSetsByDeletedAndOrCompleted(
                     new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), false, true);

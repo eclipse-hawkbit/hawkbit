@@ -9,11 +9,10 @@
 package org.eclipse.hawkbit.mgmt.client.resource.builder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
-
-import com.google.common.collect.Lists;
 
 /**
  * Builder pattern for building {@link MgmtTagRequestBodyPut}.
@@ -64,7 +63,7 @@ public class TagBuilder {
      * @return a single entry list of {@link MgmtTagRequestBodyPut}
      */
     public List<MgmtTagRequestBodyPut> build() {
-        return Lists.newArrayList(doBuild(name));
+        return Arrays.asList(doBuild(name));
     }
 
     /**
@@ -77,7 +76,7 @@ public class TagBuilder {
      * @return a list of {@link MgmtTagRequestBodyPut}
      */
     public List<MgmtTagRequestBodyPut> buildAsList(final int count) {
-        final ArrayList<MgmtTagRequestBodyPut> bodyList = Lists.newArrayList();
+        final List<MgmtTagRequestBodyPut> bodyList = new ArrayList<>();
         for (int index = 0; index < count; index++) {
             bodyList.add(doBuild(name + index));
         }

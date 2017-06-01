@@ -67,6 +67,11 @@ public final class UIComponentIdProvider {
     public static final String TARGET_FILTER_ADD_ICON_ID = "target.filter.add.id";
 
     /**
+     * ID for NO TAG for targets
+     */
+    public static final String NO_TAG_TARGET = "no.tag.target";
+
+    /**
      * ID-Dist. on deployment and distribution view
      */
     public static final String DIST_TABLE_ID = "dist.tableId";
@@ -119,6 +124,10 @@ public final class UIComponentIdProvider {
      * ID-Dist.PIN.
      */
     public static final String DIST_PIN_BUTTON = "dist.pin.button";
+    /**
+     * ID for NO TAG for distribution sets
+     */
+    public static final String NO_TAG_DISTRIBUTION_SET = "no.tag.distribution.set";
     /**
      * ID for distribution set tag icon
      */

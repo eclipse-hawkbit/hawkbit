@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.management.dstable;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
@@ -35,13 +36,15 @@ public class DistributionTableLayout extends AbstractTableLayout<DistributionTab
     public DistributionTableLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState,
             final DistributionSetManagement distributionSetManagement,
+            final DistributionSetTypeManagement distributionSetTypeManagement,
             final ManagementViewClientCriterion managementViewClientCriterion, final EntityFactory entityFactory,
             final UINotification notification, final TagManagement tagManagement,
             final SystemManagement systemManagement, final TargetManagement targetManagement,
             final DeploymentManagement deploymentManagement) {
 
         final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout = new DistributionAddUpdateWindowLayout(
-                i18n, notification, eventBus, distributionSetManagement, systemManagement, entityFactory, null);
+                i18n, notification, eventBus, distributionSetManagement, distributionSetTypeManagement,
+                systemManagement, entityFactory, null);
 
         final DsMetadataPopupLayout dsMetadataPopupLayout = new DsMetadataPopupLayout(i18n, notification, eventBus,
                 distributionSetManagement, entityFactory, permissionChecker);

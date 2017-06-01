@@ -9,10 +9,10 @@
 package org.eclipse.hawkbit.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties.UrlProtocol;
@@ -21,8 +21,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import com.google.common.collect.Lists;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -41,7 +39,8 @@ public class PropertyBasedArtifactUrlHandlerTest {
 
     private static final long TENANT_ID = 456789L;
     private static final String CONTROLLER_ID = "Test";
-    private static final String FILENAME = "Afile1234";
+    private static final String FILENAME_DECODE = "test123!§$%&";
+    private static final String FILENAME_ENCODE = "test123%21%C2%A7%24%25%26";
     private static final long SOFTWAREMODULEID = 87654L;
     private static final long TARGETID = 3474366L;
     private static final String TARGETID_BASE62 = "EZqA";
@@ -57,7 +56,7 @@ public class PropertyBasedArtifactUrlHandlerTest {
     private ArtifactUrlHandlerProperties properties;
 
     private static URLPlaceholder placeholder = new URLPlaceholder(TENANT, TENANT_ID, CONTROLLER_ID, TARGETID,
-            new SoftwareData(SOFTWAREMODULEID, FILENAME, ARTIFACTID, SHA1HASH));
+            new SoftwareData(SOFTWAREMODULEID, FILENAME_DECODE, ARTIFACTID, SHA1HASH));
 
     @Before
     public void setup() {
@@ -72,13 +71,12 @@ public class PropertyBasedArtifactUrlHandlerTest {
         properties.getProtocols().put("download-http", new UrlProtocol());
 
         final List<ArtifactUrl> ddiUrls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DDI);
-        assertEquals(Lists.newArrayList(
+        assertThat(ddiUrls).containsExactly(
                 new ArtifactUrl("http".toUpperCase(), "download-http", HTTP_LOCALHOST + TENANT + "/controller/v1/"
-                        + CONTROLLER_ID + "/softwaremodules/" + SOFTWAREMODULEID + "/artifacts/" + FILENAME)),
-                ddiUrls);
+                        + CONTROLLER_ID + "/softwaremodules/" + SOFTWAREMODULEID + "/artifacts/" + FILENAME_ENCODE));
 
         final List<ArtifactUrl> dmfUrls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DMF);
-        assertEquals(ddiUrls, dmfUrls);
+        assertThat(ddiUrls).isEqualTo(dmfUrls);
     }
 
     @Test
@@ -89,7 +87,7 @@ public class PropertyBasedArtifactUrlHandlerTest {
         proto.setPort(5683);
         proto.setProtocol(TEST_PROTO);
         proto.setRel(TEST_REL);
-        proto.setSupports(Lists.newArrayList(ApiType.DMF));
+        proto.setSupports(Arrays.asList(ApiType.DMF));
         proto.setRef("{protocol}://{ip}:{port}/fw/{tenant}/{controllerId}/sha1/{artifactSHA1}");
         properties.getProtocols().put(TEST_PROTO, proto);
 
@@ -98,8 +96,8 @@ public class PropertyBasedArtifactUrlHandlerTest {
         assertThat(urls).isEmpty();
         urls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DMF);
 
-        assertEquals(Lists.newArrayList(new ArtifactUrl(TEST_PROTO.toUpperCase(), TEST_REL,
-                "coap://127.0.0.1:5683/fw/" + TENANT + "/" + CONTROLLER_ID + "/sha1/" + SHA1HASH)), urls);
+        assertThat(urls).containsExactly(new ArtifactUrl(TEST_PROTO.toUpperCase(), TEST_REL,
+                "coap://127.0.0.1:5683/fw/" + TENANT + "/" + CONTROLLER_ID + "/sha1/" + SHA1HASH));
     }
 
     @Test
@@ -110,7 +108,7 @@ public class PropertyBasedArtifactUrlHandlerTest {
         proto.setPort(5683);
         proto.setProtocol(TEST_PROTO);
         proto.setRel(TEST_REL);
-        proto.setSupports(Lists.newArrayList(ApiType.DMF));
+        proto.setSupports(Arrays.asList(ApiType.DMF));
         proto.setRef("{protocol}://{ip}:{port}/fws/{tenant}/{targetIdBase62}/{artifactIdBase62}");
         properties.getProtocols().put("ftp", proto);
 
@@ -119,9 +117,8 @@ public class PropertyBasedArtifactUrlHandlerTest {
         assertThat(urls).isEmpty();
         urls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DMF);
 
-        assertEquals(Lists.newArrayList(new ArtifactUrl(TEST_PROTO.toUpperCase(), TEST_REL,
-                TEST_PROTO + "://127.0.0.1:5683/fws/" + TENANT + "/" + TARGETID_BASE62 + "/" + ARTIFACTID_BASE62)),
-                urls);
+        assertThat(urls).containsExactly(new ArtifactUrl(TEST_PROTO.toUpperCase(), TEST_REL,
+                TEST_PROTO + "://127.0.0.1:5683/fws/" + TENANT + "/" + TARGETID_BASE62 + "/" + ARTIFACTID_BASE62));
     }
 
     @Test
@@ -134,15 +131,15 @@ public class PropertyBasedArtifactUrlHandlerTest {
         proto.setPort(5683);
         proto.setProtocol(TEST_PROTO);
         proto.setRel(TEST_REL);
-        proto.setSupports(Lists.newArrayList(ApiType.DDI));
+        proto.setSupports(Arrays.asList(ApiType.DDI));
         proto.setRef("{protocol}://{hostnameRequest}:{port}/fws/{tenant}/{targetIdBase62}/{artifactIdBase62}");
         properties.getProtocols().put("ftp", proto);
 
         final List<ArtifactUrl> urls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DDI,
                 new URI("https://" + testHost));
 
-        assertEquals(Lists.newArrayList(new ArtifactUrl(TEST_PROTO.toUpperCase(), TEST_REL, TEST_PROTO + "://"
-                + testHost + ":5683/fws/" + TENANT + "/" + TARGETID_BASE62 + "/" + ARTIFACTID_BASE62)), urls);
+        assertThat(urls).containsExactly(new ArtifactUrl(TEST_PROTO.toUpperCase(), TEST_REL, TEST_PROTO + "://"
+                + testHost + ":5683/fws/" + TENANT + "/" + TARGETID_BASE62 + "/" + ARTIFACTID_BASE62));
     }
 
     @Test
@@ -156,16 +153,16 @@ public class PropertyBasedArtifactUrlHandlerTest {
 
         final List<ArtifactUrl> ddiUrls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DDI,
                 new URI("http://anotherHost.com:8083"));
-        assertEquals(Lists.newArrayList(new ArtifactUrl("http".toUpperCase(), "download-http",
+
+        assertThat(ddiUrls).containsExactly(new ArtifactUrl("http".toUpperCase(), "download-http",
                 "http://localhost:8083/" + TENANT + "/controller/v1/" + CONTROLLER_ID + "/softwaremodules/"
-                        + SOFTWAREMODULEID + "/artifacts/" + FILENAME)),
-                ddiUrls);
+                        + SOFTWAREMODULEID + "/artifacts/" + FILENAME_ENCODE));
 
         final List<ArtifactUrl> dmfUrls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DMF);
-        assertEquals(Lists.newArrayList(new ArtifactUrl("http".toUpperCase(), "download-http",
+
+        assertThat(dmfUrls).containsExactly(new ArtifactUrl("http".toUpperCase(), "download-http",
                 "http://localhost:8080/" + TENANT + "/controller/v1/" + CONTROLLER_ID + "/softwaremodules/"
-                        + SOFTWAREMODULEID + "/artifacts/" + FILENAME)),
-                dmfUrls);
+                        + SOFTWAREMODULEID + "/artifacts/" + FILENAME_ENCODE));
     }
 
     @Test
@@ -180,15 +177,14 @@ public class PropertyBasedArtifactUrlHandlerTest {
 
         final List<ArtifactUrl> ddiUrls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DDI,
                 new URI("http://anotherHost.com:8083"));
-        assertEquals(Lists.newArrayList(
+        assertThat(ddiUrls).containsExactly(
                 new ArtifactUrl("http".toUpperCase(), "download-http", "http://host.com/" + TENANT + "/controller/v1/"
-                        + CONTROLLER_ID + "/softwaremodules/" + SOFTWAREMODULEID + "/artifacts/" + FILENAME)),
-                ddiUrls);
+                        + CONTROLLER_ID + "/softwaremodules/" + SOFTWAREMODULEID + "/artifacts/" + FILENAME_ENCODE));
 
         final List<ArtifactUrl> dmfUrls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DMF);
-        assertEquals(Lists.newArrayList(new ArtifactUrl("http".toUpperCase(), "download-http",
+        assertThat(dmfUrls).containsExactly(new ArtifactUrl("http".toUpperCase(), "download-http",
                 "http://host.bumlux.net/" + TENANT + "/controller/v1/" + CONTROLLER_ID + "/softwaremodules/"
-                        + SOFTWAREMODULEID + "/artifacts/" + FILENAME)),
-                dmfUrls);
+                        + SOFTWAREMODULEID + "/artifacts/" + FILENAME_ENCODE));
+
     }
 }

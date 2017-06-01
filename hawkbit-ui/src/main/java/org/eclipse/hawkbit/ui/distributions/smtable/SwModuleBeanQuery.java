@@ -14,7 +14,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.AssignedSoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -23,10 +23,9 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
+import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
-
-import com.google.common.base.Strings;
 
 /**
  * Simple implementation of generics bean query which dynamically loads a batch
@@ -35,7 +34,7 @@ import com.google.common.base.Strings;
  */
 public class SwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSwModuleItem> {
     private static final long serialVersionUID = 4362142538539335466L;
-    private transient SoftwareManagement softwareManagementService;
+    private transient SoftwareModuleManagement softwareManagementService;
     private final Long type;
     private final String searchText;
     private final Long orderByDistId;
@@ -59,7 +58,7 @@ public class SwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSwModuleItem> 
             type = Optional.ofNullable((SoftwareModuleType) queryConfig.get(SPUIDefinitions.BY_SOFTWARE_MODULE_TYPE))
                     .map(SoftwareModuleType::getId).orElse(null);
             final String text = (String) queryConfig.get(SPUIDefinitions.FILTER_BY_TEXT);
-            if (!Strings.isNullOrEmpty(text)) {
+            if (!StringUtils.isEmpty(text)) {
                 searchText = String.format("%%%s%%", text);
             } else {
                 searchText = null;
@@ -81,7 +80,7 @@ public class SwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSwModuleItem> 
 
     @Override
     protected List<ProxyBaseSwModuleItem> loadBeans(final int startIndex, final int count) {
-        return getSoftwareManagement()
+        return getSoftwareModuleManagement()
                 .findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(
                         new OffsetBasedPageRequest(startIndex, count), orderByDistId, searchText, type)
                 .getContent().stream().map(SwModuleBeanQuery::getProxyBean).collect(Collectors.toList());
@@ -110,10 +109,10 @@ public class SwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSwModuleItem> 
     @Override
     public int size() {
         long size;
-        if (type == null && Strings.isNullOrEmpty(searchText)) {
-            size = getSoftwareManagement().countSoftwareModulesAll();
+        if (type == null && StringUtils.isEmpty(searchText)) {
+            size = getSoftwareModuleManagement().countSoftwareModulesAll();
         } else {
-            size = getSoftwareManagement().countSoftwareModuleByFilters(searchText, type);
+            size = getSoftwareModuleManagement().countSoftwareModuleByFilters(searchText, type);
         }
 
         if (size > Integer.MAX_VALUE) {
@@ -129,9 +128,9 @@ public class SwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSwModuleItem> 
         // save of the entity not required from this method
     }
 
-    private SoftwareManagement getSoftwareManagement() {
+    private SoftwareModuleManagement getSoftwareModuleManagement() {
         if (softwareManagementService == null) {
-            softwareManagementService = SpringContextHelper.getBean(SoftwareManagement.class);
+            softwareManagementService = SpringContextHelper.getBean(SoftwareModuleManagement.class);
         }
         return softwareManagementService;
     }

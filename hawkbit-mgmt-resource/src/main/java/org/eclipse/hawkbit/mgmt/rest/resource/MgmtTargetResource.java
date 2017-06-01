@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -46,8 +47,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.google.common.collect.Lists;
 
 /**
  * REST Resource handling target CRUD operations.
@@ -261,7 +260,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final ActionType type = (dsId.getType() != null) ? MgmtRestModelMapper.convertActionType(dsId.getType())
                 : ActionType.FORCED;
         this.deploymentManagement.assignDistributionSet(dsId.getId(), type, dsId.getForcetime(),
-                Lists.newArrayList(controllerId));
+                Arrays.asList(controllerId));
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

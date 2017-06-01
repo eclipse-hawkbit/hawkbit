@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.decorators;
 
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.StringUtils;
 
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.themes.ValoTheme;
@@ -56,27 +56,27 @@ public final class SPUIComboBoxDecorator {
         spUICombo.setRequired(required);
         spUICombo.addStyleName(ValoTheme.COMBOBOX_TINY);
 
-        if (StringUtils.isNotEmpty(caption)) {
+        if (!StringUtils.isEmpty(caption)) {
             spUICombo.setCaption(caption);
         }
         // Add style
-        if (StringUtils.isNotEmpty(style)) {
+        if (!StringUtils.isEmpty(style)) {
             spUICombo.setStyleName(style);
         }
         // Add style Name
-        if (StringUtils.isNotEmpty(styleName)) {
+        if (!StringUtils.isEmpty(styleName)) {
             spUICombo.addStyleName(styleName);
         }
         // AddWidth
-        if (StringUtils.isNotEmpty(width)) {
+        if (!StringUtils.isEmpty(width)) {
             spUICombo.setWidth(width);
         }
         // Set prompt
-        if (StringUtils.isNotEmpty(prompt)) {
+        if (!StringUtils.isEmpty(prompt)) {
             spUICombo.setInputPrompt(prompt);
         }
         // Set Data
-        if (StringUtils.isNotEmpty(data)) {
+        if (!StringUtils.isEmpty(data)) {
             spUICombo.setData(data);
         }
 

@@ -10,8 +10,6 @@ package org.eclipse.hawkbit.repository.model;
 
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 
-import com.google.common.io.BaseEncoding;
-
 /**
  * Binaries for a {@link SoftwareModule} Note: the decision which artifacts have
  * to be downloaded are done on the device side. e.g. Full Package, Signatures,
@@ -35,8 +33,8 @@ public interface Artifact extends TenantAwareBaseEntity {
     String getMd5Hash();
 
     /**
-     * @return SHA-1 hash of the artifact in {@link BaseEncoding#base16()}
-     *         format that identifies the {@link DbArtifact} in the system.
+     * @return SHA-1 hash of the artifact in Base16 format that identifies the
+     *         {@link DbArtifact} in the system.
      */
     String getSha1Hash();
 

@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management.targettag;
 
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -26,6 +24,7 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.util.StringUtils;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
@@ -119,9 +118,9 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
         super.createNewTag();
         final String tagNameTrimmed = HawkbitCommonUtil.trimAndNullIfEmpty(tagNameValue);
         final String tagDescriptionTrimmed = HawkbitCommonUtil.trimAndNullIfEmpty(tagDescValue);
-        if (isNotEmpty(tagNameTrimmed)) {
+        if (!StringUtils.isEmpty(tagNameTrimmed)) {
             String colour = ColorPickerConstants.START_COLOR.getCSS();
-            if (isNotEmpty(getColorPicked())) {
+            if (!StringUtils.isEmpty(getColorPicked())) {
                 colour = getColorPicked();
             }
 

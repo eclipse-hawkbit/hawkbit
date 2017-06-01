@@ -8,7 +8,12 @@
  */
 package org.eclipse.hawkbit.api;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -17,12 +22,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties.UrlProtocol;
-
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
-import com.google.common.net.UrlEscapers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 /**
  * Implementation for ArtifactUrlHandler for creating urls to download resource
@@ -42,6 +44,8 @@ import com.google.common.net.UrlEscapers;
  * 
  */
 public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PropertyBasedArtifactUrlHandler.class);
 
     private static final String PROTOCOL_PLACEHOLDER = "protocol";
     private static final String CONTROLLER_ID_PLACEHOLDER = "controllerId";
@@ -99,7 +103,7 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         for (final Entry<String, String> entry : entrySet) {
             if (entry.getKey().equals(PORT_PLACEHOLDER)) {
                 urlPattern = urlPattern.replace(":{" + entry.getKey() + "}",
-                        Strings.isNullOrEmpty(entry.getValue()) ? "" : (":" + entry.getValue()));
+                        StringUtils.isEmpty(entry.getValue()) ? "" : (":" + entry.getValue()));
             } else {
                 urlPattern = urlPattern.replace("{" + entry.getKey() + "}", entry.getValue());
             }
@@ -109,7 +113,7 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
 
     private static Map<String, String> getReplaceMap(final UrlProtocol protocol, final URLPlaceholder placeholder,
             final URI requestUri) {
-        final Map<String, String> replaceMap = Maps.newHashMapWithExpectedSize(19);
+        final Map<String, String> replaceMap = new HashMap<>();
         replaceMap.put(IP_PLACEHOLDER, protocol.getIp());
         replaceMap.put(HOSTNAME_PLACEHOLDER, protocol.getHostname());
 
@@ -117,8 +121,13 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         replaceMap.put(PORT_REQUEST_PLACEHOLDER, getRequestPort(protocol, requestUri));
         replaceMap.put(HOSTNAME_WITH_DOMAIN_REQUEST_PLACEHOLDER, computeHostWithRequestDomain(protocol, requestUri));
 
-        replaceMap.put(ARTIFACT_FILENAME_PLACEHOLDER,
-                UrlEscapers.urlFragmentEscaper().escape(placeholder.getSoftwareData().getFilename()));
+        try {
+            replaceMap.put(ARTIFACT_FILENAME_PLACEHOLDER,
+                    URLEncoder.encode(placeholder.getSoftwareData().getFilename(), StandardCharsets.UTF_8.toString()));
+        } catch (final UnsupportedEncodingException e) {
+            LOG.error("Could not encode {}", placeholder.getSoftwareData().getFilename(), e);
+        }
+
         replaceMap.put(ARTIFACT_SHA1_PLACEHOLDER, placeholder.getSoftwareData().getSha1Hash());
         replaceMap.put(PROTOCOL_PLACEHOLDER, protocol.getProtocol());
         replaceMap.put(PORT_PLACEHOLDER, getPort(protocol));
@@ -168,14 +177,14 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
             return protocol.getHostname();
         }
 
-        final String host = Splitter.on('.').trimResults().omitEmptyStrings().splitToList(protocol.getHostname())
-                .get(0);
+        final String host = StringUtils.delimitedListToStringArray(protocol.getHostname(), ".")[0].trim();
 
-        final List<String> domainElements = Splitter.on('.').trimResults().omitEmptyStrings()
-                .splitToList(requestUri.getHost());
-        final String domain = Joiner.on(".").join(domainElements.subList(1, domainElements.size()));
+        final List<String> domainElements = Arrays
+                .asList(StringUtils.delimitedListToStringArray(requestUri.getHost(), "."));
+        final String domain = StringUtils.collectionToDelimitedString(domainElements.subList(1, domainElements.size()),
+                ".");
 
-        if (Strings.isNullOrEmpty(domain)) {
+        if (StringUtils.isEmpty(domain)) {
             return protocol.getHostname();
         }
 

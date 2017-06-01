@@ -17,7 +17,6 @@ import javax.persistence.PersistenceContext;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
-import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -91,9 +90,6 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     protected RolloutRepository rolloutRepository;
 
     @Autowired
-    protected TenantAwareCacheManager cacheManager;
-
-    @Autowired
     protected TenantConfigurationProperties tenantConfigurationProperties;
 
     @Transactional(readOnly = true)
@@ -108,7 +104,7 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
 
     protected TargetTagAssignmentResult toggleTagAssignment(final Collection<Target> targets, final TargetTag tag) {
         return targetManagement.toggleTagAssignment(
-                targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()), tag.getName());
+                targets.stream().map(Target::getControllerId).collect(Collectors.toList()), tag.getName());
     }
 
     public DistributionSetTagAssignmentResult toggleTagAssignment(final Collection<DistributionSet> sets,

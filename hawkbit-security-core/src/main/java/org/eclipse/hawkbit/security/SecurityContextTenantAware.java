@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.security;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -21,8 +22,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
-
-import com.google.common.collect.Lists;
 
 /**
  * A {@link TenantAware} implemenation which retrieves the ID of the tenant from
@@ -40,7 +39,7 @@ public class SecurityContextTenantAware implements TenantAware {
             final Object principal = context.getAuthentication().getPrincipal();
             if (context.getAuthentication().getDetails() instanceof TenantAwareAuthenticationDetails) {
                 return ((TenantAwareAuthenticationDetails) context.getAuthentication().getDetails()).getTenant();
-            }else if (principal instanceof UserPrincipal) {
+            } else if (principal instanceof UserPrincipal) {
                 return ((UserPrincipal) principal).getTenant();
             }
         }
@@ -74,13 +73,13 @@ public class SecurityContextTenantAware implements TenantAware {
         private static final long serialVersionUID = 1L;
 
         private static final String SYSTEM_USER = "system";
-        private static final Collection<? extends GrantedAuthority> SYSTEM_AUTHORITIES = Lists
-                .newArrayList(new SimpleGrantedAuthority(SpringEvalExpressions.SYSTEM_ROLE));
+        private static final Collection<? extends GrantedAuthority> SYSTEM_AUTHORITIES = Arrays
+                .asList(new SimpleGrantedAuthority(SpringEvalExpressions.SYSTEM_ROLE));
         private final Authentication delegate;
 
         private final UserPrincipal systemPrincipal;
 
-        private TenantAwareAuthenticationDetails tenantAwareAuthenticationDetails;
+        private final TenantAwareAuthenticationDetails tenantAwareAuthenticationDetails;
 
         private AuthenticationDelegate(final Authentication delegate, final String tenant) {
             this.delegate = delegate;

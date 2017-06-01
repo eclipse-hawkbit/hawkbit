@@ -9,9 +9,8 @@
 package org.eclipse.hawkbit.repository.report.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
-import com.google.common.collect.ImmutableList;
 
 /**
  * Bean for holding the system usage stats.
@@ -89,7 +88,7 @@ public class SystemUsageReport {
      * @return tenant data
      */
     public List<TenantUsage> getTenants() {
-        return ImmutableList.copyOf(tenants);
+        return Collections.unmodifiableList(tenants);
     }
 
 }

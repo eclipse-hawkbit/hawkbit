@@ -14,7 +14,8 @@ import javax.servlet.MultipartConfigElement;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -93,7 +94,9 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
     UploadArtifactView(final UIEventBus eventBus, final SpPermissionChecker permChecker, final VaadinMessageSource i18n,
             final UINotification uiNotification, final ArtifactUploadState artifactUploadState,
             final TagManagement tagManagement, final EntityFactory entityFactory,
-            final SoftwareManagement softwareManagement, final UploadViewClientCriterion uploadViewClientCriterion,
+            final SoftwareModuleManagement softwareModuleManagement,
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement,
+            final UploadViewClientCriterion uploadViewClientCriterion,
             final MultipartConfigElement multipartConfigElement, final ArtifactManagement artifactManagement) {
         this.eventBus = eventBus;
         this.permChecker = permChecker;
@@ -101,15 +104,15 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         this.uiNotification = uiNotification;
         this.artifactUploadState = artifactUploadState;
         this.filterByTypeLayout = new SMTypeFilterLayout(artifactUploadState, i18n, permChecker, eventBus,
-                tagManagement, entityFactory, uiNotification, softwareManagement, uploadViewClientCriterion);
+                tagManagement, entityFactory, uiNotification, softwareModuleTypeManagement, uploadViewClientCriterion);
         this.smTableLayout = new SoftwareModuleTableLayout(i18n, permChecker, artifactUploadState, uiNotification,
-                eventBus, softwareManagement, entityFactory, uploadViewClientCriterion);
+                eventBus, softwareModuleManagement, softwareModuleTypeManagement, entityFactory, uploadViewClientCriterion);
         this.artifactDetailsLayout = new ArtifactDetailsLayout(i18n, eventBus, artifactUploadState, uiNotification,
-                artifactManagement, softwareManagement);
+                artifactManagement, softwareModuleManagement);
         this.uploadLayout = new UploadLayout(i18n, uiNotification, eventBus, artifactUploadState,
-                multipartConfigElement, artifactManagement, softwareManagement);
+                multipartConfigElement, artifactManagement, softwareModuleManagement);
         this.deleteActionsLayout = new SMDeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
-                artifactUploadState, softwareManagement, uploadViewClientCriterion);
+                artifactUploadState, softwareModuleManagement, softwareModuleTypeManagement, uploadViewClientCriterion);
     }
 
     @PostConstruct

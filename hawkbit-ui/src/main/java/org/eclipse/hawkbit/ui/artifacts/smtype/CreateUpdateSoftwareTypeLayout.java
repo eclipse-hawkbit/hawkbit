@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -53,7 +53,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = LoggerFactory.getLogger(CreateUpdateSoftwareTypeLayout.class);
 
-    private final transient SoftwareManagement swTypeManagementService;
+    private final transient SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
     private String singleAssignStr;
     private String multiAssignStr;
@@ -76,14 +76,14 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
      *            SpPermissionChecker
      * @param uiNotification
      *            UINotification
-     * @param swTypeManagementService
-     *            SoftwareManagement
+     * @param softwareModuleTypeManagement
+     *            management for {@link SoftwareModuleType}s
      */
     public CreateUpdateSoftwareTypeLayout(final VaadinMessageSource i18n, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
-            final UINotification uiNotification, final SoftwareManagement swTypeManagementService) {
+            final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
         super(i18n, tagManagement, entityFactory, eventBus, permChecker, uiNotification);
-        this.swTypeManagementService = swTypeManagementService;
+        this.softwareModuleTypeManagement = softwareModuleTypeManagement;
     }
 
     @Override
@@ -119,7 +119,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
     @Override
     protected Color getColorForColorPicker() {
 
-        final Optional<SoftwareModuleType> typeSelected = swTypeManagementService
+        final Optional<SoftwareModuleType> typeSelected = softwareModuleTypeManagement
                 .findSoftwareModuleTypeByName(tagNameComboBox.getValue().toString());
         if (typeSelected.isPresent()) {
             return typeSelected.get().getColour() != null
@@ -197,7 +197,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
     @Override
     protected void setTagDetails(final String targetTagSelected) {
         tagName.setValue(targetTagSelected);
-        swTypeManagementService.findSoftwareModuleTypeByName(targetTagSelected).ifPresent(selectedTypeTag -> {
+        softwareModuleTypeManagement.findSoftwareModuleTypeByName(targetTagSelected).ifPresent(selectedTypeTag -> {
             tagDesc.setValue(selectedTypeTag.getDescription());
             typeKey.setValue(selectedTypeTag.getKey());
             if (selectedTypeTag.getMaxAssignments() == 1) {
@@ -237,12 +237,12 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
 
     @Override
     protected Optional<SoftwareModuleType> findEntityByKey() {
-        return swTypeManagementService.findSoftwareModuleTypeByKey(typeKey.getValue());
+        return softwareModuleTypeManagement.findSoftwareModuleTypeByKey(typeKey.getValue());
     }
 
     @Override
     protected Optional<SoftwareModuleType> findEntityByName() {
-        return swTypeManagementService.findSoftwareModuleTypeByName(tagName.getValue());
+        return softwareModuleTypeManagement.findSoftwareModuleTypeByName(tagName.getValue());
     }
 
     @Override
@@ -264,7 +264,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
         }
 
         if (typeNameValue != null && typeKeyValue != null) {
-            final SoftwareModuleType newSWType = swTypeManagementService.createSoftwareModuleType(
+            final SoftwareModuleType newSWType = softwareModuleTypeManagement.createSoftwareModuleType(
                     entityFactory.softwareModuleType().create().key(typeKeyValue).name(typeNameValue)
                             .description(typeDescValue).colour(colorPicked).maxAssignments(assignNumber));
             uiNotification
@@ -277,7 +277,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
     }
 
     private void updateSWModuleType(final SoftwareModuleType existingType) {
-        swTypeManagementService.updateSoftwareModuleType(
+        softwareModuleTypeManagement.updateSoftwareModuleType(
                 entityFactory.softwareModuleType().update(existingType.getId()).description(tagDesc.getValue())
                         .colour(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview())));
         uiNotification

@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
@@ -68,8 +69,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-
-import com.google.common.collect.Lists;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -282,12 +281,12 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         // finish group one by finishing targets and deleting targets
         final Slice<JpaAction> runningActionsSlice = actionRepository.findByRolloutIdAndStatus(PAGE,
                 createdRollout.getId(), Status.RUNNING);
-        final List<JpaAction> runningActions = Lists.newArrayList(runningActionsSlice.iterator());
+        final List<JpaAction> runningActions = runningActionsSlice.getContent();
         finishAction(runningActions.get(0));
         finishAction(runningActions.get(1));
         finishAction(runningActions.get(2));
-        targetManagement.deleteTargets(Lists.newArrayList(runningActions.get(3).getTarget().getId(),
-                runningActions.get(4).getTarget().getId()));
+        targetManagement.deleteTargets(
+                Arrays.asList(runningActions.get(3).getTarget().getId(), runningActions.get(4).getTarget().getId()));
     }
 
     @Step("Check the status of the rollout groups, second group should be in running status")
@@ -304,10 +303,10 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     private void finishActionAndDeleteTargetsOfSecondRunningGroup(final Rollout createdRollout) {
         final Slice<JpaAction> runningActionsSlice = actionRepository.findByRolloutIdAndStatus(PAGE,
                 createdRollout.getId(), Status.RUNNING);
-        final List<JpaAction> runningActions = Lists.newArrayList(runningActionsSlice.iterator());
+        final List<JpaAction> runningActions = runningActionsSlice.getContent();
         finishAction(runningActions.get(0));
         targetManagement.deleteTargets(
-                Lists.newArrayList(runningActions.get(1).getTarget().getId(), runningActions.get(2).getTarget().getId(),
+                Arrays.asList(runningActions.get(1).getTarget().getId(), runningActions.get(2).getTarget().getId(),
                         runningActions.get(3).getTarget().getId(), runningActions.get(4).getTarget().getId()));
 
     }
@@ -316,8 +315,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     private void deleteAllTargetsFromThirdGroup(final Rollout createdRollout) {
         final Slice<JpaAction> runningActionsSlice = actionRepository.findByRolloutIdAndStatus(PAGE,
                 createdRollout.getId(), Status.SCHEDULED);
-        final List<JpaAction> runningActions = Lists.newArrayList(runningActionsSlice.iterator());
-        targetManagement.deleteTargets(Lists.newArrayList(runningActions.get(0).getTarget().getId(),
+        final List<JpaAction> runningActions = runningActionsSlice.getContent();
+        targetManagement.deleteTargets(Arrays.asList(runningActions.get(0).getTarget().getId(),
                 runningActions.get(1).getTarget().getId(), runningActions.get(2).getTarget().getId(),
                 runningActions.get(3).getTarget().getId(), runningActions.get(4).getTarget().getId()));
     }
@@ -1417,6 +1416,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 25), @Expect(type = RolloutUpdatedEvent.class, count = 2),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 5),
+            @Expect(type = RolloutGroupDeletedEvent.class, count = 5),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = RolloutGroupUpdatedEvent.class, count = 5) })
     public void deleteRolloutWhichHasNeverStartedIsHardDeleted() {
@@ -1447,6 +1447,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetCreatedEvent.class, count = 25), @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 5),
+            @Expect(type = RolloutGroupDeletedEvent.class, count = 5),
             @Expect(type = ActionCreatedEvent.class, count = 10), @Expect(type = ActionUpdatedEvent.class, count = 2),
             @Expect(type = RolloutDeletedEvent.class, count = 1) })
     public void deleteRolloutWhichHasBeenStartedBeforeIsSoftDeleted() {

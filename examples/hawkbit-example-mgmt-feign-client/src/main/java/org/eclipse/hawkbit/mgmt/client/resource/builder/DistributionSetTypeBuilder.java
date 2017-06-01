@@ -9,12 +9,11 @@
 package org.eclipse.hawkbit.mgmt.client.resource.builder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeAssigment;
-
-import com.google.common.collect.Lists;
 
 /**
  * 
@@ -28,8 +27,8 @@ public class DistributionSetTypeBuilder {
     private String key;
     private String name;
     private String description;
-    private final List<MgmtSoftwareModuleTypeAssigment> mandatorymodules = Lists.newArrayList();
-    private final List<MgmtSoftwareModuleTypeAssigment> optionalmodules = Lists.newArrayList();
+    private final List<MgmtSoftwareModuleTypeAssigment> mandatorymodules = new ArrayList<>();
+    private final List<MgmtSoftwareModuleTypeAssigment> optionalmodules = new ArrayList<>();
 
     /**
      * @param key
@@ -101,7 +100,7 @@ public class DistributionSetTypeBuilder {
      *         {@link MgmtDistributionSetTypeRequestBodyPost}
      */
     public List<MgmtDistributionSetTypeRequestBodyPost> build() {
-        return Lists.newArrayList(doBuild(""));
+        return Arrays.asList(doBuild(""));
     }
 
     /**
@@ -116,7 +115,7 @@ public class DistributionSetTypeBuilder {
      * @return a list of {@link MgmtDistributionSetTypeRequestBodyPost}
      */
     public List<MgmtDistributionSetTypeRequestBodyPost> buildAsList(final int count) {
-        final ArrayList<MgmtDistributionSetTypeRequestBodyPost> bodyList = Lists.newArrayList();
+        final List<MgmtDistributionSetTypeRequestBodyPost> bodyList = new ArrayList<>();
         for (int index = 0; index < count; index++) {
             bodyList.add(doBuild(String.valueOf(index)));
         }

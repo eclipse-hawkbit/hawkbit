@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ui.distributions.smtype;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterLayout;
@@ -31,15 +31,15 @@ public class DistSMTypeFilterLayout extends AbstractFilterLayout {
 
     private final ManageDistUIState manageDistUIState;
 
-    public DistSMTypeFilterLayout(final UIEventBus eventBus, final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
-            final ManageDistUIState manageDistUIState, final TagManagement tagManagement,
-            final EntityFactory entityFactory, final UINotification uiNotification,
-            final SoftwareManagement softwareManagement,
+    public DistSMTypeFilterLayout(final UIEventBus eventBus, final VaadinMessageSource i18n,
+            final SpPermissionChecker permChecker, final ManageDistUIState manageDistUIState,
+            final TagManagement tagManagement, final EntityFactory entityFactory, final UINotification uiNotification,
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final DistributionsViewClientCriterion distributionsViewClientCriterion) {
         super(new DistSMTypeFilterHeader(i18n, permChecker, eventBus, manageDistUIState, tagManagement, entityFactory,
-                uiNotification, softwareManagement),
+                uiNotification, softwareModuleTypeManagement),
                 new DistSMTypeFilterButtons(eventBus, manageDistUIState, distributionsViewClientCriterion,
-                        softwareManagement));
+                        softwareModuleTypeManagement));
         this.manageDistUIState = manageDistUIState;
 
         restoreState();

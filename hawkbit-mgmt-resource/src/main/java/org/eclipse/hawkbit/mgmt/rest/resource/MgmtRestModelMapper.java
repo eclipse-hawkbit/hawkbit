@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 /**
  * A mapper which maps repository model to RESTful model representation and
  * back.
+ *
  */
 final class MgmtRestModelMapper {
 

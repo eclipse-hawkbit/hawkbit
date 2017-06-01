@@ -8,10 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.components;
 
-import java.util.Arrays;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
@@ -21,6 +19,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FontAwesome;
@@ -199,7 +198,7 @@ public final class SPUIComponentProvider {
      * @return Label
      */
     public static Label createNameValueLabel(final String label, final String... values) {
-        final String valueStr = StringUtils.join(Arrays.asList(values), " ");
+        final String valueStr = StringUtils.arrayToDelimitedString(values, " ");
         final Label nameValueLabel = new Label(getBoldHTMLText(label) + valueStr, ContentMode.HTML);
         nameValueLabel.setSizeFull();
         nameValueLabel.addStyleName(SPUIDefinitions.TEXT_STYLE);

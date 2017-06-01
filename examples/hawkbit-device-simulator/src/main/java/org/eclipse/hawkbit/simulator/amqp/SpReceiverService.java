@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.simulator.amqp;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
@@ -26,8 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
-
-import com.google.common.collect.Lists;
 
 /**
  * Handle all incoming Messages from hawkBit update server.
@@ -133,7 +132,7 @@ public class SpReceiverService extends ReceiverService {
         final Long actionId = convertMessage(message, Long.class);
 
         final SimulatedUpdate update = new SimulatedUpdate(tenant, thingId, actionId);
-        spSenderService.finishUpdateProcess(update, Lists.newArrayList("Simulation canceled"));
+        spSenderService.finishUpdateProcess(update, Arrays.asList("Simulation canceled"));
     }
 
     private void handleUpdateProcess(final Message message, final String thingId) {

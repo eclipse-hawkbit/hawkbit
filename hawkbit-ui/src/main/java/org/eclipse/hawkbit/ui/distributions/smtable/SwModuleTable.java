@@ -14,7 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsLayout;
@@ -71,7 +71,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
 
     private final ManageDistUIState manageDistUIState;
 
-    private final transient SoftwareManagement softwareManagement;
+    private final transient SoftwareModuleManagement softwareModuleManagement;
 
     private final DistributionsViewClientCriterion distributionsViewClientCriterion;
 
@@ -80,13 +80,13 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
     private final SwMetadataPopupLayout swMetadataPopupLayout;
 
     SwModuleTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification uiNotification,
-            final ManageDistUIState manageDistUIState, final SoftwareManagement softwareManagement,
+            final ManageDistUIState manageDistUIState, final SoftwareModuleManagement softwareManagement,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final ArtifactManagement artifactManagement, final SwMetadataPopupLayout swMetadataPopupLayout,
             final ArtifactUploadState artifactUploadState) {
         super(eventBus, i18n, uiNotification);
         this.manageDistUIState = manageDistUIState;
-        this.softwareManagement = softwareManagement;
+        this.softwareModuleManagement = softwareManagement;
         this.distributionsViewClientCriterion = distributionsViewClientCriterion;
         this.artifactDetailsLayout = new ArtifactDetailsLayout(i18n, eventBus, artifactUploadState, uiNotification,
                 artifactManagement, softwareManagement);
@@ -252,7 +252,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
 
     @Override
     protected Optional<SoftwareModule> findEntityByTableValue(final Long lastSelectedId) {
-        return softwareManagement.findSoftwareModuleById(lastSelectedId);
+        return softwareModuleManagement.findSoftwareModuleById(lastSelectedId);
     }
 
     @Override
@@ -414,7 +414,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
     }
 
     private void showMetadataDetails(final Long itemId) {
-        softwareManagement.findSoftwareModuleById(itemId)
+        softwareModuleManagement.findSoftwareModuleById(itemId)
                 .ifPresent(swmodule -> UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null)));
     }
 

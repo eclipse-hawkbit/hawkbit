@@ -9,9 +9,9 @@
 package org.eclipse.hawkbit.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
+import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
@@ -51,6 +52,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Device Management Federation API")
 @Stories("Amqp Message Handler Service")
 public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegrationTest {
+    private static final String CORRELATION_ID = UUID.randomUUID().toString();
 
     @Autowired
     private AmqpProperties amqpProperties;
@@ -512,7 +514,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         final Long actionId = registerTargetAndCancelActionId();
 
         sendActionUpdateStatus(new DmfActionUpdateStatus(actionId, DmfActionStatus.CANCEL_REJECTED));
-        assertAction(actionId, Status.RUNNING, Status.CANCELING, Status.CANCEL_REJECTED);
+        assertAction(actionId, 1, Status.RUNNING, Status.CANCELING, Status.CANCEL_REJECTED);
     }
 
     @Test
@@ -597,21 +599,36 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     private void registerTargetAndSendAndAssertUpdateActionStatus(final DmfActionStatus sendActionStatus,
             final Status expectedActionStatus) {
         final Long actionId = registerTargetAndSendActionStatus(sendActionStatus);
-        assertAction(actionId, Status.RUNNING, expectedActionStatus);
+        assertAction(actionId, 1, Status.RUNNING, expectedActionStatus);
     }
 
-    private void assertAction(final Long actionId, final Status... expectedActionStates) {
+    private void assertAction(final Long actionId, final int messages, final Status... expectedActionStates) {
         createConditionFactory().await().until(() -> {
             try {
                 securityRule.runAsPrivileged(() -> {
-                    final List<Status> status = deploymentManagement.findActionStatusByAction(PAGE, actionId)
-                            .getContent().stream().map(actionStatus -> actionStatus.getStatus())
+                    final List<org.eclipse.hawkbit.repository.model.ActionStatus> actionStatusList = deploymentManagement
+                            .findActionStatusByAction(PAGE, actionId).getContent();
+
+                    // Check correlation ID
+                    final List<String> messagesFromServer = actionStatusList.stream()
+                            .flatMap(actionStatus -> deploymentManagement
+                                    .findMessagesByActionStatusId(PAGE, actionStatus.getId()).getContent().stream())
+                            .filter(Objects::nonNull)
+                            .filter(message -> message
+                                    .startsWith(RepositoryConstants.SERVER_MESSAGE_PREFIX + "DMF message"))
+                            .collect(Collectors.toList());
+
+                    assertThat(messagesFromServer).hasSize(messages)
+                            .allMatch(message -> message.endsWith(CORRELATION_ID));
+
+                    final List<Status> status = actionStatusList.stream().map(actionStatus -> actionStatus.getStatus())
                             .collect(Collectors.toList());
                     assertThat(status).containsOnly(expectedActionStates);
+
                     return null;
                 });
             } catch (final Exception e) {
-                fail(e.getMessage());
+                throw new RuntimeException(e);
             }
         });
     }
@@ -620,6 +637,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         final MessageProperties messageProperties = createMessagePropertiesWithTenant(tenant);
         messageProperties.getHeaders().put(MessageHeaderKey.TYPE, MessageType.EVENT.toString());
         messageProperties.getHeaders().put(MessageHeaderKey.TOPIC, eventTopic.toString());
+        messageProperties.setCorrelationId(CORRELATION_ID.getBytes());
 
         return createMessage(payload, messageProperties);
     }

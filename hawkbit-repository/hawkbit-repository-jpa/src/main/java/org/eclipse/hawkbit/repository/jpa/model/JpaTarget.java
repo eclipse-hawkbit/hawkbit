@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -67,8 +68,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
-
 /**
  * JPA implementation of {@link Target}.
  *
@@ -90,7 +89,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
 
     private static final Logger LOG = LoggerFactory.getLogger(JpaTarget.class);
 
-    private static final List<String> TARGET_UPDATE_EVENT_IGNORE_FIELDS = Lists.newArrayList("lastTargetQuery",
+    private static final List<String> TARGET_UPDATE_EVENT_IGNORE_FIELDS = Arrays.asList("lastTargetQuery",
             "lastTargetQuery", "address", "optLockRevision", "lastModifiedAt", "lastModifiedBy");
 
     @Column(name = "controller_id", length = 64)

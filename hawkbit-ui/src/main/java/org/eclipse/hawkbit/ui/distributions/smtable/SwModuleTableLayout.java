@@ -10,7 +10,8 @@ package org.eclipse.hawkbit.ui.distributions.smtable;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
@@ -31,23 +32,25 @@ public class SwModuleTableLayout extends AbstractTableLayout<SwModuleTable> {
     private final SwModuleTable swModuleTable;
 
     public SwModuleTableLayout(final VaadinMessageSource i18n, final UINotification uiNotification,
-            final UIEventBus eventBus, final SoftwareManagement softwareManagement, final EntityFactory entityFactory,
+            final UIEventBus eventBus, final SoftwareModuleManagement softwareModuleManagement,
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement, final EntityFactory entityFactory,
             final ManageDistUIState manageDistUIState, final SpPermissionChecker permChecker,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final ArtifactUploadState artifactUploadState, final ArtifactManagement artifactManagement) {
 
         final SwMetadataPopupLayout swMetadataPopupLayout = new SwMetadataPopupLayout(i18n, uiNotification, eventBus,
-                softwareManagement, entityFactory, permChecker);
+                softwareModuleManagement, entityFactory, permChecker);
 
-        this.swModuleTable = new SwModuleTable(eventBus, i18n, uiNotification, manageDistUIState, softwareManagement,
+        this.swModuleTable = new SwModuleTable(eventBus, i18n, uiNotification, manageDistUIState, softwareModuleManagement,
                 distributionsViewClientCriterion, artifactManagement, swMetadataPopupLayout, artifactUploadState);
 
         final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow = new SoftwareModuleAddUpdateWindow(i18n,
-                uiNotification, eventBus, softwareManagement, entityFactory, swModuleTable);
+                uiNotification, eventBus, softwareModuleManagement, softwareModuleTypeManagement, entityFactory,
+                swModuleTable);
         super.init(
                 new SwModuleTableHeader(i18n, permChecker, eventBus, manageDistUIState, softwareModuleAddUpdateWindow),
                 swModuleTable, new SwModuleDetails(i18n, eventBus, permChecker, softwareModuleAddUpdateWindow,
-                        manageDistUIState, softwareManagement, swMetadataPopupLayout, entityFactory));
+                        manageDistUIState, softwareModuleManagement, swMetadataPopupLayout, entityFactory));
     }
 
     public SwModuleTable getSwModuleTable() {

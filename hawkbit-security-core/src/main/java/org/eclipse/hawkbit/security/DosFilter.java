@@ -25,8 +25,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
 /**
  * Filter for protection against denial of service attacks. It reduces the
@@ -42,10 +42,10 @@ public class DosFilter extends OncePerRequestFilter {
 
     private final Pattern ipAdressBlacklist;
 
-    private final Cache<String, AtomicInteger> readCountCache = CacheBuilder.newBuilder()
+    private final Cache<String, AtomicInteger> readCountCache = Caffeine.newBuilder()
             .expireAfterAccess(1, TimeUnit.SECONDS).build();
 
-    private final Cache<String, AtomicInteger> writeCountCache = CacheBuilder.newBuilder()
+    private final Cache<String, AtomicInteger> writeCountCache = Caffeine.newBuilder()
             .expireAfterAccess(1, TimeUnit.SECONDS).build();
 
     private final int maxRead;

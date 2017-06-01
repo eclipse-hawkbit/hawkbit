@@ -24,8 +24,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 
-import com.google.common.base.Throwables;
-
 /**
  * A Service which provide to run system code.
  */
@@ -89,6 +87,8 @@ public class SystemSecurityContext {
      *            the tenant to act as system code
      * @return the return value of the {@link Callable#call()} method.
      */
+    // The callable API throws a Exception and not a specific one
+    @SuppressWarnings({ "squid:S2221", "squid:S00112" })
     public <T> T runAsSystemAsTenant(final Callable<T> callable, final String tenant) {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         try {
@@ -97,10 +97,9 @@ public class SystemSecurityContext {
                 try {
                     setSystemContext(SecurityContextHolder.getContext());
                     return callable.call();
-                    // The callable API throws a Exception and not a specific
-                    // one
-                } catch (@SuppressWarnings("squid:S2221") final Exception e) {
-                    throw Throwables.propagate(e);
+
+                } catch (final Exception e) {
+                    throw new RuntimeException(e);
                 }
             });
 

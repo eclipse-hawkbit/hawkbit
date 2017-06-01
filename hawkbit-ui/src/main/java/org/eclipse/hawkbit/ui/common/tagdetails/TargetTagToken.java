@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.common.tagdetails;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.TagManagement;
@@ -26,8 +27,6 @@ import org.springframework.data.domain.PageRequest;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
-
-import com.google.common.collect.Lists;
 
 /**
  * Implementation of Target tag token.
@@ -76,7 +75,7 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
 
     private TargetTagAssignmentResult toggleAssignment(final String tagNameSelected) {
         final TargetTagAssignmentResult result = targetManagement
-                .toggleTagAssignment(Lists.newArrayList(selectedEntity.getControllerId()), tagNameSelected);
+                .toggleTagAssignment(Arrays.asList(selectedEntity.getControllerId()), tagNameSelected);
         processTargetTagAssigmentResult(result);
         uinotification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(tagNameSelected, result, i18n));
         return result;

@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 

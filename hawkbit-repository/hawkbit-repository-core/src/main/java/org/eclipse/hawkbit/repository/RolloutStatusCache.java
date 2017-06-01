@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
+import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.AbstractActionEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -212,6 +214,18 @@ public class RolloutStatusCache {
 
         cache = tenantAware.runAsTenant(event.getTenant(), () -> cacheManager.getCache(CACHE_GR_NAME));
         cache.evict(event.getRolloutGroupId());
+    }
+
+    @EventListener(classes = RolloutDeletedEvent.class)
+    void invalidateCachedTotalTargetCountOnRolloutDelete(final RolloutDeletedEvent event) {
+        final Cache cache = tenantAware.runAsTenant(event.getTenant(), () -> cacheManager.getCache(CACHE_RO_NAME));
+        cache.evict(event.getEntityId());
+    }
+
+    @EventListener(classes = RolloutGroupDeletedEvent.class)
+    void invalidateCachedTotalTargetCountOnRolloutGroupDelete(final RolloutGroupDeletedEvent event) {
+        final Cache cache = tenantAware.runAsTenant(event.getTenant(), () -> cacheManager.getCache(CACHE_GR_NAME));
+        cache.evict(event.getEntityId());
     }
 
     private static final class CachedTotalTargetCountActionStatus {
