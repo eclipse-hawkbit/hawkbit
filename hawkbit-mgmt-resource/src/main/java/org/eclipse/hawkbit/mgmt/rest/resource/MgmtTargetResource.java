@@ -72,7 +72,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         MgmtTargetMapper.addPollStatus(findTarget, response);
         MgmtTargetMapper.addTargetLinks(response);
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(response);
     }
 
     @Override
@@ -99,7 +99,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         }
 
         final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(findTargetsAll.getContent());
-        return new ResponseEntity<>(new PagedList<>(rest, countTargetsAll), HttpStatus.OK);
+        return ResponseEntity.ok(new PagedList<>(rest, countTargetsAll));
     }
 
     @Override
@@ -119,27 +119,27 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                 .name(targetRest.getName()).description(targetRest.getDescription()).address(targetRest.getAddress())
                 .securityToken(targetRest.getSecurityToken()));
 
-        return new ResponseEntity<>(MgmtTargetMapper.toResponse(updateTarget), HttpStatus.OK);
+        return ResponseEntity.ok(MgmtTargetMapper.toResponse(updateTarget));
     }
 
     @Override
     public ResponseEntity<Void> deleteTarget(@PathVariable("controllerId") final String controllerId) {
         this.targetManagement.deleteTarget(controllerId);
         LOG.debug("{} target deleted, return status {}", controllerId, HttpStatus.OK);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<MgmtTargetAttributes> getAttributes(@PathVariable("controllerId") final String controllerId) {
         final Map<String, String> controllerAttributes = targetManagement.getControllerAttributes(controllerId);
         if (controllerAttributes.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return ResponseEntity.noContent().build();
         }
 
         final MgmtTargetAttributes result = new MgmtTargetAttributes();
         result.putAll(controllerAttributes);
 
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return ResponseEntity.ok(result);
     }
 
     @Override
@@ -167,10 +167,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             totalActionCount = this.deploymentManagement.countActionsByTarget(controllerId);
         }
 
-        return new ResponseEntity<>(
-                new PagedList<>(MgmtTargetMapper.toResponse(controllerId, activeActions.getContent()),
-                        totalActionCount),
-                HttpStatus.OK);
+        return ResponseEntity.ok(new PagedList<>(MgmtTargetMapper.toResponse(controllerId, activeActions.getContent()),
+                totalActionCount));
     }
 
     @Override
@@ -181,10 +179,10 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
         if (!action.getTarget().getControllerId().equals(controllerId)) {
             LOG.warn("given action ({}) is not assigned to given target ({}).", action.getId(), controllerId);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
 
-        return new ResponseEntity<>(MgmtTargetMapper.toResponseWithLinks(controllerId, action), HttpStatus.OK);
+        return ResponseEntity.ok(MgmtTargetMapper.toResponseWithLinks(controllerId, action));
     }
 
     @Override
@@ -196,7 +194,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
         if (!action.getTarget().getControllerId().equals(controllerId)) {
             LOG.warn("given action ({}) is not assigned to given target ({}).", actionId, controllerId);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
 
         if (force) {
@@ -207,7 +205,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         // both functions will throw an exception, when action is in wrong
         // state, which is mapped by MgmtResponseExceptionHandler.
 
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 
     @Override
@@ -224,7 +222,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
         if (!action.getTarget().getId().equals(target.getId())) {
             LOG.warn("given action ({}) is not assigned to given target ({}).", action.getId(), target.getId());
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
@@ -234,9 +232,9 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final Page<ActionStatus> statusList = this.deploymentManagement.findActionStatusByAction(
                 new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting), action.getId());
 
-        return new ResponseEntity<>(new PagedList<>(
+        return ResponseEntity.ok(new PagedList<>(
                 MgmtTargetMapper.toActionStatusRestResponse(statusList.getContent(), deploymentManagement),
-                statusList.getTotalElements()), HttpStatus.OK);
+                statusList.getTotalElements()));
 
     }
 
@@ -247,9 +245,9 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                 .map(MgmtDistributionSetMapper::toResponse).orElse(null);
 
         if (distributionSetRest == null) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return ResponseEntity.noContent().build();
         }
-        return new ResponseEntity<>(distributionSetRest, HttpStatus.OK);
+        return ResponseEntity.ok(distributionSetRest);
     }
 
     @Override
@@ -262,7 +260,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         this.deploymentManagement.assignDistributionSet(dsId.getId(), type, dsId.getForcetime(),
                 Arrays.asList(controllerId));
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @Override
@@ -272,9 +270,9 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                 .map(MgmtDistributionSetMapper::toResponse).orElse(null);
 
         if (distributionSetRest == null) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return ResponseEntity.noContent().build();
         }
-        return new ResponseEntity<>(distributionSetRest, HttpStatus.OK);
+        return ResponseEntity.ok(distributionSetRest);
     }
 
     private Target findTargetWithExceptionIfNotFound(final String controllerId) {
@@ -290,7 +288,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
         if (!action.getTarget().getControllerId().equals(controllerId)) {
             LOG.warn("given action ({}) is not assigned to given target ({}).", action.getId(), controllerId);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
 
         if (!actionUpdate.isForced()) {
@@ -299,7 +297,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
         action = deploymentManagement.forceTargetAction(actionId);
 
-        return new ResponseEntity<>(MgmtTargetMapper.toResponseWithLinks(controllerId, action), HttpStatus.OK);
+        return ResponseEntity.ok(MgmtTargetMapper.toResponseWithLinks(controllerId, action));
     }
 
 }

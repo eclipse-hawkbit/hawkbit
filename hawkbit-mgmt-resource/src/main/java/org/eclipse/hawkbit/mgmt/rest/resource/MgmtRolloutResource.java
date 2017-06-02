@@ -86,7 +86,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         }
 
         final List<MgmtRolloutResponseBody> rest = MgmtRolloutMapper.toResponseRollout(findModulesAll.getContent());
-        return new ResponseEntity<>(new PagedList<>(rest, findModulesAll.getTotalElements()), HttpStatus.OK);
+        return ResponseEntity.ok(new PagedList<>(rest, findModulesAll.getTotalElements()));
     }
 
     @Override
@@ -94,7 +94,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         final Rollout findRolloutById = rolloutManagement.findRolloutWithDetailedStatus(rolloutId)
                 .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
 
-        return new ResponseEntity<>(MgmtRolloutMapper.toResponseRollout(findRolloutById, true), HttpStatus.OK);
+        return ResponseEntity.ok(MgmtRolloutMapper.toResponseRollout(findRolloutById, true));
     }
 
     @Override
@@ -174,7 +174,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
         final List<MgmtRolloutGroupResponseBody> rest = MgmtRolloutMapper
                 .toResponseRolloutGroup(findRolloutGroupsAll.getContent());
-        return new ResponseEntity<>(new PagedList<>(rest, findRolloutGroupsAll.getTotalElements()), HttpStatus.OK);
+        return ResponseEntity.ok(new PagedList<>(rest, findRolloutGroupsAll.getTotalElements()));
     }
 
     @Override
@@ -215,7 +215,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             rolloutGroupTargets = pageTargets;
         }
         final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(rolloutGroupTargets.getContent());
-        return new ResponseEntity<>(new PagedList<>(rest, rolloutGroupTargets.getTotalElements()), HttpStatus.OK);
+        return ResponseEntity.ok(new PagedList<>(rest, rolloutGroupTargets.getTotalElements()));
     }
 
     private DistributionSet findDistributionSetOrThrowException(final MgmtRolloutRestRequestBody rolloutRequestBody) {

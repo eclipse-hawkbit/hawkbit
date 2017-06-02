@@ -60,9 +60,8 @@ public class MgmtSystemResource implements MgmtSystemRestApi {
      */
     @Override
     public ResponseEntity<Map<String, MgmtSystemTenantConfigurationValue>> getSystemConfiguration() {
-        return new ResponseEntity<>(
-                MgmtSystemMapper.toResponse(tenantConfigurationManagement, tenantConfigurationProperties),
-                HttpStatus.OK);
+        return ResponseEntity
+                .ok(MgmtSystemMapper.toResponse(tenantConfigurationManagement, tenantConfigurationProperties));
     }
 
     /**
@@ -81,7 +80,7 @@ public class MgmtSystemResource implements MgmtSystemRestApi {
         tenantConfigurationManagement.deleteConfiguration(keyName);
 
         LOG.debug("{} config value deleted, return status {}", keyName, HttpStatus.OK);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -99,9 +98,8 @@ public class MgmtSystemResource implements MgmtSystemRestApi {
             @PathVariable("keyName") final String keyName) {
 
         LOG.debug("{} config value getted, return status {}", keyName, HttpStatus.OK);
-        return new ResponseEntity<>(
-                MgmtSystemMapper.toResponse(keyName, tenantConfigurationManagement.getConfigurationValue(keyName)),
-                HttpStatus.OK);
+        return ResponseEntity
+                .ok(MgmtSystemMapper.toResponse(keyName, tenantConfigurationManagement.getConfigurationValue(keyName)));
     }
 
     /**
@@ -123,7 +121,7 @@ public class MgmtSystemResource implements MgmtSystemRestApi {
 
         final TenantConfigurationValue<? extends Serializable> updatedValue = tenantConfigurationManagement
                 .addOrUpdateConfiguration(keyName, configurationValueRest.getValue());
-        return new ResponseEntity<>(MgmtSystemMapper.toResponse(keyName, updatedValue), HttpStatus.OK);
+        return ResponseEntity.ok(MgmtSystemMapper.toResponse(keyName, updatedValue));
     }
 
 }

@@ -73,7 +73,7 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
 
         final List<MgmtSoftwareModuleType> rest = MgmtSoftwareModuleTypeMapper
                 .toTypesResponse(findModuleTypessAll.getContent());
-        return new ResponseEntity<>(new PagedList<>(rest, countModulesAll), HttpStatus.OK);
+        return ResponseEntity.ok(new PagedList<>(rest, countModulesAll));
     }
 
     @Override
@@ -81,14 +81,14 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
             @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId) {
         final SoftwareModuleType foundType = findSoftwareModuleTypeWithExceptionIfNotFound(softwareModuleTypeId);
 
-        return new ResponseEntity<>(MgmtSoftwareModuleTypeMapper.toResponse(foundType), HttpStatus.OK);
+        return ResponseEntity.ok(MgmtSoftwareModuleTypeMapper.toResponse(foundType));
     }
 
     @Override
     public ResponseEntity<Void> deleteSoftwareModuleType(
             @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId) {
         softwareModuleTypeManagement.deleteSoftwareModuleType(softwareModuleTypeId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @Override
@@ -96,11 +96,12 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
             @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId,
             @RequestBody final MgmtSoftwareModuleTypeRequestBodyPut restSoftwareModuleType) {
 
-        final SoftwareModuleType updatedSoftwareModuleType = softwareModuleTypeManagement.updateSoftwareModuleType(entityFactory
-                .softwareModuleType().update(softwareModuleTypeId).description(restSoftwareModuleType.getDescription())
-                .colour(restSoftwareModuleType.getColour()));
+        final SoftwareModuleType updatedSoftwareModuleType = softwareModuleTypeManagement
+                .updateSoftwareModuleType(entityFactory.softwareModuleType().update(softwareModuleTypeId)
+                        .description(restSoftwareModuleType.getDescription())
+                        .colour(restSoftwareModuleType.getColour()));
 
-        return new ResponseEntity<>(MgmtSoftwareModuleTypeMapper.toResponse(updatedSoftwareModuleType), HttpStatus.OK);
+        return ResponseEntity.ok(MgmtSoftwareModuleTypeMapper.toResponse(updatedSoftwareModuleType));
     }
 
     @Override

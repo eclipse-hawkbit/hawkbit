@@ -204,13 +204,13 @@ public final class MgmtTargetMapper {
     static MgmtAction toResponseWithLinks(final String controllerId, final Action action) {
         final MgmtAction result = toResponse(controllerId, action);
 
-        if (!action.isCancelingOrCanceled()) {
+        if (action.isCancelingOrCanceled()) {
+            result.add(linkTo(methodOn(MgmtTargetRestApi.class).getAction(controllerId, action.getId()))
+                    .withRel(MgmtRestConstants.TARGET_V1_CANCELED_ACTION));
+        } else {
             result.add(linkTo(
                     methodOn(MgmtDistributionSetRestApi.class).getDistributionSet(action.getDistributionSet().getId()))
                             .withRel("distributionset"));
-        } else if (action.isCancelingOrCanceled()) {
-            result.add(linkTo(methodOn(MgmtTargetRestApi.class).getAction(controllerId, action.getId()))
-                    .withRel(MgmtRestConstants.TARGET_V1_CANCELED_ACTION));
         }
 
         result.add(linkTo(methodOn(MgmtTargetRestApi.class).getActionStatusList(controllerId, action.getId(), 0,

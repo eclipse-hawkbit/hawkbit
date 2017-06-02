@@ -56,7 +56,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
         // to single response include poll status
         final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(findTarget);
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(response);
     }
 
     @Override
@@ -85,7 +85,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
 
         final List<MgmtTargetFilterQuery> rest = MgmtTargetFilterQueryMapper
                 .toResponse(findTargetFiltersAll.getContent());
-        return new ResponseEntity<>(new PagedList<>(rest, countTargetsAll), HttpStatus.OK);
+        return ResponseEntity.ok(new PagedList<>(rest, countTargetsAll));
     }
 
     @Override
@@ -106,14 +106,14 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
                 .updateTargetFilterQuery(entityFactory.targetFilterQuery().update(filterId)
                         .name(targetFilterRest.getName()).query(targetFilterRest.getQuery()));
 
-        return new ResponseEntity<>(MgmtTargetFilterQueryMapper.toResponse(updateFilter), HttpStatus.OK);
+        return ResponseEntity.ok(MgmtTargetFilterQueryMapper.toResponse(updateFilter));
     }
 
     @Override
     public ResponseEntity<Void> deleteFilter(@PathVariable("filterId") final Long filterId) {
         filterManagement.deleteTargetFilterQuery(filterId);
         LOG.debug("{} target filter query deleted, return status {}", filterId, HttpStatus.OK);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @Override
@@ -123,7 +123,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
         final TargetFilterQuery updateFilter = filterManagement.updateTargetFilterQueryAutoAssignDS(filterId,
                 dsId.getId());
 
-        return new ResponseEntity<>(MgmtTargetFilterQueryMapper.toResponse(updateFilter), HttpStatus.OK);
+        return ResponseEntity.ok(MgmtTargetFilterQueryMapper.toResponse(updateFilter));
     }
 
     @Override
@@ -140,7 +140,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     public ResponseEntity<Void> deleteAssignedDistributionSet(@PathVariable("filterId") final Long filterId) {
         filterManagement.updateTargetFilterQueryAutoAssignDS(filterId, null);
 
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 
     private TargetFilterQuery findFilterWithExceptionIfNotFound(final Long filterId) {
