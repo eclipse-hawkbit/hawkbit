@@ -352,7 +352,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             final DistributionSetFilter distributionSetFilter) {
         final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(
                 distributionSetFilter);
-        if (specList == null || specList.isEmpty()) {
+        if (CollectionUtils.isEmpty(specList)) {
             return null;
         }
         return distributionSetRepository.findOne(SpecificationsBuilder.combineWithAnd(specList));
@@ -667,7 +667,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     private Page<JpaDistributionSet> findByCriteriaAPI(final Pageable pageable,
             final List<Specification<JpaDistributionSet>> specList) {
 
-        if (specList == null || specList.isEmpty()) {
+        if (CollectionUtils.isEmpty(specList)) {
             return distributionSetRepository.findAll(pageable);
         }
 

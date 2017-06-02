@@ -93,6 +93,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.validation.annotation.Validated;
@@ -177,7 +178,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
      */
     private Page<JpaRollout> findByCriteriaAPI(final Pageable pageable,
             final List<Specification<JpaRollout>> specList) {
-        if (specList == null || specList.isEmpty()) {
+        if (CollectionUtils.isEmpty(specList)) {
             return rolloutRepository.findAll(pageable);
         }
 
@@ -992,7 +993,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
         List<TotalTargetCountActionStatus> rolloutStatusCountItems = rolloutStatusCache.getRolloutStatus(rolloutId);
 
-        if (rolloutStatusCountItems.isEmpty()) {
+        if (CollectionUtils.isEmpty(rolloutStatusCountItems)) {
             rolloutStatusCountItems = actionRepository.getStatusCountByRolloutId(rolloutId);
             rolloutStatusCache.putRolloutStatus(rolloutId, rolloutStatusCountItems);
         }
