@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.data.Item;
@@ -156,10 +157,10 @@ public class SoftwareModuleDetailsTable extends Table {
             final Set<SoftwareModuleType> swModuleMandatoryTypes = distributionSet.getType().getMandatoryModuleTypes();
             final Set<SoftwareModuleType> swModuleOptionalTypes = distributionSet.getType().getOptionalModuleTypes();
 
-            if (swModuleMandatoryTypes != null && !swModuleMandatoryTypes.isEmpty()) {
+            if (!CollectionUtils.isEmpty(swModuleMandatoryTypes)) {
                 swModuleMandatoryTypes.forEach(swModule -> setSwModuleProperties(swModule, true, distributionSet));
             }
-            if (swModuleOptionalTypes != null && !swModuleOptionalTypes.isEmpty()) {
+            if (!CollectionUtils.isEmpty(swModuleOptionalTypes)) {
                 swModuleOptionalTypes.forEach(swModule -> setSwModuleProperties(swModule, false, distributionSet));
             }
         }

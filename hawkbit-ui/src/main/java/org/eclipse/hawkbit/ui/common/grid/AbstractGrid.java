@@ -606,11 +606,14 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
         @Override
         public String getStyle(final CellReference cellReference) {
 
-            if (Arrays.stream(center).anyMatch(o -> Objects.equals(o, cellReference.getPropertyId()))) {
+            if (center != null
+                    && Arrays.stream(center).anyMatch(o -> Objects.equals(o, cellReference.getPropertyId()))) {
                 return "centeralign";
-            } else if (Arrays.stream(right).anyMatch(o -> Objects.equals(o, cellReference.getPropertyId()))) {
+            } else if (right != null
+                    && Arrays.stream(right).anyMatch(o -> Objects.equals(o, cellReference.getPropertyId()))) {
                 return "rightalign";
-            } else if (Arrays.stream(left).anyMatch(o -> Objects.equals(o, cellReference.getPropertyId()))) {
+            } else if (left != null
+                    && Arrays.stream(left).anyMatch(o -> Objects.equals(o, cellReference.getPropertyId()))) {
                 return "leftalign";
             }
             return null;
