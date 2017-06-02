@@ -285,29 +285,6 @@ public class SecurityManagedConfiguration {
     }
 
     /**
-     * Filter registration bean for spring etag filter.
-     *
-     * @return the spring filter registration bean for registering an etag
-     *         filter in the filter chain
-     */
-    @Bean
-    @Order(100)
-    public FilterRegistrationBean eTagFilter() {
-
-        final FilterRegistrationBean filterRegBean = new FilterRegistrationBean();
-        // Exclude the URLs for downloading artifacts, so no eTag is generated
-        // in the ShallowEtagHeaderFilter, just using the SH1 hash of the
-        // artifact itself as 'ETag', because otherwise the file will be copied
-        // in memory!
-        filterRegBean.setFilter(new ExcludePathAwareShallowETagFilter("/UI/**",
-                "/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download",
-                "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/**",
-                "/api/v1/downloadserver/**"));
-
-        return filterRegBean;
-    }
-
-    /**
      * A Websecruity config to handle and filter the download ids.
      */
     @Configuration
@@ -423,6 +400,29 @@ public class SecurityManagedConfiguration {
             httpSec.httpBasic().and().exceptionHandling().authenticationEntryPoint(basicAuthEntryPoint);
             httpSec.anonymous().disable();
         }
+    }
+
+    /**
+     * Filter registration bean for spring etag filter.
+     *
+     * @return the spring filter registration bean for registering an etag
+     *         filter in the filter chain
+     */
+    @Bean
+    @Order(380)
+    public FilterRegistrationBean eTagFilter() {
+
+        final FilterRegistrationBean filterRegBean = new FilterRegistrationBean();
+        // Exclude the URLs for downloading artifacts, so no eTag is generated
+        // in the ShallowEtagHeaderFilter, just using the SH1 hash of the
+        // artifact itself as 'ETag', because otherwise the file will be copied
+        // in memory!
+        filterRegBean.setFilter(new ExcludePathAwareShallowETagFilter("/UI/**",
+                "/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download",
+                "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/**",
+                "/api/v1/downloadserver/**"));
+
+        return filterRegBean;
     }
 
     /**
