@@ -47,6 +47,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.MetaData;
+import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
@@ -236,8 +237,8 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final Long dsID, final String controllerId) {
-        return deploymentManagement.assignDistributionSet(dsID, Arrays.asList(new TargetWithActionType(controllerId,
-                ActionType.FORCED, org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME)));
+        return deploymentManagement.assignDistributionSet(dsID, Arrays.asList(
+                new TargetWithActionType(controllerId, ActionType.FORCED, RepositoryModelConstants.NO_FORCE_TIME)));
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset,
