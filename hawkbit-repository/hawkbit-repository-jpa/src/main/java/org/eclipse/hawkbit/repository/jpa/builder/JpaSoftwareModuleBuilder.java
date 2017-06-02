@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.builder;
 
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.builder.GenericSoftwareModuleUpdate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleBuilder;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
@@ -21,10 +21,10 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
  */
 public class JpaSoftwareModuleBuilder implements SoftwareModuleBuilder {
 
-    private final SoftwareManagement softwareManagement;
+    private final SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
-    public JpaSoftwareModuleBuilder(final SoftwareManagement softwareManagement) {
-        this.softwareManagement = softwareManagement;
+    public JpaSoftwareModuleBuilder(final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
+        this.softwareModuleTypeManagement = softwareModuleTypeManagement;
     }
 
     @Override
@@ -34,7 +34,7 @@ public class JpaSoftwareModuleBuilder implements SoftwareModuleBuilder {
 
     @Override
     public SoftwareModuleCreate create() {
-        return new JpaSoftwareModuleCreate(softwareManagement);
+        return new JpaSoftwareModuleCreate(softwareModuleTypeManagement);
     }
 
 }

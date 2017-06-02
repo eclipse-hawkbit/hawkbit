@@ -13,9 +13,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -38,6 +38,7 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.util.CollectionUtils;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -69,9 +70,9 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
     private static final String DIST_TYPE_MANDATORY = "mandatory";
     private static final String STAR = " * ";
 
-    private final transient SoftwareManagement softwareManagement;
+    private final transient SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
-    private final transient DistributionSetManagement distributionSetManagement;
+    private final transient DistributionSetTypeManagement distributionSetTypeManagement;
 
     private HorizontalLayout distTypeSelectLayout;
     private Table sourceTable;
@@ -97,18 +98,18 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
      *            SpPermissionChecker
      * @param uiNotification
      *            UINotification
-     * @param softwareManagement
-     *            SoftwareManagement
-     * @param distributionSetManagement
+     * @param softwareModuleTypeManagement
+     *            management for {@link SoftwareModuleType}s
+     * @param distributionSetTypeManagement
      *            DistributionSetManagement
      */
     public CreateUpdateDistSetTypeLayout(final VaadinMessageSource i18n, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
-            final UINotification uiNotification, final SoftwareManagement softwareManagement,
-            final DistributionSetManagement distributionSetManagement) {
+            final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement,
+            final DistributionSetTypeManagement distributionSetTypeManagement) {
         super(i18n, tagManagement, entityFactory, eventBus, permChecker, uiNotification);
-        this.softwareManagement = softwareManagement;
-        this.distributionSetManagement = distributionSetManagement;
+        this.softwareModuleTypeManagement = softwareModuleTypeManagement;
+        this.distributionSetTypeManagement = distributionSetTypeManagement;
     }
 
     @Override
@@ -153,7 +154,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
 
     @Override
     protected Color getColorForColorPicker() {
-        final Optional<DistributionSetType> existedDistType = distributionSetManagement
+        final Optional<DistributionSetType> existedDistType = distributionSetTypeManagement
                 .findDistributionSetTypeByName(tagNameComboBox.getValue().toString());
         if (existedDistType.isPresent()) {
             return existedDistType.get().getColour() != null
@@ -315,7 +316,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
     private void getSourceTableData() {
 
         sourceTableContainer.removeAllItems();
-        final Iterable<SoftwareModuleType> moduleTypeBeans = softwareManagement
+        final Iterable<SoftwareModuleType> moduleTypeBeans = softwareModuleTypeManagement
                 .findSoftwareModuleTypesAll(new PageRequest(0, 1_000));
         Item saveTblitem;
         for (final SoftwareModuleType swTypeTag : moduleTypeBeans) {
@@ -388,7 +389,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
         final String typeKeyValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeKey.getValue());
         final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
         final List<Long> itemIds = (List<Long>) selectedTable.getItemIds();
-        if (null != typeNameValue && null != typeKeyValue && null != itemIds && !itemIds.isEmpty()) {
+        if (null != typeNameValue && null != typeKeyValue && !CollectionUtils.isEmpty(itemIds)) {
 
             final List<Long> mandatory = itemIds.stream()
                     .filter(itemId -> isMandatoryModuleType(selectedTable.getItem(itemId)))
@@ -397,7 +398,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
             final List<Long> optional = itemIds.stream()
                     .filter(itemId -> isOptionalModuleType(selectedTable.getItem(itemId))).collect(Collectors.toList());
 
-            final DistributionSetType newDistType = distributionSetManagement.createDistributionSetType(
+            final DistributionSetType newDistType = distributionSetTypeManagement.createDistributionSetType(
                     entityFactory.distributionSetType().create().key(typeKeyValue).name(typeNameValue)
                             .description(typeDescValue).colour(colorPicked).mandatory(mandatory).optional(optional));
             uiNotification
@@ -429,8 +430,8 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
         final DistributionSetTypeUpdate update = entityFactory.distributionSetType().update(existingType.getId())
                 .description(tagDesc.getValue())
                 .colour(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview()));
-        if (distributionSetManagement.countDistributionSetsByType(existingType.getId()) <= 0 && null != itemIds
-                && !itemIds.isEmpty()) {
+        if (distributionSetTypeManagement.countDistributionSetsByType(existingType.getId()) <= 0
+                && !CollectionUtils.isEmpty(itemIds)) {
 
             update.mandatory(itemIds.stream().filter(itemId -> isMandatoryModuleType(selectedTable.getItem(itemId)))
                     .collect(Collectors.toList()))
@@ -438,7 +439,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
                             .collect(Collectors.toList()));
         }
 
-        final DistributionSetType updateDistSetType = distributionSetManagement.updateDistributionSetType(update);
+        final DistributionSetType updateDistSetType = distributionSetTypeManagement.updateDistributionSetType(update);
 
         uiNotification.displaySuccess(
                 i18n.getMessage("message.update.success", new Object[] { updateDistSetType.getName() }));
@@ -528,10 +529,10 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
         tagName.setValue(distSetTypeSelected);
         getSourceTableData();
         selectedTable.getContainerDataSource().removeAllItems();
-        distributionSetManagement.findDistributionSetTypeByName(distSetTypeSelected).ifPresent(selectedTypeTag -> {
+        distributionSetTypeManagement.findDistributionSetTypeByName(distSetTypeSelected).ifPresent(selectedTypeTag -> {
             tagDesc.setValue(selectedTypeTag.getDescription());
             typeKey.setValue(selectedTypeTag.getKey());
-            if (distributionSetManagement.countDistributionSetsByType(selectedTypeTag.getId()) <= 0) {
+            if (distributionSetTypeManagement.countDistributionSetsByType(selectedTypeTag.getId()) <= 0) {
                 distTypeSelectLayout.setEnabled(true);
                 selectedTable.setEnabled(true);
             } else {
@@ -584,12 +585,12 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
 
     @Override
     protected Optional<DistributionSetType> findEntityByKey() {
-        return distributionSetManagement.findDistributionSetTypeByKey(typeKey.getValue());
+        return distributionSetTypeManagement.findDistributionSetTypeByKey(typeKey.getValue());
     }
 
     @Override
     protected Optional<DistributionSetType> findEntityByName() {
-        return distributionSetManagement.findDistributionSetTypeByName(tagName.getValue());
+        return distributionSetTypeManagement.findDistributionSetTypeByName(tagName.getValue());
     }
 
     @Override

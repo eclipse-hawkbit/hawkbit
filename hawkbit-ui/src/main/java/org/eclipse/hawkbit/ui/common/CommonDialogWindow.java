@@ -19,7 +19,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorderWithIcon;
@@ -28,6 +27,8 @@ import org.eclipse.hawkbit.ui.management.targettable.TargetAddUpdateWindowLayout
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroupItemComponent;
 
 import com.google.common.base.Strings;
@@ -359,7 +360,7 @@ public class CommonDialogWindow extends Window {
     }
 
     private static Object emptyToNull(final Collection<?> c) {
-        return (c == null || c.isEmpty()) ? null : c;
+        return CollectionUtils.isEmpty(c) ? null : c;
     }
 
     private boolean hasNullValidator(final Component component) {

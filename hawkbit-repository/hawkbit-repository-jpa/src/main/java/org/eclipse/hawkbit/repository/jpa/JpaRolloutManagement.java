@@ -20,7 +20,6 @@ import java.util.stream.StreamSupport;
 import javax.persistence.EntityManager;
 import javax.validation.ConstraintDeclarationException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.AbstractRolloutManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -29,11 +28,13 @@ import org.eclipse.hawkbit.repository.RolloutFields;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutHelper;
 import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.builder.GenericRolloutUpdate;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
+import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
@@ -92,6 +93,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.validation.annotation.Validated;
 
@@ -139,6 +142,12 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Autowired
     private QuotaManagement quotaManagement;
 
+    @Autowired
+    private RolloutStatusCache rolloutStatusCache;
+
+    @Autowired
+    private ApplicationContext applicationContext;
+
     JpaRolloutManagement(final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
             final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
@@ -169,7 +178,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
      */
     private Page<JpaRollout> findByCriteriaAPI(final Pageable pageable,
             final List<Specification<JpaRollout>> specList) {
-        if (specList == null || specList.isEmpty()) {
+        if (CollectionUtils.isEmpty(specList)) {
             return rolloutRepository.findAll(pageable);
         }
 
@@ -865,9 +874,21 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         rollout.setStatus(RolloutStatus.DELETED);
         rollout.setDeleted(true);
         rolloutRepository.save(rollout);
+
+        sendRolloutGroupDeletedEvents(rollout);
+    }
+
+    private void sendRolloutGroupDeletedEvents(final JpaRollout rollout) {
+        final List<Long> groupIds = rollout.getRolloutGroups().stream().map(RolloutGroup::getId)
+                .collect(Collectors.toList());
+
+        afterCommit.afterCommit(() -> groupIds.forEach(rolloutGroupId -> eventPublisher
+                .publishEvent(new RolloutGroupDeletedEvent(tenantAware.getCurrentTenant(), rolloutGroupId,
+                        JpaRolloutGroup.class.getName(), applicationContext.getId()))));
     }
 
     private void hardDeleteRollout(final JpaRollout rollout) {
+        sendRolloutGroupDeletedEvents(rollout);
         rolloutRepository.delete(rollout);
     }
 
@@ -907,7 +928,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     public Slice<Rollout> findRolloutWithDetailedStatusByFilters(final Pageable pageable, final String searchText,
             final boolean deleted) {
         final Slice<JpaRollout> findAll = findByCriteriaAPI(pageable,
-                Lists.newArrayList(JpaRolloutHelper.likeNameOrDescription(searchText, deleted)));
+                Arrays.asList(JpaRolloutHelper.likeNameOrDescription(searchText, deleted)));
         setRolloutStatusDetails(findAll);
         return JpaRolloutHelper.convertPage(findAll, pageable);
     }
@@ -970,21 +991,41 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             return rollout;
         }
 
-        final List<TotalTargetCountActionStatus> rolloutStatusCountItems = actionRepository
-                .getStatusCountByRolloutId(rolloutId);
+        List<TotalTargetCountActionStatus> rolloutStatusCountItems = rolloutStatusCache.getRolloutStatus(rolloutId);
+
+        if (CollectionUtils.isEmpty(rolloutStatusCountItems)) {
+            rolloutStatusCountItems = actionRepository.getStatusCountByRolloutId(rolloutId);
+            rolloutStatusCache.putRolloutStatus(rolloutId, rolloutStatusCountItems);
+        }
+
         final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(rolloutStatusCountItems,
                 rollout.get().getTotalTargets());
         ((JpaRollout) rollout.get()).setTotalTargetCountStatus(totalTargetCountStatus);
         return rollout;
     }
 
-    private Map<Long, List<TotalTargetCountActionStatus>> getStatusCountItemForRollout(final List<Long> rolloutIds) {
+    private Map<Long, List<TotalTargetCountActionStatus>> getStatusCountItemForRollout(final List<Long> rollouts) {
+        if (rollouts.isEmpty()) {
+            return null;
+        }
+
+        final Map<Long, List<TotalTargetCountActionStatus>> fromCache = rolloutStatusCache.getRolloutStatus(rollouts);
+
+        final List<Long> rolloutIds = rollouts.stream().filter(id -> !fromCache.containsKey(id))
+                .collect(Collectors.toList());
+
         if (!rolloutIds.isEmpty()) {
             final List<TotalTargetCountActionStatus> resultList = actionRepository
                     .getStatusCountByRolloutId(rolloutIds);
-            return resultList.stream().collect(Collectors.groupingBy(TotalTargetCountActionStatus::getId));
+            final Map<Long, List<TotalTargetCountActionStatus>> fromDb = resultList.stream()
+                    .collect(Collectors.groupingBy(TotalTargetCountActionStatus::getId));
+
+            rolloutStatusCache.putRolloutStatus(fromDb);
+
+            fromCache.putAll(fromDb);
         }
-        return null;
+
+        return fromCache;
     }
 
     private void setRolloutStatusDetails(final Slice<JpaRollout> rollouts) {

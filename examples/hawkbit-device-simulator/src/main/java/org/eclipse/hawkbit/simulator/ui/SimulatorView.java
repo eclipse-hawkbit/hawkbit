@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.simulator.ui;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Locale;
 
@@ -23,7 +24,6 @@ import org.eclipse.hawkbit.simulator.event.NextPollCounterUpdate;
 import org.eclipse.hawkbit.simulator.event.ProgressUpdate;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.vaadin.data.util.BeanContainer;
@@ -93,7 +93,7 @@ public class SimulatorView extends VerticalLayout implements View {
     private final HorizontalLayout toolbar = new HorizontalLayout();
     private final Grid grid = new Grid();
     private final ComboBox responseComboBox = new ComboBox("",
-            Lists.newArrayList(ResponseStatus.SUCCESSFUL, ResponseStatus.ERROR));
+            Arrays.asList(ResponseStatus.SUCCESSFUL, ResponseStatus.ERROR));
 
     private BeanContainer<String, AbstractSimulatedDevice> beanContainer;
 

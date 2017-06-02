@@ -44,6 +44,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.io.BaseEncoding;
@@ -105,7 +106,7 @@ public class DeviceSimulatorUpdater {
 
         device.setProgress(0.0);
 
-        if (modules == null || modules.isEmpty()) {
+        if (CollectionUtils.isEmpty(modules)) {
             device.setSwversion(swVersion);
         } else {
             device.setSwversion(

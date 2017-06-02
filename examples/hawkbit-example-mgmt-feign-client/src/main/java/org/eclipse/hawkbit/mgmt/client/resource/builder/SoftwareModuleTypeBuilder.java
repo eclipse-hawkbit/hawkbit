@@ -9,12 +9,11 @@
 package org.eclipse.hawkbit.mgmt.client.resource.builder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeRequestBodyPost;
-
-import com.google.common.collect.Lists;
 
 /**
  * 
@@ -79,7 +78,7 @@ public class SoftwareModuleTypeBuilder {
      *         {@link MgmtSoftwareModuleTypeRequestBodyPost}
      */
     public List<MgmtSoftwareModuleTypeRequestBodyPost> build() {
-        return Lists.newArrayList(doBuild(""));
+        return Arrays.asList(doBuild(""));
     }
 
     /**
@@ -93,7 +92,7 @@ public class SoftwareModuleTypeBuilder {
      * @return a list of {@link MgmtSoftwareModuleTypeRequestBodyPost}
      */
     public List<MgmtSoftwareModuleTypeRequestBodyPost> buildAsList(final int count) {
-        final ArrayList<MgmtSoftwareModuleTypeRequestBodyPost> bodyList = Lists.newArrayList();
+        final List<MgmtSoftwareModuleTypeRequestBodyPost> bodyList = new ArrayList<>();
         for (int index = 0; index < count; index++) {
             bodyList.add(doBuild(String.valueOf(index)));
         }

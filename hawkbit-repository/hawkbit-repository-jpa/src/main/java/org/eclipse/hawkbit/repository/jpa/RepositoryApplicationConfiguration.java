@@ -17,12 +17,15 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.PropertiesQuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryDefaultConfiguration;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.RolloutStatusCache;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
@@ -131,17 +134,23 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         return new PropertiesQuotaManagement(securityProperties);
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    RolloutStatusCache rolloutStatusCache(final TenantAware tenantAware) {
+        return new RolloutStatusCache(tenantAware);
+    }
+
     /**
-     * @param distributionSetManagement
+     * @param distributionSetTypeManagement
      *            to loading the {@link DistributionSetType}
      * @param softwareManagement
      *            for loading {@link DistributionSet#getModules()}
      * @return DistributionSetBuilder bean
      */
     @Bean
-    DistributionSetBuilder distributionSetBuilder(final DistributionSetManagement distributionSetManagement,
-            final SoftwareManagement softwareManagement) {
-        return new JpaDistributionSetBuilder(distributionSetManagement, softwareManagement);
+    DistributionSetBuilder distributionSetBuilder(final DistributionSetTypeManagement distributionSetTypeManagement,
+            final SoftwareModuleManagement softwareManagement) {
+        return new JpaDistributionSetBuilder(distributionSetTypeManagement, softwareManagement);
     }
 
     /**
@@ -152,18 +161,18 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      * @return DistributionSetTypeBuilder bean
      */
     @Bean
-    DistributionSetTypeBuilder distributionSetTypeBuilder(final SoftwareManagement softwareManagement) {
+    DistributionSetTypeBuilder distributionSetTypeBuilder(final SoftwareModuleManagement softwareManagement) {
         return new JpaDistributionSetTypeBuilder(softwareManagement);
     }
 
     /**
-     * @param softwareManagement
+     * @param softwareModuleTypeManagement
      *            for loading {@link SoftwareModule#getType()}
      * @return SoftwareModuleBuilder bean
      */
     @Bean
-    SoftwareModuleBuilder softwareModuleBuilder(final SoftwareManagement softwareManagement) {
-        return new JpaSoftwareModuleBuilder(softwareManagement);
+    SoftwareModuleBuilder softwareModuleBuilder(final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
+        return new JpaSoftwareModuleBuilder(softwareModuleTypeManagement);
     }
 
     /**
@@ -339,6 +348,22 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
+     * {@link JpaDistributionSetManagement} bean.
+     *
+     * @return a new {@link DistributionSetManagement}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    DistributionSetTypeManagement distributionSetTypeManagement(
+            final DistributionSetTypeRepository distributionSetTypeRepository,
+            final SoftwareModuleTypeRepository softwareModuleTypeRepository,
+            final DistributionSetRepository distributionSetRepository,
+            final VirtualPropertyReplacer virtualPropertyReplacer) {
+        return new JpaDistributionSetTypeManagement(distributionSetTypeRepository, softwareModuleTypeRepository,
+                distributionSetRepository, virtualPropertyReplacer);
+    }
+
+    /**
      * {@link JpaTenantStatsManagement} bean.
      *
      * @return a new {@link TenantStatsManagement}
@@ -405,14 +430,30 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * {@link JpaSoftwareManagement} bean.
+     * {@link JpaSoftwareModuleManagement} bean.
      *
-     * @return a new {@link SoftwareManagement}
+     * @return a new {@link SoftwareModuleManagement}
      */
     @Bean
     @ConditionalOnMissingBean
-    SoftwareManagement softwareManagement() {
-        return new JpaSoftwareManagement();
+    SoftwareModuleManagement softwareModuleManagement() {
+        return new JpaSoftwareModuleManagement();
+    }
+
+    /**
+     * {@link JpaSoftwareModuleManagement} bean.
+     *
+     * @return a new {@link SoftwareModuleManagement}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    SoftwareModuleTypeManagement softwareModuleTypeManagement(
+            final DistributionSetTypeRepository distributionSetTypeRepository,
+            final SoftwareModuleTypeRepository softwareModuleTypeRepository,
+            final VirtualPropertyReplacer virtualPropertyReplacer,
+            final SoftwareModuleRepository softwareModuleRepository) {
+        return new JpaSoftwareModuleTypeManagement(distributionSetTypeRepository, softwareModuleTypeRepository,
+                virtualPropertyReplacer, softwareModuleRepository);
     }
 
     @Bean

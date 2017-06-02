@@ -17,8 +17,8 @@ import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.util.StringUtils;
 
-import com.google.common.base.Strings;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -63,7 +63,7 @@ public abstract class AbstractGridHeader extends VerticalLayout {
 
     private void restoreState() {
         final String onLoadSearchBoxValue = onLoadSearchBoxValue();
-        if (!Strings.isNullOrEmpty(onLoadSearchBoxValue)) {
+        if (!StringUtils.isEmpty(onLoadSearchBoxValue)) {
             openSearchTextField();
             searchField.setValue(onLoadSearchBoxValue);
         }

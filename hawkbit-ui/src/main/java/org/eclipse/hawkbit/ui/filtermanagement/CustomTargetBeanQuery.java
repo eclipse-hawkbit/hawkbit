@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.filtermanagement;
 
-import static org.apache.commons.lang3.ArrayUtils.isEmpty;
 import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.isNotNullOrEmpty;
 import static org.eclipse.hawkbit.ui.utils.SPUIDefinitions.FILTER_BY_QUERY;
 import static org.springframework.data.domain.Sort.Direction.ASC;
@@ -32,10 +31,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
-
-import com.google.common.base.Strings;
 
 /**
  * Simple implementation of generics bean query which dynamically loads
@@ -71,7 +69,7 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             filterQuery = (String) queryConfig.get(FILTER_BY_QUERY);
         }
 
-        if (!isEmpty(sortStates)) {
+        if (sortStates != null && sortStates.length > 0) {
 
             sort = new Sort(sortStates[0] ? ASC : DESC, (String) sortIds[0]);
 
@@ -90,7 +88,7 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
     protected List<ProxyTarget> loadBeans(final int startIndex, final int count) {
         Slice<Target> targetBeans;
         final List<ProxyTarget> proxyTargetBeans = new ArrayList<>();
-        if (!Strings.isNullOrEmpty(filterQuery)) {
+        if (!StringUtils.isEmpty(filterQuery)) {
             targetBeans = targetManagement.findTargetsAll(filterQuery,
                     new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         } else {
@@ -130,7 +128,7 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
     @Override
     public int size() {
         long size = 0;
-        if (!Strings.isNullOrEmpty(filterQuery)) {
+        if (!StringUtils.isEmpty(filterQuery)) {
             size = getTargetManagement().countTargetByTargetFilterQuery(filterQuery);
         }
         getFilterManagementUIState().setTargetsCountAll(size);

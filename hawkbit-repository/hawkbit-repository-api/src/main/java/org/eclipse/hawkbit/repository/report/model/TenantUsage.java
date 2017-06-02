@@ -9,9 +9,8 @@
 package org.eclipse.hawkbit.repository.report.model;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
-
-import com.google.common.collect.Maps;
 
 /**
  * System usage stats element for a tenant.
@@ -58,7 +57,7 @@ public class TenantUsage {
 
     private Map<String, String> getLazyUsageData() {
         if (usageData == null) {
-            usageData = Maps.newHashMap();
+            usageData = new HashMap<>();
         }
         return usageData;
     }

@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.security;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import javax.servlet.FilterChain;
@@ -32,9 +33,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.util.AntPathMatcher;
-
-import com.google.common.collect.Iterators;
-import com.google.common.collect.UnmodifiableIterator;
 
 /**
  * An abstraction for all controller based security to parse the e.g. the tenant
@@ -170,8 +168,10 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
             final String tenant, final String controllerId) {
         final DmfTenantSecurityToken secruityToken = new DmfTenantSecurityToken(tenant, null, controllerId, null,
                 FileResource.createFileResourceBySha1(""));
-        final UnmodifiableIterator<String> forEnumeration = Iterators.forEnumeration(request.getHeaderNames());
-        forEnumeration.forEachRemaining(header -> secruityToken.putHeader(header, request.getHeader(header)));
+
+        Collections.list(request.getHeaderNames())
+                .forEach(header -> secruityToken.putHeader(header, request.getHeader(header)));
+
         return secruityToken;
     }
 

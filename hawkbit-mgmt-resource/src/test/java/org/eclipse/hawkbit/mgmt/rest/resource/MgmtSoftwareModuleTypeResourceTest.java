@@ -22,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -35,7 +36,6 @@ import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
-import com.google.common.collect.Lists;
 import com.jayway.jsonpath.JsonPath;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -90,9 +90,10 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     }
 
     private SoftwareModuleType createTestType() {
-        SoftwareModuleType testType = softwareManagement.createSoftwareModuleType(entityFactory.softwareModuleType()
-                .create().key("test123").name("TestName123").description("Desc123").maxAssignments(5));
-        testType = softwareManagement.updateSoftwareModuleType(
+        SoftwareModuleType testType = softwareModuleTypeManagement
+                .createSoftwareModuleType(entityFactory.softwareModuleType().create().key("test123").name("TestName123")
+                        .description("Desc123").maxAssignments(5));
+        testType = softwareModuleTypeManagement.updateSoftwareModuleType(
                 entityFactory.softwareModuleType().update(testType.getId()).description("Desc1234"));
         return testType;
     }
@@ -162,7 +163,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes POST requests.")
     public void createSoftwareModuleTypes() throws Exception {
 
-        final List<SoftwareModuleType> types = Lists.newArrayList(
+        final List<SoftwareModuleType> types = Arrays.asList(
                 entityFactory.softwareModuleType().create().key("test1").name("TestName1").description("Desc1")
                         .colour("col1‚").maxAssignments(1).build(),
                 entityFactory.softwareModuleType().create().key("test2").name("TestName2").description("Desc2")
@@ -189,9 +190,9 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
                 .andExpect(jsonPath("[2].createdAt", not(equalTo(0))))
                 .andExpect(jsonPath("[2].maxAssignments", equalTo(3))).andReturn();
 
-        final SoftwareModuleType created1 = softwareManagement.findSoftwareModuleTypeByKey("test1").get();
-        final SoftwareModuleType created2 = softwareManagement.findSoftwareModuleTypeByKey("test2").get();
-        final SoftwareModuleType created3 = softwareManagement.findSoftwareModuleTypeByKey("test3").get();
+        final SoftwareModuleType created1 = softwareModuleTypeManagement.findSoftwareModuleTypeByKey("test1").get();
+        final SoftwareModuleType created2 = softwareModuleTypeManagement.findSoftwareModuleTypeByKey("test2").get();
+        final SoftwareModuleType created3 = softwareModuleTypeManagement.findSoftwareModuleTypeByKey("test3").get();
 
         assertThat(
                 JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
@@ -203,7 +204,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
                 JsonPath.compile("[2]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
                         .isEqualTo("http://localhost/rest/v1/softwaremoduletypes/" + created3.getId());
 
-        assertThat(softwareManagement.countSoftwareModuleTypesAll()).isEqualTo(6);
+        assertThat(softwareModuleTypeManagement.countSoftwareModuleTypesAll()).isEqualTo(6);
     }
 
     @Test
@@ -230,12 +231,12 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     public void deleteSoftwareModuleTypeUnused() throws Exception {
         final SoftwareModuleType testType = createTestType();
 
-        assertThat(softwareManagement.countSoftwareModuleTypesAll()).isEqualTo(4);
+        assertThat(softwareModuleTypeManagement.countSoftwareModuleTypesAll()).isEqualTo(4);
 
         mvc.perform(delete("/rest/v1/softwaremoduletypes/{smId}", testType.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        assertThat(softwareManagement.countSoftwareModuleTypesAll()).isEqualTo(3);
+        assertThat(softwareModuleTypeManagement.countSoftwareModuleTypesAll()).isEqualTo(3);
     }
 
     @Test
@@ -250,15 +251,15 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes/{ID} DELETE requests (soft delete scenario).")
     public void deleteSoftwareModuleTypeUsed() throws Exception {
         final SoftwareModuleType testType = createTestType();
-        softwareManagement.createSoftwareModule(
+        softwareModuleManagement.createSoftwareModule(
                 entityFactory.softwareModule().create().type(testType).name("name").version("version"));
 
-        assertThat(softwareManagement.countSoftwareModuleTypesAll()).isEqualTo(4);
+        assertThat(softwareModuleTypeManagement.countSoftwareModuleTypesAll()).isEqualTo(4);
 
         mvc.perform(delete("/rest/v1/softwaremoduletypes/{smId}", testType.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        assertThat(softwareManagement.countSoftwareModuleTypesAll()).isEqualTo(3);
+        assertThat(softwareModuleTypeManagement.countSoftwareModuleTypesAll()).isEqualTo(3);
     }
 
     @Test
@@ -321,7 +322,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     public void invalidRequestsOnSoftwaremoduleTypesResource() throws Exception {
         final SoftwareModuleType testType = createTestType();
 
-        final List<SoftwareModuleType> types = Lists.newArrayList(testType);
+        final List<SoftwareModuleType> types = Arrays.asList(testType);
 
         // SM does not exist
         mvc.perform(get("/rest/v1/softwaremoduletypes/12345678")).andDo(MockMvcResultPrinter.print())
@@ -347,10 +348,10 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
 
         final SoftwareModuleType toLongName = entityFactory.softwareModuleType().create().key("test123")
                 .name(RandomStringUtils.randomAscii(80)).build();
-        mvc.perform(post("/rest/v1/softwaremoduletypes")
-                .content(JsonBuilder.softwareModuleTypes(Lists.newArrayList(toLongName)))
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isBadRequest());
+        mvc.perform(
+                post("/rest/v1/softwaremoduletypes").content(JsonBuilder.softwareModuleTypes(Arrays.asList(toLongName)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
 
         // unsupported media type
         mvc.perform(post("/rest/v1/softwaremoduletypes").content(JsonBuilder.softwareModuleTypes(types))
@@ -369,10 +370,10 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     @Test
     @Description("Search erquest of software module types.")
     public void searchSoftwareModuleTypeRsql() throws Exception {
-        softwareManagement.createSoftwareModuleType(entityFactory.softwareModuleType().create().key("test123")
+        softwareModuleTypeManagement.createSoftwareModuleType(entityFactory.softwareModuleType().create().key("test123")
                 .name("TestName123").description("Desc123").maxAssignments(5));
-        softwareManagement.createSoftwareModuleType(entityFactory.softwareModuleType().create().key("test1234")
-                .name("TestName1234").description("Desc1234").maxAssignments(5));
+        softwareModuleTypeManagement.createSoftwareModuleType(entityFactory.softwareModuleType().create()
+                .key("test1234").name("TestName1234").description("Desc1234").maxAssignments(5));
 
         final String rsqlFindLikeDs1OrDs2 = "name==TestName123,name==TestName1234";
 
@@ -387,7 +388,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
         char character = 'a';
         for (int index = 0; index < amount; index++) {
             final String str = String.valueOf(character);
-            softwareManagement.createSoftwareModule(entityFactory.softwareModule().create().type(osType).name(str)
+            softwareModuleManagement.createSoftwareModule(entityFactory.softwareModule().create().type(osType).name(str)
                     .description(str).vendor(str).version(str));
             character++;
         }

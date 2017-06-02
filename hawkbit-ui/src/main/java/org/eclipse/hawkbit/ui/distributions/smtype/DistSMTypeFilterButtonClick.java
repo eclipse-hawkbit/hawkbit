@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.distributions.smtype;
 
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.ui.artifacts.event.RefreshSoftwareModuleByFilterEvent;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterSingleButtonClick;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
@@ -28,13 +28,13 @@ public class DistSMTypeFilterButtonClick extends AbstractFilterSingleButtonClick
 
     private final ManageDistUIState manageDistUIState;
 
-    private final transient SoftwareManagement softwareManagement;
+    private final transient SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
     DistSMTypeFilterButtonClick(final UIEventBus eventBus, final ManageDistUIState manageDistUIState,
-            final SoftwareManagement softwareManagement) {
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
         this.eventBus = eventBus;
         this.manageDistUIState = manageDistUIState;
-        this.softwareManagement = softwareManagement;
+        this.softwareModuleTypeManagement = softwareModuleTypeManagement;
     }
 
     @Override
@@ -45,10 +45,11 @@ public class DistSMTypeFilterButtonClick extends AbstractFilterSingleButtonClick
 
     @Override
     protected void filterClicked(final Button clickedButton) {
-        softwareManagement.findSoftwareModuleTypeByName(clickedButton.getData().toString()).ifPresent(smType -> {
-            manageDistUIState.getSoftwareModuleFilters().setSoftwareModuleType(smType);
-            eventBus.publish(this, new RefreshSoftwareModuleByFilterEvent());
-        });
+        softwareModuleTypeManagement.findSoftwareModuleTypeByName(clickedButton.getData().toString())
+                .ifPresent(smType -> {
+                    manageDistUIState.getSoftwareModuleFilters().setSoftwareModuleType(smType);
+                    eventBus.publish(this, new RefreshSoftwareModuleByFilterEvent());
+                });
     }
 
 }

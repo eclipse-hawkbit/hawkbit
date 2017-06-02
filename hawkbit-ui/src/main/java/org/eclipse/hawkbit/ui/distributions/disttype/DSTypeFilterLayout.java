@@ -8,9 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.distributions.disttype;
 
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterLayout;
@@ -35,12 +35,13 @@ public class DSTypeFilterLayout extends AbstractFilterLayout {
     public DSTypeFilterLayout(final ManageDistUIState manageDistUIState, final VaadinMessageSource i18n,
             final SpPermissionChecker permChecker, final UIEventBus eventBus, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UINotification uiNotification,
-            final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement,
+            final DistributionSetTypeManagement distributionSetTypeManagement,
             final DistributionsViewClientCriterion distributionsViewClientCriterion) {
         super(new DSTypeFilterHeader(i18n, permChecker, eventBus, manageDistUIState, tagManagement, entityFactory,
-                uiNotification, softwareManagement, distributionSetManagement),
+                uiNotification, softwareModuleTypeManagement, distributionSetTypeManagement),
                 new DSTypeFilterButtons(eventBus, manageDistUIState, distributionsViewClientCriterion,
-                        distributionSetManagement));
+                        distributionSetTypeManagement));
         this.manageDistUIState = manageDistUIState;
 
         restoreState();

@@ -34,9 +34,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.jpa.JpaSystemException;
+import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 import cz.jirutka.rsql.parser.ParseException;
@@ -150,7 +150,7 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
             final int currentTokenEndColumn, final int[] is) {
         for (final int i : is) {
             final Collection<String> tokenImage = TokenDescription.getTokenImage(i);
-            if (tokenImage != null && !tokenImage.isEmpty()) {
+            if (!CollectionUtils.isEmpty(tokenImage)) {
                 tokenImage.forEach(image -> listTokens.add(new SuggestToken(currentTokenEndColumn + 1,
                         nextTokenBeginColumn + image.length(), null, image)));
             }
@@ -165,8 +165,8 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
                     .of(FieldNameDescription.toTopSuggestToken(nextTokenBeginColumn - currentTokenImageName.length(),
                             nextTokenBeginColumn + currentTokenImageName.length(), currentTokenImageName));
         } else if (shouldSuggestDotToken(currentTokenImageName, containsDot)) {
-            return Optional.of(
-                    Lists.newArrayList(new SuggestToken(currentTokenEndColumn, nextTokenBeginColumn + 1, null, ".")));
+            return Optional
+                    .of(Arrays.asList(new SuggestToken(currentTokenEndColumn, nextTokenBeginColumn + 1, null, ".")));
         } else if (shouldSuggestSubTokenFieldNames(currentTokenImageName, containsDot)) {
             return handleSubtokenSuggestion(currentTokenImageName, nextTokenBeginColumn);
         }
@@ -223,7 +223,7 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
             builder = builder.substring(0, builder.lastIndexOf("Was expecting"));
         }
 
-        if (expectedTokens != null && !expectedTokens.isEmpty()) {
+        if (!CollectionUtils.isEmpty(expectedTokens)) {
             final StringBuilder tokens = new StringBuilder();
             expectedTokens.stream().forEach(value -> tokens.append(value.getSuggestion() + ","));
             builder = builder.concat("Was expecting :" + tokens.toString().substring(0, tokens.length() - 1));

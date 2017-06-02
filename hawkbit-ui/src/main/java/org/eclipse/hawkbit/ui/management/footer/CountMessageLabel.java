@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.management.footer;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
@@ -26,6 +25,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.util.StringUtils;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -63,8 +63,8 @@ public class CountMessageLabel extends Label {
      * @param targetTable
      *            TargetTable
      */
-    public CountMessageLabel(final UIEventBus eventBus, final TargetManagement targetManagement, final VaadinMessageSource i18n,
-            final ManagementUIState managementUIState, final TargetTable targetTable) {
+    public CountMessageLabel(final UIEventBus eventBus, final TargetManagement targetManagement,
+            final VaadinMessageSource i18n, final ManagementUIState managementUIState, final TargetTable targetTable) {
         this.targetManagement = targetManagement;
         this.i18n = i18n;
         this.managementUIState = managementUIState;
@@ -143,14 +143,14 @@ public class CountMessageLabel extends Label {
             final String dists = i18n.getMessage("label.filter.dist");
             final String custom = i18n.getMessage("label.filter.custom");
             final StringBuilder filterMesgBuf = new StringBuilder(i18n.getMessage("label.filter"));
-            filterMesgBuf.append(StringUtils.SPACE);
+            filterMesgBuf.append(" ");
             filterMesgBuf.append(getStatusMsg(targFilParams.getClickedStatusTargetTags(), status));
             filterMesgBuf.append(getOverdueStateMsg(targFilParams.isOverdueFilterEnabled(), overdue));
             filterMesgBuf
                     .append(getTagsMsg(targFilParams.isNoTagSelected(), targFilParams.getClickedTargetTags(), tags));
-            filterMesgBuf.append(targFilParams.getSearchText().map(search -> text).orElse(StringUtils.SPACE));
-            filterMesgBuf.append(targFilParams.getDistributionSet().map(set -> dists).orElse(StringUtils.SPACE));
-            filterMesgBuf.append(targFilParams.getTargetFilterQuery().map(query -> custom).orElse(StringUtils.SPACE));
+            filterMesgBuf.append(targFilParams.getSearchText().map(search -> text).orElse(" "));
+            filterMesgBuf.append(targFilParams.getDistributionSet().map(set -> dists).orElse(" "));
+            filterMesgBuf.append(targFilParams.getTargetFilterQuery().map(query -> custom).orElse(" "));
             final String filterMesageChk = filterMesgBuf.toString().trim();
             String filterMesage = filterMesageChk;
             if (filterMesage.endsWith(",")) {
@@ -212,7 +212,7 @@ public class CountMessageLabel extends Label {
      * @return String as msg.
      */
     private static String getStatusMsg(final List<TargetUpdateStatus> status, final String param) {
-        return status.isEmpty() ? StringUtils.SPACE : param;
+        return status.isEmpty() ? " " : param;
     }
 
     /**
@@ -223,7 +223,7 @@ public class CountMessageLabel extends Label {
      * @return String as msg.
      */
     private static String getOverdueStateMsg(final boolean overdueState, final String param) {
-        return !overdueState ? StringUtils.SPACE : param;
+        return !overdueState ? " " : param;
     }
 
     /**
@@ -236,6 +236,6 @@ public class CountMessageLabel extends Label {
      */
     private static String getTagsMsg(final Boolean noTargetTagSelected, final List<String> tags, final String param) {
         return tags.isEmpty() && (noTargetTagSelected == null || !noTargetTagSelected.booleanValue())
-                ? StringUtils.SPACE : param;
+                ? " " : param;
     }
 }

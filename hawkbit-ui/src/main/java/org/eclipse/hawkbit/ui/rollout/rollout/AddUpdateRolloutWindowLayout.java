@@ -64,13 +64,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.google.common.base.Strings;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -712,7 +712,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private void onTargetFilterChange(final ValueChangeEvent event) {
         final String filterQueryString = getTargetFilterQuery();
-        if (Strings.isNullOrEmpty(filterQueryString)) {
+        if (StringUtils.isEmpty(filterQueryString)) {
             totalTargetsCount = 0L;
             groupsLegendLayout.populateTotalTargets(null);
             defineGroupsLayout.setTargetFilter(null);

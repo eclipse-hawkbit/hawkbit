@@ -8,9 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.common.grid;
 
+import java.util.Arrays;
 import java.util.Locale;
+import java.util.Objects;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
@@ -604,11 +605,15 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
 
         @Override
         public String getStyle(final CellReference cellReference) {
-            if (ArrayUtils.contains(center, cellReference.getPropertyId())) {
+
+            if (center != null
+                    && Arrays.stream(center).anyMatch(o -> Objects.equals(o, cellReference.getPropertyId()))) {
                 return "centeralign";
-            } else if (ArrayUtils.contains(right, cellReference.getPropertyId())) {
+            } else if (right != null
+                    && Arrays.stream(right).anyMatch(o -> Objects.equals(o, cellReference.getPropertyId()))) {
                 return "rightalign";
-            } else if (ArrayUtils.contains(left, cellReference.getPropertyId())) {
+            } else if (left != null
+                    && Arrays.stream(left).anyMatch(o -> Objects.equals(o, cellReference.getPropertyId()))) {
                 return "leftalign";
             }
             return null;

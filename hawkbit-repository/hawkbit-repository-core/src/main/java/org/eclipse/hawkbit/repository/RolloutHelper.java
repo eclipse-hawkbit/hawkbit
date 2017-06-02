@@ -12,12 +12,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
+import org.springframework.util.StringUtils;
 
 /**
  * A collection of static helper methods for the {@link RolloutManagement}
@@ -193,14 +193,14 @@ public final class RolloutHelper {
             return concatAndTargetFilters(baseFilter, groupFilter);
         }
         final String previousGroupFilters = getAllGroupsTargetFilter(groups);
-        if (StringUtils.isNotEmpty(previousGroupFilters)) {
-            if (StringUtils.isNotEmpty(groupFilter)) {
+        if (!StringUtils.isEmpty(previousGroupFilters)) {
+            if (!StringUtils.isEmpty(groupFilter)) {
                 return concatAndTargetFilters(baseFilter, groupFilter, previousGroupFilters);
             } else {
                 return concatAndTargetFilters(baseFilter, previousGroupFilters);
             }
         }
-        if (StringUtils.isNotEmpty(groupFilter)) {
+        if (!StringUtils.isEmpty(groupFilter)) {
             return concatAndTargetFilters(baseFilter, groupFilter);
         } else {
             return baseFilter;
@@ -208,8 +208,8 @@ public final class RolloutHelper {
     }
 
     private static boolean isTargetFilterInGroups(final String groupFilter, final List<RolloutGroup> groups) {
-        return StringUtils.isNotEmpty(groupFilter)
-                && groups.stream().anyMatch(prevGroup -> StringUtils.isNotEmpty(prevGroup.getTargetFilterQuery())
+        return !StringUtils.isEmpty(groupFilter)
+                && groups.stream().anyMatch(prevGroup -> !StringUtils.isEmpty(prevGroup.getTargetFilterQuery())
                         && prevGroup.getTargetFilterQuery().equals(groupFilter));
     }
 

@@ -15,8 +15,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -45,6 +43,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
+import org.springframework.util.StringUtils;
 
 /**
  *
@@ -240,7 +239,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final Action action = checkActionExist(message, actionUpdateStatus);
 
         final List<String> messages = actionUpdateStatus.getMessage();
-        if (ArrayUtils.isNotEmpty(message.getMessageProperties().getCorrelationId())) {
+
+        if (isCorrelationIdNotEmpty(message)) {
             messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "DMF message correlation-id "
                     + convertCorrelationId(message));
         }
@@ -256,7 +256,13 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
     }
 
-    private Status mapStatus(final Message message, final DmfActionUpdateStatus actionUpdateStatus, final Action action) {
+    private static boolean isCorrelationIdNotEmpty(final Message message) {
+        return message.getMessageProperties().getCorrelationId() != null
+                && message.getMessageProperties().getCorrelationId().length > 0;
+    }
+
+    private Status mapStatus(final Message message, final DmfActionUpdateStatus actionUpdateStatus,
+            final Action action) {
         Status status = null;
         switch (actionUpdateStatus.getActionStatus()) {
         case DOWNLOAD:

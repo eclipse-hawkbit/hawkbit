@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.builder;
 
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeBuilder;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
@@ -21,10 +21,10 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
  */
 public class JpaDistributionSetTypeBuilder implements DistributionSetTypeBuilder {
 
-    private final SoftwareManagement softwareManagement;
+    private final SoftwareModuleManagement softwareModuleManagement;
 
-    public JpaDistributionSetTypeBuilder(final SoftwareManagement softwareManagement) {
-        this.softwareManagement = softwareManagement;
+    public JpaDistributionSetTypeBuilder(final SoftwareModuleManagement softwareManagement) {
+        this.softwareModuleManagement = softwareManagement;
     }
 
     @Override
@@ -34,7 +34,7 @@ public class JpaDistributionSetTypeBuilder implements DistributionSetTypeBuilder
 
     @Override
     public DistributionSetTypeCreate create() {
-        return new JpaDistributionSetTypeCreate(softwareManagement);
+        return new JpaDistributionSetTypeCreate(softwareModuleManagement);
     }
 
 }

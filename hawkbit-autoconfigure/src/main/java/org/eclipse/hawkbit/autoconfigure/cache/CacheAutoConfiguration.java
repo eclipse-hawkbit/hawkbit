@@ -102,25 +102,11 @@ public class CacheAutoConfiguration {
      */
     public class TenantCacheResolver extends SimpleCacheResolver {
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.springframework.cache.interceptor.AbstractCacheResolver#
-         * resolveCaches(org.springframework
-         * .cache.interceptor.CacheOperationInvocationContext)
-         */
         @Override
         public Collection<Cache> resolveCaches(final CacheOperationInvocationContext<?> context) {
             return super.resolveCaches(context).stream().map(TenantCacheWrapper::new).collect(Collectors.toList());
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.springframework.cache.interceptor.SimpleCacheResolver#
-         * getCacheNames(org.springframework
-         * .cache.interceptor.CacheOperationInvocationContext)
-         */
         @Override
         protected Collection<String> getCacheNames(final CacheOperationInvocationContext<?> context) {
             return super.getCacheNames(context).stream()

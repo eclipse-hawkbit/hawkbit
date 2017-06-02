@@ -17,8 +17,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 
-import com.google.common.net.HttpHeaders;
-
 /**
  * A utility which determines the correct IP of a connected {@link Target}. E.g
  * from a {@link HttpServletRequest}.

@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
@@ -39,6 +38,7 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.util.StringUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -580,7 +580,7 @@ public class DefineGroupsLayout extends GridLayout {
             final RolloutGroupConditionBuilder conditionBuilder = new RolloutGroupConditionBuilder()
                     .successAction(RolloutGroup.RolloutGroupSuccessAction.NEXTGROUP, null)
                     .successCondition(RolloutGroup.RolloutGroupSuccessCondition.THRESHOLD, triggerThreshold.getValue());
-            if (StringUtils.isNotEmpty(errorThreshold.getValue())) {
+            if (!StringUtils.isEmpty(errorThreshold.getValue())) {
                 conditionBuilder
                         .errorCondition(RolloutGroup.RolloutGroupErrorCondition.THRESHOLD, errorThreshold.getValue())
                         .errorAction(RolloutGroup.RolloutGroupErrorAction.PAUSE, null);
@@ -618,7 +618,7 @@ public class DefineGroupsLayout extends GridLayout {
          * @return whether the data entered in this row is valid
          */
         public boolean isValid() {
-            return StringUtils.isNotEmpty(groupName.getValue()) && targetPercentage.isValid()
+            return !StringUtils.isEmpty(groupName.getValue()) && targetPercentage.isValid()
                     && triggerThreshold.isValid() && errorThreshold.isValid();
         }
 

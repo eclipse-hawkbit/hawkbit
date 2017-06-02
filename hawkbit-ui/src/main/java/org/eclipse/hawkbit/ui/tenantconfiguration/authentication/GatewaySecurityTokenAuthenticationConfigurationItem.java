@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.StringUtils;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;

@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.distributions.footer;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.AbstractConfirmationWindowLayout;
@@ -35,11 +38,11 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.util.CollectionUtils;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
@@ -78,18 +81,27 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
     private ConfirmationTab assignmnetTab;
 
-    private final transient DistributionSetManagement dsManagement;
+    private final transient DistributionSetManagement distributionSetManagement;
 
-    private final transient SoftwareManagement softwareManagement;
+    private final transient DistributionSetTypeManagement distributionSetTypeManagement;
+
+    private final transient SoftwareModuleManagement softwareModuleManagement;
+
+    private final transient SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
     private final ManageDistUIState manageDistUIState;
 
     DistributionsConfirmationWindowLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final DistributionSetManagement dsManagement, final SoftwareManagement softwareManagement,
+            final DistributionSetManagement dsManagement,
+            final DistributionSetTypeManagement distributionSetTypeManagement,
+            final SoftwareModuleManagement softwareModuleManagement,
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final ManageDistUIState manageDistUIState) {
         super(i18n, eventBus);
-        this.dsManagement = dsManagement;
-        this.softwareManagement = softwareManagement;
+        this.distributionSetManagement = dsManagement;
+        this.distributionSetTypeManagement = distributionSetTypeManagement;
+        this.softwareModuleTypeManagement = softwareModuleTypeManagement;
+        this.softwareModuleManagement = softwareModuleManagement;
         this.manageDistUIState = manageDistUIState;
     }
 
@@ -164,7 +176,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
             removeAssignedSoftwareModules();
         }
 
-        softwareManagement.deleteSoftwareModules(swmoduleIds);
+        softwareModuleManagement.deleteSoftwareModules(swmoduleIds);
         eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.REMOVE_ENTITY, swmoduleIds));
 
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
@@ -280,8 +292,8 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         final int deleteSWModuleTypeCount = manageDistUIState.getSelectedDeleteSWModuleTypes().size();
         for (final String swModuleTypeName : manageDistUIState.getSelectedDeleteSWModuleTypes()) {
 
-            softwareManagement.findSoftwareModuleTypeByName(swModuleTypeName).map(SoftwareModuleType::getId)
-                    .ifPresent(softwareManagement::deleteSoftwareModuleType);
+            softwareModuleTypeManagement.findSoftwareModuleTypeByName(swModuleTypeName).map(SoftwareModuleType::getId)
+                    .ifPresent(softwareModuleTypeManagement::deleteSoftwareModuleType);
         }
         addToConsolitatedMsg(FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.getMessage("message.sw.module.type.delete", new Object[] { deleteSWModuleTypeCount }));
@@ -313,8 +325,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
     private void discardSoftwareTypeDelete(final String discardSWModuleType, final Object itemId,
             final ConfirmationTab tab) {
-        if (null != manageDistUIState.getSelectedDeleteSWModuleTypes()
-                && !manageDistUIState.getSelectedDeleteSWModuleTypes().isEmpty()
+        if (!CollectionUtils.isEmpty(manageDistUIState.getSelectedDeleteSWModuleTypes())
                 && manageDistUIState.getSelectedDeleteSWModuleTypes().contains(discardSWModuleType)) {
             manageDistUIState.getSelectedDeleteSWModuleTypes().remove(discardSWModuleType);
         }
@@ -372,9 +383,9 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
             });
         }
 
-        dsManagement.deleteDistributionSet(Lists.newArrayList(deletedIds));
+        distributionSetManagement.deleteDistributionSet(Arrays.asList(deletedIds));
         eventBus.publish(this,
-                new DistributionTableEvent(BaseEntityEventType.REMOVE_ENTITY, Lists.newArrayList(deletedIds)));
+                new DistributionTableEvent(BaseEntityEventType.REMOVE_ENTITY, Arrays.asList(deletedIds)));
 
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.getMessage("message.dist.deleted", deletedIds.length));
@@ -409,8 +420,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     private void discardDistDelete(final Button.ClickEvent event, final Object itemId, final ConfirmationTab tab) {
 
         final DistributionSetIdName distId = (DistributionSetIdName) ((Button) event.getComponent()).getData();
-        if (null != manageDistUIState.getDeletedDistributionList()
-                && !manageDistUIState.getDeletedDistributionList().isEmpty()
+        if (!CollectionUtils.isEmpty(manageDistUIState.getDeletedDistributionList())
                 && manageDistUIState.getDeletedDistributionList().contains(distId)) {
             manageDistUIState.getDeletedDistributionList().remove(distId);
         }
@@ -463,8 +473,9 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
         final int deleteDistTypeCount = manageDistUIState.getSelectedDeleteDistSetTypes().size();
         manageDistUIState.getSelectedDeleteDistSetTypes().stream()
-                .map(deleteDistTypeName -> dsManagement.findDistributionSetTypeByName(deleteDistTypeName).get().getId())
-                .forEach(dsManagement::deleteDistributionSetType);
+                .map(deleteDistTypeName -> distributionSetTypeManagement
+                        .findDistributionSetTypeByName(deleteDistTypeName).get().getId())
+                .forEach(distributionSetTypeManagement::deleteDistributionSetType);
 
         addToConsolitatedMsg(FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.getMessage("message.dist.type.delete", new Object[] { deleteDistTypeCount }));
@@ -497,8 +508,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
     private void discardDistTypeDelete(final String discardDSType, final Object itemId, final ConfirmationTab tab) {
 
-        if (null != manageDistUIState.getSelectedDeleteDistSetTypes()
-                && !manageDistUIState.getSelectedDeleteDistSetTypes().isEmpty()
+        if (!CollectionUtils.isEmpty(manageDistUIState.getSelectedDeleteDistSetTypes())
                 && manageDistUIState.getSelectedDeleteDistSetTypes().contains(discardDSType)) {
             manageDistUIState.getSelectedDeleteDistSetTypes().remove(discardDSType);
         }
@@ -586,7 +596,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         manageDistUIState.getAssignedList().forEach((distIdName, softIdNameSet) -> {
             final List<Long> softIds = softIdNameSet.stream().map(softIdName -> softIdName.getId())
                     .collect(Collectors.toList());
-            dsManagement.assignSoftwareModules(distIdName.getId(), softIds);
+            distributionSetManagement.assignSoftwareModules(distIdName.getId(), softIds);
 
         });
 

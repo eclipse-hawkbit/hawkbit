@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
@@ -30,15 +30,10 @@ public class SoftwareModuleTypeBeanQuery extends AbstractBeanQuery<SoftwareModul
     private static final long serialVersionUID = 7824925429198339644L;
     private final Sort sort = new Sort(Direction.ASC, "name");
     private transient Page<SoftwareModuleType> firstPageSwModuleType;
-    private transient SoftwareManagement softwareManagement;
+    private transient SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
     /**
      * Parametric constructor.
-     * 
-     * @param definition
-     * @param queryConfig
-     * @param sortIds
-     * @param sortStates
      */
     public SoftwareModuleTypeBeanQuery(final QueryDefinition definition, final Map<String, Object> queryConfig,
             final Object[] sortIds, final boolean[] sortStates) {
@@ -52,7 +47,7 @@ public class SoftwareModuleTypeBeanQuery extends AbstractBeanQuery<SoftwareModul
 
     @Override
     public int size() {
-        firstPageSwModuleType = getSoftwareManagement()
+        firstPageSwModuleType = getSoftwareModuleTypeManagement()
                 .findSoftwareModuleTypesAll(new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
         long size = firstPageSwModuleType.getTotalElements();
         if (size > Integer.MAX_VALUE) {
@@ -61,11 +56,11 @@ public class SoftwareModuleTypeBeanQuery extends AbstractBeanQuery<SoftwareModul
         return (int) size;
     }
 
-    private SoftwareManagement getSoftwareManagement() {
-        if (softwareManagement == null) {
-            softwareManagement = SpringContextHelper.getBean(SoftwareManagement.class);
+    private SoftwareModuleTypeManagement getSoftwareModuleTypeManagement() {
+        if (softwareModuleTypeManagement == null) {
+            softwareModuleTypeManagement = SpringContextHelper.getBean(SoftwareModuleTypeManagement.class);
         }
-        return softwareManagement;
+        return softwareModuleTypeManagement;
     }
 
     @Override
@@ -74,7 +69,7 @@ public class SoftwareModuleTypeBeanQuery extends AbstractBeanQuery<SoftwareModul
         if (startIndex == 0 && firstPageSwModuleType != null) {
             swModuleTypeBeans = firstPageSwModuleType;
         } else {
-            swModuleTypeBeans = getSoftwareManagement()
+            swModuleTypeBeans = getSoftwareModuleTypeManagement()
                     .findSoftwareModuleTypesAll(new OffsetBasedPageRequest(startIndex, count, sort));
         }
         return swModuleTypeBeans.getContent();

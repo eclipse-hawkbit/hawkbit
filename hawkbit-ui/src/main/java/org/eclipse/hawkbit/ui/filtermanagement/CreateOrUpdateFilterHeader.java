@@ -27,12 +27,12 @@ import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.util.StringUtils;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.google.common.base.Strings;
 import com.vaadin.event.FieldEvents.BlurListener;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.LayoutEvents.LayoutClickListener;
@@ -211,7 +211,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private void createListeners() {
         nameTextFieldBlusListner = event -> {
-            if (!Strings.isNullOrEmpty(nameTextField.getValue())) {
+            if (!StringUtils.isEmpty(nameTextField.getValue())) {
                 captionLayout.removeComponent(nameTextField);
                 captionLayout.addComponent(nameLabel);
             }
@@ -307,7 +307,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private static boolean isNameAndQueryEmpty(final String name, final String query) {
-        return Strings.isNullOrEmpty(name) && Strings.isNullOrEmpty(query);
+        return StringUtils.isEmpty(name) && StringUtils.isEmpty(query);
     }
 
     private SPUIButton createSearchResetIcon() {
@@ -401,15 +401,16 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private boolean doesAlreadyExists() {
         if (targetFilterQueryManagement.findTargetFilterQueryByName(nameTextField.getValue()).isPresent()) {
-            notification.displayValidationError(i18n.getMessage("message.target.filter.duplicate", nameTextField.getValue()));
+            notification.displayValidationError(
+                    i18n.getMessage("message.target.filter.duplicate", nameTextField.getValue()));
             return true;
         }
         return false;
     }
 
     private boolean manadatoryFieldsPresent() {
-        if (Strings.isNullOrEmpty(nameTextField.getValue())
-                || Strings.isNullOrEmpty(filterManagementUIState.getFilterQueryValue())) {
+        if (StringUtils.isEmpty(nameTextField.getValue())
+                || StringUtils.isEmpty(filterManagementUIState.getFilterQueryValue())) {
             notification.displayValidationError(i18n.getMessage("message.target.filter.validation"));
             return false;
         }

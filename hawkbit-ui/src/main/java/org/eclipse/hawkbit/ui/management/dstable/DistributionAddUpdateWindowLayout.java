@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -61,6 +62,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     private final UINotification notificationMessage;
     private final transient EventBus.UIEventBus eventBus;
     private final transient DistributionSetManagement distributionSetManagement;
+    private final transient DistributionSetTypeManagement distributionSetTypeManagement;
     private final transient SystemManagement systemManagement;
     private final transient EntityFactory entityFactory;
 
@@ -87,6 +89,8 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
      *            UIEventBus
      * @param distributionSetManagement
      *            DistributionSetManagement
+     * @param distributionSetTypeManagement
+     *            distributionSetTypeManagement
      * @param systemManagement
      *            SystemManagement
      * @param entityFactory
@@ -96,12 +100,13 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
      */
     public DistributionAddUpdateWindowLayout(final VaadinMessageSource i18n, final UINotification notificationMessage,
             final UIEventBus eventBus, final DistributionSetManagement distributionSetManagement,
-            final SystemManagement systemManagement, final EntityFactory entityFactory,
-            final DistributionSetTable distributionSetTable) {
+            final DistributionSetTypeManagement distributionSetTypeManagement, final SystemManagement systemManagement,
+            final EntityFactory entityFactory, final DistributionSetTable distributionSetTable) {
         this.i18n = i18n;
         this.notificationMessage = notificationMessage;
         this.eventBus = eventBus;
         this.distributionSetManagement = distributionSetManagement;
+        this.distributionSetTypeManagement = distributionSetTypeManagement;
         this.systemManagement = systemManagement;
         this.entityFactory = entityFactory;
         this.distributionSetTable = distributionSetTable;
@@ -136,7 +141,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             final boolean isMigStepReq = reqMigStepCheckbox.getValue();
             final Long distSetTypeId = (Long) distsetTypeNameComboBox.getValue();
 
-            distributionSetManagement.findDistributionSetTypeById(distSetTypeId).ifPresent(type -> {
+            distributionSetTypeManagement.findDistributionSetTypeById(distSetTypeId).ifPresent(type -> {
                 final DistributionSet currentDS = distributionSetManagement.updateDistributionSet(
                         entityFactory.distributionSet().update(editDistId).name(distNameTextField.getValue())
                                 .description(descTextArea.getValue()).version(distVersionTextField.getValue())
@@ -160,7 +165,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             final String desc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
             final boolean isMigStepReq = reqMigStepCheckbox.getValue();
 
-            final DistributionSetType distributionSetType = distributionSetManagement
+            final DistributionSetType distributionSetType = distributionSetTypeManagement
                     .findDistributionSetTypeById(distSetTypeId)
                     .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, distSetTypeId));
             final DistributionSet newDist = distributionSetManagement

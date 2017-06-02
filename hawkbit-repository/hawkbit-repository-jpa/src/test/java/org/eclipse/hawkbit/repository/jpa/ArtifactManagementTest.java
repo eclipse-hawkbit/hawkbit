@@ -127,7 +127,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         assertThat(artifactRepository.findAll()).hasSize(4);
         assertThat(softwareModuleRepository.findAll()).hasSize(3);
 
-        assertThat(softwareManagement.findSoftwareModuleById(sm.getId()).get().getArtifacts()).hasSize(3);
+        assertThat(softwareModuleManagement.findSoftwareModuleById(sm.getId()).get().getArtifacts()).hasSize(3);
     }
 
     @Test

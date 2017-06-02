@@ -8,9 +8,9 @@
  */
 package org.eclipse.hawkbit.security;
 
-import java.security.SecureRandom;
-
-import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.security.crypto.codec.Hex;
+import org.springframework.security.crypto.keygen.BytesKeyGenerator;
+import org.springframework.security.crypto.keygen.KeyGenerators;
 
 /**
  * A security token generator service which can be used to generate security
@@ -19,18 +19,16 @@ import org.apache.commons.lang3.RandomStringUtils;
  */
 public class SecurityTokenGenerator {
 
-    private static final boolean LETTERS_GENERATION = true;
-    private static final boolean NUMBER_GENERATION = true;
-    private static final int TOKEN_LENGTH = 32;
-    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    private static final int TOKEN_LENGTH = 16;
+    private static final BytesKeyGenerator SECURE_RANDOM = KeyGenerators.secureRandom(TOKEN_LENGTH);
 
     /**
-     * Generates a random secure token of length {@link #TOKEN_LENGTH}
-     * characters with alphanumeric characters {@code A-Z_a-z_0-9}.
+     * Generates a random secure token of {@link #TOKEN_LENGTH} bytes length as
+     * hexadecimal string.
      * 
      * @return a new generated random alphanumeric string.
      */
     public String generateToken() {
-        return RandomStringUtils.random(TOKEN_LENGTH, 0, 0, LETTERS_GENERATION, NUMBER_GENERATION, null, SECURE_RANDOM);
+        return new String(Hex.encode(SECURE_RANDOM.generateKey()));
     }
 }
