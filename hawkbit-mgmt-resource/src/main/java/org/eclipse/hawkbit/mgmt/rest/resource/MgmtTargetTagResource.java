@@ -199,19 +199,21 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtTargetTagAssigmentResult> toggleTagAssignmentUnpaged(final Long targetTagId,
-            final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
+    public ResponseEntity<MgmtTargetTagAssigmentResult> toggleTagAssignmentUnpaged(
+            @PathVariable("targetTagId") final Long targetTagId,
+            @RequestBody final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
         return toggleTagAssignment(targetTagId, assignedTargetRequestBodies);
     }
 
     @Override
-    public ResponseEntity<List<MgmtTarget>> assignTargetsUnpaged(final Long targetTagId,
-            final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
+    public ResponseEntity<List<MgmtTarget>> assignTargetsUnpaged(@PathVariable("targetTagId") final Long targetTagId,
+            @RequestBody final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
         return assignTargets(targetTagId, assignedTargetRequestBodies);
     }
 
     @Override
-    public ResponseEntity<Void> unassignTargetUnpaged(final Long targetTagId, final String controllerId) {
+    public ResponseEntity<Void> unassignTargetUnpaged(@PathVariable("targetTagId") final Long targetTagId,
+            @PathVariable("controllerId") final String controllerId) {
         return unassignTarget(targetTagId, controllerId);
     }
 
