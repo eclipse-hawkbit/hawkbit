@@ -1096,7 +1096,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .getActions().get(0);
         assertThat(deploymentManagement.findAction(actionId).get().getActionType()).isEqualTo(ActionType.SOFT);
 
-        final String body = new JSONObject().put("forced", true).toString();
+        final String body = new JSONObject().put("forceType", "forced").toString();
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/"
                 + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId).content(body)
                         .contentType(MediaType.APPLICATION_JSON))

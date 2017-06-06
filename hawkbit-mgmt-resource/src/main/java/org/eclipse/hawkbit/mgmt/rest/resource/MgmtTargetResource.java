@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionStatus;
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtDistributionSetAssigment;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
@@ -291,7 +292,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             return ResponseEntity.notFound().build();
         }
 
-        if (!actionUpdate.isForced()) {
+        if (!MgmtActionType.FORCED.equals(actionUpdate.getForceType())) {
             throw new ConstraintViolationException("Resource supports only switch to FORCED.");
         }
 

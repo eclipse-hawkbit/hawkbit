@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.action;
 
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -17,13 +19,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtActionRequestBodyPut {
 
     @JsonProperty
-    private boolean forced;
+    private MgmtActionType forceType;
 
-    public boolean isForced() {
-        return forced;
+    public MgmtActionType getForceType() {
+        return forceType;
     }
 
-    public void setForced(final boolean forced) {
-        this.forced = forced;
+    public void setForceType(final MgmtActionType forceType) {
+        this.forceType = forceType;
     }
+
 }
