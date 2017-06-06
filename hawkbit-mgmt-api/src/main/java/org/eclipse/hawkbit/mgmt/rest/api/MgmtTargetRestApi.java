@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
+import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionStatus;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtDistributionSetAssigment;
@@ -39,10 +40,9 @@ public interface MgmtTargetRestApi {
      *            the ID of the target to retrieve
      * @return a single target with status OK.
      */
-
     @RequestMapping(method = RequestMethod.GET, value = "/{controllerId}", produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtTarget> getTarget(@PathVariable("controllerId") final String controllerId);
+    ResponseEntity<MgmtTarget> getTarget(@PathVariable("controllerId") String controllerId);
 
     /**
      * Handles the GET request of retrieving all targets.
@@ -67,10 +67,10 @@ public interface MgmtTargetRestApi {
     @RequestMapping(method = RequestMethod.GET, produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTarget>> getTargets(
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam);
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) String rsqlParam);
 
     /**
      * Handles the POST request of creating new targets. The request body must
@@ -86,7 +86,7 @@ public interface MgmtTargetRestApi {
     @RequestMapping(method = RequestMethod.POST, consumes = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtTarget>> createTargets(final List<MgmtTargetRequestBody> targets);
+    ResponseEntity<List<MgmtTarget>> createTargets(List<MgmtTargetRequestBody> targets);
 
     /**
      * Handles the PUT request of updating a target. The ID is within the URL
@@ -105,8 +105,8 @@ public interface MgmtTargetRestApi {
     @RequestMapping(method = RequestMethod.PUT, value = "/{controllerId}", consumes = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtTarget> updateTarget(@PathVariable("controllerId") final String controllerId,
-            final MgmtTargetRequestBody targetRest);
+    ResponseEntity<MgmtTarget> updateTarget(@PathVariable("controllerId") String controllerId,
+            MgmtTargetRequestBody targetRest);
 
     /**
      * Handles the DELETE request of deleting a target.
@@ -118,7 +118,7 @@ public interface MgmtTargetRestApi {
      *         the response.
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "/{controllerId}")
-    ResponseEntity<Void> deleteTarget(@PathVariable("controllerId") final String controllerId);
+    ResponseEntity<Void> deleteTarget(@PathVariable("controllerId") String controllerId);
 
     /**
      * Handles the GET request of retrieving the attributes of a specific
@@ -130,7 +130,7 @@ public interface MgmtTargetRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{controllerId}/attributes", produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtTargetAttributes> getAttributes(@PathVariable("controllerId") final String controllerId);
+    ResponseEntity<MgmtTargetAttributes> getAttributes(@PathVariable("controllerId") String controllerId);
 
     /**
      * Handles the GET request of retrieving the Actions of a specific target.
@@ -155,11 +155,11 @@ public interface MgmtTargetRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{controllerId}/actions", produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<PagedList<MgmtAction>> getActionHistory(@PathVariable("controllerId") final String controllerId,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam);
+    ResponseEntity<PagedList<MgmtAction>> getActionHistory(@PathVariable("controllerId") String controllerId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) String rsqlParam);
 
     /**
      * Handles the GET request of retrieving a specific Actions of a specific
@@ -173,8 +173,8 @@ public interface MgmtTargetRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{controllerId}/actions/{actionId}", produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtAction> getAction(@PathVariable("controllerId") final String controllerId,
-            @PathVariable("actionId") final Long actionId);
+    ResponseEntity<MgmtAction> getAction(@PathVariable("controllerId") String controllerId,
+            @PathVariable("actionId") Long actionId);
 
     /**
      * Handles the DELETE request of canceling an specific Actions of a specific
@@ -189,9 +189,26 @@ public interface MgmtTargetRestApi {
      * @return status no content in case cancellation was successful
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "/{controllerId}/actions/{actionId}")
-    ResponseEntity<Void> cancelAction(@PathVariable("controllerId") final String controllerId,
-            @PathVariable("actionId") final Long actionId,
-            @RequestParam(value = "force", required = false, defaultValue = "false") final boolean force);
+    ResponseEntity<Void> cancelAction(@PathVariable("controllerId") String controllerId,
+            @PathVariable("actionId") Long actionId,
+            @RequestParam(value = "force", required = false, defaultValue = "false") boolean force);
+
+    /**
+     * Handles the PUT update request to switch an action from soft to forced.
+     *
+     * @param controllerId
+     *            the ID of the target in the URL path parameter
+     * @param actionId
+     *            the ID of the action in the URL path parameter
+     * @param actionUpdate
+     *            to update the action
+     * @return status no content in case cancellation was successful
+     */
+    @RequestMapping(method = RequestMethod.PUT, value = "/{controllerId}/actions/{actionId}", consumes = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<MgmtAction> updateAction(@PathVariable("controllerId") String controllerId,
+            @PathVariable("actionId") Long actionId, MgmtActionRequestBodyPut actionUpdate);
 
     /**
      * Handles the GET request of retrieving the ActionStatus of a specific
@@ -216,11 +233,11 @@ public interface MgmtTargetRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{controllerId}/actions/{actionId}/status", produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<PagedList<MgmtActionStatus>> getActionStatusList(
-            @PathVariable("controllerId") final String controllerId, @PathVariable("actionId") final Long actionId,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam);
+    ResponseEntity<PagedList<MgmtActionStatus>> getActionStatusList(@PathVariable("controllerId") String controllerId,
+            @PathVariable("actionId") Long actionId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) String sortParam);
 
     /**
      * Handles the GET request of retrieving the assigned distribution set of an
@@ -233,8 +250,7 @@ public interface MgmtTargetRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{controllerId}/assignedDS", produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(
-            @PathVariable("controllerId") final String controllerId);
+    ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(@PathVariable("controllerId") String controllerId);
 
     /**
      * Changes the assigned distribution set of a target.
@@ -248,8 +264,8 @@ public interface MgmtTargetRestApi {
     @RequestMapping(method = RequestMethod.POST, value = "/{controllerId}/assignedDS", consumes = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<Void> postAssignedDistributionSet(@PathVariable("controllerId") final String controllerId,
-            final MgmtDistributionSetAssigment dsId);
+    ResponseEntity<Void> postAssignedDistributionSet(@PathVariable("controllerId") String controllerId,
+            MgmtDistributionSetAssigment dsId);
 
     /**
      * Handles the GET request of retrieving the installed distribution set of
@@ -262,7 +278,6 @@ public interface MgmtTargetRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{controllerId}/installedDS", produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtDistributionSet> getInstalledDistributionSet(
-            @PathVariable("controllerId") final String controllerId);
+    ResponseEntity<MgmtDistributionSet> getInstalledDistributionSet(@PathVariable("controllerId") String controllerId);
 
 }

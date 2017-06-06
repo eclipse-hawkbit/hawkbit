@@ -70,7 +70,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             @RequestParam(value = "sha1sum", required = false) final String sha1Sum) {
 
         if (file.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().build();
         }
         String fileName = optionalFileName;
 
@@ -208,10 +208,11 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
         final Page<SoftwareModuleMetadata> metaDataPage;
 
         if (rsqlParam != null) {
-            metaDataPage = softwareModuleManagement.findSoftwareModuleMetadataBySoftwareModuleId(softwareModuleId, rsqlParam,
-                    pageable);
+            metaDataPage = softwareModuleManagement.findSoftwareModuleMetadataBySoftwareModuleId(softwareModuleId,
+                    rsqlParam, pageable);
         } else {
-            metaDataPage = softwareModuleManagement.findSoftwareModuleMetadataBySoftwareModuleId(softwareModuleId, pageable);
+            metaDataPage = softwareModuleManagement.findSoftwareModuleMetadataBySoftwareModuleId(softwareModuleId,
+                    pageable);
         }
 
         return ResponseEntity
@@ -252,8 +253,8 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @RequestBody final List<MgmtMetadata> metadataRest) {
 
-        final List<SoftwareModuleMetadata> created = softwareModuleManagement.createSoftwareModuleMetadata(softwareModuleId,
-                MgmtSoftwareModuleMapper.fromRequestSwMetadata(entityFactory, metadataRest));
+        final List<SoftwareModuleMetadata> created = softwareModuleManagement.createSoftwareModuleMetadata(
+                softwareModuleId, MgmtSoftwareModuleMapper.fromRequestSwMetadata(entityFactory, metadataRest));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(MgmtSoftwareModuleMapper.toResponseSwMetadata(created));
     }

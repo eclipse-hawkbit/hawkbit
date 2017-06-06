@@ -57,7 +57,7 @@ public class MgmtSystemManagementResource implements MgmtSystemManagementRestApi
     @Override
     public ResponseEntity<Void> deleteTenant(@PathVariable("tenant") final String tenant) {
         systemManagement.deleteTenant(tenant);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     /**

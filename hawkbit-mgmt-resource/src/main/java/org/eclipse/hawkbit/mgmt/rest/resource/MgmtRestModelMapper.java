@@ -52,13 +52,6 @@ final class MgmtRestModelMapper {
      *            the rest type
      * @return <null> or the action repository type
      */
-    /**
-     * Convert a action rest type to a action repository type.
-     * 
-     * @param actionTypeRest
-     *            the rest type
-     * @return <null> or the action repository type
-     */
     public static ActionType convertActionType(final MgmtActionType actionTypeRest) {
         if (actionTypeRest == null) {
             return null;
@@ -71,6 +64,30 @@ final class MgmtRestModelMapper {
             return ActionType.FORCED;
         case TIMEFORCED:
             return ActionType.TIMEFORCED;
+        default:
+            throw new IllegalStateException("Action Type is not supported");
+        }
+    }
+
+    /**
+     * Convert a action repository type to rest type.
+     * 
+     * @param actionType
+     *            the rest type
+     * @return <null> or the action repository type
+     */
+    public static MgmtActionType convertActionType(final ActionType actionType) {
+        if (actionType == null) {
+            return null;
+        }
+
+        switch (actionType) {
+        case SOFT:
+            return MgmtActionType.SOFT;
+        case FORCED:
+            return MgmtActionType.FORCED;
+        case TIMEFORCED:
+            return MgmtActionType.TIMEFORCED;
         default:
             throw new IllegalStateException("Action Type is not supported");
         }

@@ -106,7 +106,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         }
 
         final List<MgmtDistributionSet> rest = MgmtDistributionSetMapper.toResponseFromDsList(findDsPage.getContent());
-        return new ResponseEntity<>(new PagedList<>(rest, findDsPage.getTotalElements()), HttpStatus.OK);
+        return ResponseEntity.ok(new PagedList<>(rest, findDsPage.getTotalElements()));
     }
 
     @Override
@@ -114,7 +114,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @PathVariable("distributionSetId") final Long distributionSetId) {
         final DistributionSet foundDs = findDistributionSetWithExceptionIfNotFound(distributionSetId);
 
-        return new ResponseEntity<>(MgmtDistributionSetMapper.toResponse(foundDs), HttpStatus.OK);
+        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(foundDs));
     }
 
     @Override
@@ -138,7 +138,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     @Override
     public ResponseEntity<Void> deleteDistributionSet(@PathVariable("distributionSetId") final Long distributionSetId) {
         distributionSetManagement.deleteDistributionSet(distributionSetId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @Override
@@ -146,12 +146,10 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @PathVariable("distributionSetId") final Long distributionSetId,
             @RequestBody final MgmtDistributionSetRequestBodyPut toUpdate) {
 
-        return new ResponseEntity<>(
-                MgmtDistributionSetMapper.toResponse(distributionSetManagement.updateDistributionSet(
-                        entityFactory.distributionSet().update(distributionSetId).name(toUpdate.getName())
-                                .description(toUpdate.getDescription()).version(toUpdate.getVersion())
-                                .requiredMigrationStep(toUpdate.isRequiredMigrationStep()))),
-                HttpStatus.OK);
+        return ResponseEntity.ok(MgmtDistributionSetMapper
+                .toResponse(distributionSetManagement.updateDistributionSet(entityFactory.distributionSet()
+                        .update(distributionSetId).name(toUpdate.getName()).description(toUpdate.getDescription())
+                        .version(toUpdate.getVersion()).requiredMigrationStep(toUpdate.isRequiredMigrationStep()))));
     }
 
     @Override
@@ -175,8 +173,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             targetsAssignedDS = this.targetManagement.findTargetByAssignedDistributionSet(distributionSetId, pageable);
         }
 
-        return new ResponseEntity<>(new PagedList<>(MgmtTargetMapper.toResponse(targetsAssignedDS.getContent()),
-                targetsAssignedDS.getTotalElements()), HttpStatus.OK);
+        return ResponseEntity.ok(new PagedList<>(MgmtTargetMapper.toResponse(targetsAssignedDS.getContent()),
+                targetsAssignedDS.getTotalElements()));
     }
 
     @Override
@@ -204,8 +202,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
                     pageable);
         }
 
-        return new ResponseEntity<>(new PagedList<>(MgmtTargetMapper.toResponse(targetsInstalledDS.getContent()),
-                targetsInstalledDS.getTotalElements()), HttpStatus.OK);
+        return ResponseEntity.ok(new PagedList<>(MgmtTargetMapper.toResponse(targetsInstalledDS.getContent()),
+                targetsInstalledDS.getTotalElements()));
     }
 
     @Override
@@ -223,10 +221,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         final Page<TargetFilterQuery> targetFilterQueries = targetFilterQueryManagement
                 .findTargetFilterQueryByAutoAssignDS(pageable, distributionSetId, rsqlParam);
 
-        return new ResponseEntity<>(
-                new PagedList<>(MgmtTargetFilterQueryMapper.toResponse(targetFilterQueries.getContent()),
-                        targetFilterQueries.getTotalElements()),
-                HttpStatus.OK);
+        return ResponseEntity
+                .ok(new PagedList<>(MgmtTargetFilterQueryMapper.toResponse(targetFilterQueries.getContent()),
+                        targetFilterQueries.getTotalElements()));
     }
 
     @Override
@@ -241,7 +238,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
                                 MgmtRestModelMapper.convertActionType(t.getType()), t.getForcetime()))
                         .collect(Collectors.toList()));
 
-        return new ResponseEntity<>(MgmtDistributionSetMapper.toResponse(assignDistributionSet), HttpStatus.OK);
+        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(assignDistributionSet));
     }
 
     @Override
@@ -267,10 +264,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
                     pageable);
         }
 
-        return new ResponseEntity<>(
-                new PagedList<>(MgmtDistributionSetMapper.toResponseDsMetadata(metaDataPage.getContent()),
-                        metaDataPage.getTotalElements()),
-                HttpStatus.OK);
+        return ResponseEntity
+                .ok(new PagedList<>(MgmtDistributionSetMapper.toResponseDsMetadata(metaDataPage.getContent()),
+                        metaDataPage.getTotalElements()));
 
     }
 
@@ -324,7 +320,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
         distributionSetManagement.assignSoftwareModules(distributionSetId,
                 softwareModuleIDs.stream().map(MgmtSoftwareModuleAssigment::getId).collect(Collectors.toList()));
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @Override
@@ -348,8 +344,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
         final Page<SoftwareModule> softwaremodules = softwareModuleManagement.findSoftwareModuleByAssignedTo(pageable,
                 distributionSetId);
-        return new ResponseEntity<>(new PagedList<>(MgmtSoftwareModuleMapper.toResponse(softwaremodules.getContent()),
-                softwaremodules.getTotalElements()), HttpStatus.OK);
+        return ResponseEntity.ok(new PagedList<>(MgmtSoftwareModuleMapper.toResponse(softwaremodules.getContent()),
+                softwaremodules.getTotalElements()));
     }
 
     private DistributionSet findDistributionSetWithExceptionIfNotFound(final Long distributionSetId) {

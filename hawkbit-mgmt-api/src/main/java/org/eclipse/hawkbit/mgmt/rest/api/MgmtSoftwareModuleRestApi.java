@@ -172,7 +172,7 @@ public interface MgmtSoftwareModuleRestApi {
      *            the ID of the software module in the URL
      * @param restSoftwareModule
      *            the modules to be updated.
-     * @return status OK if update is successful
+     * @return status OK if update was successful
      */
     @RequestMapping(method = RequestMethod.PUT, value = "/{softwareModuleId}", consumes = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
@@ -186,7 +186,7 @@ public interface MgmtSoftwareModuleRestApi {
      *
      * @param softwareModuleId
      *            the ID of the module to retrieve
-     * @return status OK if delete as sucessfull.
+     * @return status OK if delete was successful.
      *
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "/{softwareModuleId}")

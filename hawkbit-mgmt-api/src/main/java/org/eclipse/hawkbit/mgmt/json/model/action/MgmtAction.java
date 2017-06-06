@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.mgmt.json.model.action;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtBaseEntity;
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -24,17 +25,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtAction extends MgmtBaseEntity {
 
     /**
-     * API definition for update action}.
+     * API definition for action in update mode.
      */
     public static final String ACTION_UPDATE = "update";
 
     /**
-     * API definition for cancel action.
+     * API definition for action in canceling.
      */
     public static final String ACTION_CANCEL = "cancel";
 
+    /**
+     * API definition for action completed.
+     */
     public static final String ACTION_FINISHED = "finished";
 
+    /**
+     * API definition for action still active.
+     */
     public static final String ACTION_PENDING = "pending";
 
     @JsonProperty("id")
@@ -45,6 +52,28 @@ public class MgmtAction extends MgmtBaseEntity {
 
     @JsonProperty
     private String status;
+
+    @JsonProperty
+    private Long forceTime;
+
+    @JsonProperty
+    private MgmtActionType forceType;
+
+    public Long getForceTime() {
+        return forceTime;
+    }
+
+    public void setForceTime(final Long forceTime) {
+        this.forceTime = forceTime;
+    }
+
+    public MgmtActionType getForceType() {
+        return forceType;
+    }
+
+    public void setForceType(final MgmtActionType forceType) {
+        this.forceType = forceType;
+    }
 
     /**
      * @return the status
