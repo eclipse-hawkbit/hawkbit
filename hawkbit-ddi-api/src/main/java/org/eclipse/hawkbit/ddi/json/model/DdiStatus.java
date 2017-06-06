@@ -13,6 +13,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -31,6 +32,7 @@ public class DdiStatus {
     @Valid
     private final DdiResult result;
 
+    @Size(min = 0, max = 50)
     private final List<String> details;
 
     /**

@@ -17,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -63,4 +65,21 @@ public interface ActionStatusRepository
      */
     @EntityGraph(value = "ActionStatus.withMessages", type = EntityGraphType.LOAD)
     Page<ActionStatus> getByActionId(Pageable pageReq, Long actionId);
+
+    /**
+     * Finds a filtered list of status messages for an action.
+     *
+     * @param pageable
+     *            for page configuration
+     * @param actionId
+     *            for which to get the status messages
+     * @param filter
+     *            is the SQL like pattern to use for filtering out or excluding
+     *            the messages
+     *
+     * @return Page with found status messages.
+     */
+    @Query("SELECT message FROM JpaActionStatus actionstatus JOIN actionstatus.messages message WHERE actionstatus.action.id = :actionId AND message NOT LIKE :filter")
+    Page<String> findMessagesByActionIdAndMessageNotLike(final Pageable pageable, @Param("actionId") Long actionId,
+            @Param("filter") String filter);
 }

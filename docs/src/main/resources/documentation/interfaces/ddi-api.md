@@ -97,7 +97,14 @@ _Example Response_
             }
         ]
     },
-    "id": "1"
+    "id": "1",
+    "actionHistory": {
+        "status": "RETRIEVED",
+        "messages": [
+            "Installing update",
+            "Downloading artifacts"
+            ]
+    }
 }
 ```
 

@@ -14,6 +14,8 @@ import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpre
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.SYSTEM_ROLE;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -60,6 +62,9 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Root Poll Resource")
 public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
+    private static final String TARGET_COMPLETED_INSTALLATION_MSG = "Target completed installation.";
+    private static final String TARGET_PROCEEDING_INSTALLATION_MSG = "Target proceeding installation.";
+    private static final String TARGET_SCHEDULED_INSTALLATION_MSG = "Target scheduled installation.";
     @Autowired
     private HawkbitSecurityProperties securityProperties;
 
@@ -352,4 +357,142 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isGone());
     }
 
+    @Test
+    @Description("Test to verify that only a specific count of messages are returned based on the input actionHistory for getControllerDeploymentActionFeedback endpoint.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void testActionHistoryCount() throws Exception {
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+        Target savedTarget = testdataFactory.createTarget("911");
+        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
+                .next();
+        final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
+                .getContent().get(0);
+
+        mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
+                tenantAware.getCurrentTenant())
+                        .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "scheduled",
+                                TARGET_SCHEDULED_INSTALLATION_MSG))
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
+                tenantAware.getCurrentTenant())
+                        .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "proceeding",
+                                TARGET_PROCEEDING_INSTALLATION_MSG))
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
+                tenantAware.getCurrentTenant())
+                        .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "closed",
+                                "success", TARGET_COMPLETED_INSTALLATION_MSG))
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        mvc.perform(get("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "?actionHistory=3",
+                tenantAware.getCurrentTenant()).contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$.actionHistory.messages",
+                        hasItem(containsString(TARGET_PROCEEDING_INSTALLATION_MSG))))
+                .andExpect(jsonPath("$.actionHistory.messages",
+                        hasItem(containsString(TARGET_SCHEDULED_INSTALLATION_MSG))));
+    }
+
+    @Test
+    @Description("Test to verify that a zero input value of actionHistory results in no action history appended for getControllerDeploymentActionFeedback endpoint.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void testActionHistoryZeroInput() throws Exception {
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+        Target savedTarget = testdataFactory.createTarget("911");
+        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
+                .next();
+        final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
+                .getContent().get(0);
+
+        mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
+                tenantAware.getCurrentTenant())
+                        .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "scheduled",
+                                TARGET_SCHEDULED_INSTALLATION_MSG))
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
+                tenantAware.getCurrentTenant())
+                        .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "proceeding",
+                                TARGET_PROCEEDING_INSTALLATION_MSG))
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
+                tenantAware.getCurrentTenant())
+                        .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "closed",
+                                "success", TARGET_COMPLETED_INSTALLATION_MSG))
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        mvc.perform(get("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "?actionHistory=-2",
+                tenantAware.getCurrentTenant()).contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+    }
+
+    @Test
+    @Description("Test to verify that entire action history is returned if the input value for actionHistory is -1, for getControllerDeploymentActionFeedback endpoint.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void testActionHistoryNegativeInput() throws Exception {
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+        Target savedTarget = testdataFactory.createTarget("911");
+        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
+                .next();
+        final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
+                .getContent().get(0);
+
+        mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
+                tenantAware.getCurrentTenant())
+                        .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "scheduled",
+                                TARGET_SCHEDULED_INSTALLATION_MSG))
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
+                tenantAware.getCurrentTenant())
+                        .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "proceeding",
+                                TARGET_PROCEEDING_INSTALLATION_MSG))
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
+                tenantAware.getCurrentTenant())
+                        .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "closed",
+                                "success", TARGET_COMPLETED_INSTALLATION_MSG))
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        mvc.perform(get("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "?actionHistory=-1",
+                tenantAware.getCurrentTenant()).contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$.actionHistory.messages",
+                        hasItem(containsString(TARGET_SCHEDULED_INSTALLATION_MSG))))
+                .andExpect(jsonPath("$.actionHistory.messages",
+                        hasItem(containsString(TARGET_PROCEEDING_INSTALLATION_MSG))))
+                .andExpect(jsonPath("$.actionHistory.messages",
+                        hasItem(containsString(TARGET_COMPLETED_INSTALLATION_MSG))));
+    }
 }
