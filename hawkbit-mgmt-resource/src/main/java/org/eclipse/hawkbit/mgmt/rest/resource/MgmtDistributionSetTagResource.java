@@ -214,20 +214,22 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
 
     @Override
     public ResponseEntity<MgmtDistributionSetTagAssigmentResult> toggleTagAssignmentUnpaged(
-            final Long distributionsetTagId,
-            final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies) {
+            @PathVariable("distributionsetTagId") final Long distributionsetTagId,
+            @RequestBody final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies) {
         return toggleTagAssignment(distributionsetTagId, assignedDSRequestBodies);
     }
 
     @Override
-    public ResponseEntity<List<MgmtDistributionSet>> assignDistributionSetsUnpaged(final Long distributionsetTagId,
-            final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies) {
+    public ResponseEntity<List<MgmtDistributionSet>> assignDistributionSetsUnpaged(
+            @PathVariable("distributionsetTagId") final Long distributionsetTagId,
+            @RequestBody final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies) {
         return assignDistributionSets(distributionsetTagId, assignedDSRequestBodies);
     }
 
     @Override
-    public ResponseEntity<Void> unassignDistributionSetUnpaged(final Long distributionsetTagId,
-            final Long distributionsetId) {
+    public ResponseEntity<Void> unassignDistributionSetUnpaged(
+            @PathVariable("distributionsetTagId") final Long distributionsetTagId,
+            @PathVariable("distributionsetId") final Long distributionsetId) {
         return unassignDistributionSet(distributionsetTagId, distributionsetId);
     }
 
