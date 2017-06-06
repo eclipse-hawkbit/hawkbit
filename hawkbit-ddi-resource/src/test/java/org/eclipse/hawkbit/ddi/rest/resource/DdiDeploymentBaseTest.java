@@ -232,7 +232,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
 
         final DistributionSetAssignmentResult result = deploymentManagement.assignDistributionSet(ds.getId(),
-                ActionType.TIMEFORCED, System.currentTimeMillis() + 1_000, Arrays.asList(target.getControllerId()));
+                ActionType.TIMEFORCED, System.currentTimeMillis() + 2_000, Arrays.asList(target.getControllerId()));
 
         final Action action = deploymentManagement
                 .findActiveActionsByTarget(PAGE, result.getAssignedEntity().get(0).getControllerId()).getContent()
@@ -255,7 +255,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                                 + "/controller/v1/4712/deploymentBase/" + action.getId());
 
         // After the time is over we should see a new etag
-        TimeUnit.MILLISECONDS.sleep(1_000);
+        TimeUnit.MILLISECONDS.sleep(2_000);
 
         mvcResult = mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
