@@ -539,7 +539,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     @Test
     @Description("The server protects itself against to many feedback upload attempts. The test verfies that "
             + "it is not possible to exceed the configured maximum number of feedback uplods.")
-    public void toMuchDeplomentActionFeedback() throws Exception {
+    public void tooMuchDeplomentActionFeedback() throws Exception {
         final Target target = testdataFactory.createTarget("4712");
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
@@ -560,6 +560,31 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 tenantAware.getCurrentTenant()).content(feedback).contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @Description("The server protects itself against to large feedback bodies. The test verfies that "
+            + "it is not possible to exceed the configured maximum number of feedback details.")
+    public void tooMuchDeplomentActionMessagesInFeedback() throws Exception {
+        final Target target = testdataFactory.createTarget("4712");
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+
+        assignDistributionSet(ds.getId(), "4712");
+        final Action action = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).getContent()
+                .get(0);
+
+        final List<String> messages = new ArrayList<>();
+        for (int i = 0; i < 51; i++) {
+            messages.add(String.valueOf(i));
+        }
+
+        final String feedback = JsonBuilder.deploymentActionFeedback(action.getId().toString(), "proceeding", "none",
+                messages);
+        mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action.getId() + "/feedback",
+                tenantAware.getCurrentTenant()).content(feedback).contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+
     }
 
     @Test

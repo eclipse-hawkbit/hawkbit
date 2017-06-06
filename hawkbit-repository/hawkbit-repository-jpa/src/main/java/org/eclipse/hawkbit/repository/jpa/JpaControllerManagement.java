@@ -31,8 +31,7 @@ import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.ToManyAttributeEntriesException;
-import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -278,6 +277,7 @@ public class JpaControllerManagement implements ControllerManagement {
         default:
             // information status entry - check for a potential DOS attack
             checkForToManyStatusEntries(action);
+            checkForToManyStatusMessages(actionStatus);
             break;
         }
 
@@ -285,6 +285,14 @@ public class JpaControllerManagement implements ControllerManagement {
         actionStatusRepository.save(actionStatus);
 
         return action;
+    }
+
+    private void checkForToManyStatusMessages(final JpaActionStatus actionStatus) {
+        if (actionStatus.getMessages().size() > quotaManagement.getMaxMessagesPerActionStatus()) {
+            throw new QuotaExceededException("ActionStatus messages", actionStatus.getMessages().size(),
+                    quotaManagement.getMaxStatusEntriesPerAction());
+        }
+
     }
 
     private void handleFinishedCancelation(final JpaActionStatus actionStatus, final JpaAction action) {
@@ -341,6 +349,7 @@ public class JpaControllerManagement implements ControllerManagement {
         default:
             // information status entry - check for a potential DOS attack
             checkForToManyStatusEntries(action);
+            checkForToManyStatusMessages(actionStatus);
             break;
         }
 
@@ -369,7 +378,8 @@ public class JpaControllerManagement implements ControllerManagement {
                 LOG_DOS.error(
                         "Potential denial of service (DOS) attack identfied. More status entries in the system than permitted ({})!",
                         quotaManagement.getMaxStatusEntriesPerAction());
-                throw new TooManyStatusEntriesException(String.valueOf(quotaManagement.getMaxStatusEntriesPerAction()));
+                throw new QuotaExceededException(ActionStatus.class, statusCount,
+                        quotaManagement.getMaxStatusEntriesPerAction());
             }
         }
     }
@@ -408,8 +418,8 @@ public class JpaControllerManagement implements ControllerManagement {
         if (target.getControllerAttributes().size() > quotaManagement.getMaxAttributeEntriesPerTarget()) {
             LOG_DOS.info("Target tries to insert more than the allowed number of entries ({}). DOS attack anticipated!",
                     quotaManagement.getMaxAttributeEntriesPerTarget());
-            throw new ToManyAttributeEntriesException(
-                    String.valueOf(quotaManagement.getMaxAttributeEntriesPerTarget()));
+            throw new QuotaExceededException("Controller attribues", target.getControllerAttributes().size(),
+                    quotaManagement.getMaxAttributeEntriesPerTarget());
         }
 
         target.setRequestControllerAttributes(false);
@@ -489,6 +499,7 @@ public class JpaControllerManagement implements ControllerManagement {
         statusMessage.setAction(action);
 
         checkForToManyStatusEntries(action);
+        checkForToManyStatusMessages(statusMessage);
 
         return actionStatusRepository.save(statusMessage);
     }
@@ -533,11 +544,11 @@ public class JpaControllerManagement implements ControllerManagement {
 
         // For negative and large value of messageCount, limit the number of
         // messages.
-        int limit = messageCount < 0 || messageCount >= RepositoryConstants.MAX_ACTION_HISTORY_MSG_COUNT
+        final int limit = messageCount < 0 || messageCount >= RepositoryConstants.MAX_ACTION_HISTORY_MSG_COUNT
                 ? RepositoryConstants.MAX_ACTION_HISTORY_MSG_COUNT : messageCount;
 
-        PageRequest pageable = new PageRequest(0, limit, new Sort(Direction.DESC, "occurredAt"));
-        Page<String> messages = actionStatusRepository.findMessagesByActionIdAndMessageNotLike(pageable, actionId,
+        final PageRequest pageable = new PageRequest(0, limit, new Sort(Direction.DESC, "occurredAt"));
+        final Page<String> messages = actionStatusRepository.findMessagesByActionIdAndMessageNotLike(pageable, actionId,
                 RepositoryConstants.SERVER_MESSAGE_PREFIX + "%");
 
         LOG.debug("Retrieved {} message(s) from action history for action {}.", messages.getNumberOfElements(),

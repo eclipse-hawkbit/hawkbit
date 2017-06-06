@@ -15,9 +15,8 @@ import javax.validation.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
-import org.eclipse.hawkbit.repository.exception.ToManyAttributeEntriesException;
-import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler;
@@ -72,7 +71,7 @@ public class DelayedRequeueExceptionStrategy extends ConditionalRejectingErrorHa
     }
 
     private boolean quotaHit(final Throwable cause) {
-        return cause instanceof TooManyStatusEntriesException || cause instanceof ToManyAttributeEntriesException;
+        return cause instanceof QuotaExceededException;
     }
 
     private boolean doesNotExist(final Throwable cause) {

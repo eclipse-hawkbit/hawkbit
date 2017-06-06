@@ -103,12 +103,7 @@ public enum SpServerError {
     /**
                 *
                 */
-    SP_ACTION_STATUS_TO_MANY_ENTRIES("hawkbit.server.error.action.status.tooManyEntries", "Too many status entries have been inserted."),
-
-    /**
-    *
-    */
-    SP_ATTRIBUTES_TO_MANY_ENTRIES("hawkbit.server.error.target.attributes.tooManyEntries", "Too many attribute entries have been inserted."),
+    SP_QUOTA_EXCEEDED("hawkbit.server.error.quota.tooManyEntries", "Too many entries have been inserted."),
 
     /**
      * error message, which describes that the action can not be canceled cause

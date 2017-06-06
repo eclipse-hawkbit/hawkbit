@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.rest.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -206,20 +207,23 @@ public abstract class JsonBuilder {
      * @throws JSONException
      */
     public static String deploymentActionFeedback(final String id, final String execution) throws JSONException {
-        return deploymentActionFeedback(id, execution, "none", RandomStringUtils.randomAscii(1000));
+        return deploymentActionFeedback(id, execution, "none", Arrays.asList(RandomStringUtils.randomAscii(1000)));
 
     }
 
     public static String deploymentActionFeedback(final String id, final String execution, final String message)
             throws JSONException {
-        return deploymentActionFeedback(id, execution, "none", message);
+        return deploymentActionFeedback(id, execution, "none", Arrays.asList(message));
 
     }
 
     public static String deploymentActionFeedback(final String id, final String execution, final String finished,
             final String message) throws JSONException {
-        final List<String> messages = new ArrayList<>();
-        messages.add(message);
+        return deploymentActionFeedback(id, execution, finished, Arrays.asList(message));
+    }
+
+    public static String deploymentActionFeedback(final String id, final String execution, final String finished,
+            final Collection<String> messages) throws JSONException {
 
         return new JSONObject().put("id", id).put("time", "20140511T121314")
                 .put("status",
