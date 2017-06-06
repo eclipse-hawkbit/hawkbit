@@ -78,7 +78,6 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class JpaControllerManagement implements ControllerManagement {
     private static final Logger LOG = LoggerFactory.getLogger(ControllerManagement.class);
-    private static final Logger LOG_DOS = LoggerFactory.getLogger("server-security.dos");
 
     @Autowired
     private EntityManager entityManager;
@@ -375,9 +374,6 @@ public class JpaControllerManagement implements ControllerManagement {
             final Long statusCount = actionStatusRepository.countByAction(action);
 
             if (statusCount >= quotaManagement.getMaxStatusEntriesPerAction()) {
-                LOG_DOS.error(
-                        "Potential denial of service (DOS) attack identfied. More status entries in the system than permitted ({})!",
-                        quotaManagement.getMaxStatusEntriesPerAction());
                 throw new QuotaExceededException(ActionStatus.class, statusCount,
                         quotaManagement.getMaxStatusEntriesPerAction());
             }
@@ -416,8 +412,6 @@ public class JpaControllerManagement implements ControllerManagement {
         target.getControllerAttributes().putAll(data);
 
         if (target.getControllerAttributes().size() > quotaManagement.getMaxAttributeEntriesPerTarget()) {
-            LOG_DOS.info("Target tries to insert more than the allowed number of entries ({}). DOS attack anticipated!",
-                    quotaManagement.getMaxAttributeEntriesPerTarget());
             throw new QuotaExceededException("Controller attribues", target.getControllerAttributes().size(),
                     quotaManagement.getMaxAttributeEntriesPerTarget());
         }
