@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.rabbitmq.test;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
@@ -61,7 +59,7 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
     }
 
     protected ConditionFactory createConditionFactory() {
-        return Awaitility.await().atMost(2, SECONDS);
+        return Awaitility.await().atMost(5, TimeUnit.SECONDS);
     }
 
     protected Message createMessage(final Object payload, final MessageProperties messageProperties) {

@@ -51,7 +51,7 @@ public interface MgmtSystemRestApi {
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "/configs/{keyName}", produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<Void> deleteConfigurationValue(@PathVariable("keyName") final String keyName);
+    ResponseEntity<Void> deleteConfigurationValue(@PathVariable("keyName") String keyName);
 
     /**
      * Handles the GET request of deleting a tenant specific configuration value
@@ -65,8 +65,7 @@ public interface MgmtSystemRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/configs/{keyName}", produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtSystemTenantConfigurationValue> getConfigurationValue(
-            @PathVariable("keyName") final String keyName);
+    ResponseEntity<MgmtSystemTenantConfigurationValue> getConfigurationValue(@PathVariable("keyName") String keyName);
 
     /**
      * Handles the GET request of deleting a tenant specific configuration value
@@ -83,8 +82,7 @@ public interface MgmtSystemRestApi {
     @RequestMapping(method = RequestMethod.PUT, value = "/configs/{keyName}", consumes = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtSystemTenantConfigurationValue> updateConfigurationValue(
-            @PathVariable("keyName") final String keyName,
-            final MgmtSystemTenantConfigurationValueRequest configurationValueRest);
+    ResponseEntity<MgmtSystemTenantConfigurationValue> updateConfigurationValue(@PathVariable("keyName") String keyName,
+            MgmtSystemTenantConfigurationValueRequest configurationValueRest);
 
 }

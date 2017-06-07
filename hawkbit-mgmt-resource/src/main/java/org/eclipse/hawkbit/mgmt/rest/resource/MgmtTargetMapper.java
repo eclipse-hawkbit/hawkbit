@@ -24,13 +24,16 @@ import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionStatus;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
 import org.eclipse.hawkbit.repository.ActionFields;
+import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -175,13 +178,17 @@ public final class MgmtTargetMapper {
                 .collect(Collectors.toList());
     }
 
-    static MgmtAction toResponse(final String targetId, final Action action, final boolean isActive) {
+    static MgmtAction toResponse(final String targetId, final Action action) {
         final MgmtAction result = new MgmtAction();
 
         result.setActionId(action.getId());
         result.setType(getType(action));
+        if (ActionType.TIMEFORCED.equals(action.getActionType())) {
+            result.setForceTime(action.getForcedTime());
+        }
+        result.setForceType(MgmtRestModelMapper.convertActionType(action.getActionType()));
 
-        if (isActive) {
+        if (action.isActive()) {
             result.setStatus(MgmtAction.ACTION_PENDING);
         } else {
             result.setStatus(MgmtAction.ACTION_FINISHED);
@@ -194,13 +201,32 @@ public final class MgmtTargetMapper {
         return result;
     }
 
+    static MgmtAction toResponseWithLinks(final String controllerId, final Action action) {
+        final MgmtAction result = toResponse(controllerId, action);
+
+        if (action.isCancelingOrCanceled()) {
+            result.add(linkTo(methodOn(MgmtTargetRestApi.class).getAction(controllerId, action.getId()))
+                    .withRel(MgmtRestConstants.TARGET_V1_CANCELED_ACTION));
+        } else {
+            result.add(linkTo(
+                    methodOn(MgmtDistributionSetRestApi.class).getDistributionSet(action.getDistributionSet().getId()))
+                            .withRel("distributionset"));
+        }
+
+        result.add(linkTo(methodOn(MgmtTargetRestApi.class).getActionStatusList(controllerId, action.getId(), 0,
+                MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE,
+                ActionStatusFields.ID.getFieldName() + ":" + SortDirection.DESC))
+                        .withRel(MgmtRestConstants.TARGET_V1_ACTION_STATUS));
+
+        return result;
+    }
+
     static List<MgmtAction> toResponse(final String targetId, final Collection<Action> actions) {
         if (actions == null) {
             return Collections.emptyList();
         }
 
-        return actions.stream().map(action -> toResponse(targetId, action, action.isActive()))
-                .collect(Collectors.toList());
+        return actions.stream().map(action -> toResponse(targetId, action)).collect(Collectors.toList());
     }
 
     private static String getType(final Action action) {

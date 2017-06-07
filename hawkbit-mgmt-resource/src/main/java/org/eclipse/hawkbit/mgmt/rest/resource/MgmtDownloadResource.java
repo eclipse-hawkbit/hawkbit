@@ -71,7 +71,7 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
             final DownloadArtifactCache artifactCache = downloadIdCache.get(downloadId);
             if (artifactCache == null) {
                 LOGGER.warn("Download Id {} could not be found", downloadId);
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                return ResponseEntity.notFound().build();
             }
 
             DbArtifact artifact = null;
@@ -85,7 +85,7 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
             if (artifact == null) {
                 LOGGER.warn("Artifact with cached id {} and download type {} could not be found.",
                         artifactCache.getId(), artifactCache.getDownloadType());
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                return ResponseEntity.notFound().build();
             }
 
             final HttpServletResponse response = requestResponseContextHolder.getHttpServletResponse();

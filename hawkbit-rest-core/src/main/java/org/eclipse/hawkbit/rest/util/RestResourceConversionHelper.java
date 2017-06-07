@@ -144,7 +144,7 @@ public final class RestResourceConversionHelper {
         if (ranges.isEmpty() || ranges.get(0).equals(full)) {
             LOG.debug("filename ({}) results into a full request: ", artifact.getFilename());
             handleFullFileRequest(artifact, response, file, controllerManagement, statusId, full);
-            result = new ResponseEntity<>(HttpStatus.OK);
+            result = ResponseEntity.ok().build();
         }
         // standard range request
         else if (ranges.size() == 1) {

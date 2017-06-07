@@ -838,12 +838,14 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actions.get(0).getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("id", equalTo(actions.get(0).getId().intValue())))
-                .andExpect(jsonPath("type", equalTo("cancel"))).andExpect(jsonPath("status", equalTo("pending")))
-                .andExpect(jsonPath("_links.self.href", equalTo(generateActionSelfLink(knownTargetId, actions.get(0)))))
+                .andExpect(jsonPath("forceType", equalTo("forced"))).andExpect(jsonPath("type", equalTo("cancel")))
+                .andExpect(jsonPath("status", equalTo("pending")))
+                .andExpect(jsonPath("_links.self.href",
+                        equalTo(generateActionSelfLink(knownTargetId, actions.get(0).getId()))))
                 .andExpect(jsonPath("_links.canceledaction.href",
                         equalTo(generateCanceledactionreferenceLink(knownTargetId, actions.get(0)))))
                 .andExpect(jsonPath("_links.status.href",
-                        equalTo(generateStatusreferenceLink(knownTargetId, actions.get(0)))));
+                        equalTo(generateStatusreferenceLink(knownTargetId, actions.get(0).getId()))));
     }
 
     @Test
@@ -859,12 +861,12 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath("content.[1].type", equalTo("update")))
                 .andExpect(jsonPath("content.[1].status", equalTo("pending")))
                 .andExpect(jsonPath("content.[1]._links.self.href",
-                        equalTo(generateActionSelfLink(knownTargetId, actions.get(1)))))
+                        equalTo(generateActionSelfLink(knownTargetId, actions.get(1).getId()))))
                 .andExpect(jsonPath("content.[0].id", equalTo(actions.get(0).getId().intValue())))
                 .andExpect(jsonPath("content.[0].type", equalTo("cancel")))
                 .andExpect(jsonPath("content.[0].status", equalTo("pending")))
                 .andExpect(jsonPath("content.[0]._links.self.href",
-                        equalTo(generateActionSelfLink(knownTargetId, actions.get(0)))))
+                        equalTo(generateActionSelfLink(knownTargetId, actions.get(0).getId()))))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(2)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(2)));
@@ -1000,7 +1002,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath("content.[0].type", equalTo("cancel")))
                 .andExpect(jsonPath("content.[0].status", equalTo("pending")))
                 .andExpect(jsonPath("content.[0]._links.self.href",
-                        equalTo(generateActionSelfLink(knownTargetId, actions.get(0)))))
+                        equalTo(generateActionSelfLink(knownTargetId, actions.get(0).getId()))))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(1)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(1)));
@@ -1017,15 +1019,15 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath("content.[0].type", equalTo("update")))
                 .andExpect(jsonPath("content.[0].status", equalTo("pending")))
                 .andExpect(jsonPath("content.[0]._links.self.href",
-                        equalTo(generateActionSelfLink(knownTargetId, actions.get(1)))))
+                        equalTo(generateActionSelfLink(knownTargetId, actions.get(1).getId()))))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(1)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(1)));
     }
 
-    private String generateActionSelfLink(final String knownTargetId, final Action action) {
+    private String generateActionSelfLink(final String knownTargetId, final Long actionId) {
         return "http://localhost" + MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + action.getId();
+                + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId;
     }
 
     private String generateCanceledactionreferenceLink(final String knownTargetId, final Action action) {
@@ -1033,10 +1035,10 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + action.getId();
     }
 
-    private String generateStatusreferenceLink(final String knownTargetId, final Action action) {
+    private String generateStatusreferenceLink(final String knownTargetId, final Long actionId) {
         return "http://localhost" + MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + action.getId() + "/"
-                + MgmtRestConstants.TARGET_V1_ACTION_STATUS + "?offset=0&limit=50&sort=id:DESC";
+                + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId + "/" + MgmtRestConstants.TARGET_V1_ACTION_STATUS
+                + "?offset=0&limit=50&sort=id:DESC";
     }
 
     private List<Action> generateTargetWithTwoUpdatesWithOneOverride(final String knownTargetId)
@@ -1074,12 +1076,41 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("id", equalTo(actions.get(1).getId().intValue())))
                 .andExpect(jsonPath("type", equalTo("update"))).andExpect(jsonPath("status", equalTo("pending")))
-                .andExpect(jsonPath("_links.self.href", equalTo(generateActionSelfLink(knownTargetId, actions.get(1)))))
+                .andExpect(jsonPath("forceType", equalTo("forced")))
+                .andExpect(jsonPath("_links.self.href",
+                        equalTo(generateActionSelfLink(knownTargetId, actions.get(1).getId()))))
                 .andExpect(jsonPath("_links.distributionset.href",
                         equalTo("http://localhost/rest/v1/distributionsets/"
                                 + actions.get(1).getDistributionSet().getId())))
                 .andExpect(jsonPath("_links.status.href",
-                        equalTo(generateStatusreferenceLink(knownTargetId, actions.get(1)))));
+                        equalTo(generateStatusreferenceLink(knownTargetId, actions.get(1).getId()))));
+    }
+
+    @Test
+    @Description("Verfies that an action is switched from soft to forced if requested by management API")
+    public void updateAction() throws Exception {
+        final Target target = testdataFactory.createTarget();
+        final DistributionSet set = testdataFactory.createDistributionSet();
+        final Long actionId = deploymentManagement
+                .assignDistributionSet(set.getId(), ActionType.SOFT, 0, Arrays.asList(target.getControllerId()))
+                .getActions().get(0);
+        assertThat(deploymentManagement.findAction(actionId).get().getActionType()).isEqualTo(ActionType.SOFT);
+
+        final String body = new JSONObject().put("forceType", "forced").toString();
+        mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/"
+                + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId).content(body)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("id", equalTo(actionId.intValue()))).andExpect(jsonPath("type", equalTo("update")))
+                .andExpect(jsonPath("status", equalTo("pending"))).andExpect(jsonPath("forceType", equalTo("forced")))
+                .andExpect(jsonPath("_links.self.href",
+                        equalTo(generateActionSelfLink(target.getControllerId(), actionId))))
+                .andExpect(jsonPath("_links.distributionset.href",
+                        equalTo("http://localhost/rest/v1/distributionsets/" + set.getId())))
+                .andExpect(jsonPath("_links.status.href",
+                        equalTo(generateStatusreferenceLink(target.getControllerId(), actionId))));
+
+        assertThat(deploymentManagement.findAction(actionId).get().getActionType()).isEqualTo(ActionType.FORCED);
     }
 
     @Test
@@ -1179,12 +1210,14 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(status().isNotFound());
 
         // not allowed methods
-        mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isMethodNotAllowed());
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
                 + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
+
+        // Invalid content
+        mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
+                + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isUnsupportedMediaType());
     }
 
     @Test

@@ -35,6 +35,6 @@ public interface MgmtDownloadRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING)
     @ResponseBody
-    ResponseEntity<Void> downloadArtifactByDownloadId(@PathVariable("downloadId") final String downloadId);
+    ResponseEntity<Void> downloadArtifactByDownloadId(@PathVariable("downloadId") String downloadId);
 
 }

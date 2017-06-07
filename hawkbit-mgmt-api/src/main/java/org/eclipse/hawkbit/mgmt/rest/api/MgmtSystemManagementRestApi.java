@@ -34,7 +34,7 @@ public interface MgmtSystemManagementRestApi {
      * @return HttpStatus.OK
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "/tenants/{tenant}")
-    ResponseEntity<Void> deleteTenant(@PathVariable("tenant") final String tenant);
+    ResponseEntity<Void> deleteTenant(@PathVariable("tenant") String tenant);
 
     /**
      * Collects and returns system usage statistics. It provides a system wide

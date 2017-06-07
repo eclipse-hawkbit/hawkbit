@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -317,4 +318,30 @@ public interface ControllerManagement {
             + SpringEvalExpressions.IS_SYSTEM_CODE)
     Optional<Target> findByTargetId(@NotNull Long targetId);
 
+    /**
+     * Retrieves the specified number of messages from action history of the
+     * given {@link Action} based on messageCount. Regardless of the value of
+     * messageCount, in order to restrict resource utilization by controllers,
+     * maximum number of messages that are retrieved from database is limited by
+     * {@link RepositoryConstants#MAX_ACTION_HISTORY_MSG_COUNT}. messageCount <
+     * 0, retrieves the maximum allowed number of action status messages from
+     * history; messageCount = 0, does not retrieve any message; and
+     * messageCount > 0, retrieves the specified number of messages, limited by
+     * maximum allowed number. A controller sends the feedback for an
+     * {@link ActionStatus} as a list of messages; while returning the messages,
+     * even though the messages from multiple {@link ActionStatus} are retrieved
+     * in descending order by the reported time
+     * ({@link ActionStatus#getOccurredAt()}), i.e. latest ActionStatus first,
+     * the sub-ordering of messages from within single {@link ActionStatus} is
+     * unspecified.
+     *
+     * @param actionId
+     *            to be filtered on
+     * @param messageCount
+     *            is the number of messages to return from history
+     *
+     * @return action history.
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    List<String> getActionHistoryMessages(@NotNull Long actionId, final int messageCount);
 }

@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -59,6 +60,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -522,4 +524,25 @@ public class JpaControllerManagement implements ControllerManagement {
         return actionStatusRepository.findByActionId(pageReq, actionId);
     }
 
+    @Override
+    public List<String> getActionHistoryMessages(final Long actionId, final int messageCount) {
+        // Just return empty list in case messageCount is zero.
+        if (messageCount == 0) {
+            return new ArrayList<>();
+        }
+
+        // For negative and large value of messageCount, limit the number of
+        // messages.
+        int limit = messageCount < 0 || messageCount >= RepositoryConstants.MAX_ACTION_HISTORY_MSG_COUNT
+                ? RepositoryConstants.MAX_ACTION_HISTORY_MSG_COUNT : messageCount;
+
+        PageRequest pageable = new PageRequest(0, limit, new Sort(Direction.DESC, "occurredAt"));
+        Page<String> messages = actionStatusRepository.findMessagesByActionIdAndMessageNotLike(pageable, actionId,
+                RepositoryConstants.SERVER_MESSAGE_PREFIX + "%");
+
+        LOG.debug("Retrieved {} message(s) from action history for action {}.", messages.getNumberOfElements(),
+                actionId);
+
+        return messages.getContent();
+    }
 }

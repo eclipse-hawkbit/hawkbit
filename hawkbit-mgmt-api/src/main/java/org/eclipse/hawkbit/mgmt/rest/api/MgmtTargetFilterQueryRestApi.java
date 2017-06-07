@@ -38,7 +38,7 @@ public interface MgmtTargetFilterQueryRestApi {
 
     @RequestMapping(method = RequestMethod.GET, value = "/{filterId}", produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtTargetFilterQuery> getFilter(@PathVariable("filterId") final Long filterId);
+    ResponseEntity<MgmtTargetFilterQuery> getFilter(@PathVariable("filterId") Long filterId);
 
     /**
      * Handles the GET request of retrieving all filters.
@@ -63,10 +63,10 @@ public interface MgmtTargetFilterQueryRestApi {
     @RequestMapping(method = RequestMethod.GET, produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTargetFilterQuery>> getFilters(
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam);
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) String rsqlParam);
 
     /**
      * Handles the POST request of creating new target filters. The request body
@@ -82,7 +82,7 @@ public interface MgmtTargetFilterQueryRestApi {
     @RequestMapping(method = RequestMethod.POST, consumes = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtTargetFilterQuery> createFilter(@RequestBody final MgmtTargetFilterQueryRequestBody filter);
+    ResponseEntity<MgmtTargetFilterQuery> createFilter(@RequestBody MgmtTargetFilterQueryRequestBody filter);
 
     /**
      * Handles the PUT request of updating a target filter. The ID is within the
@@ -101,8 +101,8 @@ public interface MgmtTargetFilterQueryRestApi {
     @RequestMapping(method = RequestMethod.PUT, value = "/{filterId}", consumes = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtTargetFilterQuery> updateFilter(@PathVariable("filterId") final Long filterId,
-            @RequestBody final MgmtTargetFilterQueryRequestBody targetFilterRest);
+    ResponseEntity<MgmtTargetFilterQuery> updateFilter(@PathVariable("filterId") Long filterId,
+            @RequestBody MgmtTargetFilterQueryRequestBody targetFilterRest);
 
     /**
      * Handles the DELETE request of deleting a target filter.
@@ -115,7 +115,7 @@ public interface MgmtTargetFilterQueryRestApi {
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "/{filterId}", produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<Void> deleteFilter(@PathVariable("filterId") final Long filterId);
+    ResponseEntity<Void> deleteFilter(@PathVariable("filterId") Long filterId);
 
     /**
      * Handles the GET request of retrieving the distribution set for auto
@@ -128,7 +128,7 @@ public interface MgmtTargetFilterQueryRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{filterId}/autoAssignDS", produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(@PathVariable("filterId") final Long filterId);
+    ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(@PathVariable("filterId") Long filterId);
 
     /**
      * Handles the POST request for changing distribution set for auto
@@ -143,8 +143,8 @@ public interface MgmtTargetFilterQueryRestApi {
     @RequestMapping(method = RequestMethod.POST, value = "/{filterId}/autoAssignDS", consumes = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtTargetFilterQuery> postAssignedDistributionSet(@PathVariable("filterId") final Long filterId,
-            @RequestBody final MgmtId dsId);
+    ResponseEntity<MgmtTargetFilterQuery> postAssignedDistributionSet(@PathVariable("filterId") Long filterId,
+            @RequestBody MgmtId dsId);
 
     /**
      * Handles the DELETE request for removing the distribution set for auto
@@ -155,6 +155,6 @@ public interface MgmtTargetFilterQueryRestApi {
      * @return http status
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "/{filterId}/autoAssignDS")
-    ResponseEntity<Void> deleteAssignedDistributionSet(@PathVariable("filterId") final Long filterId);
+    ResponseEntity<Void> deleteAssignedDistributionSet(@PathVariable("filterId") Long filterId);
 
 }

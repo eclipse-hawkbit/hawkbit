@@ -136,6 +136,17 @@ public interface DdiRootControllerRestApi {
      *            an hashcode of the resource which indicates if the action has
      *            been changed, e.g. from 'soft' to 'force' and the eTag needs
      *            to be re-generated
+     * @param actionHistoryMessageCount
+     *            specifies the number of messages to be returned from action
+     *            history. Regardless of the passed value, in order to restrict
+     *            resource utilization by controllers, maximum number of
+     *            messages that are retrieved from database is limited by
+     *            {@link RepositoryConstants#MAX_ACTION_HISTORY_MSG_COUNT}.
+     *            actionHistoryMessageCount < 0, retrieves the maximum allowed
+     *            number of action status messages from history;
+     *            actionHistoryMessageCount = 0, does not retrieve any message;
+     *            and actionHistoryMessageCount > 0, retrieves the specified
+     *            number of messages, limited by maximum allowed number.
      * @param request
      *            the HTTP request injected by spring
      * @return the response
@@ -146,7 +157,8 @@ public interface DdiRootControllerRestApi {
     ResponseEntity<DdiDeploymentBase> getControllerBasedeploymentAction(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") @NotEmpty final String controllerId,
             @PathVariable("actionId") @NotEmpty final Long actionId,
-            @RequestParam(value = "c", required = false, defaultValue = "-1") final int resource);
+            @RequestParam(value = "c", required = false, defaultValue = "-1") final int resource,
+            @RequestParam(value = "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) final Integer actionHistoryMessageCount);
 
     /**
      * This is the feedback channel for the {@link DdiDeploymentBase} action.

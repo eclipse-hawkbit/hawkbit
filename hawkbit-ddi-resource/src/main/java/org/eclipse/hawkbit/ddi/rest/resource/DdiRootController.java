@@ -19,6 +19,7 @@ import javax.validation.Valid;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
+import org.eclipse.hawkbit.ddi.json.model.DdiActionHistory;
 import org.eclipse.hawkbit.ddi.json.model.DdiCancel;
 import org.eclipse.hawkbit.ddi.json.model.DdiCancelActionToStop;
 import org.eclipse.hawkbit.ddi.json.model.DdiChunk;
@@ -28,6 +29,7 @@ import org.eclipse.hawkbit.ddi.json.model.DdiDeployment;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeployment.HandlingType;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeploymentBase;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult.FinalResult;
+import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -149,7 +151,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         if (checkModule(fileName, module)) {
             LOG.warn("Softare module with id {} could not be found.", softwareModuleId);
-            result = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            result = ResponseEntity.notFound().build();
         } else {
 
             // Exception squid:S3655 - Optional access is checked in checkModule
@@ -213,7 +215,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         if (checkModule(fileName, module)) {
             LOG.warn("Software module with id {} could not be found.", softwareModuleId);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
 
         try {
@@ -224,14 +226,15 @@ public class DdiRootController implements DdiRootControllerRestApi {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<DdiDeploymentBase> getControllerBasedeploymentAction(
             @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId,
             @PathVariable("actionId") final Long actionId,
-            @RequestParam(value = "c", required = false, defaultValue = "-1") final int resource) {
+            @RequestParam(value = "c", required = false, defaultValue = "-1") final int resource,
+            @RequestParam(value = "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) final Integer actionHistoryMessageCount) {
         LOG.debug("getControllerBasedeploymentAction({},{})", controllerId, resource);
 
         final Target target = controllerManagement.findByControllerId(controllerId)
@@ -240,7 +243,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         final Action action = findActionWithExceptionIfNotFound(actionId);
         if (!action.getTarget().getId().equals(target.getId())) {
             LOG.warn(GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET, action.getId(), target.getId());
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
 
         if (!action.isCancelingOrCanceled()) {
@@ -251,8 +254,15 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
             final HandlingType handlingType = action.isForce() ? HandlingType.FORCED : HandlingType.ATTEMPT;
 
+            List<String> actionHistoryMsgs = controllerManagement.getActionHistoryMessages(action.getId(),
+                    actionHistoryMessageCount == null ? Integer.parseInt(DdiRestConstants.NO_ACTION_HISTORY)
+                            : actionHistoryMessageCount);
+
+            DdiActionHistory actionHistory = actionHistoryMsgs.isEmpty() ? null
+                    : new DdiActionHistory(action.getStatus().name(), actionHistoryMsgs);
+
             final DdiDeploymentBase base = new DdiDeploymentBase(Long.toString(action.getId()),
-                    new DdiDeployment(handlingType, handlingType, chunks));
+                    new DdiDeployment(handlingType, handlingType, chunks), actionHistory);
 
             LOG.debug("Found an active UpdateAction for target {}. returning deyploment: {}", controllerId, base);
 
@@ -262,7 +272,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             return new ResponseEntity<>(base, HttpStatus.OK);
         }
 
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return ResponseEntity.notFound().build();
     }
 
     @Override
@@ -278,13 +288,13 @@ public class DdiRootController implements DdiRootControllerRestApi {
             LOG.warn(
                     "provideBasedeploymentActionFeedback: action in payload ({}) was not identical to action in path ({}).",
                     feedback.getId(), actionId);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
 
         final Action action = findActionWithExceptionIfNotFound(actionId);
         if (!action.getTarget().getId().equals(target.getId())) {
             LOG.warn(GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET, action.getId(), target.getId());
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
 
         if (!action.isActive()) {
@@ -295,7 +305,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         controllerManagement.addUpdateActionStatus(generateUpdateStatus(feedback, controllerId, feedback.getId()));
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
 
     }
 
@@ -363,7 +373,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId) {
         controllerManagement.updateControllerAttributes(controllerId, configData.getData());
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @Override
@@ -378,7 +388,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         final Action action = findActionWithExceptionIfNotFound(actionId);
         if (!action.getTarget().getId().equals(target.getId())) {
             LOG.warn(GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET, action.getId(), target.getId());
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
 
         if (action.isCancelingOrCanceled()) {
@@ -393,7 +403,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             return new ResponseEntity<>(cancel, HttpStatus.OK);
         }
 
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return ResponseEntity.notFound().build();
     }
 
     @Override
@@ -410,18 +420,18 @@ public class DdiRootController implements DdiRootControllerRestApi {
             LOG.warn(
                     "provideBasedeploymentActionFeedback: action in payload ({}) was not identical to action in path ({}).",
                     feedback.getId(), actionId);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
 
         final Action action = findActionWithExceptionIfNotFound(actionId);
         if (!action.getTarget().getId().equals(target.getId())) {
             LOG.warn(GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET, action.getId(), target.getId());
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
 
         controllerManagement
                 .addCancelActionStatus(generateActionCancelStatus(feedback, target, feedback.getId(), entityFactory));
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     private static ActionStatusCreate generateActionCancelStatus(final DdiActionFeedback feedback, final Target target,

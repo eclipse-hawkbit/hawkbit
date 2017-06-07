@@ -30,6 +30,12 @@ public final class RepositoryConstants {
      */
     public static final int DEFAULT_DS_TYPES_IN_TENANT = 2;
 
+    /**
+     * Maximum number of messages that can be retrieved by a controller for an
+     * {@link Action}.
+     */
+    public static final int MAX_ACTION_HISTORY_MSG_COUNT = 100;
+
     private RepositoryConstants() {
         // Utility class.
     }
