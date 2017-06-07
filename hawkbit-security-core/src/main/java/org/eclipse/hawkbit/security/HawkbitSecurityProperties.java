@@ -20,6 +20,19 @@ public class HawkbitSecurityProperties {
     private final Clients clients = new Clients();
     private final Dos dos = new Dos();
 
+    /**
+     * Content Security policy Header for Manager UI.
+     */
+    private String contentSecurityPolicy;
+
+    public String getContentSecurityPolicy() {
+        return contentSecurityPolicy;
+    }
+
+    public void setContentSecurityPolicy(final String contentSecurityPolicy) {
+        this.contentSecurityPolicy = contentSecurityPolicy;
+    }
+
     public Dos getDos() {
         return dos;
     }

@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.autoconfigure.security;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.Filter;
@@ -80,6 +82,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationEn
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.session.SessionManagementFilter;
+import org.springframework.util.StringUtils;
 import org.vaadin.spring.security.VaadinSecurityContext;
 import org.vaadin.spring.security.annotation.EnableVaadinSecurity;
 import org.vaadin.spring.security.web.VaadinDefaultRedirectStrategy;
@@ -99,7 +102,7 @@ public class SecurityManagedConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(SecurityManagedConfiguration.class);
 
-    private static final int DOS_FILTER_ORDER = 1;
+    private static final int DOS_FILTER_ORDER = -200;
 
     @Autowired
     private AuthenticationConfiguration configuration;
@@ -136,6 +139,8 @@ public class SecurityManagedConfiguration {
     @ConditionalOnClass(DdiApiConfiguration.class)
     static class ControllerSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
+        private static final String DDI_ANT_MATCHER = "/{tenant}/controller/**";
+
         @Autowired
         private ControllerManagement controllerManagement;
 
@@ -165,12 +170,10 @@ public class SecurityManagedConfiguration {
          *         of service protection filter in the filter chain
          */
         @Bean
-        @ConditionalOnClass(DdiApiConfiguration.class)
         public FilterRegistrationBean dosDDiFilter(final HawkbitSecurityProperties securityProperties) {
 
-            final FilterRegistrationBean filterRegBean = dosFilter(securityProperties.getDos().getFilter(),
-                    securityProperties.getClients());
-            filterRegBean.addUrlPatterns("/{tenant}/controller/v1/*");
+            final FilterRegistrationBean filterRegBean = dosFilter(Arrays.asList(DDI_ANT_MATCHER),
+                    securityProperties.getDos().getFilter(), securityProperties.getClients());
             filterRegBean.setOrder(DOS_FILTER_ORDER);
             filterRegBean.setName("dosDDiFilter");
 
@@ -224,13 +227,13 @@ public class SecurityManagedConfiguration {
                         Arrays.asList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS),
                                 new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_DOWNLOAD_ROLE)));
                 anoymousFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
-                httpSec.requestMatchers().antMatchers("/*/controller/v1/**", "/*/controller/artifacts/v1/**").and()
-                        .securityContext().disable().anonymous().authenticationFilter(anoymousFilter);
+                httpSec.requestMatchers().antMatchers(DDI_ANT_MATCHER).and().securityContext().disable().anonymous()
+                        .authenticationFilter(anoymousFilter);
             } else {
 
                 httpSec.addFilter(securityHeaderFilter).addFilter(securityTokenFilter)
                         .addFilter(gatewaySecurityTokenFilter).addFilter(controllerAnonymousDownloadFilter)
-                        .antMatcher("/*/controller/**").anonymous().disable().authorizeRequests().anyRequest()
+                        .antMatcher(DDI_ANT_MATCHER).anonymous().disable().authorizeRequests().anyRequest()
                         .authenticated().and().exceptionHandling()
                         .authenticationEntryPoint((request, response, authException) -> response
                                 .setStatus(HttpStatus.UNAUTHORIZED.value()))
@@ -259,8 +262,8 @@ public class SecurityManagedConfiguration {
     @Bean
     public FilterRegistrationBean dosSystemFilter(final HawkbitSecurityProperties securityProperties) {
 
-        final FilterRegistrationBean filterRegBean = dosFilter(securityProperties.getDos().getFilter(),
-                securityProperties.getClients());
+        final FilterRegistrationBean filterRegBean = dosFilter(Collections.emptyList(),
+                securityProperties.getDos().getFilter(), securityProperties.getClients());
         filterRegBean.setUrlPatterns(Arrays.asList("/system/*"));
         filterRegBean.setOrder(DOS_FILTER_ORDER);
         filterRegBean.setName("dosSystemFilter");
@@ -268,39 +271,54 @@ public class SecurityManagedConfiguration {
         return filterRegBean;
     }
 
-    private static FilterRegistrationBean dosFilter(final HawkbitSecurityProperties.Dos.Filter filterProperties,
+    private static FilterRegistrationBean dosFilter(final Collection<String> includeAntPaths,
+            final HawkbitSecurityProperties.Dos.Filter filterProperties,
             final HawkbitSecurityProperties.Clients clientProperties) {
 
         final FilterRegistrationBean filterRegBean = new FilterRegistrationBean();
 
-        filterRegBean.setFilter(new DosFilter(filterProperties.getMaxRead(), filterProperties.getMaxWrite(),
-                filterProperties.getWhitelist(), clientProperties.getBlacklist(),
+        filterRegBean.setFilter(new DosFilter(includeAntPaths, filterProperties.getMaxRead(),
+                filterProperties.getMaxWrite(), filterProperties.getWhitelist(), clientProperties.getBlacklist(),
                 clientProperties.getRemoteIpHeader()));
 
         return filterRegBean;
     }
 
     /**
-     * Filter registration bean for spring etag filter.
-     *
-     * @return the spring filter registration bean for registering an etag
-     *         filter in the filter chain
+     * A Websecruity config to handle and filter the download ids.
      */
-    @Bean
-    @Order(100)
-    public FilterRegistrationBean eTagFilter() {
+    @Configuration
+    @EnableWebSecurity
+    @Order(320)
+    @ConditionalOnClass(MgmtApiConfiguration.class)
+    public static class IdRestSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
-        final FilterRegistrationBean filterRegBean = new FilterRegistrationBean();
-        // Exclude the URLs for downloading artifacts, so no eTag is generated
-        // in the ShallowEtagHeaderFilter, just using the SH1 hash of the
-        // artifact itself as 'ETag', because otherwise the file will be copied
-        // in memory!
-        filterRegBean.setFilter(
-                new ExcludePathAwareShallowETagFilter("/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download",
-                        "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/**",
-                        "/api/v1/downloadserver/**"));
+        @Autowired
+        private DdiSecurityProperties ddiSecurityConfiguration;
 
-        return filterRegBean;
+        @Autowired
+        private DownloadIdCache downloadIdCache;
+
+        @Override
+        protected void configure(final HttpSecurity http) throws Exception {
+
+            final HttpDownloadAuthenticationFilter downloadIdAuthenticationFilter = new HttpDownloadAuthenticationFilter(
+                    downloadIdCache);
+            downloadIdAuthenticationFilter.setAuthenticationManager(authenticationManager());
+
+            http.csrf().disable();
+            http.anonymous().disable();
+
+            http.regexMatcher(HttpDownloadAuthenticationFilter.REQUEST_ID_REGEX_PATTERN)
+                    .addFilterBefore(downloadIdAuthenticationFilter, FilterSecurityInterceptor.class);
+            http.authorizeRequests().anyRequest().authenticated();
+        }
+
+        @Override
+        protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
+            auth.authenticationProvider(new PreAuthTokenSourceTrustAuthenticationProvider(
+                    ddiSecurityConfiguration.getRp().getTrustedIPs()));
+        }
     }
 
     /**
@@ -336,7 +354,7 @@ public class SecurityManagedConfiguration {
         @Bean
         public FilterRegistrationBean dosMgmtFilter(final HawkbitSecurityProperties securityProperties) {
 
-            final FilterRegistrationBean filterRegBean = dosFilter(securityProperties.getDos().getFilter(),
+            final FilterRegistrationBean filterRegBean = dosFilter(null, securityProperties.getDos().getFilter(),
                     securityProperties.getClients());
             filterRegBean.setUrlPatterns(Arrays.asList("/rest/*", "/api/*"));
             filterRegBean.setOrder(DOS_FILTER_ORDER);
@@ -385,6 +403,29 @@ public class SecurityManagedConfiguration {
     }
 
     /**
+     * Filter registration bean for spring etag filter.
+     *
+     * @return the spring filter registration bean for registering an etag
+     *         filter in the filter chain
+     */
+    @Bean
+    @Order(380)
+    public FilterRegistrationBean eTagFilter() {
+
+        final FilterRegistrationBean filterRegBean = new FilterRegistrationBean();
+        // Exclude the URLs for downloading artifacts, so no eTag is generated
+        // in the ShallowEtagHeaderFilter, just using the SH1 hash of the
+        // artifact itself as 'ETag', because otherwise the file will be copied
+        // in memory!
+        filterRegBean.setFilter(new ExcludePathAwareShallowETagFilter("/UI/**",
+                "/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download",
+                "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/**",
+                "/api/v1/downloadserver/**"));
+
+        return filterRegBean;
+    }
+
+    /**
      * {@link WebSecurityConfigurer} for external (management) access.
      */
     @Configuration
@@ -399,6 +440,9 @@ public class SecurityManagedConfiguration {
         @Autowired
         private SecurityProperties springSecurityProperties;
 
+        @Autowired
+        private HawkbitSecurityProperties hawkbitSecurityProperties;
+
         /**
          * Filter to protect the hawkBit management UI against to many requests.
          * 
@@ -411,7 +455,7 @@ public class SecurityManagedConfiguration {
         @Bean
         public FilterRegistrationBean dosMgmtUiFilter(final HawkbitSecurityProperties securityProperties) {
 
-            final FilterRegistrationBean filterRegBean = dosFilter(securityProperties.getDos().getUiFilter(),
+            final FilterRegistrationBean filterRegBean = dosFilter(null, securityProperties.getDos().getUiFilter(),
                     securityProperties.getClients());
             // All URLs that can be called anonymous
             filterRegBean.setUrlPatterns(Arrays.asList("/UI/login", "/UI/login/*", "/UI/logout", "/UI/logout/*"));
@@ -490,6 +534,10 @@ public class SecurityManagedConfiguration {
                         "\"******************\\n** Requires HTTPS Security has been disabled for UI, should only be used for developing purposes **\\n******************\"");
             }
 
+            if (!StringUtils.isEmpty(hawkbitSecurityProperties.getContentSecurityPolicy())) {
+                httpSec.headers().contentSecurityPolicy(hawkbitSecurityProperties.getContentSecurityPolicy());
+            }
+
             httpSec
                     // UI
                     .authorizeRequests().antMatchers("/UI/login/**").permitAll().antMatchers("/UI/UIDL/**").permitAll()
@@ -501,46 +549,11 @@ public class SecurityManagedConfiguration {
 
         @Override
         public void configure(final WebSecurity webSecurity) throws Exception {
+            // Not security for static content
             webSecurity.ignoring().antMatchers("/documentation/**", "/VAADIN/**", "/*.*", "/docs/**");
         }
     }
 
-    /**
-     * A Websecruity config to handle and filter the download ids.
-     */
-    @Configuration
-    @EnableWebSecurity
-    @Order(200)
-    @ConditionalOnClass(DdiApiConfiguration.class)
-    public static class IdRestSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
-
-        @Autowired
-        private DdiSecurityProperties ddiSecurityConfiguration;
-
-        @Autowired
-        private DownloadIdCache downloadIdCache;
-
-        @Override
-        protected void configure(final HttpSecurity http) throws Exception {
-
-            final HttpDownloadAuthenticationFilter downloadIdAuthenticationFilter = new HttpDownloadAuthenticationFilter(
-                    downloadIdCache);
-            downloadIdAuthenticationFilter.setAuthenticationManager(authenticationManager());
-
-            http.csrf().disable();
-            http.anonymous().disable();
-
-            http.regexMatcher(HttpDownloadAuthenticationFilter.REQUEST_ID_REGEX_PATTERN)
-                    .addFilterBefore(downloadIdAuthenticationFilter, FilterSecurityInterceptor.class);
-            http.authorizeRequests().anyRequest().authenticated();
-        }
-
-        @Override
-        protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
-            auth.authenticationProvider(new PreAuthTokenSourceTrustAuthenticationProvider(
-                    ddiSecurityConfiguration.getRp().getTrustedIPs()));
-        }
-    }
 }
 
 /**
