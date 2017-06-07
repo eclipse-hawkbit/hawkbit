@@ -563,9 +563,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     }
 
     @Test
-    @Description("The server protects itself against to large feedback bodies. The test verfies that "
+    @Description("The server protects itself against too large feedback bodies. The test verifies that "
             + "it is not possible to exceed the configured maximum number of feedback details.")
-    public void tooMuchDeplomentActionMessagesInFeedback() throws Exception {
+    public void tooMuchDeploymentActionMessagesInFeedback() throws Exception {
         final Target target = testdataFactory.createTarget("4712");
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 

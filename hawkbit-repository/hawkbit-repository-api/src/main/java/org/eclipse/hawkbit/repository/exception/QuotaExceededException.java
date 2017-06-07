@@ -57,7 +57,7 @@ public final class QuotaExceededException extends AbstractServerRtException {
      *            that is defined by the repository
      */
     public QuotaExceededException(final String type, final long inserted, final int quota) {
-        super("Too many entries of " + type + " in the request. {" + inserted + "} is bejond the permitted {" + quota
-                + "}.", SpServerError.SP_QUOTA_EXCEEDED);
+        super("Request contains too many entries of {" + type + "}. {" + inserted + "} is bejond the permitted {"
+                + quota + "}.", SpServerError.SP_QUOTA_EXCEEDED);
     }
 }

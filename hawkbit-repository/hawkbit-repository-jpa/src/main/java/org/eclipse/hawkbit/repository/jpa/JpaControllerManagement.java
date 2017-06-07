@@ -275,8 +275,8 @@ public class JpaControllerManagement implements ControllerManagement {
             break;
         default:
             // information status entry - check for a potential DOS attack
-            checkForToManyStatusEntries(action);
-            checkForToManyStatusMessages(actionStatus);
+            checkForTooManyStatusEntries(action);
+            checkForTooManyStatusMessages(actionStatus);
             break;
         }
 
@@ -286,7 +286,7 @@ public class JpaControllerManagement implements ControllerManagement {
         return action;
     }
 
-    private void checkForToManyStatusMessages(final JpaActionStatus actionStatus) {
+    private void checkForTooManyStatusMessages(final JpaActionStatus actionStatus) {
         if (actionStatus.getMessages().size() > quotaManagement.getMaxMessagesPerActionStatus()) {
             throw new QuotaExceededException("ActionStatus messages", actionStatus.getMessages().size(),
                     quotaManagement.getMaxStatusEntriesPerAction());
@@ -347,8 +347,8 @@ public class JpaControllerManagement implements ControllerManagement {
             break;
         default:
             // information status entry - check for a potential DOS attack
-            checkForToManyStatusEntries(action);
-            checkForToManyStatusMessages(actionStatus);
+            checkForTooManyStatusEntries(action);
+            checkForTooManyStatusMessages(actionStatus);
             break;
         }
 
@@ -368,7 +368,7 @@ public class JpaControllerManagement implements ControllerManagement {
         targetRepository.save(mergedTarget);
     }
 
-    private void checkForToManyStatusEntries(final JpaAction action) {
+    private void checkForTooManyStatusEntries(final JpaAction action) {
         if (quotaManagement.getMaxStatusEntriesPerAction() > 0) {
 
             final Long statusCount = actionStatusRepository.countByAction(action);
@@ -492,8 +492,8 @@ public class JpaControllerManagement implements ControllerManagement {
         final JpaActionStatus statusMessage = create.build();
         statusMessage.setAction(action);
 
-        checkForToManyStatusEntries(action);
-        checkForToManyStatusMessages(statusMessage);
+        checkForTooManyStatusEntries(action);
+        checkForTooManyStatusMessages(statusMessage);
 
         return actionStatusRepository.save(statusMessage);
     }
