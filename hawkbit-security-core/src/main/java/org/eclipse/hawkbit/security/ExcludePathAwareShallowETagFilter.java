@@ -27,14 +27,13 @@ import org.springframework.web.filter.ShallowEtagHeaderFilter;
 public class ExcludePathAwareShallowETagFilter extends ShallowEtagHeaderFilter {
 
     private final String[] excludeAntPaths;
-    private final AntPathMatcher antMatcher;
+    private final AntPathMatcher antMatcher = new AntPathMatcher();
 
     /**
      * @param excludeAntPaths
      */
     public ExcludePathAwareShallowETagFilter(final String... excludeAntPaths) {
         this.excludeAntPaths = excludeAntPaths;
-        this.antMatcher = new AntPathMatcher();
     }
 
     @Override

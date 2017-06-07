@@ -313,7 +313,7 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
     protected DefaultMockMvcBuilder createMvcWebAppContext() {
         return MockMvcBuilders.webAppContextSetup(context)
-                .addFilter(new DosFilter(100, 10, "127\\.0\\.0\\.1|\\[0:0:0:0:0:0:0:1\\]", "(^192\\.168\\.)",
+                .addFilter(new DosFilter(null, 100, 10, "127\\.0\\.0\\.1|\\[0:0:0:0:0:0:0:1\\]", "(^192\\.168\\.)",
                         "X-Forwarded-For"))
                 .addFilter(new ExcludePathAwareShallowETagFilter(
                         "/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download",
