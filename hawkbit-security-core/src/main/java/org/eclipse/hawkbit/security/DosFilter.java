@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.security;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
@@ -23,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.github.benmanes.caffeine.cache.Cache;
@@ -39,6 +41,9 @@ public class DosFilter extends OncePerRequestFilter {
     private static final Logger LOG_DOS = LoggerFactory.getLogger(SecurityConstants.SECURITY_LOG_PREFIX + ".dos");
     private static final Logger LOG_BLACKLIST = LoggerFactory
             .getLogger(SecurityConstants.SECURITY_LOG_PREFIX + ".blacklist");
+
+    private final AntPathMatcher antMatcher = new AntPathMatcher();
+    private final Collection<String> includeAntPaths;
 
     private final Pattern ipAdressBlacklist;
 
@@ -57,6 +62,9 @@ public class DosFilter extends OncePerRequestFilter {
 
     /**
      * Filter constructor including configuration.
+     * 
+     * @param includeAntPaths
+     *            paths where filter should hit
      *
      * @param maxRead
      *            Maximum number of allowed REST read/GET requests per second
@@ -73,9 +81,10 @@ public class DosFilter extends OncePerRequestFilter {
      *            the header containing the forwarded IP address e.g.
      *            {@code x-forwarded-for}
      */
-    public DosFilter(final int maxRead, final int maxWrite, final String ipDosWhiteListPattern,
-            final String ipBlackListPattern, final String forwardHeader) {
+    public DosFilter(final Collection<String> includeAntPaths, final int maxRead, final int maxWrite,
+            final String ipDosWhiteListPattern, final String ipBlackListPattern, final String forwardHeader) {
 
+        this.includeAntPaths = includeAntPaths;
         this.maxRead = maxRead;
         this.maxWrite = maxWrite;
         this.forwardHeader = forwardHeader;
@@ -93,9 +102,23 @@ public class DosFilter extends OncePerRequestFilter {
         }
     }
 
+    private boolean shouldInclude(final HttpServletRequest request) {
+        if (includeAntPaths == null || includeAntPaths.isEmpty()) {
+            return true;
+        }
+
+        return includeAntPaths.stream()
+                .anyMatch(pattern -> antMatcher.match(request.getContextPath() + pattern, request.getRequestURI()));
+    }
+
     @Override
     protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response,
             final FilterChain filterChain) throws ServletException, IOException {
+
+        if (!shouldInclude(request)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         boolean processChain;
 

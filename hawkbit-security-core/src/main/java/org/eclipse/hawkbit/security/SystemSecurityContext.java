@@ -98,6 +98,8 @@ public class SystemSecurityContext {
                     setSystemContext(SecurityContextHolder.getContext());
                     return callable.call();
 
+                } catch (final RuntimeException e) {
+                    throw e;
                 } catch (final Exception e) {
                     throw new RuntimeException(e);
                 }

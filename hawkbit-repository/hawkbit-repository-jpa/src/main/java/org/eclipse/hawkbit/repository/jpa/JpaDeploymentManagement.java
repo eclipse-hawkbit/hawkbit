@@ -614,7 +614,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         final JpaAction action = actionRepository.findById(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
-        if (!action.isForced()) {
+        if (!action.isForce()) {
             action.setActionType(ActionType.FORCED);
             return actionRepository.save(action);
         }
