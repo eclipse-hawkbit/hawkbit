@@ -33,8 +33,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
-import org.eclipse.hawkbit.repository.exception.ToManyAttributeEntriesException;
-import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -635,7 +634,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final int allowedAttributes = 10;
         testdataFactory.createTarget(controllerId);
 
-        assertThatExceptionOfType(ToManyAttributeEntriesException.class).isThrownBy(() -> securityRule
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> securityRule
                 .runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
                     writeAttributes(controllerId, allowedAttributes + 1, "key", "value");
                     return null;
@@ -654,7 +653,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetManagement.getControllerAttributes(controllerId)).hasSize(10);
 
         // Now rite one more
-        assertThatExceptionOfType(ToManyAttributeEntriesException.class).isThrownBy(() -> securityRule
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> securityRule
                 .runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
                     writeAttributes(controllerId, 1, "additional", "value1");
                     return null;
@@ -684,7 +683,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = createTargetAndAssignDs();
 
         // Fails as one entry is already in there from the assignment
-        assertThatExceptionOfType(TooManyStatusEntriesException.class).isThrownBy(() -> securityRule
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> securityRule
                 .runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
                     writeStatus(actionId, allowStatusEntries);
                     return null;
