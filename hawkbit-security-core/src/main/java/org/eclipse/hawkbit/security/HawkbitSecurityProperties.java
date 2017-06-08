@@ -109,6 +109,11 @@ public class HawkbitSecurityProperties {
          */
         private int maxRolloutGroupsPerRollout = 500;
 
+        /**
+         * Maximum number of messages per ActionStatus
+         */
+        private int maxMessagesPerActionStatus = 50;
+
         private final Filter filter = new Filter();
         private final Filter uiFilter = new Filter();
 
@@ -126,6 +131,14 @@ public class HawkbitSecurityProperties {
 
         public void setMaxStatusEntriesPerAction(final int maxStatusEntriesPerAction) {
             this.maxStatusEntriesPerAction = maxStatusEntriesPerAction;
+        }
+
+        public int getMaxMessagesPerActionStatus() {
+            return maxMessagesPerActionStatus;
+        }
+
+        public void setMaxMessagesPerActionStatus(final int maxMessagesPerActionStatus) {
+            this.maxMessagesPerActionStatus = maxMessagesPerActionStatus;
         }
 
         public int getMaxAttributeEntriesPerTarget() {

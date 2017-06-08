@@ -36,4 +36,11 @@ public interface QuotaManagement {
      */
     int getMaxRolloutGroupsPerRollout();
 
+    /**
+     * @return maximum number of
+     *         {@link ControllerManagement#getActionHistoryMessages(Long, int)}
+     *         for an individual {@link ActionStatus}.
+     */
+    int getMaxMessagesPerActionStatus();
+
 }
