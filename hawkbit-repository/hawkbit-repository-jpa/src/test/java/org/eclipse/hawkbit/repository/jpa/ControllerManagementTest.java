@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS;
 import static org.junit.Assert.fail;
 
@@ -32,7 +33,10 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
+import org.eclipse.hawkbit.repository.exception.ToManyAttributeEntriesException;
+import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -620,6 +624,79 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         testData.put("test2", "testdata20");
         assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong")
                 .isEqualTo(testData);
+    }
+
+    @Test
+    @Description("Ensures that target attribute update fails if quota hits.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2) })
+    public void updateTargetAttributesFailsIfTooManyEntries() throws Exception {
+        final String controllerId = "test123";
+        final int allowedAttributes = 10;
+        testdataFactory.createTarget(controllerId);
+
+        assertThatExceptionOfType(ToManyAttributeEntriesException.class).isThrownBy(() -> securityRule
+                .runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+                    writeAttributes(controllerId, allowedAttributes + 1, "key", "value");
+                    return null;
+                })).withMessageContaining("" + allowedAttributes);
+
+        // verify that no attributes have been written
+        assertThat(targetManagement.getControllerAttributes(controllerId)).isEmpty();
+
+        // Write allowed number of attributes twice with same key should result
+        // in update but work
+        securityRule.runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+            writeAttributes(controllerId, allowedAttributes, "key", "value1");
+            writeAttributes(controllerId, allowedAttributes, "key", "value2");
+            return null;
+        });
+        assertThat(targetManagement.getControllerAttributes(controllerId)).hasSize(10);
+
+        // Now rite one more
+        assertThatExceptionOfType(ToManyAttributeEntriesException.class).isThrownBy(() -> securityRule
+                .runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+                    writeAttributes(controllerId, 1, "additional", "value1");
+                    return null;
+                })).withMessageContaining("" + allowedAttributes);
+        assertThat(targetManagement.getControllerAttributes(controllerId)).hasSize(10);
+
+    }
+
+    private void writeAttributes(final String controllerId, final int allowedAttributes, final String keyPrefix,
+            final String valuePrefix) {
+        final Map<String, String> testData = Maps.newHashMapWithExpectedSize(allowedAttributes);
+        for (int i = 0; i < allowedAttributes; i++) {
+            testData.put(keyPrefix + i, valuePrefix);
+        }
+        controllerManagement.updateControllerAttributes(controllerId, testData);
+    }
+
+    @Test
+    @Description("Controller providing status entries fails if providing more than permitted by quota.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void controllerProvidesIntermediateFeedbackFailsIfQuotaHit() {
+        final int allowStatusEntries = 10;
+        final Long actionId = createTargetAndAssignDs();
+
+        // Fails as one entry is already in there from the assignment
+        assertThatExceptionOfType(TooManyStatusEntriesException.class).isThrownBy(() -> securityRule
+                .runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+                    writeStatus(actionId, allowStatusEntries);
+                    return null;
+                })).withMessageContaining("" + allowStatusEntries);
+
+    }
+
+    private void writeStatus(final Long actionId, final int allowedStatusEntries) {
+        for (int i = 0; i < allowedStatusEntries; i++) {
+            controllerManagement.addInformationalActionStatus(
+                    entityFactory.actionStatus().create(actionId).status(Status.RUNNING).message("test" + i));
+        }
     }
 
     @Test

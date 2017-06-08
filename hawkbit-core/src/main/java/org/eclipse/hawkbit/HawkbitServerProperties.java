@@ -73,52 +73,14 @@ public class HawkbitServerProperties {
      *
      */
     public static class Build {
-        /**
-         * Project artifact ID.
-         */
-        private String artifact = "";
-
-        /**
-         * Project name.
-         */
-        private String name = "";
-
-        /**
-         * Project description.
-         */
-        private String description = "";
 
         /**
          * Project version.
          */
         private String version = "";
 
-        public String getArtifact() {
-            return artifact;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
         public String getVersion() {
             return version;
-        }
-
-        public void setArtifact(final String artifact) {
-            this.artifact = artifact;
-        }
-
-        public void setName(final String name) {
-            this.name = name;
-        }
-
-        public void setDescription(final String description) {
-            this.description = description;
         }
 
         public void setVersion(final String version) {

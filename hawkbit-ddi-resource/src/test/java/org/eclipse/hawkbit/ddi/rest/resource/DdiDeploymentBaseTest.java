@@ -181,12 +181,12 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                         contains(artifact.getMd5Hash())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].hashes.sha1",
                         contains(artifact.getSha1Hash())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.download.href",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.download-http.href",
                         contains(
                                 HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                         + findDistributionSetByAction.findFirstModuleByType(osType).get().getId()
                                         + "/artifacts/test1")))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.md5sum.href",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.md5sum-http.href",
                         contains(
                                 HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                         + findDistributionSetByAction.findFirstModuleByType(osType).get().getId()
@@ -201,12 +201,12 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                         contains(artifactSignature.getSha1Hash())))
 
                 .andExpect(
-                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.download.href",
+                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.download-http.href",
                                 contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
                                         + "/controller/v1/4712/softwaremodules/"
                                         + findDistributionSetByAction.findFirstModuleByType(osType).get().getId()
                                         + "/artifacts/test1.signature")))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.md5sum.href",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.md5sum-http.href",
                         contains(
                                 HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                         + findDistributionSetByAction.findFirstModuleByType(osType).get().getId()
@@ -342,12 +342,12 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].hashes.sha1",
                         contains(artifact.getSha1Hash())))
                 .andExpect(
-                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.download.href",
+                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.download-http.href",
                                 contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
                                         + "/controller/v1/4712/softwaremodules/"
                                         + getOsModule(findDistributionSetByAction) + "/artifacts/test1")))
                 .andExpect(
-                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.md5sum.href",
+                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.md5sum-http.href",
                                 contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
                                         + "/controller/v1/4712/softwaremodules/"
                                         + getOsModule(findDistributionSetByAction) + "/artifacts/test1.MD5SUM")))
@@ -359,11 +359,11 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].hashes.sha1",
                         contains(artifactSignature.getSha1Hash())))
                 .andExpect(
-                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.download.href",
+                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.download-http.href",
                                 contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
                                         + "/controller/v1/4712/softwaremodules/"
                                         + getOsModule(findDistributionSetByAction) + "/artifacts/test1.signature")))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.md5sum.href",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.md5sum-http.href",
                         contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/" + getOsModule(findDistributionSetByAction)
                                 + "/artifacts/test1.signature.MD5SUM")))
@@ -455,12 +455,12 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                         contains(artifact.getMd5Hash())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].hashes.sha1",
                         contains(artifact.getSha1Hash())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.download.href",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.download-http.href",
                         contains(
                                 HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                         + findDistributionSetByAction.findFirstModuleByType(osType).get().getId()
                                         + "/artifacts/test1")))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.md5sum.href",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.md5sum-http.href",
                         contains(
                                 HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                         + findDistributionSetByAction.findFirstModuleByType(osType).get().getId()
@@ -473,12 +473,12 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                         contains(artifactSignature.getMd5Hash())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].hashes.sha1",
                         contains(artifactSignature.getSha1Hash())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.download.href",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.download-http.href",
                         contains(
                                 HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                         + findDistributionSetByAction.findFirstModuleByType(osType).get().getId()
                                         + "/artifacts/test1.signature")))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.md5sum.href",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.md5sum-http.href",
                         contains(
                                 HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                         + findDistributionSetByAction.findFirstModuleByType(osType).get().getId()

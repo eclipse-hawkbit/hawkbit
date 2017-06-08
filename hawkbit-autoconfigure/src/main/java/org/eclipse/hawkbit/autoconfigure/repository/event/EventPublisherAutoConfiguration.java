@@ -23,6 +23,7 @@ import org.springframework.cloud.bus.jackson.RemoteApplicationEventScan;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.context.support.AbstractApplicationContext;
@@ -38,6 +39,7 @@ import io.protostuff.Schema;
  */
 @Configuration
 @RemoteApplicationEventScan(basePackages = "org.eclipse.hawkbit.repository.event.remote")
+@PropertySource("classpath:/hawkbit-eventbus-defaults.properties")
 public class EventPublisherAutoConfiguration {
 
     @Autowired

@@ -30,12 +30,14 @@ import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 
 @SpringApplicationConfiguration(classes = {
         org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration.class })
+@TestPropertySource(locations = "classpath:/jpa-test.properties")
 public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest {
 
     protected static final String NOT_EXIST_ID = "1234";

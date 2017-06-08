@@ -14,6 +14,7 @@ import java.util.Map;
 
 import org.eclipse.hawkbit.ControllerPollProperties;
 import org.eclipse.hawkbit.HawkbitServerProperties.Anonymous.Download;
+import org.eclipse.hawkbit.repository.exception.InvalidTenantConfigurationKeyException;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationStringValidator;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationValidator;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationValidatorException;
