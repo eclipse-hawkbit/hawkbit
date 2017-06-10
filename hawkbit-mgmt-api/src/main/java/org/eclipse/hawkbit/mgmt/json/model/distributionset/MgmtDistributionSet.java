@@ -14,6 +14,7 @@ import java.util.List;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -31,6 +32,41 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtDistributionSet extends MgmtNamedEntity {
+
+    @JsonCreator
+    public MgmtDistributionSet() {
+        super();
+    }
+
+    /**
+     * Constructor for Distribution Set JSON model.
+     *
+     * @param dsId
+     *            for the distribution set
+     * @param version
+     *            is the supplied number or name for the version of distribution
+     *            set
+     * @param modules
+     *            is the list of {@link MgmtSoftwareModule} that are part of
+     *            this distribution
+     * @param requiredMigrationStep
+     *            indicates whether the distribution set is a required step
+     * @param type
+     *            of the distribution set
+     * @param complete
+     *            indicating if the distribution set is complete.
+     */
+    @JsonCreator
+    public MgmtDistributionSet(Long dsId, String version, List<MgmtSoftwareModule> modules,
+            boolean requiredMigrationStep, String type, Boolean complete) {
+        super();
+        this.dsId = dsId;
+        this.version = version;
+        this.modules = modules;
+        this.requiredMigrationStep = requiredMigrationStep;
+        this.type = type;
+        this.complete = complete;
+    }
 
     @JsonProperty(value = "id", required = true)
     private Long dsId;

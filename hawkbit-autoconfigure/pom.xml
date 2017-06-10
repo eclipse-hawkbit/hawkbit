@@ -74,6 +74,12 @@
          <optional>true</optional>
       </dependency>
       <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-extension-offline-update</artifactId>
+         <version>${project.version}</version>
+         <optional>true</optional>
+      </dependency>
+      <dependency>
          <groupId>org.springframework</groupId>
          <artifactId>spring-context-support</artifactId>
       </dependency>      
