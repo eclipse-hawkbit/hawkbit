@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.amqp;
 
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
-import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.util.ErrorHandler;
@@ -20,29 +19,25 @@ import org.springframework.util.ErrorHandler;
  *
  */
 public class ConfigurableRabbitListenerContainerFactory extends SimpleRabbitListenerContainerFactory {
-    private final AmqpProperties amqpProperties;
+    private final int declarationRetries;
 
     /**
      * Constructor.
      * 
-     * @param rabbitConnectionFactory
-     *            for the container factory
-     * @param amqpProperties
-     *            to configure the container factory
+     * @param missingQueuesFatal
+     *            the missingQueuesFatal to set.
+     * @see SimpleMessageListenerContainer#setMissingQueuesFatal
+     * @param declarationRetries
+     *            The number of retries
      * @param errorHandler
      *            the error handler which should be use
      */
-    public ConfigurableRabbitListenerContainerFactory(final AmqpProperties amqpProperties,
-            final ConnectionFactory rabbitConnectionFactory, final ErrorHandler errorHandler) {
-        this.amqpProperties = amqpProperties;
-        setErrorHandler(errorHandler);
-        setDefaultRequeueRejected(true);
-        setConnectionFactory(rabbitConnectionFactory);
-        setMissingQueuesFatal(amqpProperties.isMissingQueuesFatal());
-        setConcurrentConsumers(amqpProperties.getInitialConcurrentConsumers());
-        setMaxConcurrentConsumers(amqpProperties.getMaxConcurrentConsumers());
-        setPrefetchCount(amqpProperties.getPrefetchCount());
+    public ConfigurableRabbitListenerContainerFactory(final boolean missingQueuesFatal, final int declarationRetries,
+            final ErrorHandler errorHandler) {
+        this.declarationRetries = declarationRetries;
 
+        setErrorHandler(errorHandler);
+        setMissingQueuesFatal(missingQueuesFatal);
     }
 
     @Override
@@ -51,6 +46,6 @@ public class ConfigurableRabbitListenerContainerFactory extends SimpleRabbitList
     @SuppressWarnings("squid:UnusedProtectedMethod")
     protected void initializeContainer(final SimpleMessageListenerContainer instance) {
         super.initializeContainer(instance);
-        instance.setDeclarationRetries(amqpProperties.getDeclarationRetries());
+        instance.setDeclarationRetries(declarationRetries);
     }
 }

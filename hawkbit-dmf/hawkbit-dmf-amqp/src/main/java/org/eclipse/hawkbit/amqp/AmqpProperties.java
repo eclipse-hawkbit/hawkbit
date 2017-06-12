@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.amqp;
 
-import java.util.concurrent.TimeUnit;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -20,15 +18,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("hawkbit.dmf.rabbitmq")
 public class AmqpProperties {
 
-    private static final int ONE_MINUTE = 60;
-
     private static final int DEFAULT_QUEUE_DECLARATION_RETRIES = 50;
-
-    private static final int DEFAULT_INITIAL_CONSUMERS = 3;
-
-    private static final int DEFAULT_PREFETCH_COUNT = 10;
-
-    private static final int DEFAULT_MAX_CONSUMERS = 10;
 
     private static final long DEFAULT_REQUEUE_DELAY = 0;
 
@@ -62,28 +52,6 @@ public class AmqpProperties {
      * Missing queue fatal.
      */
     private boolean missingQueuesFatal;
-
-    /**
-     * Requested heartbeat interval from broker in {@link TimeUnit#SECONDS}.
-     */
-    private int requestedHeartBeat = (int) TimeUnit.SECONDS.toSeconds(ONE_MINUTE);
-
-    /**
-     * Sets an upper limit to the number of consumers.
-     */
-    private int maxConcurrentConsumers = DEFAULT_MAX_CONSUMERS;
-
-    /**
-     * Tells the broker how many messages to send to each consumer in a single
-     * request. Often this can be set quite high to improve throughput.
-     */
-    private int prefetchCount = DEFAULT_PREFETCH_COUNT;
-
-    /**
-     * Initial number of consumers. Is scaled up if necessary up to
-     * {@link #maxConcurrentConsumers}.
-     */
-    private int initialConcurrentConsumers = DEFAULT_INITIAL_CONSUMERS;
 
     /**
      * The number of retry attempts when passive queue declaration fails.
@@ -122,30 +90,6 @@ public class AmqpProperties {
         this.authenticationReceiverQueue = authenticationReceiverQueue;
     }
 
-    public int getPrefetchCount() {
-        return prefetchCount;
-    }
-
-    public void setPrefetchCount(final int prefetchCount) {
-        this.prefetchCount = prefetchCount;
-    }
-
-    public int getInitialConcurrentConsumers() {
-        return initialConcurrentConsumers;
-    }
-
-    public void setInitialConcurrentConsumers(final int initialConcurrentConsumers) {
-        this.initialConcurrentConsumers = initialConcurrentConsumers;
-    }
-
-    public int getMaxConcurrentConsumers() {
-        return maxConcurrentConsumers;
-    }
-
-    public void setMaxConcurrentConsumers(final int maxConcurrentConsumers) {
-        this.maxConcurrentConsumers = maxConcurrentConsumers;
-    }
-
     public boolean isMissingQueuesFatal() {
         return missingQueuesFatal;
     }
@@ -172,14 +116,6 @@ public class AmqpProperties {
 
     public String getReceiverQueue() {
         return receiverQueue;
-    }
-
-    public int getRequestedHeartBeat() {
-        return requestedHeartBeat;
-    }
-
-    public void setRequestedHeartBeat(final int requestedHeartBeat) {
-        this.requestedHeartBeat = requestedHeartBeat;
     }
 
     public void setReceiverQueue(final String receiverQueue) {
