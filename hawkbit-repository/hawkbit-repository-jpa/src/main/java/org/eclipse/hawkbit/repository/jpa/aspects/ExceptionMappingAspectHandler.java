@@ -18,7 +18,6 @@ import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.eclipse.hawkbit.exception.GenericSpServerException;
 import org.eclipse.hawkbit.repository.exception.ConcurrentModificationException;
-import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.slf4j.Logger;
@@ -67,7 +66,6 @@ public class ExceptionMappingAspectHandler implements Ordered {
         MAPPED_EXCEPTION_ORDER.add(DataIntegrityViolationException.class);
         MAPPED_EXCEPTION_ORDER.add(OptimisticLockingFailureException.class);
         MAPPED_EXCEPTION_ORDER.add(AccessDeniedException.class);
-        MAPPED_EXCEPTION_ORDER.add(javax.validation.ConstraintViolationException.class);
 
         EXCEPTION_MAPPING.put(DuplicateKeyException.class.getName(), EntityAlreadyExistsException.class.getName());
         EXCEPTION_MAPPING.put(DataIntegrityViolationException.class.getName(),
@@ -76,8 +74,6 @@ public class ExceptionMappingAspectHandler implements Ordered {
         EXCEPTION_MAPPING.put(OptimisticLockingFailureException.class.getName(),
                 ConcurrentModificationException.class.getName());
         EXCEPTION_MAPPING.put(AccessDeniedException.class.getName(), InsufficientPermissionException.class.getName());
-        EXCEPTION_MAPPING.put(javax.validation.ConstraintViolationException.class.getName(),
-                ConstraintViolationException.class.getName());
 
     }
 
@@ -107,6 +103,10 @@ public class ExceptionMappingAspectHandler implements Ordered {
 
         if (translatedAccessException == null) {
             translatedAccessException = ex;
+        }
+
+        if (translatedAccessException instanceof javax.validation.ConstraintViolationException) {
+            throw translatedAccessException;
         }
 
         Exception mappingException = translatedAccessException;
