@@ -64,7 +64,6 @@ import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,7 +93,6 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
 
     @Column(name = "controller_id", length = 64)
     @Size(min = 1, max = 64)
-    @NotEmpty
     @Pattern(regexp = "[.\\S]*", message = "has whitespaces which are not allowed")
     private String controllerId;
 
@@ -114,8 +112,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
      * with this security token.
      */
     @Column(name = "sec_token", updatable = true, nullable = false, length = 128)
-    @Size(max = 128)
-    @NotEmpty
+    @Size(min = 1, max = 128)
     private String securityToken;
 
     @CascadeOnDelete

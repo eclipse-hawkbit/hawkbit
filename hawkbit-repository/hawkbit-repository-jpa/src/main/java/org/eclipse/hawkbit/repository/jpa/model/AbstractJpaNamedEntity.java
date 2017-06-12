@@ -14,7 +14,6 @@ import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
-import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * {@link TenantAwareBaseEntity} extension for all entities that are named in
@@ -28,8 +27,7 @@ public abstract class AbstractJpaNamedEntity extends AbstractJpaTenantAwareBaseE
     private static final long serialVersionUID = 1L;
 
     @Column(name = "name", nullable = false, length = 64)
-    @Size(max = 64)
-    @NotEmpty
+    @Size(min = 1, max = 64)
     private String name;
 
     @Column(name = "description", nullable = true, length = 512)

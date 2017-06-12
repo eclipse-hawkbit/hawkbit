@@ -356,7 +356,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     @Description("Ensures that target update request fails is updated value fails against a constraint.")
     public void updateTargetDescriptionFailsIfInvalidLength() throws Exception {
         final String knownControllerId = "123";
-        final String knownNewDescription = RandomStringUtils.randomAlphabetic(520);
+        final String knownNewDescription = RandomStringUtils.randomAlphabetic(513);
         final String knownNameNotModiy = "nameNotModiy";
         final String body = new JSONObject().put("description", knownNewDescription).toString();
 

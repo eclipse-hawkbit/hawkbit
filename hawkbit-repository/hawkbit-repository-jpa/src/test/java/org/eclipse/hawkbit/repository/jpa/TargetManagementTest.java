@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolationException;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
@@ -178,19 +179,13 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verify that a target with empty controller id cannot be created")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void createTargetWithNoControllerId() {
-        try {
-            targetManagement.createTarget(entityFactory.target().create().controllerId(""));
-            fail("target with empty controller id should not be created");
-        } catch (final ConstraintViolationException e) {
-            // ok
-        }
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement.createTarget(entityFactory.target().create().controllerId("")))
+                .as("target with empty controller id should not be created");
 
-        try {
-            targetManagement.createTarget(entityFactory.target().create().controllerId(null));
-            fail("target with empty controller id should not be created");
-        } catch (final ConstraintViolationException e) {
-            // ok
-        }
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement.createTarget(entityFactory.target().create().controllerId(null)))
+                .as("target with null controller id should not be created");
     }
 
     @Test
@@ -248,6 +243,25 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         } catch (final ConstraintViolationException e) {
             // ok
         }
+
+    }
+
+    @Test
+    @Description("Verify that a target with cannot be created or updated with a field that is to long")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
+    public void createAndUpdateTargetWithTooLongField() {
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement.createTarget(
+                        entityFactory.target().create().controllerId(RandomStringUtils.randomAlphanumeric(65))))
+                .as("target with too long controller id should not be created");
+
+        targetManagement.createTarget(entityFactory.target().create().controllerId("a")
+                .description(RandomStringUtils.randomAlphanumeric(512)));
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement.updateTarget(
+                        entityFactory.target().update("a").description(RandomStringUtils.randomAlphanumeric(513))))
+                .as("target with too long description should not be updated");
 
     }
 
