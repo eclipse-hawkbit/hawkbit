@@ -76,7 +76,7 @@ public class MongoDBArtifactStore implements ArtifactRepository {
 
     private final GridFsOperations gridFs;
 
-    protected MongoDBArtifactStore(final GridFsOperations gridFs) {
+    MongoDBArtifactStore(final GridFsOperations gridFs) {
         this.gridFs = gridFs;
     }
 

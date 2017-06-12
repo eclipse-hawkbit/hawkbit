@@ -16,8 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 /**
@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @ConditionalOnProperty(prefix = "hawkbit.device.simulator", name = "autostart", matchIfMissing = true)
-public class SimulatorStartup implements ApplicationListener<ContextRefreshedEvent> {
+public class SimulatorStartup implements ApplicationListener<ApplicationReadyEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimulatorStartup.class);
 
     @Autowired
@@ -42,7 +42,7 @@ public class SimulatorStartup implements ApplicationListener<ContextRefreshedEve
     private AmqpProperties amqpProperties;
 
     @Override
-    public void onApplicationEvent(final ContextRefreshedEvent event) {
+    public void onApplicationEvent(final ApplicationReadyEvent event) {
         simulationProperties.getAutostarts().forEach(autostart -> {
             for (int i = 0; i < autostart.getAmount(); i++) {
                 final String deviceId = autostart.getName() + i;
