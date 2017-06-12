@@ -64,16 +64,17 @@ public class ArtifactFilesystemRepository implements ArtifactRepository {
     }
 
     @Override
-    public ArtifactFilesystem store(final InputStream content, final String filename, final String contentType) {
-        return store(content, filename, contentType, null);
+    public ArtifactFilesystem store(final String tenant, final InputStream content, final String filename,
+            final String contentType) {
+        return store(tenant, content, filename, contentType, null);
     }
 
     @Override
     // suppress warning, of not strong enough hashing algorithm, SHA-1 and MD5
     // is not used security related
     @SuppressWarnings("squid:S2070")
-    public ArtifactFilesystem store(final InputStream content, final String filename, final String contentType,
-            final DbArtifactHash hash) {
+    public ArtifactFilesystem store(final String tenant, final InputStream content, final String filename,
+            final String contentType, final DbArtifactHash hash) {
 
         final MessageDigest mdSHA1;
         final MessageDigest mdMD5;
@@ -86,17 +87,17 @@ public class ArtifactFilesystemRepository implements ArtifactRepository {
 
         final File file = createTempFile();
         final DbArtifact artifact = store(content, contentType, hash, mdSHA1, mdMD5, file);
-        return renameFileToSHA1Naming(file, artifact);
+        return renameFileToSHA1Naming(tenant, file, artifact);
     }
 
     @Override
-    public void deleteBySha1(final String sha1Hash) {
-        FileUtils.deleteQuietly(getFile(sha1Hash));
+    public void deleteBySha1(final String tenant, final String sha1Hash) {
+        FileUtils.deleteQuietly(getFile(tenant, sha1Hash));
     }
 
     @Override
-    public ArtifactFilesystem getArtifactBySha1(final String sha1) {
-        final File file = getFile(sha1);
+    public ArtifactFilesystem getArtifactBySha1(final String tenant, final String sha1) {
+        final File file = getFile(tenant, sha1);
         if (!file.exists()) {
             return null;
         }
@@ -131,8 +132,8 @@ public class ArtifactFilesystemRepository implements ArtifactRepository {
         return artifact;
     }
 
-    private ArtifactFilesystem renameFileToSHA1Naming(final File file, final DbArtifact artifact) {
-        final File fileSHA1Naming = getFile(artifact.getHashes().getSha1());
+    private ArtifactFilesystem renameFileToSHA1Naming(final String tenant, final File file, final DbArtifact artifact) {
+        final File fileSHA1Naming = getFile(tenant, artifact.getHashes().getSha1());
         final ArtifactFilesystem fileSystemArtifact = new ArtifactFilesystem(fileSHA1Naming);
         if (fileSHA1Naming.exists()) {
             FileUtils.deleteQuietly(file);
@@ -179,23 +180,28 @@ public class ArtifactFilesystemRepository implements ArtifactRepository {
         }
     }
 
-    private File getFile(final String sha1) {
-        final File aritfactDirectory = getSha1DirectoryPath(sha1).toFile();
+    private File getFile(final String tenant, final String sha1) {
+        final File aritfactDirectory = getSha1DirectoryPath(tenant, sha1).toFile();
         aritfactDirectory.mkdirs();
         return new File(aritfactDirectory, sha1);
     }
 
-    private Path getSha1DirectoryPath(final String sha1) {
+    private Path getSha1DirectoryPath(final String tenant, final String sha1) {
         final int length = sha1.length();
         final List<String> folders = Splitter.fixedLength(2).splitToList(sha1.substring(length - 4, length));
         final String folder1 = folders.get(0);
         final String folder2 = folders.get(1);
-        return Paths.get(artifactResourceProperties.getPath(), folder1, folder2);
+        return Paths.get(artifactResourceProperties.getPath(), tenant.toUpperCase(), folder1, folder2);
     }
 
     private DigestOutputStream openFileOutputStream(final File file, final MessageDigest mdSHA1,
             final MessageDigest mdMD5) throws FileNotFoundException {
         return new DigestOutputStream(
                 new DigestOutputStream(new BufferedOutputStream(new FileOutputStream(file)), mdMD5), mdSHA1);
+    }
+
+    @Override
+    public void deleteTenant(final String tenant) {
+        FileUtils.deleteQuietly(Paths.get(artifactResourceProperties.getPath(), tenant.toUpperCase()).toFile());
     }
 }

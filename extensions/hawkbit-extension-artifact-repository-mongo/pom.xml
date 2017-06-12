@@ -54,6 +54,11 @@
          <artifactId>allure-junit-adaptor</artifactId>
          <scope>test</scope>
       </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-logging</artifactId>
+         <scope>test</scope>
+      </dependency>
       <!-- MongoDB -->
       <dependency>
          <groupId>de.flapdoodle.embed</groupId>

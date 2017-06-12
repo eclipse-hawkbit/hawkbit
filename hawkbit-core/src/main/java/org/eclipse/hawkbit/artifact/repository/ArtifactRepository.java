@@ -10,8 +10,11 @@ package org.eclipse.hawkbit.artifact.repository;
 
 import java.io.InputStream;
 
+import javax.validation.constraints.NotNull;
+
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * ArtifactRepository service interface.
@@ -39,11 +42,14 @@ public interface ArtifactRepository {
      * @throws ArtifactStoreException
      *             in case storing of the artifact was not successful
      */
-    DbArtifact store(final InputStream content, final String filename, final String contentType);
+    DbArtifact store(@NotEmpty String tenant, @NotNull InputStream content, @NotEmpty String filename,
+            String contentType);
 
     /**
      * Stores an artifact into the repository.
      * 
+     * @param tenant
+     *            the tenant to store the artifact
      * @param content
      *            the content to store
      * @param filename
@@ -63,7 +69,8 @@ public interface ArtifactRepository {
      *             in case {@code hash} is provided and not matching to the
      *             calculated hashes during storing
      */
-    DbArtifact store(final InputStream content, final String filename, final String contentType, DbArtifactHash hash);
+    DbArtifact store(@NotEmpty String tenant, @NotNull InputStream content, @NotEmpty String filename,
+            String contentType, DbArtifactHash hash);
 
     /**
      * Deletes an artifact by its SHA1 hash.
@@ -75,7 +82,7 @@ public interface ArtifactRepository {
      * @throws MethodNotSupportedException
      *             if implementation does not support the operation
      */
-    void deleteBySha1(final String sha1Hash);
+    void deleteBySha1(@NotEmpty String tenant, @NotEmpty String sha1Hash);
 
     /**
      * Retrieves a {@link DbArtifact} from the store by it's SHA1 hash.
@@ -87,5 +94,7 @@ public interface ArtifactRepository {
      * @throws MethodNotSupportedException
      *             if implementation does not support the operation
      */
-    DbArtifact getArtifactBySha1(String sha1Hash);
+    DbArtifact getArtifactBySha1(@NotEmpty String tenant, @NotEmpty String sha1Hash);
+
+    void deleteTenant(@NotEmpty String tenant);
 }

@@ -30,8 +30,10 @@ import com.amazonaws.RequestClientOptions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.ByteStreams;
 
@@ -73,16 +75,17 @@ public class S3Repository implements ArtifactRepository {
     }
 
     @Override
-    public DbArtifact store(final InputStream content, final String filename, final String contentType) {
-        return store(content, filename, contentType, null);
+    public DbArtifact store(final String tenant, final InputStream content, final String filename,
+            final String contentType) {
+        return store(tenant, content, filename, contentType, null);
     }
 
     @Override
     // suppress warning, of not strong enough hashing algorithm, SHA-1 and MD5
     // is not used security related
     @SuppressWarnings("squid:S2070")
-    public DbArtifact store(final InputStream content, final String filename, final String contentType,
-            final DbArtifactHash hash) {
+    public DbArtifact store(final String tenant, final InputStream content, final String filename,
+            final String contentType, final DbArtifactHash hash) {
         final MessageDigest mdSHA1;
         final MessageDigest mdMD5;
         try {
@@ -102,7 +105,7 @@ public class S3Repository implements ArtifactRepository {
             final String sha1Hash16 = BaseEncoding.base16().lowerCase().encode(mdSHA1.digest());
             final String md5Hash16 = BaseEncoding.base16().lowerCase().encode(mdMD5.digest());
 
-            return store(sha1Hash16, md5Hash16, contentType, file, hash);
+            return store(tenant, sha1Hash16, md5Hash16, contentType, file, hash);
         } catch (final IOException e) {
             throw new ArtifactStoreException(e.getMessage(), e);
         } finally {
@@ -112,9 +115,9 @@ public class S3Repository implements ArtifactRepository {
         }
     }
 
-    private DbArtifact store(final String sha1Hash16, final String mdMD5Hash16, final String contentType,
-            final File file, final DbArtifactHash hash) {
-        final S3Artifact s3Artifact = createS3Artifact(sha1Hash16, mdMD5Hash16, contentType, file);
+    private DbArtifact store(final String tenant, final String sha1Hash16, final String mdMD5Hash16,
+            final String contentType, final File file, final DbArtifactHash hash) {
+        final S3Artifact s3Artifact = createS3Artifact(tenant, sha1Hash16, mdMD5Hash16, contentType, file);
         checkHashes(s3Artifact, hash);
 
         LOG.info("Storing file {} with length {} to AWS S3 bucket {} as SHA1 {}", file.getName(), file.length(),
@@ -137,14 +140,15 @@ public class S3Repository implements ArtifactRepository {
         }
     }
 
-    private S3Artifact createS3Artifact(final String sha1Hash16, final String mdMD5Hash16, final String contentType,
-            final File file) {
-        final S3Artifact s3Artifact = new S3Artifact(amazonS3, s3Properties, sha1Hash16);
+    private S3Artifact createS3Artifact(final String tenant, final String sha1Hash, final String mdMD5Hash16,
+            final String contentType, final File file) {
+        final String key = objectKey(tenant, sha1Hash);
+        final S3Artifact s3Artifact = new S3Artifact(amazonS3, s3Properties, key);
         s3Artifact.setContentType(contentType);
-        s3Artifact.setArtifactId(sha1Hash16);
+        s3Artifact.setArtifactId(sha1Hash);
         s3Artifact.setSize(file.length());
         s3Artifact.setContentType(contentType);
-        s3Artifact.setHashes(new DbArtifactHash(sha1Hash16, mdMD5Hash16));
+        s3Artifact.setHashes(new DbArtifactHash(sha1Hash, mdMD5Hash16));
         return s3Artifact;
     }
 
@@ -162,26 +166,34 @@ public class S3Repository implements ArtifactRepository {
     }
 
     @Override
-    public void deleteBySha1(final String sha1Hash) {
-        LOG.info("Deleting S3 object from bucket {} and key {}", s3Properties.getBucketName(), sha1Hash);
-        amazonS3.deleteObject(new DeleteObjectRequest(s3Properties.getBucketName(), sha1Hash));
+    public void deleteBySha1(final String tenant, final String sha1Hash) {
+        final String key = objectKey(tenant, sha1Hash);
+
+        LOG.info("Deleting S3 object from bucket {} and key {}", s3Properties.getBucketName(), key);
+        amazonS3.deleteObject(new DeleteObjectRequest(s3Properties.getBucketName(), key));
+    }
+
+    private static String objectKey(final String tenant, final String sha1Hash) {
+        return tenant.toUpperCase() + "/" + sha1Hash;
     }
 
     @Override
-    public DbArtifact getArtifactBySha1(final String sha1) {
-        LOG.info("Retrieving S3 object from bucket {} and key {}", s3Properties.getBucketName(), sha1);
-        final S3Object s3Object = amazonS3.getObject(s3Properties.getBucketName(), sha1);
+    public DbArtifact getArtifactBySha1(final String tenant, final String sha1Hash) {
+        final String key = objectKey(tenant, sha1Hash);
+
+        LOG.info("Retrieving S3 object from bucket {} and key {}", s3Properties.getBucketName(), key);
+        final S3Object s3Object = amazonS3.getObject(s3Properties.getBucketName(), key);
         if (s3Object == null) {
             return null;
         }
 
         final ObjectMetadata s3ObjectMetadata = s3Object.getObjectMetadata();
 
-        final S3Artifact s3Artifact = new S3Artifact(amazonS3, s3Properties, sha1);
-        s3Artifact.setArtifactId(sha1);
+        final S3Artifact s3Artifact = new S3Artifact(amazonS3, s3Properties, key);
+        s3Artifact.setArtifactId(sha1Hash);
         s3Artifact.setSize(s3ObjectMetadata.getContentLength());
         // the MD5Content is stored in the ETag
-        s3Artifact.setHashes(new DbArtifactHash(sha1,
+        s3Artifact.setHashes(new DbArtifactHash(sha1Hash,
                 BaseEncoding.base16().lowerCase().encode(BaseEncoding.base64().decode(s3ObjectMetadata.getETag()))));
         s3Artifact.setContentType(s3ObjectMetadata.getContentType());
         return s3Artifact;
@@ -219,5 +231,22 @@ public class S3Repository implements ArtifactRepository {
 
     private boolean exists(final String sha1) {
         return amazonS3.doesObjectExist(s3Properties.getBucketName(), sha1);
+    }
+
+    @Override
+    public void deleteTenant(final String tenant) {
+        final String folder = tenant.toUpperCase();
+
+        LOG.info("Deleting S3 object folder (tenant) from bucket {} and key {}", s3Properties.getBucketName(), folder);
+
+        // Delete artifacts
+        ObjectListing objects = amazonS3.listObjects(s3Properties.getBucketName(), folder + "/");
+        do {
+            for (final S3ObjectSummary objectSummary : objects.getObjectSummaries()) {
+                amazonS3.deleteObject(s3Properties.getBucketName(), objectSummary.getKey());
+            }
+            objects = amazonS3.listNextBatchOfObjects(objects);
+        } while (objects.isTruncated());
+
     }
 }

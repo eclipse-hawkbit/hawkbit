@@ -13,6 +13,7 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
+import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -502,16 +503,13 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         return new JpaControllerManagement();
     }
 
-    /**
-     * {@link JpaArtifactManagement} bean.
-     *
-     * @return a new {@link ArtifactManagement}
-     */
-
     @Bean
     @ConditionalOnMissingBean
-    ArtifactManagement artifactManagement() {
-        return new JpaArtifactManagement();
+    ArtifactManagement artifactManagement(final LocalArtifactRepository localArtifactRepository,
+            final SoftwareModuleRepository softwareModuleRepository, final ArtifactRepository artifactRepository,
+            final TenantAware tenantAware) {
+        return new JpaArtifactManagement(localArtifactRepository, softwareModuleRepository, artifactRepository,
+                tenantAware);
     }
 
     /**
