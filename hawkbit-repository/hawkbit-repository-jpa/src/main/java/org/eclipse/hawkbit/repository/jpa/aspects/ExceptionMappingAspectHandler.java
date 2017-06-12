@@ -18,6 +18,7 @@ import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.eclipse.hawkbit.exception.GenericSpServerException;
 import org.eclipse.hawkbit.repository.exception.ConcurrentModificationException;
+import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.slf4j.Logger;
@@ -66,6 +67,7 @@ public class ExceptionMappingAspectHandler implements Ordered {
         MAPPED_EXCEPTION_ORDER.add(DataIntegrityViolationException.class);
         MAPPED_EXCEPTION_ORDER.add(OptimisticLockingFailureException.class);
         MAPPED_EXCEPTION_ORDER.add(AccessDeniedException.class);
+        MAPPED_EXCEPTION_ORDER.add(javax.validation.ConstraintViolationException.class);
 
         EXCEPTION_MAPPING.put(DuplicateKeyException.class.getName(), EntityAlreadyExistsException.class.getName());
         EXCEPTION_MAPPING.put(DataIntegrityViolationException.class.getName(),
@@ -74,6 +76,9 @@ public class ExceptionMappingAspectHandler implements Ordered {
         EXCEPTION_MAPPING.put(OptimisticLockingFailureException.class.getName(),
                 ConcurrentModificationException.class.getName());
         EXCEPTION_MAPPING.put(AccessDeniedException.class.getName(), InsufficientPermissionException.class.getName());
+        EXCEPTION_MAPPING.put(javax.validation.ConstraintViolationException.class.getName(),
+                ConstraintViolationException.class.getName());
+
     }
 
     /**
@@ -125,7 +130,7 @@ public class ExceptionMappingAspectHandler implements Ordered {
         throw mappingException;
     }
 
-    private DataAccessException translateEclipseLinkExceptionIfPossible(final Exception exception) {
+    private Exception translateEclipseLinkExceptionIfPossible(final Exception exception) {
         final DataAccessException translatedAccessException = jpaVendorAdapter.getJpaDialect()
                 .translateExceptionIfPossible((RuntimeException) exception);
         return translateSQLStateExceptionIfPossible(translatedAccessException);
@@ -142,26 +147,26 @@ public class ExceptionMappingAspectHandler implements Ordered {
      *            the base access exception from jpa
      * @return the translated accessException
      */
-    private DataAccessException translateSQLStateExceptionIfPossible(final DataAccessException accessException) {
+    private Exception translateSQLStateExceptionIfPossible(final DataAccessException accessException) {
         if (!(accessException instanceof JpaSystemException)) {
             return accessException;
         }
 
-        final SQLException ex = findSqlException((JpaSystemException) accessException);
+        final SQLException ex = findException((JpaSystemException) accessException, SQLException.class);
 
-        if (ex == null) {
-            return accessException;
+        if (ex != null) {
+            return sqlStateExceptionTranslator.translate(null, null, ex);
         }
 
-        return sqlStateExceptionTranslator.translate(null, null, ex);
+        return findException(accessException, javax.validation.ConstraintViolationException.class);
     }
 
-    private static SQLException findSqlException(final JpaSystemException jpaSystemException) {
-        Throwable exception = jpaSystemException.getCause();
+    private static <T> T findException(final Exception ex, final Class<T> type) {
+        Throwable exception = ex.getCause();
         while (exception != null) {
             final Throwable cause = exception.getCause();
-            if (cause instanceof SQLException) {
-                return (SQLException) cause;
+            if (cause != null && type.equals(cause.getClass())) {
+                return (T) cause;
             }
             exception = cause;
         }
