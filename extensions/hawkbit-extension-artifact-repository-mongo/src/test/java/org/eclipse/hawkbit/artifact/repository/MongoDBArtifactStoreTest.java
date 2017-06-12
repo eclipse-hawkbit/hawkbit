@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.google.common.io.BaseEncoding;
@@ -35,8 +34,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Artifact Store MongoDB")
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = { MongoDBArtifactStoreAutoConfiguration.class, TestConfiguration.class }, properties = {
-        "spring.data.mongodb.port=0", "spring.mongodb.embedded.version=3.4.4",
-        "logging.level.org.springframework.data.mongodb=DEBUG" }, webEnvironment = WebEnvironment.NONE)
+        "spring.data.mongodb.port=0", "spring.mongodb.embedded.version=3.4.4" })
 public class MongoDBArtifactStoreTest {
     private static final String TENANT = "test_tenant";
 
