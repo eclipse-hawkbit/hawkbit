@@ -90,8 +90,9 @@ public class S3RepositoryTest {
         storeRandomBytes(rndBytes, knownContentType);
 
         // verify
-        Mockito.verify(amazonS3Mock).putObject(eq(s3Properties.getBucketName()), eq(knownSHA1),
-                inputStreamCaptor.capture(), objectMetaDataCaptor.capture());
+        Mockito.verify(amazonS3Mock).putObject(eq(s3Properties.getBucketName()),
+                eq(TENANT.toUpperCase() + "/" + knownSHA1), inputStreamCaptor.capture(),
+                objectMetaDataCaptor.capture());
 
         final ObjectMetadata recordedObjectMetadata = objectMetaDataCaptor.getValue();
         assertThat(recordedObjectMetadata.getContentType()).isEqualTo(knownContentType);
