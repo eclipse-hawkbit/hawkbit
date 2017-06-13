@@ -75,7 +75,8 @@ public interface ArtifactRepository {
     /**
      * Deletes an artifact by its SHA1 hash.
      * 
-     * 
+     * @param tenant
+     *            the tenant to store the artifact
      * @param sha1Hash
      *            the sha1-hash of the artifact to delete
      * 
@@ -87,6 +88,8 @@ public interface ArtifactRepository {
     /**
      * Retrieves a {@link DbArtifact} from the store by it's SHA1 hash.
      * 
+     * @param tenant
+     *            the tenant to store the artifact
      * @param sha1Hash
      *            the sha1-hash of the file to lookup.
      * @return The artifact file object or {@code null} if no file exists.
@@ -96,5 +99,11 @@ public interface ArtifactRepository {
      */
     DbArtifact getArtifactBySha1(@NotEmpty String tenant, @NotEmpty String sha1Hash);
 
-    void deleteTenant(@NotEmpty String tenant);
+    /**
+     * Deletes all artifacts of given tenant.
+     * 
+     * @param tenant
+     *            to erase
+     */
+    void deleteByTenant(@NotEmpty String tenant);
 }

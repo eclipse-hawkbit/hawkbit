@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.validation.annotation.Validated;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.RequestClientOptions;
@@ -50,6 +51,7 @@ import com.google.common.io.ByteStreams;
  * across several buckets.
  * </p>
  */
+@Validated
 public class S3Repository implements ArtifactRepository {
 
     private static final Logger LOG = LoggerFactory.getLogger(S3Repository.class);
@@ -175,7 +177,7 @@ public class S3Repository implements ArtifactRepository {
     }
 
     private static String objectKey(final String tenant, final String sha1Hash) {
-        return tenant.toUpperCase() + "/" + sha1Hash;
+        return tenant.trim().toUpperCase() + "/" + sha1Hash;
     }
 
     @Override
@@ -235,7 +237,7 @@ public class S3Repository implements ArtifactRepository {
     }
 
     @Override
-    public void deleteTenant(final String tenant) {
+    public void deleteByTenant(final String tenant) {
         final String folder = tenant.toUpperCase();
 
         LOG.info("Deleting S3 object folder (tenant) from bucket {} and key {}", s3Properties.getBucketName(), folder);

@@ -253,7 +253,7 @@ public class MongoDBArtifactStore implements ArtifactRepository {
     }
 
     @Override
-    public void deleteTenant(final String tenant) {
+    public void deleteByTenant(final String tenant) {
         try {
             gridFs.delete(new Query().addCriteria(Criteria.where(TENANT_QUERY).is(sanitizeTenant(tenant))));
         } catch (final MongoClientException e) {

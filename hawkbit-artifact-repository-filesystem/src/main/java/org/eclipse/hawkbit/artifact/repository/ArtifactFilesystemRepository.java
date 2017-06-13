@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.validation.annotation.Validated;
 
 import com.google.common.base.Splitter;
 import com.google.common.io.BaseEncoding;
@@ -44,6 +45,7 @@ import com.google.common.io.Files;
  * are stored in different sub-directories based on the last four digits of the
  * SHA1-hash {@code (/basepath/[two digit sha1]/[two digit sha1])}.
  */
+@Validated
 public class ArtifactFilesystemRepository implements ArtifactRepository {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtifactFilesystemRepository.class);
@@ -191,7 +193,7 @@ public class ArtifactFilesystemRepository implements ArtifactRepository {
         final List<String> folders = Splitter.fixedLength(2).splitToList(sha1.substring(length - 4, length));
         final String folder1 = folders.get(0);
         final String folder2 = folders.get(1);
-        return Paths.get(artifactResourceProperties.getPath(), tenant.toUpperCase(), folder1, folder2);
+        return Paths.get(artifactResourceProperties.getPath(), sanitizeTenant(tenant), folder1, folder2);
     }
 
     private DigestOutputStream openFileOutputStream(final File file, final MessageDigest mdSHA1,
@@ -201,7 +203,11 @@ public class ArtifactFilesystemRepository implements ArtifactRepository {
     }
 
     @Override
-    public void deleteTenant(final String tenant) {
-        FileUtils.deleteQuietly(Paths.get(artifactResourceProperties.getPath(), tenant.toUpperCase()).toFile());
+    public void deleteByTenant(final String tenant) {
+        FileUtils.deleteQuietly(Paths.get(artifactResourceProperties.getPath(), sanitizeTenant(tenant)).toFile());
+    }
+
+    private static String sanitizeTenant(final String tenant) {
+        return tenant.trim().toUpperCase();
     }
 }

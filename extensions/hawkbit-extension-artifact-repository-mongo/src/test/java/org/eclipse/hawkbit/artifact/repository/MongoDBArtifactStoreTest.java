@@ -64,7 +64,7 @@ public class MongoDBArtifactStoreTest {
     }
 
     @Test
-    @Description("Deltes file from repoeitory identified ny SHA1 hash as filename.")
+    @Description("Deletes file from repository identified by SHA1 hash as filename.")
     public void deleteArtifactBySHA1Hash() throws NoSuchAlgorithmException {
         final int filelengthBytes = 128;
         final String filename = "testfile.json";
@@ -77,7 +77,7 @@ public class MongoDBArtifactStoreTest {
     }
 
     @Test
-    @Description("Verfies that all data of a tenant is erased if repositoty is asked to do so. "
+    @Description("Verfies that all data of a tenant is erased if repository is asked to do so. "
             + "Data of other tenants is not affected.")
     public void deleteTenant() throws NoSuchAlgorithmException {
         final int filelengthBytes = 128;
@@ -87,7 +87,8 @@ public class MongoDBArtifactStoreTest {
         final String shaDeleted = storeAndVerify(TENANT, filelengthBytes, filename, contentType);
         final String shaUndeleted = storeAndVerify("another_tenant", filelengthBytes, filename, contentType);
 
-        artifactStoreUnderTest.deleteTenant(TENANT);
+        artifactStoreUnderTest.deleteByTenant("tenant_that_does_not_exist");
+        artifactStoreUnderTest.deleteByTenant(TENANT);
         assertThat(artifactStoreUnderTest.getArtifactBySha1(TENANT, shaDeleted)).isNull();
         assertThat(artifactStoreUnderTest.getArtifactBySha1("another_tenant", shaUndeleted)).isNotNull();
     }

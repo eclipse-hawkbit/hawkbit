@@ -72,7 +72,7 @@ public class ArtifactFilesystemRepositoryTest {
     public void deleteStoredArtifactOftenant() {
         final ArtifactFilesystem artifact = storeRandomArtifact(randomBytes());
 
-        artifactFilesystemRepository.deleteTenant(TENANT);
+        artifactFilesystemRepository.deleteByTenant(TENANT);
 
         assertThat(artifactFilesystemRepository.getArtifactBySha1(TENANT, artifact.getHashes().getSha1())).isNull();
     }

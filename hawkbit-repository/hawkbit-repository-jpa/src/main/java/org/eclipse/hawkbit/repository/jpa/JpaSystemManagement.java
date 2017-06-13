@@ -240,7 +240,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
             distributionSetRepository.deleteByTenant(tenant);
             distributionSetTypeRepository.deleteByTenant(tenant);
             softwareModuleRepository.deleteByTenant(tenant);
-            artifactRepository.deleteTenant(tenant);
+            artifactRepository.deleteByTenant(tenant);
             softwareModuleTypeRepository.deleteByTenant(tenant);
             return null;
         });
