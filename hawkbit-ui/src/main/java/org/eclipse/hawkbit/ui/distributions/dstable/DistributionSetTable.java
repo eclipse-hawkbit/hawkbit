@@ -21,9 +21,7 @@ import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
@@ -355,46 +353,10 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             /* Invalid type of the software module */
             notification.displayValidationError(i18n.getMessage("message.software.dist.type.notallowed",
                     HawkbitCommonUtil.concatStrings(":", sm.getName(), sm.getVersion()),
-                    HawkbitCommonUtil.concatStrings(":", ds.getName(), ds.getVersion()),
-                    getAllowedSoftwareModuleTypes(ds.getType()), sm.getType().getName()));
+                    HawkbitCommonUtil.concatStrings(":", ds.getName(), ds.getVersion()), sm.getType().getName()));
             return false;
         }
         return true;
-    }
-
-    private static StringBuilder getAllowedSoftwareModuleTypes(final DistributionSetType distributionSetType) {
-        final StringBuilder allowedSoftwareModuleTypes = new StringBuilder();
-        appendMandatorySoftwareModuleTypes(distributionSetType.getMandatoryModuleTypes(), allowedSoftwareModuleTypes);
-        appendOptionalSoftwareModuleTypes(distributionSetType.getOptionalModuleTypes(), allowedSoftwareModuleTypes);
-        beautifyTextForErrorMessage(allowedSoftwareModuleTypes);
-        return allowedSoftwareModuleTypes;
-    }
-
-    private static void appendMandatorySoftwareModuleTypes(final Set<SoftwareModuleType> mandatorySoftwareModuleTypes,
-            final StringBuilder allowedSoftwareModuleTypes) {
-        mandatorySoftwareModuleTypes
-                .forEach(mandatory -> appendSoftwareModuleType(allowedSoftwareModuleTypes, mandatory));
-    }
-
-    private static void appendOptionalSoftwareModuleTypes(final Set<SoftwareModuleType> optionalSoftwareModuleTypes,
-            final StringBuilder allowedSoftwareModuleTypes) {
-        optionalSoftwareModuleTypes.forEach(optional -> appendSoftwareModuleType(allowedSoftwareModuleTypes, optional));
-    }
-
-    private static void appendSoftwareModuleType(final StringBuilder allowedSoftwareModuleTypes,
-            final SoftwareModuleType softwareModuleType) {
-        if (allowedSoftwareModuleTypes.length() > 0) {
-            allowedSoftwareModuleTypes.append(", ");
-        }
-        allowedSoftwareModuleTypes.append(softwareModuleType.getName());
-    }
-
-    private static void beautifyTextForErrorMessage(final StringBuilder allowedSoftwareModuleTypes) {
-        final int lastSoftwareModuleTypesSeparator = allowedSoftwareModuleTypes.lastIndexOf(", ");
-        if (lastSoftwareModuleTypesSeparator != -1) {
-            allowedSoftwareModuleTypes.replace(lastSoftwareModuleTypesSeparator, lastSoftwareModuleTypesSeparator + 1,
-                    " or");
-        }
     }
 
     private boolean isSoftwareModuleDragged(final Long distId, final SoftwareModule sm) {
