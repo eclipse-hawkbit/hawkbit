@@ -92,7 +92,7 @@ public class MongoDBArtifactStore implements ArtifactRepository {
     public DbArtifact getArtifactBySha1(final String tenant, final String sha1Hash) {
 
         return map(gridFs.findOne(new Query()
-                .addCriteria(Criteria.where(FILENAME).is(sha1Hash).and(TENANT_QUERY).is(tenant.toUpperCase()))));
+                .addCriteria(Criteria.where(FILENAME).is(sha1Hash).and(TENANT_QUERY).is(sanitizeTenant(tenant)))));
     }
 
     @Override
@@ -122,11 +122,15 @@ public class MongoDBArtifactStore implements ArtifactRepository {
         }
     }
 
+    private static String sanitizeTenant(final String tenant) {
+        return tenant.trim().toUpperCase();
+    }
+
     @Override
     public void deleteBySha1(final String tenant, final String sha1Hash) {
         try {
             deleteArtifact(gridFs.findOne(new Query()
-                    .addCriteria(Criteria.where(FILENAME).is(sha1Hash).and(TENANT_QUERY).is(tenant.toUpperCase()))));
+                    .addCriteria(Criteria.where(FILENAME).is(sha1Hash).and(TENANT_QUERY).is(sanitizeTenant(tenant)))));
         } catch (final MongoException e) {
             throw new ArtifactStoreException(e.getMessage(), e);
         }
@@ -143,20 +147,21 @@ public class MongoDBArtifactStore implements ArtifactRepository {
 
     }
 
-    private DbArtifact store(final String tenant, final InputStream content, final String contentType,
-            final OutputStream os, final File tempFile, final DbArtifactHash hash) {
+    private DbArtifact store(final String t, final InputStream content, final String contentType, final OutputStream os,
+            final File tempFile, final DbArtifactHash hash) {
         final GridFsArtifact storedArtifact;
+        final String tenant = sanitizeTenant(t);
         try {
             final String sha1Hash = computeSHA1Hash(content, os, hash != null ? hash.getSha1() : null);
             // upload if it does not exist already, check if file exists, not
             // tenant specific.
-            final GridFSDBFile result = gridFs.findOne(new Query()
-                    .addCriteria(Criteria.where(FILENAME).is(sha1Hash).and(TENANT_QUERY).is(tenant.toUpperCase())));
-            if (null == result) {
+            final GridFSDBFile result = gridFs.findOne(
+                    new Query().addCriteria(Criteria.where(FILENAME).is(sha1Hash).and(TENANT_QUERY).is(tenant)));
+            if (result == null) {
                 try (FileInputStream inputStream = new FileInputStream(tempFile)) {
                     final BasicDBObject metadata = new BasicDBObject();
                     metadata.put(SHA1, sha1Hash);
-                    metadata.put(TENANT, tenant.toUpperCase());
+                    metadata.put(TENANT, tenant);
                     storedArtifact = map(gridFs.store(inputStream, sha1Hash, contentType, metadata));
                 }
             } else {
@@ -250,7 +255,7 @@ public class MongoDBArtifactStore implements ArtifactRepository {
     @Override
     public void deleteTenant(final String tenant) {
         try {
-            gridFs.delete(new Query().addCriteria(Criteria.where(TENANT_QUERY).is(tenant.toUpperCase())));
+            gridFs.delete(new Query().addCriteria(Criteria.where(TENANT_QUERY).is(sanitizeTenant(tenant))));
         } catch (final MongoClientException e) {
             throw new ArtifactStoreException(e.getMessage(), e);
         }

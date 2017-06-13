@@ -119,11 +119,12 @@ public class S3Repository implements ArtifactRepository {
             final String contentType, final File file, final DbArtifactHash hash) {
         final S3Artifact s3Artifact = createS3Artifact(tenant, sha1Hash16, mdMD5Hash16, contentType, file);
         checkHashes(s3Artifact, hash);
+        final String key = objectKey(tenant, sha1Hash16);
 
         LOG.info("Storing file {} with length {} to AWS S3 bucket {} as SHA1 {}", file.getName(), file.length(),
-                s3Properties.getBucketName(), sha1Hash16);
+                s3Properties.getBucketName(), key);
 
-        if (exists(sha1Hash16)) {
+        if (exists(key)) {
             LOG.debug("Artifact {} already exists on S3 bucket {}, don't need to upload twice", sha1Hash16,
                     s3Properties.getBucketName());
             return s3Artifact;
@@ -132,7 +133,7 @@ public class S3Repository implements ArtifactRepository {
         try (final InputStream inputStream = new BufferedInputStream(new FileInputStream(file),
                 RequestClientOptions.DEFAULT_STREAM_BUFFER_SIZE)) {
             final ObjectMetadata objectMetadata = createObjectMetadata(mdMD5Hash16, contentType, file);
-            amazonS3.putObject(s3Properties.getBucketName(), sha1Hash16, inputStream, objectMetadata);
+            amazonS3.putObject(s3Properties.getBucketName(), key, inputStream, objectMetadata);
 
             return s3Artifact;
         } catch (final IOException | AmazonClientException e) {
