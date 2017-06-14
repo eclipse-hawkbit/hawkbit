@@ -8,10 +8,13 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Builder to create a new {@link Target} entry. Defines all fields that can be
@@ -26,28 +29,30 @@ public interface TargetCreate {
      *            for {@link Target#getControllerId()}
      * @return updated builder instance
      */
-    TargetCreate controllerId(@NotEmpty String controllerId);
+    TargetCreate controllerId(@Size(min = 1, max = Target.CONTROLLER_ID_MAX_SIZE) @NotNull String controllerId);
 
     /**
      * @param name
-     *            for {@link Target#getName()}
+     *            for {@link Target#getName()} filled with
+     *            {@link #controllerId(String)} as default if not set explicitly
      * @return updated builder instance
      */
-    TargetCreate name(@NotEmpty String name);
+    TargetCreate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
 
     /**
      * @param description
      *            for {@link Target#getDescription()}
      * @return updated builder instance
      */
-    TargetCreate description(String description);
+    TargetCreate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
      * @param securityToken
-     *            for {@link Target#getSecurityToken()}
+     *            for {@link Target#getSecurityToken()} is generated with a
+     *            random sequence as default if not set explicitly
      * @return updated builder instance
      */
-    TargetCreate securityToken(String securityToken);
+    TargetCreate securityToken(@Size(min = 1, max = Target.SECURITY_TOKEN_MAX_SIZE) @NotNull String securityToken);
 
     /**
      * @param address
@@ -58,7 +63,7 @@ public interface TargetCreate {
      * 
      * @return updated builder instance
      */
-    TargetCreate address(String address);
+    TargetCreate address(@Size(max = Target.ADDRESS_MAX_SIZE) String address);
 
     /**
      * @param lastTargetQuery
@@ -69,10 +74,12 @@ public interface TargetCreate {
 
     /**
      * @param status
-     *            for {@link Target#getUpdateStatus()}
+     *            for {@link Target#getUpdateStatus()} is
+     *            {@link TargetUpdateStatus#UNKNOWN} as default if not set
+     *            explicitly
      * @return updated builder instance
      */
-    TargetCreate status(TargetUpdateStatus status);
+    TargetCreate status(@NotNull TargetUpdateStatus status);
 
     /**
      * @return peek on current state of {@link Target} in the builder

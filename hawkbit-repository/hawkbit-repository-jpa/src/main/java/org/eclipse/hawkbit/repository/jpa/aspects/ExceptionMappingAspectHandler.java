@@ -26,6 +26,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.transaction.TransactionSystemException;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -73,13 +74,19 @@ public class ExceptionMappingAspectHandler implements Ordered {
      *            the thrown and catched exception
      * @throws Throwable
      */
-    //FIXME check to further reduce this
+    // FIXME check to further reduce this
     @AfterThrowing(pointcut = "( execution( * org.springframework.transaction..*.*(..)) "
             + " || execution( * org.eclipse.hawkbit.repository.*.*(..)) )", throwing = "ex")
     // Exception for squid:S00112, squid:S1162
     // It is a AspectJ proxy which deals with exceptions.
     @SuppressWarnings({ "squid:S00112", "squid:S1162" })
     public void catchAndWrapJpaExceptionsService(final Exception ex) throws Throwable {
+
+        // Workarround for EclipseLink pre-update where it does not throw
+        // ConstraintViolationException correctly
+        if (ex instanceof TransactionSystemException) {
+            throw findConstraintViolationException(ex);
+        }
 
         Exception mappingException = ex;
 
@@ -99,6 +106,19 @@ public class ExceptionMappingAspectHandler implements Ordered {
         }
 
         throw mappingException;
+    }
+
+    private static Exception findConstraintViolationException(final Exception rex) {
+        Throwable exception = rex;
+        do {
+            final Throwable cause = exception.getCause();
+            if (cause instanceof javax.validation.ConstraintViolationException) {
+                return (Exception) cause;
+            }
+            exception = cause;
+        } while (exception != null);
+
+        return rex;
     }
 
     @Override

@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.model;
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
@@ -20,7 +21,6 @@ import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.eclipse.persistence.annotations.Multitenant;
 import org.eclipse.persistence.annotations.MultitenantType;
 import org.eclipse.persistence.annotations.TenantDiscriminatorColumn;
-import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Holder of the base attributes common to all tenant aware entities.
@@ -33,8 +33,8 @@ public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEn
     private static final long serialVersionUID = 1L;
 
     @Column(name = "tenant", nullable = false, insertable = false, updatable = false, length = 40)
-    @Size(max = 40)
-    @NotEmpty
+    @Size(min = 1, max = 40)
+    @NotNull
     private String tenant;
 
     /**

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.validation.ConstraintViolationException;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -158,6 +159,12 @@ public interface TargetManagement {
      * @param create
      *            to be created
      * @return the created {@link Target}
+     * 
+     * @throws EntityAlreadyExistsException
+     *             given target already exists.
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link TargetCreate} for field constraints.
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET + SpringEvalExpressions.HAS_AUTH_OR
@@ -176,6 +183,9 @@ public interface TargetManagement {
      *
      * @throws EntityAlreadyExistsException
      *             of one of the given targets already exist.
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link TargetCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
     List<Target> createTargets(@NotNull Collection<TargetCreate> creates);
@@ -612,6 +622,9 @@ public interface TargetManagement {
      * 
      * @throws EntityNotFoundException
      *             if given target does not exist
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link TargetUpdate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)

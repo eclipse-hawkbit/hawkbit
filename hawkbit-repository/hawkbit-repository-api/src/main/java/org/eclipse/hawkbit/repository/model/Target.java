@@ -20,6 +20,20 @@ import java.util.concurrent.TimeUnit;
  * </p>
  */
 public interface Target extends NamedEntity {
+    /**
+     * Maximum length of controllerId.
+     */
+    public static final int CONTROLLER_ID_MAX_SIZE = 64;
+
+    /**
+     * Maximum length of securityToken.
+     */
+    public static final int SECURITY_TOKEN_MAX_SIZE = 128;
+
+    /**
+     * Maximum length of address.
+     */
+    public static final int ADDRESS_MAX_SIZE = 512;
 
     /**
      * @return business identifier of the {@link Target}
