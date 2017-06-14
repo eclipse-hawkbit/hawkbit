@@ -23,11 +23,11 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -118,13 +118,15 @@ public interface ControllerManagement {
     /**
      * Retrieves oldest {@link Action} that is active and assigned to a
      * {@link Target}.
+     * 
+     * For performance reasons this method does not throw
+     * {@link EntityNotFoundException} in case target with given controlelrId
+     * does not exist but will return an {@link Optional#empty()} instead.
      *
      * @param controllerId
      *            identifies the target to retrieve the actions from
      * @return a list of actions assigned to given target which are active
      * 
-     * @throws EntityNotFoundException
-     *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     Optional<Action> findOldestActiveActionByTarget(@NotNull String controllerId);

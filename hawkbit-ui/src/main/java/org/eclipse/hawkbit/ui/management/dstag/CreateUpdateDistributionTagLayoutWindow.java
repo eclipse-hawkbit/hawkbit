@@ -52,6 +52,10 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
 
     @Override
     protected void populateTagNameCombo() {
+        if (tagNameComboBox == null) {
+            return;
+        }
+
         tagNameComboBox.removeAllItems();
         final List<DistributionSetTag> distTagNameList = tagManagement
                 .findAllDistributionSetTags(new PageRequest(0, MAX_TAGS)).getContent();

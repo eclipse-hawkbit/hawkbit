@@ -28,9 +28,9 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -49,14 +49,22 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     private static final Logger LOG = LoggerFactory.getLogger(JpaArtifactManagement.class);
 
-    @Autowired
-    private LocalArtifactRepository localArtifactRepository;
+    private final LocalArtifactRepository localArtifactRepository;
 
-    @Autowired
-    private SoftwareModuleRepository softwareModuleRepository;
+    private final SoftwareModuleRepository softwareModuleRepository;
 
-    @Autowired
-    private ArtifactRepository artifactRepository;
+    private final ArtifactRepository artifactRepository;
+
+    private final TenantAware tenantAware;
+
+    JpaArtifactManagement(final LocalArtifactRepository localArtifactRepository,
+            final SoftwareModuleRepository softwareModuleRepository, final ArtifactRepository artifactRepository,
+            final TenantAware tenantAware) {
+        this.localArtifactRepository = localArtifactRepository;
+        this.softwareModuleRepository = softwareModuleRepository;
+        this.artifactRepository = artifactRepository;
+        this.tenantAware = tenantAware;
+    }
 
     private static Artifact checkForExistingArtifact(final String filename, final boolean overrideExisting,
             final SoftwareModule softwareModule) {
@@ -87,7 +95,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
         final Artifact existing = checkForExistingArtifact(filename, overrideExisting, softwareModule);
 
         try {
-            result = artifactRepository.store(stream, filename, contentType,
+            result = artifactRepository.store(tenantAware.getCurrentTenant(), stream, filename, contentType,
                     new DbArtifactHash(providedSha1Sum, providedMd5Sum));
         } catch (final ArtifactStoreException e) {
             throw new ArtifactUploadFailedException(e);
@@ -118,7 +126,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
         try {
             LOG.debug("deleting artifact from repository {}", sha1Hash);
-            artifactRepository.deleteBySha1(sha1Hash);
+            artifactRepository.deleteBySha1(tenantAware.getCurrentTenant(), sha1Hash);
             return true;
         } catch (final ArtifactStoreException e) {
             throw new ArtifactDeleteFailedException(e);
@@ -177,7 +185,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     @Override
     public Optional<DbArtifact> loadArtifactBinary(final String sha1Hash) {
-        return Optional.ofNullable(artifactRepository.getArtifactBySha1(sha1Hash));
+        return Optional.ofNullable(artifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), sha1Hash));
     }
 
     private Artifact storeArtifactMetadata(final SoftwareModule softwareModule, final String providedFilename,

@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
+import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.SystemManagement;
@@ -115,6 +116,9 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Autowired
     private RolloutStatusCache rolloutStatusCache;
+
+    @Autowired
+    private ArtifactRepository artifactRepository;
 
     @Override
     public SystemUsageReport getSystemUsageStatistics() {
@@ -236,6 +240,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
             distributionSetRepository.deleteByTenant(tenant);
             distributionSetTypeRepository.deleteByTenant(tenant);
             softwareModuleRepository.deleteByTenant(tenant);
+            artifactRepository.deleteByTenant(tenant);
             softwareModuleTypeRepository.deleteByTenant(tenant);
             return null;
         });

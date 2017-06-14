@@ -117,6 +117,17 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     Optional<Action> findFirstByTargetControllerIdAndActive(final Sort sort, final String controllerId, boolean active);
 
     /**
+     * Checks if an active action exists for given
+     * {@link Target#getControllerId()}.
+     * 
+     * @param controllerId
+     *            of target to check
+     * @return <code>true</code> if an active action for the target exists.
+     */
+    @Query("SELECT CASE WHEN COUNT(a)>0 THEN 'true' ELSE 'false' END FROM JpaAction a JOIN a.target t WHERE t.controllerId=:controllerId AND a.active=1")
+    boolean activeActionExistsForControllerId(@Param("controllerId") String controllerId);
+
+    /**
      * Retrieves latest {@link Action} for given target and
      * {@link SoftwareModule}.
      *

@@ -24,13 +24,13 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.GridFsOperations;
+import org.springframework.validation.annotation.Validated;
 
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.ByteStreams;
@@ -44,6 +44,7 @@ import com.mongodb.gridfs.GridFSFile;
  * The file management which looks up all the file in the file tore.
  *
  */
+@Validated
 public class MongoDBArtifactStore implements ArtifactRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBArtifactStore.class);
@@ -56,9 +57,14 @@ public class MongoDBArtifactStore implements ArtifactRepository {
     private static final String FILENAME = "filename";
 
     /**
-     * The mongoDB field which automatically calculated by the mongoDB.
+     * The mongoDB field which holds the tenant of the file to download.
      */
-    private static final String MD5 = "md5";
+    private static final String TENANT = "tenant";
+
+    /**
+     * Query by {@link TenantAware} field.
+     */
+    private static final String TENANT_QUERY = "metadata." + TENANT;
 
     /**
      * The mongoDB field which holds the SHA1 hash, stored in the meta data
@@ -68,10 +74,11 @@ public class MongoDBArtifactStore implements ArtifactRepository {
 
     private static final String ID = "_id";
 
-    @Autowired
-    private GridFsOperations gridFs;
+    private final GridFsOperations gridFs;
 
-    MongoTemplate mongoTemplate;
+    MongoDBArtifactStore(final GridFsOperations gridFs) {
+        this.gridFs = gridFs;
+    }
 
     /**
      * Retrieves a {@link GridFSDBFile} from the store by it's SHA1 hash.
@@ -82,36 +89,28 @@ public class MongoDBArtifactStore implements ArtifactRepository {
      * @return The DbArtifact object or {@code null} if no file exists.
      */
     @Override
-    public DbArtifact getArtifactBySha1(final String sha1Hash) {
-        return map(gridFs.findOne(new Query().addCriteria(Criteria.where(FILENAME).is(sha1Hash))));
-    }
+    public DbArtifact getArtifactBySha1(final String tenant, final String sha1Hash) {
 
-    /**
-     * Retrieves a {@link GridFSDBFile} from the store by it's MD5 hash.
-     * 
-     * @param md5Hash
-     *            the md5-hash of the file to lookup.
-     * @return The gridfs file object or {@code null} if no file exists.
-     */
-    public DbArtifact getArtifactByMd5(final String md5Hash) {
-        return map(gridFs.findOne(new Query().addCriteria(Criteria.where(MD5).is(md5Hash))));
+        return map(gridFs.findOne(new Query()
+                .addCriteria(Criteria.where(FILENAME).is(sha1Hash).and(TENANT_QUERY).is(sanitizeTenant(tenant)))));
     }
 
     @Override
-    public DbArtifact store(final InputStream content, final String filename, final String contentType) {
-        return store(content, filename, contentType, null);
+    public DbArtifact store(final String tenant, final InputStream content, final String filename,
+            final String contentType) {
+        return store(tenant, content, filename, contentType, null);
     }
 
     @Override
-    public DbArtifact store(final InputStream content, final String filename, final String contentType,
-            final DbArtifactHash hash) {
+    public DbArtifact store(final String tenant, final InputStream content, final String filename,
+            final String contentType, final DbArtifactHash hash) {
         File tempFile = null;
         try {
             LOGGER.debug("storing file {} of content {}", filename, contentType);
             tempFile = File.createTempFile("uploadFile", null);
             try (final BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(tempFile))) {
                 try (BufferedInputStream bis = new BufferedInputStream(content)) {
-                    return store(bis, contentType, bos, tempFile, hash);
+                    return store(tenant, bis, contentType, bos, tempFile, hash);
                 }
             }
         } catch (final IOException | MongoException e1) {
@@ -123,10 +122,15 @@ public class MongoDBArtifactStore implements ArtifactRepository {
         }
     }
 
+    private static String sanitizeTenant(final String tenant) {
+        return tenant.trim().toUpperCase();
+    }
+
     @Override
-    public void deleteBySha1(final String sha1Hash) {
+    public void deleteBySha1(final String tenant, final String sha1Hash) {
         try {
-            deleteArtifact(gridFs.findOne(new Query().addCriteria(Criteria.where(FILENAME).is(sha1Hash))));
+            deleteArtifact(gridFs.findOne(new Query()
+                    .addCriteria(Criteria.where(FILENAME).is(sha1Hash).and(TENANT_QUERY).is(sanitizeTenant(tenant)))));
         } catch (final MongoException e) {
             throw new ArtifactStoreException(e.getMessage(), e);
         }
@@ -143,18 +147,21 @@ public class MongoDBArtifactStore implements ArtifactRepository {
 
     }
 
-    private DbArtifact store(final InputStream content, final String contentType, final OutputStream os,
+    private DbArtifact store(final String t, final InputStream content, final String contentType, final OutputStream os,
             final File tempFile, final DbArtifactHash hash) {
         final GridFsArtifact storedArtifact;
+        final String tenant = sanitizeTenant(t);
         try {
             final String sha1Hash = computeSHA1Hash(content, os, hash != null ? hash.getSha1() : null);
             // upload if it does not exist already, check if file exists, not
             // tenant specific.
-            final GridFSDBFile result = gridFs.findOne(new Query().addCriteria(Criteria.where(FILENAME).is(sha1Hash)));
-            if (null == result) {
+            final GridFSDBFile result = gridFs.findOne(
+                    new Query().addCriteria(Criteria.where(FILENAME).is(sha1Hash).and(TENANT_QUERY).is(tenant)));
+            if (result == null) {
                 try (FileInputStream inputStream = new FileInputStream(tempFile)) {
                     final BasicDBObject metadata = new BasicDBObject();
                     metadata.put(SHA1, sha1Hash);
+                    metadata.put(TENANT, tenant);
                     storedArtifact = map(gridFs.store(inputStream, sha1Hash, contentType, metadata));
                 }
             } else {
@@ -243,5 +250,14 @@ public class MongoDBArtifactStore implements ArtifactRepository {
         artifact.setContentType(fsFile.getContentType());
         artifact.setHashes(new DbArtifactHash(fsFile.getFilename(), fsFile.getMD5()));
         return artifact;
+    }
+
+    @Override
+    public void deleteByTenant(final String tenant) {
+        try {
+            gridFs.delete(new Query().addCriteria(Criteria.where(TENANT_QUERY).is(sanitizeTenant(tenant))));
+        } catch (final MongoClientException e) {
+            throw new ArtifactStoreException(e.getMessage(), e);
+        }
     }
 }
