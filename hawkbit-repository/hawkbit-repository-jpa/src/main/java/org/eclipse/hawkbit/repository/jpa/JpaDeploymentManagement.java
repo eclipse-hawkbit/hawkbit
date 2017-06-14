@@ -44,8 +44,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
@@ -138,16 +136,20 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private PlatformTransactionManager txManager;
 
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    // Exception squid:S2095: see
-    // https://jira.sonarsource.com/browse/SONARJAVA-1478
-    @SuppressWarnings({ "squid:S2095" })
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID, final ActionType actionType,
             final long forcedTimestamp, final Collection<String> targetIDs) {
-        return assignDistributionSet(dsID, targetIDs.stream()
-                .map(t -> new TargetWithActionType(t, actionType, forcedTimestamp)).collect(Collectors.toList()));
+
+        final JpaDistributionSet set = distributionSetRepository.findOne(dsID);
+        if (set == null) {
+            throw new EntityNotFoundException(DistributionSet.class, dsID);
+        }
+
+        return assignDistributionSetToTargets(set, targetIDs.stream()
+                .map(t -> new TargetWithActionType(t, actionType, forcedTimestamp)).collect(Collectors.toList()), null);
+
     }
 
     @Override
@@ -156,7 +158,13 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
             final Collection<TargetWithActionType> targets) {
-        return assignDistributionSet(dsID, targets, null);
+
+        final JpaDistributionSet set = distributionSetRepository.findOne(dsID);
+        if (set == null) {
+            throw new EntityNotFoundException(DistributionSet.class, dsID);
+        }
+
+        return assignDistributionSetToTargets(set, targets, null);
     }
 
     @Override
@@ -170,7 +178,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             throw new EntityNotFoundException(DistributionSet.class, dsID);
         }
 
-        return assignDistributionSetToTargets(set, targets, null, null, actionMessage);
+        return assignDistributionSetToTargets(set, targets, actionMessage);
     }
 
     /**
@@ -181,10 +189,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      *            the ID of the distribution set to assign
      * @param targetsWithActionType
      *            a list of all targets and their action type
-     * @param rollout
-     *            the rollout for this assignment
-     * @param rolloutGroup
-     *            the rollout group for this assignment
      * @param actionMessage
      *            an optional message to be written into the action status
      * @return the assignment result
@@ -194,8 +198,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      *        {@link DistributionSetType}.
      */
     private DistributionSetAssignmentResult assignDistributionSetToTargets(@NotNull final JpaDistributionSet set,
-            final Collection<TargetWithActionType> targetsWithActionType, final JpaRollout rollout,
-            final JpaRolloutGroup rolloutGroup, final String actionMessage) {
+            final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage) {
 
         if (!set.isComplete()) {
             throw new IncompleteDistributionSetException(
@@ -253,8 +256,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         targetIds.forEach(tIds -> targetRepository.setAssignedDistributionSetAndUpdateStatus(TargetUpdateStatus.PENDING,
                 set, System.currentTimeMillis(), currentUser, tIds));
-        final Map<String, JpaAction> targetIdsToActions = targets.stream().map(
-                t -> actionRepository.save(createTargetAction(targetsWithActionMap, t, set, rollout, rolloutGroup)))
+        final Map<String, JpaAction> targetIdsToActions = targets.stream()
+                .map(t -> actionRepository.save(createTargetAction(targetsWithActionMap, t, set)))
                 .collect(Collectors.toMap(a -> a.getTarget().getControllerId(), Function.identity()));
 
         // create initial action status when action is created so we remember
@@ -295,8 +298,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private static JpaAction createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap,
-            final JpaTarget target, final JpaDistributionSet set, final JpaRollout rollout,
-            final JpaRolloutGroup rolloutGroup) {
+            final JpaTarget target, final JpaDistributionSet set) {
         final JpaAction actionForTarget = new JpaAction();
         final TargetWithActionType targetWithActionType = targetsWithActionMap.get(target.getControllerId());
         actionForTarget.setActionType(targetWithActionType.getActionType());
@@ -305,8 +307,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         actionForTarget.setStatus(Status.RUNNING);
         actionForTarget.setTarget(target);
         actionForTarget.setDistributionSet(set);
-        actionForTarget.setRollout(rollout);
-        actionForTarget.setRolloutGroup(rolloutGroup);
         return actionForTarget;
     }
 

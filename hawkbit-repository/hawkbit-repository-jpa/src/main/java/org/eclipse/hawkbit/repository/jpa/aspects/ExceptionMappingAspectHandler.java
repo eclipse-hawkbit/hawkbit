@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.aspects;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -22,17 +21,11 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
-import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.transaction.TransactionSystemException;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -55,10 +48,6 @@ public class ExceptionMappingAspectHandler implements Ordered {
      * exception.
      */
     private static final List<Class<?>> MAPPED_EXCEPTION_ORDER = Lists.newArrayListWithExpectedSize(4);
-    @Autowired
-    private JpaVendorAdapter jpaVendorAdapter;
-
-    private final SQLStateSQLExceptionTranslator sqlStateExceptionTranslator = new SQLStateSQLExceptionTranslator();
 
     static {
 
@@ -74,7 +63,6 @@ public class ExceptionMappingAspectHandler implements Ordered {
         EXCEPTION_MAPPING.put(OptimisticLockingFailureException.class.getName(),
                 ConcurrentModificationException.class.getName());
         EXCEPTION_MAPPING.put(AccessDeniedException.class.getName(), InsufficientPermissionException.class.getName());
-
     }
 
     /**
@@ -85,6 +73,7 @@ public class ExceptionMappingAspectHandler implements Ordered {
      *            the thrown and catched exception
      * @throws Throwable
      */
+    //FIXME check to further reduce this
     @AfterThrowing(pointcut = "( execution( * org.springframework.transaction..*.*(..)) "
             + " || execution( * org.eclipse.hawkbit.repository.*.*(..)) )", throwing = "ex")
     // Exception for squid:S00112, squid:S1162
@@ -92,29 +81,11 @@ public class ExceptionMappingAspectHandler implements Ordered {
     @SuppressWarnings({ "squid:S00112", "squid:S1162" })
     public void catchAndWrapJpaExceptionsService(final Exception ex) throws Throwable {
 
-        LOG.trace("exception occured", ex);
-        Exception translatedAccessException = translateEclipseLinkExceptionIfPossible(ex);
+        Exception mappingException = ex;
 
-        if (translatedAccessException == null && ex instanceof TransactionSystemException) {
-            final TransactionSystemException systemException = (TransactionSystemException) ex;
-            translatedAccessException = translateEclipseLinkExceptionIfPossible(
-                    (Exception) systemException.getOriginalException());
-        }
-
-        if (translatedAccessException == null) {
-            translatedAccessException = ex;
-        }
-
-        if (translatedAccessException instanceof javax.validation.ConstraintViolationException) {
-            throw translatedAccessException;
-        }
-
-        Exception mappingException = translatedAccessException;
-
-        LOG.trace("translated excpetion is", translatedAccessException);
         for (final Class<?> mappedEx : MAPPED_EXCEPTION_ORDER) {
 
-            if (mappedEx.isAssignableFrom(translatedAccessException.getClass())) {
+            if (mappedEx.isAssignableFrom(ex.getClass())) {
                 if (!EXCEPTION_MAPPING.containsKey(mappedEx.getName())) {
                     LOG.error("there is no mapping configured for exception class {}", mappedEx.getName());
                     mappingException = new GenericSpServerException(ex);
@@ -122,55 +93,12 @@ public class ExceptionMappingAspectHandler implements Ordered {
                     mappingException = (Exception) Class.forName(EXCEPTION_MAPPING.get(mappedEx.getName()))
                             .getConstructor(Throwable.class).newInstance(ex);
                 }
+                LOG.trace("mapped exception {} to {}", ex.getClass(), mappingException.getClass());
                 break;
             }
         }
 
-        LOG.trace("mapped exception {} to {}", translatedAccessException.getClass(), mappingException.getClass());
         throw mappingException;
-    }
-
-    private Exception translateEclipseLinkExceptionIfPossible(final Exception exception) {
-        final DataAccessException translatedAccessException = jpaVendorAdapter.getJpaDialect()
-                .translateExceptionIfPossible((RuntimeException) exception);
-        return translateSQLStateExceptionIfPossible(translatedAccessException);
-
-    }
-
-    /**
-     * There is no EclipseLinkExceptionTranslator. So we have to check and
-     * translate the exception by the sql error code. Luckily, there we can use
-     * {@link SQLStateSQLExceptionTranslator} if we can get a
-     * {@link SQLException}.
-     *
-     * @param accessException
-     *            the base access exception from jpa
-     * @return the translated accessException
-     */
-    private Exception translateSQLStateExceptionIfPossible(final DataAccessException accessException) {
-        if (!(accessException instanceof JpaSystemException)) {
-            return accessException;
-        }
-
-        final SQLException ex = findException((JpaSystemException) accessException, SQLException.class);
-
-        if (ex != null) {
-            return sqlStateExceptionTranslator.translate(null, null, ex);
-        }
-
-        return findException(accessException, javax.validation.ConstraintViolationException.class);
-    }
-
-    private static <T> T findException(final Exception ex, final Class<T> type) {
-        Throwable exception = ex.getCause();
-        while (exception != null) {
-            final Throwable cause = exception.getCause();
-            if (cause != null && type.equals(cause.getClass())) {
-                return (T) cause;
-            }
-            exception = cause;
-        }
-        return null;
     }
 
     @Override
