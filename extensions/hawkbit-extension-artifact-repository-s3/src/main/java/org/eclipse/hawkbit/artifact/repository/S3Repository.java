@@ -177,7 +177,7 @@ public class S3Repository implements ArtifactRepository {
     }
 
     private static String objectKey(final String tenant, final String sha1Hash) {
-        return tenant.trim().toUpperCase() + "/" + sha1Hash;
+        return sanitizeTenant(tenant) + "/" + sha1Hash;
     }
 
     @Override
@@ -238,7 +238,7 @@ public class S3Repository implements ArtifactRepository {
 
     @Override
     public void deleteByTenant(final String tenant) {
-        final String folder = tenant.toUpperCase();
+        final String folder = sanitizeTenant(tenant);
 
         LOG.info("Deleting S3 object folder (tenant) from bucket {} and key {}", s3Properties.getBucketName(), folder);
 
@@ -251,5 +251,9 @@ public class S3Repository implements ArtifactRepository {
             objects = amazonS3.listNextBatchOfObjects(objects);
         } while (objects.isTruncated());
 
+    }
+
+    private static String sanitizeTenant(final String tenant) {
+        return tenant.trim().toUpperCase();
     }
 }
