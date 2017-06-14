@@ -37,6 +37,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
         "spring.data.mongodb.port=0", "spring.mongodb.embedded.version=3.4.4" })
 public class MongoDBArtifactStoreTest {
     private static final String TENANT = "test_tenant";
+    private static final String TENANT2 = "test_tenant2";
 
     @Autowired
     private MongoDBArtifactStore artifactStoreUnderTest;
@@ -44,16 +45,19 @@ public class MongoDBArtifactStoreTest {
     @Test
     @Description("Ensures that search by SHA1 hash (which is used by hawkBit as artifact ID) finds the expected results.")
     public void findArtifactBySHA1Hash() throws NoSuchAlgorithmException {
-        final int filelengthBytes = 128;
-        final String filename = "testfile.json";
-        final String contentType = "application/json";
 
-        storeAndVerify(TENANT, filelengthBytes, filename, contentType);
+        final String sha1 = storeRandomArifactAndVerify(TENANT);
+        final String sha2 = storeRandomArifactAndVerify(TENANT2);
+
+        assertThat(artifactStoreUnderTest.getArtifactBySha1(TENANT2, sha1)).isNull();
+        assertThat(artifactStoreUnderTest.getArtifactBySha1(TENANT, sha2)).isNull();
     }
 
     @Step
-    private String storeAndVerify(final String tenant, final int filelengthBytes, final String filename,
-            final String contentType) throws NoSuchAlgorithmException {
+    private String storeRandomArifactAndVerify(final String tenant) throws NoSuchAlgorithmException {
+        final int filelengthBytes = 128;
+        final String filename = "testfile.json";
+        final String contentType = "application/json";
 
         final DigestInputStream digestInputStream = digestInputStream(generateInputStream(filelengthBytes), "SHA-1");
         artifactStoreUnderTest.store(tenant, digestInputStream, filename, contentType);
@@ -66,11 +70,8 @@ public class MongoDBArtifactStoreTest {
     @Test
     @Description("Deletes file from repository identified by SHA1 hash as filename.")
     public void deleteArtifactBySHA1Hash() throws NoSuchAlgorithmException {
-        final int filelengthBytes = 128;
-        final String filename = "testfile.json";
-        final String contentType = "application/json";
 
-        final String sha1 = storeAndVerify(TENANT, filelengthBytes, filename, contentType);
+        final String sha1 = storeRandomArifactAndVerify(TENANT);
 
         artifactStoreUnderTest.deleteBySha1(TENANT, sha1);
         assertThat(artifactStoreUnderTest.getArtifactBySha1(TENANT, sha1)).isNull();
@@ -80,12 +81,9 @@ public class MongoDBArtifactStoreTest {
     @Description("Verfies that all data of a tenant is erased if repository is asked to do so. "
             + "Data of other tenants is not affected.")
     public void deleteTenant() throws NoSuchAlgorithmException {
-        final int filelengthBytes = 128;
-        final String filename = "testfile.json";
-        final String contentType = "application/json";
 
-        final String shaDeleted = storeAndVerify(TENANT, filelengthBytes, filename, contentType);
-        final String shaUndeleted = storeAndVerify("another_tenant", filelengthBytes, filename, contentType);
+        final String shaDeleted = storeRandomArifactAndVerify(TENANT);
+        final String shaUndeleted = storeRandomArifactAndVerify("another_tenant");
 
         artifactStoreUnderTest.deleteByTenant("tenant_that_does_not_exist");
         artifactStoreUnderTest.deleteByTenant(TENANT);
