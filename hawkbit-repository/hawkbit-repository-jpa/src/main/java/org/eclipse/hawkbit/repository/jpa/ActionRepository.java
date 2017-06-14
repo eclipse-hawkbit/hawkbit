@@ -117,7 +117,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     Optional<Action> findFirstByTargetControllerIdAndActive(final Sort sort, final String controllerId, boolean active);
 
     /**
-     * Checks if an active action exist for given
+     * Checks if an active action exists for given
      * {@link Target#getControllerId()}.
      * 
      * @param controllerId

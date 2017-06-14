@@ -121,7 +121,7 @@ public interface ControllerManagement {
      * 
      * For performance reasons this method does not throw
      * {@link EntityNotFoundException} in case target with given controlelrId
-     * does not exist butt will return an {@link Optional#empty()} instead.
+     * does not exist but will return an {@link Optional#empty()} instead.
      *
      * @param controllerId
      *            identifies the target to retrieve the actions from

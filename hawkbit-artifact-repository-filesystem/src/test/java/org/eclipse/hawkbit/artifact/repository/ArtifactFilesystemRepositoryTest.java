@@ -69,7 +69,7 @@ public class ArtifactFilesystemRepositoryTest {
 
     @Test
     @Description("Verfies that all artifacts of a tenant can be deleted in the file-system repository")
-    public void deleteStoredArtifactOftenant() {
+    public void deleteStoredArtifactOfTenant() {
         final ArtifactFilesystem artifact = storeRandomArtifact(randomBytes());
 
         artifactFilesystemRepository.deleteByTenant(TENANT);
@@ -82,6 +82,13 @@ public class ArtifactFilesystemRepositoryTest {
     public void deleteArtifactWhichDoesNotExistsBySHA1HashWithoutException() {
         try {
             artifactFilesystemRepository.deleteBySha1(TENANT, "sha1HashWhichDoesNotExists");
+        } catch (final Exception e) {
+            Assertions.fail("did not expect an exception while deleting a file which does not exists");
+        }
+
+        final ArtifactFilesystem artifact = storeRandomArtifact(randomBytes());
+        try {
+            artifactFilesystemRepository.deleteBySha1("tenantWhichDoesNotExist", artifact.getHashes().getSha1());
         } catch (final Exception e) {
             Assertions.fail("did not expect an exception while deleting a file which does not exists");
         }
