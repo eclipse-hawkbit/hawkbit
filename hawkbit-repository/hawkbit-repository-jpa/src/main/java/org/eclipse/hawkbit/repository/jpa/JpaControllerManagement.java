@@ -188,7 +188,9 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Override
     public Optional<Action> findOldestActiveActionByTarget(final String controllerId) {
-        throwExceptionIfTargetDoesNotExist(controllerId);
+        if (!actionRepository.activeActionExistsForControllerId(controllerId)) {
+            return Optional.empty();
+        }
 
         // used in favorite to findFirstByTargetAndActiveOrderByIdAsc due to
         // DATAJPA-841 issue.
