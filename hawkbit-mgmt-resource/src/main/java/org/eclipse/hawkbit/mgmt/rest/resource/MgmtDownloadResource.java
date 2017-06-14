@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.cache.DownloadType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDownloadRestApi;
 import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,9 +38,6 @@ import com.google.common.net.HttpHeaders;
 
 /**
  * A resource for download artifacts.
- * 
- *
- *
  */
 @RestController
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
@@ -55,6 +53,9 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
 
     @Autowired
     private RequestResponseContextHolder requestResponseContextHolder;
+
+    @Autowired
+    private TenantAware tenantAware;
 
     /**
      * Handles the GET request for downloading an artifact.
@@ -77,7 +78,7 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
             DbArtifact artifact = null;
 
             if (DownloadType.BY_SHA1.equals(artifactCache.getDownloadType())) {
-                artifact = artifactRepository.getArtifactBySha1(artifactCache.getId());
+                artifact = artifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifactCache.getId());
             } else {
                 LOGGER.warn("Download Type {} not supported", artifactCache.getDownloadType());
             }

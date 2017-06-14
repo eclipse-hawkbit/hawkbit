@@ -73,7 +73,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 /**
  * JPA implementation of {@link SoftwareModuleManagement}.
@@ -591,7 +590,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteSoftwareModule(final Long moduleId) {
-        deleteSoftwareModules(Sets.newHashSet(moduleId));
+        deleteSoftwareModules(Arrays.asList(moduleId));
     }
 
     @Override

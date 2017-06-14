@@ -54,6 +54,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Unit Tests - S3 Repository")
 @Stories("S3 Artifact Repository")
 public class S3RepositoryTest {
+    private static final String TENANT = "test_tenant";
 
     @Mock
     private AmazonS3 amazonS3Mock;
@@ -89,8 +90,9 @@ public class S3RepositoryTest {
         storeRandomBytes(rndBytes, knownContentType);
 
         // verify
-        Mockito.verify(amazonS3Mock).putObject(eq(s3Properties.getBucketName()), eq(knownSHA1),
-                inputStreamCaptor.capture(), objectMetaDataCaptor.capture());
+        Mockito.verify(amazonS3Mock).putObject(eq(s3Properties.getBucketName()),
+                eq(TENANT.toUpperCase() + "/" + knownSHA1), inputStreamCaptor.capture(),
+                objectMetaDataCaptor.capture());
 
         final ObjectMetadata recordedObjectMetadata = objectMetaDataCaptor.getValue();
         assertThat(recordedObjectMetadata.getContentType()).isEqualTo(knownContentType);
@@ -115,7 +117,7 @@ public class S3RepositoryTest {
         when(s3ObjectMetadataMock.getContentType()).thenReturn(knownContentType);
 
         // test
-        final DbArtifact artifactBySha1 = s3RepositoryUnderTest.getArtifactBySha1(knownSHA1Hash);
+        final DbArtifact artifactBySha1 = s3RepositoryUnderTest.getArtifactBySha1(TENANT, knownSHA1Hash);
 
         // verify
         assertThat(artifactBySha1.getArtifactId()).isEqualTo(knownSHA1Hash);
@@ -150,7 +152,7 @@ public class S3RepositoryTest {
         when(amazonS3Mock.getObject(s3Properties.getBucketName(), knownSHA1Hash)).thenReturn(null);
 
         // test
-        final DbArtifact artifactBySha1NotExists = s3RepositoryUnderTest.getArtifactBySha1(knownSHA1Hash);
+        final DbArtifact artifactBySha1NotExists = s3RepositoryUnderTest.getArtifactBySha1(TENANT, knownSHA1Hash);
 
         // verify
         assertThat(artifactBySha1NotExists).isNull();
@@ -201,7 +203,7 @@ public class S3RepositoryTest {
             throws IOException {
         final String knownFileName = "randomBytes";
         try (InputStream content = new BufferedInputStream(new ByteArrayInputStream(rndBytes))) {
-            s3RepositoryUnderTest.store(content, knownFileName, contentType, hashes);
+            s3RepositoryUnderTest.store(TENANT, content, knownFileName, contentType, hashes);
         }
     }
 

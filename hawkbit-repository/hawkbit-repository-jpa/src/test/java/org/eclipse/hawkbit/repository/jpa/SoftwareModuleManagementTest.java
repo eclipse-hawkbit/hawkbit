@@ -22,7 +22,6 @@ import java.util.List;
 import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
-import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
@@ -490,13 +489,15 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertThat(artifactRepository.findAll()).hasSize(results.length);
         for (final Artifact result : results) {
             assertThat(result.getId()).isNotNull();
-            assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getSha1Hash())).isNotNull();
+            assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), result.getSha1Hash()))
+                    .isNotNull();
         }
     }
 
     private void assertArtfiactNull(final Artifact... results) {
         for (final Artifact result : results) {
-            assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getSha1Hash())).isNull();
+            assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), result.getSha1Hash()))
+                    .isNull();
         }
     }
 

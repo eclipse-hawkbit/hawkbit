@@ -175,16 +175,21 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         assertThat(result2.getId()).isNotNull();
         assertThat(((JpaArtifact) result).getSha1Hash()).isNotEqualTo(((JpaArtifact) result2).getSha1Hash());
 
-        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getSha1Hash())).isNotNull();
-        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result2).getSha1Hash())).isNotNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), result.getSha1Hash()))
+                .isNotNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), result2.getSha1Hash()))
+                .isNotNull();
 
         artifactManagement.deleteArtifact(result.getId());
 
-        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getSha1Hash())).isNull();
-        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result2).getSha1Hash())).isNotNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), result.getSha1Hash()))
+                .isNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), result2.getSha1Hash()))
+                .isNotNull();
 
         artifactManagement.deleteArtifact(result2.getId());
-        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result2).getSha1Hash())).isNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), result2.getSha1Hash()))
+                .isNull();
 
         assertThat(artifactRepository.findAll()).hasSize(0);
     }
@@ -211,12 +216,15 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         assertThat(result2.getId()).isNotNull();
         assertThat(((JpaArtifact) result).getSha1Hash()).isEqualTo(((JpaArtifact) result2).getSha1Hash());
 
-        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getSha1Hash())).isNotNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), result.getSha1Hash()))
+                .isNotNull();
         artifactManagement.deleteArtifact(result.getId());
-        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getSha1Hash())).isNotNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), result.getSha1Hash()))
+                .isNotNull();
 
         artifactManagement.deleteArtifact(result2.getId());
-        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getSha1Hash())).isNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), result.getSha1Hash()))
+                .isNull();
     }
 
     @Test
