@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -93,7 +94,8 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     DistributionSetTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification notification,
             final SpPermissionChecker permissionChecker, final ManageDistUIState manageDistUIState,
-            final DistributionSetManagement distributionSetManagement, final SoftwareModuleManagement softwareManagement,
+            final DistributionSetManagement distributionSetManagement,
+            final SoftwareModuleManagement softwareManagement,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final TargetManagement targetManagement, final DsMetadataPopupLayout dsMetadataPopupLayout) {
         super(eventBus, i18n, notification);
@@ -120,7 +122,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     private void handleSelectedAndUpdatedDs(final List<DistributionSetUpdatedEvent> events) {
         manageDistUIState.getLastSelectedDistribution()
-                .ifPresent(lastSelectedDsIdName -> events.stream()
+                .ifPresent(lastSelectedDsIdName -> events.stream().filter(event -> !Objects.isNull(event.getEntity()))
                         .filter(event -> event.getEntityId().equals(lastSelectedDsIdName)).findAny()
                         .ifPresent(event -> eventBus.publish(this,
                                 new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, event.getEntity()))));
@@ -129,7 +131,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     private void updateVisableTableEntries(final List<DistributionSetUpdatedEvent> events,
             final List<Long> visibleItemIds) {
         events.stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
-                .filter(event -> event.getEntity().isComplete())
+                .filter(event -> !Objects.isNull(event.getEntity())).filter(DistributionSetUpdatedEvent::isComplete)
                 .forEach(event -> updateDistributionInTable(event.getEntity()));
     }
 
@@ -259,7 +261,8 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             final String name = (String) softwareItem.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
             final String swVersion = (String) softwareItem.getItemProperty(SPUILabelDefinitions.VAR_VERSION).getValue();
 
-            final Optional<SoftwareModule> softwareModule = softwareModuleManagement.findSoftwareModuleById(softwareModuleId);
+            final Optional<SoftwareModule> softwareModule = softwareModuleManagement
+                    .findSoftwareModuleById(softwareModuleId);
 
             if (softwareModule.isPresent() && validSoftwareModule((Long) distId, softwareModule.get())) {
                 final SoftwareModuleIdName softwareModuleIdName = new SoftwareModuleIdName(softwareModuleId,
