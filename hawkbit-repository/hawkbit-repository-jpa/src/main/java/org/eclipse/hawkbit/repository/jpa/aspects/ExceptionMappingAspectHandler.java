@@ -74,16 +74,15 @@ public class ExceptionMappingAspectHandler implements Ordered {
      *            the thrown and catched exception
      * @throws Throwable
      */
-    // FIXME check to further reduce this
-    @AfterThrowing(pointcut = "( execution( * org.springframework.transaction..*.*(..)) "
-            + " || execution( * org.eclipse.hawkbit.repository.*.*(..)) )", throwing = "ex")
+    @AfterThrowing(pointcut = "execution( * org.eclipse.hawkbit.repository.jpa.*Management.*(..))", throwing = "ex")
     // Exception for squid:S00112, squid:S1162
     // It is a AspectJ proxy which deals with exceptions.
     @SuppressWarnings({ "squid:S00112", "squid:S1162" })
     public void catchAndWrapJpaExceptionsService(final Exception ex) throws Throwable {
 
         // Workarround for EclipseLink pre-update where it does not throw
-        // ConstraintViolationException correctly
+        // ConstraintViolationException correctly in case of existing entity
+        // update
         if (ex instanceof TransactionSystemException) {
             throw findConstraintViolationException(ex);
         }
