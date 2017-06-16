@@ -34,6 +34,9 @@ public class DistributionSetUpdatedEvent extends RemoteEntityEvent<DistributionS
      *            Distribution Set
      * @param applicationId
      *            the origin application id
+     * @param complete
+     *            <code>true</code> if {@link DistributionSet} is after the
+     *            update {@link DistributionSet#isComplete()}
      */
     public DistributionSetUpdatedEvent(final DistributionSet ds, final String applicationId, final boolean complete) {
         super(ds, applicationId);
