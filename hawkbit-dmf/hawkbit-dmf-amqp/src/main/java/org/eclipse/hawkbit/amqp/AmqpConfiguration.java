@@ -242,28 +242,16 @@ public class AmqpConfiguration {
 
     /**
      * Create AMQP handler service bean for authentication messages.
-     *
-     * @param rabbitTemplate
-     *            for converting messages
-     * @param authenticationManager
-     *            for target authentication
-     * @param artifactManagement
-     *            for artifact URI generation
-     * @param downloadIdCache
-     *            for download IDs
-     * @param hostnameResolver
-     *            for resolving the host for downloads
-     * @param controllerManagement
-     *            for target repo access
+     * 
      * @return handler service bean
      */
     @Bean
-    public AmqpAuthenticationMessageHandler amqpAuthenticationMessageHandler(final RabbitTemplate rabbitTemplate,
+    AmqpAuthenticationMessageHandler amqpAuthenticationMessageHandler(final RabbitTemplate rabbitTemplate,
             final AmqpControllerAuthentication authenticationManager, final ArtifactManagement artifactManagement,
             final DownloadIdCache downloadIdCache, final HostnameResolver hostnameResolver,
-            final ControllerManagement controllerManagement) {
+            final ControllerManagement controllerManagement, final TenantAware tenantAware) {
         return new AmqpAuthenticationMessageHandler(rabbitTemplate, authenticationManager, artifactManagement,
-                downloadIdCache, hostnameResolver, controllerManagement);
+                downloadIdCache, hostnameResolver, controllerManagement, tenantAware);
     }
 
     /**
