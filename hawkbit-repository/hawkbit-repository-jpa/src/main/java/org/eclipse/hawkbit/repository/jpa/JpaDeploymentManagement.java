@@ -142,12 +142,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID, final ActionType actionType,
             final long forcedTimestamp, final Collection<String> targetIDs) {
 
-        final JpaDistributionSet set = distributionSetRepository.findOne(dsID);
-        if (set == null) {
-            throw new EntityNotFoundException(DistributionSet.class, dsID);
-        }
-
-        return assignDistributionSetToTargets(set, targetIDs.stream()
+        return assignDistributionSetToTargets(dsID, targetIDs.stream()
                 .map(t -> new TargetWithActionType(t, actionType, forcedTimestamp)).collect(Collectors.toList()), null);
 
     }
@@ -159,12 +154,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
             final Collection<TargetWithActionType> targets) {
 
-        final JpaDistributionSet set = distributionSetRepository.findOne(dsID);
-        if (set == null) {
-            throw new EntityNotFoundException(DistributionSet.class, dsID);
-        }
-
-        return assignDistributionSetToTargets(set, targets, null);
+        return assignDistributionSetToTargets(dsID, targets, null);
     }
 
     @Override
@@ -173,19 +163,15 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
             final Collection<TargetWithActionType> targets, final String actionMessage) {
-        final JpaDistributionSet set = distributionSetRepository.findOne(dsID);
-        if (set == null) {
-            throw new EntityNotFoundException(DistributionSet.class, dsID);
-        }
 
-        return assignDistributionSetToTargets(set, targets, actionMessage);
+        return assignDistributionSetToTargets(dsID, targets, actionMessage);
     }
 
     /**
      * method assigns the {@link DistributionSet} to all {@link Target}s by
      * their IDs with a specific {@link ActionType} and {@code forcetime}.
      *
-     * @param set
+     * @param dsID
      *            the ID of the distribution set to assign
      * @param targetsWithActionType
      *            a list of all targets and their action type
@@ -197,8 +183,13 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      *        {@link SoftwareModuleType} are not assigned as define by the
      *        {@link DistributionSetType}.
      */
-    private DistributionSetAssignmentResult assignDistributionSetToTargets(@NotNull final JpaDistributionSet set,
+    private DistributionSetAssignmentResult assignDistributionSetToTargets(final Long dsID,
             final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage) {
+
+        final JpaDistributionSet set = distributionSetRepository.findOne(dsID);
+        if (set == null) {
+            throw new EntityNotFoundException(DistributionSet.class, dsID);
+        }
 
         if (!set.isComplete()) {
             throw new IncompleteDistributionSetException(

@@ -26,11 +26,12 @@ public class ConstraintViolationException extends AbstractServerRtException {
     /**
      * Constructor for {@link ConstraintViolationException}
      * 
-     * @param cause
-     *            of the exception
+     * @param ex
+     *            the javax.validation.ConstraintViolationException which is
+     *            thrown
      */
-    public ConstraintViolationException(final Throwable cause) {
-        this(getExceptionMessage(cause));
+    public ConstraintViolationException(final javax.validation.ConstraintViolationException ex) {
+        this(getExceptionMessage(ex));
     }
 
     /**
@@ -53,15 +54,11 @@ public class ConstraintViolationException extends AbstractServerRtException {
      *            javax.validation.ConstraintViolationException which is thrown
      * @return message String with proper error information
      */
-    public static String getExceptionMessage(final Throwable ex) {
-        if (ex instanceof javax.validation.ConstraintViolationException) {
-            return ((javax.validation.ConstraintViolationException) ex)
-                    .getConstraintViolations().stream().map(violation -> violation.getPropertyPath()
-                            + MESSAGE_FORMATTER_SEPARATOR + violation.getMessage() + ".")
-                    .collect(Collectors.joining(MESSAGE_FORMATTER_SEPARATOR));
-        }
-
-        return ex.getMessage();
+    public static String getExceptionMessage(final javax.validation.ConstraintViolationException ex) {
+        return ex
+                .getConstraintViolations().stream().map(violation -> violation.getPropertyPath()
+                        + MESSAGE_FORMATTER_SEPARATOR + violation.getMessage() + ".")
+                .collect(Collectors.joining(MESSAGE_FORMATTER_SEPARATOR));
     }
 
 }
