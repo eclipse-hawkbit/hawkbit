@@ -218,7 +218,7 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
             cache.put(downloadId, downloadCache);
             authentificationResponse.setDownloadUrl(UriComponentsBuilder
                     .fromUri(hostnameResolver.resolveHostname().toURI()).path("/api/v1/downloadserver/downloadId/")
-                    .path(tenantAware.getCurrentTenant()).path(downloadId).build().toUriString());
+                    .path(tenantAware.getCurrentTenant()).path("/").path(downloadId).build().toUriString());
             authentificationResponse.setResponseCode(HttpStatus.OK.value());
         } catch (final BadCredentialsException | AuthenticationServiceException | CredentialsExpiredException e) {
             LOG.error("Login failed", e);
