@@ -53,7 +53,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.matcher.EventVerifier;
-import org.eclipse.hawkbit.security.DosFilter;
 import org.eclipse.hawkbit.security.ExcludePathAwareShallowETagFilter;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -313,8 +312,6 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
     protected DefaultMockMvcBuilder createMvcWebAppContext() {
         return MockMvcBuilders.webAppContextSetup(context)
-                .addFilter(new DosFilter(null, 100, 10, "127\\.0\\.0\\.1|\\[0:0:0:0:0:0:0:1\\]", "(^192\\.168\\.)",
-                        "X-Forwarded-For"))
                 .addFilter(new ExcludePathAwareShallowETagFilter(
                         "/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download",
                         "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/**",
