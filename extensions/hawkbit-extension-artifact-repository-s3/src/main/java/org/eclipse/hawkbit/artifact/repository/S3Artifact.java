@@ -22,22 +22,22 @@ public class S3Artifact extends DbArtifact {
 
     private final AmazonS3 amazonS3;
     private final S3RepositoryProperties s3Properties;
-    private final String sha1;
+    private final String key;
 
-    S3Artifact(final AmazonS3 amazonS3, final S3RepositoryProperties s3Properties, final String sha1) {
+    S3Artifact(final AmazonS3 amazonS3, final S3RepositoryProperties s3Properties, final String key) {
         this.amazonS3 = amazonS3;
         this.s3Properties = s3Properties;
-        this.sha1 = sha1;
+        this.key = key;
     }
 
     @Override
     public InputStream getFileInputStream() {
-        return amazonS3.getObject(s3Properties.getBucketName(), sha1).getObjectContent();
+        return amazonS3.getObject(s3Properties.getBucketName(), key).getObjectContent();
     }
 
     @Override
     public String toString() {
-        return "S3Artifact [sha1=" + sha1 + ", getArtifactId()=" + getArtifactId() + ", getHashes()=" + getHashes()
+        return "S3Artifact [key=" + key + ", getArtifactId()=" + getArtifactId() + ", getHashes()=" + getHashes()
                 + ", getSize()=" + getSize() + ", getContentType()=" + getContentType() + "]";
     }
 }

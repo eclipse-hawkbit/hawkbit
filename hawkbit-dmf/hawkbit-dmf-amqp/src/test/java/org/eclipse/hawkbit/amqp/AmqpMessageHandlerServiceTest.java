@@ -53,6 +53,7 @@ import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -115,6 +116,9 @@ public class AmqpMessageHandlerServiceTest {
     @Mock
     private RabbitTemplate rabbitTemplate;
 
+    @Mock
+    private TenantAware tenantAwareMock;
+
     @Captor
     private ArgumentCaptor<Map<String, String>> attributesCaptor;
 
@@ -134,7 +138,7 @@ public class AmqpMessageHandlerServiceTest {
                 controllerManagementMock, entityFactoryMock);
         amqpAuthenticationMessageHandlerService = new AmqpAuthenticationMessageHandler(rabbitTemplate,
                 authenticationManagerMock, artifactManagementMock, downloadIdCache, hostnameResolverMock,
-                controllerManagementMock);
+                controllerManagementMock, tenantAwareMock);
     }
 
     @Test
@@ -315,8 +319,8 @@ public class AmqpMessageHandlerServiceTest {
     @Description("Tests that an download request is denied for an artifact which does not exists")
     public void authenticationRequestDeniedForArtifactWhichDoesNotExists() {
         final MessageProperties messageProperties = createMessageProperties(null);
-        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLLER_ID, TARGET_ID,
-                FileResource.createFileResourceBySha1("12345"));
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLLER_ID,
+                TARGET_ID, FileResource.createFileResourceBySha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
 
@@ -334,8 +338,8 @@ public class AmqpMessageHandlerServiceTest {
     @Description("Tests that an download request is denied for an artifact which is not assigned to the requested target")
     public void authenticationRequestDeniedForArtifactWhichIsNotAssignedToTarget() {
         final MessageProperties messageProperties = createMessageProperties(null);
-        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLLER_ID, TARGET_ID,
-                FileResource.createFileResourceBySha1("12345"));
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLLER_ID,
+                TARGET_ID, FileResource.createFileResourceBySha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
 
@@ -358,8 +362,8 @@ public class AmqpMessageHandlerServiceTest {
     @Description("Tests that an download request is allowed for an artifact which exists and assigned to the requested target")
     public void authenticationRequestAllowedForArtifactWhichExistsAndAssignedToTarget() throws MalformedURLException {
         final MessageProperties messageProperties = createMessageProperties(null);
-        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLLER_ID, TARGET_ID,
-                FileResource.createFileResourceBySha1("12345"));
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLLER_ID,
+                TARGET_ID, FileResource.createFileResourceBySha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
 

@@ -313,7 +313,8 @@ public class SecurityManagedConfiguration {
 
             http.regexMatcher(HttpDownloadAuthenticationFilter.REQUEST_ID_REGEX_PATTERN)
                     .addFilterBefore(downloadIdAuthenticationFilter, FilterSecurityInterceptor.class);
-            http.authorizeRequests().anyRequest().authenticated();
+            http.authorizeRequests().anyRequest().authenticated().and().sessionManagement()
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         }
 
         @Override
@@ -401,6 +402,7 @@ public class SecurityManagedConfiguration {
 
             httpSec.httpBasic().and().exceptionHandling().authenticationEntryPoint(basicAuthEntryPoint);
             httpSec.anonymous().disable();
+            httpSec.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         }
     }
 

@@ -20,11 +20,15 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
+import org.eclipse.hawkbit.security.DosFilter;
+import org.eclipse.hawkbit.security.ExcludePathAwareShallowETagFilter;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.google.common.net.HttpHeaders;
 
@@ -40,6 +44,17 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - REST Security")
 @Stories("Denial of Service protection filter")
 public class DosFilterTest extends AbstractDDiApiIntegrationTest {
+
+    @Override
+    protected DefaultMockMvcBuilder createMvcWebAppContext() {
+        return MockMvcBuilders.webAppContextSetup(context)
+                .addFilter(new DosFilter(null, 10, 10, "127\\.0\\.0\\.1|\\[0:0:0:0:0:0:0:1\\]", "(^192\\.168\\.)",
+                        "X-Forwarded-For"))
+                .addFilter(new ExcludePathAwareShallowETagFilter(
+                        "/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download",
+                        "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/**",
+                        "/api/v1/downloadserver/**"));
+    }
 
     @Test
     @Description("Ensures that clients that are on the blacklist are forbidded ")
@@ -60,18 +75,18 @@ public class DosFilterTest extends AbstractDDiApiIntegrationTest {
                     .header(HttpHeaders.X_FORWARDED_FOR, "10.0.0.1")).andReturn();
             requests++;
 
-            // we give up after 10.000 requests
-            assertThat(requests).isLessThan(10_000);
+            // we give up after 1.000 requests
+            assertThat(requests).isLessThan(1_000);
         } while (result.getResponse().getStatus() != HttpStatus.TOO_MANY_REQUESTS.value());
 
         // the filter shuts down after 100 GET requests
-        assertThat(requests).isGreaterThanOrEqualTo(100);
+        assertThat(requests).isGreaterThanOrEqualTo(10);
     }
 
     @Test
     @Description("Ensures that an assumed READ DoS attempt is not blocked as the client (with IPv4 address) is on a whitelist")
     public void unacceptableGetLoadButOnWhitelistIPv4() throws Exception {
-        for (int i = 0; i < 1_000; i++) {
+        for (int i = 0; i < 100; i++) {
             mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
                     .header(HttpHeaders.X_FORWARDED_FOR, "127.0.0.1")).andExpect(status().isOk());
         }
@@ -80,7 +95,7 @@ public class DosFilterTest extends AbstractDDiApiIntegrationTest {
     @Test
     @Description("Ensures that an assumed READ DoS attempt is not blocked as the client (with IPv6 address) is on a whitelist")
     public void unacceptableGetLoadButOnWhitelistIPv6() throws Exception {
-        for (int i = 0; i < 1_000; i++) {
+        for (int i = 0; i < 100; i++) {
             mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
                     .header(HttpHeaders.X_FORWARDED_FOR, "0:0:0:0:0:0:0:1")).andExpect(status().isOk());
         }
@@ -93,7 +108,7 @@ public class DosFilterTest extends AbstractDDiApiIntegrationTest {
         for (int x = 0; x < 3; x++) {
             // sleep for one second
             Thread.sleep(1100);
-            for (int i = 0; i < 99; i++) {
+            for (int i = 0; i < 9; i++) {
                 mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
                         .header(HttpHeaders.X_FORWARDED_FOR, "10.0.0.1")).andExpect(status().isOk());
             }

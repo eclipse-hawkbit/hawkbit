@@ -51,22 +51,28 @@ public class MgmtDownloadResourceTest extends AbstractManagementApiIntegrationTe
     @Test
     @Description("This test verifies the call of download artifact without a valid download id fails.")
     public void testNoDownloadIdAvailable() throws Exception {
-        mvc.perform(get(MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE
-                + MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING, downloadIdNotAvailable))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+        mvc.perform(get(
+                MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE
+                        + MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING,
+                tenantAware.getCurrentTenant(), downloadIdNotAvailable)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
 
     }
 
     @Test
     @Description("This test verifies the call of download artifact works and the download id will be removed.")
     public void testDownload() throws Exception {
-        mvc.perform(get(MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE
-                + MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING, downloadIdSha1)).andDo(MockMvcResultPrinter.print())
+        mvc.perform(get(
+                MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE
+                        + MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING,
+                tenantAware.getCurrentTenant(), downloadIdSha1)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         // because cache is empty
-        mvc.perform(get(MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE
-                + MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING, downloadIdSha1)).andDo(MockMvcResultPrinter.print())
+        mvc.perform(get(
+                MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE
+                        + MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING,
+                tenantAware.getCurrentTenant(), downloadIdSha1)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
     }

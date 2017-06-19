@@ -20,54 +20,75 @@ import org.eclipse.hawkbit.artifact.TestConfiguration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.data.mongodb.gridfs.GridFsOperations;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.google.common.io.BaseEncoding;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Step;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
 @Stories("Artifact Store MongoDB")
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = { MongoDBArtifactStoreAutoConfiguration.class, TestConfiguration.class })
-@TestPropertySource(properties = { "spring.data.mongodb.port=0", "spring.mongodb.embedded.version=3.2.7" })
+@SpringBootTest(classes = { MongoDBArtifactStoreAutoConfiguration.class, TestConfiguration.class }, properties = {
+        "spring.data.mongodb.port=0", "spring.mongodb.embedded.version=3.4.4" })
 public class MongoDBArtifactStoreTest {
+    private static final String TENANT = "test_tenant";
+    private static final String TENANT2 = "test_tenant2";
 
     @Autowired
     private MongoDBArtifactStore artifactStoreUnderTest;
 
-    @Autowired
-    private GridFsOperations gridFs;
-
     @Test
     @Description("Ensures that search by SHA1 hash (which is used by hawkBit as artifact ID) finds the expected results.")
     public void findArtifactBySHA1Hash() throws NoSuchAlgorithmException {
+
+        final String sha1 = storeRandomArifactAndVerify(TENANT);
+        final String sha2 = storeRandomArifactAndVerify(TENANT2);
+
+        assertThat(artifactStoreUnderTest.getArtifactBySha1(TENANT2, sha1)).isNull();
+        assertThat(artifactStoreUnderTest.getArtifactBySha1(TENANT, sha2)).isNull();
+    }
+
+    @Step
+    private String storeRandomArifactAndVerify(final String tenant) throws NoSuchAlgorithmException {
         final int filelengthBytes = 128;
         final String filename = "testfile.json";
         final String contentType = "application/json";
 
         final DigestInputStream digestInputStream = digestInputStream(generateInputStream(filelengthBytes), "SHA-1");
-        artifactStoreUnderTest.store(digestInputStream, filename, contentType);
-        assertThat(artifactStoreUnderTest.getArtifactBySha1(
-                BaseEncoding.base16().lowerCase().encode(digestInputStream.getMessageDigest().digest()))).isNotNull();
+        artifactStoreUnderTest.store(tenant, digestInputStream, filename, contentType);
+
+        final String sha1 = BaseEncoding.base16().lowerCase().encode(digestInputStream.getMessageDigest().digest());
+        assertThat(artifactStoreUnderTest.getArtifactBySha1(tenant, sha1)).isNotNull();
+        return sha1;
     }
 
     @Test
-    @Description("Ensures that search by MD5 hash finds the expected results.")
-    public void findArtifactByMD5Hash() throws NoSuchAlgorithmException {
-        final int filelengthBytes = 128;
-        final String filename = "testfile.json";
-        final String contentType = "application/json";
+    @Description("Deletes file from repository identified by SHA1 hash as filename.")
+    public void deleteArtifactBySHA1Hash() throws NoSuchAlgorithmException {
 
-        final DigestInputStream digestInputStream = digestInputStream(generateInputStream(filelengthBytes), "MD5");
-        artifactStoreUnderTest.store(digestInputStream, filename, contentType);
-        assertThat(artifactStoreUnderTest.getArtifactByMd5(
-                BaseEncoding.base16().lowerCase().encode(digestInputStream.getMessageDigest().digest()))).isNotNull();
+        final String sha1 = storeRandomArifactAndVerify(TENANT);
+
+        artifactStoreUnderTest.deleteBySha1(TENANT, sha1);
+        assertThat(artifactStoreUnderTest.getArtifactBySha1(TENANT, sha1)).isNull();
+    }
+
+    @Test
+    @Description("Verfies that all data of a tenant is erased if repository is asked to do so. "
+            + "Data of other tenants is not affected.")
+    public void deleteTenant() throws NoSuchAlgorithmException {
+
+        final String shaDeleted = storeRandomArifactAndVerify(TENANT);
+        final String shaUndeleted = storeRandomArifactAndVerify("another_tenant");
+
+        artifactStoreUnderTest.deleteByTenant("tenant_that_does_not_exist");
+        artifactStoreUnderTest.deleteByTenant(TENANT);
+        assertThat(artifactStoreUnderTest.getArtifactBySha1(TENANT, shaDeleted)).isNull();
+        assertThat(artifactStoreUnderTest.getArtifactBySha1("another_tenant", shaUndeleted)).isNotNull();
     }
 
     private static ByteArrayInputStream generateInputStream(final int length) {

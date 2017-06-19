@@ -78,6 +78,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(controllerManagement.getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(),
                 module.getId())).isNotPresent();
 
+        assertThat(controllerManagement.findOldestActiveActionByTarget(NOT_EXIST_ID)).isNotPresent();
+
         assertThat(controllerManagement.hasTargetArtifactAssigned(target.getControllerId(), "XXX")).isFalse();
         assertThat(controllerManagement.hasTargetArtifactAssigned(target.getId(), "XXX")).isFalse();
     }
@@ -99,8 +101,6 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         verifyThrownExceptionBy(() -> controllerManagement.addUpdateActionStatus(
                 entityFactory.actionStatus().create(NOT_EXIST_IDL).status(Action.Status.FINISHED)), "Action");
-
-        verifyThrownExceptionBy(() -> controllerManagement.findOldestActiveActionByTarget(NOT_EXIST_ID), "Target");
 
         verifyThrownExceptionBy(() -> controllerManagement
                 .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), NOT_EXIST_IDL),

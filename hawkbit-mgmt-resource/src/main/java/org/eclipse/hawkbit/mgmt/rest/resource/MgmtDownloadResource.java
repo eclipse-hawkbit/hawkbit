@@ -37,9 +37,6 @@ import com.google.common.net.HttpHeaders;
 
 /**
  * A resource for download artifacts.
- * 
- *
- *
  */
 @RestController
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
@@ -56,17 +53,10 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
     @Autowired
     private RequestResponseContextHolder requestResponseContextHolder;
 
-    /**
-     * Handles the GET request for downloading an artifact.
-     * 
-     * @param downloadId
-     *            the generated download id
-     * @return {@link ResponseEntity} with status {@link HttpStatus#OK} if
-     *         successful
-     */
     @Override
     @ResponseBody
-    public ResponseEntity<Void> downloadArtifactByDownloadId(@PathVariable("downloadId") final String downloadId) {
+    public ResponseEntity<Void> downloadArtifactByDownloadId(@PathVariable("tenant") final String tenant,
+            @PathVariable("downloadId") final String downloadId) {
         try {
             final DownloadArtifactCache artifactCache = downloadIdCache.get(downloadId);
             if (artifactCache == null) {
@@ -77,7 +67,7 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
             DbArtifact artifact = null;
 
             if (DownloadType.BY_SHA1.equals(artifactCache.getDownloadType())) {
-                artifact = artifactRepository.getArtifactBySha1(artifactCache.getId());
+                artifact = artifactRepository.getArtifactBySha1(tenant, artifactCache.getId());
             } else {
                 LOGGER.warn("Download Type {} not supported", artifactCache.getDownloadType());
             }
