@@ -19,6 +19,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
+import javax.persistence.OptimisticLockException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
@@ -135,10 +136,11 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Autowired
     private PlatformTransactionManager txManager;
 
+    // Note: OptimisticLockException added due to usage of flush whch means that
+    // springs transaction based exception mapping will not happen
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(include = { ConcurrencyFailureException.class}, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID, final ActionType actionType,
             final long forcedTimestamp, final Collection<String> targetIDs) {
 
@@ -149,8 +151,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(include = { ConcurrencyFailureException.class}, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
             final Collection<TargetWithActionType> targets) {
 
@@ -159,8 +160,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(include = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
             final Collection<TargetWithActionType> targets, final String actionMessage) {
 
@@ -216,7 +216,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         if (targets.isEmpty()) {
             // detaching as it is not necessary to persist the set itself
-            entityManager.clear();
+            entityManager.detach(set);
             // return with nothing as all targets had the DS already assigned
             return new DistributionSetAssignmentResult(Collections.emptyList(), 0, targetsWithActionType.size(),
                     Collections.emptyList(), targetManagement);
@@ -258,21 +258,19 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         targetIdsToActions.values().forEach(action -> setRunningActionStatus(action, actionMessage));
 
         // flush to get action IDs
-        entityManager.flush();
-        // detaching as everything that needs to be stored is already flushed
-        entityManager.clear();
+        // entityManager.flush();
 
-        // collect updated target and actions IDs in order to return them
-        final DistributionSetAssignmentResult result = new DistributionSetAssignmentResult(
-                targets.stream().map(Target::getControllerId).collect(Collectors.toList()), targets.size(),
-                controllerIDs.size() - targets.size(),
-                targetIdsToActions.values().stream().map(Action::getId).collect(Collectors.toList()), targetManagement);
-
-        LOG.debug("assignDistribution({}) finished {}", set, result);
+        // detaching as it is not necessary to persist the set itself
+        entityManager.detach(set);
+        // detaching as the entity has been changed by the JPQL query above
+        targets.forEach(entityManager::detach);
 
         sendAssignmentEvents(targets, targetIdsCancellList, targetIdsToActions);
 
-        return result;
+        return new DistributionSetAssignmentResult(
+                targets.stream().map(Target::getControllerId).collect(Collectors.toList()), targets.size(),
+                controllerIDs.size() - targets.size(), Lists.newArrayList(targetIdsToActions.values()),
+                targetManagement);
     }
 
     private void sendAssignmentEvents(final List<JpaTarget> targets, final Set<Long> targetIdsCancellList,

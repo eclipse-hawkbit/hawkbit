@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.model;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.springframework.util.CollectionUtils;
@@ -23,7 +24,7 @@ import org.springframework.util.CollectionUtils;
 public class DistributionSetAssignmentResult extends AssignmentResult<Target> {
 
     private final List<String> assignedTargets;
-    private final List<Long> actions;
+    private final List<Action> actions;
 
     private final TargetManagement targetManagement;
 
@@ -45,7 +46,7 @@ public class DistributionSetAssignmentResult extends AssignmentResult<Target> {
      *
      */
     public DistributionSetAssignmentResult(final List<String> assignedTargets, final int assigned,
-            final int alreadyAssigned, final List<Long> actions, final TargetManagement targetManagement) {
+            final int alreadyAssigned, final List<Action> actions, final TargetManagement targetManagement) {
         super(assigned, alreadyAssigned, 0, Collections.emptyList(), Collections.emptyList());
         this.assignedTargets = assignedTargets;
         this.actions = actions;
@@ -60,7 +61,7 @@ public class DistributionSetAssignmentResult extends AssignmentResult<Target> {
             return Collections.emptyList();
         }
 
-        return Collections.unmodifiableList(actions);
+        return actions.stream().map(Action::getId).collect(Collectors.toList());
     }
 
     @Override
