@@ -32,7 +32,6 @@ public interface TenantMetaDataRepository extends PagingAndSortingRepository<Jpa
      *            to search for
      * @return found {@link TenantMetaData} or <code>null</code>
      */
-    // @Transactional(propagation = Propagation.REQUIRES_NEW)
     TenantMetaData findByTenantIgnoreCase(String tenant);
 
     @Override
