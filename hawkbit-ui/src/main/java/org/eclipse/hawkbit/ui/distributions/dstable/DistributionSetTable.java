@@ -93,7 +93,8 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     DistributionSetTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification notification,
             final SpPermissionChecker permissionChecker, final ManageDistUIState manageDistUIState,
-            final DistributionSetManagement distributionSetManagement, final SoftwareModuleManagement softwareManagement,
+            final DistributionSetManagement distributionSetManagement,
+            final SoftwareModuleManagement softwareManagement,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final TargetManagement targetManagement, final DsMetadataPopupLayout dsMetadataPopupLayout) {
         super(eventBus, i18n, notification);
@@ -259,7 +260,8 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             final String name = (String) softwareItem.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
             final String swVersion = (String) softwareItem.getItemProperty(SPUILabelDefinitions.VAR_VERSION).getValue();
 
-            final Optional<SoftwareModule> softwareModule = softwareModuleManagement.findSoftwareModuleById(softwareModuleId);
+            final Optional<SoftwareModule> softwareModule = softwareModuleManagement
+                    .findSoftwareModuleById(softwareModuleId);
 
             if (softwareModule.isPresent() && validSoftwareModule((Long) distId, softwareModule.get())) {
                 final SoftwareModuleIdName softwareModuleIdName = new SoftwareModuleIdName(softwareModuleId,
@@ -342,8 +344,8 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         if (ds.getModules().contains(sm)) {
             /* Already has software module */
             notification.displayValidationError(i18n.getMessage("message.software.dist.already.assigned",
-                    HawkbitCommonUtil.concatStrings(":", ds.getName(), ds.getVersion()),
-                    HawkbitCommonUtil.concatStrings(":", sm.getName(), sm.getVersion())));
+                    HawkbitCommonUtil.concatStrings(":", sm.getName(), sm.getVersion()),
+                    HawkbitCommonUtil.concatStrings(":", ds.getName(), ds.getVersion())));
             return false;
         }
 
@@ -351,7 +353,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             /* Invalid type of the software module */
             notification.displayValidationError(i18n.getMessage("message.software.dist.type.notallowed",
                     HawkbitCommonUtil.concatStrings(":", sm.getName(), sm.getVersion()),
-                    HawkbitCommonUtil.concatStrings(":", ds.getName(), ds.getVersion())));
+                    HawkbitCommonUtil.concatStrings(":", ds.getName(), ds.getVersion()), sm.getType().getName()));
             return false;
         }
         return true;
