@@ -19,7 +19,7 @@ import javax.persistence.PersistenceException;
 
 import org.junit.Test;
 import org.springframework.dao.ConcurrencyFailureException;
-import org.springframework.orm.jpa.JpaSystemException;
+import org.springframework.dao.UncategorizedDataAccessException;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -49,18 +49,19 @@ public class HawkBitEclipseLinkJpaDialectTest {
         final PersistenceException persEception = mock(PersistenceException.class);
         when(persEception.getCause()).thenReturn(new SQLException("simulated transaction ER_LOCK_DEADLOCK", "40001"));
 
-        assertThat(hawkBitEclipseLinkJpaDialectUnderTest
-                .translateExceptionIfPossible(new JpaSystemException(persEception)))
-                        .isInstanceOf(ConcurrencyFailureException.class);
+        assertThat(hawkBitEclipseLinkJpaDialectUnderTest.translateExceptionIfPossible(persEception))
+                .isInstanceOf(ConcurrencyFailureException.class);
     }
 
     @Test
     @Description("Use Case: PersistenceException that could not be mapped by EclipseLinkJpaDialect directly but instead is wrapped"
             + " into JpaSystemException. Cause of PersistenceException is not an SQLException.")
     public void jpaSystemExceptionWithNumberFormatExceptionIsNull() {
+        final PersistenceException persEception = mock(PersistenceException.class);
+        when(persEception.getCause()).thenReturn(new NumberFormatException());
 
-        assertThat(hawkBitEclipseLinkJpaDialectUnderTest
-                .translateExceptionIfPossible(new JpaSystemException(new NumberFormatException()))).isNull();
+        assertThat(hawkBitEclipseLinkJpaDialectUnderTest.translateExceptionIfPossible(persEception))
+                .isInstanceOf(UncategorizedDataAccessException.class);
     }
 
     @Test
