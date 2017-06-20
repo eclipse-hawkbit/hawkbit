@@ -29,7 +29,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  * Mapping tests for {@link HawkBitEclipseLinkJpaDialect}.
  *
  */
-@Features("Component Tests - Repository")
+@Features("Unit Tests - Repository")
 @Stories("Exception handling")
 public class HawkBitEclipseLinkJpaDialectTest {
     private final HawkBitEclipseLinkJpaDialect hawkBitEclipseLinkJpaDialectUnderTest = new HawkBitEclipseLinkJpaDialect();
