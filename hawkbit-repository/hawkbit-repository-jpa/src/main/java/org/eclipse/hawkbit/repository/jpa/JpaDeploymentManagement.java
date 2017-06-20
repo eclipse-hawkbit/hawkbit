@@ -135,8 +135,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Autowired
     private PlatformTransactionManager txManager;
 
-    // Note: OptimisticLockException added due to usage of flush whch means that
-    // springs transaction based exception mapping will not happen
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = {
