@@ -122,7 +122,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     private void handleSelectedAndUpdatedDs(final List<DistributionSetUpdatedEvent> events) {
         manageDistUIState.getLastSelectedDistribution()
-                .ifPresent(lastSelectedDsIdName -> events.stream().filter(event -> !Objects.isNull(event.getEntity()))
+                .ifPresent(lastSelectedDsIdName -> events.stream().filter(Objects::nonNull)
                         .filter(event -> event.getEntityId().equals(lastSelectedDsIdName)).findAny()
                         .ifPresent(event -> eventBus.publish(this,
                                 new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, event.getEntity()))));
@@ -131,7 +131,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     private void updateVisableTableEntries(final List<DistributionSetUpdatedEvent> events,
             final List<Long> visibleItemIds) {
         events.stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
-                .filter(event -> !Objects.isNull(event.getEntity())).filter(DistributionSetUpdatedEvent::isComplete)
+                .filter(DistributionSetUpdatedEvent::isComplete).filter(Objects::nonNull)
                 .forEach(event -> updateDistributionInTable(event.getEntity()));
     }
 

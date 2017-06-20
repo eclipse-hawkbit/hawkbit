@@ -48,7 +48,7 @@ public abstract class AbstractTargetTagToken<T extends BaseEntity> extends Abstr
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEventTargetTagCreated(final TargetTagCreatedEventContainer container) {
-        container.getEvents().stream().filter(event -> !Objects.isNull(event.getEntity()))
+        container.getEvents().stream().filter(Objects::nonNull)
                 .map(TargetTagCreatedEvent::getEntity)
                 .forEach(tag -> setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour()));
     }

@@ -129,7 +129,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedEventContainer eventContainer) {
-        eventContainer.getEvents().stream().filter(event -> !Objects.isNull(event.getEntity()))
+        eventContainer.getEvents().stream().filter(Objects::nonNull)
                 .map(DistributionSetTagCreatedEvent::getEntity)
                 .forEach(distributionSetTag -> setContainerPropertValues(distributionSetTag.getId(),
                         distributionSetTag.getName(), distributionSetTag.getColour()));
@@ -143,7 +143,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdatedEventContainer eventContainer) {
-        eventContainer.getEvents().stream().filter(event -> !Objects.isNull(event.getEntity()))
+        eventContainer.getEvents().stream().filter(Objects::nonNull)
                 .map(DistributionSetTagUpdatedEvent::getEntity).forEach(entity -> {
                     final Item item = container.getItem(entity.getId());
                     if (item != null) {

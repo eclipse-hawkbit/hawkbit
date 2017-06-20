@@ -135,7 +135,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
         final List<Long> visibleItemIds = (List<Long>) getVisibleItemIds();
         handleSelectedAndUpdatedSoftwareModules(eventContainer.getEvents());
         eventContainer.getEvents().stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
-                .filter(event -> !Objects.isNull(event.getEntity()))
+                .filter(Objects::nonNull)
                 .forEach(event -> updateSoftwareModuleInTable(event.getEntity()));
     }
 
@@ -143,7 +143,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
         manageDistUIState.getLastSelectedSoftwareModule()
                 .ifPresent(lastSelectedModuleId -> events.stream()
                         .filter(event -> lastSelectedModuleId.equals(event.getEntityId()))
-                        .filter(event -> !Objects.isNull(event.getEntity())).findAny()
+                        .filter(Objects::nonNull).findAny()
                         .ifPresent(lastEvent -> eventBus.publish(this,
                                 new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, lastEvent.getEntity()))));
     }

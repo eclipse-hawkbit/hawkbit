@@ -176,7 +176,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         @SuppressWarnings("unchecked")
         final List<Long> visibleItemIds = (List<Long>) getVisibleItemIds();
         eventContainer.getEvents().stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
-                .filter(event -> !Objects.isNull(event.getEntity()))
+                .filter(Objects::nonNull)
                 .forEach(event -> updateSoftwareModuleInTable(event.getEntity()));
     }
 
