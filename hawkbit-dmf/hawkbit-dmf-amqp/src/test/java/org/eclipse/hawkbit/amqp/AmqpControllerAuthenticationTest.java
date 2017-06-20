@@ -41,10 +41,10 @@ import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.DdiSecurityProperties.Authentication.Anonymous;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.security.DdiSecurityProperties.Rp;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -170,7 +170,7 @@ public class AmqpControllerAuthenticationTest {
 
         amqpAuthenticationMessageHandlerService = new AmqpAuthenticationMessageHandler(rabbitTemplate,
                 authenticationManager, artifactManagementMock, cacheMock, hostnameResolverMock,
-                controllerManagementMock);
+                controllerManagementMock, tenantAware);
 
         when(hostnameResolverMock.resolveHostname()).thenReturn(new URL("http://localhost"));
 
@@ -181,8 +181,8 @@ public class AmqpControllerAuthenticationTest {
     @Test
     @Description("Tests authentication manager without principal")
     public void testAuthenticationeBadCredantialsWithoutPricipal() {
-        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID, TARGET_ID,
-                FileResource.createFileResourceBySha1(SHA1));
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID,
+                TARGET_ID, FileResource.createFileResourceBySha1(SHA1));
         try {
             authenticationManager.doAuthenticate(securityToken);
             fail("BadCredentialsException was excepeted since principal was missing");
@@ -195,8 +195,8 @@ public class AmqpControllerAuthenticationTest {
     @Test
     @Description("Tests authentication manager without wrong credential")
     public void testAuthenticationBadCredantialsWithWrongCredential() {
-        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID, TARGET_ID,
-                FileResource.createFileResourceBySha1(SHA1));
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID,
+                TARGET_ID, FileResource.createFileResourceBySha1(SHA1));
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
@@ -213,8 +213,8 @@ public class AmqpControllerAuthenticationTest {
     @Test
     @Description("Tests authentication successfull")
     public void testSuccessfullAuthentication() {
-        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID, TARGET_ID,
-                FileResource.createFileResourceBySha1(SHA1));
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID,
+                TARGET_ID, FileResource.createFileResourceBySha1(SHA1));
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
@@ -228,8 +228,8 @@ public class AmqpControllerAuthenticationTest {
     public void testAuthenticationMessageBadCredantialsWithoutPricipal() {
         final MessageProperties messageProperties = createMessageProperties(null);
 
-        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID, TARGET_ID,
-                FileResource.createFileResourceBySha1(SHA1));
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID,
+                TARGET_ID, FileResource.createFileResourceBySha1(SHA1));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
 
@@ -246,8 +246,8 @@ public class AmqpControllerAuthenticationTest {
     @Description("Tests authentication message without wrong credential")
     public void testAuthenticationMessageBadCredantialsWithWrongCredential() {
         final MessageProperties messageProperties = createMessageProperties(null);
-        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID, TARGET_ID,
-                FileResource.createFileResourceBySha1(SHA1));
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID,
+                TARGET_ID, FileResource.createFileResourceBySha1(SHA1));
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
@@ -324,8 +324,8 @@ public class AmqpControllerAuthenticationTest {
     @Description("Tests authentication message successfull")
     public void successfullMessageAuthenticationWithTenantid() {
         final MessageProperties messageProperties = createMessageProperties(null);
-        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(null, TENANT_ID, CONTROLLER_ID, TARGET_ID,
-                FileResource.createFileResourceBySha1(SHA1));
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(null, TENANT_ID, CONTROLLER_ID,
+                TARGET_ID, FileResource.createFileResourceBySha1(SHA1));
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);

@@ -26,6 +26,8 @@ public interface MgmtDownloadRestApi {
     /**
      * Handles the GET request for downloading an artifact.
      * 
+     * @param tenant
+     *            the download belongs to
      * @param downloadId
      *            the generated download id
      * @param response
@@ -35,6 +37,7 @@ public interface MgmtDownloadRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING)
     @ResponseBody
-    ResponseEntity<Void> downloadArtifactByDownloadId(@PathVariable("downloadId") String downloadId);
+    ResponseEntity<Void> downloadArtifactByDownloadId(@PathVariable("tenant") String tenant,
+            @PathVariable("downloadId") String downloadId);
 
 }

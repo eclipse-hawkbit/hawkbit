@@ -20,7 +20,6 @@ import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.cache.DownloadType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDownloadRestApi;
 import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,20 +53,10 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
     @Autowired
     private RequestResponseContextHolder requestResponseContextHolder;
 
-    @Autowired
-    private TenantAware tenantAware;
-
-    /**
-     * Handles the GET request for downloading an artifact.
-     * 
-     * @param downloadId
-     *            the generated download id
-     * @return {@link ResponseEntity} with status {@link HttpStatus#OK} if
-     *         successful
-     */
     @Override
     @ResponseBody
-    public ResponseEntity<Void> downloadArtifactByDownloadId(@PathVariable("downloadId") final String downloadId) {
+    public ResponseEntity<Void> downloadArtifactByDownloadId(@PathVariable("tenant") final String tenant,
+            @PathVariable("downloadId") final String downloadId) {
         try {
             final DownloadArtifactCache artifactCache = downloadIdCache.get(downloadId);
             if (artifactCache == null) {
@@ -78,7 +67,7 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
             DbArtifact artifact = null;
 
             if (DownloadType.BY_SHA1.equals(artifactCache.getDownloadType())) {
-                artifact = artifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifactCache.getId());
+                artifact = artifactRepository.getArtifactBySha1(tenant, artifactCache.getId());
             } else {
                 LOGGER.warn("Download Type {} not supported", artifactCache.getDownloadType());
             }

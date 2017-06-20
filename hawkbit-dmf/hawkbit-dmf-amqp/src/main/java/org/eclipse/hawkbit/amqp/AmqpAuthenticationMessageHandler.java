@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
@@ -63,6 +64,8 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
 
     private final ControllerManagement controllerManagement;
 
+    private final TenantAware tenantAware;
+
     /**
      * @param rabbitTemplate
      *            the configured amqp template.
@@ -76,17 +79,20 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
      *            for target authentication
      * @param controllerManagement
      *            for target repo access
+     * @param tenantAware
+     *            to access current tenant
      */
     public AmqpAuthenticationMessageHandler(final RabbitTemplate rabbitTemplate,
             final AmqpControllerAuthentication authenticationManager, final ArtifactManagement artifactManagement,
             final DownloadIdCache cache, final HostnameResolver hostnameResolver,
-            final ControllerManagement controllerManagement) {
+            final ControllerManagement controllerManagement, final TenantAware tenantAware) {
         super(rabbitTemplate);
         this.authenticationManager = authenticationManager;
         this.artifactManagement = artifactManagement;
         this.cache = cache;
         this.hostnameResolver = hostnameResolver;
         this.controllerManagement = controllerManagement;
+        this.tenantAware = tenantAware;
     }
 
     /**
@@ -210,9 +216,9 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
             // SHA1 key is set, download by SHA1
             final DownloadArtifactCache downloadCache = new DownloadArtifactCache(DownloadType.BY_SHA1, sha1Hash);
             cache.put(downloadId, downloadCache);
-            authentificationResponse
-                    .setDownloadUrl(UriComponentsBuilder.fromUri(hostnameResolver.resolveHostname().toURI())
-                            .path("/api/v1/downloadserver/downloadId/").path(downloadId).build().toUriString());
+            authentificationResponse.setDownloadUrl(UriComponentsBuilder
+                    .fromUri(hostnameResolver.resolveHostname().toURI()).path("/api/v1/downloadserver/downloadId/")
+                    .path(tenantAware.getCurrentTenant()).path("/").path(downloadId).build().toUriString());
             authentificationResponse.setResponseCode(HttpStatus.OK.value());
         } catch (final BadCredentialsException | AuthenticationServiceException | CredentialsExpiredException e) {
             LOG.error("Login failed", e);
