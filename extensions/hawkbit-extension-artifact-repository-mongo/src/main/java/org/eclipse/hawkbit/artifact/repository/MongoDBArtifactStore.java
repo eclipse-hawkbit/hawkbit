@@ -91,8 +91,16 @@ public class MongoDBArtifactStore implements ArtifactRepository {
     @Override
     public DbArtifact getArtifactBySha1(final String tenant, final String sha1Hash) {
 
-        return map(gridFs.findOne(new Query()
-                .addCriteria(Criteria.where(FILENAME).is(sha1Hash).and(TENANT_QUERY).is(sanitizeTenant(tenant)))));
+        GridFSDBFile found = gridFs.findOne(new Query()
+                .addCriteria(Criteria.where(FILENAME).is(sha1Hash).and(TENANT_QUERY).is(sanitizeTenant(tenant))));
+
+        // fallback pre-multi-tenancy
+        if (found == null) {
+            found = gridFs.findOne(
+                    new Query().addCriteria(Criteria.where(FILENAME).is(sha1Hash).and(TENANT_QUERY).exists(false)));
+        }
+
+        return map(found);
     }
 
     @Override
