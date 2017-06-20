@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolationException;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
@@ -55,11 +56,14 @@ import com.google.common.collect.Iterables;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Step;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
 @Stories("Target Management")
 public class TargetManagementTest extends AbstractJpaIntegrationTest {
+
+    private static final String WHITESPACE_ERROR = "target with whitespaces in controller id should not be created";
 
     @Test
     @Description("Verifies that management get access react as specfied on calls for non existing entities by means "
@@ -175,25 +179,6 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verify that a target with empty controller id cannot be created")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
-    public void createTargetWithNoControllerId() {
-        try {
-            targetManagement.createTarget(entityFactory.target().create().controllerId(""));
-            fail("target with empty controller id should not be created");
-        } catch (final ConstraintViolationException e) {
-            // ok
-        }
-
-        try {
-            targetManagement.createTarget(entityFactory.target().create().controllerId(null));
-            fail("target with empty controller id should not be created");
-        } catch (final ConstraintViolationException e) {
-            // ok
-        }
-    }
-
-    @Test
     @Description("Verify that a target with same controller ID than another device cannot be created.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
     public void createTargetThatViolatesUniqueConstraintFails() {
@@ -204,50 +189,125 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verify that a target with whitespaces in controller id cannot be created")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
-    public void createTargetWithWhitespaces() {
-        try {
-            targetManagement.createTarget(entityFactory.target().create().controllerId(" "));
-            fail("target with whitespaces in controller id should not be created");
-        } catch (final ConstraintViolationException e) {
-            // ok
-        }
+    @Description("Verify that a target with with invalid properties cannot be created or updated")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 0) })
+    public void createAndUpdateTargetWithInvalidFields() {
+        final Target target = testdataFactory.createTarget();
 
-        try {
-            targetManagement.createTarget(entityFactory.target().create().controllerId(" a"));
-            fail("target with whitespaces in controller id should not be created");
-        } catch (final ConstraintViolationException e) {
-            // ok
-        }
+        createTargetWithInvalidControllerId();
+        createAndUpdateTargetWithInvalidDescription(target);
+        createAndUpdateTargetWithInvalidName(target);
+        createAndUpdateTargetWithInvalidSecurityToken(target);
+        createAndUpdateTargetWithInvalidAddress(target);
+    }
 
-        try {
-            targetManagement.createTarget(entityFactory.target().create().controllerId("a "));
-            fail("target with whitespaces in controller id should not be created");
-        } catch (final ConstraintViolationException e) {
-            // ok
-        }
+    @Step
+    private void createAndUpdateTargetWithInvalidDescription(final Target target) {
 
-        try {
-            targetManagement.createTarget(entityFactory.target().create().controllerId("a b"));
-            fail("target with whitespaces in controller id should not be created");
-        } catch (final ConstraintViolationException e) {
-            // ok
-        }
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement.createTarget(entityFactory.target().create().controllerId("a")
+                        .description(RandomStringUtils.randomAlphanumeric(513))))
+                .as("target with too long description should not be created");
 
-        try {
-            targetManagement.createTarget(entityFactory.target().create().controllerId("     "));
-            fail("target with whitespaces in controller id should not be created");
-        } catch (final ConstraintViolationException e) {
-            // ok
-        }
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement.updateTarget(entityFactory.target().update(target.getControllerId())
+                        .description(RandomStringUtils.randomAlphanumeric(513))))
+                .as("target with too long description should not be updated");
 
-        try {
-            targetManagement.createTarget(entityFactory.target().create().controllerId("aaa   bbb"));
-            fail("target with whitespaces in controller id should not be created");
-        } catch (final ConstraintViolationException e) {
-            // ok
-        }
+    }
+
+    @Step
+    private void createAndUpdateTargetWithInvalidName(final Target target) {
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement.createTarget(entityFactory.target().create().controllerId("a")
+                        .name(RandomStringUtils.randomAlphanumeric(65))))
+                .as("target with too long name should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement.updateTarget(entityFactory.target().update(target.getControllerId())
+                        .name(RandomStringUtils.randomAlphanumeric(65))))
+                .as("target with too long name should not be updated");
+
+        assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(
+                () -> targetManagement.updateTarget(entityFactory.target().update(target.getControllerId()).name("")))
+                .as("target with too short name should not be updated");
+
+    }
+
+    @Step
+    private void createAndUpdateTargetWithInvalidSecurityToken(final Target target) {
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement.createTarget(entityFactory.target().create().controllerId("a")
+                        .securityToken(RandomStringUtils.randomAlphanumeric(129))))
+                .as("target with too long token should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement.updateTarget(entityFactory.target().update(target.getControllerId())
+                        .securityToken(RandomStringUtils.randomAlphanumeric(129))))
+                .as("target with too long token should not be updated");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement
+                        .updateTarget(entityFactory.target().update(target.getControllerId()).securityToken("")))
+                .as("target with too short token should not be updated");
+    }
+
+    @Step
+    private void createAndUpdateTargetWithInvalidAddress(final Target target) {
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement.createTarget(entityFactory.target().create().controllerId("a")
+                        .address(RandomStringUtils.randomAlphanumeric(513))))
+                .as("target with too long address should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement.updateTarget(entityFactory.target().update(target.getControllerId())
+                        .address(RandomStringUtils.randomAlphanumeric(513))))
+                .as("target with too long address should not be updated");
+    }
+
+    @Step
+    private void createTargetWithInvalidControllerId() {
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement.createTarget(entityFactory.target().create().controllerId("")))
+                .as("target with empty controller id should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement.createTarget(entityFactory.target().create().controllerId(null)))
+                .as("target with null controller id should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement.createTarget(
+                        entityFactory.target().create().controllerId(RandomStringUtils.randomAlphanumeric(65))))
+                .as("target with too long controller id should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement.createTarget(entityFactory.target().create().controllerId(" ")))
+                .as(WHITESPACE_ERROR);
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement.createTarget(entityFactory.target().create().controllerId(" a")))
+                .as(WHITESPACE_ERROR);
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement.createTarget(entityFactory.target().create().controllerId("a ")))
+                .as(WHITESPACE_ERROR);
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement.createTarget(entityFactory.target().create().controllerId("a b")))
+                .as(WHITESPACE_ERROR);
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement.createTarget(entityFactory.target().create().controllerId("     ")))
+                .as(WHITESPACE_ERROR);
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(
+                        () -> targetManagement.createTarget(entityFactory.target().create().controllerId("aaa   bbb")))
+                .as(WHITESPACE_ERROR);
 
     }
 

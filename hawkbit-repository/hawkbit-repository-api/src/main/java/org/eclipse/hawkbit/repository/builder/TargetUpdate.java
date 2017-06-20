@@ -8,9 +8,12 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Builder to update an existing {@link Target} entry. Defines all fields that
@@ -24,21 +27,21 @@ public interface TargetUpdate {
      *            for {@link Target#getName()}
      * @return updated builder instance
      */
-    TargetUpdate name(@NotEmpty String name);
+    TargetUpdate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
 
     /**
      * @param description
      *            for {@link Target#getDescription()}
      * @return updated builder instance
      */
-    TargetUpdate description(String description);
+    TargetUpdate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
      * @param securityToken
      *            for {@link Target#getSecurityToken()}
      * @return updated builder instance
      */
-    TargetUpdate securityToken(@NotEmpty String securityToken);
+    TargetUpdate securityToken(@Size(min = 1, max = Target.SECURITY_TOKEN_MAX_SIZE) @NotNull String securityToken);
 
     /**
      * @param address
@@ -49,7 +52,7 @@ public interface TargetUpdate {
      * 
      * @return updated builder instance
      */
-    TargetUpdate address(String address);
+    TargetUpdate address(@Size(max = Target.ADDRESS_MAX_SIZE) String address);
 
     /**
      * @param lastTargetQuery
@@ -63,5 +66,5 @@ public interface TargetUpdate {
      *            for {@link Target#getUpdateStatus()}
      * @return updated builder instance
      */
-    TargetUpdate status(TargetUpdateStatus status);
+    TargetUpdate status(@NotNull TargetUpdateStatus status);
 }

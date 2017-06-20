@@ -209,6 +209,11 @@ public final class MgmtRestConstants {
     public static final String SOFTWAREMODULE_V1_ARTIFACT = "artifacts";
 
     /**
+     * The target URL mapping, href link for software module access.
+     */
+    public static final String DISTRIBUTIONSET_V1_MODULE = "modules";
+
+    /**
      * The target URL mapping, href link for type information.
      */
     public static final String SOFTWAREMODULE_V1_TYPE = "type";

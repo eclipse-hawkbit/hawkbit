@@ -353,6 +353,26 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     }
 
     @Test
+    @Description("Ensures that target update request fails is updated value fails against a constraint.")
+    public void updateTargetDescriptionFailsIfInvalidLength() throws Exception {
+        final String knownControllerId = "123";
+        final String knownNewDescription = RandomStringUtils.randomAlphabetic(513);
+        final String knownNameNotModiy = "nameNotModiy";
+        final String body = new JSONObject().put("description", knownNewDescription).toString();
+
+        // prepare
+        targetManagement.createTarget(entityFactory.target().create().controllerId(knownControllerId)
+                .name(knownNameNotModiy).description("old description"));
+
+        mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content(body)
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+
+        final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownControllerId).get();
+        assertThat(findTargetByControllerID.getDescription()).isEqualTo("old description");
+    }
+
+    @Test
     @Description("Ensures that target update request is reflected by repository.")
     public void updateTargetSecurityToken() throws Exception {
         final String knownControllerId = "123";

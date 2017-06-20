@@ -91,6 +91,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
+import org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -288,7 +289,14 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     @Override
     protected AbstractJpaVendorAdapter createJpaVendorAdapter() {
-        return new EclipseLinkJpaVendorAdapter();
+        return new EclipseLinkJpaVendorAdapter() {
+            private final HawkBitEclipseLinkJpaDialect jpaDialect = new HawkBitEclipseLinkJpaDialect();
+
+            @Override
+            public EclipseLinkJpaDialect getJpaDialect() {
+                return jpaDialect;
+            }
+        };
     }
 
     @Override

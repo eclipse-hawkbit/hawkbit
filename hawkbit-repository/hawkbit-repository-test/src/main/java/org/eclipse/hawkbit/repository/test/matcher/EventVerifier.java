@@ -9,6 +9,7 @@
 
 package org.eclipse.hawkbit.repository.test.matcher;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 import java.util.Iterator;
@@ -18,6 +19,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.hawkbit.repository.event.remote.RemoteIdEvent;
+import org.eclipse.hawkbit.repository.event.remote.RemoteTenantAwareEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.test.util.TestContextProvider;
 import org.junit.Assert;
 import org.junit.rules.TestRule;
@@ -120,6 +124,21 @@ public class EventVerifier implements TestRule {
         @Override
         public void onApplicationEvent(final RemoteApplicationEvent event) {
             LOGGER.debug("Received event {}", event.getClass().getSimpleName());
+
+            if (event instanceof RemoteTenantAwareEvent) {
+                assertThat(((RemoteTenantAwareEvent) event).getTenant()).isNotEmpty();
+            }
+
+            if (event instanceof RemoteIdEvent) {
+                assertThat(((RemoteIdEvent) event).getEntityId()).isNotNull();
+            }
+
+            if (event instanceof TargetAssignDistributionSetEvent) {
+                assertThat(((TargetAssignDistributionSetEvent) event).getActionId()).isNotNull();
+                assertThat(((TargetAssignDistributionSetEvent) event).getControllerId()).isNotEmpty();
+                assertThat(((TargetAssignDistributionSetEvent) event).getDistributionSetId()).isNotNull();
+            }
+
             capturedEvents.add(event.getClass());
         }
 

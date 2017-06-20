@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.net.URI;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,7 +24,6 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
-import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
@@ -90,9 +89,6 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Autowired
     private SoftwareModuleRepository softwareModuleRepository;
-
-    @Autowired
-    private TargetManagement targetManagement;
 
     @Autowired
     private ActionStatusRepository actionStatusRepository;
@@ -214,10 +210,10 @@ public class JpaControllerManagement implements ControllerManagement {
         final JpaTarget target = targetRepository.findOne(spec);
 
         if (target == null) {
-            final Target result = targetManagement.createTarget(entityFactory.target().create()
+            final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
                     .controllerId(controllerId).description("Plug and Play target: " + controllerId).name(controllerId)
                     .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
-                    .address(Optional.ofNullable(address).map(URI::toString).orElse(null)));
+                    .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build());
 
             afterCommit.afterCommit(
                     () -> eventPublisher.publishEvent(new TargetPollEvent(result, applicationContext.getId())));
@@ -535,7 +531,7 @@ public class JpaControllerManagement implements ControllerManagement {
     public List<String> getActionHistoryMessages(final Long actionId, final int messageCount) {
         // Just return empty list in case messageCount is zero.
         if (messageCount == 0) {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
 
         // For negative and large value of messageCount, limit the number of

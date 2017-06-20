@@ -117,13 +117,17 @@ public final class MgmtDistributionSetMapper {
         response.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getDistributionSet(response.getDsId()))
                 .withSelfRel());
 
+        response.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getAssignedSoftwareModules(response.getDsId(),
+                MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
+                MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null))
+                        .withRel(MgmtRestConstants.DISTRIBUTIONSET_V1_MODULE));
+
         response.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class)
                 .getDistributionSetType(distributionSet.getType().getId())).withRel("type"));
 
         response.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getMetadata(response.getDsId(),
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
-                MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null))
-                        .withRel("metadata"));
+                MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("metadata"));
 
         return response;
     }

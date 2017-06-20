@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.aspects;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -22,15 +21,10 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
-import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.TransactionSystemException;
 
@@ -55,10 +49,6 @@ public class ExceptionMappingAspectHandler implements Ordered {
      * exception.
      */
     private static final List<Class<?>> MAPPED_EXCEPTION_ORDER = Lists.newArrayListWithExpectedSize(4);
-    @Autowired
-    private JpaVendorAdapter jpaVendorAdapter;
-
-    private final SQLStateSQLExceptionTranslator sqlStateExceptionTranslator = new SQLStateSQLExceptionTranslator();
 
     static {
 
@@ -84,88 +74,48 @@ public class ExceptionMappingAspectHandler implements Ordered {
      *            the thrown and catched exception
      * @throws Throwable
      */
-    @AfterThrowing(pointcut = "( execution( * org.springframework.transaction..*.*(..)) "
-            + " || execution( * org.eclipse.hawkbit.repository.*.*(..)) )", throwing = "ex")
+    @AfterThrowing(pointcut = "execution( * org.eclipse.hawkbit.repository.jpa.*Management.*(..))", throwing = "ex")
     // Exception for squid:S00112, squid:S1162
     // It is a AspectJ proxy which deals with exceptions.
     @SuppressWarnings({ "squid:S00112", "squid:S1162" })
     public void catchAndWrapJpaExceptionsService(final Exception ex) throws Throwable {
 
-        LOG.trace("exception occured", ex);
-        Exception translatedAccessException = translateEclipseLinkExceptionIfPossible(ex);
-
-        if (translatedAccessException == null && ex instanceof TransactionSystemException) {
-            final TransactionSystemException systemException = (TransactionSystemException) ex;
-            translatedAccessException = translateEclipseLinkExceptionIfPossible(
-                    (Exception) systemException.getOriginalException());
+        // Workarround for EclipseLink merge where it does not throw
+        // ConstraintViolationException directly in case of existing entity
+        // update
+        if (ex instanceof TransactionSystemException) {
+            throw replaceWithCauseIfConstraintViolationException((TransactionSystemException) ex);
         }
 
-        if (translatedAccessException == null) {
-            translatedAccessException = ex;
-        }
-
-        Exception mappingException = translatedAccessException;
-
-        LOG.trace("translated excpetion is", translatedAccessException);
         for (final Class<?> mappedEx : MAPPED_EXCEPTION_ORDER) {
 
-            if (mappedEx.isAssignableFrom(translatedAccessException.getClass())) {
-                if (!EXCEPTION_MAPPING.containsKey(mappedEx.getName())) {
-                    LOG.error("there is no mapping configured for exception class {}", mappedEx.getName());
-                    mappingException = new GenericSpServerException(ex);
-                } else {
-                    mappingException = (Exception) Class.forName(EXCEPTION_MAPPING.get(mappedEx.getName()))
-                            .getConstructor(Throwable.class).newInstance(ex);
-                }
-                break;
+            if (!mappedEx.isAssignableFrom(ex.getClass())) {
+                continue;
             }
+
+            if (EXCEPTION_MAPPING.containsKey(mappedEx.getName())) {
+                throw (Exception) Class.forName(EXCEPTION_MAPPING.get(mappedEx.getName()))
+                        .getConstructor(Throwable.class).newInstance(ex);
+            }
+
+            LOG.error("there is no mapping configured for exception class {}", mappedEx.getName());
+            throw new GenericSpServerException(ex);
         }
 
-        LOG.trace("mapped exception {} to {}", translatedAccessException.getClass(), mappingException.getClass());
-        throw mappingException;
+        throw ex;
     }
 
-    private DataAccessException translateEclipseLinkExceptionIfPossible(final Exception exception) {
-        final DataAccessException translatedAccessException = jpaVendorAdapter.getJpaDialect()
-                .translateExceptionIfPossible((RuntimeException) exception);
-        return translateSQLStateExceptionIfPossible(translatedAccessException);
-
-    }
-
-    /**
-     * There is no EclipseLinkExceptionTranslator. So we have to check and
-     * translate the exception by the sql error code. Luckily, there we can use
-     * {@link SQLStateSQLExceptionTranslator} if we can get a
-     * {@link SQLException}.
-     *
-     * @param accessException
-     *            the base access exception from jpa
-     * @return the translated accessException
-     */
-    private DataAccessException translateSQLStateExceptionIfPossible(final DataAccessException accessException) {
-        if (!(accessException instanceof JpaSystemException)) {
-            return accessException;
-        }
-
-        final SQLException ex = findSqlException((JpaSystemException) accessException);
-
-        if (ex == null) {
-            return accessException;
-        }
-
-        return sqlStateExceptionTranslator.translate(null, null, ex);
-    }
-
-    private static SQLException findSqlException(final JpaSystemException jpaSystemException) {
-        Throwable exception = jpaSystemException.getCause();
-        while (exception != null) {
+    private static Exception replaceWithCauseIfConstraintViolationException(final TransactionSystemException rex) {
+        Throwable exception = rex;
+        do {
             final Throwable cause = exception.getCause();
-            if (cause instanceof SQLException) {
-                return (SQLException) cause;
+            if (cause instanceof javax.validation.ConstraintViolationException) {
+                return (Exception) cause;
             }
             exception = cause;
-        }
-        return null;
+        } while (exception != null);
+
+        return rex;
     }
 
     @Override

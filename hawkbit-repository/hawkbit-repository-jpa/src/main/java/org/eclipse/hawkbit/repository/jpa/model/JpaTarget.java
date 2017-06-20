@@ -64,7 +64,6 @@ import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,9 +91,9 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     private static final List<String> TARGET_UPDATE_EVENT_IGNORE_FIELDS = Arrays.asList("lastTargetQuery",
             "lastTargetQuery", "address", "optLockRevision", "lastModifiedAt", "lastModifiedBy");
 
-    @Column(name = "controller_id", length = 64)
-    @Size(min = 1, max = 64)
-    @NotEmpty
+    @Column(name = "controller_id", length = Target.CONTROLLER_ID_MAX_SIZE)
+    @Size(min = 1, max = Target.CONTROLLER_ID_MAX_SIZE)
+    @NotNull
     @Pattern(regexp = "[.\\S]*", message = "has whitespaces which are not allowed")
     private String controllerId;
 
@@ -113,17 +112,17 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
      * the security token of the target which allows if enabled to authenticate
      * with this security token.
      */
-    @Column(name = "sec_token", updatable = true, nullable = false, length = 128)
-    @Size(max = 128)
-    @NotEmpty
+    @Column(name = "sec_token", updatable = true, nullable = false, length = Target.SECURITY_TOKEN_MAX_SIZE)
+    @Size(min = 1, max = Target.SECURITY_TOKEN_MAX_SIZE)
+    @NotNull
     private String securityToken;
 
     @CascadeOnDelete
     @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
     private List<RolloutTargetGroup> rolloutTargetGroup;
 
-    @Column(name = "address", length = 512)
-    @Size(max = 512)
+    @Column(name = "address", length = Target.ADDRESS_MAX_SIZE)
+    @Size(max = Target.ADDRESS_MAX_SIZE)
     private String address;
 
     @Column(name = "last_target_query")

@@ -10,11 +10,11 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
-import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * {@link TenantAwareBaseEntity} extension for all entities that are named in
@@ -27,13 +27,13 @@ import org.hibernate.validator.constraints.NotEmpty;
 public abstract class AbstractJpaNamedEntity extends AbstractJpaTenantAwareBaseEntity implements NamedEntity {
     private static final long serialVersionUID = 1L;
 
-    @Column(name = "name", nullable = false, length = 64)
-    @Size(max = 64)
-    @NotEmpty
+    @Column(name = "name", nullable = false, length = NamedEntity.NAME_MAX_SIZE)
+    @Size(min = 1, max = NamedEntity.NAME_MAX_SIZE)
+    @NotNull
     private String name;
 
-    @Column(name = "description", nullable = true, length = 512)
-    @Size(max = 512)
+    @Column(name = "description", nullable = true, length = NamedEntity.DESCRIPTION_MAX_SIZE)
+    @Size(max = NamedEntity.DESCRIPTION_MAX_SIZE)
     private String description;
 
     /**
