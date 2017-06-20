@@ -84,30 +84,28 @@ public class ExceptionMappingAspectHandler implements Ordered {
         // ConstraintViolationException directly in case of existing entity
         // update
         if (ex instanceof TransactionSystemException) {
-            throw findConstraintViolationException(ex);
+            throw replaceWithCauseIfConstraintViolationException((TransactionSystemException) ex);
         }
-
-        Exception mappingException = ex;
 
         for (final Class<?> mappedEx : MAPPED_EXCEPTION_ORDER) {
 
-            if (mappedEx.isAssignableFrom(ex.getClass())) {
-                if (!EXCEPTION_MAPPING.containsKey(mappedEx.getName())) {
-                    LOG.error("there is no mapping configured for exception class {}", mappedEx.getName());
-                    mappingException = new GenericSpServerException(ex);
-                } else {
-                    mappingException = (Exception) Class.forName(EXCEPTION_MAPPING.get(mappedEx.getName()))
-                            .getConstructor(Throwable.class).newInstance(ex);
-                }
-                LOG.trace("mapped exception {} to {}", ex.getClass(), mappingException.getClass());
+            if (!mappedEx.isAssignableFrom(ex.getClass())) {
                 break;
             }
+
+            if (EXCEPTION_MAPPING.containsKey(mappedEx.getName())) {
+                throw (Exception) Class.forName(EXCEPTION_MAPPING.get(mappedEx.getName()))
+                        .getConstructor(Throwable.class).newInstance(ex);
+            }
+
+            LOG.error("there is no mapping configured for exception class {}", mappedEx.getName());
+            throw new GenericSpServerException(ex);
         }
 
-        throw mappingException;
+        throw ex;
     }
 
-    private static Exception findConstraintViolationException(final Exception rex) {
+    private static Exception replaceWithCauseIfConstraintViolationException(final TransactionSystemException rex) {
         Throwable exception = rex;
         do {
             final Throwable cause = exception.getCause();

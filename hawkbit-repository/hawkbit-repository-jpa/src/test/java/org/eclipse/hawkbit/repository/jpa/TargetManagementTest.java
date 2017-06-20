@@ -189,7 +189,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verify that a target with empty controller id cannot be created")
+    @Description("Verify that a target with with invalid properties cannot be created or updated")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 0) })
     public void createAndUpdateTargetWithInvalidFields() {
