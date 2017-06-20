@@ -20,6 +20,7 @@ import org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect;
  * mechanisms.
  *
  */
+// TODO try to document the most prominient use cases
 public class HawkBitEclipseLinkJpaDialect extends EclipseLinkJpaDialect {
     private static final long serialVersionUID = 1L;
 
