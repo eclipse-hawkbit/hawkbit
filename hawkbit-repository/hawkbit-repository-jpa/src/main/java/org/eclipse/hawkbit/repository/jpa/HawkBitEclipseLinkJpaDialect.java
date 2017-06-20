@@ -42,7 +42,12 @@ public class HawkBitEclipseLinkJpaDialect extends EclipseLinkJpaDialect {
             return accessException;
         }
 
-        return searchAndTranslateSqlException(accessException);
+        final DataAccessException sql = searchAndTranslateSqlException(accessException);
+        if (sql != null) {
+            return sql;
+        }
+
+        return accessException;
     }
 
     private static DataAccessException searchAndTranslateSqlException(final RuntimeException ex) {
