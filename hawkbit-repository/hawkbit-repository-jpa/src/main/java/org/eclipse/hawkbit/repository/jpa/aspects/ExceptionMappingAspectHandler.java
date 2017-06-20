@@ -90,7 +90,7 @@ public class ExceptionMappingAspectHandler implements Ordered {
         for (final Class<?> mappedEx : MAPPED_EXCEPTION_ORDER) {
 
             if (!mappedEx.isAssignableFrom(ex.getClass())) {
-                break;
+                continue;
             }
 
             if (EXCEPTION_MAPPING.containsKey(mappedEx.getName())) {
