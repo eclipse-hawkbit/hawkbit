@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
@@ -175,6 +176,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         @SuppressWarnings("unchecked")
         final List<Long> visibleItemIds = (List<Long>) getVisibleItemIds();
         eventContainer.getEvents().stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
+                .filter(Objects::nonNull)
                 .forEach(event -> updateSoftwareModuleInTable(event.getEntity()));
     }
 

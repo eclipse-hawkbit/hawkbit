@@ -9,10 +9,13 @@
 package org.eclipse.hawkbit.ui.common.tagdetails;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
@@ -126,7 +129,8 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedEventContainer eventContainer) {
-        eventContainer.getEvents().stream().map(event -> event.getEntity())
+        eventContainer.getEvents().stream().filter(Objects::nonNull)
+                .map(DistributionSetTagCreatedEvent::getEntity)
                 .forEach(distributionSetTag -> setContainerPropertValues(distributionSetTag.getId(),
                         distributionSetTag.getName(), distributionSetTag.getColour()));
     }
@@ -139,12 +143,13 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdatedEventContainer eventContainer) {
-        eventContainer.getEvents().stream().map(event -> event.getEntity()).forEach(entity -> {
-            final Item item = container.getItem(entity.getId());
-            if (item != null) {
-                updateItem(entity.getName(), entity.getColour(), item);
-            }
-        });
+        eventContainer.getEvents().stream().filter(Objects::nonNull)
+                .map(DistributionSetTagUpdatedEvent::getEntity).forEach(entity -> {
+                    final Item item = container.getItem(entity.getId());
+                    if (item != null) {
+                        updateItem(entity.getName(), entity.getColour(), item);
+                    }
+                });
     }
 
     private void processTargetTagAssigmentResult(final DistributionSetTagAssignmentResult assignmentResult) {

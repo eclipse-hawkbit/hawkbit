@@ -19,19 +19,13 @@ import ru.yandex.qatools.allure.annotations.Stories;
  * Test the remote entity events.
  */
 @Features("Component Tests - Repository")
-@Stories("Test DistributionSetCreatedEvent and DistributionSetUpdateEvent")
-public class DistributionSetEventTest extends AbstractRemoteEntityEventTest<DistributionSet> {
+@Stories("Test DistributionSetCreatedEvent")
+public class DistributionSetCreatedEventTest extends AbstractRemoteEntityEventTest<DistributionSet> {
 
     @Test
     @Description("Verifies that the distribution set entity reloading by remote created event works")
     public void testDistributionSetCreatedEvent() {
         assertAndCreateRemoteEvent(DistributionSetCreatedEvent.class);
-    }
-
-    @Test
-    @Description("Verifies that the distribution set entity reloading by remote updated event works")
-    public void testDistributionSetUpdateEvent() {
-        assertAndCreateRemoteEvent(DistributionSetUpdatedEvent.class);
     }
 
     @Override

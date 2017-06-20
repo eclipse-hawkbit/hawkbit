@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -121,7 +122,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     private void handleSelectedAndUpdatedDs(final List<DistributionSetUpdatedEvent> events) {
         manageDistUIState.getLastSelectedDistribution()
-                .ifPresent(lastSelectedDsIdName -> events.stream()
+                .ifPresent(lastSelectedDsIdName -> events.stream().filter(Objects::nonNull)
                         .filter(event -> event.getEntityId().equals(lastSelectedDsIdName)).findAny()
                         .ifPresent(event -> eventBus.publish(this,
                                 new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, event.getEntity()))));
@@ -130,7 +131,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     private void updateVisableTableEntries(final List<DistributionSetUpdatedEvent> events,
             final List<Long> visibleItemIds) {
         events.stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
-                .filter(event -> event.getEntity().isComplete())
+                .filter(DistributionSetUpdatedEvent::isComplete).filter(Objects::nonNull)
                 .forEach(event -> updateDistributionInTable(event.getEntity()));
     }
 

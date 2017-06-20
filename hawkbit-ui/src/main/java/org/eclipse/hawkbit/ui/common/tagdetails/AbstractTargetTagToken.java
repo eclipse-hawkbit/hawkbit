@@ -9,8 +9,10 @@
 package org.eclipse.hawkbit.ui.common.tagdetails;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -46,7 +48,8 @@ public abstract class AbstractTargetTagToken<T extends BaseEntity> extends Abstr
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEventTargetTagCreated(final TargetTagCreatedEventContainer container) {
-        container.getEvents().stream().map(event -> event.getEntity())
+        container.getEvents().stream().filter(Objects::nonNull)
+                .map(TargetTagCreatedEvent::getEntity)
                 .forEach(tag -> setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour()));
     }
 

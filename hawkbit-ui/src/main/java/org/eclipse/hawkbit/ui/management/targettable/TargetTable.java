@@ -152,7 +152,7 @@ public class TargetTable extends AbstractTable<Target> {
             refreshTargets();
         } else {
             eventContainer.getEvents().stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
-                    .filter(event -> !Objects.isNull(event.getEntity()))
+                    .filter(Objects::nonNull)
                     .forEach(event -> updateVisibleItemOnEvent(event.getEntity()));
         }
         publishTargetSelectedEntityForRefresh(eventContainer.getEvents().stream());
@@ -160,8 +160,8 @@ public class TargetTable extends AbstractTable<Target> {
 
     private void publishTargetSelectedEntityForRefresh(
             final Stream<? extends RemoteEntityEvent<Target>> targetEntityEventStream) {
-        targetEntityEventStream.filter(event -> isLastSelectedTarget(event.getEntityId())).findAny()
-                .ifPresent(event -> eventBus.publish(this,
+        targetEntityEventStream.filter(event -> isLastSelectedTarget(event.getEntityId()))
+                .filter(Objects::nonNull).findAny().ifPresent(event -> eventBus.publish(this,
                         new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, event.getEntity())));
     }
 

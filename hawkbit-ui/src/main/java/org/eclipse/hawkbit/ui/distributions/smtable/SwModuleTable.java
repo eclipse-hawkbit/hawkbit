@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.distributions.smtable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -134,13 +135,15 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
         final List<Long> visibleItemIds = (List<Long>) getVisibleItemIds();
         handleSelectedAndUpdatedSoftwareModules(eventContainer.getEvents());
         eventContainer.getEvents().stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
+                .filter(Objects::nonNull)
                 .forEach(event -> updateSoftwareModuleInTable(event.getEntity()));
     }
 
     private void handleSelectedAndUpdatedSoftwareModules(final List<SoftwareModuleUpdatedEvent> events) {
         manageDistUIState.getLastSelectedSoftwareModule()
                 .ifPresent(lastSelectedModuleId -> events.stream()
-                        .filter(event -> lastSelectedModuleId.equals(event.getEntityId())).findAny()
+                        .filter(event -> lastSelectedModuleId.equals(event.getEntityId()))
+                        .filter(Objects::nonNull).findAny()
                         .ifPresent(lastEvent -> eventBus.publish(this,
                                 new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, lastEvent.getEntity()))));
     }

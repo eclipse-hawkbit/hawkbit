@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -87,9 +88,9 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     private final ManagementViewClientCriterion managementViewClientCriterion;
 
     private final transient TargetManagement targetManagement;
-    
+
     private final transient TagManagement tagManagement;
-    
+
     private final DsMetadataPopupLayout dsMetadataPopupLayout;
 
     private final transient DistributionSetManagement distributionSetManagement;
@@ -137,31 +138,29 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             updateVisableTableEntries(eventContainer.getEvents(), visibleItemIds);
         }
         final Long lastSelectedDsIdName = managementUIState.getLastSelectedDsIdName();
-        eventContainer.getEvents().stream().filter(event -> event.getEntityId().equals(lastSelectedDsIdName)).findAny()
-                .ifPresent(event -> eventBus.publish(this,
+        eventContainer.getEvents().stream().filter(event -> event.getEntityId().equals(lastSelectedDsIdName))
+                .filter(Objects::nonNull).findAny().ifPresent(event -> eventBus.publish(this,
                         new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, event.getEntity())));
 
     }
 
     private static boolean allOfThemAffectCompletedSetsThatAreNotVisible(final List<DistributionSetUpdatedEvent> events,
             final List<Long> visibleItemIds) {
-        return events.stream()
-                .allMatch(event -> !visibleItemIds.contains(event.getEntityId()) && event.getEntity().isComplete());
+        return events.stream().allMatch(event -> !visibleItemIds.contains(event.getEntityId()) && event.isComplete());
     }
 
     private void updateVisableTableEntries(final List<DistributionSetUpdatedEvent> events,
             final List<Long> visibleItemIds) {
         events.stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
-                .filter(event -> event.getEntity().isComplete())
+                .filter(DistributionSetUpdatedEvent::isComplete).filter(Objects::nonNull)
                 .forEach(event -> updateDistributionInTable(event.getEntity()));
     }
 
     private boolean checkAndHandleIfVisibleDsSwitchesFromCompleteToIncomplete(
             final List<DistributionSetUpdatedEvent> events, final List<Long> visibleItemIds) {
         final List<Long> setsThatAreVisibleButNotCompleteAnymore = events.stream()
-                .filter(event -> visibleItemIds.contains(event.getEntityId()))
-                .filter(event -> !event.getEntity().isComplete()).map(DistributionSetUpdatedEvent::getEntityId)
-                .collect(Collectors.toList());
+                .filter(event -> visibleItemIds.contains(event.getEntityId())).filter(event -> !event.isComplete())
+                .map(DistributionSetUpdatedEvent::getEntityId).collect(Collectors.toList());
 
         if (!setsThatAreVisibleButNotCompleteAnymore.isEmpty()) {
             refreshContainer();
