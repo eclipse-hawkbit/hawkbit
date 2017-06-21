@@ -62,13 +62,13 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     @Description("Tests register target")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 2),
             @Expect(type = TargetPollEvent.class, count = 3) })
-    public void registerTargets() throws InterruptedException {
+    public void registerTargets() {
         registerAndAssertTargetWithExistingTenant(REGISTER_TARGET, 1);
 
         final String target2 = "Target2";
         registerAndAssertTargetWithExistingTenant(target2, 2);
-        final Long pollingTimeTarget2 = controllerManagement.findByControllerId(target2).get().getLastTargetQuery();
-        registerSameTargetAndAssertBasedOnLastPolling(target2, 2, TargetUpdateStatus.REGISTERED, pollingTimeTarget2);
+        final int version = controllerManagement.findByControllerId(target2).get().getOptLockRevision();
+        registerSameTargetAndAssertBasedOnVersion(target2, 2, TargetUpdateStatus.REGISTERED, version);
         Mockito.verifyZeroInteractions(getDeadletterListener());
     }
 
@@ -455,7 +455,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
             @Expect(type = ActionUpdatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 2) })
-    public void receiveCancelUpdateMessageAfterAssignmentWasCanceled() throws InterruptedException {
+    public void receiveCancelUpdateMessageAfterAssignmentWasCanceled() {
 
         // Setup
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist(REGISTER_TARGET, TEST_URI);
@@ -465,8 +465,8 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         deploymentManagement.cancelAction(distributionSetAssignmentResult.getActions().get(0));
 
         // test
-        registerSameTargetAndAssertBasedOnLastPolling(REGISTER_TARGET, 1, TargetUpdateStatus.PENDING,
-                target.getLastTargetQuery());
+        registerSameTargetAndAssertBasedOnVersion(REGISTER_TARGET, 1, TargetUpdateStatus.PENDING,
+                target.getOptLockRevision());
 
         // verify
         assertCancelActionMessage(distributionSetAssignmentResult.getActions().get(0));

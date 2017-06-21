@@ -15,7 +15,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.amqp.DmfApiConfiguration;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
@@ -210,25 +209,17 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         assertTarget(registerdTarget, expectedTargetStatus, createdBy);
     }
 
-    protected void registerSameTargetAndAssertBasedOnLastPolling(final String target,
-            final int existingTargetsAfterCreation, final TargetUpdateStatus expectedTargetStatus,
-            final Long pollingTimeTargetOld) throws InterruptedException {
-        assertThat(pollingTimeTargetOld).isGreaterThan(0L);
-
-        // sleep to ensure that poll time is different than the given one
-        TimeUnit.MILLISECONDS.sleep(5);
-
+    protected void registerSameTargetAndAssertBasedOnVersion(final String target,
+            final int existingTargetsAfterCreation, final TargetUpdateStatus expectedTargetStatus, final int version) {
         createAndSendTarget(target, TENANT_EXIST);
-        final Target registerdTarget = waitUntilIsPresent(
-                () -> findTargetBasedOnNewPolltime(target, pollingTimeTargetOld));
+        final Target registerdTarget = waitUntilIsPresent(() -> findTargetBasedOnNewVersion(target, version));
         assertAllTargetsCount(existingTargetsAfterCreation);
         assertThat(registerdTarget.getUpdateStatus()).isEqualTo(expectedTargetStatus);
     }
 
-    private Optional<Target> findTargetBasedOnNewPolltime(final String controllerId, final Long pollingTimeTargetOld) {
+    private Optional<Target> findTargetBasedOnNewVersion(final String controllerId, final int version) {
         final Optional<Target> target2 = controllerManagement.findByControllerId(controllerId);
-        final Long pollingTimeTargetNew = target2.get().getLastTargetQuery();
-        if (pollingTimeTargetOld < pollingTimeTargetNew) {
+        if (version < target2.get().getOptLockRevision()) {
             return target2;
         }
         return Optional.empty();

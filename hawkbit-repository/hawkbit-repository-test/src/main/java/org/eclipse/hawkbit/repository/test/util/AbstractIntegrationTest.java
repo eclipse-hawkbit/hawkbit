@@ -271,6 +271,7 @@ public abstract class AbstractIntegrationTest {
 
     @Before
     public void before() throws Exception {
+
         mvc = createMvcWebAppContext().build();
         final String description = "Updated description.";
 
