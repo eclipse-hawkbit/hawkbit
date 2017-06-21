@@ -30,6 +30,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.repository.report.model.SystemUsageReport;
+import org.eclipse.hawkbit.repository.report.model.SystemUsageReportWithTenants;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
@@ -145,20 +146,20 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         final Long actions = (Long) entityManager.createNativeQuery("SELECT COUNT(id) FROM sp_action")
                 .getSingleResult();
 
-        return new SystemUsageReport(targets, artifacts, actions,
+        return new SystemUsageReportWithTenants(targets, artifacts, actions,
                 sumOfArtifacts.setScale(0, BigDecimal.ROUND_HALF_UP).longValue());
     }
 
     @Override
-    public SystemUsageReport getSystemUsageStatisticsWithTenants() {
-        final SystemUsageReport result = getSystemUsageStatistics();
+    public SystemUsageReportWithTenants getSystemUsageStatisticsWithTenants() {
+        final SystemUsageReportWithTenants result = (SystemUsageReportWithTenants) getSystemUsageStatistics();
 
         usageStatsPerTenant(result);
 
         return result;
     }
 
-    private void usageStatsPerTenant(final SystemUsageReport report) {
+    private void usageStatsPerTenant(final SystemUsageReportWithTenants report) {
         final List<String> tenants = findTenants(new PageRequest(0, MAX_TENANTS_QUERY)).getContent();
 
         tenants.forEach(tenant -> tenantAware.runAsTenant(tenant, () -> {

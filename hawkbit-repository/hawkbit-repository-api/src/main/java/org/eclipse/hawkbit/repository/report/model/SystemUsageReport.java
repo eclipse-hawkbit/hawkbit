@@ -8,10 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.report.model;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 /**
  * Bean for holding the system usage stats.
  *
@@ -21,8 +17,6 @@ public class SystemUsageReport {
     private final long overallArtifacts;
     private final long overallArtifactVolumeInBytes;
     private final long overallActions;
-
-    private final List<TenantUsage> tenants = new ArrayList<>();
 
     /**
      * Constructor.
@@ -38,7 +32,6 @@ public class SystemUsageReport {
      */
     public SystemUsageReport(final long overallTargets, final long overallArtifacts, final long overallActions,
             final long overallArtifactVolumeInBytes) {
-        super();
         this.overallTargets = overallTargets;
         this.overallArtifacts = overallArtifacts;
         this.overallActions = overallActions;
@@ -68,27 +61,10 @@ public class SystemUsageReport {
     }
 
     /**
-     * @param tenantUsage
-     *            of one tenant
-     * @return updated bean
-     */
-    public SystemUsageReport addTenantData(final TenantUsage tenantUsage) {
-        tenants.add(tenantUsage);
-        return this;
-    }
-
-    /**
      * @return actions of system
      */
     public long getOverallActions() {
         return overallActions;
-    }
-
-    /**
-     * @return tenant data
-     */
-    public List<TenantUsage> getTenants() {
-        return Collections.unmodifiableList(tenants);
     }
 
 }

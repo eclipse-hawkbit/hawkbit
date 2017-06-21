@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.mgmt.json.model.systemmanagement.MgmtSystemStatistics
 import org.eclipse.hawkbit.mgmt.json.model.systemmanagement.MgmtSystemTenantServiceUsage;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSystemManagementRestApi;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.report.model.SystemUsageReport;
+import org.eclipse.hawkbit.repository.report.model.SystemUsageReportWithTenants;
 import org.eclipse.hawkbit.repository.report.model.TenantUsage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +67,7 @@ public class MgmtSystemManagementResource implements MgmtSystemManagementRestApi
      */
     @Override
     public ResponseEntity<MgmtSystemStatisticsRest> getSystemUsageStats() {
-        final SystemUsageReport report = systemManagement.getSystemUsageStatisticsWithTenants();
+        final SystemUsageReportWithTenants report = systemManagement.getSystemUsageStatisticsWithTenants();
 
         final MgmtSystemStatisticsRest result = new MgmtSystemStatisticsRest()
                 .setOverallActions(report.getOverallActions()).setOverallArtifacts(report.getOverallArtifacts())
