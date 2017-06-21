@@ -71,8 +71,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.Environment;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -99,7 +97,7 @@ import org.springframework.web.context.WebApplicationContext;
 // refreshed we e.g. get two instances of CacheManager which leads to very
 // strange test failures.
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public abstract class AbstractIntegrationTest implements EnvironmentAware {
+public abstract class AbstractIntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
     protected static final Pageable PAGE = new PageRequest(0, 400, new Sort(Direction.ASC, "id"));
@@ -227,13 +225,6 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
             LOG.error("Test {} failed with {}.", description.getMethodName(), e);
         }
     };
-
-    protected Environment environment = null;
-
-    @Override
-    public void setEnvironment(final Environment environment) {
-        this.environment = environment;
-    }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final Long dsID, final String controllerId) {
         return deploymentManagement.assignDistributionSet(dsID, Arrays.asList(
