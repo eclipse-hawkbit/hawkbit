@@ -428,11 +428,11 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = ActionCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
+            @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 2) })
     public void receiveDownLoadAndInstallMessageAfterAssignment() {
 
         // setup
-        controllerManagement.findOrRegisterTargetIfItDoesNotexist(REGISTER_TARGET, null);
+        controllerManagement.findOrRegisterTargetIfItDoesNotexist(REGISTER_TARGET, TEST_URI);
         final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         assignDistributionSet(distributionSet.getId(), REGISTER_TARGET);
 
@@ -452,12 +452,12 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
-            @Expect(type = ActionUpdatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = ActionUpdatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetPollEvent.class, count = 1) })
     public void receiveCancelUpdateMessageAfterAssignmentWasCanceled() {
 
         // Setup
-        controllerManagement.findOrRegisterTargetIfItDoesNotexist(REGISTER_TARGET, null);
+        controllerManagement.findOrRegisterTargetIfItDoesNotexist(REGISTER_TARGET, TEST_URI);
         final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         final DistributionSetAssignmentResult distributionSetAssignmentResult = assignDistributionSet(
                 distributionSet.getId(), REGISTER_TARGET);
