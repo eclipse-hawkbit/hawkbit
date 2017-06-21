@@ -61,6 +61,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Controller Management")
 public class ControllerManagementTest extends AbstractJpaIntegrationTest {
+    private static final URI LOCALHOST = URI.create("http://127.0.0.1");
     @Autowired
     private RepositoryProperties repositoryProperties;
 
@@ -424,16 +425,16 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetPollEvent.class, count = 2) })
     public void findOrRegisterTargetIfItDoesNotexist() {
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist("AA",
-                URI.create("http://127.0.0.1"));
+                LOCALHOST);
         assertThat(target).as("target should not be null").isNotNull();
 
         final Target sameTarget = controllerManagement.findOrRegisterTargetIfItDoesNotexist("AA",
-                URI.create("http://127.0.0.1"));
+                LOCALHOST);
         assertThat(target.getId()).as("Target should be the equals").isEqualTo(sameTarget.getId());
         assertThat(targetRepository.count()).as("Only 1 target should be registred").isEqualTo(1L);
 
         assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(
-                () -> controllerManagement.findOrRegisterTargetIfItDoesNotexist("", URI.create("http://127.0.0.1")))
+                () -> controllerManagement.findOrRegisterTargetIfItDoesNotexist("", LOCALHOST))
                 .as("register target with empty controllerId should fail");
     }
 
