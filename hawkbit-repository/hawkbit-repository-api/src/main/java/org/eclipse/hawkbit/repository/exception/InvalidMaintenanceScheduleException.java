@@ -1,0 +1,44 @@
+/**
+ * Copyright (c) Siemens AG, 2018
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+package org.eclipse.hawkbit.repository.exception;
+
+import org.eclipse.hawkbit.exception.AbstractServerRtException;
+import org.eclipse.hawkbit.exception.SpServerError;
+
+/**
+ * This exception is thrown if trying to set a maintenance schedule that is
+ * invalid. A maintenance schedule is considered to be valid only if schedule,
+ * duration and timezone are all null, or are all valid; in which case there
+ * should be at least one valid window after the current time.
+ */
+public class InvalidMaintenanceScheduleException extends AbstractServerRtException {
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * Constructor for {@link InvalidMaintenanceScheduleException}.
+     *
+     * @param message
+     *            the message for this exception.
+     */
+    public InvalidMaintenanceScheduleException(final String message) {
+        super(message, SpServerError.SP_MAINTENANCE_SCHEDULE_INVALID);
+    }
+
+    /**
+     * Constructor for {@link InvalidMaintenanceScheduleException}.
+     *
+     * @param message
+     *            the message for this exception
+     * @param cause
+     *            the cause for this exception.
+     */
+    public InvalidMaintenanceScheduleException(final String message, final Throwable cause) {
+        super(message, SpServerError.SP_MAINTENANCE_SCHEDULE_INVALID, cause);
+    }
+}
