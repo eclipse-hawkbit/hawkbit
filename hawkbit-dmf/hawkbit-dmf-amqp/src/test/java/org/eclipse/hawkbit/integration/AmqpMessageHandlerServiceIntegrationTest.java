@@ -35,6 +35,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
@@ -452,19 +453,20 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
-            @Expect(type = ActionUpdatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 2),
-            @Expect(type = TargetPollEvent.class, count = 1) })
+            @Expect(type = ActionUpdatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 2) })
     public void receiveCancelUpdateMessageAfterAssignmentWasCanceled() {
 
         // Setup
-        controllerManagement.findOrRegisterTargetIfItDoesNotexist(REGISTER_TARGET, TEST_URI);
+        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist(REGISTER_TARGET, TEST_URI);
         final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         final DistributionSetAssignmentResult distributionSetAssignmentResult = assignDistributionSet(
                 distributionSet.getId(), REGISTER_TARGET);
         deploymentManagement.cancelAction(distributionSetAssignmentResult.getActions().get(0));
 
         // test
-        registerAndAssertTargetWithExistingTenant(REGISTER_TARGET, 1, TargetUpdateStatus.PENDING, "bumlux");
+        registerSameTargetAndAssertBasedOnLastPolling(REGISTER_TARGET, 1, TargetUpdateStatus.PENDING,
+                target.getLastTargetQuery());
 
         // verify
         assertCancelActionMessage(distributionSetAssignmentResult.getActions().get(0));
