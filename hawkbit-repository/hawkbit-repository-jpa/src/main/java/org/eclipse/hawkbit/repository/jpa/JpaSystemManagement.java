@@ -147,7 +147,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
                 .getSingleResult();
 
         return new SystemUsageReportWithTenants(targets, artifacts, actions,
-                sumOfArtifacts.setScale(0, BigDecimal.ROUND_HALF_UP).longValue());
+                sumOfArtifacts.setScale(0, BigDecimal.ROUND_HALF_UP).longValue(), tenantMetaDataRepository.count());
     }
 
     @Override

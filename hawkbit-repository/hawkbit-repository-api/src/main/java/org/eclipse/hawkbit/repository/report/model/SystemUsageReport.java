@@ -17,6 +17,7 @@ public class SystemUsageReport {
     private final long overallArtifacts;
     private final long overallArtifactVolumeInBytes;
     private final long overallActions;
+    private final long overallTenants;
 
     /**
      * Constructor.
@@ -29,42 +30,35 @@ public class SystemUsageReport {
      *            of the system
      * @param overallArtifactVolumeInBytes
      *            of the system
+     * @param overallTenants
+     *            of the system
      */
     public SystemUsageReport(final long overallTargets, final long overallArtifacts, final long overallActions,
-            final long overallArtifactVolumeInBytes) {
+            final long overallArtifactVolumeInBytes, final long overallTenants) {
         this.overallTargets = overallTargets;
         this.overallArtifacts = overallArtifacts;
         this.overallActions = overallActions;
-
         this.overallArtifactVolumeInBytes = overallArtifactVolumeInBytes;
+        this.overallTenants = overallTenants;
     }
 
-    /**
-     * @return overallTargets in the system
-     */
     public long getOverallTargets() {
         return overallTargets;
     }
 
-    /**
-     * @return overallArtifacts in the system
-     */
     public long getOverallArtifacts() {
         return overallArtifacts;
     }
 
-    /**
-     * @return overallArtifactVolumeInBytes of the system
-     */
     public long getOverallArtifactVolumeInBytes() {
         return overallArtifactVolumeInBytes;
     }
 
-    /**
-     * @return actions of system
-     */
     public long getOverallActions() {
         return overallActions;
     }
 
+    public long getOverallTenants() {
+        return overallTenants;
+    }
 }

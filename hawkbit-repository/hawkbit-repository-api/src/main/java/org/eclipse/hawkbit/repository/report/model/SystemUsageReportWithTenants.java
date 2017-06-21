@@ -33,8 +33,8 @@ public class SystemUsageReportWithTenants extends SystemUsageReport {
      *            of the system
      */
     public SystemUsageReportWithTenants(final long overallTargets, final long overallArtifacts,
-            final long overallActions, final long overallArtifactVolumeInBytes) {
-        super(overallTargets, overallArtifacts, overallActions, overallArtifactVolumeInBytes);
+            final long overallActions, final long overallArtifactVolumeInBytes, final long overallTenants) {
+        super(overallTargets, overallArtifacts, overallActions, overallArtifactVolumeInBytes, overallTenants);
     }
 
     /**
