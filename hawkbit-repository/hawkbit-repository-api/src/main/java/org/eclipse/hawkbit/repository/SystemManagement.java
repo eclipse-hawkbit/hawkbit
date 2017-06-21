@@ -70,6 +70,14 @@ public interface SystemManagement {
      * @return SystemUsageReport of the current system
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
+    SystemUsageReport getSystemUsageStatisticsWithTenants();
+
+    /**
+     * Calculated overall system usage statistics
+     *
+     * @return SystemUsageReport of the current system
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
     SystemUsageReport getSystemUsageStatistics();
 
     /**
