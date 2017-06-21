@@ -49,9 +49,10 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
         // overall data
         assertThat(systemManagement.getSystemUsageStatistics().getOverallArtifacts()).isEqualTo(2);
         assertThat(systemManagement.getSystemUsageStatistics().getOverallArtifactVolumeInBytes()).isEqualTo(1234 * 2);
+        assertThat(systemManagement.getSystemUsageStatistics().getTenants()).isEmpty();
 
         // per tenant data
-        final List<TenantUsage> tenants = systemManagement.getSystemUsageStatistics().getTenants();
+        final List<TenantUsage> tenants = systemManagement.getSystemUsageStatisticsWithTenants().getTenants();
         assertThat(tenants).hasSize(3);
         assertThat(tenants).containsOnly(new TenantUsage("default"),
                 new TenantUsage("tenant0").setArtifacts(1).setOverallArtifactVolumeInBytes(1234),
@@ -67,12 +68,14 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
         // overall data
         assertThat(systemManagement.getSystemUsageStatistics().getOverallTargets()).isEqualTo(200);
         assertThat(systemManagement.getSystemUsageStatistics().getOverallActions()).isEqualTo(0);
+        assertThat(systemManagement.getSystemUsageStatistics().getTenants()).isEmpty();
 
         // per tenant data
-        final List<TenantUsage> tenants = systemManagement.getSystemUsageStatistics().getTenants();
+        final List<TenantUsage> tenants = systemManagement.getSystemUsageStatisticsWithTenants().getTenants();
         assertThat(tenants).hasSize(3);
         assertThat(tenants).containsOnly(new TenantUsage("default"), new TenantUsage("tenant0").setTargets(100),
                 new TenantUsage("tenant1").setTargets(100));
+
     }
 
     @Test
@@ -83,9 +86,10 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
 
         // 2 tenants, 100 targets each, 2 deployments per target => 400
         assertThat(systemManagement.getSystemUsageStatistics().getOverallActions()).isEqualTo(400);
+        assertThat(systemManagement.getSystemUsageStatistics().getTenants()).isEmpty();
 
         // per tenant data
-        final List<TenantUsage> tenants = systemManagement.getSystemUsageStatistics().getTenants();
+        final List<TenantUsage> tenants = systemManagement.getSystemUsageStatisticsWithTenants().getTenants();
         assertThat(tenants).hasSize(3);
         assertThat(tenants).containsOnly(new TenantUsage("default"),
                 new TenantUsage("tenant0").setTargets(100).setActions(200),

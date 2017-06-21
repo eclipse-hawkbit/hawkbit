@@ -145,8 +145,13 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         final Long actions = (Long) entityManager.createNativeQuery("SELECT COUNT(id) FROM sp_action")
                 .getSingleResult();
 
-        final SystemUsageReport result = new SystemUsageReport(targets, artifacts, actions,
+        return new SystemUsageReport(targets, artifacts, actions,
                 sumOfArtifacts.setScale(0, BigDecimal.ROUND_HALF_UP).longValue());
+    }
+
+    @Override
+    public SystemUsageReport getSystemUsageStatisticsWithTenants() {
+        final SystemUsageReport result = getSystemUsageStatistics();
 
         usageStatsPerTenant(result);
 
