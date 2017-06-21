@@ -283,7 +283,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
                     : new DdiActionHistory(action.getStatus().name(), actionHistoryMsgs);
 
             final DdiDeploymentBase base = new DdiDeploymentBase(Long.toString(action.getId()),
-                    new DdiDeployment(handlingType, handlingType, chunks), actionHistory);
+                    new DdiDeployment(handlingType, handlingType, chunks, null), actionHistory);
 
             LOG.debug("Found an active UpdateAction for target {}. returning deyploment: {}", controllerId, base);
 
