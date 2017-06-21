@@ -39,11 +39,13 @@ import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.util.ErrorHandler;
@@ -57,6 +59,7 @@ import com.google.common.collect.Maps;
  */
 @EnableConfigurationProperties({ AmqpProperties.class, AmqpDeadletterProperties.class })
 @ConditionalOnProperty(prefix = "hawkbit.dmf.rabbitmq", name = "enabled", matchIfMissing = true)
+@PropertySource("classpath:/hawkbit-dmf-defaults.properties")
 public class AmqpConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmqpConfiguration.class);
@@ -265,18 +268,14 @@ public class AmqpConfiguration {
         return new DefaultAmqpSenderService(rabbitTemplate());
     }
 
-    /**
-     * Returns the Listener factory.
-     *
-     * @param errorHandler
-     *            the error hander
-     * @return the {@link SimpleMessageListenerContainer} that gets used receive
-     *         AMQP messages
-     */
-    @Bean(name = { "listenerContainerFactory" })
+    @Bean
+    @ConditionalOnMissingBean(name = "listenerContainerFactory")
     public RabbitListenerContainerFactory<SimpleMessageListenerContainer> listenerContainerFactory(
-            final ErrorHandler errorHandler) {
-        return new ConfigurableRabbitListenerContainerFactory(amqpProperties, rabbitConnectionFactory, errorHandler);
+            final SimpleRabbitListenerContainerFactoryConfigurer configurer, final ErrorHandler errorHandler) {
+        final ConfigurableRabbitListenerContainerFactory factory = new ConfigurableRabbitListenerContainerFactory(
+                amqpProperties.isMissingQueuesFatal(), amqpProperties.getDeclarationRetries(), errorHandler);
+        configurer.configure(factory, rabbitConnectionFactory);
+        return factory;
     }
 
     /**
