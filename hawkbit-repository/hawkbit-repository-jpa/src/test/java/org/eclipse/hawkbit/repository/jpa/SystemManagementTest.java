@@ -51,7 +51,7 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
         assertThat(systemManagement.getSystemUsageStatistics().getOverallArtifactVolumeInBytes()).isEqualTo(1234 * 2);
 
         // per tenant data
-        final List<TenantUsage> tenants = systemManagement.getSystemUsageStatistics().getTenants();
+        final List<TenantUsage> tenants = systemManagement.getSystemUsageStatisticsWithTenants().getTenants();
         assertThat(tenants).hasSize(3);
         assertThat(tenants).containsOnly(new TenantUsage("default"),
                 new TenantUsage("tenant0").setArtifacts(1).setOverallArtifactVolumeInBytes(1234),
@@ -69,10 +69,11 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
         assertThat(systemManagement.getSystemUsageStatistics().getOverallActions()).isEqualTo(0);
 
         // per tenant data
-        final List<TenantUsage> tenants = systemManagement.getSystemUsageStatistics().getTenants();
+        final List<TenantUsage> tenants = systemManagement.getSystemUsageStatisticsWithTenants().getTenants();
         assertThat(tenants).hasSize(3);
         assertThat(tenants).containsOnly(new TenantUsage("default"), new TenantUsage("tenant0").setTargets(100),
                 new TenantUsage("tenant1").setTargets(100));
+
     }
 
     @Test
@@ -85,7 +86,7 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
         assertThat(systemManagement.getSystemUsageStatistics().getOverallActions()).isEqualTo(400);
 
         // per tenant data
-        final List<TenantUsage> tenants = systemManagement.getSystemUsageStatistics().getTenants();
+        final List<TenantUsage> tenants = systemManagement.getSystemUsageStatisticsWithTenants().getTenants();
         assertThat(tenants).hasSize(3);
         assertThat(tenants).containsOnly(new TenantUsage("default"),
                 new TenantUsage("tenant0").setTargets(100).setActions(200),

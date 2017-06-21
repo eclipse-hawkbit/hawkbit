@@ -19,14 +19,13 @@ import org.eclipse.hawkbit.mgmt.json.model.systemmanagement.MgmtSystemStatistics
 import org.eclipse.hawkbit.mgmt.json.model.systemmanagement.MgmtSystemTenantServiceUsage;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSystemManagementRestApi;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.report.model.SystemUsageReport;
+import org.eclipse.hawkbit.repository.report.model.SystemUsageReportWithTenants;
 import org.eclipse.hawkbit.repository.report.model.TenantUsage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -68,7 +67,7 @@ public class MgmtSystemManagementResource implements MgmtSystemManagementRestApi
      */
     @Override
     public ResponseEntity<MgmtSystemStatisticsRest> getSystemUsageStats() {
-        final SystemUsageReport report = systemManagement.getSystemUsageStatistics();
+        final SystemUsageReportWithTenants report = systemManagement.getSystemUsageStatisticsWithTenants();
 
         final MgmtSystemStatisticsRest result = new MgmtSystemStatisticsRest()
                 .setOverallActions(report.getOverallActions()).setOverallArtifacts(report.getOverallArtifacts())
