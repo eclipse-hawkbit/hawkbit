@@ -62,7 +62,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     @Description("Tests register target")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 2),
             @Expect(type = TargetPollEvent.class, count = 3) })
-    public void registerTargets() {
+    public void registerTargets() throws InterruptedException {
         registerAndAssertTargetWithExistingTenant(REGISTER_TARGET, 1);
 
         final String target2 = "Target2";
@@ -455,7 +455,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
             @Expect(type = ActionUpdatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 2) })
-    public void receiveCancelUpdateMessageAfterAssignmentWasCanceled() {
+    public void receiveCancelUpdateMessageAfterAssignmentWasCanceled() throws InterruptedException {
 
         // Setup
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist(REGISTER_TARGET, TEST_URI);

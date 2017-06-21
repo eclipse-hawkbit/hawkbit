@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.amqp.DmfApiConfiguration;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
@@ -211,7 +212,12 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
 
     protected void registerSameTargetAndAssertBasedOnLastPolling(final String target,
             final int existingTargetsAfterCreation, final TargetUpdateStatus expectedTargetStatus,
-            final Long pollingTimeTargetOld) {
+            final Long pollingTimeTargetOld) throws InterruptedException {
+        assertThat(pollingTimeTargetOld).isGreaterThan(0L);
+
+        // sleep to ensure that poll time is different than the given one
+        TimeUnit.MILLISECONDS.sleep(5);
+
         createAndSendTarget(target, TENANT_EXIST);
         final Target registerdTarget = waitUntilIsPresent(
                 () -> findTargetBasedOnNewPolltime(target, pollingTimeTargetOld));

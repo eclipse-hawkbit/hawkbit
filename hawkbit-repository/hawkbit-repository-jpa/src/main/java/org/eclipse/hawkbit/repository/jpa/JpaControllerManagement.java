@@ -134,7 +134,7 @@ public class JpaControllerManagement implements ControllerManagement {
         final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
-        return updateTargetStatus(target, null, System.currentTimeMillis(), address);
+        return updateTargetStatus(target, address);
     }
 
     @Override
@@ -221,17 +221,10 @@ public class JpaControllerManagement implements ControllerManagement {
             return result;
         }
 
-        return updateTargetStatus(target, null, System.currentTimeMillis(), address);
+        return updateTargetStatus(target, address);
     }
 
-    private Target updateTargetStatus(final JpaTarget toUpdate, final TargetUpdateStatus status,
-            final Long lastTargetQuery, final URI address) {
-        if (status != null) {
-            toUpdate.setUpdateStatus(status);
-        }
-        if (lastTargetQuery != null) {
-            toUpdate.setLastTargetQuery(lastTargetQuery);
-        }
+    private Target updateTargetStatus(final JpaTarget toUpdate, final URI address) {
 
         if (TargetUpdateStatus.UNKNOWN.equals(toUpdate.getUpdateStatus())) {
             toUpdate.setUpdateStatus(TargetUpdateStatus.REGISTERED);
@@ -242,6 +235,8 @@ public class JpaControllerManagement implements ControllerManagement {
             afterCommit.afterCommit(
                     () -> eventPublisher.publishEvent(new TargetPollEvent(toUpdate, applicationContext.getId())));
         }
+
+        toUpdate.setLastTargetQuery(System.currentTimeMillis());
 
         return targetRepository.save(toUpdate);
     }
