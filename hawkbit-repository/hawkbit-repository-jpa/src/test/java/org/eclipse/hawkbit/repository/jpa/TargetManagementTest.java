@@ -28,6 +28,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
@@ -797,7 +798,8 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Tests the a target can be read with only the read target permission")
-    @Expect(type = TargetCreatedEvent.class, count = 0)
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 1) })
     public void targetCanBeReadWithOnlyReadTargetPermission() throws Exception {
         final String knownTargetControllerId = "readTarget";
         controllerManagement.findOrRegisterTargetIfItDoesNotexist(knownTargetControllerId, new URI("http://127.0.0.1"));
