@@ -21,6 +21,7 @@ import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
+import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
@@ -349,4 +350,23 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     List<String> getActionHistoryMessages(long actionId, int messageCount);
+
+    /**
+     * Cancels given {@link Action} for this {@link Target}. However, it might
+     * be possible that the controller will continue to work on the cancelation.
+     * The controller needs to acknowledge or reject the cancelation using
+     * {@link DdiRootController#postCancelActionFeedback}.
+     *
+     * @param actionId
+     *            to be canceled
+     *
+     * @return canceled {@link Action}
+     *
+     * @throws CancelActionNotAllowedException
+     *             in case the given action is not active or is already canceled
+     * @throws EntityNotFoundException
+     *             if action with given actionId does not exist.
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    Action cancelAction(long actionId);
 }

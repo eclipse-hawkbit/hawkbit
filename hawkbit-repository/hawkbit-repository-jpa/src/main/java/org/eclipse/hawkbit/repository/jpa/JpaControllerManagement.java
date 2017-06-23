@@ -35,6 +35,7 @@ import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
@@ -71,6 +72,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -747,5 +749,56 @@ public class JpaControllerManagement implements ControllerManagement {
             return true;
         }
 
+    }
+
+    /**
+     * Cancels given {@link Action} for this {@link Target}. The method will
+     * immediately add a {@link Status#CANCELED} status to the action. However,
+     * it might be possible that the controller will continue to work on the
+     * cancelation. The controller needs to acknowledge or reject the
+     * cancelation using {@link DdiRootController#postCancelActionFeedback}.
+     *
+     * @param actionId
+     *            to be canceled
+     *
+     * @return canceled {@link Action}
+     *
+     * @throws CancelActionNotAllowedException
+     *             in case the given action is not active or is already canceled
+     * @throws EntityNotFoundException
+     *             if action with given actionId does not exist.
+     */
+    @Modifying
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public Action cancelAction(long actionId) {
+        LOG.debug("cancelAction({})", actionId);
+
+        final JpaAction action = actionRepository.findById(actionId)
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
+
+        if (action.isCancelingOrCanceled()) {
+            throw new CancelActionNotAllowedException("Actions in canceling or canceled state cannot be canceled");
+        }
+
+        if (action.isActive()) {
+            LOG.debug("action ({}) was still active. Change to {}.", action, Status.CANCELING);
+            action.setStatus(Status.CANCELING);
+
+            // document that the status has been retrieved
+            actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELING, System.currentTimeMillis(),
+                    "manual cancelation requested"));
+            final Action saveAction = actionRepository.save(action);
+            cancelAssignDistributionSetEvent((JpaTarget) action.getTarget(), action.getId());
+
+            return saveAction;
+        } else {
+            throw new CancelActionNotAllowedException(
+                    "Action [id: " + action.getId() + "] is not active and cannot be canceled");
+        }
+    }
+
+    private void cancelAssignDistributionSetEvent(final JpaTarget target, final Long actionId) {
+        afterCommit.afterCommit(() -> eventPublisher
+                .publishEvent(new CancelTargetAssignmentEvent(target, actionId, applicationContext.getId())));
     }
 }

@@ -219,6 +219,9 @@ public abstract class AbstractDsAssignmentStrategy {
         actionForTarget.setActive(true);
         actionForTarget.setTarget(target);
         actionForTarget.setDistributionSet(set);
+        actionForTarget.setMaintenanceSchedule(targetWithActionType.getMaintenanceSchedule());
+        actionForTarget.setMaintenanceWindowDuration(targetWithActionType.getMaintenanceWindowDuration());
+        actionForTarget.setMaintenanceWindowTimeZone(targetWithActionType.getMaintenanceWindowTimeZone());
         return actionForTarget;
     }
 
