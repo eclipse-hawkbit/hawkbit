@@ -161,7 +161,7 @@
       <gwtmockito.version>1.1.6</gwtmockito.version>
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
       <guava.version>19.0</guava.version>
-      <mariadb-java-client.version>1.5.7</mariadb-java-client.version>
+      <mariadb-java-client.version>2.0.2</mariadb-java-client.version>
       <embedded-mongo.version>1.50.5</embedded-mongo.version>
       <javax.el-api.version>2.2.4</javax.el-api.version>
       <corn-cps.version>1.1.7</corn-cps.version>
@@ -387,6 +387,30 @@
                      <exclude>**/Abstract*.java</exclude>
                   </excludes>
                </configuration>
+            </plugin>
+            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-failsafe-plugin</artifactId>
+               <configuration>
+                  <reuseForks>true</reuseForks>
+                  <forkCount>3</forkCount>
+                  <argLine>-Xmx1024m ${jacoco.agent.ut.arg}</argLine>
+                  <properties>
+                     <property>
+                        <name>listener</name>
+                        <value>ru.yandex.qatools.allure.junit.AllureRunListener</value>
+                     </property>
+                  </properties>
+               </configuration>
+               <executions>
+                  <execution>
+                     <id>integration-test</id>
+                     <phase>integration-test</phase>
+                     <goals>
+                        <goal>integration-test</goal>
+                     </goals>
+                  </execution>
+               </executions>
             </plugin>
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
