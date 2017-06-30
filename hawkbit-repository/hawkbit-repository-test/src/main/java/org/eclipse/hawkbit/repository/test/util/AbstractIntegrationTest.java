@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.repository.test.util;
 
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.SYSTEM_ROLE;
-import static org.junit.rules.RuleChain.outerRule;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,7 +60,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
-import org.junit.rules.RuleChain;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.junit.runner.RunWith;
@@ -80,6 +78,8 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestExecutionListeners.MergeMode;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -97,6 +97,11 @@ import org.springframework.web.context.WebApplicationContext;
 // refreshed we e.g. get two instances of CacheManager which leads to very
 // strange test failures.
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
+// Cleaning repository will fire "delete" events. We won't count them to the
+// test execution. So, the order execution between EventVerifier and Cleanup is
+// important!
+@TestExecutionListeners(inheritListeners = true, listeners = { EventVerifier.class,
+        CleanupTestExecutionListener.class }, mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
 public abstract class AbstractIntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
@@ -198,11 +203,6 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected ServiceMatcher serviceMatcher;
-
-    @Rule
-    // Cleaning repository will fire "delete" events. We won't count them to the
-    // test execution. So there is order between both rules:
-    public RuleChain ruleChain = outerRule(new CleanRepositoryRule()).around(new EventVerifier());
 
     @Rule
     public final WithSpringAuthorityRule securityRule = new WithSpringAuthorityRule();
