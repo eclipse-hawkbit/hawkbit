@@ -52,7 +52,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.matcher.EventVerifier;
-import org.eclipse.hawkbit.security.ExcludePathAwareShallowETagFilter;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.After;
@@ -81,14 +80,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestExecutionListeners.MergeMode;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@WebAppConfiguration
 @ActiveProfiles({ "test" })
 @WithUser(principal = "bumlux", allSpPermissions = true, authorities = { CONTROLLER_ROLE, SYSTEM_ROLE })
 @SpringApplicationConfiguration(classes = { TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
@@ -155,9 +148,6 @@ public abstract class AbstractIntegrationTest {
     protected ArtifactManagement artifactManagement;
 
     @Autowired
-    protected WebApplicationContext context;
-
-    @Autowired
     protected AuditingHandler auditingHandler;
 
     @Autowired
@@ -189,8 +179,6 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected QuotaManagement quotaManagement;
-
-    protected MockMvc mvc;
 
     protected SoftwareModuleType osType;
     protected SoftwareModuleType appType;
@@ -271,8 +259,6 @@ public abstract class AbstractIntegrationTest {
 
     @Before
     public void before() throws Exception {
-
-        mvc = createMvcWebAppContext().build();
         final String description = "Updated description.";
 
         osType = securityRule
@@ -300,14 +286,6 @@ public abstract class AbstractIntegrationTest {
         } catch (final IOException | IllegalArgumentException e) {
             LOG.warn("Cannot cleanup file-directory", e);
         }
-    }
-
-    protected DefaultMockMvcBuilder createMvcWebAppContext() {
-        return MockMvcBuilders.webAppContextSetup(context)
-                .addFilter(new ExcludePathAwareShallowETagFilter(
-                        "/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download",
-                        "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/**",
-                        "/api/v1/downloadserver/**"));
     }
 
     private static CIMySqlTestDatabase tesdatabase;
