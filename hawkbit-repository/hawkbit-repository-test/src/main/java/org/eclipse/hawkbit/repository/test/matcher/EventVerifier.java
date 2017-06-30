@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.test.matcher;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
+import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
@@ -22,17 +23,15 @@ import java.util.stream.Stream;
 import org.eclipse.hawkbit.repository.event.remote.RemoteIdEvent;
 import org.eclipse.hawkbit.repository.event.remote.RemoteTenantAwareEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
-import org.eclipse.hawkbit.repository.test.util.TestContextProvider;
 import org.junit.Assert;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ApplicationEventMulticaster;
+import org.springframework.test.context.TestContext;
+import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 import com.google.common.collect.ConcurrentHashMultiset;
 import com.google.common.collect.Multiset;
@@ -43,35 +42,34 @@ import com.jayway.awaitility.core.ConditionTimeoutException;
 /**
  * Test rule to setup and verify the event count for a method.
  */
-public class EventVerifier implements TestRule {
+public class EventVerifier extends AbstractTestExecutionListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventVerifier.class);
 
     private EventCaptor eventCaptor;
 
     @Override
-    public Statement apply(final Statement test, final Description description) {
-        return new Statement() {
-            @Override
-            public void evaluate() throws Throwable {
-
-                final Optional<Expect[]> expectedEvents = getExpectationsFrom(description);
-                expectedEvents.ifPresent(events -> beforeTest());
-                try {
-                    test.evaluate();
-                    expectedEvents.ifPresent(events -> afterTest(events));
-                } finally {
-                    expectedEvents.ifPresent(listener -> removeEventListener());
-                }
-            }
-        };
+    public void beforeTestMethod(final TestContext testContext) throws Exception {
+        final Optional<Expect[]> expectedEvents = getExpectationsFrom(testContext.getTestMethod());
+        expectedEvents.ifPresent(events -> beforeTest(testContext));
     }
 
-    private Optional<Expect[]> getExpectationsFrom(final Description description) {
-        return Optional.ofNullable(description.getAnnotation(ExpectEvents.class)).map(ExpectEvents::value);
+    @Override
+    public void afterTestMethod(final TestContext testContext) throws Exception {
+        final Optional<Expect[]> expectedEvents = getExpectationsFrom(testContext.getTestMethod());
+        try {
+            expectedEvents.ifPresent(events -> afterTest(events));
+        } finally {
+            expectedEvents.ifPresent(listener -> removeEventListener(testContext));
+        }
     }
 
-    private void beforeTest() {
-        final ConfigurableApplicationContext context = TestContextProvider.getContext();
+    private Optional<Expect[]> getExpectationsFrom(final Method testMethod) {
+        return Optional.ofNullable(testMethod.getAnnotation(ExpectEvents.class)).map(ExpectEvents::value);
+    }
+
+    private void beforeTest(final TestContext testContext) {
+        final ConfigurableApplicationContext context = (ConfigurableApplicationContext) testContext
+                .getApplicationContext();
         eventCaptor = new EventCaptor();
         context.addApplicationListener(eventCaptor);
     }
@@ -111,8 +109,8 @@ public class EventVerifier implements TestRule {
 
     }
 
-    private void removeEventListener() {
-        final ApplicationEventMulticaster multicaster = TestContextProvider.getContext()
+    private void removeEventListener(final TestContext testContext) {
+        final ApplicationEventMulticaster multicaster = testContext.getApplicationContext()
                 .getBean(ApplicationEventMulticaster.class);
         multicaster.removeApplicationListener(eventCaptor);
     }

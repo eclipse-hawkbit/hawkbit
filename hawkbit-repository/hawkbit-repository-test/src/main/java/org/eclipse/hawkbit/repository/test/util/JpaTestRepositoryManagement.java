@@ -20,7 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
-public class JpaTestRepositoryManagement implements TestRepositoryManagement {
+public class JpaTestRepositoryManagement {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JpaTestRepositoryManagement.class);
     private static final Pageable PAGE = new PageRequest(0, 400, new Sort(Direction.ASC, "id"));
@@ -48,7 +48,6 @@ public class JpaTestRepositoryManagement implements TestRepositoryManagement {
         this.systemManagement = systemManagement;
     }
 
-    @Override
     public void clearTestRepository() {
         deleteAllRepos();
         cacheManager.getDirectCacheNames().forEach(name -> cacheManager.getDirectCache(name).clear());
