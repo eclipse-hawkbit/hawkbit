@@ -47,7 +47,8 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.rest.util.FileStreamingHelper;
+import org.eclipse.hawkbit.rest.util.FileStreamingUtil;
+import org.eclipse.hawkbit.rest.util.HttpUtil;
 import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -163,7 +164,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
                     .orElseThrow(() -> new ArtifactBinaryNotFoundException(artifact.getSha1Hash()));
 
             final String ifMatch = requestResponseContextHolder.getHttpServletRequest().getHeader("If-Match");
-            if (ifMatch != null && !FileStreamingHelper.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
+            if (ifMatch != null && !HttpUtil.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
                 result = new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
             } else {
                 final ActionStatus action = checkAndLogDownload(requestResponseContextHolder.getHttpServletRequest(),
@@ -171,7 +172,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
                 final Long statusId = action.getId();
 
-                result = FileStreamingHelper.writeFileResponse(file, artifact.getFilename(),
+                result = FileStreamingUtil.writeFileResponse(file, artifact.getFilename(),
                         artifact.getLastModifiedAt() != null ? artifact.getLastModifiedAt() : artifact.getCreatedAt(),
                         requestResponseContextHolder.getHttpServletResponse(),
                         requestResponseContextHolder.getHttpServletRequest(),
@@ -228,7 +229,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
                 .orElseThrow(() -> new EntityNotFoundException(Artifact.class, fileName));
 
         try {
-            FileStreamingHelper.writeMD5FileResponse(requestResponseContextHolder.getHttpServletResponse(),
+            FileStreamingUtil.writeMD5FileResponse(requestResponseContextHolder.getHttpServletResponse(),
                     artifact.getMd5Hash(), fileName);
         } catch (final IOException e) {
             LOG.error("Failed to stream MD5 File", e);

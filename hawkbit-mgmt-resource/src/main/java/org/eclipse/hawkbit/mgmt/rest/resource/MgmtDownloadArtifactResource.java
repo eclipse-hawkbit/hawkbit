@@ -22,7 +22,8 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.rest.util.FileStreamingFailedException;
-import org.eclipse.hawkbit.rest.util.FileStreamingHelper;
+import org.eclipse.hawkbit.rest.util.FileStreamingUtil;
+import org.eclipse.hawkbit.rest.util.HttpUtil;
 import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,12 +77,12 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
                 .orElseThrow(() -> new ArtifactBinaryNotFoundException(artifact.getSha1Hash()));
         final HttpServletRequest request = requestResponseContextHolder.getHttpServletRequest();
         final String ifMatch = request.getHeader("If-Match");
-        if (ifMatch != null && !FileStreamingHelper.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
+        if (ifMatch != null && !HttpUtil.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
             return new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
         }
 
         try (InputStream inputStream = file.getFileInputStream()) {
-            return FileStreamingHelper.writeFileResponse(file, artifact.getFilename(),
+            return FileStreamingUtil.writeFileResponse(file, artifact.getFilename(),
                     artifact.getLastModifiedAt() != null ? artifact.getLastModifiedAt() : artifact.getCreatedAt(),
                     requestResponseContextHolder.getHttpServletResponse(), request, null);
         } catch (final IOException e) {

@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.cache.DownloadArtifactCache;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.cache.DownloadType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDownloadRestApi;
-import org.eclipse.hawkbit.rest.util.FileStreamingHelper;
+import org.eclipse.hawkbit.rest.util.FileStreamingUtil;
 import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +72,7 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
                 return ResponseEntity.notFound().build();
             }
 
-            return FileStreamingHelper.writeFileResponse(artifact, downloadId, null,
+            return FileStreamingUtil.writeFileResponse(artifact, downloadId, null,
                     requestResponseContextHolder.getHttpServletResponse(),
                     requestResponseContextHolder.getHttpServletRequest(), null);
 

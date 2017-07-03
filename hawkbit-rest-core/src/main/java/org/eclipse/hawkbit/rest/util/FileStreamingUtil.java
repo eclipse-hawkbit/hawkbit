@@ -14,7 +14,6 @@ import java.io.OutputStream;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.ServletOutputStream;
@@ -34,32 +33,16 @@ import com.google.common.math.DoubleMath;
 import com.google.common.net.HttpHeaders;
 
 /**
- * Utility class for the Rest Source API.
+ * Utility class for artifact file streaming.
  */
-public final class FileStreamingHelper {
+public final class FileStreamingUtil {
 
-    private static final Logger LOG = LoggerFactory.getLogger(FileStreamingHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FileStreamingUtil.class);
 
     private static final int BUFFER_SIZE = 0x2000; // 8k
 
-    private FileStreamingHelper() {
+    private FileStreamingUtil() {
 
-    }
-
-    /**
-     * Checks given CSV string for defined match value or wildcard.
-     *
-     * @param matchHeader
-     *            to search through
-     * @param toMatch
-     *            to search for
-     *
-     * @return <code>true</code> if string matches.
-     */
-    public static boolean matchesHttpHeader(final String matchHeader, final String toMatch) {
-        final String[] matchValues = matchHeader.split("\\s*,\\s*");
-        Arrays.sort(matchValues);
-        return Arrays.binarySearch(matchValues, toMatch) > -1 || Arrays.binarySearch(matchValues, "*") > -1;
     }
 
     /**
@@ -130,9 +113,9 @@ public final class FileStreamingHelper {
      * @throws FileStreamingFailedException
      *             if streaming fails
      */
-    public static ResponseEntity<InputStream> writeFileResponse(final AbstractDbArtifact artifact, final String filename,
-            final Long lastModified, final HttpServletResponse response, final HttpServletRequest request,
-            final FileStreamingProgressListener progressListener) {
+    public static ResponseEntity<InputStream> writeFileResponse(final AbstractDbArtifact artifact,
+            final String filename, final Long lastModified, final HttpServletResponse response,
+            final HttpServletRequest request, final FileStreamingProgressListener progressListener) {
 
         ResponseEntity<InputStream> result;
 
@@ -197,9 +180,9 @@ public final class FileStreamingHelper {
         return result;
     }
 
-    private static ResponseEntity<InputStream> handleFullFileRequest(final AbstractDbArtifact artifact, final String filename,
-            final HttpServletResponse response, final FileStreamingProgressListener progressListener,
-            final ByteRange full) {
+    private static ResponseEntity<InputStream> handleFullFileRequest(final AbstractDbArtifact artifact,
+            final String filename, final HttpServletResponse response,
+            final FileStreamingProgressListener progressListener, final ByteRange full) {
         final ByteRange r = full;
         response.setHeader(HttpHeaders.CONTENT_RANGE, "bytes " + r.getStart() + "-" + r.getEnd() + "/" + r.getTotal());
         response.setContentLengthLong(r.getLength());
