@@ -30,7 +30,8 @@ public class ArtifactFilesystemTest {
     @Description("Verifies that an exception is thrown on opening an InputStream when file does not exists")
     public void getInputStreamOfNonExistingFileThrowsException() {
         final File file = new File("fileWhichTotalDoesNotExists");
-        final ArtifactFilesystem underTest = new ArtifactFilesystem(file);
+        final ArtifactFilesystem underTest = new ArtifactFilesystem(file, "fileWhichTotalDoesNotExists", null, null,
+                null);
         try {
             underTest.getFileInputStream();
             Assertions.fail("Expected a FileNotFoundException because file does not exists");
@@ -45,7 +46,8 @@ public class ArtifactFilesystemTest {
         final File createTempFile = File.createTempFile(ArtifactFilesystemTest.class.getSimpleName(), "");
         createTempFile.deleteOnExit();
 
-        final ArtifactFilesystem underTest = new ArtifactFilesystem(createTempFile);
+        final ArtifactFilesystem underTest = new ArtifactFilesystem(createTempFile,
+                ArtifactFilesystemTest.class.getSimpleName(), null, null, null);
         final byte[] buffer = new byte[1024];
         IOUtils.read(underTest.getFileInputStream(), buffer);
     }

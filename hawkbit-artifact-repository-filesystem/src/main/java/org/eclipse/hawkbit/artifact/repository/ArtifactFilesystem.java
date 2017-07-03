@@ -14,19 +14,22 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 
 import com.google.common.base.Throwables;
 
 /**
- * A {@link DbArtifact} implementation which dynamically creates a
+ * The default {@link AbstractDbArtifact} implementation which dynamically creates a
  * {@link FileInputStream} on calling {@link #getFileInputStream()}.
  */
-public class ArtifactFilesystem extends DbArtifact {
+public class ArtifactFilesystem extends AbstractDbArtifact {
 
     private final File file;
 
-    ArtifactFilesystem(final File file) {
+    public ArtifactFilesystem(final File file, final String artifactId, final DbArtifactHash hashes, final Long size,
+            final String contentType) {
+        super(artifactId, hashes, size, contentType);
         this.file = file;
     }
 
@@ -35,6 +38,10 @@ public class ArtifactFilesystem extends DbArtifact {
     // cannot be closed in this method
     @SuppressWarnings("squid:S2095")
     public InputStream getFileInputStream() {
+        if (file == null) {
+            return null;
+        }
+
         try {
             return new BufferedInputStream(new FileInputStream(file));
         } catch (final FileNotFoundException e) {

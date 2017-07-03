@@ -10,21 +10,24 @@ package org.eclipse.hawkbit.artifact.repository;
 
 import java.io.InputStream;
 
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 
 import com.amazonaws.services.s3.AmazonS3;
 
 /**
- * An {@link DbArtifact} implementation which retrieves the {@link InputStream}
+ * An {@link AbstractDbArtifact} implementation which retrieves the {@link InputStream}
  * from the {@link AmazonS3} client.
  */
-public class S3Artifact extends DbArtifact {
+public class S3Artifact extends AbstractDbArtifact {
 
     private final AmazonS3 amazonS3;
     private final S3RepositoryProperties s3Properties;
     private final String key;
 
-    S3Artifact(final AmazonS3 amazonS3, final S3RepositoryProperties s3Properties, final String key) {
+    S3Artifact(final AmazonS3 amazonS3, final S3RepositoryProperties s3Properties, final String key,
+            final String artifactId, final DbArtifactHash hashes, final Long size, final String contentType) {
+        super(artifactId, hashes, size, contentType);
         this.amazonS3 = amazonS3;
         this.s3Properties = s3Properties;
         this.key = key;
@@ -32,6 +35,10 @@ public class S3Artifact extends DbArtifact {
 
     @Override
     public InputStream getFileInputStream() {
+        if (amazonS3 == null) {
+            return null;
+        }
+
         return amazonS3.getObject(s3Properties.getBucketName(), key).getObjectContent();
     }
 

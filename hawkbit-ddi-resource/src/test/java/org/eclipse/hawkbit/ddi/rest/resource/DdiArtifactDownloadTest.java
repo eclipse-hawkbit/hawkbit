@@ -311,6 +311,18 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         assertThat(result.getResponse().getContentAsByteArray())
                 .isEqualTo(Arrays.copyOfRange(random, 1000, resultLength));
 
+        // Start download from file end fails
+        mvc.perform(
+                get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
+                        tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), "file1")
+                                .header("Range", "bytes=" + random.length + "-"))
+                .andExpect(status().isRequestedRangeNotSatisfiable())
+                .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
+                .andExpect(header().string("Accept-Ranges", "bytes"))
+                .andExpect(header().string("Last-Modified", dateFormat.format(new Date(artifact.getCreatedAt()))))
+                .andExpect(header().string("Content-Range", "bytes */" + random.length))
+                .andExpect(header().string("Content-Disposition", "attachment;filename=file1"));
+
         // multipart download - first 20 bytes in 2 parts
         result = mvc
                 .perform(

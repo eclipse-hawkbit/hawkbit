@@ -14,9 +14,9 @@ package org.eclipse.hawkbit.artifact.repository.model;
  */
 public class DbArtifactHash {
 
-    private String sha1;
+    private final String sha1;
 
-    private String md5;
+    private final String md5;
 
     /**
      * Constructor.
@@ -27,16 +27,7 @@ public class DbArtifactHash {
      *            the md5 hash
      */
     public DbArtifactHash(final String sha1, final String md5) {
-        super();
         this.sha1 = sha1;
-        this.md5 = md5;
-    }
-
-    public void setSha1(final String sha1) {
-        this.sha1 = sha1;
-    }
-
-    public void setMd5(final String md5) {
         this.md5 = md5;
     }
 

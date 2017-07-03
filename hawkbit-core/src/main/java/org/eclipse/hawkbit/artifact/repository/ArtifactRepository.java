@@ -12,7 +12,7 @@ import java.io.InputStream;
 
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -42,7 +42,7 @@ public interface ArtifactRepository {
      * @throws ArtifactStoreException
      *             in case storing of the artifact was not successful
      */
-    DbArtifact store(@NotEmpty String tenant, @NotNull InputStream content, @NotEmpty String filename,
+    AbstractDbArtifact store(@NotEmpty String tenant, @NotNull InputStream content, @NotEmpty String filename,
             String contentType);
 
     /**
@@ -69,7 +69,7 @@ public interface ArtifactRepository {
      *             in case {@code hash} is provided and not matching to the
      *             calculated hashes during storing
      */
-    DbArtifact store(@NotEmpty String tenant, @NotNull InputStream content, @NotEmpty String filename,
+    AbstractDbArtifact store(@NotEmpty String tenant, @NotNull InputStream content, @NotEmpty String filename,
             String contentType, DbArtifactHash hash);
 
     /**
@@ -86,7 +86,7 @@ public interface ArtifactRepository {
     void deleteBySha1(@NotEmpty String tenant, @NotEmpty String sha1Hash);
 
     /**
-     * Retrieves a {@link DbArtifact} from the store by it's SHA1 hash.
+     * Retrieves a {@link AbstractDbArtifact} from the store by it's SHA1 hash.
      * 
      * @param tenant
      *            the tenant to store the artifact
@@ -97,7 +97,7 @@ public interface ArtifactRepository {
      * @throws MethodNotSupportedException
      *             if implementation does not support the operation
      */
-    DbArtifact getArtifactBySha1(@NotEmpty String tenant, @NotEmpty String sha1Hash);
+    AbstractDbArtifact getArtifactBySha1(@NotEmpty String tenant, @NotEmpty String sha1Hash);
 
     /**
      * Deletes all artifacts of given tenant.

@@ -22,7 +22,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
@@ -89,7 +89,7 @@ public class MongoDBArtifactStore implements ArtifactRepository {
      * @return The DbArtifact object or {@code null} if no file exists.
      */
     @Override
-    public DbArtifact getArtifactBySha1(final String tenant, final String sha1Hash) {
+    public AbstractDbArtifact getArtifactBySha1(final String tenant, final String sha1Hash) {
 
         GridFSDBFile found = gridFs.findOne(new Query()
                 .addCriteria(Criteria.where(FILENAME).is(sha1Hash).and(TENANT_QUERY).is(sanitizeTenant(tenant))));
@@ -104,13 +104,13 @@ public class MongoDBArtifactStore implements ArtifactRepository {
     }
 
     @Override
-    public DbArtifact store(final String tenant, final InputStream content, final String filename,
+    public AbstractDbArtifact store(final String tenant, final InputStream content, final String filename,
             final String contentType) {
         return store(tenant, content, filename, contentType, null);
     }
 
     @Override
-    public DbArtifact store(final String tenant, final InputStream content, final String filename,
+    public AbstractDbArtifact store(final String tenant, final InputStream content, final String filename,
             final String contentType, final DbArtifactHash hash) {
         File tempFile = null;
         try {
@@ -155,7 +155,7 @@ public class MongoDBArtifactStore implements ArtifactRepository {
 
     }
 
-    private DbArtifact store(final String t, final InputStream content, final String contentType, final OutputStream os,
+    private AbstractDbArtifact store(final String t, final InputStream content, final String contentType, final OutputStream os,
             final File tempFile, final DbArtifactHash hash) {
         final GridFsArtifact storedArtifact;
         final String tenant = sanitizeTenant(t);
@@ -216,7 +216,7 @@ public class MongoDBArtifactStore implements ArtifactRepository {
     }
 
     /**
-     * Maps a list of {@link GridFSDBFile} to paged list of {@link DbArtifact}s.
+     * Maps a list of {@link GridFSDBFile} to paged list of {@link AbstractDbArtifact}s.
      *
      * @param tenant
      *            the tenant
@@ -224,7 +224,7 @@ public class MongoDBArtifactStore implements ArtifactRepository {
      *            the list of mongoDB gridFs files.
      * @return a paged list of artifacts mapped from the given dbFiles
      */
-    private static List<DbArtifact> map(final List<GridFSDBFile> dbFiles) {
+    private static List<AbstractDbArtifact> map(final List<GridFSDBFile> dbFiles) {
         return dbFiles.stream().map(MongoDBArtifactStore::map).collect(Collectors.toList());
     }
 
@@ -235,12 +235,12 @@ public class MongoDBArtifactStore implements ArtifactRepository {
      *            the ids of the files to lookup.
      * @return list of artfiacts
      */
-    public List<DbArtifact> getArtifactsByIds(final List<String> ids) {
+    public List<AbstractDbArtifact> getArtifactsByIds(final List<String> ids) {
         return map(gridFs.find(new Query().addCriteria(Criteria.where(ID).in(ids))));
     }
 
     /**
-     * Maps a single {@link GridFSFile} to {@link DbArtifact}.
+     * Maps a single {@link GridFSFile} to {@link AbstractDbArtifact}.
      *
      * @param tenant
      *            the tenant
@@ -252,12 +252,8 @@ public class MongoDBArtifactStore implements ArtifactRepository {
         if (fsFile == null) {
             return null;
         }
-        final GridFsArtifact artifact = new GridFsArtifact(fsFile);
-        artifact.setArtifactId(fsFile.getId().toString());
-        artifact.setSize(fsFile.getLength());
-        artifact.setContentType(fsFile.getContentType());
-        artifact.setHashes(new DbArtifactHash(fsFile.getFilename(), fsFile.getMD5()));
-        return artifact;
+
+        return new GridFsArtifact(fsFile);
     }
 
     @Override

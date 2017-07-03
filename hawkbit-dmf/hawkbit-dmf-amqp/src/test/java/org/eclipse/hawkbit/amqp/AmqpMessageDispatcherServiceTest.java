@@ -26,7 +26,8 @@ import java.util.UUID;
 
 import org.eclipse.hawkbit.api.ArtifactUrl;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
+import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystem;
+import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -173,9 +174,9 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     public void testSendDownloadRequest() {
         DistributionSet dsA = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         SoftwareModule module = dsA.getModules().iterator().next();
-        final List<DbArtifact> receivedList = new ArrayList<>();
+        final List<AbstractDbArtifact> receivedList = new ArrayList<>();
         for (final Artifact artifact : testdataFactory.createArtifacts(module.getId())) {
-            receivedList.add(new DbArtifact());
+            receivedList.add(new ArtifactFilesystem(null, artifact.getSha1Hash(), null, artifact.getSize(), null));
         }
         module = softwareModuleManagement.findSoftwareModuleById(module.getId()).get();
         dsA = distributionSetManagement.findDistributionSetById(dsA.getId()).get();

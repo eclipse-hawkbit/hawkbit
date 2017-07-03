@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.api;
 
+import java.io.InputStream;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,7 +39,7 @@ public interface MgmtDownloadRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING)
     @ResponseBody
-    ResponseEntity<Void> downloadArtifactByDownloadId(@PathVariable("tenant") String tenant,
+    ResponseEntity<InputStream> downloadArtifactByDownloadId(@PathVariable("tenant") String tenant,
             @PathVariable("downloadId") String downloadId);
 
 }

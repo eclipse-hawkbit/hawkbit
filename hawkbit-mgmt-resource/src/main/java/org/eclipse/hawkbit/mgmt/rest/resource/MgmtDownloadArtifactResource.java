@@ -8,11 +8,12 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDownloadArtifactRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
@@ -20,14 +21,16 @@ import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.rest.util.FileStreamingFailedException;
+import org.eclipse.hawkbit.rest.util.FileStreamingHelper;
 import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
-import org.eclipse.hawkbit.rest.util.RestResourceConversionHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -37,6 +40,7 @@ import org.springframework.web.context.WebApplicationContext;
 @RestController
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi {
+    private static final Logger LOG = LoggerFactory.getLogger(MgmtDownloadArtifactResource.class);
 
     @Autowired
     private SoftwareModuleManagement softwareModuleManagement;
@@ -58,25 +62,32 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
      * @return responseEntity with status ok if successful
      */
     @Override
-    @ResponseBody
     public ResponseEntity<InputStream> downloadArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("artifactId") final Long artifactId) {
+
+        LOG.error("got request for {} {}", softwareModuleId, artifactId);
+
         final SoftwareModule module = softwareModuleManagement.findSoftwareModuleById(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
         final Artifact artifact = module.getArtifact(artifactId)
                 .orElseThrow(() -> new EntityNotFoundException(Artifact.class, artifactId));
 
-        final DbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash())
+        final AbstractDbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash())
                 .orElseThrow(() -> new ArtifactBinaryNotFoundException(artifact.getSha1Hash()));
         final HttpServletRequest request = requestResponseContextHolder.getHttpServletRequest();
         final String ifMatch = request.getHeader("If-Match");
-        if (ifMatch != null && !RestResourceConversionHelper.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
+        if (ifMatch != null && !FileStreamingHelper.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
             return new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
         }
 
-        return RestResourceConversionHelper.writeFileResponse(artifact,
-                requestResponseContextHolder.getHttpServletResponse(), request, file);
-
+        try (InputStream inputStream = file.getFileInputStream()) {
+            return FileStreamingHelper.writeFileResponse(file, artifact.getFilename(),
+                    artifact.getLastModifiedAt() != null ? artifact.getLastModifiedAt() : artifact.getCreatedAt(),
+                    requestResponseContextHolder.getHttpServletResponse(), request, null);
+        } catch (final IOException e) {
+            throw new FileStreamingFailedException(
+                    "Could not load artifact binary " + artifactId + " for module " + softwareModuleId, e);
+        }
     }
 
 }

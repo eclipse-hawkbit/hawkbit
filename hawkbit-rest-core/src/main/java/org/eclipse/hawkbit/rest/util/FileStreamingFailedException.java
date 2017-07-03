@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.exception.SpServerError;
 /**
  * Thrown if artifact content streaming to client failed.
  */
-public final class FileSteamingFailedException extends AbstractServerRtException {
+public final class FileStreamingFailedException extends AbstractServerRtException {
 
     private static final long serialVersionUID = 1L;
 
@@ -22,7 +22,7 @@ public final class FileSteamingFailedException extends AbstractServerRtException
      * Creates a new FileUploadFailedException with
      * {@link SpServerError#SP_REST_BODY_NOT_READABLE} error.
      */
-    public FileSteamingFailedException() {
+    public FileStreamingFailedException() {
         super(SpServerError.SP_ARTIFACT_LOAD_FAILED);
     }
 
@@ -32,7 +32,7 @@ public final class FileSteamingFailedException extends AbstractServerRtException
      * @param cause
      *            for the exception
      */
-    public FileSteamingFailedException(final Throwable cause) {
+    public FileStreamingFailedException(final Throwable cause) {
         super(SpServerError.SP_ARTIFACT_LOAD_FAILED, cause);
     }
 
@@ -42,7 +42,19 @@ public final class FileSteamingFailedException extends AbstractServerRtException
      * @param message
      *            of the error
      */
-    public FileSteamingFailedException(final String message) {
+    public FileStreamingFailedException(final String message) {
         super(message, SpServerError.SP_ARTIFACT_LOAD_FAILED);
+    }
+
+    /**
+     * Constructor with error string and cause.
+     * 
+     * @param message
+     *            of the error
+     * @param cause
+     *            for the exception
+     */
+    public FileStreamingFailedException(final String message, final Throwable cause) {
+        super(message, SpServerError.SP_ARTIFACT_LOAD_FAILED, cause);
     }
 }
