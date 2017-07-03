@@ -16,7 +16,7 @@ package org.eclipse.hawkbit.rest.util;
 public interface FileStreamingProgressListener {
 
     /**
-     * Called multiple times during streaming
+     * Called multiple times during streaming.
      * 
      * @param requestedBytes
      *            requested bytes of the request
