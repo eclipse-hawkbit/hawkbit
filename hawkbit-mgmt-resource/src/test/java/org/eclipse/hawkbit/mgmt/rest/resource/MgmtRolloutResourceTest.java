@@ -37,7 +37,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
@@ -714,7 +713,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
     public void retrieveTargetsFromRolloutGroupWithQuery() throws Exception {
         // setup
         final int amountTargets = 10;
-        final List<Target> targets = testdataFactory.createTargets(amountTargets, "rollout", "rollout");
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -724,11 +723,13 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
                 .findRolloutGroupsByRolloutId(rollout.getId(), new PageRequest(0, 1, Direction.ASC, "id")).getContent()
                 .get(0);
 
+        final String targetInGroup = rolloutGroupManagement.findRolloutGroupTargets(firstGroup.getId(), PAGE)
+                .getContent().get(0).getControllerId();
+
         // retrieve targets from the first rollout group with known ID
         mvc.perform(
                 get("/rest/v1/rollouts/{rolloutId}/deploygroups/{groupId}/targets", rollout.getId(), firstGroup.getId())
-                        .accept(MediaType.APPLICATION_JSON).param("q",
-                                "controllerId==" + targets.get(0).getControllerId()))
+                        .accept(MediaType.APPLICATION_JSON).param("q", "controllerId==" + targetInGroup))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.content", hasSize(1))).andExpect(jsonPath("$.total", equalTo(1)));
