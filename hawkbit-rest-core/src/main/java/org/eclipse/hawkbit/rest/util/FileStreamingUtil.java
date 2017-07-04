@@ -193,7 +193,8 @@ public final class FileStreamingUtil {
         response.setContentLengthLong(r.getLength());
 
         try (InputStream from = artifact.getFileInputStream()) {
-            copyStreams(from, response.getOutputStream(), progressListener, r.getStart(), r.getLength(), filename);
+            final ServletOutputStream to = response.getOutputStream();
+            copyStreams(from, to, progressListener, r.getStart(), r.getLength(), filename);
         } catch (final IOException e) {
             throw new FileStreamingFailedException("fullfileRequest " + filename, e);
         }
@@ -294,7 +295,8 @@ public final class FileStreamingUtil {
         response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
 
         try (InputStream from = artifact.getFileInputStream()) {
-            copyStreams(from, response.getOutputStream(), progressListener, r.getStart(), r.getLength(), filename);
+            final ServletOutputStream to = response.getOutputStream();
+            copyStreams(from, to, progressListener, r.getStart(), r.getLength(), filename);
         } catch (final IOException e) {
             LOG.error("standardRangeRequest of file ({}) failed!", filename, e);
             throw new FileStreamingFailedException(filename);
@@ -316,61 +318,55 @@ public final class FileStreamingUtil {
         long total = 0;
         int progressPercent = 1;
 
-        try {
-            ByteStreams.skipFully(from, start);
+        ByteStreams.skipFully(from, start);
 
-            long toRead = length;
-            boolean toContinue = true;
-            long shippedSinceLastEvent = 0;
+        long toRead = length;
+        boolean toContinue = true;
+        long shippedSinceLastEvent = 0;
 
-            while (toContinue) {
-                final int r = from.read(buf);
-                if (r == -1) {
-                    break;
-                }
-
-                toRead -= r;
-                if (toRead > 0) {
-                    to.write(buf, 0, r);
-                    total += r;
-                    shippedSinceLastEvent += r;
-                } else {
-                    to.write(buf, 0, (int) toRead + r);
-                    total += toRead + r;
-                    shippedSinceLastEvent += toRead + r;
-                    toContinue = false;
-                }
-
-                if (progressListener != null) {
-                    final int newPercent = DoubleMath.roundToInt(total * 100.0 / length, RoundingMode.DOWN);
-
-                    // every 10 percent an event
-                    if (newPercent == 100 || newPercent > progressPercent + 10) {
-                        progressPercent = newPercent;
-                        progressListener.progress(length, shippedSinceLastEvent, total);
-                        shippedSinceLastEvent = 0;
-                    }
-                }
+        while (toContinue) {
+            final int r = from.read(buf);
+            if (r == -1) {
+                break;
             }
 
-            final long totalTime = System.currentTimeMillis() - startMillis;
-
-            if (total < length) {
-                throw new FileStreamingFailedException(filename + ": " + (length - total)
-                        + " bytes could not be written to client, total time on write: !" + totalTime + " ms");
+            toRead -= r;
+            if (toRead > 0) {
+                to.write(buf, 0, r);
+                total += r;
+                shippedSinceLastEvent += r;
+            } else {
+                to.write(buf, 0, (int) toRead + r);
+                total += toRead + r;
+                shippedSinceLastEvent += toRead + r;
+                toContinue = false;
             }
 
-            LOG.trace("Finished copy-stream of file {} with length {} in {} ms", filename, length, totalTime);
+            if (progressListener != null) {
+                final int newPercent = DoubleMath.roundToInt(total * 100.0 / length, RoundingMode.DOWN);
 
-            return total;
-        } catch (final IOException e) {
-            final long totalTime = System.currentTimeMillis() - startMillis;
-            LOG.debug("Exception during copy-streams of file {} after {} ms", filename, totalTime);
-            throw e;
+                // every 10 percent an event
+                if (newPercent == 100 || newPercent > progressPercent + 10) {
+                    progressPercent = newPercent;
+                    progressListener.progress(length, shippedSinceLastEvent, total);
+                    shippedSinceLastEvent = 0;
+                }
+            }
         }
+
+        final long totalTime = System.currentTimeMillis() - startMillis;
+
+        if (total < length) {
+            throw new FileStreamingFailedException(filename + ": " + (length - total)
+                    + " bytes could not be written to client, total time on write: !" + totalTime + " ms");
+        }
+
+        LOG.trace("Finished copy-stream of file {} with length {} in {} ms", filename, length, totalTime);
+
+        return total;
     }
 
-    private static class ByteRange {
+    private final static class ByteRange {
         private static final String MULTIPART_BOUNDARY = "THIS_STRING_SEPARATES_MULTIPART";
 
         private final long start;

@@ -19,8 +19,6 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.ConstraintViolationException;
-
 import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
@@ -34,6 +32,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
+import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -424,17 +423,15 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 2) })
     public void findOrRegisterTargetIfItDoesNotexist() {
-        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist("AA",
-                LOCALHOST);
+        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist("AA", LOCALHOST);
         assertThat(target).as("target should not be null").isNotNull();
 
-        final Target sameTarget = controllerManagement.findOrRegisterTargetIfItDoesNotexist("AA",
-                LOCALHOST);
+        final Target sameTarget = controllerManagement.findOrRegisterTargetIfItDoesNotexist("AA", LOCALHOST);
         assertThat(target.getId()).as("Target should be the equals").isEqualTo(sameTarget.getId());
         assertThat(targetRepository.count()).as("Only 1 target should be registred").isEqualTo(1L);
 
-        assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(
-                () -> controllerManagement.findOrRegisterTargetIfItDoesNotexist("", LOCALHOST))
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotexist("", LOCALHOST))
                 .as("register target with empty controllerId should fail");
     }
 

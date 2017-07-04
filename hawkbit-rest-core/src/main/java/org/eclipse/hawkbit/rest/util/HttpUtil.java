@@ -13,7 +13,11 @@ import java.util.Arrays;
 /**
  * Utility class for the Rest Source API.
  */
-public class HttpUtil {
+public final class HttpUtil {
+
+    private HttpUtil() {
+
+    }
 
     /**
      * Checks given CSV string for defined match value or wildcard.
