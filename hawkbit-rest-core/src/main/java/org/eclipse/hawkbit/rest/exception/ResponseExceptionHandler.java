@@ -13,12 +13,10 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.ConstraintViolationException;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.repository.exception.MultiPartFileUploadException;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +69,6 @@ public class ResponseExceptionHandler {
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_CONSTRAINT_VIOLATION, HttpStatus.BAD_REQUEST);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_OPERATION_NOT_SUPPORTED, HttpStatus.GONE);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_CONCURRENT_MODIFICATION, HttpStatus.CONFLICT);
-
     }
 
     private static HttpStatus getStatusOrDefault(final SpServerError error) {
@@ -121,30 +118,6 @@ public class ResponseExceptionHandler {
             final Exception ex) {
         logRequest(request, ex);
         final ExceptionInfo response = createExceptionInfo(new MessageNotReadableException());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-    }
-
-    /**
-     * Method for handling exception of type ConstraintViolationException which
-     * is thrown in case the request is rejected due to a constraint violation.
-     * Called by the Spring-Framework for exception handling.
-     *
-     * @param request
-     *            the Http request
-     * @param ex
-     *            the exception which occurred
-     * @return the entity to be responded containing the exception information
-     *         as entity.
-     */
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ExceptionInfo> handleConstraintViolationException(final HttpServletRequest request,
-            final Exception ex) {
-        logRequest(request, ex);
-
-        final ExceptionInfo response = createExceptionInfo(
-                new org.eclipse.hawkbit.repository.exception.ConstraintViolationException(
-                        (ConstraintViolationException) ex));
-
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 

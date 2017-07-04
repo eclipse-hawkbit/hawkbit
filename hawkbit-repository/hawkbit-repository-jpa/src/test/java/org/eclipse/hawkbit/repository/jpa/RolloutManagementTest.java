@@ -139,7 +139,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = RolloutUpdatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 10) })
     public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
-        final Rollout createdRollout = testdataFactory.createRollout("xxx");
+        testdataFactory.createRollout("xxx");
 
         verifyThrownExceptionBy(() -> rolloutManagement.deleteRollout(NOT_EXIST_IDL), "Rollout");
 

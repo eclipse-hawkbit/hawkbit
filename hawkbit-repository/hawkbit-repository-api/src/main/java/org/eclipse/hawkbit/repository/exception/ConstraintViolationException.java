@@ -24,13 +24,12 @@ public class ConstraintViolationException extends AbstractServerRtException {
     private static final String MESSAGE_FORMATTER_SEPARATOR = " ";
 
     /**
-     * Constructor for {@link ConstraintViolationException}
+     * Constructor for {@link Throwable}
      * 
      * @param ex
-     *            the javax.validation.ConstraintViolationException which is
-     *            thrown
+     *            the cause
      */
-    public ConstraintViolationException(final javax.validation.ConstraintViolationException ex) {
+    public ConstraintViolationException(final Throwable ex) {
         this(getExceptionMessage(ex));
     }
 
@@ -54,11 +53,15 @@ public class ConstraintViolationException extends AbstractServerRtException {
      *            javax.validation.ConstraintViolationException which is thrown
      * @return message String with proper error information
      */
-    public static String getExceptionMessage(final javax.validation.ConstraintViolationException ex) {
-        return ex
-                .getConstraintViolations().stream().map(violation -> violation.getPropertyPath()
-                        + MESSAGE_FORMATTER_SEPARATOR + violation.getMessage() + ".")
-                .collect(Collectors.joining(MESSAGE_FORMATTER_SEPARATOR));
+    public static String getExceptionMessage(final Throwable ex) {
+        if (ex instanceof javax.validation.ConstraintViolationException) {
+            return ((javax.validation.ConstraintViolationException) ex)
+                    .getConstraintViolations().stream().map(violation -> violation.getPropertyPath()
+                            + MESSAGE_FORMATTER_SEPARATOR + violation.getMessage() + ".")
+                    .collect(Collectors.joining(MESSAGE_FORMATTER_SEPARATOR));
+        }
+
+        return SpServerError.SP_REPO_CONSTRAINT_VIOLATION.getMessage();
     }
 
 }
