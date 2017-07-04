@@ -14,9 +14,10 @@ import static org.junit.Assert.fail;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.validation.ConstraintViolationException;
+
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
-import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;

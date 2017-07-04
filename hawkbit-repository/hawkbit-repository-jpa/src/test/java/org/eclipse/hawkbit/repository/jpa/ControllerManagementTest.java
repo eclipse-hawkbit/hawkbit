@@ -19,6 +19,8 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.ConstraintViolationException;
+
 import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
@@ -32,7 +34,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
-import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;

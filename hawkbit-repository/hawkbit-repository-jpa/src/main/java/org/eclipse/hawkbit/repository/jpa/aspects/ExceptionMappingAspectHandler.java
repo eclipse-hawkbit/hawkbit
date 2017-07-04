@@ -17,7 +17,6 @@ import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.eclipse.hawkbit.exception.GenericSpServerException;
 import org.eclipse.hawkbit.repository.exception.ConcurrentModificationException;
-import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.slf4j.Logger;
@@ -53,14 +52,10 @@ public class ExceptionMappingAspectHandler implements Ordered {
 
     static {
 
-        MAPPED_EXCEPTION_ORDER.add(javax.validation.ConstraintViolationException.class);
         MAPPED_EXCEPTION_ORDER.add(DuplicateKeyException.class);
         MAPPED_EXCEPTION_ORDER.add(DataIntegrityViolationException.class);
         MAPPED_EXCEPTION_ORDER.add(OptimisticLockingFailureException.class);
         MAPPED_EXCEPTION_ORDER.add(AccessDeniedException.class);
-
-        EXCEPTION_MAPPING.put(javax.validation.ConstraintViolationException.class.getName(),
-                org.eclipse.hawkbit.repository.exception.ConstraintViolationException.class.getName());
 
         EXCEPTION_MAPPING.put(DuplicateKeyException.class.getName(), EntityAlreadyExistsException.class.getName());
         EXCEPTION_MAPPING.put(DataIntegrityViolationException.class.getName(),
@@ -115,7 +110,7 @@ public class ExceptionMappingAspectHandler implements Ordered {
         do {
             final Throwable cause = exception.getCause();
             if (cause instanceof javax.validation.ConstraintViolationException) {
-                return new ConstraintViolationException(cause);
+                return (Exception) cause;
             }
             exception = cause;
         } while (exception != null);

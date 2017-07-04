@@ -13,6 +13,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.ValidationException;
+
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionRequestBodyPut;
@@ -29,7 +31,6 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -293,7 +294,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         }
 
         if (!MgmtActionType.FORCED.equals(actionUpdate.getForceType())) {
-            throw new ConstraintViolationException("Resource supports only switch to FORCED.");
+            throw new ValidationException("Resource supports only switch to FORCED.");
         }
 
         action = deploymentManagement.forceTargetAction(actionId);
