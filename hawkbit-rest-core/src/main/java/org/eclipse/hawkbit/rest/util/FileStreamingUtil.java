@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +31,6 @@ import org.springframework.http.ResponseEntity;
 import com.google.common.base.Preconditions;
 import com.google.common.io.ByteStreams;
 import com.google.common.math.DoubleMath;
-import com.google.common.net.HttpHeaders;
 
 /**
  * Utility class for artifact file streaming.
@@ -38,6 +38,11 @@ import com.google.common.net.HttpHeaders;
 public final class FileStreamingUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileStreamingUtil.class);
+
+    /**
+     * File suffix for MDH hash download (see Linux md5sum).
+     */
+    public static final String ARTIFACT_MD5_DWNL_SUFFIX = ".MD5SUM";
 
     private static final int BUFFER_SIZE = 0x2000; // 8k
 
@@ -72,7 +77,7 @@ public final class FileStreamingUtil {
         final byte[] content = builder.toString().getBytes(StandardCharsets.US_ASCII);
 
         final StringBuilder header = new StringBuilder().append("attachment;filename=").append(filename)
-                .append(".MD5SUM");
+                .append(ARTIFACT_MD5_DWNL_SUFFIX);
 
         response.setContentLength(content.length);
         response.setHeader("Content-Disposition", header.toString());

@@ -112,7 +112,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         // test failed If-match
         mvc.perform(get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{smId}/artifacts/{filename}",
                 tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename())
-                        .header("If-Match", "fsjkhgjfdhg"))
+                        .header(HttpHeaders.IF_MATCH, "fsjkhgjfdhg"))
                 .andExpect(status().isPreconditionFailed());
 
         // test invalid range

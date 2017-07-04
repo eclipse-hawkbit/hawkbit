@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -76,7 +77,7 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
         final AbstractDbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash())
                 .orElseThrow(() -> new ArtifactBinaryNotFoundException(artifact.getSha1Hash()));
         final HttpServletRequest request = requestResponseContextHolder.getHttpServletRequest();
-        final String ifMatch = request.getHeader("If-Match");
+        final String ifMatch = request.getHeader(HttpHeaders.IF_MATCH);
         if (ifMatch != null && !HttpUtil.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
             return new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
         }

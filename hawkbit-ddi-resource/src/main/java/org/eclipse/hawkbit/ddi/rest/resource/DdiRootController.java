@@ -58,6 +58,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -163,7 +164,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             final AbstractDbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash())
                     .orElseThrow(() -> new ArtifactBinaryNotFoundException(artifact.getSha1Hash()));
 
-            final String ifMatch = requestResponseContextHolder.getHttpServletRequest().getHeader("If-Match");
+            final String ifMatch = requestResponseContextHolder.getHttpServletRequest().getHeader(HttpHeaders.IF_MATCH);
             if (ifMatch != null && !HttpUtil.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
                 result = new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
             } else {
