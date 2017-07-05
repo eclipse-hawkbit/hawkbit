@@ -83,7 +83,7 @@ public class EventVerifier extends AbstractTestExecutionListener {
 
         for (final Expect expectedEvent : expectedEvents) {
             try {
-                Awaitility.await().atMost(30, TimeUnit.SECONDS)
+                Awaitility.await().atMost(5, TimeUnit.SECONDS)
                         .until(() -> eventCaptor.getCountFor(expectedEvent.type()), equalTo(expectedEvent.count()));
 
             } catch (final ConditionTimeoutException ex) {

@@ -63,7 +63,7 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
     }
 
     protected ConditionFactory createConditionFactory() {
-        return Awaitility.await().atMost(30, TimeUnit.SECONDS);
+        return Awaitility.await().atMost(5, TimeUnit.SECONDS);
     }
 
     protected Message createMessage(final Object payload, final MessageProperties messageProperties) {

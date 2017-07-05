@@ -232,11 +232,12 @@ public class JpaControllerManagement implements ControllerManagement {
 
         if (address != null) {
             toUpdate.setAddress(address.toString());
-            afterCommit.afterCommit(
-                    () -> eventPublisher.publishEvent(new TargetPollEvent(toUpdate, applicationContext.getId())));
         }
 
         toUpdate.setLastTargetQuery(System.currentTimeMillis());
+
+        afterCommit.afterCommit(
+                () -> eventPublisher.publishEvent(new TargetPollEvent(toUpdate, applicationContext.getId())));
 
         return targetRepository.save(toUpdate);
     }
