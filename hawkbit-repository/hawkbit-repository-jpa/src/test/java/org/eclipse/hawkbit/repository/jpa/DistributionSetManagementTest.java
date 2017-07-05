@@ -447,8 +447,8 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .createDistributionSetTag(entityFactory.tag().create().name("DistributionSetTag-C"));
         tagManagement.createDistributionSetTag(entityFactory.tag().create().name("DistributionSetTag-D"));
 
-        List<DistributionSet> ds100Group1 = testdataFactory.createDistributionSets("", 5);
-        List<DistributionSet> ds100Group2 = testdataFactory.createDistributionSets("test2", 5);
+        List<DistributionSet> ds5Group1 = testdataFactory.createDistributionSets("", 5);
+        List<DistributionSet> dsGroup2 = testdataFactory.createDistributionSets("test2", 5);
         DistributionSet dsDeleted = testdataFactory.createDistributionSet("deleted");
         final DistributionSet dsInComplete = distributionSetManagement.createDistributionSet(entityFactory
                 .distributionSet().create().name("notcomplete").version("1").type(standardDsType.getKey()));
@@ -469,11 +469,11 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         distributionSetManagement.deleteDistributionSet(dsDeleted.getId());
         dsDeleted = distributionSetManagement.findDistributionSetById(dsDeleted.getId()).get();
 
-        ds100Group1 = toggleTagAssignment(ds100Group1, dsTagA).getAssignedEntity();
+        ds5Group1 = toggleTagAssignment(ds5Group1, dsTagA).getAssignedEntity();
         dsTagA = distributionSetTagRepository.findByNameEquals(dsTagA.getName()).get();
-        ds100Group1 = toggleTagAssignment(ds100Group1, dsTagB).getAssignedEntity();
+        ds5Group1 = toggleTagAssignment(ds5Group1, dsTagB).getAssignedEntity();
         dsTagA = distributionSetTagRepository.findByNameEquals(dsTagA.getName()).get();
-        ds100Group2 = toggleTagAssignment(ds100Group2, dsTagA).getAssignedEntity();
+        dsGroup2 = toggleTagAssignment(dsGroup2, dsTagA).getAssignedEntity();
         dsTagA = distributionSetTagRepository.findByNameEquals(dsTagA.getName()).get();
 
         // check setup
@@ -481,8 +481,8 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         // Find all
         List<DistributionSet> expected = Lists.newArrayListWithExpectedSize(13);
-        expected.addAll(ds100Group1);
-        expected.addAll(ds100Group2);
+        expected.addAll(ds5Group1);
+        expected.addAll(dsGroup2);
         expected.add(dsDeleted);
         expected.add(dsInComplete);
         expected.add(dsNewType);
@@ -504,8 +504,8 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         // search for completed
         expected = new ArrayList<>();
-        expected.addAll(ds100Group1);
-        expected.addAll(ds100Group2);
+        expected.addAll(ds5Group1);
+        expected.addAll(dsGroup2);
         expected.add(dsDeleted);
         expected.add(dsNewType);
 
@@ -558,8 +558,8 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         // combine deleted and complete
         expected = new ArrayList<>();
-        expected.addAll(ds100Group1);
-        expected.addAll(ds100Group2);
+        expected.addAll(ds5Group1);
+        expected.addAll(dsGroup2);
         expected.add(dsNewType);
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
@@ -585,8 +585,8 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         // combine deleted and complete and type
         expected = new ArrayList<>();
-        expected.addAll(ds100Group1);
-        expected.addAll(ds100Group2);
+        expected.addAll(ds5Group1);
+        expected.addAll(dsGroup2);
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsDeleted(Boolean.FALSE)
                 .setIsComplete(Boolean.TRUE).setType(standardDsType);
         assertThat(distributionSetManagement.findDistributionSetsByFilters(PAGE, distributionSetFilterBuilder.build())
@@ -609,7 +609,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .getContent()).hasSize(1).containsOnly(expected.toArray(new DistributionSet[0]));
 
         // combine deleted and complete and type and text
-        expected = ds100Group2;
+        expected = dsGroup2;
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
                 .setType(standardDsType).setSearchText("%test2");
         assertThat(distributionSetManagement.findDistributionSetsByFilters(PAGE, distributionSetFilterBuilder.build())
@@ -631,7 +631,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .getContent()).hasSize(0);
 
         // combine deleted and complete and type and text and tag
-        expected = ds100Group2;
+        expected = dsGroup2;
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true).setType(standardDsType)
                 .setSearchText("%test2").setTagNames(Arrays.asList(dsTagA.getName()));
         assertThat(distributionSetManagement.findDistributionSetsByFilters(PAGE, distributionSetFilterBuilder.build())

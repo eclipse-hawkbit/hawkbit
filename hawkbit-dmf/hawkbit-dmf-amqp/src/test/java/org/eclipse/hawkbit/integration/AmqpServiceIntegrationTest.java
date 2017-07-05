@@ -212,9 +212,9 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
     protected void registerSameTargetAndAssertBasedOnVersion(final String target,
             final int existingTargetsAfterCreation, final TargetUpdateStatus expectedTargetStatus, final int version) {
         createAndSendTarget(target, TENANT_EXIST);
-        final Target registerdTarget = waitUntilIsPresent(() -> findTargetBasedOnNewVersion(target, version));
+        final Target registeredTarget = waitUntilIsPresent(() -> findTargetBasedOnNewVersion(target, version));
         assertAllTargetsCount(existingTargetsAfterCreation);
-        assertThat(registerdTarget.getUpdateStatus()).isEqualTo(expectedTargetStatus);
+        assertThat(registeredTarget.getUpdateStatus()).isEqualTo(expectedTargetStatus);
     }
 
     private Optional<Target> findTargetBasedOnNewVersion(final String controllerId, final int version) {
