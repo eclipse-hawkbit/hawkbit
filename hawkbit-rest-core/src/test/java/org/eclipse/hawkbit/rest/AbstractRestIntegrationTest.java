@@ -34,7 +34,7 @@ public abstract class AbstractRestIntegrationTest extends AbstractIntegrationTes
     private FilterHttpResponse filterHttpResponse;
 
     @Autowired
-    private WebApplicationContext webApplicationContext;
+    protected WebApplicationContext webApplicationContext;
 
     @Override
     @Before
