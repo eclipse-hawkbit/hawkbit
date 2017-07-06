@@ -113,6 +113,8 @@
 
       <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->
       <!-- Newer versions needed than defined in Boot -->
+      <!-- Deserializer security vulnerability fixed -->
+      <jackson.version>2.8.9</jackson.version>
       <!-- Performance fixes -->
       <spring-hateoas.version>0.23.0.RELEASE</spring-hateoas.version>      
       <!-- Java 8 support -->
@@ -128,7 +130,6 @@
       <jetty.version>9.3.14.v20161028</jetty.version>
       <!-- Avoid extra CQs through transitive dependencies -->
       <logback.version>1.1.3</logback.version>
-      <jackson.version>2.8.2</jackson.version>
       <classmate.version>1.3.0</classmate.version>
       <h2.version>1.4.186</h2.version>
       <hibernate-validator.version>5.2.2.Final</hibernate-validator.version>
