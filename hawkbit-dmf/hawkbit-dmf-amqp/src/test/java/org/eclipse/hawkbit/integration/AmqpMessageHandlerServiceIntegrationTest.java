@@ -36,7 +36,6 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
@@ -70,8 +69,8 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
 
         final String target2 = "Target2";
         registerAndAssertTargetWithExistingTenant(target2, 2);
-        final int version = controllerManagement.findByControllerId(target2).get().getOptLockRevision();
-        registerSameTargetAndAssertBasedOnVersion(target2, 2, TargetUpdateStatus.REGISTERED, version);
+
+        registerSameTargetAndAssertBasedOnVersion(target2, 2, TargetUpdateStatus.REGISTERED);
         Mockito.verifyZeroInteractions(getDeadletterListener());
     }
 
@@ -456,7 +455,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         assignDistributionSet(distributionSet.getId(), controllerId);
 
         // test
-        registerAndAssertTargetWithExistingTenant(controllerId, 1, TargetUpdateStatus.PENDING, "bumlux");
+        registerSameTargetAndAssertBasedOnVersion(controllerId, 1, TargetUpdateStatus.PENDING);
 
         // verify
         assertDownloadAndInstallMessage(distributionSet.getModules(), controllerId);
@@ -477,15 +476,14 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         final String controllerId = TARGET_PREFIX + "receiveCancelUpdateMessageAfterAssignmentWasCanceled";
 
         // Setup
-        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist(controllerId, TEST_URI);
+        controllerManagement.findOrRegisterTargetIfItDoesNotexist(controllerId, TEST_URI);
         final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         final DistributionSetAssignmentResult distributionSetAssignmentResult = assignDistributionSet(
                 distributionSet.getId(), controllerId);
         deploymentManagement.cancelAction(distributionSetAssignmentResult.getActions().get(0));
 
         // test
-        registerSameTargetAndAssertBasedOnVersion(controllerId, 1, TargetUpdateStatus.PENDING,
-                target.getOptLockRevision());
+        registerSameTargetAndAssertBasedOnVersion(controllerId, 1, TargetUpdateStatus.PENDING);
 
         // verify
         assertCancelActionMessage(distributionSetAssignmentResult.getActions().get(0), controllerId);
