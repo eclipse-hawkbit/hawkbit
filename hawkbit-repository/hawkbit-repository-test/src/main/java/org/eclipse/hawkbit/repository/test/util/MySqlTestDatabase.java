@@ -17,15 +17,16 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.context.TestContext;
+import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 /**
- * {@link Testdatabase} implementation for MySQL.
- *
+ * A {@link TestExecutionListener} for creating and dropping MySql schemas if
+ * tests are setup with MySql.
  */
-public class CIMySqlTestDatabase extends AbstractTestExecutionListener {
+public class MySqlTestDatabase extends AbstractTestExecutionListener {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CIMySqlTestDatabase.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MySqlTestDatabase.class);
     private String schemaName;
     private String uri;
     private final String username;
@@ -34,7 +35,7 @@ public class CIMySqlTestDatabase extends AbstractTestExecutionListener {
     /**
      * Constructor.
      */
-    public CIMySqlTestDatabase() {
+    public MySqlTestDatabase() {
         this.username = System.getProperty("spring.datasource.username");
         this.password = System.getProperty("spring.datasource.password");
         this.uri = System.getProperty("spring.datasource.url");
@@ -50,16 +51,20 @@ public class CIMySqlTestDatabase extends AbstractTestExecutionListener {
 
     @Override
     public void beforeTestClass(final TestContext testContext) throws Exception {
-        if ("MYSQL".equals(System.getProperty("spring.jpa.database"))) {
+        if (isRunningWithMySql()) {
             createSchema();
         }
     }
 
     @Override
     public void afterTestClass(final TestContext testContext) throws Exception {
-        if ("MYSQL".equals(System.getProperty("spring.jpa.database"))) {
+        if (isRunningWithMySql()) {
             dropSchema();
         }
+    }
+
+    private boolean isRunningWithMySql() {
+        return "MYSQL".equals(System.getProperty("spring.jpa.database"));
     }
 
     private void createSchema() {

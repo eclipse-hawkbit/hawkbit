@@ -101,7 +101,7 @@ import org.springframework.web.context.WebApplicationContext;
 // test execution. So, the order execution between EventVerifier and Cleanup is
 // important!
 @TestExecutionListeners(inheritListeners = true, listeners = { EventVerifier.class, CleanupTestExecutionListener.class,
-        CIMySqlTestDatabase.class }, mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
+        MySqlTestDatabase.class }, mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
 public abstract class AbstractIntegrationTest implements EnvironmentAware {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
