@@ -67,6 +67,8 @@ public class CIMySqlTestDatabase extends AbstractTestExecutionListener {
             try (PreparedStatement statement = connection.prepareStatement("CREATE SCHEMA " + schemaName + ";")) {
                 statement.execute();
                 LOG.info("Schema {} created on uri {}", schemaName, uri);
+            } finally {
+                connection.commit();
             }
         } catch (final SQLException e) {
             LOG.error("Schema creation failed!", e);
@@ -79,6 +81,8 @@ public class CIMySqlTestDatabase extends AbstractTestExecutionListener {
             try (PreparedStatement statement = connection.prepareStatement("DROP SCHEMA " + schemaName + ";")) {
                 statement.execute();
                 LOG.info("Schema {} dropped on uri {}", schemaName, uri);
+            } finally {
+                connection.commit();
             }
         } catch (final SQLException e) {
             LOG.error("Schema drop failed!", e);
