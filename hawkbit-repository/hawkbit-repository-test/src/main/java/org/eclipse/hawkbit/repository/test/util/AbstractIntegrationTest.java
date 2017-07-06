@@ -56,9 +56,7 @@ import org.eclipse.hawkbit.repository.test.matcher.EventVerifier;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
@@ -94,8 +92,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 // Cleaning repository will fire "delete" events. We won't count them to the
 // test execution. So, the order execution between EventVerifier and Cleanup is
 // important!
-@TestExecutionListeners(inheritListeners = true, listeners = { EventVerifier.class,
-        CleanupTestExecutionListener.class }, mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
+@TestExecutionListeners(inheritListeners = true, listeners = { EventVerifier.class, CleanupTestExecutionListener.class,
+        MySqlTestDatabase.class }, mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
 public abstract class AbstractIntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
@@ -288,27 +286,6 @@ public abstract class AbstractIntegrationTest {
             FileUtils.deleteDirectory(new File(artifactFilesystemProperties.getPath()));
         } catch (final IOException | IllegalArgumentException e) {
             LOG.warn("Cannot cleanup file-directory", e);
-        }
-    }
-
-    private static CIMySqlTestDatabase tesdatabase;
-
-    @BeforeClass
-    public static void beforeClass() {
-        createTestdatabaseAndStart();
-    }
-
-    private static synchronized void createTestdatabaseAndStart() {
-        if ("MYSQL".equals(System.getProperty("spring.jpa.database"))) {
-            tesdatabase = new CIMySqlTestDatabase();
-            tesdatabase.before();
-        }
-    }
-
-    @AfterClass
-    public static void afterClass() {
-        if (tesdatabase != null) {
-            tesdatabase.after();
         }
     }
 }
