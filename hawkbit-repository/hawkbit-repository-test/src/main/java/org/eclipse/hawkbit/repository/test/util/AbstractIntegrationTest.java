@@ -13,6 +13,7 @@ import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpre
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -99,6 +100,8 @@ public abstract class AbstractIntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
     protected static final Pageable PAGE = new PageRequest(0, 400, new Sort(Direction.ASC, "id"));
+
+    protected static final URI LOCALHOST = URI.create("http://127.0.0.1");
 
     /**
      * Constant for MediaType HAL with encoding UTF-8. Necessary since Spring

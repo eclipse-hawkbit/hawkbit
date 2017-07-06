@@ -14,7 +14,6 @@ import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpre
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +60,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Controller Management")
 public class ControllerManagementTest extends AbstractJpaIntegrationTest {
-    private static final URI LOCALHOST = URI.create("http://127.0.0.1");
+
     @Autowired
     private RepositoryProperties repositoryProperties;
 
@@ -121,9 +120,6 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         verifyThrownExceptionBy(() -> controllerManagement.updateControllerAttributes(NOT_EXIST_ID, Maps.newHashMap()),
                 "Target");
-
-        verifyThrownExceptionBy(
-                () -> controllerManagement.updateLastTargetQuery(NOT_EXIST_ID, new URI("http://test.com")), "Target");
     }
 
     @Test
@@ -424,17 +420,15 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 2) })
     public void findOrRegisterTargetIfItDoesNotexist() {
-        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist("AA",
-                LOCALHOST);
+        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist("AA", LOCALHOST);
         assertThat(target).as("target should not be null").isNotNull();
 
-        final Target sameTarget = controllerManagement.findOrRegisterTargetIfItDoesNotexist("AA",
-                LOCALHOST);
+        final Target sameTarget = controllerManagement.findOrRegisterTargetIfItDoesNotexist("AA", LOCALHOST);
         assertThat(target.getId()).as("Target should be the equals").isEqualTo(sameTarget.getId());
         assertThat(targetRepository.count()).as("Only 1 target should be registred").isEqualTo(1L);
 
-        assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(
-                () -> controllerManagement.findOrRegisterTargetIfItDoesNotexist("", LOCALHOST))
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotexist("", LOCALHOST))
                 .as("register target with empty controllerId should fail");
     }
 

@@ -24,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -1322,7 +1323,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     private Target createSingleTarget(final String controllerId, final String name) {
         targetManagement.createTarget(entityFactory.target().create().controllerId(controllerId).name(name)
                 .description(TARGET_DESCRIPTION_TEST));
-        return controllerManagement.updateLastTargetQuery(controllerId, null);
+        return controllerManagement.findOrRegisterTargetIfItDoesNotexist(controllerId, LOCALHOST);
     }
 
     /**
@@ -1331,13 +1332,14 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
      *
      * @param amount
      *            The number of targets to create
+     * @throws URISyntaxException
      */
     private void createTargetsAlphabetical(final int amount) {
         char character = 'a';
         for (int index = 0; index < amount; index++) {
             final String str = String.valueOf(character);
             targetManagement.createTarget(entityFactory.target().create().controllerId(str).name(str).description(str));
-            controllerManagement.updateLastTargetQuery(str, null);
+            controllerManagement.findOrRegisterTargetIfItDoesNotexist(str, LOCALHOST);
             character++;
         }
     }

@@ -127,17 +127,6 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Target updateLastTargetQuery(final String controllerId, final URI address) {
-        final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
-
-        return updateTargetStatus(target, address);
-    }
-
-    @Override
     public Optional<Action> getActionForDownloadByTargetAndSoftwareModule(final String controllerId,
             final Long moduleId) {
         throwExceptionIfTargetDoesNotExist(controllerId);
@@ -230,10 +219,7 @@ public class JpaControllerManagement implements ControllerManagement {
             toUpdate.setUpdateStatus(TargetUpdateStatus.REGISTERED);
         }
 
-        if (address != null) {
-            toUpdate.setAddress(address.toString());
-        }
-
+        toUpdate.setAddress(address.toString());
         toUpdate.setLastTargetQuery(System.currentTimeMillis());
 
         afterCommit.afterCommit(
