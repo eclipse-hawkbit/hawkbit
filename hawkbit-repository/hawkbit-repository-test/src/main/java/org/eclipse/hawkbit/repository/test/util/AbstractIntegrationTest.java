@@ -100,8 +100,8 @@ import org.springframework.web.context.WebApplicationContext;
 // Cleaning repository will fire "delete" events. We won't count them to the
 // test execution. So, the order execution between EventVerifier and Cleanup is
 // important!
-@TestExecutionListeners(inheritListeners = true, listeners = { CIMySqlTestDatabase.class, EventVerifier.class,
-        CleanupTestExecutionListener.class }, mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
+@TestExecutionListeners(inheritListeners = true, listeners = { EventVerifier.class, CleanupTestExecutionListener.class,
+        CIMySqlTestDatabase.class }, mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
 public abstract class AbstractIntegrationTest implements EnvironmentAware {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
