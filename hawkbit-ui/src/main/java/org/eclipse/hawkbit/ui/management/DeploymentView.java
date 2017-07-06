@@ -47,8 +47,8 @@ import org.eclipse.hawkbit.ui.management.targettable.TargetTableLayout;
 import org.eclipse.hawkbit.ui.management.targettag.CreateUpdateTargetTagLayoutWindow;
 import org.eclipse.hawkbit.ui.management.targettag.TargetTagFilterLayout;
 import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
-import org.eclipse.hawkbit.ui.push.DistributionCreatedEventContainer;
-import org.eclipse.hawkbit.ui.push.DistributionDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.DistributionSetCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.DistributionSetDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionSetTagCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionSetTagDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionSetTagUpdatedEventContainer;
@@ -402,8 +402,8 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
         supportedEvents.put(TargetCreatedEventContainer.class, targetTableLayout.getTable());
         supportedEvents.put(TargetDeletedEventContainer.class, targetTableLayout.getTable());
 
-        supportedEvents.put(DistributionCreatedEventContainer.class, distributionTableLayout.getTable());
-        supportedEvents.put(DistributionDeletedEventContainer.class, distributionTableLayout.getTable());
+        supportedEvents.put(DistributionSetCreatedEventContainer.class, distributionTableLayout.getTable());
+        supportedEvents.put(DistributionSetDeletedEventContainer.class, distributionTableLayout.getTable());
 
         supportedEvents.put(TargetTagCreatedEventContainer.class, targetTagFilterLayout);
         supportedEvents.put(TargetTagDeletedEventContainer.class, targetTagFilterLayout);

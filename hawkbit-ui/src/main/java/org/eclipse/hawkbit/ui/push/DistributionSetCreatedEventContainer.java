@@ -16,11 +16,11 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreated
  * EventHolder for {@link DistributionSetCreatedEvent}s.
  *
  */
-public class DistributionCreatedEventContainer implements EventContainer<DistributionSetCreatedEvent> {
+public class DistributionSetCreatedEventContainer implements EventContainer<DistributionSetCreatedEvent> {
     private static final String I18N_UNREAD_NOTIFICATION_UNREAD_MESSAGE = "distribution.created.event.container.notifcation.message";
     private final List<DistributionSetCreatedEvent> events;
 
-    DistributionCreatedEventContainer(final List<DistributionSetCreatedEvent> events) {
+    DistributionSetCreatedEventContainer(final List<DistributionSetCreatedEvent> events) {
         this.events = events;
     }
 
