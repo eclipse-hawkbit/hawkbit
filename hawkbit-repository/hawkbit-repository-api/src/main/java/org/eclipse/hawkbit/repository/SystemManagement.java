@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.repository.report.model.SystemUsageReport;
+import org.eclipse.hawkbit.repository.report.model.SystemUsageReportWithTenants;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -66,6 +67,14 @@ public interface SystemManagement {
     /**
      * Calculated system usage statistics, both overall for the entire system
      * and per tenant;
+     *
+     * @return SystemUsageReport of the current system
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
+    SystemUsageReportWithTenants getSystemUsageStatisticsWithTenants();
+
+    /**
+     * Calculated overall system usage statistics
      *
      * @return SystemUsageReport of the current system
      */
