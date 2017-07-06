@@ -60,8 +60,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     public void targetCreatedEventIsPublished() throws InterruptedException {
         final Target createdTarget = testdataFactory.createTarget("12345");
 
-        final TargetCreatedEvent targetCreatedEvent = eventListener.waitForEvent(TargetCreatedEvent.class, 1,
-                TimeUnit.SECONDS);
+        final TargetCreatedEvent targetCreatedEvent = eventListener.waitForEvent(TargetCreatedEvent.class);
         assertThat(targetCreatedEvent).isNotNull();
         assertThat(targetCreatedEvent.getEntity().getId()).isEqualTo(createdTarget.getId());
     }
@@ -73,8 +72,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
         targetManagement
                 .updateTarget(entityFactory.target().update(createdTarget.getControllerId()).name("updateName"));
 
-        final TargetUpdatedEvent targetUpdatedEvent = eventListener.waitForEvent(TargetUpdatedEvent.class, 1,
-                TimeUnit.SECONDS);
+        final TargetUpdatedEvent targetUpdatedEvent = eventListener.waitForEvent(TargetUpdatedEvent.class);
         assertThat(targetUpdatedEvent).isNotNull();
         assertThat(targetUpdatedEvent.getEntity().getId()).isEqualTo(createdTarget.getId());
     }
@@ -86,8 +84,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
         targetManagement.deleteTarget("12345");
 
-        final TargetDeletedEvent targetDeletedEvent = eventListener.waitForEvent(TargetDeletedEvent.class, 1,
-                TimeUnit.SECONDS);
+        final TargetDeletedEvent targetDeletedEvent = eventListener.waitForEvent(TargetDeletedEvent.class);
         assertThat(targetDeletedEvent).isNotNull();
         assertThat(targetDeletedEvent.getEntityId()).isEqualTo(createdTarget.getId());
     }
@@ -110,8 +107,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
         rolloutManagement.deleteRollout(createdRollout.getId());
         rolloutManagement.handleRollouts();
 
-        final RolloutDeletedEvent rolloutDeletedEvent = eventListener.waitForEvent(RolloutDeletedEvent.class, 1,
-                TimeUnit.SECONDS);
+        final RolloutDeletedEvent rolloutDeletedEvent = eventListener.waitForEvent(RolloutDeletedEvent.class);
         assertThat(rolloutDeletedEvent).isNotNull();
         assertThat(rolloutDeletedEvent.getEntityId()).isEqualTo(createdRollout.getId());
     }
@@ -121,8 +117,8 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     public void distributionSetCreatedEventIsPublished() throws InterruptedException {
         final DistributionSet createDistributionSet = testdataFactory.createDistributionSet();
 
-        final DistributionSetCreatedEvent dsCreatedEvent = eventListener.waitForEvent(DistributionSetCreatedEvent.class,
-                1, TimeUnit.SECONDS);
+        final DistributionSetCreatedEvent dsCreatedEvent = eventListener
+                .waitForEvent(DistributionSetCreatedEvent.class);
         assertThat(dsCreatedEvent).isNotNull();
         assertThat(dsCreatedEvent.getEntity().getId()).isEqualTo(createDistributionSet.getId());
     }
@@ -134,8 +130,8 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
         distributionSetManagement.deleteDistributionSet(createDistributionSet.getId());
 
-        final DistributionSetDeletedEvent dsDeletedEvent = eventListener.waitForEvent(DistributionSetDeletedEvent.class,
-                1, TimeUnit.SECONDS);
+        final DistributionSetDeletedEvent dsDeletedEvent = eventListener
+                .waitForEvent(DistributionSetDeletedEvent.class);
         assertThat(dsDeletedEvent).isNotNull();
         assertThat(dsDeletedEvent.getEntityId()).isEqualTo(createDistributionSet.getId());
     }
@@ -146,7 +142,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
         final SoftwareModule softwareModule = testdataFactory.createSoftwareModuleApp();
 
         final SoftwareModuleCreatedEvent softwareModuleCreatedEvent = eventListener
-                .waitForEvent(SoftwareModuleCreatedEvent.class, 1, TimeUnit.SECONDS);
+                .waitForEvent(SoftwareModuleCreatedEvent.class);
         assertThat(softwareModuleCreatedEvent).isNotNull();
         assertThat(softwareModuleCreatedEvent.getEntity().getId()).isEqualTo(softwareModule.getId());
     }
@@ -159,7 +155,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
                 .updateSoftwareModule(entityFactory.softwareModule().update(softwareModule.getId()).description("New"));
 
         final SoftwareModuleUpdatedEvent softwareModuleUpdatedEvent = eventListener
-                .waitForEvent(SoftwareModuleUpdatedEvent.class, 1, TimeUnit.SECONDS);
+                .waitForEvent(SoftwareModuleUpdatedEvent.class);
         assertThat(softwareModuleUpdatedEvent).isNotNull();
         assertThat(softwareModuleUpdatedEvent.getEntity().getId()).isEqualTo(softwareModule.getId());
     }
@@ -171,7 +167,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
         softwareModuleManagement.deleteSoftwareModule(softwareModule.getId());
 
         final SoftwareModuleDeletedEvent softwareModuleDeletedEvent = eventListener
-                .waitForEvent(SoftwareModuleDeletedEvent.class, 1, TimeUnit.SECONDS);
+                .waitForEvent(SoftwareModuleDeletedEvent.class);
         assertThat(softwareModuleDeletedEvent).isNotNull();
         assertThat(softwareModuleDeletedEvent.getEntityId()).isEqualTo(softwareModule.getId());
     }
@@ -194,15 +190,14 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
             queue.offer(event);
         }
 
-        public <T> T waitForEvent(final Class<T> eventType, final long timeout, final TimeUnit timeUnit)
-                throws InterruptedException {
+        public <T> T waitForEvent(final Class<T> eventType) throws InterruptedException {
             TenantAwareEvent event = null;
-            while ((event = queue.poll(timeout, timeUnit)) != null) {
+            while ((event = queue.poll(5, TimeUnit.SECONDS)) != null) {
                 if (event.getClass().isAssignableFrom(eventType)) {
                     return (T) event;
                 }
             }
-            Assertions.fail("Missing event " + eventType + " within timeout " + timeout + " " + timeUnit);
+            Assertions.fail("Missing event " + eventType + " within timeout.");
             return null;
         }
     }
