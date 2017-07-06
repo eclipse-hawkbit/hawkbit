@@ -240,7 +240,7 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         messageProperties.getHeaders().put(MessageHeaderKey.TYPE, MessageType.THING_CREATED.toString());
         messageProperties.setReplyTo(DmfTestConfiguration.REPLY_TO_EXCHANGE);
 
-        return createMessage("", messageProperties);
+        return createMessage(null, messageProperties);
     }
 
     protected MessageProperties createMessagePropertiesWithTenant(final String tenant) {
