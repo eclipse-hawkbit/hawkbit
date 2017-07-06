@@ -16,12 +16,14 @@ import java.sql.SQLException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.test.context.TestContext;
+import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 /**
  * {@link Testdatabase} implementation for MySQL.
  *
  */
-public class CIMySqlTestDatabase implements Testdatabase {
+public class CIMySqlTestDatabase extends AbstractTestExecutionListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(CIMySqlTestDatabase.class);
     private String schemaName;
@@ -47,8 +49,17 @@ public class CIMySqlTestDatabase implements Testdatabase {
     }
 
     @Override
-    public void before() {
-        createSchema();
+    public void beforeTestClass(final TestContext testContext) throws Exception {
+        if ("MYSQL".equals(System.getProperty("spring.jpa.database"))) {
+            createSchema();
+        }
+    }
+
+    @Override
+    public void afterTestClass(final TestContext testContext) throws Exception {
+        if ("MYSQL".equals(System.getProperty("spring.jpa.database"))) {
+            dropSchema();
+        }
     }
 
     private void createSchema() {
@@ -63,11 +74,6 @@ public class CIMySqlTestDatabase implements Testdatabase {
 
     }
 
-    @Override
-    public void after() {
-        dropSchema();
-    }
-
     private void dropSchema() {
         try (Connection connection = DriverManager.getConnection(uri, username, password)) {
             try (PreparedStatement statement = connection.prepareStatement("DROP SCHEMA " + schemaName + ";")) {
@@ -77,10 +83,5 @@ public class CIMySqlTestDatabase implements Testdatabase {
         } catch (final SQLException e) {
             LOG.error("Schema drop failed!", e);
         }
-    }
-
-    @Override
-    public String getUri() {
-        return uri;
     }
 }
