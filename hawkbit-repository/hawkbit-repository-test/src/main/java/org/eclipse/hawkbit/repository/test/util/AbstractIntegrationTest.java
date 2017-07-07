@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystemProperties;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
@@ -56,7 +57,9 @@ import org.eclipse.hawkbit.repository.test.matcher.EventVerifier;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
@@ -280,12 +283,32 @@ public abstract class AbstractIntegrationTest {
         standardDsType = securityRule.runAsPrivileged(() -> testdataFactory.findOrCreateDefaultTestDsType());
     }
 
+    private static String artifactDirectory = "./artifactrepo/" + RandomStringUtils.randomAlphanumeric(20);
+
     @After
     public void cleanUp() {
-        try {
-            FileUtils.deleteDirectory(new File(artifactFilesystemProperties.getPath()));
-        } catch (final IOException | IllegalArgumentException e) {
-            LOG.warn("Cannot cleanup file-directory", e);
+        if (new File(artifactDirectory).exists()) {
+            try {
+                FileUtils.cleanDirectory(new File(artifactDirectory));
+            } catch (final IOException | IllegalArgumentException e) {
+                LOG.warn("Cannot cleanup file-directory", e);
+            }
+        }
+    }
+
+    @BeforeClass
+    public static void beforeClass() {
+        System.setProperty("org.eclipse.hawkbit.repository.file.path", artifactDirectory);
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        if (new File(artifactDirectory).exists()) {
+            try {
+                FileUtils.deleteDirectory(new File(artifactDirectory));
+            } catch (final IOException | IllegalArgumentException e) {
+                LOG.warn("Cannot delete file-directory", e);
+            }
         }
     }
 }
