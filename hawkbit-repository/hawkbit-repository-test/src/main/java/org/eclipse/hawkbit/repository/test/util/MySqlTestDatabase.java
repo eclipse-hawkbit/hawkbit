@@ -16,14 +16,17 @@ import java.sql.SQLException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.test.context.TestContext;
+import org.springframework.test.context.TestExecutionListener;
+import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 /**
- * {@link Testdatabase} implementation for MySQL.
- *
+ * A {@link TestExecutionListener} for creating and dropping MySql schemas if
+ * tests are setup with MySql.
  */
-public class CIMySqlTestDatabase implements Testdatabase {
+public class MySqlTestDatabase extends AbstractTestExecutionListener {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CIMySqlTestDatabase.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MySqlTestDatabase.class);
     private String schemaName;
     private String uri;
     private final String username;
@@ -32,7 +35,7 @@ public class CIMySqlTestDatabase implements Testdatabase {
     /**
      * Constructor.
      */
-    public CIMySqlTestDatabase() {
+    public MySqlTestDatabase() {
         this.username = System.getProperty("spring.datasource.username");
         this.password = System.getProperty("spring.datasource.password");
         this.uri = System.getProperty("spring.datasource.url");
@@ -47,8 +50,21 @@ public class CIMySqlTestDatabase implements Testdatabase {
     }
 
     @Override
-    public void before() {
-        createSchema();
+    public void beforeTestClass(final TestContext testContext) throws Exception {
+        if (isRunningWithMySql()) {
+            createSchema();
+        }
+    }
+
+    @Override
+    public void afterTestClass(final TestContext testContext) throws Exception {
+        if (isRunningWithMySql()) {
+            dropSchema();
+        }
+    }
+
+    private boolean isRunningWithMySql() {
+        return "MYSQL".equals(System.getProperty("spring.jpa.database"));
     }
 
     private void createSchema() {
@@ -56,6 +72,8 @@ public class CIMySqlTestDatabase implements Testdatabase {
             try (PreparedStatement statement = connection.prepareStatement("CREATE SCHEMA " + schemaName + ";")) {
                 statement.execute();
                 LOG.info("Schema {} created on uri {}", schemaName, uri);
+            } finally {
+                connection.commit();
             }
         } catch (final SQLException e) {
             LOG.error("Schema creation failed!", e);
@@ -63,24 +81,16 @@ public class CIMySqlTestDatabase implements Testdatabase {
 
     }
 
-    @Override
-    public void after() {
-        dropSchema();
-    }
-
     private void dropSchema() {
         try (Connection connection = DriverManager.getConnection(uri, username, password)) {
             try (PreparedStatement statement = connection.prepareStatement("DROP SCHEMA " + schemaName + ";")) {
                 statement.execute();
                 LOG.info("Schema {} dropped on uri {}", schemaName, uri);
+            } finally {
+                connection.commit();
             }
         } catch (final SQLException e) {
             LOG.error("Schema drop failed!", e);
         }
-    }
-
-    @Override
-    public String getUri() {
-        return uri;
     }
 }
