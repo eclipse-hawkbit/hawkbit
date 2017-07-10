@@ -159,7 +159,11 @@ public interface ControllerManagement {
     Page<ActionStatus> findActionStatusByAction(@NotNull Pageable pageReq, @NotNull Long actionId);
 
     /**
-     * register new target in the repository (plug-and-play).
+     * Register new target in the repository (plug-and-play) and in case it
+     * already exists updates {@link Target#getAddress()} and
+     * {@link Target#getLastTargetQuery()} and switches if
+     * {@link TargetUpdateStatus#UNKNOWN} to
+     * {@link TargetUpdateStatus#REGISTERED}.
      *
      * @param controllerId
      *            reference
@@ -273,23 +277,6 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     Target updateControllerAttributes(@NotEmpty String controllerId, @NotNull Map<String, String> attributes);
-
-    /**
-     * Refreshes the time of the last time the controller has been connected to
-     * the server. Switches {@link TargetUpdateStatus#UNKNOWN} to
-     * {@link TargetUpdateStatus#REGISTERED} if necessary.
-     *
-     * @param controllerId
-     *            of the target to to update
-     * @param address
-     *            the client address of the target, might be {@code null}
-     * @return the updated target
-     *
-     * @throws EntityNotFoundException
-     *             if target with given ID could not be found
-     */
-    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Target updateLastTargetQuery(@NotEmpty String controllerId, URI address);
 
     /**
      * Finds {@link Target} based on given controller ID returns found Target

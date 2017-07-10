@@ -35,6 +35,7 @@ import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
+import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -752,12 +753,13 @@ public class TestdataFactory {
      * @return {@link List} of {@link Target} entities
      */
     public List<Target> createTargets(final int number) {
-        final List<Target> targets = Lists.newArrayListWithExpectedSize(number);
+
+        final List<TargetCreate> targets = Lists.newArrayListWithExpectedSize(number);
         for (int i = 0; i < number; i++) {
-            targets.add(createTarget(DEFAULT_CONTROLLER_ID + i));
+            targets.add(entityFactory.target().create().controllerId(DEFAULT_CONTROLLER_ID + i));
         }
 
-        return targets;
+        return targetManagement.createTargets(targets);
     }
 
     /**

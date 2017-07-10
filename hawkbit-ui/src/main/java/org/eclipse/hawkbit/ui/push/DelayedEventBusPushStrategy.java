@@ -96,7 +96,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
         this.delay = delay;
     }
 
-    private boolean isEventProvided(final org.eclipse.hawkbit.repository.event.TenantAwareEvent event) {
+    private boolean isEventProvided(final TenantAwareEvent event) {
         return eventProvider.getEvents().containsKey(event.getClass());
     }
 
@@ -174,8 +174,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
          * @return {@code true} if the event can be dispatched to the UI
          *         otherwise {@code false}
          */
-        private boolean eventSecurityCheck(final SecurityContext userContext,
-                final org.eclipse.hawkbit.repository.event.TenantAwareEvent event) {
+        private boolean eventSecurityCheck(final SecurityContext userContext, final TenantAwareEvent event) {
             if (userContext == null || userContext.getAuthentication() == null) {
                 return false;
             }
@@ -187,8 +186,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
             return false;
         }
 
-        private void doDispatch(final List<org.eclipse.hawkbit.repository.event.TenantAwareEvent> events,
-                final WrappedSession wrappedSession) {
+        private void doDispatch(final List<TenantAwareEvent> events, final WrappedSession wrappedSession) {
             final SecurityContext userContext = (SecurityContext) wrappedSession
                     .getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
             final SecurityContext oldContext = SecurityContextHolder.getContext();

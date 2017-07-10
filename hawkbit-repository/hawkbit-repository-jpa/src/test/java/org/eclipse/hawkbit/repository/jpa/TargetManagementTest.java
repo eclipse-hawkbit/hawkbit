@@ -397,7 +397,8 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 5),
             @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6) })
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = TargetPollEvent.class, count = 1) })
     public void findTargetByControllerIDWithDetails() {
         final DistributionSet set = testdataFactory.createDistributionSet("test");
         final DistributionSet set2 = testdataFactory.createDistributionSet("test2");
@@ -414,7 +415,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         Target target = createTargetWithAttributes("4711");
 
         final long current = System.currentTimeMillis();
-        controllerManagement.updateLastTargetQuery("4711", null);
+        controllerManagement.findOrRegisterTargetIfItDoesNotexist("4711", LOCALHOST);
 
         final DistributionSetAssignmentResult result = assignDistributionSet(set.getId(), "4711");
 

@@ -1172,7 +1172,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verify the creation and the start of a rollout.")
     public void createAndStartRollout() throws Exception {
 
-        final int amountTargetsForRollout = 500;
+        final int amountTargetsForRollout = 50;
         final int amountGroups = 5;
         final String successCondition = "50";
         final String errorCondition = "80";
@@ -1204,8 +1204,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         myRollout = rolloutManagement.findRolloutById(myRollout.getId()).get();
         assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.RUNNING);
         final Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus = createInitStatusMap();
-        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 100L);
-        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.SCHEDULED, 400L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 10L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.SCHEDULED, 40L);
         validateRolloutActionStatus(myRollout.getId(), expectedTargetCountStatus);
     }
 
@@ -1213,7 +1213,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verify the creation and the automatic start of a rollout.")
     public void createAndAutoStartRollout() throws Exception {
 
-        final int amountTargetsForRollout = 500;
+        final int amountTargetsForRollout = 50;
         final int amountGroups = 5;
         final String successCondition = "50";
         final String errorCondition = "80";
@@ -1255,8 +1255,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         myRollout = rolloutManagement.findRolloutById(myRollout.getId()).get();
         assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.RUNNING);
         final Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus = createInitStatusMap();
-        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 100L);
-        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.SCHEDULED, 400L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 10L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.SCHEDULED, 40L);
         validateRolloutActionStatus(myRollout.getId(), expectedTargetCountStatus);
     }
 

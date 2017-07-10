@@ -23,6 +23,8 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.T
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationValidatorException;
 import org.junit.Assert;
 import org.junit.Test;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -30,7 +32,14 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
 @Stories("Tenant Configuration Management")
-public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest {
+public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest implements EnvironmentAware {
+
+    private Environment environment = null;
+
+    @Override
+    public void setEnvironment(final Environment environment) {
+        this.environment = environment;
+    }
 
     @Test
     @Description("Tests that tenant specific configuration can be persisted and in case the tenant does not have specific configuration the default from environment is used instead.")

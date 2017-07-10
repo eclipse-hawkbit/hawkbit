@@ -29,6 +29,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import com.google.common.net.HttpHeaders;
 
@@ -46,7 +47,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class DosFilterTest extends AbstractDDiApiIntegrationTest {
 
     @Override
-    protected DefaultMockMvcBuilder createMvcWebAppContext() {
+    protected DefaultMockMvcBuilder createMvcWebAppContext(final WebApplicationContext context) {
         return MockMvcBuilders.webAppContextSetup(context)
                 .addFilter(new DosFilter(null, 10, 10, "127\\.0\\.0\\.1|\\[0:0:0:0:0:0:0:1\\]", "(^192\\.168\\.)",
                         "X-Forwarded-For"))

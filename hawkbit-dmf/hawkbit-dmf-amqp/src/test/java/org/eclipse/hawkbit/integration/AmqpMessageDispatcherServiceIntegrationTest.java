@@ -37,6 +37,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Device Management Federation API")
 @Stories("Amqp Message Dispatcher Service")
 public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceIntegrationTest {
+    private static final String TARGET_PREFIX = "Dmf_disp_";
 
     @Test
     @Description("Verify that a distribution assignment send a download and install message.")
@@ -47,11 +48,12 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 2) })
     public void sendDownloadAndInstallStatus() {
-        registerTargetAndAssignDistributionSet();
+        final String controllerId = TARGET_PREFIX + "sendDownloadAndInstallStatus";
+        registerTargetAndAssignDistributionSet(controllerId);
 
-        createAndSendTarget(TENANT_EXIST);
-        waitUntilTargetStatusIsPending();
-        assertDownloadAndInstallMessage(getDistributionSet().getModules());
+        createAndSendTarget(controllerId, TENANT_EXIST);
+        waitUntilTargetStatusIsPending(controllerId);
+        assertDownloadAndInstallMessage(getDistributionSet().getModules(), controllerId);
     }
 
     @Test
@@ -64,16 +66,18 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 2), @Expect(type = TargetPollEvent.class, count = 3) })
     public void assignDistributionSetMultipleTimes() {
-        final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet();
+        final String controllerId = TARGET_PREFIX + "assignDistributionSetMultipleTimes";
+
+        final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
 
         final DistributionSet distributionSet2 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         registerTargetAndAssignDistributionSet(distributionSet2.getId(), TargetUpdateStatus.PENDING,
-                getDistributionSet().getModules());
-        assertCancelActionMessage(assignmentResult.getActions().get(0));
+                getDistributionSet().getModules(), controllerId);
+        assertCancelActionMessage(assignmentResult.getActions().get(0), controllerId);
 
-        createAndSendTarget(TENANT_EXIST);
-        waitUntilTargetStatusIsPending();
-        assertCancelActionMessage(assignmentResult.getActions().get(0));
+        createAndSendTarget(controllerId, TENANT_EXIST);
+        waitUntilTargetStatusIsPending(controllerId);
+        assertCancelActionMessage(assignmentResult.getActions().get(0), controllerId);
 
     }
 
@@ -87,11 +91,13 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 2) })
     public void sendCancelStatus() {
-        final Long actionId = registerTargetAndCancelActionId();
+        final String controllerId = TARGET_PREFIX + "sendCancelStatus";
 
-        createAndSendTarget(TENANT_EXIST);
-        waitUntilTargetStatusIsPending();
-        assertCancelActionMessage(actionId);
+        final Long actionId = registerTargetAndCancelActionId(controllerId);
+
+        createAndSendTarget(controllerId, TENANT_EXIST);
+        waitUntilTargetStatusIsPending(controllerId);
+        assertCancelActionMessage(actionId, controllerId);
     }
 
     @Test
@@ -99,16 +105,16 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1), @Expect(type = TargetDeletedEvent.class, count = 1) })
     public void sendDeleteMessage() {
+        final String controllerId = TARGET_PREFIX + "sendDeleteMessage";
 
-        registerAndAssertTargetWithExistingTenant(REGISTER_TARGET, 1);
-        targetManagement.deleteTarget(REGISTER_TARGET);
-        assertDeleteMessage(REGISTER_TARGET);
+        registerAndAssertTargetWithExistingTenant(controllerId, 1);
+        targetManagement.deleteTarget(controllerId);
+        assertDeleteMessage(controllerId);
     }
 
-    private void waitUntilTargetStatusIsPending() {
+    private void waitUntilTargetStatusIsPending(final String controllerId) {
         waitUntil(() -> {
-            final Optional<Target> findTargetByControllerID = targetManagement
-                    .findTargetByControllerID(REGISTER_TARGET);
+            final Optional<Target> findTargetByControllerID = targetManagement.findTargetByControllerID(controllerId);
             return findTargetByControllerID.isPresent()
                     && TargetUpdateStatus.PENDING.equals(findTargetByControllerID.get().getUpdateStatus());
         });
@@ -119,9 +125,4 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
             return securityRule.runAsPrivileged(callable);
         });
     }
-
-    private void createAndSendTarget(final String tenant) {
-        createAndSendTarget(REGISTER_TARGET, tenant);
-    }
-
 }

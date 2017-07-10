@@ -51,10 +51,9 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         final Target savedTarget = testdataFactory.createTarget();
 
-        final Action updateAction = deploymentManagement.findActionWithDetails(
-                assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getActions().get(0)).get();
+        final Long actionId = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getActions().get(0);
 
-        final Action cancelAction = deploymentManagement.cancelAction(updateAction.getId());
+        final Action cancelAction = deploymentManagement.cancelAction(actionId);
 
         // controller rejects cancelation
         mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
@@ -66,11 +65,12 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         final long current = System.currentTimeMillis();
 
         // get update action anyway
-        mvc.perform(get("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/deploymentBase/"
-                + updateAction.getId(), tenantAware.getCurrentTenant()).accept(MediaType.APPLICATION_JSON))
+        mvc.perform(
+                get("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/deploymentBase/" + actionId,
+                        tenantAware.getCurrentTenant()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(jsonPath("$.id", equalTo(String.valueOf(updateAction.getId()))))
+                .andExpect(jsonPath("$.id", equalTo(String.valueOf(actionId))))
                 .andExpect(jsonPath("$.deployment.download", equalTo("forced")))
                 .andExpect(jsonPath("$.deployment.update", equalTo("forced")))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==jvm)].version",
@@ -82,8 +82,8 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
 
         // and finish it
         mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/deploymentBase/"
-                + updateAction.getId() + "/feedback", tenantAware.getCurrentTenant()).content(
-                        JsonBuilder.deploymentActionFeedback(updateAction.getId().toString(), "closed", "success"))
+                + actionId + "/feedback", tenantAware.getCurrentTenant())
+                        .content(JsonBuilder.deploymentActionFeedback(actionId.toString(), "closed", "success"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
@@ -103,8 +103,7 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         final Target savedTarget = testdataFactory.createTarget();
 
-        final Action updateAction = deploymentManagement.findActionWithDetails(
-                assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getActions().get(0)).get();
+        final Long actionId = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getActions().get(0);
 
         long current = System.currentTimeMillis();
         mvc.perform(get("/{tenant}/controller/v1/{controller}", tenantAware.getCurrentTenant(),
@@ -114,7 +113,7 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.deploymentBase.href",
                         startsWith("http://localhost/" + tenantAware.getCurrentTenant() + "/controller/v1/"
-                                + TestdataFactory.DEFAULT_CONTROLLER_ID + "/deploymentBase/" + updateAction.getId())));
+                                + TestdataFactory.DEFAULT_CONTROLLER_ID + "/deploymentBase/" + actionId)));
         Thread.sleep(1); // is required: otherwise processing the next line is
         // often too fast and
         // the following assert will fail
@@ -130,7 +129,7 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
 
         assertThat(activeActionsByTarget).hasSize(1);
         assertThat(activeActionsByTarget.get(0).getStatus()).isEqualTo(Status.RUNNING);
-        final Action cancelAction = deploymentManagement.cancelAction(updateAction.getId());
+        final Action cancelAction = deploymentManagement.cancelAction(actionId);
 
         activeActionsByTarget = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
                 .getContent();
@@ -164,14 +163,14 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.id", equalTo(String.valueOf(cancelAction.getId()))))
-                .andExpect(jsonPath("$.cancelAction.stopId", equalTo(String.valueOf(updateAction.getId()))));
+                .andExpect(jsonPath("$.cancelAction.stopId", equalTo(String.valueOf(actionId))));
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
                 .getLastTargetQuery()).isLessThanOrEqualTo(System.currentTimeMillis());
 
         // controller confirmed cancelled action, should not be active anymore
         mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
                 + cancelAction.getId() + "/feedback", tenantAware.getCurrentTenant()).accept(MediaType.APPLICATION_JSON)
-                        .content(JsonBuilder.cancelActionFeedback(updateAction.getId().toString(), "closed"))
+                        .content(JsonBuilder.cancelActionFeedback(actionId.toString(), "closed"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
@@ -220,10 +219,9 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         final Target savedTarget = testdataFactory.createTarget(targetid);
         final List<Target> toAssign = new ArrayList<>();
         toAssign.add(savedTarget);
-        final Action updateAction = deploymentManagement
-                .findActionWithDetails(assignDistributionSet(ds, toAssign).getActions().get(0)).get();
+        final Long actionId = assignDistributionSet(ds, toAssign).getActions().get(0);
 
-        return deploymentManagement.cancelAction(updateAction.getId());
+        return deploymentManagement.cancelAction(actionId);
     }
 
     @Test
@@ -234,13 +232,11 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
 
         final Target savedTarget = testdataFactory.createTarget();
 
-        final Action updateAction = deploymentManagement
-                .findActionWithDetails(
-                        assignDistributionSet(ds.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID).getActions().get(0))
-                .get();
+        final Long actionId = assignDistributionSet(ds.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID).getActions()
+                .get(0);
 
         // cancel action manually
-        final Action cancelAction = deploymentManagement.cancelAction(updateAction.getId());
+        final Action cancelAction = deploymentManagement.cancelAction(actionId);
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(2);
 
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
@@ -311,26 +307,20 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
 
         final Target savedTarget = testdataFactory.createTarget();
 
-        final Action updateAction = deploymentManagement
-                .findActionWithDetails(
-                        assignDistributionSet(ds.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID).getActions().get(0))
-                .get();
-        final Action updateAction2 = deploymentManagement
-                .findActionWithDetails(
-                        assignDistributionSet(ds2.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID).getActions().get(0))
-                .get();
-        final Action updateAction3 = deploymentManagement
-                .findActionWithDetails(
-                        assignDistributionSet(ds3.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID).getActions().get(0))
-                .get();
+        final Long actionId = assignDistributionSet(ds.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID).getActions()
+                .get(0);
+        final Long actionId2 = assignDistributionSet(ds2.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID).getActions()
+                .get(0);
+        final Long actionId3 = assignDistributionSet(ds3.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID).getActions()
+                .get(0);
 
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(3);
 
         // 3 update actions, 0 cancel actions
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(3);
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(3);
-        final Action cancelAction = deploymentManagement.cancelAction(updateAction.getId());
-        final Action cancelAction2 = deploymentManagement.cancelAction(updateAction2.getId());
+        final Action cancelAction = deploymentManagement.cancelAction(actionId);
+        final Action cancelAction2 = deploymentManagement.cancelAction(actionId2);
 
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(3);
         assertThat(deploymentManagement.countActionsByTarget(savedTarget.getControllerId())).isEqualTo(3);
@@ -339,7 +329,7 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.id", equalTo(String.valueOf(cancelAction.getId()))))
-                .andExpect(jsonPath("$.cancelAction.stopId", equalTo(String.valueOf(updateAction.getId()))));
+                .andExpect(jsonPath("$.cancelAction.stopId", equalTo(String.valueOf(actionId))));
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(6);
 
         mvc.perform(get("/{tenant}/controller/v1/{controllerId}", tenantAware.getCurrentTenant(),
@@ -366,7 +356,7 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.id", equalTo(String.valueOf(cancelAction2.getId()))))
-                .andExpect(jsonPath("$.cancelAction.stopId", equalTo(String.valueOf(updateAction2.getId()))));
+                .andExpect(jsonPath("$.cancelAction.stopId", equalTo(String.valueOf(actionId2))));
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(8);
 
         mvc.perform(get("/{tenant}/controller/v1/{controller}", tenantAware.getCurrentTenant(),
@@ -387,15 +377,16 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
 
         assertThat(deploymentManagement.getAssignedDistributionSet(TestdataFactory.DEFAULT_CONTROLLER_ID).get())
                 .isEqualTo(ds3);
-        mvc.perform(get("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/deploymentBase/"
-                + updateAction3.getId(), tenantAware.getCurrentTenant())).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+        mvc.perform(
+                get("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/deploymentBase/" + actionId3,
+                        tenantAware.getCurrentTenant()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(10);
 
         // 1 update actions, 0 cancel actions
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
 
-        final Action cancelAction3 = deploymentManagement.cancelAction(updateAction3.getId());
+        final Action cancelAction3 = deploymentManagement.cancelAction(actionId3);
 
         // action is in cancelling state
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
@@ -408,7 +399,7 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.id", equalTo(String.valueOf(cancelAction3.getId()))))
-                .andExpect(jsonPath("$.cancelAction.stopId", equalTo(String.valueOf(updateAction3.getId()))));
+                .andExpect(jsonPath("$.cancelAction.stopId", equalTo(String.valueOf(actionId3))));
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(12);
 
         // now lets return feedback for the third cancelation
@@ -427,15 +418,13 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
     @Test
     @Description("Tests the feeback channel closing for too many feedbacks, i.e. denial of service prevention.")
     public void tooMuchCancelActionFeedback() throws Exception {
-        final Target target = testdataFactory.createTarget();
+        testdataFactory.createTarget();
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
-        final Action action = deploymentManagement
-                .findActionWithDetails(
-                        assignDistributionSet(ds.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID).getActions().get(0))
-                .get();
+        final Long actionId = assignDistributionSet(ds.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID).getActions()
+                .get(0);
 
-        final Action cancelAction = deploymentManagement.cancelAction(action.getId());
+        final Action cancelAction = deploymentManagement.cancelAction(actionId);
 
         final String feedback = JsonBuilder.cancelActionFeedback(cancelAction.getId().toString(), "proceeding");
         // assignDistributionSet creates an ActionStatus and cancel action

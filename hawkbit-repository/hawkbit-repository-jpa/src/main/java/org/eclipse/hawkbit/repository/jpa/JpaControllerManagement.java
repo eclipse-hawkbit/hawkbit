@@ -127,17 +127,6 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Target updateLastTargetQuery(final String controllerId, final URI address) {
-        final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
-
-        return updateTargetStatus(target, null, System.currentTimeMillis(), address);
-    }
-
-    @Override
     public Optional<Action> getActionForDownloadByTargetAndSoftwareModule(final String controllerId,
             final Long moduleId) {
         throwExceptionIfTargetDoesNotExist(controllerId);
@@ -221,27 +210,20 @@ public class JpaControllerManagement implements ControllerManagement {
             return result;
         }
 
-        return updateTargetStatus(target, null, System.currentTimeMillis(), address);
+        return updateTargetStatus(target, address);
     }
 
-    private Target updateTargetStatus(final JpaTarget toUpdate, final TargetUpdateStatus status,
-            final Long lastTargetQuery, final URI address) {
-        if (status != null) {
-            toUpdate.setUpdateStatus(status);
-        }
-        if (lastTargetQuery != null) {
-            toUpdate.setLastTargetQuery(lastTargetQuery);
-        }
+    private Target updateTargetStatus(final JpaTarget toUpdate, final URI address) {
 
         if (TargetUpdateStatus.UNKNOWN.equals(toUpdate.getUpdateStatus())) {
             toUpdate.setUpdateStatus(TargetUpdateStatus.REGISTERED);
         }
 
-        if (address != null) {
-            toUpdate.setAddress(address.toString());
-            afterCommit.afterCommit(
-                    () -> eventPublisher.publishEvent(new TargetPollEvent(toUpdate, applicationContext.getId())));
-        }
+        toUpdate.setAddress(address.toString());
+        toUpdate.setLastTargetQuery(System.currentTimeMillis());
+
+        afterCommit.afterCommit(
+                () -> eventPublisher.publishEvent(new TargetPollEvent(toUpdate, applicationContext.getId())));
 
         return targetRepository.save(toUpdate);
     }

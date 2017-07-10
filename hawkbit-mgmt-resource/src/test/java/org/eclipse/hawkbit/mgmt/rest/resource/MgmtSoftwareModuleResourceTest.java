@@ -86,8 +86,9 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final String updateVendor = "newVendor1";
         final String updateDescription = "newDescription1";
 
-        SoftwareModule sm = softwareModuleManagement.createSoftwareModule(entityFactory.softwareModule().create().type(osType)
-                .name(knownSWName).version(knownSWVersion).description(knownSWDescription).vendor(knownSWVendor));
+        SoftwareModule sm = softwareModuleManagement
+                .createSoftwareModule(entityFactory.softwareModule().create().type(osType).name(knownSWName)
+                        .version(knownSWVersion).description(knownSWDescription).vendor(knownSWVendor));
 
         assertThat(sm.getName()).as("Wrong name of the software module").isEqualTo(knownSWName);
 
@@ -140,7 +141,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         // check rest of response compared to DB
         final MgmtArtifact artResult = ResourceUtility
                 .convertArtifactResponse(mvcResult.getResponse().getContentAsString());
-        final Long artId = softwareModuleManagement.findSoftwareModuleById(sm.getId()).get().getArtifacts().get(0).getId();
+        final Long artId = softwareModuleManagement.findSoftwareModuleById(sm.getId()).get().getArtifacts().get(0)
+                .getId();
         assertThat(artResult.getArtifactId()).as("Wrong artifact id").isEqualTo(artId);
         assertThat(JsonPath.compile("$._links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
                 .as("Link contains no self url")
@@ -158,9 +160,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         assertThat(artifactManagement.countArtifactsAll()).as("Wrong artifact size").isEqualTo(1);
 
         // binary
-        try (InputStream fileInputStream = artifactManagement
-                .loadArtifactBinary(
-                        softwareModuleManagement.findSoftwareModuleById(sm.getId()).get().getArtifacts().get(0).getSha1Hash())
+        try (InputStream fileInputStream = artifactManagement.loadArtifactBinary(
+                softwareModuleManagement.findSoftwareModuleById(sm.getId()).get().getArtifacts().get(0).getSha1Hash())
                 .get().getFileInputStream()) {
             assertTrue("Wrong artifact content",
                     IOUtils.contentEquals(new ByteArrayInputStream(random), fileInputStream));
@@ -174,8 +175,9 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .isEqualTo(HashGeneratorUtils.generateMD5(random));
 
         // metadata
-        assertThat(softwareModuleManagement.findSoftwareModuleById(sm.getId()).get().getArtifacts().get(0).getFilename())
-                .as("wrong metadata of the filename").isEqualTo("origFilename");
+        assertThat(
+                softwareModuleManagement.findSoftwareModuleById(sm.getId()).get().getArtifacts().get(0).getFilename())
+                        .as("wrong metadata of the filename").isEqualTo("origFilename");
     }
 
     @Test
@@ -295,25 +297,22 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final Artifact artifact2 = artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(),
                 "file2", false);
 
-        final MvcResult result = mvc
-                .perform(
-                        get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download", sm.getId(), artifact.getId()))
-                .andExpect(header().string("ETag", artifact.getSha1Hash()))
-                .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM)).andReturn();
-
-        assertTrue("Wrong response content", Arrays.equals(result.getResponse().getContentAsByteArray(), random));
-
-        final MvcResult result2 = mvc
-                .perform(get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download", sm.getId(),
-                        artifact2.getId()))
-                .andExpect(header().string("ETag", artifact2.getSha1Hash()))
-                .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM)).andReturn();
-
-        assertTrue("Response has wrong response content",
-                Arrays.equals(result2.getResponse().getContentAsByteArray(), random));
+        downloadAndVerify(sm, random, artifact);
+        downloadAndVerify(sm, random, artifact2);
 
         assertThat(softwareModuleManagement.findSoftwareModulesAll(PAGE)).as("Softwaremodule size is wrong").hasSize(1);
         assertThat(artifactManagement.countArtifactsAll()).isEqualTo(2);
+    }
+
+    private void downloadAndVerify(final SoftwareModule sm, final byte[] random, final Artifact artifact)
+            throws Exception {
+        final MvcResult result = mvc
+                .perform(
+                        get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download", sm.getId(), artifact.getId()))
+                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
+                .andExpect(header().string("ETag", artifact.getSha1Hash())).andReturn();
+
+        assertTrue("Wrong response content", Arrays.equals(result.getResponse().getContentAsByteArray(), random));
     }
 
     @Test
@@ -444,10 +443,9 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         final SoftwareModule toLongName = entityFactory.softwareModule().create().type(osType)
                 .name(RandomStringUtils.randomAscii(80)).build();
-        mvc.perform(
-                post("/rest/v1/softwaremodules").content(JsonBuilder.softwareModules(Arrays.asList(toLongName)))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+        mvc.perform(post("/rest/v1/softwaremodules").content(JsonBuilder.softwareModules(Arrays.asList(toLongName)))
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
 
         // unsupported media type
         mvc.perform(post("/rest/v1/softwaremodules").content(JsonBuilder.softwareModules(modules))
@@ -707,14 +705,16 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                         .isEqualTo("http://localhost/rest/v1/softwaremodules/" + appCreated.getId() + "/artifacts");
 
         assertThat(softwareModuleManagement.findSoftwareModulesAll(PAGE)).as("Wrong softwaremodule size").hasSize(2);
-        assertThat(softwareModuleManagement.findSoftwareModulesByType(PAGE, osType.getId()).getContent().get(0).getName())
-                .as("Softwaremoudle name is wrong").isEqualTo(os.getName());
+        assertThat(
+                softwareModuleManagement.findSoftwareModulesByType(PAGE, osType.getId()).getContent().get(0).getName())
+                        .as("Softwaremoudle name is wrong").isEqualTo(os.getName());
         assertThat(softwareModuleManagement.findSoftwareModulesByType(PAGE, osType.getId()).getContent().get(0)
                 .getCreatedBy()).as("Softwaremoudle created by is wrong").isEqualTo("uploadTester");
         assertThat(softwareModuleManagement.findSoftwareModulesByType(PAGE, osType.getId()).getContent().get(0)
                 .getCreatedAt()).as("Softwaremoudle created at is wrong").isGreaterThanOrEqualTo(current);
-        assertThat(softwareModuleManagement.findSoftwareModulesByType(PAGE, appType.getId()).getContent().get(0).getName())
-                .as("Softwaremoudle name is wrong").isEqualTo(ah.getName());
+        assertThat(
+                softwareModuleManagement.findSoftwareModulesByType(PAGE, appType.getId()).getContent().get(0).getName())
+                        .as("Softwaremoudle name is wrong").isEqualTo(ah.getName());
     }
 
     @Test
@@ -819,10 +819,10 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(jsonPath("[1]key", equalTo(knownKey2)))
                 .andExpect(jsonPath("[1]value", equalTo(knownValue2)));
 
-        final SoftwareModuleMetadata metaKey1 = softwareModuleManagement.findSoftwareModuleMetadata(sm.getId(), knownKey1)
-                .get();
-        final SoftwareModuleMetadata metaKey2 = softwareModuleManagement.findSoftwareModuleMetadata(sm.getId(), knownKey2)
-                .get();
+        final SoftwareModuleMetadata metaKey1 = softwareModuleManagement
+                .findSoftwareModuleMetadata(sm.getId(), knownKey1).get();
+        final SoftwareModuleMetadata metaKey2 = softwareModuleManagement
+                .findSoftwareModuleMetadata(sm.getId(), knownKey2).get();
 
         assertThat(metaKey1.getValue()).as("Metadata key is wrong").isEqualTo(knownValue1);
         assertThat(metaKey2.getValue()).as("Metadata key is wrong").isEqualTo(knownValue2);
@@ -848,8 +848,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("key", equalTo(knownKey))).andExpect(jsonPath("value", equalTo(updateValue)));
 
-        final SoftwareModuleMetadata assertDS = softwareModuleManagement.findSoftwareModuleMetadata(sm.getId(), knownKey)
-                .get();
+        final SoftwareModuleMetadata assertDS = softwareModuleManagement
+                .findSoftwareModuleMetadata(sm.getId(), knownKey).get();
         assertThat(assertDS.getValue()).as("Metadata is wrong").isEqualTo(updateValue);
     }
 

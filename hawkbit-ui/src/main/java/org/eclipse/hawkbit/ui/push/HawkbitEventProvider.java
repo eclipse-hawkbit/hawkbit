@@ -56,8 +56,8 @@ public class HawkbitEventProvider implements UIEventProvider {
         EVENTS.put(CancelTargetAssignmentEvent.class, CancelTargetAssignmentEventContainer.class);
 
         EVENTS.put(DistributionSetUpdatedEvent.class, DistributionSetUpdatedEventContainer.class);
-        EVENTS.put(DistributionSetDeletedEvent.class, DistributionDeletedEventContainer.class);
-        EVENTS.put(DistributionSetCreatedEvent.class, DistributionCreatedEventContainer.class);
+        EVENTS.put(DistributionSetDeletedEvent.class, DistributionSetDeletedEventContainer.class);
+        EVENTS.put(DistributionSetCreatedEvent.class, DistributionSetCreatedEventContainer.class);
 
         EVENTS.put(RolloutGroupChangedEvent.class, RolloutGroupChangedEventContainer.class);
         EVENTS.put(RolloutChangedEvent.class, RolloutChangeEventContainer.class);
