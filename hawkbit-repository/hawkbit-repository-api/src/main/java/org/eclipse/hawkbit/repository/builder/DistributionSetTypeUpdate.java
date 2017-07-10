@@ -10,7 +10,10 @@ package org.eclipse.hawkbit.repository.builder;
 
 import java.util.Collection;
 
+import javax.validation.constraints.Size;
+
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 
 /**
  * Builder to update an existing {@link DistributionSetType} entry. Defines all
@@ -24,14 +27,14 @@ public interface DistributionSetTypeUpdate {
      *            for {@link DistributionSetType#getDescription()}
      * @return updated builder instance
      */
-    DistributionSetTypeUpdate description(String description);
+    DistributionSetTypeUpdate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
      * @param colour
      *            for {@link DistributionSetType#getColour()}
      * @return updated builder instance
      */
-    DistributionSetTypeUpdate colour(String colour);
+    DistributionSetTypeUpdate colour(@Size(max = DistributionSetType.COLOUR_MAX_SIZE) String colour);
 
     /**
      * @param mandatory

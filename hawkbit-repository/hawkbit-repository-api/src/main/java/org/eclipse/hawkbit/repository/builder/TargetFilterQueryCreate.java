@@ -10,10 +10,13 @@ package org.eclipse.hawkbit.repository.builder;
 
 import java.util.Optional;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Builder to create a new {@link TargetFilterQuery} entry. Defines all fields
@@ -27,14 +30,14 @@ public interface TargetFilterQueryCreate {
      *            of {@link TargetFilterQuery#getName()}
      * @return updated builder instance
      */
-    TargetFilterQueryCreate name(@NotEmpty String name);
+    TargetFilterQueryCreate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
 
     /**
      * @param query
      *            of {@link TargetFilterQuery#getQuery()}
      * @return updated builder instance
      */
-    TargetFilterQueryCreate query(@NotEmpty String query);
+    TargetFilterQueryCreate query(@Size(min = 1, max = TargetFilterQuery.QUERY_MAX_SIZE) @NotNull String query);
 
     /**
      * @param set

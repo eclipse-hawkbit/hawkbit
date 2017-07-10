@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import javax.validation.ConstraintViolationException;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -111,6 +112,9 @@ public interface DistributionSetManagement {
      * @throws DistributionSetCreationFailedMissingMandatoryModuleException
      *             is {@link DistributionSet} does not contain mandatory
      *             {@link SoftwareModule}s.
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link DistributionSetCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     DistributionSet createDistributionSet(@NotNull DistributionSetCreate create);
@@ -148,6 +152,9 @@ public interface DistributionSetManagement {
      * @throws DistributionSetCreationFailedMissingMandatoryModuleException
      *             is {@link DistributionSet} does not contain mandatory
      *             {@link SoftwareModule}s.
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link DistributionSetCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     List<DistributionSet> createDistributionSets(@NotNull Collection<DistributionSetCreate> creates);
@@ -529,6 +536,9 @@ public interface DistributionSetManagement {
      * @throws EntityReadOnlyException
      *             if user tries to change requiredMigrationStep or type on a DS
      *             that is already assigned to targets
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link DistributionSetUpdate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     DistributionSet updateDistributionSet(@NotNull DistributionSetUpdate update);

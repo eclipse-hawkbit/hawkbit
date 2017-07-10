@@ -26,8 +26,8 @@ import org.eclipse.hawkbit.repository.model.Tag;
 public class JpaTag extends AbstractJpaNamedEntity implements Tag {
     private static final long serialVersionUID = 1L;
 
-    @Column(name = "colour", nullable = true, length = 16)
-    @Size(max = 16)
+    @Column(name = "colour", nullable = true, length = Tag.COLOUR_MAX_SIZE)
+    @Size(max = Tag.COLOUR_MAX_SIZE)
     private String colour;
 
     protected JpaTag() {

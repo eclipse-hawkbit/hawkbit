@@ -14,6 +14,11 @@ package org.eclipse.hawkbit.repository.model;
  */
 public interface NamedVersionedEntity extends NamedEntity {
     /**
+     * Maximum length of version.
+     */
+    int VERSION_MAX_SIZE = 64;
+
+    /**
      * @return the version of entity.
      */
     String getVersion();

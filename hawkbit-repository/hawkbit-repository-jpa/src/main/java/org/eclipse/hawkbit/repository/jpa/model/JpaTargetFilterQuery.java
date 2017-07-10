@@ -21,6 +21,7 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -38,13 +39,13 @@ import org.hibernate.validator.constraints.NotEmpty;
 public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity implements TargetFilterQuery {
     private static final long serialVersionUID = 7493966984413479089L;
 
-    @Column(name = "name", length = 64, nullable = false)
-    @Size(max = 64)
+    @Column(name = "name", length = NamedEntity.NAME_MAX_SIZE, nullable = false)
+    @Size(max = NamedEntity.NAME_MAX_SIZE)
     @NotEmpty
     private String name;
 
-    @Column(name = "query", length = 1024, nullable = false)
-    @Size(max = 1024)
+    @Column(name = "query", length = TargetFilterQuery.QUERY_MAX_SIZE, nullable = false)
+    @Size(max = TargetFilterQuery.QUERY_MAX_SIZE)
     @NotEmpty
     private String query;
 

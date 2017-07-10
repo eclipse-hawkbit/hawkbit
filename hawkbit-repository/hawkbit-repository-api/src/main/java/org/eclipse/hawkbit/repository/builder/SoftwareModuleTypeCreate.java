@@ -8,9 +8,12 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Builder to create a new {@link SoftwareModuleType} entry. Defines all fields
@@ -24,28 +27,28 @@ public interface SoftwareModuleTypeCreate {
      *            for {@link SoftwareModuleType#getKey()}
      * @return updated builder instance
      */
-    SoftwareModuleTypeCreate key(@NotEmpty String key);
+    SoftwareModuleTypeCreate key(@Size(min = 1, max = SoftwareModuleType.KEY_MAX_SIZE) @NotNull String key);
 
     /**
      * @param name
      *            for {@link SoftwareModuleType#getName()}
      * @return updated builder instance
      */
-    SoftwareModuleTypeCreate name(@NotEmpty String name);
+    SoftwareModuleTypeCreate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
 
     /**
      * @param description
      *            for {@link SoftwareModuleType#getDescription()}
      * @return updated builder instance
      */
-    SoftwareModuleTypeCreate description(String description);
+    SoftwareModuleTypeCreate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
      * @param colour
      *            for {@link SoftwareModuleType#getColour()}
      * @return updated builder instance
      */
-    SoftwareModuleTypeCreate colour(String colour);
+    SoftwareModuleTypeCreate colour(@Size(max = SoftwareModuleType.COLOUR_MAX_SIZE) String colour);
 
     /**
      * @param maxAssignments

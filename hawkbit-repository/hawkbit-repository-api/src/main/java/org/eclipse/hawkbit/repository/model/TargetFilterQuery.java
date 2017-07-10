@@ -33,6 +33,10 @@ package org.eclipse.hawkbit.repository.model;
  *
  */
 public interface TargetFilterQuery extends TenantAwareBaseEntity {
+    /**
+     * Maximum length of query filter string.
+     */
+    int QUERY_MAX_SIZE = 1024;
 
     /**
      * @return name of the {@link TargetFilterQuery}.

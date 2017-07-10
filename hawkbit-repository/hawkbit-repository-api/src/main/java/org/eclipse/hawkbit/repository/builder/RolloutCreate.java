@@ -11,12 +11,14 @@ package org.eclipse.hawkbit.repository.builder;
 import java.util.Optional;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Rollout;
-import org.hibernate.validator.constraints.NotEmpty;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 
 /**
  * Builder to create a new {@link Rollout} entry. Defines all fields that can be
@@ -30,14 +32,14 @@ public interface RolloutCreate {
      *            for {@link Rollout#getName()}
      * @return updated builder instance
      */
-    RolloutCreate name(@NotEmpty String name);
+    RolloutCreate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
 
     /**
      * @param description
      *            for {@link Rollout#getDescription()}
      * @return updated builder instance
      */
-    RolloutCreate description(String description);
+    RolloutCreate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
      * @param set
@@ -60,7 +62,8 @@ public interface RolloutCreate {
      *            for {@link Rollout#getTargetFilterQuery()}
      * @return updated builder instance
      */
-    RolloutCreate targetFilterQuery(@NotEmpty String targetFilterQuery);
+    RolloutCreate targetFilterQuery(
+            @Size(min = 1, max = TargetFilterQuery.QUERY_MAX_SIZE) @NotNull String targetFilterQuery);
 
     /**
      * @param actionType

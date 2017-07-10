@@ -77,8 +77,8 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     @Column(name = "deleted")
     private boolean deleted;
 
-    @Column(name = "vendor", nullable = true, length = 256)
-    @Size(max = 256)
+    @Column(name = "vendor", nullable = true, length = SoftwareModule.VENDOR_MAX_SIZE)
+    @Size(max = SoftwareModule.VENDOR_MAX_SIZE)
     private String vendor;
 
     @CascadeOnDelete

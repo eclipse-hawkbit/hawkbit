@@ -22,6 +22,7 @@ import javax.persistence.Index;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -29,7 +30,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -54,13 +54,13 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
             CascadeType.PERSIST }, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<DistributionSetTypeElement> elements;
 
-    @Column(name = "type_key", nullable = false, updatable = false, length = 64)
-    @Size(max = 64)
-    @NotEmpty
+    @Column(name = "type_key", nullable = false, updatable = false, length = DistributionSetType.KEY_MAX_SIZE)
+    @Size(min = 1, max = DistributionSetType.KEY_MAX_SIZE)
+    @NotNull
     private String key;
 
-    @Column(name = "colour", nullable = true, length = 16)
-    @Size(max = 16)
+    @Column(name = "colour", nullable = true, length = DistributionSetType.COLOUR_MAX_SIZE)
+    @Size(max = DistributionSetType.COLOUR_MAX_SIZE)
     private String colour;
 
     @Column(name = "deleted")

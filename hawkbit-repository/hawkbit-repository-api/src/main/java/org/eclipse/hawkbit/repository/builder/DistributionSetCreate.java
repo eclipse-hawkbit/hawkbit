@@ -11,10 +11,14 @@ package org.eclipse.hawkbit.repository.builder;
 import java.util.Collection;
 import java.util.Optional;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.hibernate.validator.constraints.NotEmpty;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
+import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 
 /**
  * Builder to create a new {@link DistributionSet} entry. Defines all fields
@@ -29,28 +33,28 @@ public interface DistributionSetCreate {
      *            for {@link DistributionSet#getName()}
      * @return updated builder instance
      */
-    DistributionSetCreate name(@NotEmpty String name);
+    DistributionSetCreate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
 
     /**
      * @param version
      *            for {@link DistributionSet#getVersion()}
      * @return updated builder instance
      */
-    DistributionSetCreate version(@NotEmpty String version);
+    DistributionSetCreate version(@Size(min = 1, max = NamedVersionedEntity.VERSION_MAX_SIZE) @NotNull String version);
 
     /**
      * @param description
      *            for {@link DistributionSet#getDescription()}
      * @return updated builder instance
      */
-    DistributionSetCreate description(String description);
+    DistributionSetCreate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
      * @param typeKey
      *            for {@link DistributionSet#getType()}
      * @return updated builder instance
      */
-    DistributionSetCreate type(@NotEmpty String typeKey);
+    DistributionSetCreate type(@Size(min = 1, max = DistributionSetType.KEY_MAX_SIZE) @NotNull String typeKey);
 
     /**
      * @param type

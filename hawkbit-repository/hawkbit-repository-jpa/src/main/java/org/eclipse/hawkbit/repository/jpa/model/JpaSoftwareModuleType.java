@@ -14,10 +14,10 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Type of a software modules.
@@ -35,17 +35,17 @@ import org.hibernate.validator.constraints.NotEmpty;
 public class JpaSoftwareModuleType extends AbstractJpaNamedEntity implements SoftwareModuleType {
     private static final long serialVersionUID = 1L;
 
-    @Column(name = "type_key", nullable = false, length = 64)
-    @Size(max = 64)
-    @NotEmpty
+    @Column(name = "type_key", nullable = false, length = SoftwareModuleType.KEY_MAX_SIZE)
+    @Size(min = 1, max = SoftwareModuleType.KEY_MAX_SIZE)
+    @NotNull
     private String key;
 
     @Column(name = "max_ds_assignments", nullable = false)
     @Min(1)
     private int maxAssignments;
 
-    @Column(name = "colour", nullable = true, length = 16)
-    @Size(max = 16)
+    @Column(name = "colour", nullable = true, length = SoftwareModuleType.COLOUR_MAX_SIZE)
+    @Size(max = SoftwareModuleType.COLOUR_MAX_SIZE)
     private String colour;
 
     @Column(name = "deleted")

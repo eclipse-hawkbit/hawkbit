@@ -8,8 +8,10 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
+import javax.validation.constraints.Size;
+
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Builder to update an existing {@link TargetFilterQuery} entry. Defines all
@@ -22,13 +24,13 @@ public interface TargetFilterQueryUpdate {
      *            of {@link TargetFilterQuery#getName()}
      * @return updated builder instance
      */
-    TargetFilterQueryUpdate name(@NotEmpty String name);
+    TargetFilterQueryUpdate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) String name);
 
     /**
      * @param query
      *            of {@link TargetFilterQuery#getQuery()}
      * @return updated builder instance
      */
-    TargetFilterQueryUpdate query(@NotEmpty String query);
+    TargetFilterQueryUpdate query(@Size(min = 1, max = TargetFilterQuery.QUERY_MAX_SIZE) String query);
 
 }

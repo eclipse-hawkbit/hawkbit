@@ -10,10 +10,14 @@ package org.eclipse.hawkbit.repository.builder;
 
 import java.util.Optional;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
+import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Builder to create a new {@link SoftwareModule} entry. Defines all fields that
@@ -27,35 +31,35 @@ public interface SoftwareModuleCreate {
      *            for {@link SoftwareModule#getName()}
      * @return updated builder instance
      */
-    SoftwareModuleCreate name(@NotEmpty String name);
+    SoftwareModuleCreate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
 
     /**
      * @param version
      *            for {@link SoftwareModule#getVersion()}
      * @return updated builder instance
      */
-    SoftwareModuleCreate version(@NotEmpty String version);
+    SoftwareModuleCreate version(@Size(min = 1, max = NamedVersionedEntity.VERSION_MAX_SIZE) @NotNull String version);
 
     /**
      * @param description
      *            for {@link SoftwareModule#getDescription()}
      * @return updated builder instance
      */
-    SoftwareModuleCreate description(String description);
+    SoftwareModuleCreate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
      * @param vendor
      *            for {@link SoftwareModule#getVendor()}
      * @return updated builder instance
      */
-    SoftwareModuleCreate vendor(String vendor);
+    SoftwareModuleCreate vendor(@Size(max = SoftwareModule.VENDOR_MAX_SIZE) String vendor);
 
     /**
      * @param typeKey
      *            for {@link SoftwareModule#getType()}
      * @return updated builder instance
      */
-    SoftwareModuleCreate type(@NotEmpty String typeKey);
+    SoftwareModuleCreate type(@Size(min = 1, max = SoftwareModuleType.KEY_MAX_SIZE) @NotNull String typeKey);
 
     /**
      * @param type

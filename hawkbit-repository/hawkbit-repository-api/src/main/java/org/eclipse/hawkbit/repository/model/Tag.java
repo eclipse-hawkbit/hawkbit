@@ -13,6 +13,10 @@ package org.eclipse.hawkbit.repository.model;
  *
  */
 public interface Tag extends NamedEntity {
+    /**
+     * Maximum length of colour in Management UI.
+     */
+    int COLOUR_MAX_SIZE = 16;
 
     /**
      * @return colour code of the tag used in Management UI.
