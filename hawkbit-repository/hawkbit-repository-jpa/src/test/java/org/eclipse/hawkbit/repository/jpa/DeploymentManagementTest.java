@@ -869,17 +869,16 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 ds.getId(), ActionType.SOFT,
                 org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME,
                 Arrays.asList(target.getControllerId()));
-        final Action action = deploymentManagement.findActionWithDetails(assignDistributionSet.getActions().get(0))
-                .get();
+        final Long actionId = assignDistributionSet.getActions().get(0);
         // verify preparation
-        Action findAction = deploymentManagement.findAction(action.getId()).get();
+        Action findAction = deploymentManagement.findAction(actionId).get();
         assertThat(findAction.getActionType()).as("action type is wrong").isEqualTo(ActionType.SOFT);
 
         // test
-        deploymentManagement.forceTargetAction(action.getId());
+        deploymentManagement.forceTargetAction(actionId);
 
         // verify test
-        findAction = deploymentManagement.findAction(action.getId()).get();
+        findAction = deploymentManagement.findAction(actionId).get();
         assertThat(findAction.getActionType()).as("action type is wrong").isEqualTo(ActionType.FORCED);
     }
 
@@ -894,18 +893,17 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 ds.getId(), ActionType.FORCED,
                 org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME,
                 Arrays.asList(target.getControllerId()));
-        final Action action = deploymentManagement.findActionWithDetails(assignDistributionSet.getActions().get(0))
-                .get();
+        final Long actionId = assignDistributionSet.getActions().get(0);
         // verify perparation
-        Action findAction = deploymentManagement.findAction(action.getId()).get();
+        Action findAction = deploymentManagement.findAction(actionId).get();
         assertThat(findAction.getActionType()).as("action type is wrong").isEqualTo(ActionType.FORCED);
 
         // test
-        final Action forceTargetAction = deploymentManagement.forceTargetAction(action.getId());
+        final Action forceTargetAction = deploymentManagement.forceTargetAction(actionId);
 
         // verify test
         assertThat(forceTargetAction.getActionType()).as("action type is wrong").isEqualTo(ActionType.FORCED);
-        findAction = deploymentManagement.findAction(action.getId()).get();
+        findAction = deploymentManagement.findAction(actionId).get();
         assertThat(findAction.getActionType()).as("action type is wrong").isEqualTo(ActionType.FORCED);
     }
 

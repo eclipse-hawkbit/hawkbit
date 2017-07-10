@@ -13,12 +13,14 @@ import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpre
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystemProperties;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
@@ -52,11 +54,12 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.matcher.EventVerifier;
-import org.eclipse.hawkbit.security.ExcludePathAwareShallowETagFilter;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
@@ -67,8 +70,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.Environment;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -81,14 +82,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestExecutionListeners.MergeMode;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@WebAppConfiguration
 @ActiveProfiles({ "test" })
 @WithUser(principal = "bumlux", allSpPermissions = true, authorities = { CONTROLLER_ROLE, SYSTEM_ROLE })
 @SpringApplicationConfiguration(classes = { TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
@@ -102,10 +97,12 @@ import org.springframework.web.context.WebApplicationContext;
 // important!
 @TestExecutionListeners(inheritListeners = true, listeners = { EventVerifier.class, CleanupTestExecutionListener.class,
         MySqlTestDatabase.class }, mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
-public abstract class AbstractIntegrationTest implements EnvironmentAware {
+public abstract class AbstractIntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
     protected static final Pageable PAGE = new PageRequest(0, 400, new Sort(Direction.ASC, "id"));
+
+    protected static final URI LOCALHOST = URI.create("http://127.0.0.1");
 
     /**
      * Constant for MediaType HAL with encoding UTF-8. Necessary since Spring
@@ -155,9 +152,6 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     protected ArtifactManagement artifactManagement;
 
     @Autowired
-    protected WebApplicationContext context;
-
-    @Autowired
     protected AuditingHandler auditingHandler;
 
     @Autowired
@@ -189,8 +183,6 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
     @Autowired
     protected QuotaManagement quotaManagement;
-
-    protected MockMvc mvc;
 
     protected SoftwareModuleType osType;
     protected SoftwareModuleType appType;
@@ -225,13 +217,6 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
             LOG.error("Test {} failed with {}.", description.getMethodName(), e);
         }
     };
-
-    protected Environment environment = null;
-
-    @Override
-    public void setEnvironment(final Environment environment) {
-        this.environment = environment;
-    }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final Long dsID, final String controllerId) {
         return deploymentManagement.assignDistributionSet(dsID, Arrays.asList(
@@ -278,7 +263,6 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
     @Before
     public void before() throws Exception {
-        mvc = createMvcWebAppContext().build();
         final String description = "Updated description.";
 
         osType = securityRule
@@ -299,20 +283,32 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
         standardDsType = securityRule.runAsPrivileged(() -> testdataFactory.findOrCreateDefaultTestDsType());
     }
 
+    private static String artifactDirectory = "./artifactrepo/" + RandomStringUtils.randomAlphanumeric(20);
+
     @After
     public void cleanUp() {
-        try {
-            FileUtils.deleteDirectory(new File(artifactFilesystemProperties.getPath()));
-        } catch (final IOException | IllegalArgumentException e) {
-            LOG.warn("Cannot cleanup file-directory", e);
+        if (new File(artifactDirectory).exists()) {
+            try {
+                FileUtils.cleanDirectory(new File(artifactDirectory));
+            } catch (final IOException | IllegalArgumentException e) {
+                LOG.warn("Cannot cleanup file-directory", e);
+            }
         }
     }
 
-    protected DefaultMockMvcBuilder createMvcWebAppContext() {
-        return MockMvcBuilders.webAppContextSetup(context)
-                .addFilter(new ExcludePathAwareShallowETagFilter(
-                        "/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download",
-                        "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/**",
-                        "/api/v1/downloadserver/**"));
+    @BeforeClass
+    public static void beforeClass() {
+        System.setProperty("org.eclipse.hawkbit.repository.file.path", artifactDirectory);
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        if (new File(artifactDirectory).exists()) {
+            try {
+                FileUtils.deleteDirectory(new File(artifactDirectory));
+            } catch (final IOException | IllegalArgumentException e) {
+                LOG.warn("Cannot delete file-directory", e);
+            }
+        }
     }
 }

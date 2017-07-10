@@ -10,23 +10,24 @@ package org.eclipse.hawkbit.rest;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.hawkbit.rest.exception.ResponseExceptionHandler;
 import org.eclipse.hawkbit.rest.util.FilterHttpResponse;
 import org.eclipse.hawkbit.rest.util.HttpResponseFactoryBean;
 import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Configuration for Rest api.
  */
 @Configuration
-@ComponentScan
 @EnableHypermediaSupport(type = { HypermediaType.HAL })
 public class RestConfiguration {
 
@@ -34,7 +35,7 @@ public class RestConfiguration {
      * Create filter for {@link HttpServletResponse}.
      */
     @Bean
-    public FilterHttpResponse filterHttpResponse() {
+    FilterHttpResponse filterHttpResponse() {
         return new FilterHttpResponse();
     }
 
@@ -42,7 +43,7 @@ public class RestConfiguration {
      * Create factory bean for {@link HttpServletResponse}.
      */
     @Bean
-    public FactoryBean<HttpServletResponse> httpResponseFactoryBean() {
+    FactoryBean<HttpServletResponse> httpResponseFactoryBean() {
         return new HttpResponseFactoryBean();
     }
 
@@ -51,7 +52,16 @@ public class RestConfiguration {
      */
     @Bean
     @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-    public RequestResponseContextHolder requestResponseContextHolder() {
+    RequestResponseContextHolder requestResponseContextHolder() {
         return new RequestResponseContextHolder();
+    }
+
+    /**
+     * {@link ControllerAdvice} for mapping {@link RuntimeException}s from the
+     * repository to {@link HttpStatus} codes.
+     */
+    @Bean
+    ResponseExceptionHandler responseExceptionHandler() {
+        return new ResponseExceptionHandler();
     }
 }

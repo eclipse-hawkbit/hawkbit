@@ -33,9 +33,9 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
@@ -54,6 +54,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Amqp Message Handler Service")
 public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegrationTest {
     private static final String CORRELATION_ID = UUID.randomUUID().toString();
+    private static final String TARGET_PREFIX = "Dmf_hand_";
 
     @Autowired
     private AmqpProperties amqpProperties;
@@ -63,12 +64,13 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 2),
             @Expect(type = TargetPollEvent.class, count = 3) })
     public void registerTargets() {
-        registerAndAssertTargetWithExistingTenant(REGISTER_TARGET, 1);
+        final String controllerId = TARGET_PREFIX + "registerTargets";
+        registerAndAssertTargetWithExistingTenant(controllerId, 1);
 
         final String target2 = "Target2";
         registerAndAssertTargetWithExistingTenant(target2, 2);
-        final Long pollingTimeTarget2 = controllerManagement.findByControllerId(target2).get().getLastTargetQuery();
-        registerSameTargetAndAssertBasedOnLastPolling(target2, 2, TargetUpdateStatus.REGISTERED, pollingTimeTarget2);
+
+        registerSameTargetAndAssertBasedOnVersion(target2, 2, TargetUpdateStatus.REGISTERED);
         Mockito.verifyZeroInteractions(getDeadletterListener());
     }
 
@@ -106,7 +108,8 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     @Description("Tests not allowed content-type in message. This message should forwarded to the deadletter queue")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void wrongContentType() {
-        final Message createTargetMessage = createTargetMessage(REGISTER_TARGET, TENANT_EXIST);
+        final String controllerId = TARGET_PREFIX + "wrongContentType";
+        final Message createTargetMessage = createTargetMessage(controllerId, TENANT_EXIST);
         createTargetMessage.getMessageProperties().setContentType("WrongContentType");
         getDmfClient().send(createTargetMessage);
 
@@ -118,7 +121,8 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     @Description("Tests null reply to property in message header. This message should forwarded to the deadletter queue")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void missingReplyToProperty() {
-        final Message createTargetMessage = createTargetMessage(REGISTER_TARGET, TENANT_EXIST);
+        final String controllerId = TARGET_PREFIX + "missingReplyToProperty";
+        final Message createTargetMessage = createTargetMessage(controllerId, TENANT_EXIST);
         createTargetMessage.getMessageProperties().setReplyTo(null);
         getDmfClient().send(createTargetMessage);
 
@@ -130,7 +134,8 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     @Description("Tests missing reply to property in message header. This message should forwarded to the deadletter queue")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void emptyReplyToProperty() {
-        final Message createTargetMessage = createTargetMessage(REGISTER_TARGET, TENANT_EXIST);
+        final String controllerId = TARGET_PREFIX + "emptyReplyToProperty";
+        final Message createTargetMessage = createTargetMessage(controllerId, TENANT_EXIST);
         createTargetMessage.getMessageProperties().setReplyTo("");
         getDmfClient().send(createTargetMessage);
 
@@ -165,7 +170,8 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     @Description("Tests missing tenant message header. This message should forwarded to the deadletter queue")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void missingTenantHeader() {
-        final Message createTargetMessage = createTargetMessage(REGISTER_TARGET, TENANT_EXIST);
+        final String controllerId = TARGET_PREFIX + "missingTenantHeader";
+        final Message createTargetMessage = createTargetMessage(controllerId, TENANT_EXIST);
         createTargetMessage.getMessageProperties().getHeaders().remove(MessageHeaderKey.TENANT);
         getDmfClient().send(createTargetMessage);
 
@@ -177,7 +183,8 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     @Description("Tests null tenant message header. This message should forwarded to the deadletter queue")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void nullTenantHeader() {
-        final Message createTargetMessage = createTargetMessage(REGISTER_TARGET, null);
+        final String controllerId = TARGET_PREFIX + "nullTenantHeader";
+        final Message createTargetMessage = createTargetMessage(controllerId, null);
         getDmfClient().send(createTargetMessage);
 
         verifyOneDeadLetterMessage();
@@ -188,7 +195,8 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     @Description("Tests empty tenant message header. This message should forwarded to the deadletter queue")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void emptyTenantHeader() {
-        final Message createTargetMessage = createTargetMessage(REGISTER_TARGET, "");
+        final String controllerId = TARGET_PREFIX + "emptyTenantHeader";
+        final Message createTargetMessage = createTargetMessage(controllerId, "");
         getDmfClient().send(createTargetMessage);
 
         verifyOneDeadLetterMessage();
@@ -199,7 +207,8 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     @Description("Tests tenant not exist. This message should forwarded to the deadletter queue")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void tenantNotExist() {
-        final Message createTargetMessage = createTargetMessage(REGISTER_TARGET, "TenantNotExist");
+        final String controllerId = TARGET_PREFIX + "tenantNotExist";
+        final Message createTargetMessage = createTargetMessage(controllerId, "TenantNotExist");
         getDmfClient().send(createTargetMessage);
 
         verifyOneDeadLetterMessage();
@@ -346,7 +355,8 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 2), @Expect(type = TargetPollEvent.class, count = 1) })
     public void finishActionStatus() {
-        registerTargetAndSendAndAssertUpdateActionStatus(DmfActionStatus.FINISHED, Status.FINISHED);
+        final String controllerId = TARGET_PREFIX + "finishActionStatus";
+        registerTargetAndSendAndAssertUpdateActionStatus(DmfActionStatus.FINISHED, Status.FINISHED, controllerId);
     }
 
     @Test
@@ -358,7 +368,8 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
     public void runningActionStatus() {
-        registerTargetAndSendAndAssertUpdateActionStatus(DmfActionStatus.RUNNING, Status.RUNNING);
+        final String controllerId = TARGET_PREFIX + "runningActionStatus";
+        registerTargetAndSendAndAssertUpdateActionStatus(DmfActionStatus.RUNNING, Status.RUNNING, controllerId);
     }
 
     @Test
@@ -370,7 +381,8 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
     public void downloadActionStatus() {
-        registerTargetAndSendAndAssertUpdateActionStatus(DmfActionStatus.DOWNLOAD, Status.DOWNLOAD);
+        final String controllerId = TARGET_PREFIX + "downloadActionStatus";
+        registerTargetAndSendAndAssertUpdateActionStatus(DmfActionStatus.DOWNLOAD, Status.DOWNLOAD, controllerId);
     }
 
     @Test
@@ -382,7 +394,8 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 2), @Expect(type = TargetPollEvent.class, count = 1) })
     public void errorActionStatus() {
-        registerTargetAndSendAndAssertUpdateActionStatus(DmfActionStatus.ERROR, Status.ERROR);
+        final String controllerId = TARGET_PREFIX + "errorActionStatus";
+        registerTargetAndSendAndAssertUpdateActionStatus(DmfActionStatus.ERROR, Status.ERROR, controllerId);
     }
 
     @Test
@@ -394,7 +407,8 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
     public void warningActionStatus() {
-        registerTargetAndSendAndAssertUpdateActionStatus(DmfActionStatus.WARNING, Status.WARNING);
+        final String controllerId = TARGET_PREFIX + "warningActionStatus";
+        registerTargetAndSendAndAssertUpdateActionStatus(DmfActionStatus.WARNING, Status.WARNING, controllerId);
     }
 
     @Test
@@ -406,7 +420,8 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
     public void retrievedActionStatus() {
-        registerTargetAndSendAndAssertUpdateActionStatus(DmfActionStatus.RETRIEVED, Status.RETRIEVED);
+        final String controllerId = TARGET_PREFIX + "retrievedActionStatus";
+        registerTargetAndSendAndAssertUpdateActionStatus(DmfActionStatus.RETRIEVED, Status.RETRIEVED, controllerId);
     }
 
     @Test
@@ -418,7 +433,8 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
     public void cancelNotAllowActionStatus() {
-        registerTargetAndSendActionStatus(DmfActionStatus.CANCELED);
+        final String controllerId = TARGET_PREFIX + "cancelNotAllowActionStatus";
+        registerTargetAndSendActionStatus(DmfActionStatus.CANCELED, controllerId);
         verifyOneDeadLetterMessage();
     }
 
@@ -431,17 +447,18 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 2) })
     public void receiveDownLoadAndInstallMessageAfterAssignment() {
+        final String controllerId = TARGET_PREFIX + "receiveDownLoadAndInstallMessageAfterAssignment";
 
         // setup
-        controllerManagement.findOrRegisterTargetIfItDoesNotexist(REGISTER_TARGET, TEST_URI);
+        controllerManagement.findOrRegisterTargetIfItDoesNotexist(controllerId, TEST_URI);
         final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
-        assignDistributionSet(distributionSet.getId(), REGISTER_TARGET);
+        assignDistributionSet(distributionSet.getId(), controllerId);
 
         // test
-        registerAndAssertTargetWithExistingTenant(REGISTER_TARGET, 1, TargetUpdateStatus.PENDING, "bumlux");
+        registerSameTargetAndAssertBasedOnVersion(controllerId, 1, TargetUpdateStatus.PENDING);
 
         // verify
-        assertDownloadAndInstallMessage(distributionSet.getModules());
+        assertDownloadAndInstallMessage(distributionSet.getModules(), controllerId);
         Mockito.verifyZeroInteractions(getDeadletterListener());
     }
 
@@ -456,20 +473,20 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = ActionUpdatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 2) })
     public void receiveCancelUpdateMessageAfterAssignmentWasCanceled() {
+        final String controllerId = TARGET_PREFIX + "receiveCancelUpdateMessageAfterAssignmentWasCanceled";
 
         // Setup
-        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist(REGISTER_TARGET, TEST_URI);
+        controllerManagement.findOrRegisterTargetIfItDoesNotexist(controllerId, TEST_URI);
         final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         final DistributionSetAssignmentResult distributionSetAssignmentResult = assignDistributionSet(
-                distributionSet.getId(), REGISTER_TARGET);
+                distributionSet.getId(), controllerId);
         deploymentManagement.cancelAction(distributionSetAssignmentResult.getActions().get(0));
 
         // test
-        registerSameTargetAndAssertBasedOnLastPolling(REGISTER_TARGET, 1, TargetUpdateStatus.PENDING,
-                target.getLastTargetQuery());
+        registerSameTargetAndAssertBasedOnVersion(controllerId, 1, TargetUpdateStatus.PENDING);
 
         // verify
-        assertCancelActionMessage(distributionSetAssignmentResult.getActions().get(0));
+        assertCancelActionMessage(distributionSetAssignmentResult.getActions().get(0), controllerId);
         Mockito.verifyZeroInteractions(getDeadletterListener());
     }
 
@@ -483,7 +500,9 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
     public void actionNotExists() {
-        final Long actionId = registerTargetAndCancelActionId();
+        final String controllerId = TARGET_PREFIX + "actionNotExists";
+
+        final Long actionId = registerTargetAndCancelActionId(controllerId);
         final Long actionNotExist = actionId + 1;
 
         sendActionUpdateStatus(new DmfActionUpdateStatus(actionNotExist, DmfActionStatus.CANCELED));
@@ -499,7 +518,8 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
     public void canceledRejectedNotAllowActionStatus() {
-        registerTargetAndSendActionStatus(DmfActionStatus.CANCEL_REJECTED);
+        final String controllerId = TARGET_PREFIX + "canceledRejectedNotAllowActionStatus";
+        registerTargetAndSendActionStatus(DmfActionStatus.CANCEL_REJECTED, controllerId);
         verifyOneDeadLetterMessage();
     }
 
@@ -513,7 +533,9 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
     public void canceledRejectedActionStatus() {
-        final Long actionId = registerTargetAndCancelActionId();
+        final String controllerId = TARGET_PREFIX + "canceledRejectedActionStatus";
+
+        final Long actionId = registerTargetAndCancelActionId(controllerId);
 
         sendActionUpdateStatus(new DmfActionUpdateStatus(actionId, DmfActionStatus.CANCEL_REJECTED));
         assertAction(actionId, 1, Status.RUNNING, Status.CANCELING, Status.CANCEL_REJECTED);
@@ -524,19 +546,19 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
     public void updateAttributes() {
+        final String controllerId = TARGET_PREFIX + "updateAttributes";
 
         // setup
-        final String target = "ControllerAttributeTestTarget";
-        registerAndAssertTargetWithExistingTenant(target, 1);
+        registerAndAssertTargetWithExistingTenant(controllerId, 1);
         final DmfAttributeUpdate controllerAttribute = new DmfAttributeUpdate();
         controllerAttribute.getAttributes().put("test1", "testA");
         controllerAttribute.getAttributes().put("test2", "testB");
 
         // test
-        sendUpdateAttributeMessage(target, TENANT_EXIST, controllerAttribute);
+        sendUpdateAttributeMessage(controllerId, TENANT_EXIST, controllerAttribute);
 
         // validate
-        assertUpdateAttributes(target, controllerAttribute.getAttributes());
+        assertUpdateAttributes(controllerId, controllerAttribute.getAttributes());
     }
 
     @Test
@@ -544,10 +566,10 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 0), @Expect(type = TargetPollEvent.class, count = 1) })
     public void updateAttributesWithNoThingId() {
+        final String controllerId = TARGET_PREFIX + "updateAttributesWithNoThingId";
 
         // setup
-        final String target = "ControllerAttributeTestTarget";
-        registerAndAssertTargetWithExistingTenant(target, 1);
+        registerAndAssertTargetWithExistingTenant(controllerId, 1);
         final DmfAttributeUpdate controllerAttribute = new DmfAttributeUpdate();
         controllerAttribute.getAttributes().put("test1", "testA");
         controllerAttribute.getAttributes().put("test2", "testB");
@@ -561,7 +583,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         // verify
         verifyOneDeadLetterMessage();
         final DmfAttributeUpdate controllerAttributeEmpty = new DmfAttributeUpdate();
-        assertUpdateAttributes(target, controllerAttributeEmpty.getAttributes());
+        assertUpdateAttributes(controllerId, controllerAttributeEmpty.getAttributes());
     }
 
     @Test
@@ -586,8 +608,8 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         verifyOneDeadLetterMessage();
     }
 
-    private Long registerTargetAndSendActionStatus(final DmfActionStatus sendActionStatus) {
-        final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet();
+    private Long registerTargetAndSendActionStatus(final DmfActionStatus sendActionStatus, final String controllerId) {
+        final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
         final Long actionId = assignmentResult.getActions().get(0);
         sendActionUpdateStatus(new DmfActionUpdateStatus(actionId, sendActionStatus));
         return actionId;
@@ -599,8 +621,8 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     }
 
     private void registerTargetAndSendAndAssertUpdateActionStatus(final DmfActionStatus sendActionStatus,
-            final Status expectedActionStatus) {
-        final Long actionId = registerTargetAndSendActionStatus(sendActionStatus);
+            final Status expectedActionStatus, final String controllerId) {
+        final Long actionId = registerTargetAndSendActionStatus(sendActionStatus, controllerId);
         assertAction(actionId, 1, Status.RUNNING, expectedActionStatus);
     }
 
@@ -608,7 +630,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         createConditionFactory().await().until(() -> {
             try {
                 securityRule.runAsPrivileged(() -> {
-                    final List<org.eclipse.hawkbit.repository.model.ActionStatus> actionStatusList = deploymentManagement
+                    final List<ActionStatus> actionStatusList = deploymentManagement
                             .findActionStatusByAction(PAGE, actionId).getContent();
 
                     // Check correlation ID
@@ -623,7 +645,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
                     assertThat(messagesFromServer).hasSize(messages)
                             .allMatch(message -> message.endsWith(CORRELATION_ID));
 
-                    final List<Status> status = actionStatusList.stream().map(actionStatus -> actionStatus.getStatus())
+                    final List<Status> status = actionStatusList.stream().map(ActionStatus::getStatus)
                             .collect(Collectors.toList());
                     assertThat(status).containsOnly(expectedActionStates);
 

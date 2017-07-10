@@ -41,7 +41,6 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -231,12 +230,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Target target = testdataFactory.createTarget("4712");
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
 
-        final DistributionSetAssignmentResult result = deploymentManagement.assignDistributionSet(ds.getId(),
-                ActionType.TIMEFORCED, System.currentTimeMillis() + 2_000, Arrays.asList(target.getControllerId()));
-
-        final Action action = deploymentManagement
-                .findActiveActionsByTarget(PAGE, result.getAssignedEntity().get(0).getControllerId()).getContent()
-                .get(0);
+        final Long actionId = deploymentManagement.assignDistributionSet(ds.getId(), ActionType.TIMEFORCED,
+                System.currentTimeMillis() + 2_000, Arrays.asList(target.getControllerId())).getActions().get(0);
 
         MvcResult mvcResult = mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -252,7 +247,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(JsonPath.compile("_links.deploymentBase.href").read(mvcResult.getResponse().getContentAsString())
                 .toString()).isEqualTo(urlBeforeSwitch)
                         .startsWith("http://localhost/" + tenantAware.getCurrentTenant()
-                                + "/controller/v1/4712/deploymentBase/" + action.getId());
+                                + "/controller/v1/4712/deploymentBase/" + actionId);
 
         // After the time is over we should see a new etag
         TimeUnit.MILLISECONDS.sleep(2_000);
@@ -521,19 +516,15 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
 
         // wrong media type
-        final List<Target> toAssign = new ArrayList<>();
-        toAssign.add(target);
+        final List<Target> toAssign = Arrays.asList(target);
         final DistributionSet savedSet = testdataFactory.createDistributionSet("");
 
-        final Action action1 = deploymentManagement
-                .findActionWithDetails(assignDistributionSet(savedSet, toAssign).getActions().get(0)).get();
-        mvc.perform(
-                get("/{tenant}/controller/v1/4712/deploymentBase/" + action1.getId(), tenantAware.getCurrentTenant()))
+        final Long actionId = assignDistributionSet(savedSet, toAssign).getActions().get(0);
+        mvc.perform(get("/{tenant}/controller/v1/4712/deploymentBase/" + actionId, tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
-        mvc.perform(
-                get("/{tenant}/controller/v1/4712/deploymentBase/" + action1.getId(), tenantAware.getCurrentTenant())
-                        .accept(MediaType.APPLICATION_ATOM_XML))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotAcceptable());
+        mvc.perform(get("/{tenant}/controller/v1/4712/deploymentBase/" + actionId, tenantAware.getCurrentTenant())
+                .accept(MediaType.APPLICATION_ATOM_XML)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotAcceptable());
     }
 
     @Test
@@ -601,12 +592,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final List<Target> toAssign = new ArrayList<>();
         toAssign.add(savedTarget1);
 
-        final Action action1 = deploymentManagement
-                .findActionWithDetails(assignDistributionSet(ds1.getId(), "4712").getActions().get(0)).get();
-        final Action action2 = deploymentManagement
-                .findActionWithDetails(assignDistributionSet(ds2.getId(), "4712").getActions().get(0)).get();
-        final Action action3 = deploymentManagement
-                .findActionWithDetails(assignDistributionSet(ds3.getId(), "4712").getActions().get(0)).get();
+        final Long actionId1 = assignDistributionSet(ds1.getId(), "4712").getActions().get(0);
+        final Long actionId2 = assignDistributionSet(ds2.getId(), "4712").getActions().get(0);
+        final Long actionId3 = assignDistributionSet(ds3.getId(), "4712").getActions().get(0);
 
         Target myT = targetManagement.findTargetByControllerID("4712").get();
         assertThat(myT.getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
@@ -618,9 +606,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         // action1 done
 
-        mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action1.getId() + "/feedback",
+        mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + actionId1 + "/feedback",
                 tenantAware.getCurrentTenant())
-                        .content(JsonBuilder.deploymentActionFeedback(action1.getId().toString(), "closed"))
+                        .content(JsonBuilder.deploymentActionFeedback(actionId1.toString(), "closed"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         myT = targetManagement.findTargetByControllerID("4712").get();
@@ -635,9 +623,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(actionStatusMessages.iterator().next().getStatus()).isEqualTo(Status.FINISHED);
 
         // action2 done
-        mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action2.getId() + "/feedback",
+        mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + actionId2 + "/feedback",
                 tenantAware.getCurrentTenant())
-                        .content(JsonBuilder.deploymentActionFeedback(action2.getId().toString(), "closed"))
+                        .content(JsonBuilder.deploymentActionFeedback(actionId2.toString(), "closed"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         myT = targetManagement.findTargetByControllerID("4712").get();
@@ -652,9 +640,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(actionStatusMessages).haveAtLeast(1, new ActionStatusCondition(Status.FINISHED));
 
         // action3 done
-        mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action3.getId() + "/feedback",
+        mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + actionId3 + "/feedback",
                 tenantAware.getCurrentTenant())
-                        .content(JsonBuilder.deploymentActionFeedback(action3.getId().toString(), "closed"))
+                        .content(JsonBuilder.deploymentActionFeedback(actionId3.toString(), "closed"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         myT = targetManagement.findTargetByControllerID("4712").get();

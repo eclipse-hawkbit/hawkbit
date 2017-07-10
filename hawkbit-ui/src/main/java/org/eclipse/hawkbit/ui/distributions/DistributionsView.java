@@ -38,8 +38,8 @@ import org.eclipse.hawkbit.ui.distributions.smtype.DistSMTypeFilterLayout;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
-import org.eclipse.hawkbit.ui.push.DistributionCreatedEventContainer;
-import org.eclipse.hawkbit.ui.push.DistributionDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.DistributionSetCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.DistributionSetDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.SoftwareModuleCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.SoftwareModuleDeletedEventContainer;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -278,8 +278,8 @@ public class DistributionsView extends AbstractNotificationView implements Brows
     protected Map<Class<?>, RefreshableContainer> getSupportedPushEvents() {
         final Map<Class<?>, RefreshableContainer> supportedEvents = Maps.newHashMapWithExpectedSize(2);
 
-        supportedEvents.put(DistributionCreatedEventContainer.class, distributionTableLayout.getTable());
-        supportedEvents.put(DistributionDeletedEventContainer.class, distributionTableLayout.getTable());
+        supportedEvents.put(DistributionSetCreatedEventContainer.class, distributionTableLayout.getTable());
+        supportedEvents.put(DistributionSetDeletedEventContainer.class, distributionTableLayout.getTable());
 
         supportedEvents.put(SoftwareModuleCreatedEventContainer.class, softwareModuleTableLayout.getTable());
         supportedEvents.put(SoftwareModuleDeletedEventContainer.class, softwareModuleTableLayout.getTable());
