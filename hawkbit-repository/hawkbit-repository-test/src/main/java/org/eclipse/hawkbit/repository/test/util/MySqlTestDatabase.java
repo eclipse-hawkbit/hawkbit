@@ -29,29 +29,17 @@ public class MySqlTestDatabase extends AbstractTestExecutionListener {
     private static final Logger LOG = LoggerFactory.getLogger(MySqlTestDatabase.class);
     private String schemaName;
     private String uri;
-    private final String username;
-    private final String password;
-
-    /**
-     * Constructor.
-     */
-    public MySqlTestDatabase() {
-        this.username = System.getProperty("spring.datasource.username");
-        this.password = System.getProperty("spring.datasource.password");
-        this.uri = System.getProperty("spring.datasource.url");
-        createSchemaUri();
-    }
-
-    private void createSchemaUri() {
-        schemaName = "SP" + RandomStringUtils.randomAlphanumeric(10);
-        this.uri = this.uri.substring(0, uri.lastIndexOf('/') + 1);
-
-        System.setProperty("spring.datasource.url", uri + schemaName);
-    }
+    private String username;
+    private String password;
 
     @Override
     public void beforeTestClass(final TestContext testContext) throws Exception {
         if (isRunningWithMySql()) {
+            LOG.info("Setting up mysql schema for test class {}", testContext.getTestClass().getName());
+            this.username = System.getProperty("spring.datasource.username");
+            this.password = System.getProperty("spring.datasource.password");
+            this.uri = System.getProperty("spring.datasource.url");
+            createSchemaUri();
             createSchema();
         }
     }
@@ -63,6 +51,13 @@ public class MySqlTestDatabase extends AbstractTestExecutionListener {
         }
     }
 
+    private void createSchemaUri() {
+        schemaName = "SP" + RandomStringUtils.randomAlphanumeric(10);
+        this.uri = this.uri.substring(0, uri.lastIndexOf('/') + 1);
+
+        System.setProperty("spring.datasource.url", uri + schemaName);
+    }
+
     private boolean isRunningWithMySql() {
         return "MYSQL".equals(System.getProperty("spring.jpa.database"));
     }
@@ -70,10 +65,9 @@ public class MySqlTestDatabase extends AbstractTestExecutionListener {
     private void createSchema() {
         try (Connection connection = DriverManager.getConnection(uri, username, password)) {
             try (PreparedStatement statement = connection.prepareStatement("CREATE SCHEMA " + schemaName + ";")) {
+                LOG.info("Creating schema {} on uri {}", schemaName, uri);
                 statement.execute();
-                LOG.info("Schema {} created on uri {}", schemaName, uri);
-            } finally {
-                connection.commit();
+                LOG.info("Created schema {} on uri {}", schemaName, uri);
             }
         } catch (final SQLException e) {
             LOG.error("Schema creation failed!", e);
@@ -84,10 +78,9 @@ public class MySqlTestDatabase extends AbstractTestExecutionListener {
     private void dropSchema() {
         try (Connection connection = DriverManager.getConnection(uri, username, password)) {
             try (PreparedStatement statement = connection.prepareStatement("DROP SCHEMA " + schemaName + ";")) {
+                LOG.info("Dropping schema {} on uri {}", schemaName, uri);
                 statement.execute();
-                LOG.info("Schema {} dropped on uri {}", schemaName, uri);
-            } finally {
-                connection.commit();
+                LOG.info("Dropped schema {} on uri {}", schemaName, uri);
             }
         } catch (final SQLException e) {
             LOG.error("Schema drop failed!", e);
