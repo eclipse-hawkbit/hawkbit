@@ -366,7 +366,7 @@ public final class FileStreamingUtil {
         return total;
     }
 
-    private final static class ByteRange {
+    private static final class ByteRange {
         private static final String MULTIPART_BOUNDARY = "THIS_STRING_SEPARATES_MULTIPART";
 
         private final long start;

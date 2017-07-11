@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,7 +20,6 @@ import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.rest.util.FileStreamingFailedException;
 import org.eclipse.hawkbit.rest.util.FileStreamingUtil;
 import org.eclipse.hawkbit.rest.util.HttpUtil;
 import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
@@ -67,8 +65,6 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
     public ResponseEntity<InputStream> downloadArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("artifactId") final Long artifactId) {
 
-        LOG.error("got request for {} {}", softwareModuleId, artifactId);
-
         final SoftwareModule module = softwareModuleManagement.findSoftwareModuleById(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
         final Artifact artifact = module.getArtifact(artifactId)
@@ -82,14 +78,9 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
             return new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
         }
 
-        try (InputStream inputStream = file.getFileInputStream()) {
-            return FileStreamingUtil.writeFileResponse(file, artifact.getFilename(),
-                    artifact.getLastModifiedAt() != null ? artifact.getLastModifiedAt() : artifact.getCreatedAt(),
-                    requestResponseContextHolder.getHttpServletResponse(), request, null);
-        } catch (final IOException e) {
-            throw new FileStreamingFailedException(
-                    "Could not load artifact binary " + artifactId + " for module " + softwareModuleId, e);
-        }
+        return FileStreamingUtil.writeFileResponse(file, artifact.getFilename(),
+                artifact.getLastModifiedAt() != null ? artifact.getLastModifiedAt() : artifact.getCreatedAt(),
+                requestResponseContextHolder.getHttpServletResponse(), request, null);
     }
 
 }
