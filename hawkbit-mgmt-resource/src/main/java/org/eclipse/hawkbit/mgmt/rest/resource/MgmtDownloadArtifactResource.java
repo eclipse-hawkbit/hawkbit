@@ -40,8 +40,6 @@ import org.springframework.web.context.WebApplicationContext;
 @RestController
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi {
-    private static final Logger LOG = LoggerFactory.getLogger(MgmtDownloadArtifactResource.class);
-
     @Autowired
     private SoftwareModuleManagement softwareModuleManagement;
 
