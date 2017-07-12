@@ -51,6 +51,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
@@ -172,6 +173,7 @@ public class SecurityManagedConfiguration {
          *         of service protection filter in the filter chain
          */
         @Bean
+        @ConditionalOnProperty(prefix = "hawkbit.server.security.dos.filter", name = "enabled", matchIfMissing = true)
         public FilterRegistrationBean dosDDiFilter(final HawkbitSecurityProperties securityProperties) {
 
             final FilterRegistrationBean filterRegBean = dosFilter(Arrays.asList(DDI_ANT_MATCHER),
@@ -262,6 +264,7 @@ public class SecurityManagedConfiguration {
      *         service protection filter in the filter chain
      */
     @Bean
+    @ConditionalOnProperty(prefix = "hawkbit.server.security.dos.filter", name = "enabled", matchIfMissing = true)
     public FilterRegistrationBean dosSystemFilter(final HawkbitSecurityProperties securityProperties) {
 
         final FilterRegistrationBean filterRegBean = dosFilter(Collections.emptyList(),
@@ -355,6 +358,7 @@ public class SecurityManagedConfiguration {
          *         of service protection filter in the filter chain
          */
         @Bean
+        @ConditionalOnProperty(prefix = "hawkbit.server.security.dos.filter", name = "enabled", matchIfMissing = true)
         public FilterRegistrationBean dosMgmtFilter(final HawkbitSecurityProperties securityProperties) {
 
             final FilterRegistrationBean filterRegBean = dosFilter(null, securityProperties.getDos().getFilter(),
@@ -457,6 +461,7 @@ public class SecurityManagedConfiguration {
          *         of service protection filter in the filter chain
          */
         @Bean
+        @ConditionalOnProperty(prefix = "hawkbit.server.security.dos.ui-filter", name = "enabled", matchIfMissing = true)
         public FilterRegistrationBean dosMgmtUiFilter(final HawkbitSecurityProperties securityProperties) {
 
             final FilterRegistrationBean filterRegBean = dosFilter(null, securityProperties.getDos().getUiFilter(),
