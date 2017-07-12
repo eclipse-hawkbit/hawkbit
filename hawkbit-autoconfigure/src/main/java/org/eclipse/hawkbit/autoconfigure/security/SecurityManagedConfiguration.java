@@ -35,7 +35,6 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.ControllerTenantAwareAuthenticationDetailsSource;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.DosFilter;
-import org.eclipse.hawkbit.security.ExcludePathAwareShallowETagFilter;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticateAnonymousDownloadFilter;
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticateSecurityTokenFilter;
@@ -408,29 +407,6 @@ public class SecurityManagedConfiguration {
             httpSec.anonymous().disable();
             httpSec.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         }
-    }
-
-    /**
-     * Filter registration bean for spring etag filter.
-     *
-     * @return the spring filter registration bean for registering an etag
-     *         filter in the filter chain
-     */
-    @Bean
-    @Order(380)
-    public FilterRegistrationBean eTagFilter() {
-
-        final FilterRegistrationBean filterRegBean = new FilterRegistrationBean();
-        // Exclude the URLs for downloading artifacts, so no eTag is generated
-        // in the ShallowEtagHeaderFilter, just using the SH1 hash of the
-        // artifact itself as 'ETag', because otherwise the file will be copied
-        // in memory!
-        filterRegBean.setFilter(new ExcludePathAwareShallowETagFilter("/UI/**",
-                "/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download",
-                "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/**",
-                "/api/v1/downloadserver/**"));
-
-        return filterRegBean;
     }
 
     /**
