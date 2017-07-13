@@ -39,6 +39,10 @@
          <groupId>javax.servlet</groupId>
          <artifactId>javax.servlet-api</artifactId>
          <scope>provided</scope>
+      </dependency>      
+      <dependency>
+         <groupId>com.github.ben-manes.caffeine</groupId>
+         <artifactId>caffeine</artifactId>
       </dependency>
 
       <!-- Test -->

@@ -159,10 +159,15 @@ public class HawkbitSecurityProperties {
 
         /**
          * Configuration for hawkBits DOS prevention filter. This is usually an
-         * infrastructure topic but might be useful in some cases.
+         * infrastructure topic (e.g. Web Application Firewall (WAF)) but might
+         * be useful in some cases, e.g. to prevent unintended misuse.
          *
          */
         public static class Filter {
+            /**
+             * True if filter is enabled.
+             */
+            private boolean enabled = true;
 
             /**
              * White list of peer IP addresses for DOS filter (regular
@@ -172,15 +177,23 @@ public class HawkbitSecurityProperties {
 
             /**
              * # Maximum number of allowed REST read/GET requests per second per
-             * client.
+             * client IP.
              */
             int maxRead = 200;
 
             /**
              * Maximum number of allowed REST write/(PUT/POST/etc.) requests per
-             * second per client.
+             * second per client IP.
              */
             int maxWrite = 50;
+
+            public boolean isEnabled() {
+                return enabled;
+            }
+
+            public void setEnabled(final boolean enabled) {
+                this.enabled = enabled;
+            }
 
             public String getWhitelist() {
                 return whitelist;

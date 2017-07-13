@@ -10,8 +10,8 @@ package org.eclipse.hawkbit.rest;
 
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
+import org.eclipse.hawkbit.rest.filter.ExcludePathAwareShallowETagFilter;
 import org.eclipse.hawkbit.rest.util.FilterHttpResponse;
-import org.eclipse.hawkbit.security.ExcludePathAwareShallowETagFilter;
 import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
