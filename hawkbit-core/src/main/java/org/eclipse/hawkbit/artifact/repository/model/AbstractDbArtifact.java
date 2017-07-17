@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.artifact.repository.model;
 
 import java.io.InputStream;
 
+import org.springframework.util.Assert;
+
 /**
  * Database representation of artifact.
  * 
@@ -23,24 +25,39 @@ public abstract class AbstractDbArtifact {
 
     protected AbstractDbArtifact(final String artifactId, final DbArtifactHash hashes, final Long size,
             final String contentType) {
+        Assert.notNull(artifactId, "Artifact ID cannot be null");
+        Assert.notNull(hashes, "Hashes cannot be null");
+        Assert.notNull(size, "Size cannot be null");
         this.artifactId = artifactId;
         this.hashes = hashes;
         this.size = size;
         this.contentType = contentType;
     }
 
+    /**
+     * @return ID of the artifact
+     */
     public String getArtifactId() {
         return artifactId;
     }
 
+    /**
+     * @return hashes of the artifact
+     */
     public DbArtifactHash getHashes() {
         return hashes;
     }
 
+    /**
+     * @return site of the artifact in bytes
+     */
     public Long getSize() {
         return size;
     }
 
+    /**
+     * @return content-type if known by the repository or <code>null</code>
+     */
     public String getContentType() {
         return contentType;
     }

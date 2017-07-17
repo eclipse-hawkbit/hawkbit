@@ -155,8 +155,8 @@ public class MongoDBArtifactStore implements ArtifactRepository {
 
     }
 
-    private AbstractDbArtifact store(final String t, final InputStream content, final String contentType, final OutputStream os,
-            final File tempFile, final DbArtifactHash hash) {
+    private AbstractDbArtifact store(final String t, final InputStream content, final String contentType,
+            final OutputStream os, final File tempFile, final DbArtifactHash hash) {
         final GridFsArtifact storedArtifact;
         final String tenant = sanitizeTenant(t);
         try {
@@ -216,13 +216,14 @@ public class MongoDBArtifactStore implements ArtifactRepository {
     }
 
     /**
-     * Maps a list of {@link GridFSDBFile} to paged list of {@link AbstractDbArtifact}s.
+     * Maps a list of {@link GridFSDBFile} to a list of
+     * {@link AbstractDbArtifact}s.
      *
      * @param tenant
      *            the tenant
      * @param dbFiles
      *            the list of mongoDB gridFs files.
-     * @return a paged list of artifacts mapped from the given dbFiles
+     * @return list of artifacts mapped from the given dbFiles
      */
     private static List<AbstractDbArtifact> map(final List<GridFSDBFile> dbFiles) {
         return dbFiles.stream().map(MongoDBArtifactStore::map).collect(Collectors.toList());
@@ -233,7 +234,7 @@ public class MongoDBArtifactStore implements ArtifactRepository {
      *
      * @param ids
      *            the ids of the files to lookup.
-     * @return list of artfiacts
+     * @return list of artifacts
      */
     public List<AbstractDbArtifact> getArtifactsByIds(final List<String> ids) {
         return map(gridFs.find(new Query().addCriteria(Criteria.where(ID).in(ids))));

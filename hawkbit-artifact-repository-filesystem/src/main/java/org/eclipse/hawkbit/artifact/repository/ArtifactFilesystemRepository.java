@@ -116,7 +116,7 @@ public class ArtifactFilesystemRepository implements ArtifactRepository {
             final String sha1Hash = BaseEncoding.base16().lowerCase().encode(mdSHA1.digest());
             final String md5Hash = BaseEncoding.base16().lowerCase().encode(mdMD5.digest());
 
-            artifact = new ArtifactFilesystem(null, sha1Hash, new DbArtifactHash(sha1Hash, md5Hash), artifactSize,
+            artifact = new ArtifactFilesystem(file, sha1Hash, new DbArtifactHash(sha1Hash, md5Hash), artifactSize,
                     contentType);
 
             checkHashes(artifact, hash);
@@ -131,7 +131,8 @@ public class ArtifactFilesystemRepository implements ArtifactRepository {
         return artifact;
     }
 
-    private ArtifactFilesystem renameFileToSHA1Naming(final String tenant, final File file, final AbstractDbArtifact artifact) {
+    private ArtifactFilesystem renameFileToSHA1Naming(final String tenant, final File file,
+            final AbstractDbArtifact artifact) {
         final File fileSHA1Naming = getFile(tenant, artifact.getHashes().getSha1());
         final ArtifactFilesystem fileSystemArtifact = new ArtifactFilesystem(fileSHA1Naming, artifact.getArtifactId(),
                 artifact.getHashes(), artifact.getSize(), artifact.getContentType());
