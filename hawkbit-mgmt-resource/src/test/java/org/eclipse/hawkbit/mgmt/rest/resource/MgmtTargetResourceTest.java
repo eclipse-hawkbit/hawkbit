@@ -46,6 +46,7 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
@@ -1144,7 +1145,9 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
                 .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("assigned", equalTo(1))).andExpect(jsonPath("alreadyAssigned", equalTo(0)))
+                .andExpect(jsonPath("total", equalTo(1)));
 
         assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get()).isEqualTo(set);
         target = targetManagement.findTargetByControllerID(target.getControllerId()).get();
@@ -1152,7 +1155,41 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         // repeating DS assignment leads again to OK
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
                 .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("assigned", equalTo(0))).andExpect(jsonPath("alreadyAssigned", equalTo(1)))
+                .andExpect(jsonPath("total", equalTo(1)));
+
+        // ...but does not change the target
+        assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).get()).isEqualTo(target);
+    }
+
+    @Test
+    @Description("Verfies that an offline DS to target assignment is reflected by the repository and that repeating "
+            + "the assignment does not change the target.")
+    public void offlineAssignDistributionSetToTarget() throws Exception {
+
+        Target target = testdataFactory.createTarget();
+        final DistributionSet set = testdataFactory.createDistributionSet("one");
+
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId()
+                + "/assignedDS?offline=true").content("{\"id\":" + set.getId() + "}")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("assigned", equalTo(1))).andExpect(jsonPath("alreadyAssigned", equalTo(0)))
+                .andExpect(jsonPath("total", equalTo(1)));
+
+        assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get()).isEqualTo(set);
+        assertThat(deploymentManagement.getInstalledDistributionSet(target.getControllerId()).get()).isEqualTo(set);
+        target = targetManagement.findTargetByControllerID(target.getControllerId()).get();
+        assertThat(target.getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
+
+        // repeating DS assignment leads again to OK
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId()
+                + "/assignedDS?offline=true").content("{\"id\":" + set.getId() + "}")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("assigned", equalTo(0))).andExpect(jsonPath("alreadyAssigned", equalTo(1)))
+                .andExpect(jsonPath("total", equalTo(1)));
 
         // ...but does not change the target
         assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).get()).isEqualTo(target);

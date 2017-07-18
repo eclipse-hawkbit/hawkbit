@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionStatus;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtDistributionSetAssigment;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAttributes;
@@ -252,16 +253,21 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> postAssignedDistributionSet(@PathVariable("controllerId") final String controllerId,
-            @RequestBody final MgmtDistributionSetAssigment dsId) {
+    public ResponseEntity<MgmtTargetAssignmentResponseBody> postAssignedDistributionSet(
+            @PathVariable("controllerId") final String controllerId,
+            @RequestBody final MgmtDistributionSetAssigment dsId,
+            @RequestParam(value = "offline", required = false) final boolean offline) {
+
+        if (offline) {
+            return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(
+                    deploymentManagement.offlineAssignedDistributionSet(dsId.getId(), Arrays.asList(controllerId))));
+        }
 
         findTargetWithExceptionIfNotFound(controllerId);
         final ActionType type = (dsId.getType() != null) ? MgmtRestModelMapper.convertActionType(dsId.getType())
                 : ActionType.FORCED;
-        this.deploymentManagement.assignDistributionSet(dsId.getId(), type, dsId.getForcetime(),
-                Arrays.asList(controllerId));
-
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(deploymentManagement
+                .assignDistributionSet(dsId.getId(), type, dsId.getForcetime(), Arrays.asList(controllerId))));
     }
 
     @Override
