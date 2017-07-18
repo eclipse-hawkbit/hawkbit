@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -47,6 +48,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -139,11 +141,22 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetAssignmentResult assignDistributionSet(final Long dsID, final ActionType actionType,
-            final long forcedTimestamp, final Collection<String> targetIDs) {
+    public DistributionSetAssignmentResult offlineAssignedDistributionSet(final Long dsID,
+            final Collection<String> controllerIDs) {
+        return assignDistributionSetToTargets(dsID, controllerIDs.stream()
+                .map(t -> new TargetWithActionType(t, ActionType.FORCED, -1)).collect(Collectors.toList()), null, true);
+    }
 
-        return assignDistributionSetToTargets(dsID, targetIDs.stream()
-                .map(t -> new TargetWithActionType(t, actionType, forcedTimestamp)).collect(Collectors.toList()), null);
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public DistributionSetAssignmentResult assignDistributionSet(final Long dsID, final ActionType actionType,
+            final long forcedTimestamp, final Collection<String> controllerIDs) {
+
+        return assignDistributionSetToTargets(dsID, controllerIDs.stream()
+                .map(t -> new TargetWithActionType(t, actionType, forcedTimestamp)).collect(Collectors.toList()), null,
+                false);
 
     }
 
@@ -154,7 +167,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
             final Collection<TargetWithActionType> targets) {
 
-        return assignDistributionSetToTargets(dsID, targets, null);
+        return assignDistributionSetToTargets(dsID, targets, null, false);
     }
 
     @Override
@@ -164,12 +177,22 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
             final Collection<TargetWithActionType> targets, final String actionMessage) {
 
-        return assignDistributionSetToTargets(dsID, targets, actionMessage);
+        return assignDistributionSetToTargets(dsID, targets, actionMessage, false);
     }
 
     /**
      * method assigns the {@link DistributionSet} to all {@link Target}s by
      * their IDs with a specific {@link ActionType} and {@code forcetime}.
+     * 
+     * 
+     * In case the update was executed offline (i.e. not managed by hawkBit) the
+     * handling differs my means that:<br/>
+     * A. it ignores targets completely that are in
+     * {@link TargetUpdateStatus#PENDING}.<br/>
+     * B. it created completed actions.<br/>
+     * C. sets both installed and assigned DS on the target and switches the
+     * status to {@link TargetUpdateStatus#IN_SYNC} <br/>
+     * D. does not send a {@link TargetAssignDistributionSetEvent}.<br/>
      *
      * @param dsID
      *            the ID of the distribution set to assign
@@ -177,6 +200,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      *            a list of all targets and their action type
      * @param actionMessage
      *            an optional message to be written into the action status
+     * @param offline
+     *            to <code>true</code> in offline case
      * @return the assignment result
      *
      * @throw IncompleteDistributionSetException if mandatory
@@ -184,7 +209,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      *        {@link DistributionSetType}.
      */
     private DistributionSetAssignmentResult assignDistributionSetToTargets(final Long dsID,
-            final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage) {
+            final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
+            final boolean offline) {
 
         final JpaDistributionSet set = distributionSetRepository.findOne(dsID);
         if (set == null) {
@@ -209,10 +235,19 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         // maximum 1000 elements, so we need to split the entries here and
         // execute multiple statements we take the target only into account if
         // the requested operation is no duplicate of a previous one
-        final List<JpaTarget> targets = Lists.partition(controllerIDs, Constants.MAX_ENTRIES_IN_STATEMENT).stream()
-                .map(ids -> targetRepository
-                        .findAll(TargetSpecifications.hasControllerIdAndAssignedDistributionSetIdNot(ids, set.getId())))
-                .flatMap(List::stream).collect(Collectors.toList());
+        final List<JpaTarget> targets;
+        if (offline) {
+            targets = Lists.partition(controllerIDs, Constants.MAX_ENTRIES_IN_STATEMENT).stream()
+                    .map(ids -> targetRepository.findAll(SpecificationsBuilder.combineWithAnd(Arrays.asList(
+                            TargetSpecifications.hasControllerIdAndAssignedDistributionSetIdNot(ids, set.getId()),
+                            TargetSpecifications.notEqualToTargetUpdateStatus(TargetUpdateStatus.PENDING)))))
+                    .flatMap(List::stream).collect(Collectors.toList());
+        } else {
+            targets = Lists.partition(controllerIDs, Constants.MAX_ENTRIES_IN_STATEMENT).stream()
+                    .map(ids -> targetRepository.findAll(
+                            TargetSpecifications.hasControllerIdAndAssignedDistributionSetIdNot(ids, set.getId())))
+                    .flatMap(List::stream).collect(Collectors.toList());
+        }
 
         if (targets.isEmpty()) {
             // detaching as it is not necessary to persist the set itself
@@ -229,8 +264,9 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         // need to remember which one we have been switched to canceling state
         // because for targets which we have changed to canceling we don't want
         // to publish the new action update event.
-        final Set<Long> targetIdsCancellList = targetIds.stream().map(this::overrideObsoleteUpdateActions)
-                .flatMap(Collection::stream).collect(Collectors.toSet());
+        final Set<Long> targetIdsCancellList = offline ? Collections.emptySet()
+                : targetIds.stream().map(this::overrideObsoleteUpdateActions).flatMap(Collection::stream)
+                        .collect(Collectors.toSet());
 
         // cancel all scheduled actions which are in-active, these actions were
         // not active before and the manual assignment which has been done
@@ -245,24 +281,30 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             currentUser = null;
         }
 
-        targetIds.forEach(tIds -> targetRepository.setAssignedDistributionSetAndUpdateStatus(TargetUpdateStatus.PENDING,
-                set, System.currentTimeMillis(), currentUser, tIds));
+        if (offline) {
+            targetIds.forEach(tIds -> targetRepository.setAssignedAndInstalledDistributionSetAndUpdateStatus(
+                    TargetUpdateStatus.IN_SYNC, set, System.currentTimeMillis(), currentUser, tIds));
+        } else {
+            targetIds.forEach(tIds -> targetRepository.setAssignedDistributionSetAndUpdateStatus(
+                    TargetUpdateStatus.PENDING, set, System.currentTimeMillis(), currentUser, tIds));
+        }
+
         final Map<String, JpaAction> targetIdsToActions = targets.stream()
-                .map(t -> actionRepository.save(createTargetAction(targetsWithActionMap, t, set)))
+                .map(t -> actionRepository.save(createTargetAction(targetsWithActionMap, t, set, offline)))
                 .collect(Collectors.toMap(a -> a.getTarget().getControllerId(), Function.identity()));
 
         // create initial action status when action is created so we remember
         // the initial running status because we will change the status
         // of the action itself and with this action status we have a nicer
         // action history.
-        targetIdsToActions.values().forEach(action -> setRunningActionStatus(action, actionMessage));
+        targetIdsToActions.values().forEach(action -> setActionStatus(action, actionMessage, offline));
 
         // detaching as it is not necessary to persist the set itself
         entityManager.detach(set);
         // detaching as the entity has been updated by the JPQL query above
         targets.forEach(entityManager::detach);
 
-        sendAssignmentEvents(targets, targetIdsCancellList, targetIdsToActions);
+        sendAssignmentEvents(targets, targetIdsCancellList, targetIdsToActions, offline);
 
         return new DistributionSetAssignmentResult(
                 targets.stream().map(Target::getControllerId).collect(Collectors.toList()), targets.size(),
@@ -271,11 +313,11 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private void sendAssignmentEvents(final List<JpaTarget> targets, final Set<Long> targetIdsCancellList,
-            final Map<String, JpaAction> targetIdsToActions) {
+            final Map<String, JpaAction> targetIdsToActions, final boolean offline) {
 
         targets.forEach(target -> {
             sendTargetUpdatedEvent(target);
-            if (targetIdsCancellList.contains(target.getId())) {
+            if (offline || targetIdsCancellList.contains(target.getId())) {
                 return;
             }
 
@@ -284,13 +326,13 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private static JpaAction createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap,
-            final JpaTarget target, final JpaDistributionSet set) {
+            final JpaTarget target, final JpaDistributionSet set, final boolean offline) {
         final JpaAction actionForTarget = new JpaAction();
         final TargetWithActionType targetWithActionType = targetsWithActionMap.get(target.getControllerId());
         actionForTarget.setActionType(targetWithActionType.getActionType());
         actionForTarget.setForcedTime(targetWithActionType.getForceTime());
         actionForTarget.setActive(true);
-        actionForTarget.setStatus(Status.RUNNING);
+        actionForTarget.setStatus(offline ? Status.FINISHED : Status.RUNNING);
         actionForTarget.setTarget(target);
         actionForTarget.setDistributionSet(set);
         return actionForTarget;
@@ -478,7 +520,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         action.setStatus(Status.RUNNING);
         final JpaAction savedAction = actionRepository.save(action);
 
-        setRunningActionStatus(savedAction, null);
+        setActionStatus(savedAction, null, false);
 
         target = (JpaTarget) entityManager.merge(savedAction.getTarget());
 
@@ -494,13 +536,17 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         }
     }
 
-    private void setRunningActionStatus(final JpaAction action, final String actionMessage) {
+    private void setActionStatus(final JpaAction action, final String actionMessage, final boolean offline) {
         final JpaActionStatus actionStatus = new JpaActionStatus();
         actionStatus.setAction(action);
         actionStatus.setOccurredAt(action.getCreatedAt());
-        actionStatus.setStatus(Status.RUNNING);
+        actionStatus.setStatus(offline ? Status.FINISHED : Status.RUNNING);
         if (actionMessage != null) {
             actionStatus.addMessage(actionMessage);
+        }
+        if (offline) {
+            actionStatus
+                    .addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Action reported as offline deployment");
         }
 
         actionStatusRepository.save(actionStatus);
@@ -683,4 +729,5 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         return distributionSetRepository.findInstalledAtTarget(controllerId);
     }
+
 }

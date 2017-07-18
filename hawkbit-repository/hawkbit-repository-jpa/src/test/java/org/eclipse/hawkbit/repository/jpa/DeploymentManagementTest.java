@@ -428,6 +428,38 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         return action;
     }
 
+    @Test
+    @Description("Simple offline deployment of a distribution set to a list of targets. Verifies that offline assigment "
+            + "is correctly executed for targets that do not have a runnign update already. Those are ignored.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 20),
+            @Expect(type = TargetUpdatedEvent.class, count = 20), @Expect(type = ActionCreatedEvent.class, count = 20),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 10) })
+    public void assignedDistributionSet() {
+        final List<String> controllerIds = testdataFactory.createTargets(10).stream().map(Target::getControllerId)
+                .collect(Collectors.toList());
+        final List<Target> onlineAssignedTargets = testdataFactory.createTargets(10, "2");
+        controllerIds.addAll(onlineAssignedTargets.stream().map(Target::getControllerId).collect(Collectors.toList()));
+
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        assignDistributionSet(testdataFactory.createDistributionSet("2"), onlineAssignedTargets);
+
+        final long current = System.currentTimeMillis();
+        final List<Target> targets = deploymentManagement.offlineAssignedDistributionSet(ds.getId(), controllerIds)
+                .getAssignedEntity();
+        assertThat(actionRepository.count()).isEqualTo(20);
+
+        assertThat(targetManagement.findTargetByInstalledDistributionSet(ds.getId(), PAGE).getContent())
+                .containsAll(targets).hasSize(10)
+                .containsAll(targetManagement.findTargetByAssignedDistributionSet(ds.getId(), PAGE))
+                .as("InstallationDate set").allMatch(target -> target.getInstallationDate() >= current)
+                .as("TargetUpdateStatus IN_SYNC")
+                .allMatch(target -> TargetUpdateStatus.IN_SYNC.equals(target.getUpdateStatus()))
+                .as("InstallationDate equal to LastModifiedAt")
+                .allMatch(target -> target.getLastModifiedAt().equals(target.getInstallationDate()));
+    }
+
     /**
      * test a simple deployment by calling the
      * {@link TargetRepository#assignDistributionSet(DistributionSet, Iterable)}
