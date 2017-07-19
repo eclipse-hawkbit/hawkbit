@@ -13,7 +13,7 @@ import java.util.Optional;
 
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
@@ -196,15 +196,15 @@ public interface ArtifactManagement {
     Page<Artifact> findArtifactBySoftwareModule(@NotNull Pageable pageReq, @NotNull Long swId);
 
     /**
-     * Loads {@link DbArtifact} from store for given {@link Artifact}.
+     * Loads {@link AbstractDbArtifact} from store for given {@link Artifact}.
      *
      * @param sha1Hash
      *            to search for
-     * @return loaded {@link DbArtifact}
+     * @return loaded {@link AbstractDbArtifact}
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DOWNLOAD_ARTIFACT + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.HAS_CONTROLLER_DOWNLOAD)
-    Optional<DbArtifact> loadArtifactBinary(@NotEmpty String sha1Hash);
+    Optional<AbstractDbArtifact> loadArtifactBinary(@NotEmpty String sha1Hash);
 
 }

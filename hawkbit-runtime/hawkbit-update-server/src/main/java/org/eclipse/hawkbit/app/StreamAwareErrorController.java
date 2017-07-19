@@ -41,7 +41,7 @@ public class StreamAwareErrorController extends BasicErrorController {
     }
 
     @RequestMapping(produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    ResponseEntity<Void> errorStream(final HttpServletRequest request, final HttpServletResponse response) {
+    public ResponseEntity<Void> errorStream(final HttpServletRequest request, final HttpServletResponse response) {
         final HttpStatus status = getStatus(request);
         return new ResponseEntity<>(status);
     }

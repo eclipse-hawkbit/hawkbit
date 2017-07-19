@@ -21,6 +21,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import javax.validation.ValidationException;
+
 import org.assertj.core.api.Condition;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
@@ -37,7 +39,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
-import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
@@ -139,7 +140,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = RolloutUpdatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 10) })
     public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
-        final Rollout createdRollout = testdataFactory.createRollout("xxx");
+        testdataFactory.createRollout("xxx");
 
         verifyThrownExceptionBy(() -> rolloutManagement.deleteRollout(NOT_EXIST_IDL), "Rollout");
 
@@ -1089,7 +1090,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsFor" + rolloutName);
 
-        assertThatExceptionOfType(ConstraintViolationException.class)
+        assertThatExceptionOfType(ValidationException.class)
                 .isThrownBy(() -> testdataFactory.createRolloutByVariables(rolloutName, "desc", amountGroups,
                         "id==notExisting", distributionSet, successCondition, errorCondition))
                 .withMessageContaining("does not match any existing");
@@ -1336,7 +1337,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutGroups.add(generateRolloutGroup(0, percentTargetsInGroup1, null));
         rolloutGroups.add(generateRolloutGroup(1, percentTargetsInGroup2, null));
 
-        assertThatExceptionOfType(ConstraintViolationException.class)
+        assertThatExceptionOfType(ValidationException.class)
                 .isThrownBy(() -> rolloutManagement.createRollout(myRollout, rolloutGroups, conditions))
                 .withMessageContaining("groups don't match");
 
@@ -1357,7 +1358,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 generateRolloutGroup(0, percentTargetsInGroup1, null),
                 generateRolloutGroup(1, percentTargetsInGroup2, null));
 
-        assertThatExceptionOfType(ConstraintViolationException.class)
+        assertThatExceptionOfType(ValidationException.class)
                 .isThrownBy(() -> rolloutManagement.createRollout(myRollout, rolloutGroups, conditions))
                 .withMessageContaining("percentage has to be between 1 and 100");
 
@@ -1373,7 +1374,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults().build();
         final RolloutCreate myRollout = generateTargetsAndRollout(rolloutName, amountTargetsForRollout);
 
-        assertThatExceptionOfType(ConstraintViolationException.class)
+        assertThatExceptionOfType(ValidationException.class)
                 .isThrownBy(() -> rolloutManagement.createRollout(myRollout, illegalGroupAmount, conditions))
                 .withMessageContaining("not be greater than " + quotaManagement.getMaxRolloutGroupsPerRollout());
 

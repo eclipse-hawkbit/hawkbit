@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.eclipse.hawkbit.api.HostnameResolver;
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.eclipse.hawkbit.cache.DownloadArtifactCache;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
@@ -188,7 +188,7 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
         return Optional.empty();
     }
 
-    private static DmfArtifact convertDbArtifact(final DbArtifact dbArtifact) {
+    private static DmfArtifact convertDbArtifact(final AbstractDbArtifact dbArtifact) {
         final DmfArtifact artifact = new DmfArtifact();
         artifact.setSize(dbArtifact.getSize());
         final DbArtifactHash dbArtifactHash = dbArtifact.getHashes();

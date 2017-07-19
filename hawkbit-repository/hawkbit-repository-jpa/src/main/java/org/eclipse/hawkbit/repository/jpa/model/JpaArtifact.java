@@ -21,7 +21,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -71,9 +71,9 @@ public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Art
      * Constructs artifact.
      *
      * @param sha1Hash
-     *            that is the link to the {@link DbArtifact} entity.
+     *            that is the link to the {@link AbstractDbArtifact} entity.
      * @param filename
-     *            that is used by {@link DbArtifact} store.
+     *            that is used by {@link AbstractDbArtifact} store.
      * @param softwareModule
      *            of this artifact
      */

@@ -28,7 +28,7 @@ import java.util.Optional;
 
 import org.eclipse.hawkbit.api.HostnameResolver;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
@@ -371,7 +371,7 @@ public class AmqpMessageHandlerServiceTest {
         final Artifact localArtifactMock = mock(Artifact.class);
         when(localArtifactMock.getSha1Hash()).thenReturn(SHA1);
 
-        final DbArtifact dbArtifactMock = mock(DbArtifact.class);
+        final AbstractDbArtifact dbArtifactMock = mock(AbstractDbArtifact.class);
         when(artifactManagementMock.findFirstArtifactBySHA1(SHA1)).thenReturn(Optional.of(localArtifactMock));
         when(controllerManagementMock.hasTargetArtifactAssigned(securityToken.getControllerId(), SHA1))
                 .thenReturn(true);

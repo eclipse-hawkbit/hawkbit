@@ -8,11 +8,8 @@
  */
 package org.eclipse.hawkbit.ddi.rest.resource;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.hawkbit.api.ApiType;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
@@ -34,8 +31,6 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpRequest;
-
-import com.google.common.base.Charsets;
 
 /**
  * Utility class for the DDI API.
@@ -146,25 +141,6 @@ public final class DataConversionHelper {
         int result = action.hashCode();
         result = prime * result + (action.isHitAutoForceTime(System.currentTimeMillis()) ? 1231 : 1237);
         return result;
-    }
-
-    static void writeMD5FileResponse(final String fileName, final HttpServletResponse response, final Artifact artifact)
-            throws IOException {
-        final StringBuilder builder = new StringBuilder();
-        builder.append(artifact.getMd5Hash());
-        builder.append("  ");
-        builder.append(fileName);
-        final byte[] content = builder.toString().getBytes(Charsets.US_ASCII);
-
-        final StringBuilder header = new StringBuilder();
-        header.append("attachment;filename=");
-        header.append(fileName);
-        header.append(DdiRestConstants.ARTIFACT_MD5_DWNL_SUFFIX);
-
-        response.setContentLength(content.length);
-        response.setHeader("Content-Disposition", header.toString());
-
-        response.getOutputStream().write(content, 0, content.length);
     }
 
 }

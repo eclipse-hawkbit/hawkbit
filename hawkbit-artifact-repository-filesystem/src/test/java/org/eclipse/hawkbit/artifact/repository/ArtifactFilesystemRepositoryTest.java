@@ -16,7 +16,7 @@ import java.util.Random;
 
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.junit.Test;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -52,7 +52,7 @@ public class ArtifactFilesystemRepositoryTest {
         final byte[] fileContent = randomBytes();
         final ArtifactFilesystem artifact = storeRandomArtifact(fileContent);
 
-        final DbArtifact artifactBySha1 = artifactFilesystemRepository.getArtifactBySha1(TENANT,
+        final AbstractDbArtifact artifactBySha1 = artifactFilesystemRepository.getArtifactBySha1(TENANT,
                 artifact.getHashes().getSha1());
         assertThat(artifactBySha1).isNotNull();
     }

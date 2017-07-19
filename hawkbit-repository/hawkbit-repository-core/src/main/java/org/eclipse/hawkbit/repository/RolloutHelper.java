@@ -12,7 +12,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
+import javax.validation.ValidationException;
+
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -35,10 +36,10 @@ public final class RolloutHelper {
      */
     public static void verifyRolloutGroupConditions(final RolloutGroupConditions conditions) {
         if (conditions.getSuccessCondition() == null) {
-            throw new ConstraintViolationException("Rollout group is missing success condition");
+            throw new ValidationException("Rollout group is missing success condition");
         }
         if (conditions.getSuccessAction() == null) {
-            throw new ConstraintViolationException("Rollout group is missing success action");
+            throw new ValidationException("Rollout group is missing success action");
         }
     }
 
@@ -52,14 +53,14 @@ public final class RolloutHelper {
      */
     public static RolloutGroup verifyRolloutGroupHasConditions(final RolloutGroup group) {
         if (group.getTargetPercentage() < 1F || group.getTargetPercentage() > 100F) {
-            throw new ConstraintViolationException("Target percentage has to be between 1 and 100");
+            throw new ValidationException("Target percentage has to be between 1 and 100");
         }
 
         if (group.getSuccessCondition() == null) {
-            throw new ConstraintViolationException("Rollout group is missing success condition");
+            throw new ValidationException("Rollout group is missing success condition");
         }
         if (group.getSuccessAction() == null) {
-            throw new ConstraintViolationException("Rollout group is missing success action");
+            throw new ValidationException("Rollout group is missing success action");
         }
         return group;
     }
@@ -74,9 +75,9 @@ public final class RolloutHelper {
      */
     public static void verifyRolloutGroupParameter(final int amountGroup, final QuotaManagement quotaManagement) {
         if (amountGroup <= 0) {
-            throw new ConstraintViolationException("the amount of groups cannot be lower than zero");
+            throw new ValidationException("the amount of groups cannot be lower than zero");
         } else if (amountGroup > quotaManagement.getMaxRolloutGroupsPerRollout()) {
-            throw new ConstraintViolationException("the amount of groups cannot be greater than 500");
+            throw new ValidationException("the amount of groups cannot be greater than 500");
         }
     }
 
@@ -88,9 +89,9 @@ public final class RolloutHelper {
      */
     public static void verifyRolloutGroupTargetPercentage(final float percentage) {
         if (percentage <= 0) {
-            throw new ConstraintViolationException("the percentage must be greater than zero");
+            throw new ValidationException("the percentage must be greater than zero");
         } else if (percentage > 100) {
-            throw new ConstraintViolationException("the percentage must not be greater than 100");
+            throw new ValidationException("the percentage must not be greater than 100");
         }
     }
 
@@ -240,11 +241,10 @@ public final class RolloutHelper {
      */
     public static void verifyRemainingTargets(final long targetCount) {
         if (targetCount > 0) {
-            throw new ConstraintViolationException(
-                    "Rollout groups don't match all targets that are targeted by the rollout");
+            throw new ValidationException("Rollout groups don't match all targets that are targeted by the rollout");
         }
         if (targetCount != 0) {
-            throw new ConstraintViolationException("Rollout groups target count verification failed");
+            throw new ValidationException("Rollout groups target count verification failed");
         }
     }
 

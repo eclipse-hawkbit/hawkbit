@@ -315,8 +315,8 @@ public class RSQLUtilityTest {
                 .thenReturn(mock(Predicate.class));
 
         // test
-        final Predicate result = RSQLUtility.parse(correctRsql, TestFieldEnum.class, setupMacroLookup())
-                .toPredicate(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
+        RSQLUtility.parse(correctRsql, TestFieldEnum.class, setupMacroLookup()).toPredicate(baseSoftwareModuleRootMock,
+                criteriaQueryMock, criteriaBuilderMock);
 
         // verification
         verify(macroResolver).lookup(overdueProp);
