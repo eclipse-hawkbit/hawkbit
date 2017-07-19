@@ -29,7 +29,7 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
     @Test
     @Description("Verifies that the download progress reloading by remote events works")
     public void reloadDownloadProgessByRemoteEvent() {
-        final DownloadProgressEvent downloadProgressEvent = new DownloadProgressEvent("DEFAULT", 3L, "Node");
+        final DownloadProgressEvent downloadProgressEvent = new DownloadProgressEvent("DEFAULT", 1L, 3L, "Node");
 
         DownloadProgressEvent remoteEvent = (DownloadProgressEvent) createProtoStuffEvent(downloadProgressEvent);
         assertThat(downloadProgressEvent).isEqualTo(remoteEvent);

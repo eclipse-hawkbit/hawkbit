@@ -25,5 +25,5 @@ public interface FileStreamingProgressListener {
      * @param shippedBytesOverall
      *            during the request
      */
-    void progress(Long requestedBytes, Long shippedBytesSinceLast, Long shippedBytesOverall);
+    void progress(long requestedBytes, long shippedBytesSinceLast, long shippedBytesOverall);
 }

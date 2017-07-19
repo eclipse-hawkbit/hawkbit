@@ -20,14 +20,13 @@ public abstract class AbstractDbArtifact {
 
     private final String artifactId;
     private final DbArtifactHash hashes;
-    private final Long size;
+    private final long size;
     private final String contentType;
 
-    protected AbstractDbArtifact(final String artifactId, final DbArtifactHash hashes, final Long size,
+    protected AbstractDbArtifact(final String artifactId, final DbArtifactHash hashes, final long size,
             final String contentType) {
         Assert.notNull(artifactId, "Artifact ID cannot be null");
         Assert.notNull(hashes, "Hashes cannot be null");
-        Assert.notNull(size, "Size cannot be null");
         this.artifactId = artifactId;
         this.hashes = hashes;
         this.size = size;
@@ -51,7 +50,7 @@ public abstract class AbstractDbArtifact {
     /**
      * @return site of the artifact in bytes
      */
-    public Long getSize() {
+    public long getSize() {
         return size;
     }
 

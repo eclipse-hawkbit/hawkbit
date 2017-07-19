@@ -80,9 +80,9 @@ public final class FileStreamingUtil {
                 .append(ARTIFACT_MD5_DWNL_SUFFIX);
 
         response.setContentLength(content.length);
-        response.setHeader("Content-Disposition", header.toString());
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, header.toString());
 
-        response.getOutputStream().write(content, 0, content.length);
+        response.getOutputStream().write(content);
 
         return ResponseEntity.ok().build();
     }
@@ -269,7 +269,8 @@ public final class FileStreamingUtil {
                     // Add multipart boundary and header fields for every range.
                     to.println();
                     to.println("--" + ByteRange.MULTIPART_BOUNDARY);
-                    to.println("Content-Range: bytes " + r.getStart() + "-" + r.getEnd() + "/" + r.getTotal());
+                    to.println(HttpHeaders.CONTENT_RANGE + ": bytes " + r.getStart() + "-" + r.getEnd() + "/"
+                            + r.getTotal());
 
                     // Copy single part range of multi part range.
                     copyStreams(from, to, progressListener, r.getStart(), r.getLength(), filename);

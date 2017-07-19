@@ -38,6 +38,7 @@ import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
+import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.SoftwareModuleNotAssignedToTargetException;
@@ -57,6 +58,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -81,6 +84,12 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(DdiRootController.class);
     private static final String GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET = "given action ({}) is not assigned to given target ({}).";
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Autowired
     private ControllerManagement controllerManagement;
@@ -177,8 +186,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
                         artifact.getLastModifiedAt() != null ? artifact.getLastModifiedAt() : artifact.getCreatedAt(),
                         requestResponseContextHolder.getHttpServletResponse(),
                         requestResponseContextHolder.getHttpServletRequest(),
-                        (length, shippedSinceLastEvent, total) -> controllerManagement.downloadProgress(statusId,
-                                length, shippedSinceLastEvent, total));
+                        (length, shippedSinceLastEvent, total) -> eventPublisher
+                                .publishEvent(new DownloadProgressEvent(tenantAware.getCurrentTenant(), statusId,
+                                        shippedSinceLastEvent, applicationContext.getId())));
 
             }
         }

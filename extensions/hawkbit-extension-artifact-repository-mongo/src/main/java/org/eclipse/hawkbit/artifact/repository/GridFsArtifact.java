@@ -12,7 +12,6 @@ import java.io.InputStream;
 
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
-import org.springframework.util.Assert;
 
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSFile;
@@ -36,7 +35,6 @@ public class GridFsArtifact extends AbstractDbArtifact {
     public GridFsArtifact(final GridFSFile dbFile) {
         super(dbFile.getId().toString(), new DbArtifactHash(dbFile.getFilename(), dbFile.getMD5()), dbFile.getLength(),
                 dbFile.getContentType());
-        Assert.notNull(dbFile, "GridFSFile cannot be null");
         this.dbFile = dbFile;
     }
 

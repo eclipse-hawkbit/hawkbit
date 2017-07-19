@@ -21,8 +21,8 @@ import org.springframework.util.Assert;
 import com.google.common.base.Throwables;
 
 /**
- * The default {@link AbstractDbArtifact} implementation which dynamically
- * creates a {@link FileInputStream} on calling {@link #getFileInputStream()}.
+ * {@link AbstractDbArtifact} implementation which dynamically creates a
+ * {@link FileInputStream} on calling {@link #getFileInputStream()}.
  */
 public class ArtifactFilesystem extends AbstractDbArtifact {
 
