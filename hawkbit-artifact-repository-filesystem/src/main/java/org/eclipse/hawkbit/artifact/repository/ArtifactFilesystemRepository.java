@@ -22,7 +22,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +88,7 @@ public class ArtifactFilesystemRepository implements ArtifactRepository {
         }
 
         final File file = createTempFile();
-        final DbArtifact artifact = store(content, contentType, hash, mdSHA1, mdMD5, file);
+        final AbstractDbArtifact artifact = store(content, contentType, hash, mdSHA1, mdMD5, file);
         return renameFileToSHA1Naming(tenant, file, artifact);
     }
 
@@ -103,25 +103,22 @@ public class ArtifactFilesystemRepository implements ArtifactRepository {
         if (!file.exists()) {
             return null;
         }
-        final ArtifactFilesystem artifact = new ArtifactFilesystem(file);
-        artifact.setArtifactId(sha1);
-        artifact.setHashes(new DbArtifactHash(sha1, null));
-        artifact.setSize(file.length());
-        return artifact;
+
+        return new ArtifactFilesystem(file, sha1, new DbArtifactHash(sha1, null), file.length(), null);
     }
 
-    private DbArtifact store(final InputStream content, final String contentType, final DbArtifactHash hash,
+    private AbstractDbArtifact store(final InputStream content, final String contentType, final DbArtifactHash hash,
             final MessageDigest mdSHA1, final MessageDigest mdMD5, final File file) {
-        final DbArtifact artifact = new DbArtifact();
+        AbstractDbArtifact artifact;
         try (final DigestOutputStream outputstream = openFileOutputStream(file, mdSHA1, mdMD5)) {
             final long artifactSize = ByteStreams.copy(content, outputstream);
             outputstream.flush();
             final String sha1Hash = BaseEncoding.base16().lowerCase().encode(mdSHA1.digest());
             final String md5Hash = BaseEncoding.base16().lowerCase().encode(mdMD5.digest());
-            artifact.setArtifactId(sha1Hash);
-            artifact.setSize(artifactSize);
-            artifact.setContentType(contentType);
-            artifact.setHashes(new DbArtifactHash(sha1Hash, md5Hash));
+
+            artifact = new ArtifactFilesystem(file, sha1Hash, new DbArtifactHash(sha1Hash, md5Hash), artifactSize,
+                    contentType);
+
             checkHashes(artifact, hash);
         } catch (final IOException e) {
             throw new ArtifactStoreException(e.getMessage(), e);
@@ -134,9 +131,11 @@ public class ArtifactFilesystemRepository implements ArtifactRepository {
         return artifact;
     }
 
-    private ArtifactFilesystem renameFileToSHA1Naming(final String tenant, final File file, final DbArtifact artifact) {
+    private ArtifactFilesystem renameFileToSHA1Naming(final String tenant, final File file,
+            final AbstractDbArtifact artifact) {
         final File fileSHA1Naming = getFile(tenant, artifact.getHashes().getSha1());
-        final ArtifactFilesystem fileSystemArtifact = new ArtifactFilesystem(fileSHA1Naming);
+        final ArtifactFilesystem fileSystemArtifact = new ArtifactFilesystem(fileSHA1Naming, artifact.getArtifactId(),
+                artifact.getHashes(), artifact.getSize(), artifact.getContentType());
         if (fileSHA1Naming.exists()) {
             FileUtils.deleteQuietly(file);
         } else {
@@ -150,14 +149,11 @@ public class ArtifactFilesystemRepository implements ArtifactRepository {
         if (!file.delete()) {
             LOG.debug("Could not delete temp file {}", file);
         }
-        fileSystemArtifact.setArtifactId(artifact.getArtifactId());
-        fileSystemArtifact.setContentType(artifact.getContentType());
-        fileSystemArtifact.setHashes(artifact.getHashes());
-        fileSystemArtifact.setSize(artifact.getSize());
+
         return fileSystemArtifact;
     }
 
-    private DbArtifact checkHashes(final DbArtifact artifact, final DbArtifactHash hash) {
+    private AbstractDbArtifact checkHashes(final AbstractDbArtifact artifact, final DbArtifactHash hash) {
         if (hash == null) {
             return artifact;
         }

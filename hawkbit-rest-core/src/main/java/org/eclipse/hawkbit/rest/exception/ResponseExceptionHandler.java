@@ -11,14 +11,15 @@ package org.eclipse.hawkbit.rest.exception;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolationException;
+import javax.validation.ValidationException;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.repository.exception.MultiPartFileUploadException;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,8 @@ public class ResponseExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(ResponseExceptionHandler.class);
     private static final Map<SpServerError, HttpStatus> ERROR_TO_HTTP_STATUS = new EnumMap<>(SpServerError.class);
     private static final HttpStatus DEFAULT_RESPONSE_STATUS = HttpStatus.INTERNAL_SERVER_ERROR;
+
+    private static final String MESSAGE_FORMATTER_SEPARATOR = " ";
 
     static {
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_ENTITY_NOT_EXISTS, HttpStatus.NOT_FOUND);
@@ -138,12 +141,40 @@ public class ResponseExceptionHandler {
      */
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ExceptionInfo> handleConstraintViolationException(final HttpServletRequest request,
-            final Exception ex) {
+            final ConstraintViolationException ex) {
         logRequest(request, ex);
 
-        final ExceptionInfo response = createExceptionInfo(
-                new org.eclipse.hawkbit.repository.exception.ConstraintViolationException(
-                        (ConstraintViolationException) ex));
+        final ExceptionInfo response = new ExceptionInfo();
+        response.setMessage(ex.getConstraintViolations().stream().map(
+                violation -> violation.getPropertyPath() + MESSAGE_FORMATTER_SEPARATOR + violation.getMessage() + ".")
+                .collect(Collectors.joining(MESSAGE_FORMATTER_SEPARATOR)));
+        response.setExceptionClass(ex.getClass().getName());
+        response.setErrorCode(SpServerError.SP_REPO_CONSTRAINT_VIOLATION.getKey());
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Method for handling exception of type ValidationException which is thrown
+     * in case the request is rejected due to invalid requests. Called by the
+     * Spring-Framework for exception handling.
+     *
+     * @param request
+     *            the Http request
+     * @param ex
+     *            the exception which occurred
+     * @return the entity to be responded containing the exception information
+     *         as entity.
+     */
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ExceptionInfo> handleValidationException(final HttpServletRequest request,
+            final ValidationException ex) {
+        logRequest(request, ex);
+
+        final ExceptionInfo response = new ExceptionInfo();
+        response.setMessage(ex.getMessage());
+        response.setExceptionClass(ex.getClass().getName());
+        response.setErrorCode(SpServerError.SP_REPO_CONSTRAINT_VIOLATION.getKey());
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }

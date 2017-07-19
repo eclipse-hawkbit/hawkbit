@@ -14,7 +14,7 @@ import java.util.Optional;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.artifact.repository.ArtifactStoreException;
 import org.eclipse.hawkbit.artifact.repository.HashNotMatchException;
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
@@ -88,7 +88,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     public Artifact createArtifact(final InputStream stream, final Long moduleId, final String filename,
             final String providedMd5Sum, final String providedSha1Sum, final boolean overrideExisting,
             final String contentType) {
-        DbArtifact result = null;
+        AbstractDbArtifact result = null;
 
         final SoftwareModule softwareModule = getModuleAndThrowExceptionIfThatFails(moduleId);
 
@@ -184,12 +184,12 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     @Override
-    public Optional<DbArtifact> loadArtifactBinary(final String sha1Hash) {
+    public Optional<AbstractDbArtifact> loadArtifactBinary(final String sha1Hash) {
         return Optional.ofNullable(artifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), sha1Hash));
     }
 
     private Artifact storeArtifactMetadata(final SoftwareModule softwareModule, final String providedFilename,
-            final DbArtifact result, final Artifact existing) {
+            final AbstractDbArtifact result, final Artifact existing) {
         JpaArtifact artifact = (JpaArtifact) existing;
         if (existing == null) {
             artifact = new JpaArtifact(result.getHashes().getSha1(), providedFilename, softwareModule);

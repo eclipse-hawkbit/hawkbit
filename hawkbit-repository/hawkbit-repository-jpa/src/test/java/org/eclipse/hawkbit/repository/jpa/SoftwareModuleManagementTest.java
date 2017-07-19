@@ -252,8 +252,8 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     @Description("Counts all software modules in the repsitory that are not marked as deleted.")
     public void countSoftwareModulesAll() {
         // found in test
-        final SoftwareModule one = testdataFactory.createSoftwareModuleOs("one");
-        final SoftwareModule two = testdataFactory.createSoftwareModuleOs("two");
+        testdataFactory.createSoftwareModuleOs("one");
+        testdataFactory.createSoftwareModuleOs("two");
         final SoftwareModule deleted = testdataFactory.createSoftwareModuleOs("deleted");
         // ignored
         softwareModuleManagement.deleteSoftwareModule(deleted.getId());

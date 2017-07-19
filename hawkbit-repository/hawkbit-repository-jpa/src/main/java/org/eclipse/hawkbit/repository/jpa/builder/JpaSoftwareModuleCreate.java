@@ -8,10 +8,11 @@
  */
 package org.eclipse.hawkbit.repository.jpa.builder;
 
+import javax.validation.ValidationException;
+
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.builder.AbstractSoftwareModuleUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
-import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -36,7 +37,7 @@ public class JpaSoftwareModuleCreate extends AbstractSoftwareModuleUpdateCreate<
 
     private SoftwareModuleType getSoftwareModuleTypeFromKeyString(final String type) {
         if (type == null) {
-            throw new ConstraintViolationException("type cannot be null");
+            throw new ValidationException("type cannot be null");
         }
 
         return softwareModuleTypeManagement.findSoftwareModuleTypeByKey(type.trim())

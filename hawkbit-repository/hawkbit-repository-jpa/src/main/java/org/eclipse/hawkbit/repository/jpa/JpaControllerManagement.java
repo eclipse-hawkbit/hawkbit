@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
-import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -481,13 +480,6 @@ public class JpaControllerManagement implements ControllerManagement {
     private JpaAction getActionAndThrowExceptionIfNotFound(final Long actionId) {
         return actionRepository.findById(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
-    }
-
-    @Override
-    public void downloadProgress(final Long statusId, final Long requestedBytes, final Long shippedBytesSinceLast,
-            final Long shippedBytesOverall) {
-        eventPublisher.publishEvent(new DownloadProgressEvent(tenantAware.getCurrentTenant(), shippedBytesSinceLast,
-                applicationContext.getId()));
     }
 
     @Override
