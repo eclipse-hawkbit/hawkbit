@@ -430,7 +430,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Simple offline deployment of a distribution set to a list of targets. Verifies that offline assigment "
-            + "is correctly executed for targets that do not have a runnign update already. Those are ignored.")
+            + "is correctly executed for targets that do not have a running update already. Those are ignored.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 20),
             @Expect(type = TargetUpdatedEvent.class, count = 20), @Expect(type = ActionCreatedEvent.class, count = 20),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),

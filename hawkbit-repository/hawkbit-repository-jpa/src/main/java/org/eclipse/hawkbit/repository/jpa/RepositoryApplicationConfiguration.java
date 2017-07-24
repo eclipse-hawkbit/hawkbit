@@ -50,6 +50,7 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
 import org.eclipse.hawkbit.repository.jpa.event.JpaEventEntityManager;
+import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
@@ -87,6 +88,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.support.locks.LockRegistry;
@@ -496,8 +498,16 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    DeploymentManagement deploymentManagement() {
-        return new JpaDeploymentManagement();
+    DeploymentManagement deploymentManagement(final EntityManager entityManager,
+            final ActionRepository actionRepository, final DistributionSetRepository distributionSetRepository,
+            final TargetRepository targetRepository, final ActionStatusRepository actionStatusRepository,
+            final TargetManagement targetManagement, final AuditorAware<String> auditorProvider,
+            final ApplicationEventPublisher eventPublisher, final ApplicationContext applicationContext,
+            final AfterTransactionCommitExecutor afterCommit, final VirtualPropertyReplacer virtualPropertyReplacer,
+            final PlatformTransactionManager txManager) {
+        return new JpaDeploymentManagement(entityManager, actionRepository, distributionSetRepository, targetRepository,
+                actionStatusRepository, targetManagement, auditorProvider, eventPublisher, applicationContext,
+                afterCommit, virtualPropertyReplacer, txManager);
     }
 
     /**

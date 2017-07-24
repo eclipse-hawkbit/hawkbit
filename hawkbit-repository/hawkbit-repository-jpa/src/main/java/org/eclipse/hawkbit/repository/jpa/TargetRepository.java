@@ -59,8 +59,8 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
             @Param("lastModifiedBy") String modifiedBy, @Param("targets") Collection<Long> targets);
 
     /**
-     * Sets {@link JpaTarget#getAssignedDistributionSet()} and
-     * {@link JpaTarget#getInstalledDistributionSet()}.
+     * Sets {@link JpaTarget#getAssignedDistributionSet()},
+     * {@link JpaTarget#getInstalledDistributionSet()} and
      * {@link JpaTarget#getInstallationDate()}
      *
      * @param set

@@ -121,13 +121,16 @@ public interface DeploymentManagement {
      * Method registers an "offline" assignment, i.e. adds a completed action
      * for the given {@link DistributionSet} to the given {@link Target}s.
      * 
-     * The handling differs to hawkBit manged updates my means that:<br/>
-     * A. it ignores targets completely that are in
-     * {@link TargetUpdateStatus#PENDING}.<br/>
-     * B. it creates completed actions.<br/>
-     * C. sets both installed and assigned DS on the target and switches the
-     * status to {@link TargetUpdateStatus#IN_SYNC} <br/>
-     * D. does not send a {@link TargetAssignDistributionSetEvent}.<br/>
+     * The handling differs to hawkBit managed updates my means that:<br/>
+     * 
+     * <ol type="A">
+     * <li>it ignores targets completely that are in
+     * {@link TargetUpdateStatus#PENDING}.</li>
+     * <li>it creates completed actions.</li>
+     * <li>sets both installed and assigned DS on the target and switches the
+     * status to {@link TargetUpdateStatus#IN_SYNC}.</li>
+     * <li>does not send a {@link TargetAssignDistributionSetEvent}.</li>
+     * </ol>
      * 
      * @param dsID
      *            the ID of the distribution set that was assigned
@@ -137,7 +140,7 @@ public interface DeploymentManagement {
      * 
      * @throws IncompleteDistributionSetException
      *             if mandatory {@link SoftwareModuleType} are not assigned as
-     *             define by the {@link DistributionSetType}.
+     *             defined by the {@link DistributionSetType}.
      *
      * @throws EntityNotFoundException
      *             if either provided {@link DistributionSet} or {@link Target}s
