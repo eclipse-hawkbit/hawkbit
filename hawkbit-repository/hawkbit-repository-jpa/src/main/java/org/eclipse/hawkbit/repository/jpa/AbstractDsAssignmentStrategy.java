@@ -33,7 +33,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 
 /**
- * @author kaizimmerm
+ * {@link DistributionSet} to {@link Target} assignment strategy as utility for
+ * {@link JpaDeploymentManagement}.
  *
  */
 public abstract class AbstractDsAssignmentStrategy {
