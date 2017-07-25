@@ -63,29 +63,29 @@ public abstract class AbstractDsAssignmentStrategy {
      * 
      * @param controllerIDs
      *            as provided by repository caller
-     * @param setId
+     * @param distributionSetId
      *            to assign
      * @return list of targets up to {@link Constants#MAX_ENTRIES_IN_STATEMENT}
      */
-    abstract List<JpaTarget> findTargetsForAssignment(final List<String> controllerIDs, final long setId);
+    abstract List<JpaTarget> findTargetsForAssignment(final List<String> controllerIDs, final long distributionSetId);
 
     /**
      * Update status and DS fields of given target.
      * 
-     * @param set
+     * @param distributionSet
      *            to set
      * @param targetIds
      *            to change
      * @param currentUser
      *            for auditing
      */
-    abstract void updateTargetStatus(final JpaDistributionSet set, final List<List<Long>> targetIds,
+    abstract void updateTargetStatus(final JpaDistributionSet distributionSet, final List<List<Long>> targetIds,
             final String currentUser);
 
     /**
      * Cancels actions that can be canceled (i.e.
      * {@link DistributionSet#isRequiredMigrationStep() is <code>false</code>})
-     * as a result of the new assignment and returns all {@link Target}s whers
+     * as a result of the new assignment and returns all {@link Target}s where
      * such actions existed.
      * 
      * @param targetIds
@@ -135,8 +135,8 @@ public abstract class AbstractDsAssignmentStrategy {
 
         return activeActions.stream().map(action -> {
             action.setStatus(Status.CANCELING);
-            // document that the status has been retrieved
 
+            // document that the status has been retrieved
             actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELING, System.currentTimeMillis(),
                     RepositoryConstants.SERVER_MESSAGE_PREFIX + "cancel obsolete action due to new update"));
             actionRepository.save(action);

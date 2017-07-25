@@ -140,9 +140,11 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetAssignmentResult offlineAssignedDistributionSet(final Long dsID,
             final Collection<String> controllerIDs) {
-        return assignDistributionSetToTargets(dsID, controllerIDs.stream()
-                .map(t -> new TargetWithActionType(t, ActionType.FORCED, -1)).collect(Collectors.toList()), null,
-                offlineDsAssignmentStrategy);
+        return assignDistributionSetToTargets(dsID,
+                controllerIDs.stream()
+                        .map(controllerId -> new TargetWithActionType(controllerId, ActionType.FORCED, -1))
+                        .collect(Collectors.toList()),
+                null, offlineDsAssignmentStrategy);
     }
 
     @Override
@@ -152,9 +154,11 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID, final ActionType actionType,
             final long forcedTimestamp, final Collection<String> controllerIDs) {
 
-        return assignDistributionSetToTargets(dsID, controllerIDs.stream()
-                .map(t -> new TargetWithActionType(t, actionType, forcedTimestamp)).collect(Collectors.toList()), null,
-                onlineDsAssignmentStrategy);
+        return assignDistributionSetToTargets(dsID,
+                controllerIDs.stream()
+                        .map(controllerId -> new TargetWithActionType(controllerId, actionType, forcedTimestamp))
+                        .collect(Collectors.toList()),
+                null, onlineDsAssignmentStrategy);
 
     }
 

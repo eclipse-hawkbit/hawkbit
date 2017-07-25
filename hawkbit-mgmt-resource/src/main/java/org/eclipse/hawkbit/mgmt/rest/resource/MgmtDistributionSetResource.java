@@ -228,21 +228,21 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     @Override
     public ResponseEntity<MgmtTargetAssignmentResponseBody> createAssignedTarget(
             @PathVariable("distributionSetId") final Long distributionSetId,
-            @RequestBody final List<MgmtTargetAssignmentRequestBody> targetIds,
+            @RequestBody final List<MgmtTargetAssignmentRequestBody> assignments,
             @RequestParam(value = "offline", required = false) final boolean offline) {
 
         if (offline) {
             return ResponseEntity.ok(MgmtDistributionSetMapper
-                    .toResponse(this.deployManagament.offlineAssignedDistributionSet(distributionSetId, targetIds
+                    .toResponse(this.deployManagament.offlineAssignedDistributionSet(distributionSetId, assignments
                             .stream().map(MgmtTargetAssignmentRequestBody::getId).collect(Collectors.toList()))));
         }
 
-        return ResponseEntity
-                .ok(MgmtDistributionSetMapper.toResponse(this.deployManagament.assignDistributionSet(distributionSetId,
-                        targetIds.stream()
-                                .map(t -> new TargetWithActionType(t.getId(),
-                                        MgmtRestModelMapper.convertActionType(t.getType()), t.getForcetime()))
-                                .collect(Collectors.toList()))));
+        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(this.deployManagament.assignDistributionSet(
+                distributionSetId,
+                assignments.stream()
+                        .map(assignment -> new TargetWithActionType(assignment.getId(),
+                                MgmtRestModelMapper.convertActionType(assignment.getType()), assignment.getForcetime()))
+                        .collect(Collectors.toList()))));
 
     }
 
