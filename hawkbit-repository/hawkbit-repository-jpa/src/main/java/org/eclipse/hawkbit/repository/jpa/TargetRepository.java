@@ -59,6 +59,29 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
             @Param("lastModifiedBy") String modifiedBy, @Param("targets") Collection<Long> targets);
 
     /**
+     * Sets {@link JpaTarget#getAssignedDistributionSet()},
+     * {@link JpaTarget#getInstalledDistributionSet()} and
+     * {@link JpaTarget#getInstallationDate()}
+     *
+     * @param set
+     *            to use
+     * @param status
+     *            to set
+     * @param modifiedAt
+     *            current time
+     * @param modifiedBy
+     *            current auditor
+     * @param targets
+     *            to update
+     */
+    @Modifying
+    @Transactional
+    @Query("UPDATE JpaTarget t SET t.assignedDistributionSet = :set, t.installedDistributionSet = :set, t.installationDate = :lastModifiedAt, t.lastModifiedAt = :lastModifiedAt, t.lastModifiedBy = :lastModifiedBy, t.updateStatus = :status WHERE t.id IN :targets")
+    void setAssignedAndInstalledDistributionSetAndUpdateStatus(@Param("status") TargetUpdateStatus status,
+            @Param("set") JpaDistributionSet set, @Param("lastModifiedAt") Long modifiedAt,
+            @Param("lastModifiedBy") String modifiedBy, @Param("targets") Collection<Long> targets);
+
+    /**
      * Loads {@link Target} by given ID.
      *
      * @param controllerID
