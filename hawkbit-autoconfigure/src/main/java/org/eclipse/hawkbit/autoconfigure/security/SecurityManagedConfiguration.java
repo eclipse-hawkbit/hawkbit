@@ -35,7 +35,6 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.ControllerTenantAwareAuthenticationDetailsSource;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.DosFilter;
-import org.eclipse.hawkbit.security.ExcludePathAwareShallowETagFilter;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticateAnonymousDownloadFilter;
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticateSecurityTokenFilter;
@@ -51,6 +50,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
@@ -172,6 +172,7 @@ public class SecurityManagedConfiguration {
          *         of service protection filter in the filter chain
          */
         @Bean
+        @ConditionalOnProperty(prefix = "hawkbit.server.security.dos.filter", name = "enabled", matchIfMissing = true)
         public FilterRegistrationBean dosDDiFilter(final HawkbitSecurityProperties securityProperties) {
 
             final FilterRegistrationBean filterRegBean = dosFilter(Arrays.asList(DDI_ANT_MATCHER),
@@ -262,6 +263,7 @@ public class SecurityManagedConfiguration {
      *         service protection filter in the filter chain
      */
     @Bean
+    @ConditionalOnProperty(prefix = "hawkbit.server.security.dos.filter", name = "enabled", matchIfMissing = true)
     public FilterRegistrationBean dosSystemFilter(final HawkbitSecurityProperties securityProperties) {
 
         final FilterRegistrationBean filterRegBean = dosFilter(Collections.emptyList(),
@@ -355,6 +357,7 @@ public class SecurityManagedConfiguration {
          *         of service protection filter in the filter chain
          */
         @Bean
+        @ConditionalOnProperty(prefix = "hawkbit.server.security.dos.filter", name = "enabled", matchIfMissing = true)
         public FilterRegistrationBean dosMgmtFilter(final HawkbitSecurityProperties securityProperties) {
 
             final FilterRegistrationBean filterRegBean = dosFilter(null, securityProperties.getDos().getFilter(),
@@ -407,29 +410,6 @@ public class SecurityManagedConfiguration {
     }
 
     /**
-     * Filter registration bean for spring etag filter.
-     *
-     * @return the spring filter registration bean for registering an etag
-     *         filter in the filter chain
-     */
-    @Bean
-    @Order(380)
-    public FilterRegistrationBean eTagFilter() {
-
-        final FilterRegistrationBean filterRegBean = new FilterRegistrationBean();
-        // Exclude the URLs for downloading artifacts, so no eTag is generated
-        // in the ShallowEtagHeaderFilter, just using the SH1 hash of the
-        // artifact itself as 'ETag', because otherwise the file will be copied
-        // in memory!
-        filterRegBean.setFilter(new ExcludePathAwareShallowETagFilter("/UI/**",
-                "/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download",
-                "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/**",
-                "/api/v1/downloadserver/**"));
-
-        return filterRegBean;
-    }
-
-    /**
      * {@link WebSecurityConfigurer} for external (management) access.
      */
     @Configuration
@@ -457,6 +437,7 @@ public class SecurityManagedConfiguration {
          *         of service protection filter in the filter chain
          */
         @Bean
+        @ConditionalOnProperty(prefix = "hawkbit.server.security.dos.ui-filter", name = "enabled", matchIfMissing = true)
         public FilterRegistrationBean dosMgmtUiFilter(final HawkbitSecurityProperties securityProperties) {
 
             final FilterRegistrationBean filterRegBean = dosFilter(null, securityProperties.getDos().getUiFilter(),

@@ -11,10 +11,12 @@ package org.eclipse.hawkbit.rest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.hawkbit.rest.exception.ResponseExceptionHandler;
+import org.eclipse.hawkbit.rest.filter.ExcludePathAwareShallowETagFilter;
 import org.eclipse.hawkbit.rest.util.FilterHttpResponse;
 import org.eclipse.hawkbit.rest.util.HttpResponseFactoryBean;
 import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -63,5 +65,27 @@ public class RestConfiguration {
     @Bean
     ResponseExceptionHandler responseExceptionHandler() {
         return new ResponseExceptionHandler();
+    }
+
+    /**
+     * Filter registration bean for spring etag filter.
+     *
+     * @return the spring filter registration bean for registering an etag
+     *         filter in the filter chain
+     */
+    @Bean
+    FilterRegistrationBean eTagFilter() {
+
+        final FilterRegistrationBean filterRegBean = new FilterRegistrationBean();
+        // Exclude the URLs for downloading artifacts, so no eTag is generated
+        // in the ShallowEtagHeaderFilter, just using the SH1 hash of the
+        // artifact itself as 'ETag', because otherwise the file will be copied
+        // in memory!
+        filterRegBean.setFilter(new ExcludePathAwareShallowETagFilter("/UI/**",
+                "/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download",
+                "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/**",
+                "/api/v1/downloadserver/**"));
+
+        return filterRegBean;
     }
 }

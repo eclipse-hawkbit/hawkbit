@@ -12,9 +12,6 @@ import org.eclipse.hawkbit.rest.exception.SortParameterUnsupportedDirectionExcep
 
 /**
  * A definition of possible sorting direction.
- * 
- *
- *
  */
 public enum SortDirection {
     /**

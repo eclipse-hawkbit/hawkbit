@@ -747,7 +747,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Deletes multiple targets and verfies that all related metadat is also deleted.")
+    @Description("Deletes multiple targets and verfies that all related metadata is also deleted.")
     public void deletesTargetsAndVerifyCascadeDeletes() {
 
         final String undeployedTargetPrefix = "undep-T";

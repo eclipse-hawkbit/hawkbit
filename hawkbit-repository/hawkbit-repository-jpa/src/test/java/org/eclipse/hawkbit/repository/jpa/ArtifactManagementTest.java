@@ -104,10 +104,8 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
         final Artifact result = artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(), "file1",
                 false);
-        final Artifact result11 = artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(),
-                "file11", false);
-        final Artifact result12 = artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(),
-                "file12", false);
+        artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(), "file11", false);
+        artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(), "file12", false);
         final Artifact result2 = artifactManagement.createArtifact(new ByteArrayInputStream(random), sm2.getId(),
                 "file2", false);
 
@@ -270,8 +268,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(artifactManagement.findArtifactBySoftwareModule(PAGE, sm.getId())).isEmpty();
 
-        final Artifact result = artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024), sm.getId(),
-                "file1", false);
+        artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024), sm.getId(), "file1", false);
 
         assertThat(artifactManagement.findArtifactBySoftwareModule(PAGE, sm.getId())).hasSize(1);
     }

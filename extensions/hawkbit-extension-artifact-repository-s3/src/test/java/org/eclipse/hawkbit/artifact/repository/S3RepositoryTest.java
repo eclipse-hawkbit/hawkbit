@@ -26,7 +26,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.junit.Before;
 import org.junit.Test;
@@ -117,7 +117,7 @@ public class S3RepositoryTest {
         when(s3ObjectMetadataMock.getContentType()).thenReturn(knownContentType);
 
         // test
-        final DbArtifact artifactBySha1 = s3RepositoryUnderTest.getArtifactBySha1(TENANT, knownSHA1Hash);
+        final AbstractDbArtifact artifactBySha1 = s3RepositoryUnderTest.getArtifactBySha1(TENANT, knownSHA1Hash);
 
         // verify
         assertThat(artifactBySha1.getArtifactId()).isEqualTo(knownSHA1Hash);
@@ -152,7 +152,7 @@ public class S3RepositoryTest {
         when(amazonS3Mock.getObject(s3Properties.getBucketName(), knownSHA1Hash)).thenReturn(null);
 
         // test
-        final DbArtifact artifactBySha1NotExists = s3RepositoryUnderTest.getArtifactBySha1(TENANT, knownSHA1Hash);
+        final AbstractDbArtifact artifactBySha1NotExists = s3RepositoryUnderTest.getArtifactBySha1(TENANT, knownSHA1Hash);
 
         // verify
         assertThat(artifactBySha1NotExists).isNull();

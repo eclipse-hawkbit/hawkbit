@@ -19,6 +19,7 @@ import java.util.stream.StreamSupport;
 
 import javax.persistence.EntityManager;
 import javax.validation.ConstraintDeclarationException;
+import javax.validation.ValidationException;
 
 import org.eclipse.hawkbit.repository.AbstractRolloutManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -37,7 +38,6 @@ import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
-import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
@@ -216,7 +216,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
         final Long totalTargets = targetManagement.countTargetByTargetFilterQuery(rollout.getTargetFilterQuery());
         if (totalTargets == 0) {
-            throw new ConstraintViolationException("Rollout does not match any existing targets");
+            throw new ValidationException("Rollout does not match any existing targets");
         }
         rollout.setTotalTargets(totalTargets);
         return rolloutRepository.save(rollout);

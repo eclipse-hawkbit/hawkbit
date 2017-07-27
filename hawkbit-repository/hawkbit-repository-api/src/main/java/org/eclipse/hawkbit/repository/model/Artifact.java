@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 
 /**
  * Binaries for a {@link SoftwareModule} Note: the decision which artifacts have
@@ -34,7 +34,7 @@ public interface Artifact extends TenantAwareBaseEntity {
 
     /**
      * @return SHA-1 hash of the artifact in Base16 format that identifies the
-     *         {@link DbArtifact} in the system.
+     *         {@link AbstractDbArtifact} in the system.
      */
     String getSha1Hash();
 

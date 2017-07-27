@@ -16,11 +16,13 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.net.URL;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.api.HostnameResolver;
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
+import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystem;
+import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
@@ -160,9 +162,8 @@ public class AmqpControllerAuthenticationTest {
         when(artifactManagementMock.findArtifact(ARTIFACT_ID)).thenReturn(Optional.of(testArtifact));
         when(artifactManagementMock.findFirstArtifactBySHA1(SHA1)).thenReturn(Optional.of(testArtifact));
 
-        final DbArtifact artifact = new DbArtifact();
-        artifact.setSize(ARTIFACT_SIZE);
-        artifact.setHashes(new DbArtifactHash(SHA1, "md5 test"));
+        final AbstractDbArtifact artifact = new ArtifactFilesystem(new File("does not exist"), SHA1,
+                new DbArtifactHash(SHA1, "md5 test"), ARTIFACT_SIZE, null);
         when(artifactManagementMock.loadArtifactBinary(SHA1)).thenReturn(Optional.of(artifact));
 
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate,

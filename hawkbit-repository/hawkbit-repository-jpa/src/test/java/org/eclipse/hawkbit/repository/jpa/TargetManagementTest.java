@@ -484,8 +484,6 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
      */
     private void checkTargetHasTags(final boolean strict, final Iterable<Target> targets, final TargetTag... tags) {
         _target: for (final Target tl : targets) {
-            final Target t = targetManagement.findTargetByControllerID(tl.getControllerId()).get();
-
             for (final Tag tt : tagManagement.findAllTargetTags(PAGE, tl.getControllerId())) {
                 for (final Tag tag : tags) {
                     if (tag.getName().equals(tt.getName())) {
@@ -502,7 +500,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     private void checkTargetHasNotTags(final Iterable<Target> targets, final TargetTag... tags) {
         for (final Target tl : targets) {
-            final Target t = targetManagement.findTargetByControllerID(tl.getControllerId()).get();
+            targetManagement.findTargetByControllerID(tl.getControllerId()).get();
 
             for (final Tag tag : tags) {
                 for (final Tag tt : tagManagement.findAllTargetTags(PAGE, tl.getControllerId())) {

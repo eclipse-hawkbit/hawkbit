@@ -20,7 +20,7 @@ import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,7 +77,7 @@ public class S3Repository implements ArtifactRepository {
     }
 
     @Override
-    public DbArtifact store(final String tenant, final InputStream content, final String filename,
+    public AbstractDbArtifact store(final String tenant, final InputStream content, final String filename,
             final String contentType) {
         return store(tenant, content, filename, contentType, null);
     }
@@ -86,7 +86,7 @@ public class S3Repository implements ArtifactRepository {
     // suppress warning, of not strong enough hashing algorithm, SHA-1 and MD5
     // is not used security related
     @SuppressWarnings("squid:S2070")
-    public DbArtifact store(final String tenant, final InputStream content, final String filename,
+    public AbstractDbArtifact store(final String tenant, final InputStream content, final String filename,
             final String contentType, final DbArtifactHash hash) {
         final MessageDigest mdSHA1;
         final MessageDigest mdMD5;
@@ -117,7 +117,7 @@ public class S3Repository implements ArtifactRepository {
         }
     }
 
-    private DbArtifact store(final String tenant, final String sha1Hash16, final String mdMD5Hash16,
+    private AbstractDbArtifact store(final String tenant, final String sha1Hash16, final String mdMD5Hash16,
             final String contentType, final File file, final DbArtifactHash hash) {
         final S3Artifact s3Artifact = createS3Artifact(tenant, sha1Hash16, mdMD5Hash16, contentType, file);
         checkHashes(s3Artifact, hash);
@@ -145,14 +145,8 @@ public class S3Repository implements ArtifactRepository {
 
     private S3Artifact createS3Artifact(final String tenant, final String sha1Hash, final String mdMD5Hash16,
             final String contentType, final File file) {
-        final String key = objectKey(tenant, sha1Hash);
-        final S3Artifact s3Artifact = new S3Artifact(amazonS3, s3Properties, key);
-        s3Artifact.setContentType(contentType);
-        s3Artifact.setArtifactId(sha1Hash);
-        s3Artifact.setSize(file.length());
-        s3Artifact.setContentType(contentType);
-        s3Artifact.setHashes(new DbArtifactHash(sha1Hash, mdMD5Hash16));
-        return s3Artifact;
+        return new S3Artifact(amazonS3, s3Properties, objectKey(tenant, sha1Hash), sha1Hash,
+                new DbArtifactHash(sha1Hash, mdMD5Hash16), file.length(), contentType);
     }
 
     private ObjectMetadata createObjectMetadata(final String mdMD5Hash16, final String contentType, final File file) {
@@ -181,7 +175,7 @@ public class S3Repository implements ArtifactRepository {
     }
 
     @Override
-    public DbArtifact getArtifactBySha1(final String tenant, final String sha1Hash) {
+    public AbstractDbArtifact getArtifactBySha1(final String tenant, final String sha1Hash) {
         final String key = objectKey(tenant, sha1Hash);
 
         LOG.info("Retrieving S3 object from bucket {} and key {}", s3Properties.getBucketName(), key);
@@ -192,17 +186,15 @@ public class S3Repository implements ArtifactRepository {
 
         final ObjectMetadata s3ObjectMetadata = s3Object.getObjectMetadata();
 
-        final S3Artifact s3Artifact = new S3Artifact(amazonS3, s3Properties, key);
-        s3Artifact.setArtifactId(sha1Hash);
-        s3Artifact.setSize(s3ObjectMetadata.getContentLength());
         // the MD5Content is stored in the ETag
-        s3Artifact.setHashes(new DbArtifactHash(sha1Hash,
-                BaseEncoding.base16().lowerCase().encode(BaseEncoding.base64().decode(s3ObjectMetadata.getETag()))));
-        s3Artifact.setContentType(s3ObjectMetadata.getContentType());
-        return s3Artifact;
+        return new S3Artifact(amazonS3, s3Properties, key, sha1Hash,
+                new DbArtifactHash(sha1Hash,
+                        BaseEncoding.base16().lowerCase()
+                                .encode(BaseEncoding.base64().decode(s3ObjectMetadata.getETag()))),
+                s3ObjectMetadata.getContentLength(), s3ObjectMetadata.getContentType());
     }
 
-    private static void checkHashes(final DbArtifact artifact, final DbArtifactHash hash) {
+    private static void checkHashes(final AbstractDbArtifact artifact, final DbArtifactHash hash) {
         if (hash == null) {
             return;
         }

@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionHistory;
 import org.eclipse.hawkbit.ddi.json.model.DdiCancel;
@@ -38,6 +38,7 @@ import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
+import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.SoftwareModuleNotAssignedToTargetException;
@@ -47,8 +48,9 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.rest.util.FileStreamingUtil;
+import org.eclipse.hawkbit.rest.util.HttpUtil;
 import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
-import org.eclipse.hawkbit.rest.util.RestResourceConversionHelper;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.util.IpUtil;
@@ -56,7 +58,10 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -79,6 +84,12 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(DdiRootController.class);
     private static final String GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET = "given action ({}) is not assigned to given target ({}).";
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Autowired
     private ControllerManagement controllerManagement;
@@ -142,7 +153,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("controllerId") final String controllerId,
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("fileName") final String fileName) {
-        ResponseEntity<InputStream> result;
+        final ResponseEntity<InputStream> result;
 
         final Target target = controllerManagement.findByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
@@ -159,19 +170,26 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @SuppressWarnings("squid:S3655")
             final Artifact artifact = module.getArtifactByFilename(fileName).get();
 
-            final DbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash())
+            final AbstractDbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash())
                     .orElseThrow(() -> new ArtifactBinaryNotFoundException(artifact.getSha1Hash()));
 
-            final String ifMatch = requestResponseContextHolder.getHttpServletRequest().getHeader("If-Match");
-            if (ifMatch != null && !RestResourceConversionHelper.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
+            final String ifMatch = requestResponseContextHolder.getHttpServletRequest().getHeader(HttpHeaders.IF_MATCH);
+            if (ifMatch != null && !HttpUtil.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
                 result = new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
             } else {
                 final ActionStatus action = checkAndLogDownload(requestResponseContextHolder.getHttpServletRequest(),
                         target, module.getId());
-                result = RestResourceConversionHelper.writeFileResponse(artifact,
+
+                final Long statusId = action.getId();
+
+                result = FileStreamingUtil.writeFileResponse(file, artifact.getFilename(),
+                        artifact.getLastModifiedAt() != null ? artifact.getLastModifiedAt() : artifact.getCreatedAt(),
                         requestResponseContextHolder.getHttpServletResponse(),
-                        requestResponseContextHolder.getHttpServletRequest(), file, controllerManagement,
-                        action.getId());
+                        requestResponseContextHolder.getHttpServletRequest(),
+                        (length, shippedSinceLastEvent, total) -> eventPublisher
+                                .publishEvent(new DownloadProgressEvent(tenantAware.getCurrentTenant(), statusId,
+                                        shippedSinceLastEvent, applicationContext.getId())));
+
             }
         }
         return result;
@@ -218,15 +236,19 @@ public class DdiRootController implements DdiRootControllerRestApi {
             return ResponseEntity.notFound().build();
         }
 
+        final Artifact artifact = module.getArtifactByFilename(fileName)
+                .orElseThrow(() -> new EntityNotFoundException(Artifact.class, fileName));
+
         try {
-            DataConversionHelper.writeMD5FileResponse(fileName, requestResponseContextHolder.getHttpServletResponse(),
-                    module.getArtifactByFilename(fileName).get());
+            FileStreamingUtil.writeMD5FileResponse(requestResponseContextHolder.getHttpServletResponse(),
+                    artifact.getMd5Hash(), fileName);
         } catch (final IOException e) {
             LOG.error("Failed to stream MD5 File", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return ResponseEntity.ok().build();
+
     }
 
     @Override
@@ -254,11 +276,11 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
             final HandlingType handlingType = action.isForce() ? HandlingType.FORCED : HandlingType.ATTEMPT;
 
-            List<String> actionHistoryMsgs = controllerManagement.getActionHistoryMessages(action.getId(),
+            final List<String> actionHistoryMsgs = controllerManagement.getActionHistoryMessages(action.getId(),
                     actionHistoryMessageCount == null ? Integer.parseInt(DdiRestConstants.NO_ACTION_HISTORY)
                             : actionHistoryMessageCount);
 
-            DdiActionHistory actionHistory = actionHistoryMsgs.isEmpty() ? null
+            final DdiActionHistory actionHistory = actionHistoryMsgs.isEmpty() ? null
                     : new DdiActionHistory(action.getStatus().name(), actionHistoryMsgs);
 
             final DdiDeploymentBase base = new DdiDeploymentBase(Long.toString(action.getId()),

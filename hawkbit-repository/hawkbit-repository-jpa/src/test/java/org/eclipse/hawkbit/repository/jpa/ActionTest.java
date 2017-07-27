@@ -26,7 +26,6 @@ public class ActionTest {
     @Description("Ensures that timeforced moded switch from soft to forces after defined timeframe.")
     public void timeforcedHitNewHasCodeIsGenerated() throws InterruptedException {
 
-        final boolean active;
         // current time + 1 seconds
         final long sleepTime = 1000;
         final long timeForceTimeAt = System.currentTimeMillis() + sleepTime;

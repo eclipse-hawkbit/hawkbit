@@ -16,6 +16,7 @@ import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
+import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.junit.Test;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -30,7 +31,8 @@ public class ArtifactFilesystemTest {
     @Description("Verifies that an exception is thrown on opening an InputStream when file does not exists")
     public void getInputStreamOfNonExistingFileThrowsException() {
         final File file = new File("fileWhichTotalDoesNotExists");
-        final ArtifactFilesystem underTest = new ArtifactFilesystem(file);
+        final ArtifactFilesystem underTest = new ArtifactFilesystem(file, "fileWhichTotalDoesNotExists",
+                new DbArtifactHash("1", "2"), 0L, null);
         try {
             underTest.getFileInputStream();
             Assertions.fail("Expected a FileNotFoundException because file does not exists");
@@ -45,7 +47,8 @@ public class ArtifactFilesystemTest {
         final File createTempFile = File.createTempFile(ArtifactFilesystemTest.class.getSimpleName(), "");
         createTempFile.deleteOnExit();
 
-        final ArtifactFilesystem underTest = new ArtifactFilesystem(createTempFile);
+        final ArtifactFilesystem underTest = new ArtifactFilesystem(createTempFile,
+                ArtifactFilesystemTest.class.getSimpleName(), new DbArtifactHash("1", "2"), 0L, null);
         final byte[] buffer = new byte[1024];
         IOUtils.read(underTest.getFileInputStream(), buffer);
     }
