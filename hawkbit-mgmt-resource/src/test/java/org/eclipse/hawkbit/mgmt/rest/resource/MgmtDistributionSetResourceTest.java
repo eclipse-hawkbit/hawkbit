@@ -205,28 +205,47 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Test
     @Description("Ensures that multi target assignment through API is reflected by the repository.")
     public void assignMultipleTargetsToDistributionSet() throws Exception {
-        // prepare distribution set
-        final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
-        final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
-        // prepare targets
-        final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
+        final List<Target> targets = testdataFactory.createTargets(5);
         final JSONArray list = new JSONArray();
-        for (final String targetId : knownTargetIds) {
-            testdataFactory.createTarget(targetId);
-            list.put(new JSONObject().put("id", Long.valueOf(targetId)));
-        }
+        targets.forEach(target -> list.put(new JSONObject().put("id", target.getControllerId())));
+
         // assign already one target to DS
-        assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
+        assignDistributionSet(createdDs.getId(), targets.get(0).getControllerId());
 
         mvc.perform(post(
                 MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId() + "/assignedTargets")
                         .contentType(MediaType.APPLICATION_JSON).content(list.toString()))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.assigned", equalTo(knownTargetIds.length - 1)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.assigned", equalTo(targets.size() - 1)))
                 .andExpect(jsonPath("$.alreadyAssigned", equalTo(1)))
-                .andExpect(jsonPath("$.total", equalTo(knownTargetIds.length)));
+                .andExpect(jsonPath("$.total", equalTo(targets.size())));
 
         assertThat(targetManagement.findTargetByAssignedDistributionSet(createdDs.getId(), PAGE).getContent())
                 .as("Five targets in repository have DS assigned").hasSize(5);
+    }
+
+    @Test
+    @Description("Ensures that offline reported multi target assignment through API is reflected by the repository.")
+    public void offlineAssignmentOfMultipleTargetsToDistributionSet() throws Exception {
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
+        final List<Target> targets = testdataFactory.createTargets(5);
+        final JSONArray list = new JSONArray();
+        targets.forEach(target -> list.put(new JSONObject().put("id", target.getControllerId())));
+
+        // assign already one target to DS
+        assignDistributionSet(createdDs.getId(), targets.get(0).getControllerId());
+
+        mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId()
+                + "/assignedTargets?offline=true").contentType(MediaType.APPLICATION_JSON).content(list.toString()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.assigned", equalTo(targets.size() - 1)))
+                .andExpect(jsonPath("$.alreadyAssigned", equalTo(1)))
+                .andExpect(jsonPath("$.total", equalTo(targets.size())));
+
+        assertThat(targetManagement.findTargetByAssignedDistributionSet(createdDs.getId(), PAGE).getContent())
+                .as("Five targets in repository have DS assigned").hasSize(5);
+
+        assertThat(targetManagement.findTargetByInstalledDistributionSet(createdDs.getId(), PAGE).getContent())
+                .hasSize(4);
     }
 
     @Test

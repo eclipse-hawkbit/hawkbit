@@ -98,6 +98,19 @@ public final class TargetSpecifications {
     }
 
     /**
+     * {@link Specification} for retrieving {@link Target}s by "not equal to
+     * given {@link TargetUpdateStatus}".
+     *
+     * @param updateStatus
+     *            to be filtered on
+     * 
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> notEqualToTargetUpdateStatus(final TargetUpdateStatus updateStatus) {
+        return (targetRoot, query, cb) -> cb.not(cb.equal(targetRoot.get(JpaTarget_.updateStatus), updateStatus));
+    }
+
+    /**
      * {@link Specification} for retrieving {@link Target}s that are overdue. A
      * target is overdue if it did not respond during the configured
      * intervals:<br>

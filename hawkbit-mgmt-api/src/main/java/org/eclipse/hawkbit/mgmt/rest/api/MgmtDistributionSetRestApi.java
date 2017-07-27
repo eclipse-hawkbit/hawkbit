@@ -219,6 +219,9 @@ public interface MgmtDistributionSetRestApi {
      * @param targetIds
      *            the IDs of the target which should get assigned to the
      *            distribution set given in the response body
+     * @param offline
+     *            to <code>true</code> if update was executed offline, i.e. not
+     *            managed by hawkBit.
      * @return status OK if the assignment of the targets was successful and a
      *         complex return body which contains information about the assigned
      *         targets and the already assigned targets counters
@@ -227,7 +230,9 @@ public interface MgmtDistributionSetRestApi {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetAssignmentResponseBody> createAssignedTarget(
-            @PathVariable("distributionSetId") Long distributionSetId, List<MgmtTargetAssignmentRequestBody> targetIds);
+            @PathVariable("distributionSetId") Long distributionSetId,
+            final List<MgmtTargetAssignmentRequestBody> targetIds,
+            @RequestParam(value = "offline", required = false) boolean offline);
 
     /**
      * Gets a paged list of meta data for a distribution set.

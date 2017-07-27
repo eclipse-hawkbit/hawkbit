@@ -15,6 +15,7 @@ import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionStatus;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtDistributionSetAssigment;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAttributes;
@@ -245,6 +246,7 @@ public interface MgmtTargetRestApi {
      *
      * @param controllerId
      *            the ID of the target to retrieve the assigned distribution
+     * 
      * @return the assigned distribution set with status OK, if none is assigned
      *         than {@code null} content (e.g. "{}")
      */
@@ -259,13 +261,20 @@ public interface MgmtTargetRestApi {
      *            of the target to change
      * @param dsId
      *            of the distributionset that is to be assigned
-     * @return http status
+     * @param offline
+     *            to <code>true</code> if update was executed offline, i.e. not
+     *            managed by hawkBit.
+     * 
+     * @return status OK if the assignment of the targets was successful and a
+     *         complex return body which contains information about the assigned
+     *         targets and the already assigned targets counters
      */
     @RequestMapping(method = RequestMethod.POST, value = "/{controllerId}/assignedDS", consumes = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<Void> postAssignedDistributionSet(@PathVariable("controllerId") String controllerId,
-            MgmtDistributionSetAssigment dsId);
+    ResponseEntity<MgmtTargetAssignmentResponseBody> postAssignedDistributionSet(
+            @PathVariable("controllerId") String controllerId, MgmtDistributionSetAssigment dsId,
+            @RequestParam(value = "offline", required = false) boolean offline);
 
     /**
      * Handles the GET request of retrieving the installed distribution set of

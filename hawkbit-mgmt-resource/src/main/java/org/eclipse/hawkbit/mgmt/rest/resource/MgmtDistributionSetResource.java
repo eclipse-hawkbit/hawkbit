@@ -35,7 +35,6 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -229,16 +228,22 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     @Override
     public ResponseEntity<MgmtTargetAssignmentResponseBody> createAssignedTarget(
             @PathVariable("distributionSetId") final Long distributionSetId,
-            @RequestBody final List<MgmtTargetAssignmentRequestBody> targetIds) {
+            @RequestBody final List<MgmtTargetAssignmentRequestBody> assignments,
+            @RequestParam(value = "offline", required = false) final boolean offline) {
 
-        final DistributionSetAssignmentResult assignDistributionSet = this.deployManagament.assignDistributionSet(
+        if (offline) {
+            return ResponseEntity.ok(MgmtDistributionSetMapper
+                    .toResponse(this.deployManagament.offlineAssignedDistributionSet(distributionSetId, assignments
+                            .stream().map(MgmtTargetAssignmentRequestBody::getId).collect(Collectors.toList()))));
+        }
+
+        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(this.deployManagament.assignDistributionSet(
                 distributionSetId,
-                targetIds.stream()
-                        .map(t -> new TargetWithActionType(t.getId(),
-                                MgmtRestModelMapper.convertActionType(t.getType()), t.getForcetime()))
-                        .collect(Collectors.toList()));
+                assignments.stream()
+                        .map(assignment -> new TargetWithActionType(assignment.getId(),
+                                MgmtRestModelMapper.convertActionType(assignment.getType()), assignment.getForcetime()))
+                        .collect(Collectors.toList()))));
 
-        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(assignDistributionSet));
     }
 
     @Override
