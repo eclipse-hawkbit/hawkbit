@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Optional;
 
+import javax.validation.ConstraintViolationException;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -35,6 +36,9 @@ public interface TargetFilterQueryManagement {
      * @param create
      *            to create
      * @return the created {@link TargetFilterQuery}
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link TargetFilterQueryCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
     TargetFilterQuery createTargetFilterQuery(@NotNull TargetFilterQueryCreate create);
@@ -188,6 +192,9 @@ public interface TargetFilterQueryManagement {
      * @throws EntityNotFoundException
      *             if either {@link TargetFilterQuery} and/or autoAssignDs are
      *             provided but not found
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link TargetFilterQueryUpdate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     TargetFilterQuery updateTargetFilterQuery(@NotNull TargetFilterQueryUpdate update);

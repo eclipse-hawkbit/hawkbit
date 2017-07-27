@@ -59,7 +59,6 @@ final class MgmtRestModelMapper {
 
         switch (actionTypeRest) {
         case SOFT:
-
             return ActionType.SOFT;
         case FORCED:
             return ActionType.FORCED;

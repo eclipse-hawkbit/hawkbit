@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import javax.validation.ConstraintViolationException;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -71,11 +72,14 @@ public interface SoftwareModuleManagement {
      * @param creates
      *            {@link SoftwareModule}s to create
      * @return SoftwareModule
+     * 
      * @throws EntityAlreadyExistsException
      *             if a given entity already exists
-     * 
      * @throws EntityNotFoundException
      *             of given software module type does not exist
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link SoftwareModuleCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     List<SoftwareModule> createSoftwareModule(@NotNull Collection<SoftwareModuleCreate> creates);
@@ -85,11 +89,14 @@ public interface SoftwareModuleManagement {
      * @param create
      *            SoftwareModule to create
      * @return SoftwareModule
+     * 
      * @throws EntityAlreadyExistsException
      *             if a given entity already exists
-     * 
      * @throws EntityNotFoundException
      *             of given software module type does not exist
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link SoftwareModuleCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     SoftwareModule createSoftwareModule(@NotNull SoftwareModuleCreate create);
@@ -407,7 +414,10 @@ public interface SoftwareModuleManagement {
      * @return the saved Entity.
      * 
      * @throws EntityNotFoundException
-     *             if fiven {@link SoftwareModule} does not exist
+     *             if given {@link SoftwareModule} does not exist
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link SoftwareModuleUpdate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     SoftwareModule updateSoftwareModule(@NotNull SoftwareModuleUpdate update);

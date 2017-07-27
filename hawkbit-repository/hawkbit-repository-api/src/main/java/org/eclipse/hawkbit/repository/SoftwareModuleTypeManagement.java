@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import javax.validation.ConstraintViolationException;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -44,6 +45,10 @@ public interface SoftwareModuleTypeManagement {
      * @param creates
      *            to create
      * @return created Entity
+     * 
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link SoftwareModuleTypeCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     List<SoftwareModuleType> createSoftwareModuleType(@NotNull Collection<SoftwareModuleTypeCreate> creates);
@@ -54,6 +59,10 @@ public interface SoftwareModuleTypeManagement {
      * @param create
      *            to create
      * @return created Entity
+     * 
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link SoftwareModuleTypeCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     SoftwareModuleType createSoftwareModuleType(@NotNull SoftwareModuleTypeCreate create);
@@ -137,6 +146,9 @@ public interface SoftwareModuleTypeManagement {
      * @throws EntityNotFoundException
      *             in case the {@link SoftwareModuleType} does not exists and
      *             cannot be updated
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link SoftwareModuleTypeUpdate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     SoftwareModuleType updateSoftwareModuleType(@NotNull SoftwareModuleTypeUpdate update);

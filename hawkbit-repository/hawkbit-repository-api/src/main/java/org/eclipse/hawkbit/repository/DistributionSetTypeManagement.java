@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import javax.validation.ConstraintViolationException;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -46,6 +47,9 @@ public interface DistributionSetTypeManagement {
      *             if a provided linked entity does not exists (
      *             {@link DistributionSetType#getMandatoryModuleTypes()} or
      *             {@link DistributionSetType#getOptionalModuleTypes()}
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link DistributionSetTypeCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     DistributionSetType createDistributionSetType(@NotNull DistributionSetTypeCreate create);
@@ -61,6 +65,9 @@ public interface DistributionSetTypeManagement {
      *             if a provided linked entity does not exists (
      *             {@link DistributionSetType#getMandatoryModuleTypes()} or
      *             {@link DistributionSetType#getOptionalModuleTypes()}
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link DistributionSetTypeCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     List<DistributionSetType> createDistributionSetTypes(@NotNull Collection<DistributionSetTypeCreate> creates);
@@ -161,6 +168,9 @@ public interface DistributionSetTypeManagement {
      *             if the {@link DistributionSetType} is already in use by a
      *             {@link DistributionSet} and user tries to change list of
      *             {@link SoftwareModuleType}s
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link DistributionSetTypeUpdate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     DistributionSetType updateDistributionSetType(@NotNull DistributionSetTypeUpdate update);
