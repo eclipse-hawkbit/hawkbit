@@ -176,7 +176,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verify that a DistributionSet with with invalid properties cannot be created or updated")
+    @Description("Verify that a DistributionSet with invalid properties cannot be created or updated")
     @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 0) })
