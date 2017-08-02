@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import javax.validation.ConstraintViolationException;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -51,8 +52,12 @@ public interface TagManagement {
      * @param create
      *            to be created.
      * @return the new {@link DistributionSet}
+     * 
      * @throws EntityAlreadyExistsException
      *             if distributionSetTag already exists
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link TagCreate} for field constraints.
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
@@ -64,8 +69,12 @@ public interface TagManagement {
      * @param creates
      *            to be created
      * @return the new {@link DistributionSetTag}
+     * 
      * @throws EntityAlreadyExistsException
      *             if a given entity already exists
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link TagCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     List<DistributionSetTag> createDistributionSetTags(@NotNull Collection<TagCreate> creates);
@@ -80,6 +89,9 @@ public interface TagManagement {
      *
      * @throws EntityAlreadyExistsException
      *             if given object already exists
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link TagCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
     TargetTag createTargetTag(@NotNull TagCreate create);
@@ -93,6 +105,9 @@ public interface TagManagement {
      *
      * @throws EntityAlreadyExistsException
      *             if given object has already an ID.
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link TagCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
     List<TargetTag> createTargetTags(@NotNull Collection<TagCreate> creates);
@@ -261,6 +276,9 @@ public interface TagManagement {
      * @throws EntityNotFoundException
      *             in case the {@link DistributionSetTag} does not exists and
      *             cannot be updated
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link TagUpdate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     DistributionSetTag updateDistributionSetTag(@NotNull TagUpdate update);
@@ -275,6 +293,9 @@ public interface TagManagement {
      * @throws EntityNotFoundException
      *             in case the {@link TargetTag} does not exists and cannot be
      *             updated
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link TagUpdate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     TargetTag updateTargetTag(@NotNull TagUpdate update);

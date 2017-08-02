@@ -8,8 +8,11 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Tag;
-import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Builder to update an existing {@link Tag} entry. Defines all fields that can
@@ -22,20 +25,20 @@ public interface TagUpdate {
      *            for {@link Tag#getName()}
      * @return updated builder instance
      */
-    TagUpdate name(@NotEmpty String name);
+    TagUpdate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
 
     /**
      * @param description
      *            for {@link Tag#getDescription()}
      * @return updated builder instance
      */
-    TagUpdate description(String description);
+    TagUpdate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
      * @param colour
      *            for {@link Tag#getColour()}
      * @return updated builder instance
      */
-    TagUpdate colour(String colour);
+    TagUpdate colour(@Size(max = Tag.COLOUR_MAX_SIZE) String colour);
 
 }

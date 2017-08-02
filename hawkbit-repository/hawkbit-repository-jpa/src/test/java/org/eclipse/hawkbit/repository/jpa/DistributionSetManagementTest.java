@@ -19,11 +19,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.validation.ConstraintViolationException;
+
+import org.apache.commons.lang3.RandomStringUtils;
 import org.assertj.core.api.Condition;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -52,6 +56,7 @@ import com.google.common.collect.Sets;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Step;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
@@ -168,6 +173,84 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         verifyThrownExceptionBy(() -> distributionSetManagement.updateDistributionSetMetadata(set.getId(),
                 entityFactory.generateMetadata(NOT_EXIST_ID, "xxx")), "DistributionSetMetadata");
+    }
+
+    @Test
+    @Description("Verify that a DistributionSet with invalid properties cannot be created or updated")
+    @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 0) })
+    public void createAndUpdateDistributionSetWithInvalidFields() {
+        final DistributionSet set = testdataFactory.createDistributionSet();
+
+        createAndUpdateDistributionSetWithInvalidDescription(set);
+        createAndUpdateDistributionSetWithInvalidName(set);
+        createAndUpdateDistributionSetWithInvalidVersion(set);
+    }
+
+    @Step
+    private void createAndUpdateDistributionSetWithInvalidDescription(final DistributionSet set) {
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> distributionSetManagement.createDistributionSet(entityFactory.distributionSet()
+                        .create().name("a").version("a").description(RandomStringUtils.randomAlphanumeric(513))))
+                .as("entity with too long description should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> distributionSetManagement.updateDistributionSet(entityFactory.distributionSet()
+                        .update(set.getId()).description(RandomStringUtils.randomAlphanumeric(513))))
+                .as("entity with too long description should not be updated");
+
+    }
+
+    @Step
+    private void createAndUpdateDistributionSetWithInvalidName(final DistributionSet set) {
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> distributionSetManagement.createDistributionSet(entityFactory.distributionSet()
+                        .create().version("a").name(RandomStringUtils.randomAlphanumeric(65))))
+                .as("entity with too long name should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> distributionSetManagement
+                        .createDistributionSet(entityFactory.distributionSet().create().version("a").name("")))
+                .as("entity with too long name should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> distributionSetManagement.updateDistributionSet(entityFactory.distributionSet()
+                        .update(set.getId()).name(RandomStringUtils.randomAlphanumeric(65))))
+                .as("entity with too long name should not be updated");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> distributionSetManagement
+                        .updateDistributionSet(entityFactory.distributionSet().update(set.getId()).name("")))
+                .as("entity with too short name should not be updated");
+
+    }
+
+    @Step
+    private void createAndUpdateDistributionSetWithInvalidVersion(final DistributionSet set) {
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> distributionSetManagement.createDistributionSet(entityFactory.distributionSet()
+                        .create().name("a").version(RandomStringUtils.randomAlphanumeric(65))))
+                .as("entity with too long name should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> distributionSetManagement
+                        .createDistributionSet(entityFactory.distributionSet().create().name("a").version("")))
+                .as("entity with too long name should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> distributionSetManagement.updateDistributionSet(entityFactory.distributionSet()
+                        .update(set.getId()).version(RandomStringUtils.randomAlphanumeric(65))))
+                .as("entity with too long name should not be updated");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> distributionSetManagement
+                        .updateDistributionSet(entityFactory.distributionSet().update(set.getId()).version("")))
+                .as("entity with too short name should not be updated");
+
     }
 
     @Test

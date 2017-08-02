@@ -15,6 +15,15 @@ package org.eclipse.hawkbit.repository.model;
  *
  */
 public interface SoftwareModuleType extends NamedEntity {
+    /**
+     * Maximum length of key.
+     */
+    int KEY_MAX_SIZE = 64;
+
+    /**
+     * Maximum length of colour in Management UI.
+     */
+    int COLOUR_MAX_SIZE = 16;
 
     /**
      * @return business key of this {@link SoftwareModuleType}.

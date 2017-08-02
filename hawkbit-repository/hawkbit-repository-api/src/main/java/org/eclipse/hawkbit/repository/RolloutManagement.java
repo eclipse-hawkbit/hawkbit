@@ -121,7 +121,7 @@ public interface RolloutManagement {
      * @throws EntityNotFoundException
      *             if given {@link DistributionSet} does not exist
      * @throws ConstraintViolationException
-     *             if rollout or group parameters are invalid
+     *             if rollout or group parameters are invalid.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     Rollout createRollout(@NotNull RolloutCreate create, int amountGroup, @NotNull RolloutGroupConditions conditions);
@@ -174,6 +174,9 @@ public interface RolloutManagement {
      * @return the validation information
      * @throws RolloutIllegalStateException
      *             thrown when no targets are targeted by the rollout
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link RolloutGroupCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
     ListenableFuture<RolloutGroupsValidation> validateTargetsInGroups(List<RolloutGroupCreate> groups,

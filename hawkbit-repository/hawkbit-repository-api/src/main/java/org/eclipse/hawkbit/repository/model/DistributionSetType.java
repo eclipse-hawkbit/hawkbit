@@ -19,6 +19,15 @@ import java.util.Set;
  *
  */
 public interface DistributionSetType extends NamedEntity {
+    /**
+     * Maximum length of key.
+     */
+    int KEY_MAX_SIZE = 64;
+
+    /**
+     * Maximum length of colour in Management UI.
+     */
+    int COLOUR_MAX_SIZE = 16;
 
     /**
      * @return <code>true</code> if the type is deleted and only kept for

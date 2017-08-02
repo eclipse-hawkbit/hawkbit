@@ -16,6 +16,10 @@ import java.util.Optional;
  *
  */
 public interface SoftwareModule extends NamedVersionedEntity {
+    /**
+     * Maximum length of software vendor.
+     */
+    int VENDOR_MAX_SIZE = 256;
 
     /**
      * @param artifactId

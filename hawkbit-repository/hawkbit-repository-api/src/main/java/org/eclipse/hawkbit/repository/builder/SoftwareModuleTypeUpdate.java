@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
+import javax.validation.constraints.Size;
+
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 
 /**
@@ -21,12 +24,12 @@ public interface SoftwareModuleTypeUpdate {
      *            for {@link SoftwareModuleType#getDescription()}
      * @return updated builder instance
      */
-    SoftwareModuleTypeUpdate description(String description);
+    SoftwareModuleTypeUpdate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
      * @param colour
      *            for {@link SoftwareModuleType#getColour()}
      * @return updated builder instance
      */
-    SoftwareModuleTypeUpdate colour(String colour);
+    SoftwareModuleTypeUpdate colour(@Size(max = SoftwareModuleType.COLOUR_MAX_SIZE) String colour);
 }

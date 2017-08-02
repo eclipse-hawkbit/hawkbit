@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.validation.ConstraintViolationException;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -55,6 +56,9 @@ public interface ControllerManagement {
      *             per entry are inserted
      * @throws EntityNotFoundException
      *             if given action does not exist
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link ActionStatusCreate} for field constraints.
      * 
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
@@ -74,6 +78,9 @@ public interface ControllerManagement {
      *             per entry are inserted
      * @throws EntityNotFoundException
      *             if given action does not exist
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link ActionStatusCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     ActionStatus addInformationalActionStatus(@NotNull ActionStatusCreate create);
@@ -91,9 +98,11 @@ public interface ControllerManagement {
      * @throws QuotaExceededException
      *             if more than the allowed number of status entries or messages
      *             per entry are inserted
-     * 
      * @throws EntityNotFoundException
      *             if action status not exist
+     * @throws ConstraintViolationException
+     *             if fields are not filled as specified. Check
+     *             {@link ActionStatusCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     Action addUpdateActionStatus(@NotNull ActionStatusCreate create);
