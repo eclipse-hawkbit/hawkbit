@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  *
  */
 @RequestMapping(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING)
-public interface MgmtSystemRestApi {
+public interface MgmtTenantManagementRestApi {
 
     @RequestMapping(method = RequestMethod.GET, produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })

@@ -24,9 +24,9 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.T
  * A mapper which maps repository model to RESTful model representation and
  * back.
  */
-public final class MgmtSystemMapper {
+public final class MgmtTenantManagementMapper {
 
-    private MgmtSystemMapper() {
+    private MgmtTenantManagementMapper() {
         // Utility class
     }
 
@@ -50,7 +50,7 @@ public final class MgmtSystemMapper {
         restConfValue.setLastModifiedAt(repoConfValue.getLastModifiedAt());
         restConfValue.setLastModifiedBy(repoConfValue.getLastModifiedBy());
 
-        restConfValue.add(linkTo(methodOn(MgmtSystemResource.class).getConfigurationValue(key)).withSelfRel());
+        restConfValue.add(linkTo(methodOn(MgmtTenantManagementResource.class).getConfigurationValue(key)).withSelfRel());
 
         return restConfValue;
     }

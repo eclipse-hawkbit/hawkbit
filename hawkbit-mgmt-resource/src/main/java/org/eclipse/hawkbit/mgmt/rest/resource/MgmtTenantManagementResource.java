@@ -16,7 +16,7 @@ import java.util.Map;
 
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValue;
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValueRequest;
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtSystemRestApi;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtTenantManagementRestApi;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
@@ -34,15 +34,15 @@ import org.springframework.web.bind.annotation.RestController;
  * REST Resource handling tenant specific configuration operations.
  */
 @RestController
-public class MgmtSystemResource implements MgmtSystemRestApi {
+public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MgmtSystemResource.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MgmtTenantManagementResource.class);
 
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final TenantConfigurationProperties tenantConfigurationProperties;
 
     @Autowired
-    MgmtSystemResource(final TenantConfigurationManagement tenantConfigurationManagement,
+    MgmtTenantManagementResource(final TenantConfigurationManagement tenantConfigurationManagement,
             final TenantConfigurationProperties tenantConfigurationProperties) {
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.tenantConfigurationProperties = tenantConfigurationProperties;
@@ -51,7 +51,7 @@ public class MgmtSystemResource implements MgmtSystemRestApi {
     @Override
     public ResponseEntity<ResourceSupport> getSystem() {
         final ResourceSupport resourceSupport = new ResourceSupport();
-        resourceSupport.add(linkTo(methodOn(MgmtSystemResource.class).getSystemConfiguration()).withRel("configs"));
+        resourceSupport.add(linkTo(methodOn(MgmtTenantManagementResource.class).getSystemConfiguration()).withRel("configs"));
         return ResponseEntity.ok(resourceSupport);
     }
 
@@ -61,7 +61,7 @@ public class MgmtSystemResource implements MgmtSystemRestApi {
     @Override
     public ResponseEntity<Map<String, MgmtSystemTenantConfigurationValue>> getSystemConfiguration() {
         return ResponseEntity
-                .ok(MgmtSystemMapper.toResponse(tenantConfigurationManagement, tenantConfigurationProperties));
+                .ok(MgmtTenantManagementMapper.toResponse(tenantConfigurationManagement, tenantConfigurationProperties));
     }
 
     /**
@@ -99,7 +99,7 @@ public class MgmtSystemResource implements MgmtSystemRestApi {
 
         LOG.debug("{} config value getted, return status {}", keyName, HttpStatus.OK);
         return ResponseEntity
-                .ok(MgmtSystemMapper.toResponse(keyName, tenantConfigurationManagement.getConfigurationValue(keyName)));
+                .ok(MgmtTenantManagementMapper.toResponse(keyName, tenantConfigurationManagement.getConfigurationValue(keyName)));
     }
 
     /**
@@ -121,7 +121,7 @@ public class MgmtSystemResource implements MgmtSystemRestApi {
 
         final TenantConfigurationValue<? extends Serializable> updatedValue = tenantConfigurationManagement
                 .addOrUpdateConfiguration(keyName, configurationValueRest.getValue());
-        return ResponseEntity.ok(MgmtSystemMapper.toResponse(keyName, updatedValue));
+        return ResponseEntity.ok(MgmtTenantManagementMapper.toResponse(keyName, updatedValue));
     }
 
 }
