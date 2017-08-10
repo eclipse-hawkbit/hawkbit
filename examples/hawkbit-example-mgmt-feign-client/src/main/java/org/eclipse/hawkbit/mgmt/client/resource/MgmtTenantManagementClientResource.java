@@ -15,6 +15,6 @@ import org.springframework.cloud.netflix.feign.FeignClient;
  * Client binding for the {@link MgmtTenantManagementRestApi}.
  *
  */
-@FeignClient(name = "MgmtSystemClient", url = "${hawkbit.url:localhost:8080}")
+@FeignClient(name = "MgmtTenantManagementClient", url = "${hawkbit.url:localhost:8080}")
 public interface MgmtTenantManagementClientResource extends MgmtTenantManagementRestApi {
 }
