@@ -50,7 +50,8 @@ public final class MgmtTenantManagementMapper {
         restConfValue.setLastModifiedAt(repoConfValue.getLastModifiedAt());
         restConfValue.setLastModifiedBy(repoConfValue.getLastModifiedBy());
 
-        restConfValue.add(linkTo(methodOn(MgmtTenantManagementResource.class).getConfigurationValue(key)).withSelfRel());
+        restConfValue.add(
+                linkTo(methodOn(MgmtTenantManagementResource.class).getTenantConfigurationValue(key)).withSelfRel());
 
         return restConfValue;
     }
