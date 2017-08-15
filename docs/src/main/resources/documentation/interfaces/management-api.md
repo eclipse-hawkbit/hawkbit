@@ -37,6 +37,7 @@ Available Management APIs resources are:
 * [Target Tag](https://docs.bosch-iot-rollouts.com/documentation/rest-api/targettag-api-guide.html)
 * [Distribution Set Tag](https://docs.bosch-iot-rollouts.com/documentation/rest-api/distributionsettag-api-guide.html)
 * [Rollouts](https://docs.bosch-iot-rollouts.com/documentation/rest-api/rollout-api-guide.html)
+* [Tenant](https://docs.bosch-iot-rollouts.com/documentation/rest-api/tenant-api-guide.html)
 
 
 ## Headers

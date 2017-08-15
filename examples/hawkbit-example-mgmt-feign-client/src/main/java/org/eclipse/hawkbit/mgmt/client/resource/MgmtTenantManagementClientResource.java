@@ -8,13 +8,13 @@
  */
 package org.eclipse.hawkbit.mgmt.client.resource;
 
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtSystemRestApi;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtTenantManagementRestApi;
 import org.springframework.cloud.netflix.feign.FeignClient;
 
 /**
- * Client binding for the {@link MgmtSystemRestApi}.
+ * Client binding for the {@link MgmtTenantManagementRestApi}.
  *
  */
-@FeignClient(name = "MgmtSystemClient", url = "${hawkbit.url:localhost:8080}")
-public interface MgmtSystemClientResource extends MgmtSystemRestApi {
+@FeignClient(name = "MgmtTenantManagementClient", url = "${hawkbit.url:localhost:8080}")
+public interface MgmtTenantManagementClientResource extends MgmtTenantManagementRestApi {
 }
