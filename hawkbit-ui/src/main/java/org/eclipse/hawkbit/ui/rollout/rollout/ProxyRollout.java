@@ -35,7 +35,7 @@ public class ProxyRollout {
 
     private RolloutRendererData rolloutRendererData;
 
-    public static String PXY_ROLLOUT = "rollout";
+    public static final String PXY_ROLLOUT = "rollout";
 
     private Long id;
     private String name;
