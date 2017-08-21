@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.rollout.rollout;
 
 import static org.eclipse.hawkbit.ui.rollout.DistributionBarHelper.getTooltip;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
@@ -59,6 +58,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
+import com.google.common.collect.Lists;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.PropertyValueGenerator;
@@ -108,6 +108,10 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
     private static final Map<RolloutStatus, StatusFontIcon> statusIconMap = new EnumMap<>(RolloutStatus.class);
 
+    private static final List<Object> HIDDEN_COLUMNS = Arrays.asList(SPUILabelDefinitions.VAR_CREATED_DATE,
+            SPUILabelDefinitions.VAR_CREATED_USER, SPUILabelDefinitions.VAR_MODIFIED_DATE,
+            SPUILabelDefinitions.VAR_MODIFIED_BY, SPUILabelDefinitions.VAR_DESC);
+
     static {
         statusIconMap.put(RolloutStatus.FINISHED,
                 new StatusFontIcon(FontAwesome.CHECK_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_GREEN));
@@ -126,11 +130,6 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
                 new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_RED));
         statusIconMap.put(RolloutStatus.DELETING, new StatusFontIcon(null, SPUIStyleDefinitions.STATUS_SPINNER_RED));
     }
-
-    private static final List<Object> HIDDEN_COLUMNS = Arrays.asList(SPUILabelDefinitions.VAR_NAME,
-            SPUILabelDefinitions.VAR_CREATED_DATE, SPUILabelDefinitions.VAR_CREATED_USER,
-            SPUILabelDefinitions.VAR_MODIFIED_DATE, SPUILabelDefinitions.VAR_MODIFIED_BY,
-            SPUILabelDefinitions.VAR_DESC);
 
     /**
      * Constructor.
@@ -260,7 +259,6 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     protected void addContainerProperties() {
         final LazyQueryContainer rolloutGridContainer = getGeneratedPropertySupport().getRawContainer();
 
-        rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", false, false);
         rolloutGridContainer.addContainerProperty(ROLLOUT_RENDERER_DATA, RolloutRendererData.class, null, false, false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, null, false, false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_STATUS, RolloutStatus.class, null, false,
@@ -380,33 +378,23 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
     @Override
     protected void setColumnProperties() {
-        removeColumn(ProxyRollout.PXY_ROLLOUT);
-        clearSortOrder();
-        final List<Object> columnList = new ArrayList<>();
-        columnList.add(ROLLOUT_RENDERER_DATA);
-        columnList.add(SPUILabelDefinitions.VAR_DIST_NAME_VERSION);
-        columnList.add(SPUILabelDefinitions.VAR_STATUS);
-        columnList.add(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS);
-        columnList.add(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS);
-        columnList.add(SPUILabelDefinitions.VAR_TOTAL_TARGETS);
 
-        columnList.add(VIRT_PROP_RUN);
-        columnList.add(VIRT_PROP_PAUSE);
+        final List<String> columnsToShowInOrder = Lists.newArrayList(ROLLOUT_RENDERER_DATA,
+                SPUILabelDefinitions.VAR_DIST_NAME_VERSION, SPUILabelDefinitions.VAR_STATUS,
+                SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS, SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS,
+                SPUILabelDefinitions.VAR_TOTAL_TARGETS, VIRT_PROP_RUN, VIRT_PROP_PAUSE, VIRT_PROP_UPDATE,
+                VIRT_PROP_COPY, VIRT_PROP_DELETE, SPUILabelDefinitions.VAR_CREATED_DATE,
+                SPUILabelDefinitions.VAR_CREATED_USER, SPUILabelDefinitions.VAR_MODIFIED_DATE,
+                SPUILabelDefinitions.VAR_MODIFIED_BY, SPUILabelDefinitions.VAR_DESC);
 
-        if (permissionChecker.hasRolloutUpdatePermission()) {
-            columnList.add(VIRT_PROP_UPDATE);
+        if (!permissionChecker.hasRolloutUpdatePermission()) {
+            columnsToShowInOrder.remove(VIRT_PROP_UPDATE);
         }
-        if (permissionChecker.hasRolloutCreatePermission()) {
-            columnList.add(VIRT_PROP_COPY);
+        if (!permissionChecker.hasRolloutCreatePermission()) {
+            columnsToShowInOrder.remove(VIRT_PROP_COPY);
         }
-        columnList.add(VIRT_PROP_DELETE);
 
-        columnList.add(SPUILabelDefinitions.VAR_CREATED_DATE);
-        columnList.add(SPUILabelDefinitions.VAR_CREATED_USER);
-        columnList.add(SPUILabelDefinitions.VAR_MODIFIED_DATE);
-        columnList.add(SPUILabelDefinitions.VAR_MODIFIED_BY);
-        columnList.add(SPUILabelDefinitions.VAR_DESC);
-        setColumnOrder(columnList.toArray());
+        setColumns(columnsToShowInOrder.toArray());
     }
 
     @Override
@@ -416,10 +404,15 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         }
 
         getColumn(VIRT_PROP_RUN).setHidable(false);
-        getColumn(VIRT_PROP_COPY).setHidable(false);
-        getColumn(VIRT_PROP_DELETE).setHidable(false);
-        getColumn(VIRT_PROP_UPDATE).setHidable(false);
         getColumn(VIRT_PROP_PAUSE).setHidable(false);
+        getColumn(VIRT_PROP_DELETE).setHidable(false);
+
+        if (permissionChecker.hasRolloutUpdatePermission()) {
+            getColumn(VIRT_PROP_UPDATE).setHidable(false);
+        }
+        if (permissionChecker.hasRolloutCreatePermission()) {
+            getColumn(VIRT_PROP_COPY).setHidable(false);
+        }
     }
 
     @Override
@@ -446,12 +439,16 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         getColumn(VIRT_PROP_PAUSE).setRenderer(
                 new GridButtonRenderer(clickEvent -> pauseRollout((Long) clickEvent.getItemId())),
                 new RolloutGridButtonConverter(this::createPauseButtonMetadata));
-        getColumn(VIRT_PROP_UPDATE).setRenderer(
-                new GridButtonRenderer(clickEvent -> updateRollout((Long) clickEvent.getItemId())),
-                new RolloutGridButtonConverter(this::createUpdateButtonMetadata));
-        getColumn(VIRT_PROP_COPY).setRenderer(
-                new GridButtonRenderer(clickEvent -> copyRollout((Long) clickEvent.getItemId())),
-                new RolloutGridButtonConverter(this::createCopyButtonMetadata));
+        if (permissionChecker.hasRolloutUpdatePermission()) {
+            getColumn(VIRT_PROP_UPDATE).setRenderer(
+                    new GridButtonRenderer(clickEvent -> updateRollout((Long) clickEvent.getItemId())),
+                    new RolloutGridButtonConverter(this::createUpdateButtonMetadata));
+        }
+        if (permissionChecker.hasRolloutCreatePermission()) {
+            getColumn(VIRT_PROP_COPY).setRenderer(
+                    new GridButtonRenderer(clickEvent -> copyRollout((Long) clickEvent.getItemId())),
+                    new RolloutGridButtonConverter(this::createCopyButtonMetadata));
+        }
         getColumn(VIRT_PROP_DELETE).setRenderer(
                 new GridButtonRenderer(clickEvent -> deleteRollout((Long) clickEvent.getItemId())),
                 new RolloutGridButtonConverter(this::createDeleteButtonMetadata));
@@ -496,8 +493,12 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
             decoratedContainer.addGeneratedProperty(VIRT_PROP_RUN, new GenericPropertyValueGenerator());
             decoratedContainer.addGeneratedProperty(VIRT_PROP_PAUSE, new GenericPropertyValueGenerator());
-            decoratedContainer.addGeneratedProperty(VIRT_PROP_UPDATE, new GenericPropertyValueGenerator());
-            decoratedContainer.addGeneratedProperty(VIRT_PROP_COPY, new GenericPropertyValueGenerator());
+            if (permissionChecker.hasRolloutUpdatePermission()) {
+                decoratedContainer.addGeneratedProperty(VIRT_PROP_UPDATE, new GenericPropertyValueGenerator());
+            }
+            if (permissionChecker.hasRolloutCreatePermission()) {
+                decoratedContainer.addGeneratedProperty(VIRT_PROP_COPY, new GenericPropertyValueGenerator());
+            }
             decoratedContainer.addGeneratedProperty(VIRT_PROP_DELETE, new GenericPropertyValueGenerator());
 
             return decoratedContainer;
