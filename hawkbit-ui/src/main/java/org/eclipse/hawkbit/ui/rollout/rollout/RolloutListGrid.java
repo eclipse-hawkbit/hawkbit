@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -131,22 +132,6 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         statusIconMap.put(RolloutStatus.DELETING, new StatusFontIcon(null, SPUIStyleDefinitions.STATUS_SPINNER_RED));
     }
 
-    /**
-     * Constructor.
-     * 
-     * @param i18n
-     * @param eventBus
-     * @param rolloutManagement
-     * @param uiNotification
-     * @param rolloutUIState
-     * @param permissionChecker
-     * @param targetManagement
-     * @param entityFactory
-     * @param uiProperties
-     * @param targetFilterQueryManagement
-     * @param rolloutGroupManagement
-     * @param quotaManagement
-     */
     RolloutListGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final RolloutManagement rolloutManagement, final UINotification uiNotification,
             final RolloutUIState rolloutUIState, final SpPermissionChecker permissionChecker,
@@ -164,6 +149,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
         setGeneratedPropertySupport(new RolloutGeneratedPropertySupport());
         init();
+        hideColumnsDueToInsufficientPermissions();
     }
 
     /**
@@ -216,15 +202,14 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         if (!rollout.isPresent()) {
             return;
         }
-
         final GeneratedPropertyContainer rolloutContainer = (GeneratedPropertyContainer) getContainerDataSource();
         final Item item = rolloutContainer.getItem(rolloutChangeEvent.getRolloutId());
         if (item == null) {
             refreshContainer();
             return;
         }
+
         updateItem(rollout.get(), item);
-        refreshContainer();
     }
 
     private void updateItem(final Rollout rollout, final Item item) {
@@ -236,6 +221,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         final int groupsCreated = rollout.getRolloutGroupsCreated();
         item.getItemProperty(ROLLOUT_RENDERER_DATA)
                 .setValue(new RolloutRendererData(rollout.getName(), rollout.getStatus().toString()));
+        item.getItemProperty(ProxyRollout.PXY_ROLLOUT).setValue(rollout);
 
         if (groupsCreated != 0) {
             item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setValue(Integer.valueOf(groupsCreated));
@@ -308,15 +294,11 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         getColumn(VIRT_PROP_PAUSE).setMinimumWidth(25);
         getColumn(VIRT_PROP_PAUSE).setMaximumWidth(25);
 
-        if (permissionChecker.hasRolloutUpdatePermission()) {
-            getColumn(VIRT_PROP_UPDATE).setMinimumWidth(25);
-            getColumn(VIRT_PROP_UPDATE).setMaximumWidth(25);
-        }
+        getColumn(VIRT_PROP_UPDATE).setMinimumWidth(25);
+        getColumn(VIRT_PROP_UPDATE).setMaximumWidth(25);
 
-        if (permissionChecker.hasRolloutCreatePermission()) {
-            getColumn(VIRT_PROP_COPY).setMinimumWidth(25);
-            getColumn(VIRT_PROP_COPY).setMaximumWidth(25);
-        }
+        getColumn(VIRT_PROP_COPY).setMinimumWidth(25);
+        getColumn(VIRT_PROP_COPY).setMaximumWidth(25);
 
         getColumn(VIRT_PROP_DELETE).setMinimumWidth(25);
         getColumn(VIRT_PROP_DELETE).setMaximumWidth(40);
@@ -342,15 +324,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
         getColumn(VIRT_PROP_RUN).setHeaderCaption(i18n.getMessage("header.action.run"));
         getColumn(VIRT_PROP_PAUSE).setHeaderCaption(i18n.getMessage("header.action.pause"));
-
-        if (permissionChecker.hasRolloutUpdatePermission()) {
-            getColumn(VIRT_PROP_UPDATE).setHeaderCaption(i18n.getMessage("header.action.update"));
-        }
-
-        if (permissionChecker.hasRolloutCreatePermission()) {
-            getColumn(VIRT_PROP_COPY).setHeaderCaption(i18n.getMessage("header.action.copy"));
-        }
-
+        getColumn(VIRT_PROP_UPDATE).setHeaderCaption(i18n.getMessage("header.action.update"));
+        getColumn(VIRT_PROP_COPY).setHeaderCaption(i18n.getMessage("header.action.copy"));
         getColumn(VIRT_PROP_DELETE).setHeaderCaption(i18n.getMessage("header.action.delete"));
 
         joinColumns().setText(i18n.getMessage("header.action"));
@@ -358,17 +333,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
     private HeaderCell joinColumns() {
 
-        if (permissionChecker.hasRolloutUpdatePermission() && permissionChecker.hasRolloutCreatePermission()) {
-            return getDefaultHeaderRow().join(VIRT_PROP_RUN, VIRT_PROP_PAUSE, VIRT_PROP_UPDATE, VIRT_PROP_COPY,
-                    VIRT_PROP_DELETE);
-        }
-        if (permissionChecker.hasRolloutUpdatePermission()) {
-            return getDefaultHeaderRow().join(VIRT_PROP_RUN, VIRT_PROP_PAUSE, VIRT_PROP_UPDATE, VIRT_PROP_DELETE);
-        }
-        if (permissionChecker.hasRolloutCreatePermission()) {
-            return getDefaultHeaderRow().join(VIRT_PROP_RUN, VIRT_PROP_PAUSE, VIRT_PROP_COPY, VIRT_PROP_DELETE);
-        }
-        return getDefaultHeaderRow().join(VIRT_PROP_RUN, VIRT_PROP_PAUSE);
+        return getDefaultHeaderRow().join(VIRT_PROP_RUN, VIRT_PROP_PAUSE, VIRT_PROP_UPDATE, VIRT_PROP_COPY,
+                VIRT_PROP_DELETE);
     }
 
     @Override
@@ -387,13 +353,6 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
                 SPUILabelDefinitions.VAR_CREATED_USER, SPUILabelDefinitions.VAR_MODIFIED_DATE,
                 SPUILabelDefinitions.VAR_MODIFIED_BY, SPUILabelDefinitions.VAR_DESC);
 
-        if (!permissionChecker.hasRolloutUpdatePermission()) {
-            columnsToShowInOrder.remove(VIRT_PROP_UPDATE);
-        }
-        if (!permissionChecker.hasRolloutCreatePermission()) {
-            columnsToShowInOrder.remove(VIRT_PROP_COPY);
-        }
-
         setColumns(columnsToShowInOrder.toArray());
     }
 
@@ -406,13 +365,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         getColumn(VIRT_PROP_RUN).setHidable(false);
         getColumn(VIRT_PROP_PAUSE).setHidable(false);
         getColumn(VIRT_PROP_DELETE).setHidable(false);
-
-        if (permissionChecker.hasRolloutUpdatePermission()) {
-            getColumn(VIRT_PROP_UPDATE).setHidable(false);
-        }
-        if (permissionChecker.hasRolloutCreatePermission()) {
-            getColumn(VIRT_PROP_COPY).setHidable(false);
-        }
+        getColumn(VIRT_PROP_UPDATE).setHidable(false);
+        getColumn(VIRT_PROP_COPY).setHidable(false);
     }
 
     @Override
@@ -439,16 +393,12 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         getColumn(VIRT_PROP_PAUSE).setRenderer(
                 new GridButtonRenderer(clickEvent -> pauseRollout((Long) clickEvent.getItemId())),
                 new RolloutGridButtonConverter(this::createPauseButtonMetadata));
-        if (permissionChecker.hasRolloutUpdatePermission()) {
-            getColumn(VIRT_PROP_UPDATE).setRenderer(
-                    new GridButtonRenderer(clickEvent -> updateRollout((Long) clickEvent.getItemId())),
-                    new RolloutGridButtonConverter(this::createUpdateButtonMetadata));
-        }
-        if (permissionChecker.hasRolloutCreatePermission()) {
-            getColumn(VIRT_PROP_COPY).setRenderer(
-                    new GridButtonRenderer(clickEvent -> copyRollout((Long) clickEvent.getItemId())),
-                    new RolloutGridButtonConverter(this::createCopyButtonMetadata));
-        }
+        getColumn(VIRT_PROP_UPDATE).setRenderer(
+                new GridButtonRenderer(clickEvent -> updateRollout((Long) clickEvent.getItemId())),
+                new RolloutGridButtonConverter(this::createUpdateButtonMetadata));
+        getColumn(VIRT_PROP_COPY).setRenderer(
+                new GridButtonRenderer(clickEvent -> copyRollout((Long) clickEvent.getItemId())),
+                new RolloutGridButtonConverter(this::createCopyButtonMetadata));
         getColumn(VIRT_PROP_DELETE).setRenderer(
                 new GridButtonRenderer(clickEvent -> deleteRollout((Long) clickEvent.getItemId())),
                 new RolloutGridButtonConverter(this::createDeleteButtonMetadata));
@@ -493,12 +443,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
             decoratedContainer.addGeneratedProperty(VIRT_PROP_RUN, new GenericPropertyValueGenerator());
             decoratedContainer.addGeneratedProperty(VIRT_PROP_PAUSE, new GenericPropertyValueGenerator());
-            if (permissionChecker.hasRolloutUpdatePermission()) {
-                decoratedContainer.addGeneratedProperty(VIRT_PROP_UPDATE, new GenericPropertyValueGenerator());
-            }
-            if (permissionChecker.hasRolloutCreatePermission()) {
-                decoratedContainer.addGeneratedProperty(VIRT_PROP_COPY, new GenericPropertyValueGenerator());
-            }
+            decoratedContainer.addGeneratedProperty(VIRT_PROP_UPDATE, new GenericPropertyValueGenerator());
+            decoratedContainer.addGeneratedProperty(VIRT_PROP_COPY, new GenericPropertyValueGenerator());
             decoratedContainer.addGeneratedProperty(VIRT_PROP_DELETE, new GenericPropertyValueGenerator());
 
             return decoratedContainer;
@@ -786,6 +732,20 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         public Class<String> getPresentationType() {
             return String.class;
         }
+    }
+
+    private final void hideColumnsDueToInsufficientPermissions() {
+
+        final List<Object> modifiableColumnsList = getColumns().stream().map(Column::getPropertyId)
+                .collect(Collectors.toList());
+
+        if (!permissionChecker.hasRolloutUpdatePermission()) {
+            modifiableColumnsList.remove(VIRT_PROP_UPDATE);
+        }
+        if (!permissionChecker.hasRolloutCreatePermission()) {
+            modifiableColumnsList.remove(VIRT_PROP_COPY);
+        }
+        setColumns(modifiableColumnsList.toArray());
     }
 
 }
