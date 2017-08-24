@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
-import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
@@ -35,7 +34,7 @@ public class ProxyRollout {
 
     private RolloutRendererData rolloutRendererData;
 
-    public static final String PXY_ROLLOUT = "rollout";
+    public static final String PXY_ROLLOUT_STATUS = "status";
 
     private Long id;
     private String name;
@@ -46,7 +45,6 @@ public class ProxyRollout {
     private long forcedTime;
     private RolloutStatus status;
     private TotalTargetCountStatus totalTargetCountStatus;
-    private Rollout rollout;
 
     public RolloutRendererData getRolloutRendererData() {
         return rolloutRendererData;
@@ -220,14 +218,6 @@ public class ProxyRollout {
 
     public void setTotalTargetCountStatus(final TotalTargetCountStatus totalTargetCountStatus) {
         this.totalTargetCountStatus = totalTargetCountStatus;
-    }
-
-    public Rollout getRollout() {
-        return rollout;
-    }
-
-    public void setRollout(final Rollout rollout) {
-        this.rollout = rollout;
     }
 
 }

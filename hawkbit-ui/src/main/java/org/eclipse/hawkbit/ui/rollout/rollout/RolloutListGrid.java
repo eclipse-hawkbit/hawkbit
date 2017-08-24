@@ -221,7 +221,6 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         final int groupsCreated = rollout.getRolloutGroupsCreated();
         item.getItemProperty(ROLLOUT_RENDERER_DATA)
                 .setValue(new RolloutRendererData(rollout.getName(), rollout.getStatus().toString()));
-        item.getItemProperty(ProxyRollout.PXY_ROLLOUT).setValue(rollout);
 
         if (groupsCreated != 0) {
             item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setValue(Integer.valueOf(groupsCreated));
@@ -267,7 +266,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS,
                 TotalTargetCountStatus.class, null, false, false);
 
-        rolloutGridContainer.addContainerProperty(ProxyRollout.PXY_ROLLOUT, Rollout.class, null, true, false);
+        rolloutGridContainer.addContainerProperty(ProxyRollout.PXY_ROLLOUT_STATUS, RolloutStatus.class, null, true,
+                false);
     }
 
     @Override
@@ -408,17 +408,17 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
      * Generator class responsible to retrieve a Rollout from the grid data in
      * order to generate a virtual property.
      */
-    class GenericPropertyValueGenerator extends PropertyValueGenerator<Rollout> {
+    class GenericPropertyValueGenerator extends PropertyValueGenerator<RolloutStatus> {
         private static final long serialVersionUID = 1L;
 
         @Override
-        public Rollout getValue(final Item item, final Object itemId, final Object propertyId) {
-            return (Rollout) item.getItemProperty(ProxyRollout.PXY_ROLLOUT).getValue();
+        public RolloutStatus getValue(final Item item, final Object itemId, final Object propertyId) {
+            return (RolloutStatus) item.getItemProperty(ProxyRollout.PXY_ROLLOUT_STATUS).getValue();
         }
 
         @Override
-        public Class<Rollout> getType() {
-            return Rollout.class;
+        public Class<RolloutStatus> getType() {
+            return RolloutStatus.class;
         }
     }
 
@@ -452,9 +452,9 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     /**
-     * Concrete grid-button converter that handles Rollouts.
+     * Concrete grid-button converter that handles Rollouts Status.
      */
-    class RolloutGridButtonConverter extends AbstractGridButtonConverter<Rollout> {
+    class RolloutGridButtonConverter extends AbstractGridButtonConverter<RolloutStatus> {
 
         private static final long serialVersionUID = 1L;
 
@@ -462,15 +462,16 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
          * Constructor that sets the appropriate adapter.
          *
          * @param adapter
-         *            adapts <code>Action</code> to <code>StatusFontIcon</code>
+         *            adapts <code>RolloutStatus</code> to
+         *            <code>StatusFontIcon</code>
          */
-        public RolloutGridButtonConverter(final GridButtonAdapter<Rollout> adapter) {
+        public RolloutGridButtonConverter(final GridButtonAdapter<RolloutStatus> adapter) {
             addAdapter(adapter);
         }
 
         @Override
-        public Class<Rollout> getModelType() {
-            return Rollout.class;
+        public Class<RolloutStatus> getModelType() {
+            return RolloutStatus.class;
         }
     }
 
@@ -596,32 +597,32 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         return !expectedRolloutStatus.contains(currentRolloutStatus);
     }
 
-    private StatusFontIcon createRunButtonMetadata(final Rollout rollout) {
-        final boolean isDisabled = hasToBeDisabled(rollout.getStatus(), RUN_BUTTON_ENABLED);
+    private StatusFontIcon createRunButtonMetadata(final RolloutStatus rolloutStatus) {
+        final boolean isDisabled = hasToBeDisabled(rolloutStatus, RUN_BUTTON_ENABLED);
         return new StatusFontIcon(FontAwesome.PLAY, null, i18n.getMessage("tooltip.rollout.run"),
                 UIComponentIdProvider.ROLLOUT_RUN_BUTTON_ID, isDisabled);
     }
 
-    private StatusFontIcon createPauseButtonMetadata(final Rollout rollout) {
-        final boolean isDisabled = hasToBeDisabled(rollout.getStatus(), PAUSE_BUTTON_ENABLED);
+    private StatusFontIcon createPauseButtonMetadata(final RolloutStatus rolloutStatus) {
+        final boolean isDisabled = hasToBeDisabled(rolloutStatus, PAUSE_BUTTON_ENABLED);
         return new StatusFontIcon(FontAwesome.PAUSE, null, i18n.getMessage("tooltip.rollout.pause"),
                 UIComponentIdProvider.ROLLOUT_PAUSE_BUTTON_ID, isDisabled);
     }
 
-    private StatusFontIcon createCopyButtonMetadata(final Rollout rollout) {
-        final boolean isDisabled = hasToBeDisabled(rollout.getStatus(), DELETE_COPY_BUTTON_ENABLED);
+    private StatusFontIcon createCopyButtonMetadata(final RolloutStatus rolloutStatus) {
+        final boolean isDisabled = hasToBeDisabled(rolloutStatus, DELETE_COPY_BUTTON_ENABLED);
         return new StatusFontIcon(FontAwesome.COPY, null, i18n.getMessage("tooltip.rollout.copy"),
                 UIComponentIdProvider.ROLLOUT_COPY_BUTTON_ID, isDisabled);
     }
 
-    private StatusFontIcon createUpdateButtonMetadata(final Rollout rollout) {
-        final boolean isDisabled = hasToBeDisabled(rollout.getStatus(), UPDATE_BUTTON_ENABLED);
+    private StatusFontIcon createUpdateButtonMetadata(final RolloutStatus rolloutStatus) {
+        final boolean isDisabled = hasToBeDisabled(rolloutStatus, UPDATE_BUTTON_ENABLED);
         return new StatusFontIcon(FontAwesome.EDIT, null, i18n.getMessage("tooltip.rollout.update"),
                 UIComponentIdProvider.ROLLOUT_UPDATE_BUTTON_ID, isDisabled);
     }
 
-    private StatusFontIcon createDeleteButtonMetadata(final Rollout rollout) {
-        final boolean isDisabled = hasToBeDisabled(rollout.getStatus(), DELETE_COPY_BUTTON_ENABLED);
+    private StatusFontIcon createDeleteButtonMetadata(final RolloutStatus rolloutStatus) {
+        final boolean isDisabled = hasToBeDisabled(rolloutStatus, DELETE_COPY_BUTTON_ENABLED);
         return new StatusFontIcon(FontAwesome.TRASH_O, null, i18n.getMessage("tooltip.rollout.delete"),
                 UIComponentIdProvider.ROLLOUT_DELETE_BUTTON_ID, isDisabled);
     }
