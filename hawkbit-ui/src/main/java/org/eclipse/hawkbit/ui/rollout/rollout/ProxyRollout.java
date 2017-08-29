@@ -34,8 +34,6 @@ public class ProxyRollout {
 
     private RolloutRendererData rolloutRendererData;
 
-    public static final String PXY_ROLLOUT_STATUS = "status";
-
     private Long id;
     private String name;
     private String version;
@@ -219,5 +217,4 @@ public class ProxyRollout {
     public void setTotalTargetCountStatus(final TotalTargetCountStatus totalTargetCountStatus) {
         this.totalTargetCountStatus = totalTargetCountStatus;
     }
-
 }

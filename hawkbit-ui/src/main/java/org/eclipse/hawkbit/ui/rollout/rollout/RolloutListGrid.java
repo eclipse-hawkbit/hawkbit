@@ -59,7 +59,6 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.google.common.collect.Lists;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.PropertyValueGenerator;
@@ -266,7 +265,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS,
                 TotalTargetCountStatus.class, null, false, false);
 
-        rolloutGridContainer.addContainerProperty(ProxyRollout.PXY_ROLLOUT_STATUS, RolloutStatus.class, null, true,
+        rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_STATUS, RolloutStatus.class, null, true,
                 false);
     }
 
@@ -345,7 +344,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     @Override
     protected void setColumnProperties() {
 
-        final List<String> columnsToShowInOrder = Lists.newArrayList(ROLLOUT_RENDERER_DATA,
+        final List<String> columnsToShowInOrder = Arrays.asList(ROLLOUT_RENDERER_DATA,
                 SPUILabelDefinitions.VAR_DIST_NAME_VERSION, SPUILabelDefinitions.VAR_STATUS,
                 SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS, SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS,
                 SPUILabelDefinitions.VAR_TOTAL_TARGETS, VIRT_PROP_RUN, VIRT_PROP_PAUSE, VIRT_PROP_UPDATE,
@@ -413,7 +412,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
         @Override
         public RolloutStatus getValue(final Item item, final Object itemId, final Object propertyId) {
-            return (RolloutStatus) item.getItemProperty(ProxyRollout.PXY_ROLLOUT_STATUS).getValue();
+            return (RolloutStatus) item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).getValue();
         }
 
         @Override
