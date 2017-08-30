@@ -64,14 +64,9 @@ public class DdiDeployment {
     }
 
     /**
-     * The handling type for the update action.
+     * Handling type for the update action.
      */
     public enum HandlingType {
-
-        /**
-         * Not necessary for the command.
-         */
-        SKIP("skip"),
 
         /**
          * Try to execute (local applications may intervene by SP control API).
