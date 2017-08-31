@@ -190,7 +190,8 @@ public class ConfigurableScenario {
         PagedList<MgmtTarget> targets;
         do {
             targets = targetResource.getTargets(0, PAGE_SIZE, null, null).getBody();
-            targets.getContent().stream().forEach(target -> targetResource.deleteTarget(target.getControllerId()));
+            targets.getContent().parallelStream()
+                    .forEach(target -> targetResource.deleteTarget(target.getControllerId()));
         } while (targets.getTotal() > PAGE_SIZE);
 
         deleteTargetTags();
