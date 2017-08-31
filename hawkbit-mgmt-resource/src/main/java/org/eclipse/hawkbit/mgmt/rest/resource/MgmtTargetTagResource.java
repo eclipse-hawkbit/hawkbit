@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTagRestApi;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
-import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -50,7 +50,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     private static final Logger LOG = LoggerFactory.getLogger(MgmtTargetTagResource.class);
 
     @Autowired
-    private TagManagement tagManagement;
+    private TargetTagManagement tagManagement;
 
     @Autowired
     private TargetManagement targetManagement;

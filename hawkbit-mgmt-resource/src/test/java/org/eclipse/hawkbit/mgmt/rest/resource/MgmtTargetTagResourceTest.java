@@ -113,11 +113,11 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
 
-        final Tag createdOne = tagManagement.findAllTargetTags("name==thetest1", PAGE).getContent().get(0);
+        final Tag createdOne = targetTagManagement.findAllTargetTags("name==thetest1", PAGE).getContent().get(0);
         assertThat(createdOne.getName()).isEqualTo(tagOne.getName());
         assertThat(createdOne.getDescription()).isEqualTo(tagOne.getDescription());
         assertThat(createdOne.getColour()).isEqualTo(tagOne.getColour());
-        final Tag createdTwo = tagManagement.findAllTargetTags("name==thetest2", PAGE).getContent().get(0);
+        final Tag createdTwo = targetTagManagement.findAllTargetTags("name==thetest2", PAGE).getContent().get(0);
         assertThat(createdTwo.getName()).isEqualTo(tagTwo.getName());
         assertThat(createdTwo.getDescription()).isEqualTo(tagTwo.getDescription());
         assertThat(createdTwo.getColour()).isEqualTo(tagTwo.getColour());
@@ -143,7 +143,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
 
-        final Tag updated = tagManagement.findAllTargetTags("name==updatedName", PAGE).getContent().get(0);
+        final Tag updated = targetTagManagement.findAllTargetTags("name==updatedName", PAGE).getContent().get(0);
         assertThat(updated.getName()).isEqualTo(update.getName());
         assertThat(updated.getDescription()).isEqualTo(update.getDescription());
         assertThat(updated.getColour()).isEqualTo(update.getColour());
@@ -162,7 +162,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         mvc.perform(delete(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + original.getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        assertThat(tagManagement.findTargetTagById(original.getId())).isNotPresent();
+        assertThat(targetTagManagement.findTargetTagById(original.getId())).isNotPresent();
     }
 
     @Test

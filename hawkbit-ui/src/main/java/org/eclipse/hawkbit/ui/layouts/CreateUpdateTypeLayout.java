@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.layouts;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
@@ -47,9 +46,9 @@ public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends Abst
     private static final String TYPE_NAME_DYNAMIC_STYLE = "new-tag-name";
     private static final String TYPE_DESC_DYNAMIC_STYLE = "new-tag-desc";
 
-    public CreateUpdateTypeLayout(final VaadinMessageSource i18n, final TagManagement tagManagement, final EntityFactory entityFactory,
+    public CreateUpdateTypeLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification) {
-        super(i18n, tagManagement, entityFactory, eventBus, permChecker, uiNotification);
+        super(i18n, entityFactory, eventBus, permChecker, uiNotification);
     }
 
     @Override
@@ -67,8 +66,8 @@ public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends Abst
         colorLabel = new LabelBuilder().name(i18n.getMessage("label.choose.type.color")).buildLabel();
         colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
 
-        tagNameComboBox = SPUIComponentProvider.getComboBox(i18n.getMessage("label.combobox.type"), "", null, null, false, "",
-                i18n.getMessage("label.combobox.type"));
+        tagNameComboBox = SPUIComponentProvider.getComboBox(i18n.getMessage("label.combobox.type"), "", null, null,
+                false, "", i18n.getMessage("label.combobox.type"));
         tagNameComboBox.setId(SPUIDefinitions.NEW_DISTRIBUTION_SET_TYPE_NAME_COMBO);
         tagNameComboBox.addStyleName(SPUIDefinitions.FILTER_TYPE_COMBO_STYLE);
         tagNameComboBox.setImmediate(true);

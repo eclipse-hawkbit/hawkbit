@@ -330,7 +330,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
             assignDS.add(testdataFactory.createDistributionSet("DS" + i, "1.0", Collections.emptyList()).getId());
         }
 
-        final DistributionSetTag tag = tagManagement
+        final DistributionSetTag tag = distributionSetTagManagement
                 .createDistributionSetTag(entityFactory.tag().create().name("Tag1"));
 
         final List<DistributionSet> assignedDS = distributionSetManagement.assignTag(assignDS, tag.getId());
@@ -338,7 +338,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assignedDS.stream().map(c -> (JpaDistributionSet) c)
                 .forEach(ds -> assertThat(ds.getTags().size()).as("ds has wrong tag size").isEqualTo(1));
 
-        DistributionSetTag findDistributionSetTag = tagManagement.findDistributionSetTag("Tag1").get();
+        DistributionSetTag findDistributionSetTag = distributionSetTagManagement.findDistributionSetTag("Tag1").get();
 
         assertThat(assignedDS.size()).as("assigned ds has wrong size").isEqualTo(
                 distributionSetManagement.findDistributionSetsByTag(PAGE, tag.getId()).getNumberOfElements());
@@ -347,7 +347,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .unAssignTag(assignDS.get(0), findDistributionSetTag.getId());
         assertThat(unAssignDS.getId()).as("unassigned ds is wrong").isEqualTo(assignDS.get(0));
         assertThat(unAssignDS.getTags().size()).as("unassigned ds has wrong tag size").isEqualTo(0);
-        findDistributionSetTag = tagManagement.findDistributionSetTag("Tag1").get();
+        findDistributionSetTag = distributionSetTagManagement.findDistributionSetTag("Tag1").get();
         assertThat(distributionSetManagement.findDistributionSetsByTag(PAGE, tag.getId()).getNumberOfElements())
                 .as("ds tag ds has wrong ds size").isEqualTo(3);
 
@@ -522,13 +522,14 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("searches for distribution sets based on the various filter options, e.g. name, version, desc., tags.")
     public void searchDistributionSetsOnFilters() {
-        DistributionSetTag dsTagA = tagManagement
+        DistributionSetTag dsTagA = distributionSetTagManagement
                 .createDistributionSetTag(entityFactory.tag().create().name("DistributionSetTag-A"));
-        final DistributionSetTag dsTagB = tagManagement
+        final DistributionSetTag dsTagB = distributionSetTagManagement
                 .createDistributionSetTag(entityFactory.tag().create().name("DistributionSetTag-B"));
-        final DistributionSetTag dsTagC = tagManagement
+        final DistributionSetTag dsTagC = distributionSetTagManagement
                 .createDistributionSetTag(entityFactory.tag().create().name("DistributionSetTag-C"));
-        tagManagement.createDistributionSetTag(entityFactory.tag().create().name("DistributionSetTag-D"));
+        distributionSetTagManagement
+                .createDistributionSetTag(entityFactory.tag().create().name("DistributionSetTag-D"));
 
         List<DistributionSet> ds5Group1 = testdataFactory.createDistributionSets("", 5);
         List<DistributionSet> dsGroup2 = testdataFactory.createDistributionSets("test2", 5);

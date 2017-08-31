@@ -29,7 +29,7 @@ import java.util.concurrent.Executor;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -81,7 +81,7 @@ public class BulkUploadHandler extends CustomComponent
     private static final Splitter SPLITTER = Splitter.on(',').omitEmptyStrings().trimResults();
 
     private final transient TargetManagement targetManagement;
-    private final transient TagManagement tagManagement;
+    private final transient TargetTagManagement tagManagement;
 
     private final ComboBox comboBox;
     private final TextArea descTextArea;
@@ -106,7 +106,7 @@ public class BulkUploadHandler extends CustomComponent
     private final UI uiInstance;
 
     BulkUploadHandler(final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout,
-            final TargetManagement targetManagement, final TagManagement tagManagement,
+            final TargetManagement targetManagement, final TargetTagManagement tagManagement,
             final EntityFactory entityFactory, final DistributionSetManagement distributionSetManagement,
             final ManagementUIState managementUIState, final DeploymentManagement deploymentManagement, final VaadinMessageSource i18n,
             final UI uiInstance, final Executor uiExecutor) {

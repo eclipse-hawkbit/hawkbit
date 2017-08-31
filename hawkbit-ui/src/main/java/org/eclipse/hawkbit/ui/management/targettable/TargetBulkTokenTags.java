@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.util.Map;
 
-import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.tagdetails.AbstractTargetTagToken;
@@ -30,7 +30,7 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken {
     private static final int MAX_TAGS = 500;
 
     TargetBulkTokenTags(final SpPermissionChecker checker, final VaadinMessageSource i18n, final UINotification uinotification,
-            final UIEventBus eventBus, final ManagementUIState managementUIState, final TagManagement tagManagement) {
+            final UIEventBus eventBus, final ManagementUIState managementUIState, final TargetTagManagement tagManagement) {
         super(checker, i18n, uinotification, eventBus, managementUIState, tagManagement);
     }
 

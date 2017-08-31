@@ -21,9 +21,9 @@ import javax.persistence.EntityManager;
 import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
 import org.eclipse.hawkbit.repository.builder.DistributionSetUpdate;
 import org.eclipse.hawkbit.repository.builder.GenericDistributionSetUpdate;
@@ -88,7 +88,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     private DistributionSetRepository distributionSetRepository;
 
     @Autowired
-    private TagManagement tagManagement;
+    private DistributionSetTagManagement distributionSetTagManagement;
 
     @Autowired
     private SystemManagement systemManagement;
@@ -148,7 +148,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                     sets.stream().map(DistributionSet::getId).collect(Collectors.toList()));
         }
 
-        final DistributionSetTag myTag = tagManagement.findDistributionSetTag(tagName)
+        final DistributionSetTag myTag = distributionSetTagManagement.findDistributionSetTag(tagName)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, tagName));
 
         DistributionSetTagAssignmentResult result;
@@ -693,7 +693,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                     allDs.stream().map(DistributionSet::getId).collect(Collectors.toList()));
         }
 
-        final DistributionSetTag distributionSetTag = tagManagement.findDistributionSetTagById(dsTagId)
+        final DistributionSetTag distributionSetTag = distributionSetTagManagement.findDistributionSetTagById(dsTagId)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, dsTagId));
 
         allDs.forEach(ds -> ds.addTag(distributionSetTag));
@@ -714,7 +714,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         final JpaDistributionSet set = (JpaDistributionSet) findDistributionSetByIdWithDetails(dsId)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, dsId));
 
-        final DistributionSetTag distributionSetTag = tagManagement.findDistributionSetTagById(dsTagId)
+        final DistributionSetTag distributionSetTag = distributionSetTagManagement.findDistributionSetTagById(dsTagId)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, dsTagId));
 
         set.removeTag(distributionSetTag);

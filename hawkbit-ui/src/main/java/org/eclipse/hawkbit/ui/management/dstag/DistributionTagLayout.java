@@ -9,8 +9,8 @@
 package org.eclipse.hawkbit.ui.management.dstag;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
@@ -38,15 +38,15 @@ public class DistributionTagLayout extends AbstractFilterLayout implements Refre
 
     private final ManagementUIState managementUIState;
 
-    public DistributionTagLayout(final UIEventBus eventbus, final ManagementUIState managementUIState, final VaadinMessageSource i18n,
-            final SpPermissionChecker permChecker, final UIEventBus eventBus, final TagManagement tagManagement,
-            final EntityFactory entityFactory, final UINotification uiNotification,
-            final DistributionTableFilters distFilterParameters,
+    public DistributionTagLayout(final UIEventBus eventbus, final ManagementUIState managementUIState,
+            final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
+            final DistributionSetTagManagement distributionSetTagManagement, final EntityFactory entityFactory,
+            final UINotification uiNotification, final DistributionTableFilters distFilterParameters,
             final DistributionSetManagement distributionSetManagement,
             final ManagementViewClientCriterion managementViewClientCriterion) {
 
-        super(new DistributionTagHeader(i18n, managementUIState, permChecker, eventBus, tagManagement, entityFactory,
-                uiNotification),
+        super(new DistributionTagHeader(i18n, managementUIState, permChecker, eventBus, distributionSetTagManagement,
+                entityFactory, uiNotification),
                 new DistributionTagButtons(eventBus, managementUIState, entityFactory, i18n, uiNotification,
                         permChecker, distFilterParameters, distributionSetManagement, managementViewClientCriterion));
         this.managementUIState = managementUIState;

@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.management.tag.ProxyTag;
 import org.eclipse.hawkbit.ui.management.tag.TagIdName;
@@ -34,7 +34,7 @@ public class DistributionTagBeanQuery extends AbstractBeanQuery<ProxyTag> {
     private static final long serialVersionUID = -4791426170440663033L;
     private final Sort sort = new Sort(Direction.ASC, "name");
     private transient Page<DistributionSetTag> firstPageDsTag = null;
-    private transient TagManagement tagManagementService;
+    private transient DistributionSetTagManagement distributionSetTagManagement;
 
     /**
      * Parametric Constructor.
@@ -65,11 +65,11 @@ public class DistributionTagBeanQuery extends AbstractBeanQuery<ProxyTag> {
         return (int) size;
     }
 
-    private TagManagement getTagManagement() {
-        if (tagManagementService == null) {
-            tagManagementService = SpringContextHelper.getBean(TagManagement.class);
+    private DistributionSetTagManagement getTagManagement() {
+        if (distributionSetTagManagement == null) {
+            distributionSetTagManagement = SpringContextHelper.getBean(DistributionSetTagManagement.class);
         }
-        return tagManagementService;
+        return distributionSetTagManagement;
     }
 
     @Override

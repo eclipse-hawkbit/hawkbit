@@ -17,8 +17,9 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -62,7 +63,9 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private static final long serialVersionUID = 1L;
 
-    private final transient TagManagement tagManagementService;
+    private final transient DistributionSetTagManagement distributionSetTagManagement;
+
+    private final transient TargetTagManagement targetTagManagement;
 
     private final ManagementViewClientCriterion managementViewClientCriterion;
 
@@ -77,13 +80,15 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
     private final transient DistributionSetManagement distributionSetManagement;
 
     public DeleteActionsLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
-            final UIEventBus eventBus, final UINotification notification, final TagManagement tagManagementService,
+            final UIEventBus eventBus, final UINotification notification, final TargetTagManagement targetTagManagement,
+            final DistributionSetTagManagement distributionSetTagManagement,
             final ManagementViewClientCriterion managementViewClientCriterion,
             final ManagementUIState managementUIState, final TargetManagement targetManagement,
             final TargetTable targetTable, final DeploymentManagement deploymentManagement,
             final DistributionSetManagement distributionSetManagement) {
         super(i18n, permChecker, eventBus, notification);
-        this.tagManagementService = tagManagementService;
+        this.distributionSetTagManagement = distributionSetTagManagement;
+        this.targetTagManagement = targetTagManagement;
         this.managementViewClientCriterion = managementViewClientCriterion;
         this.managementUIState = managementUIState;
         this.manangementConfirmationWindowLayout = new ManangementConfirmationWindowLayout(i18n, eventBus,
@@ -244,7 +249,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         if (managementUIState.getDistributionTableFilters().getDistSetTags().contains(tagName)) {
             notification.displayValidationError(i18n.getMessage("message.tag.delete", new Object[] { tagName }));
         } else {
-            tagManagementService.deleteDistributionSetTag(tagName);
+            distributionSetTagManagement.deleteDistributionSetTag(tagName);
 
             if (source instanceof DragAndDropWrapper) {
                 final Long id = DeleteActionsLayoutHelper.getDistributionTagId((DragAndDropWrapper) source);
@@ -261,7 +266,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         if (managementUIState.getTargetTableFilters().getClickedTargetTags().contains(tagName)) {
             notification.displayValidationError(i18n.getMessage("message.tag.delete", new Object[] { tagName }));
         } else {
-            tagManagementService.deleteTargetTag(tagName);
+            targetTagManagement.deleteTargetTag(tagName);
 
             if (source instanceof DragAndDropWrapper) {
                 final Long id = DeleteActionsLayoutHelper.getTargetTagId((DragAndDropWrapper) source);

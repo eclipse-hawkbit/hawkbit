@@ -20,8 +20,8 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
@@ -89,7 +89,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     private final transient TargetManagement targetManagement;
 
-    private final transient TagManagement tagManagement;
+    private final transient TargetTagManagement targetTagManagement;
 
     private final DsMetadataPopupLayout dsMetadataPopupLayout;
 
@@ -109,13 +109,13 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             final ManagementViewClientCriterion managementViewClientCriterion, final TargetManagement targetManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout,
             final DistributionSetManagement distributionSetManagement, final DeploymentManagement deploymentManagement,
-            final TagManagement tagManagement) {
+            final TargetTagManagement targetTagManagement) {
         super(eventBus, i18n, notification);
         this.permissionChecker = permissionChecker;
         this.managementUIState = managementUIState;
         this.managementViewClientCriterion = managementViewClientCriterion;
         this.targetManagement = targetManagement;
-        this.tagManagement = tagManagement;
+        this.targetTagManagement = targetTagManagement;
         this.dsMetadataPopupLayout = dsMetadataPopupLayout;
         this.distributionSetManagement = distributionSetManagement;
         this.deploymentManagement = deploymentManagement;
@@ -394,7 +394,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         // get all the targets assigned to the tag
         // assign dist to those targets
 
-        tagManagement.findTargetTag(targetTagName).ifPresent(tag -> {
+        targetTagManagement.findTargetTag(targetTagName).ifPresent(tag -> {
             Pageable query = new PageRequest(0, 500);
             Page<Target> assignedTargets;
             boolean assigned = false;

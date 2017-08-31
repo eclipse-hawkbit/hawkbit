@@ -223,7 +223,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // not exists
         assignDS.add(100L);
 
-        final DistributionSetTag tag = tagManagement
+        final DistributionSetTag tag = distributionSetTagManagement
                 .createDistributionSetTag(entityFactory.tag().create().name("Tag1"));
 
         assertThatExceptionOfType(EntityNotFoundException.class)

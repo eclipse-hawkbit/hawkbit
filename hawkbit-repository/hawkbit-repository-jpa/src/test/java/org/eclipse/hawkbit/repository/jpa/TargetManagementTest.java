@@ -81,7 +81,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetTagCreatedEvent.class, count = 1) })
     public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
-        final TargetTag tag = tagManagement.createTargetTag(entityFactory.tag().create().name("A"));
+        final TargetTag tag = targetTagManagement.createTargetTag(entityFactory.tag().create().name("A"));
         final Target target = testdataFactory.createTarget();
 
         verifyThrownExceptionBy(
@@ -328,22 +328,22 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         assignTarget.add(targetManagement.createTarget(entityFactory.target().create().controllerId("targetId1236"))
                 .getControllerId());
 
-        final TargetTag targetTag = tagManagement.createTargetTag(entityFactory.tag().create().name("Tag1"));
+        final TargetTag targetTag = targetTagManagement.createTargetTag(entityFactory.tag().create().name("Tag1"));
 
         final List<Target> assignedTargets = targetManagement.assignTag(assignTarget, targetTag.getId());
         assertThat(assignedTargets.size()).as("Assigned targets are wrong").isEqualTo(4);
         assignedTargets.forEach(target -> assertThat(
-                tagManagement.findAllTargetTags(PAGE, target.getControllerId()).getNumberOfElements()).isEqualTo(1));
+                targetTagManagement.findAllTargetTags(PAGE, target.getControllerId()).getNumberOfElements()).isEqualTo(1));
 
-        TargetTag findTargetTag = tagManagement.findTargetTag("Tag1").get();
+        TargetTag findTargetTag = targetTagManagement.findTargetTag("Tag1").get();
         assertThat(assignedTargets.size()).as("Assigned targets are wrong")
                 .isEqualTo(targetManagement.findTargetsByTag(PAGE, targetTag.getId()).getNumberOfElements());
 
         final Target unAssignTarget = targetManagement.unAssignTag("targetId123", findTargetTag.getId());
         assertThat(unAssignTarget.getControllerId()).as("Controller id is wrong").isEqualTo("targetId123");
-        assertThat(tagManagement.findAllTargetTags(PAGE, unAssignTarget.getControllerId())).as("Tag size is wrong")
+        assertThat(targetTagManagement.findAllTargetTags(PAGE, unAssignTarget.getControllerId())).as("Tag size is wrong")
                 .isEmpty();
-        findTargetTag = tagManagement.findTargetTag("Tag1").get();
+        findTargetTag = targetTagManagement.findTargetTag("Tag1").get();
         assertThat(targetManagement.findTargetsByTag(PAGE, targetTag.getId())).as("Assigned targets are wrong")
                 .hasSize(3);
         assertThat(targetManagement.findTargetsByTag(PAGE, "controllerId==targetId123", targetTag.getId()))
@@ -484,7 +484,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
      */
     private void checkTargetHasTags(final boolean strict, final Iterable<Target> targets, final TargetTag... tags) {
         _target: for (final Target tl : targets) {
-            for (final Tag tt : tagManagement.findAllTargetTags(PAGE, tl.getControllerId())) {
+            for (final Tag tt : targetTagManagement.findAllTargetTags(PAGE, tl.getControllerId())) {
                 for (final Tag tag : tags) {
                     if (tag.getName().equals(tt.getName())) {
                         continue _target;
@@ -503,7 +503,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
             targetManagement.findTargetByControllerID(tl.getControllerId()).get();
 
             for (final Tag tag : tags) {
-                for (final Tag tt : tagManagement.findAllTargetTags(PAGE, tl.getControllerId())) {
+                for (final Tag tt : targetTagManagement.findAllTargetTags(PAGE, tl.getControllerId())) {
                     if (tag.getName().equals(tt.getName())) {
                         fail("Target should have no tags");
                     }
@@ -634,15 +634,15 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         t2Tags.forEach(tag -> targetManagement.assignTag(Arrays.asList(t2.getControllerId()), tag.getId()));
 
         final Target t11 = targetManagement.findTargetByControllerID(t1.getControllerId()).get();
-        assertThat(tagManagement.findAllTargetTags(PAGE, t11.getControllerId()).getContent()).as("Tag size is wrong")
+        assertThat(targetTagManagement.findAllTargetTags(PAGE, t11.getControllerId()).getContent()).as("Tag size is wrong")
                 .hasSize(noT1Tags).containsAll(t1Tags);
-        assertThat(tagManagement.findAllTargetTags(PAGE, t11.getControllerId()).getContent()).as("Tag size is wrong")
+        assertThat(targetTagManagement.findAllTargetTags(PAGE, t11.getControllerId()).getContent()).as("Tag size is wrong")
                 .hasSize(noT1Tags).doesNotContain(Iterables.toArray(t2Tags, TargetTag.class));
 
         final Target t21 = targetManagement.findTargetByControllerID(t2.getControllerId()).get();
-        assertThat(tagManagement.findAllTargetTags(PAGE, t21.getControllerId()).getContent()).as("Tag size is wrong")
+        assertThat(targetTagManagement.findAllTargetTags(PAGE, t21.getControllerId()).getContent()).as("Tag size is wrong")
                 .hasSize(noT2Tags).containsAll(t2Tags);
-        assertThat(tagManagement.findAllTargetTags(PAGE, t21.getControllerId()).getContent()).as("Tag size is wrong")
+        assertThat(targetTagManagement.findAllTargetTags(PAGE, t21.getControllerId()).getContent()).as("Tag size is wrong")
                 .hasSize(noT2Tags).doesNotContain(Iterables.toArray(t1Tags, TargetTag.class));
     }
 
@@ -660,10 +660,10 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         final List<Target> tagABCTargets = testdataFactory.createTargets(10, "tagABCTargets", "first description");
 
-        final TargetTag tagA = tagManagement.createTargetTag(entityFactory.tag().create().name("A"));
-        final TargetTag tagB = tagManagement.createTargetTag(entityFactory.tag().create().name("B"));
-        final TargetTag tagC = tagManagement.createTargetTag(entityFactory.tag().create().name("C"));
-        tagManagement.createTargetTag(entityFactory.tag().create().name("X"));
+        final TargetTag tagA = targetTagManagement.createTargetTag(entityFactory.tag().create().name("A"));
+        final TargetTag tagB = targetTagManagement.createTargetTag(entityFactory.tag().create().name("B"));
+        final TargetTag tagC = targetTagManagement.createTargetTag(entityFactory.tag().create().name("C"));
+        targetTagManagement.createTargetTag(entityFactory.tag().create().name("X"));
 
         // doing different assignments
         toggleTagAssignment(tagATargets, tagA);
@@ -721,9 +721,9 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetCreatedEvent.class, count = 109),
             @Expect(type = TargetUpdatedEvent.class, count = 227) })
     public void targetTagBulkUnassignments() {
-        final TargetTag targTagA = tagManagement.createTargetTag(entityFactory.tag().create().name("Targ-A-Tag"));
-        final TargetTag targTagB = tagManagement.createTargetTag(entityFactory.tag().create().name("Targ-B-Tag"));
-        final TargetTag targTagC = tagManagement.createTargetTag(entityFactory.tag().create().name("Targ-C-Tag"));
+        final TargetTag targTagA = targetTagManagement.createTargetTag(entityFactory.tag().create().name("Targ-A-Tag"));
+        final TargetTag targTagB = targetTagManagement.createTargetTag(entityFactory.tag().create().name("Targ-B-Tag"));
+        final TargetTag targTagC = targetTagManagement.createTargetTag(entityFactory.tag().create().name("Targ-C-Tag"));
 
         final List<Target> targAs = testdataFactory.createTargets(25, "target-id-A", "first description");
         final List<Target> targBs = testdataFactory.createTargets(20, "target-id-B", "first description");
@@ -780,7 +780,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetUpdatedEvent.class, count = 25) })
     public void findTargetsWithNoTag() {
 
-        final TargetTag targTagA = tagManagement.createTargetTag(entityFactory.tag().create().name("Targ-A-Tag"));
+        final TargetTag targTagA = targetTagManagement.createTargetTag(entityFactory.tag().create().name("Targ-A-Tag"));
         final List<Target> targAs = testdataFactory.createTargets(25, "target-id-A", "first description");
         toggleTagAssignment(targAs, targTagA);
 
@@ -817,7 +817,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Description("Test that RSQL filter finds targets with tags or specific ids.")
     public void findTargetsWithTagOrId() {
         final String rsqlFilter = "tag==Targ-A-Tag,id==target-id-B-00001,id==target-id-B-00008";
-        final TargetTag targTagA = tagManagement.createTargetTag(entityFactory.tag().create().name("Targ-A-Tag"));
+        final TargetTag targTagA = targetTagManagement.createTargetTag(entityFactory.tag().create().name("Targ-A-Tag"));
         final List<String> targAs = testdataFactory.createTargets(25, "target-id-A", "first description").stream()
                 .map(Target::getControllerId).collect(Collectors.toList());
         targetManagement.toggleTagAssignment(targAs, targTagA.getName());

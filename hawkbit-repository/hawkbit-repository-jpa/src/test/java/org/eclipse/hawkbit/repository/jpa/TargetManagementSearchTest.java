@@ -47,10 +47,10 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
             + "That includes both the test itself, as a count operation with the same filters "
             + "and query definitions by RSQL (named and un-named).")
     public void targetSearchWithVariousFilterCombinations() {
-        final TargetTag targTagX = tagManagement.createTargetTag(entityFactory.tag().create().name("TargTag-X"));
-        final TargetTag targTagY = tagManagement.createTargetTag(entityFactory.tag().create().name("TargTag-Y"));
-        final TargetTag targTagZ = tagManagement.createTargetTag(entityFactory.tag().create().name("TargTag-Z"));
-        final TargetTag targTagW = tagManagement.createTargetTag(entityFactory.tag().create().name("TargTag-W"));
+        final TargetTag targTagX = targetTagManagement.createTargetTag(entityFactory.tag().create().name("TargTag-X"));
+        final TargetTag targTagY = targetTagManagement.createTargetTag(entityFactory.tag().create().name("TargTag-Y"));
+        final TargetTag targTagZ = targetTagManagement.createTargetTag(entityFactory.tag().create().name("TargTag-Z"));
+        final TargetTag targTagW = targetTagManagement.createTargetTag(entityFactory.tag().create().name("TargTag-W"));
 
         final DistributionSet setA = testdataFactory.createDistributionSet("");
 

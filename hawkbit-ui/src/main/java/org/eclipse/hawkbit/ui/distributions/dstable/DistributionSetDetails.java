@@ -13,9 +13,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -69,14 +69,15 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
             final SpPermissionChecker permissionChecker, final ManageDistUIState manageDistUIState,
             final ManagementUIState managementUIState,
             final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout,
-            final SoftwareModuleManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
-            final TargetManagement targetManagement, final EntityFactory entityFactory,
-            final UINotification uiNotification, final TagManagement tagManagement,
+            final SoftwareModuleManagement softwareManagement,
+            final DistributionSetManagement distributionSetManagement, final TargetManagement targetManagement,
+            final EntityFactory entityFactory, final UINotification uiNotification,
+            final DistributionSetTagManagement distributionSetTagManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout) {
         super(i18n, eventBus, permissionChecker, managementUIState, distributionAddUpdateWindowLayout,
-                distributionSetManagement, dsMetadataPopupLayout, entityFactory, uiNotification, tagManagement,
-                createSoftwareModuleDetailsTable(i18n, permissionChecker, distributionSetManagement, eventBus,
-                        manageDistUIState, uiNotification));
+                distributionSetManagement, dsMetadataPopupLayout, entityFactory, uiNotification,
+                distributionSetTagManagement, createSoftwareModuleDetailsTable(i18n, permissionChecker,
+                        distributionSetManagement, eventBus, manageDistUIState, uiNotification));
         this.manageDistUIState = manageDistUIState;
         this.softwareModuleManagement = softwareManagement;
         this.targetManagement = targetManagement;

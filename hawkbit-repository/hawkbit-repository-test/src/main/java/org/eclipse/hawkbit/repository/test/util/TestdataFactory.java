@@ -27,13 +27,14 @@ import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -135,7 +136,10 @@ public class TestdataFactory {
     private DeploymentManagement deploymentManagement;
 
     @Autowired
-    private TagManagement tagManagement;
+    private TargetTagManagement targetTagManagement;
+
+    @Autowired
+    private DistributionSetTagManagement distributionSetTagManagement;
 
     @Autowired
     private EntityFactory entityFactory;
@@ -871,7 +875,7 @@ public class TestdataFactory {
                     .colour(String.valueOf(i)));
         }
 
-        return tagManagement.createTargetTags(result);
+        return targetTagManagement.createTargetTags(result);
     }
 
     /**
@@ -890,7 +894,7 @@ public class TestdataFactory {
                     entityFactory.tag().create().name("tag" + i).description("tagdesc" + i).colour(String.valueOf(i)));
         }
 
-        return tagManagement.createDistributionSetTags(result);
+        return distributionSetTagManagement.createDistributionSetTags(result);
     }
 
     private Action sendUpdateActionStatusToTarget(final Status status, final Action updActA,

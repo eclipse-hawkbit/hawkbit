@@ -37,7 +37,7 @@ import com.google.common.base.Splitter;
 /**
  * Entity to store the status for a specific action.
  */
-@Table(name = "sp_action_status", indexes = { @Index(name = "sp_idx_action_status_01", columnList = "tenant,action"),
+@Table(name = "sp_action_status", indexes = {
         @Index(name = "sp_idx_action_status_02", columnList = "tenant,action,status"),
         @Index(name = "sp_idx_action_status_prim", columnList = "tenant,id") })
 @NamedEntityGraph(name = "ActionStatus.withMessages", attributeNodes = { @NamedAttributeNode("messages") })

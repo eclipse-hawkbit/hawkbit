@@ -14,7 +14,6 @@ import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
@@ -66,8 +65,6 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
      * 
      * @param i18n
      *            I18N
-     * @param tagManagement
-     *            TagManagement
      * @param entityFactory
      *            EntityFactory
      * @param eventBus
@@ -79,10 +76,10 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
      * @param softwareModuleTypeManagement
      *            management for {@link SoftwareModuleType}s
      */
-    public CreateUpdateSoftwareTypeLayout(final VaadinMessageSource i18n, final TagManagement tagManagement,
-            final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
-            final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
-        super(i18n, tagManagement, entityFactory, eventBus, permChecker, uiNotification);
+    public CreateUpdateSoftwareTypeLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
+            final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
+        super(i18n, entityFactory, eventBus, permChecker, uiNotification);
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
     }
 

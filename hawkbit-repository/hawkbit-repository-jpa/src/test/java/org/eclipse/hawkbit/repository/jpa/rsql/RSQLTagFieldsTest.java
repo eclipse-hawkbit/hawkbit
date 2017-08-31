@@ -34,8 +34,8 @@ public class RSQLTagFieldsTest extends AbstractJpaIntegrationTest {
         for (int i = 0; i < 5; i++) {
             final TagCreate targetTag = entityFactory.tag().create().name(Integer.toString(i))
                     .description(Integer.toString(i)).colour(i % 2 == 0 ? "red" : "blue");
-            tagManagement.createTargetTag(targetTag);
-            tagManagement.createDistributionSetTag(targetTag);
+            targetTagManagement.createTargetTag(targetTag);
+            distributionSetTagManagement.createDistributionSetTag(targetTag);
         }
     }
 
@@ -101,7 +101,7 @@ public class RSQLTagFieldsTest extends AbstractJpaIntegrationTest {
 
     private void assertRSQLQueryDistributionSet(final String rsqlParam, final long expectedEntities) {
 
-        final Page<DistributionSetTag> findEnitity = tagManagement.findAllDistributionSetTags(rsqlParam,
+        final Page<DistributionSetTag> findEnitity = distributionSetTagManagement.findAllDistributionSetTags(rsqlParam,
                 new PageRequest(0, 100));
         final long countAllEntities = findEnitity.getTotalElements();
         assertThat(findEnitity).isNotNull();
@@ -110,7 +110,7 @@ public class RSQLTagFieldsTest extends AbstractJpaIntegrationTest {
 
     private void assertRSQLQueryTarget(final String rsqlParam, final long expectedEntities) {
 
-        final Page<TargetTag> findEnitity = tagManagement.findAllTargetTags(rsqlParam, new PageRequest(0, 100));
+        final Page<TargetTag> findEnitity = targetTagManagement.findAllTargetTags(rsqlParam, new PageRequest(0, 100));
         final long countAllEntities = findEnitity.getTotalElements();
         assertThat(findEnitity).isNotNull();
         assertThat(countAllEntities).isEqualTo(expectedEntities);

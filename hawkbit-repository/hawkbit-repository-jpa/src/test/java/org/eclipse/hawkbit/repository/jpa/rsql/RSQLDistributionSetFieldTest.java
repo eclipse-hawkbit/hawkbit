@@ -46,11 +46,11 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
                 .updateDistributionSet(entityFactory.distributionSet().update(ds2.getId()).description("DS%"));
         createDistributionSetMetadata(ds2.getId(), entityFactory.generateMetadata("metaKey", "value"));
 
-        final DistributionSetTag targetTag = tagManagement
+        final DistributionSetTag targetTag = distributionSetTagManagement
                 .createDistributionSetTag(entityFactory.tag().create().name("Tag1"));
-        tagManagement.createDistributionSetTag(entityFactory.tag().create().name("Tag2"));
-        tagManagement.createDistributionSetTag(entityFactory.tag().create().name("Tag3"));
-        tagManagement.createDistributionSetTag(entityFactory.tag().create().name("Tag4"));
+        distributionSetTagManagement.createDistributionSetTag(entityFactory.tag().create().name("Tag2"));
+        distributionSetTagManagement.createDistributionSetTag(entityFactory.tag().create().name("Tag3"));
+        distributionSetTagManagement.createDistributionSetTag(entityFactory.tag().create().name("Tag4"));
 
         distributionSetManagement.assignTag(Arrays.asList(ds.getId(), ds2.getId()), targetTag.getId());
     }

@@ -9,11 +9,11 @@
 package org.eclipse.hawkbit.ui.distributions.dstable;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
@@ -35,9 +35,11 @@ public class DistributionSetTableLayout extends AbstractTableLayout<Distribution
 
     public DistributionSetTableLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManageDistUIState manageDistUIState,
-            final SoftwareModuleManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
+            final SoftwareModuleManagement softwareManagement,
+            final DistributionSetManagement distributionSetManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement, final TargetManagement targetManagement,
-            final EntityFactory entityFactory, final UINotification uiNotification, final TagManagement tagManagement,
+            final EntityFactory entityFactory, final UINotification uiNotification,
+            final DistributionSetTagManagement distributionSetTagManagement,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final SystemManagement systemManagement) {
 
@@ -58,7 +60,7 @@ public class DistributionSetTableLayout extends AbstractTableLayout<Distribution
                 distributionSetTable,
                 new DistributionSetDetails(i18n, eventBus, permissionChecker, manageDistUIState, null,
                         distributionAddUpdateWindowLayout, softwareManagement, distributionSetManagement,
-                        targetManagement, entityFactory, uiNotification, tagManagement, popupLayout));
+                        targetManagement, entityFactory, uiNotification, distributionSetTagManagement, popupLayout));
     }
 
     public DistributionSetTable getDistributionSetTable() {

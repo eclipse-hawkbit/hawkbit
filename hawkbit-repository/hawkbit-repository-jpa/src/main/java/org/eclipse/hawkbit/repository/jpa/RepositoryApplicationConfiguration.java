@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.PropertiesQuotaManagement;
@@ -28,9 +29,9 @@ import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetBuilder;
@@ -430,14 +431,25 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * {@link JpaTagManagement} bean.
+     * {@link JpaTargetTagManagement} bean.
      *
-     * @return a new {@link TagManagement}
+     * @return a new {@link TargetTagManagement}
      */
     @Bean
     @ConditionalOnMissingBean
-    TagManagement tagManagement() {
-        return new JpaTagManagement();
+    TargetTagManagement targetTagManagement() {
+        return new JpaTargetTagManagement();
+    }
+
+    /**
+     * {@link JpaDistributionSetTagManagement} bean.
+     *
+     * @return a new {@link JpaDistributionSetTagManagement}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    DistributionSetTagManagement distributionSetTagManagement() {
+        return new JpaDistributionSetTagManagement();
     }
 
     /**

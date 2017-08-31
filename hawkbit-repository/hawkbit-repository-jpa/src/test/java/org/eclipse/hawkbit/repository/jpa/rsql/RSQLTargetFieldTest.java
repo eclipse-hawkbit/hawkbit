@@ -60,10 +60,10 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         testdataFactory.createTarget("targetId1235");
         testdataFactory.createTarget("targetId1236");
 
-        final TargetTag targetTag = tagManagement.createTargetTag(entityFactory.tag().create().name("Tag1"));
-        tagManagement.createTargetTag(entityFactory.tag().create().name("Tag2"));
-        tagManagement.createTargetTag(entityFactory.tag().create().name("Tag3"));
-        tagManagement.createTargetTag(entityFactory.tag().create().name("Tag4"));
+        final TargetTag targetTag = targetTagManagement.createTargetTag(entityFactory.tag().create().name("Tag1"));
+        targetTagManagement.createTargetTag(entityFactory.tag().create().name("Tag2"));
+        targetTagManagement.createTargetTag(entityFactory.tag().create().name("Tag3"));
+        targetTagManagement.createTargetTag(entityFactory.tag().create().name("Tag4"));
 
         targetManagement.assignTag(Arrays.asList(target.getControllerId(), target2.getControllerId()),
                 targetTag.getId());

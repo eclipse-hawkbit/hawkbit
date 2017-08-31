@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -84,12 +83,10 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
     private IndexedContainer originalSelectedTableContainer;
 
     /**
-     * Constructor for CreateUpdateDistSetTypeLayout
+     * Constructor for {@link CreateUpdateDistSetTypeLayout}.
      * 
      * @param i18n
      *            I18N
-     * @param tagManagement
-     *            TagManagement
      * @param entityFactory
      *            EntityFactory
      * @param eventBus
@@ -103,11 +100,11 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
      * @param distributionSetTypeManagement
      *            DistributionSetManagement
      */
-    public CreateUpdateDistSetTypeLayout(final VaadinMessageSource i18n, final TagManagement tagManagement,
-            final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
-            final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement,
+    public CreateUpdateDistSetTypeLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
+            final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement) {
-        super(i18n, tagManagement, entityFactory, eventBus, permChecker, uiNotification);
+        super(i18n, entityFactory, eventBus, permChecker, uiNotification);
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
         this.distributionSetTypeManagement = distributionSetTypeManagement;
     }
@@ -194,7 +191,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
         twinColumnLayout.setExpandRatio(sourceTable, 0.45F);
         twinColumnLayout.setExpandRatio(selectButtonLayout, 0.07F);
         twinColumnLayout.setExpandRatio(selectedTable, 0.48F);
-        sourceTable.setVisibleColumns(new Object[] { DIST_TYPE_NAME });
+        sourceTable.setVisibleColumns(DIST_TYPE_NAME);
         return twinColumnLayout;
     }
 
@@ -263,7 +260,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
         sourceTableContainer.addContainerProperty(DIST_TYPE_DESCRIPTION, String.class, "");
         sourceTable.setContainerDataSource(sourceTableContainer);
 
-        sourceTable.setVisibleColumns(new Object[] { DIST_TYPE_NAME });
+        sourceTable.setVisibleColumns(DIST_TYPE_NAME);
         sourceTable.setColumnHeaders(i18n.getMessage("header.dist.twintable.available"));
         sourceTable.setColumnExpandRatio(DIST_TYPE_NAME, 1.0F);
         getSourceTableData();
@@ -401,8 +398,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
             final DistributionSetType newDistType = distributionSetTypeManagement.createDistributionSetType(
                     entityFactory.distributionSetType().create().key(typeKeyValue).name(typeNameValue)
                             .description(typeDescValue).colour(colorPicked).mandatory(mandatory).optional(optional));
-            uiNotification
-                    .displaySuccess(i18n.getMessage("message.save.success", new Object[] { newDistType.getName() }));
+            uiNotification.displaySuccess(i18n.getMessage("message.save.success", newDistType.getName()));
             eventBus.publish(this,
                     new DistributionSetTypeEvent(DistributionSetTypeEnum.ADD_DIST_SET_TYPE, newDistType));
         } else {
@@ -441,8 +437,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
 
         final DistributionSetType updateDistSetType = distributionSetTypeManagement.updateDistributionSetType(update);
 
-        uiNotification.displaySuccess(
-                i18n.getMessage("message.update.success", new Object[] { updateDistSetType.getName() }));
+        uiNotification.displaySuccess(i18n.getMessage("message.update.success", updateDistSetType.getName()));
         eventBus.publish(this,
                 new DistributionSetTypeEvent(DistributionSetTypeEnum.UPDATE_DIST_SET_TYPE, updateDistSetType));
 
@@ -595,7 +590,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
 
     @Override
     protected String getDuplicateKeyErrorMessage(final DistributionSetType existingType) {
-        return i18n.getMessage("message.type.key.duplicate.check", new Object[] { existingType.getKey() });
+        return i18n.getMessage("message.type.key.duplicate.check", existingType.getKey());
     }
 
     @Override

@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.FilterParams;
-import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.RemoteEntityEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -104,7 +104,7 @@ public class TargetTable extends AbstractTable<Target> {
 
     private final transient DistributionSetManagement distributionSetManagement;
 
-    private final transient TagManagement tagManagement;
+    private final transient TargetTagManagement tagManagement;
 
     private final SpPermissionChecker permChecker;
 
@@ -119,7 +119,7 @@ public class TargetTable extends AbstractTable<Target> {
     public TargetTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification notification,
             final TargetManagement targetManagement, final ManagementUIState managementUIState,
             final SpPermissionChecker permChecker, final ManagementViewClientCriterion managementViewClientCriterion,
-            final DistributionSetManagement distributionSetManagement, final TagManagement tagManagement) {
+            final DistributionSetManagement distributionSetManagement, final TargetTagManagement tagManagement) {
         super(eventBus, i18n, notification);
         this.targetManagement = targetManagement;
         this.permChecker = permChecker;
