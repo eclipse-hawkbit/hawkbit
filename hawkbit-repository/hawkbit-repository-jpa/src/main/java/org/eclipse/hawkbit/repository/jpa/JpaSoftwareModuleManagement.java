@@ -152,7 +152,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         specList.add(SoftwareModuleSpecification.equalType(typeId));
         specList.add(SoftwareModuleSpecification.isDeletedFalse());
 
-        return convertSmPage(findSwModuleByCriteriaAPI(pageable, specList), pageable);
+        return convertSmPage(findByCriteriaAPI(pageable, specList), pageable);
     }
 
     private void throwExceptionIfSoftwareModuleTypeDoesNotExist(final Long typeId) {
@@ -193,7 +193,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         return distributionSetRepository.countByModulesId(moduleId) <= 0;
     }
 
-    private Slice<JpaSoftwareModule> findSwModuleByCriteriaAPI(final Pageable pageable,
+    private Slice<JpaSoftwareModule> findByCriteriaAPI(final Pageable pageable,
             final List<Specification<JpaSoftwareModule>> specList) {
         return criteriaNoCountDao.findAll(SpecificationsBuilder.combineWithAnd(specList), pageable,
                 JpaSoftwareModule.class);
@@ -261,7 +261,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
         specList.add(spec);
 
-        return convertSmPage(findSwModuleByCriteriaAPI(pageable, specList), pageable);
+        return convertSmPage(findByCriteriaAPI(pageable, specList), pageable);
     }
 
     @Override
@@ -315,7 +315,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
         specList.add(spec);
 
-        return convertSmPage(findSwModuleByCriteriaAPI(pageable, specList), pageable);
+        return convertSmPage(findByCriteriaAPI(pageable, specList), pageable);
     }
 
     @Override

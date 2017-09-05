@@ -70,7 +70,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
 
         final Slice<DistributionSetType> findModuleTypessAll;
-        Long countModulesAll;
+        long countModulesAll;
         if (rsqlParam != null) {
             findModuleTypessAll = distributionSetTypeManagement.findByRsql(pageable, rsqlParam);
             countModulesAll = ((Page<DistributionSetType>) findModuleTypessAll).getTotalElements();
@@ -116,8 +116,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
             @RequestBody final List<MgmtDistributionSetTypeRequestBodyPost> distributionSetTypes) {
 
         final List<DistributionSetType> createdSoftwareModules = distributionSetTypeManagement
-                .create(
-                        MgmtDistributionSetTypeMapper.smFromRequest(entityFactory, distributionSetTypes));
+                .create(MgmtDistributionSetTypeMapper.smFromRequest(entityFactory, distributionSetTypes));
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(MgmtDistributionSetTypeMapper.toTypesResponse(createdSoftwareModules));

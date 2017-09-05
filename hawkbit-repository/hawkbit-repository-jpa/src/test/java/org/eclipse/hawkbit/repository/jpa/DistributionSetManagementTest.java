@@ -75,8 +75,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet set = testdataFactory.createDistributionSet();
         assertThat(distributionSetManagement.get(NOT_EXIST_IDL)).isNotPresent();
         assertThat(distributionSetManagement.getWithDetails(NOT_EXIST_IDL)).isNotPresent();
-        assertThat(distributionSetManagement.getByNameAndVersion(NOT_EXIST_ID, NOT_EXIST_ID))
-                .isNotPresent();
+        assertThat(distributionSetManagement.getByNameAndVersion(NOT_EXIST_ID, NOT_EXIST_ID)).isNotPresent();
         assertThat(distributionSetManagement.getMetaDataByDistributionSetId(set.getId(), NOT_EXIST_ID)).isNotPresent();
 
     }
@@ -112,10 +111,8 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> distributionSetManagement.assignTag(Arrays.asList(NOT_EXIST_IDL), dsTag.getId()),
                 "DistributionSet");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement.findByTag(PAGE, NOT_EXIST_IDL),
-                "DistributionSetTag");
-        verifyThrownExceptionBy(
-                () -> distributionSetManagement.findByRsqlAndTag(PAGE, "name==*", NOT_EXIST_IDL),
+        verifyThrownExceptionBy(() -> distributionSetManagement.findByTag(PAGE, NOT_EXIST_IDL), "DistributionSetTag");
+        verifyThrownExceptionBy(() -> distributionSetManagement.findByRsqlAndTag(PAGE, "name==*", NOT_EXIST_IDL),
                 "DistributionSetTag");
 
         verifyThrownExceptionBy(
@@ -141,12 +138,10 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         verifyThrownExceptionBy(() -> distributionSetManagement.delete(Arrays.asList(NOT_EXIST_IDL)),
                 "DistributionSet");
-        verifyThrownExceptionBy(() -> distributionSetManagement.delete(NOT_EXIST_IDL),
-                "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetManagement.delete(NOT_EXIST_IDL), "DistributionSet");
         verifyThrownExceptionBy(() -> distributionSetManagement.deleteMetaData(NOT_EXIST_IDL, "xxx"),
                 "DistributionSet");
-        verifyThrownExceptionBy(
-                () -> distributionSetManagement.deleteMetaData(set.getId(), NOT_EXIST_ID),
+        verifyThrownExceptionBy(() -> distributionSetManagement.deleteMetaData(set.getId(), NOT_EXIST_ID),
                 "DistributionSetMetadata");
 
         verifyThrownExceptionBy(() -> distributionSetManagement.getByAction(NOT_EXIST_IDL), "Action");
@@ -154,20 +149,19 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> distributionSetManagement.getMetaDataByDistributionSetId(NOT_EXIST_IDL, "xxx"),
                 "DistributionSet");
 
-        verifyThrownExceptionBy(
-                () -> distributionSetManagement.findMetaDataByDistributionSetId(PAGE, NOT_EXIST_IDL),
+        verifyThrownExceptionBy(() -> distributionSetManagement.findMetaDataByDistributionSetId(PAGE, NOT_EXIST_IDL),
                 "DistributionSet");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement
-                .findMetaDataByDistributionSetIdAndRsql(PAGE, NOT_EXIST_IDL, "name==*"), "DistributionSet");
+        verifyThrownExceptionBy(
+                () -> distributionSetManagement.findMetaDataByDistributionSetIdAndRsql(PAGE, NOT_EXIST_IDL, "name==*"),
+                "DistributionSet");
 
         assertThatThrownBy(() -> distributionSetManagement.isInUse(NOT_EXIST_IDL))
                 .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("DistributionSet");
 
         verifyThrownExceptionBy(
-                () -> distributionSetManagement
-                        .update(entityFactory.distributionSet().update(NOT_EXIST_IDL)),
+                () -> distributionSetManagement.update(entityFactory.distributionSet().update(NOT_EXIST_IDL)),
                 "DistributionSet");
 
         verifyThrownExceptionBy(() -> distributionSetManagement.updateMetaData(NOT_EXIST_IDL,
@@ -194,13 +188,13 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     private void createAndUpdateDistributionSetWithInvalidDescription(final DistributionSet set) {
 
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> distributionSetManagement.create(entityFactory.distributionSet()
-                        .create().name("a").version("a").description(RandomStringUtils.randomAlphanumeric(513))))
+                .isThrownBy(() -> distributionSetManagement.create(entityFactory.distributionSet().create().name("a")
+                        .version("a").description(RandomStringUtils.randomAlphanumeric(513))))
                 .as("entity with too long description should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> distributionSetManagement.update(entityFactory.distributionSet()
-                        .update(set.getId()).description(RandomStringUtils.randomAlphanumeric(513))))
+                .isThrownBy(() -> distributionSetManagement.update(entityFactory.distributionSet().update(set.getId())
+                        .description(RandomStringUtils.randomAlphanumeric(513))))
                 .as("entity with too long description should not be updated");
 
     }
@@ -209,23 +203,21 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     private void createAndUpdateDistributionSetWithInvalidName(final DistributionSet set) {
 
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> distributionSetManagement.create(entityFactory.distributionSet()
-                        .create().version("a").name(RandomStringUtils.randomAlphanumeric(65))))
+                .isThrownBy(() -> distributionSetManagement.create(entityFactory.distributionSet().create().version("a")
+                        .name(RandomStringUtils.randomAlphanumeric(65))))
+                .as("entity with too long name should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(
+                () -> distributionSetManagement.create(entityFactory.distributionSet().create().version("a").name("")))
                 .as("entity with too long name should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> distributionSetManagement
-                        .create(entityFactory.distributionSet().create().version("a").name("")))
-                .as("entity with too long name should not be created");
-
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> distributionSetManagement.update(entityFactory.distributionSet()
-                        .update(set.getId()).name(RandomStringUtils.randomAlphanumeric(65))))
+                .isThrownBy(() -> distributionSetManagement.update(entityFactory.distributionSet().update(set.getId())
+                        .name(RandomStringUtils.randomAlphanumeric(65))))
                 .as("entity with too long name should not be updated");
 
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> distributionSetManagement
-                        .update(entityFactory.distributionSet().update(set.getId()).name("")))
+        assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(
+                () -> distributionSetManagement.update(entityFactory.distributionSet().update(set.getId()).name("")))
                 .as("entity with too short name should not be updated");
 
     }
@@ -234,23 +226,21 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     private void createAndUpdateDistributionSetWithInvalidVersion(final DistributionSet set) {
 
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> distributionSetManagement.create(entityFactory.distributionSet()
-                        .create().name("a").version(RandomStringUtils.randomAlphanumeric(65))))
+                .isThrownBy(() -> distributionSetManagement.create(entityFactory.distributionSet().create().name("a")
+                        .version(RandomStringUtils.randomAlphanumeric(65))))
+                .as("entity with too long name should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(
+                () -> distributionSetManagement.create(entityFactory.distributionSet().create().name("a").version("")))
                 .as("entity with too long name should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> distributionSetManagement
-                        .create(entityFactory.distributionSet().create().name("a").version("")))
-                .as("entity with too long name should not be created");
-
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> distributionSetManagement.update(entityFactory.distributionSet()
-                        .update(set.getId()).version(RandomStringUtils.randomAlphanumeric(65))))
+                .isThrownBy(() -> distributionSetManagement.update(entityFactory.distributionSet().update(set.getId())
+                        .version(RandomStringUtils.randomAlphanumeric(65))))
                 .as("entity with too long name should not be updated");
 
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> distributionSetManagement
-                        .update(entityFactory.distributionSet().update(set.getId()).version("")))
+        assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(
+                () -> distributionSetManagement.update(entityFactory.distributionSet().update(set.getId()).version("")))
                 .as("entity with too short name should not be updated");
 
     }
@@ -278,8 +268,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that a DS cannot be created if another DS with same name and version exists.")
     public void createDistributionSetWithDuplicateNameAndVersionFails() {
-        distributionSetManagement
-                .create(entityFactory.distributionSet().create().name("newtypesoft").version("1"));
+        distributionSetManagement.create(entityFactory.distributionSet().create().name("newtypesoft").version("1"));
 
         assertThatExceptionOfType(EntityAlreadyExistsException.class).isThrownBy(() -> distributionSetManagement
                 .create(entityFactory.distributionSet().create().name("newtypesoft").version("1")));
@@ -332,8 +321,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
             assignDS.add(testdataFactory.createDistributionSet("DS" + i, "1.0", Collections.emptyList()).getId());
         }
 
-        final DistributionSetTag tag = distributionSetTagManagement
-                .create(entityFactory.tag().create().name("Tag1"));
+        final DistributionSetTag tag = distributionSetTagManagement.create(entityFactory.tag().create().name("Tag1"));
 
         final List<DistributionSet> assignedDS = distributionSetManagement.assignTag(assignDS, tag.getId());
         assertThat(assignedDS.size()).as("assigned ds has wrong size").isEqualTo(4);
@@ -342,8 +330,8 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         DistributionSetTag findDistributionSetTag = distributionSetTagManagement.getByName("Tag1").get();
 
-        assertThat(assignedDS.size()).as("assigned ds has wrong size").isEqualTo(
-                distributionSetManagement.findByTag(PAGE, tag.getId()).getNumberOfElements());
+        assertThat(assignedDS.size()).as("assigned ds has wrong size")
+                .isEqualTo(distributionSetManagement.findByTag(PAGE, tag.getId()).getNumberOfElements());
 
         final JpaDistributionSet unAssignDS = (JpaDistributionSet) distributionSetManagement
                 .unAssignTag(assignDS.get(0), findDistributionSetTag.getId());
@@ -353,12 +341,10 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(distributionSetManagement.findByTag(PAGE, tag.getId()).getNumberOfElements())
                 .as("ds tag ds has wrong ds size").isEqualTo(3);
 
-        assertThat(distributionSetManagement
-                .findByRsqlAndTag(PAGE, "name==" + unAssignDS.getName(), tag.getId()).getNumberOfElements())
-                        .as("ds tag ds has wrong ds size").isEqualTo(0);
-        assertThat(distributionSetManagement
-                .findByRsqlAndTag(PAGE, "name!=" + unAssignDS.getName(), tag.getId()).getNumberOfElements())
-                        .as("ds tag ds has wrong ds size").isEqualTo(3);
+        assertThat(distributionSetManagement.findByRsqlAndTag(PAGE, "name==" + unAssignDS.getName(), tag.getId())
+                .getNumberOfElements()).as("ds tag ds has wrong ds size").isEqualTo(0);
+        assertThat(distributionSetManagement.findByRsqlAndTag(PAGE, "name!=" + unAssignDS.getName(), tag.getId())
+                .getNumberOfElements()).as("ds tag ds has wrong ds size").isEqualTo(3);
     }
 
     @Test
@@ -394,13 +380,11 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Description("Ensures that it is not possible to add a software module that is not defined of the DS's type.")
     public void updateDistributionSetUnsupportedModuleFails() {
         final DistributionSet set = distributionSetManagement
-                .create(
-                        entityFactory.distributionSet().create().name("agent-hub2")
-                                .version("1.0.5").type(
-                                        distributionSetTypeManagement
-                                                .create(entityFactory.distributionSetType().create().key("test")
-                                                        .name("test").mandatory(Arrays.asList(osType.getId())))
-                                                .getKey()));
+                .create(entityFactory.distributionSet().create().name("agent-hub2")
+                        .version(
+                                "1.0.5")
+                        .type(distributionSetTypeManagement.create(entityFactory.distributionSetType().create()
+                                .key("test").name("test").mandatory(Arrays.asList(osType.getId()))).getKey()));
 
         final SoftwareModule module = softwareModuleManagement.create(
                 entityFactory.softwareModule().create().name("agent-hub2").version("1.0.5").type(appType.getKey()));
@@ -430,9 +414,8 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(ds.findFirstModuleByType(appType).isPresent()).isFalse();
 
         // Update description
-        distributionSetManagement
-                .update(entityFactory.distributionSet().update(ds.getId()).name("a new name")
-                        .description("a new description").version("a new version").requiredMigrationStep(true));
+        distributionSetManagement.update(entityFactory.distributionSet().update(ds.getId()).name("a new name")
+                .description("a new description").version("a new version").requiredMigrationStep(true));
         ds = distributionSetManagement.getWithDetails(ds.getId()).get();
         assertThat(ds.getDescription()).isEqualTo("a new description");
         assertThat(ds.getName()).isEqualTo("a new name");
@@ -508,15 +491,19 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .setIsDeleted(false).setIsComplete(true).setSelectDSWithNoTag(Boolean.FALSE);
 
         // target first only has an assigned DS-three so check order correct
-        final List<DistributionSet> tFirstPin = distributionSetManagement.findByFilterAndAssignedInstalledDsOrderedByLinkTarget(
-                PAGE, distributionSetFilterBuilder, tFirst.getControllerId()).getContent();
+        final List<DistributionSet> tFirstPin = distributionSetManagement
+                .findByFilterAndAssignedInstalledDsOrderedByLinkTarget(PAGE, distributionSetFilterBuilder,
+                        tFirst.getControllerId())
+                .getContent();
         assertThat(tFirstPin.get(0)).isEqualTo(dsThree);
         assertThat(tFirstPin).hasSize(10);
 
         // target second has installed DS-2 and assigned DS-4 so check order
         // correct
-        final List<DistributionSet> tSecondPin = distributionSetManagement.findByFilterAndAssignedInstalledDsOrderedByLinkTarget(
-                PAGE, distributionSetFilterBuilder, tSecond.getControllerId()).getContent();
+        final List<DistributionSet> tSecondPin = distributionSetManagement
+                .findByFilterAndAssignedInstalledDsOrderedByLinkTarget(PAGE, distributionSetFilterBuilder,
+                        tSecond.getControllerId())
+                .getContent();
         assertThat(tSecondPin.get(0)).isEqualTo(dsSecond);
         assertThat(tSecondPin.get(1)).isEqualTo(dsFour);
         assertThat(tFirstPin).hasSize(10);
@@ -531,14 +518,13 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .create(entityFactory.tag().create().name("DistributionSetTag-B"));
         final DistributionSetTag dsTagC = distributionSetTagManagement
                 .create(entityFactory.tag().create().name("DistributionSetTag-C"));
-        distributionSetTagManagement
-                .create(entityFactory.tag().create().name("DistributionSetTag-D"));
+        distributionSetTagManagement.create(entityFactory.tag().create().name("DistributionSetTag-D"));
 
         List<DistributionSet> ds5Group1 = testdataFactory.createDistributionSets("", 5);
         List<DistributionSet> dsGroup2 = testdataFactory.createDistributionSets("test2", 5);
         DistributionSet dsDeleted = testdataFactory.createDistributionSet("deleted");
-        final DistributionSet dsInComplete = distributionSetManagement.create(entityFactory
-                .distributionSet().create().name("notcomplete").version("1").type(standardDsType.getKey()));
+        final DistributionSet dsInComplete = distributionSetManagement.create(entityFactory.distributionSet().create()
+                .name("notcomplete").version("1").type(standardDsType.getKey()));
 
         DistributionSetType newType = distributionSetTypeManagement
                 .create(entityFactory.distributionSetType().create().key("foo").name("bar").description("test"));
@@ -575,8 +561,8 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         expected.add(dsNewType);
 
         assertThat(distributionSetManagement
-                .findByDistributionSetFilter(PAGE, getDistributionSetFilterBuilder().build()).getContent())
-                        .hasSize(13).containsOnly(expected.toArray(new DistributionSet[0]));
+                .findByDistributionSetFilter(PAGE, getDistributionSetFilterBuilder().build()).getContent()).hasSize(13)
+                        .containsOnly(expected.toArray(new DistributionSet[0]));
 
         DistributionSetFilterBuilder distributionSetFilterBuilder;
 
@@ -740,8 +726,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     public void findDistributionSetsWithoutLazy() {
         testdataFactory.createDistributionSets(20);
 
-        assertThat(distributionSetManagement.findByDeletedAndOrCompleted(PAGE, false, true))
-                .hasSize(20);
+        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(20);
     }
 
     @Test
@@ -755,9 +740,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         distributionSetManagement.delete(ds1.getId());
         // not assigned so not marked as deleted but fully deleted
         assertThat(distributionSetRepository.findAll()).hasSize(1);
-        assertThat(distributionSetManagement
-                .findByDeletedAndOrCompleted(PAGE, Boolean.FALSE, Boolean.TRUE).getTotalElements())
-                        .isEqualTo(1);
+        assertThat(distributionSetManagement.findByCompleted(PAGE, true).getTotalElements()).isEqualTo(1);
     }
 
     @Test
@@ -810,14 +793,11 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         // delete assigned ds
         assertThat(distributionSetRepository.findAll()).hasSize(4);
-        distributionSetManagement
-                .delete(Arrays.asList(dsToTargetAssigned.getId(), dsToRolloutAssigned.getId()));
+        distributionSetManagement.delete(Arrays.asList(dsToTargetAssigned.getId(), dsToRolloutAssigned.getId()));
 
         // not assigned so not marked as deleted
         assertThat(distributionSetRepository.findAll()).hasSize(4);
-        assertThat(distributionSetManagement
-                .findByDeletedAndOrCompleted(PAGE, Boolean.FALSE, Boolean.TRUE).getTotalElements())
-                        .isEqualTo(2);
+        assertThat(distributionSetManagement.findByCompleted(PAGE, true).getTotalElements()).isEqualTo(2);
     }
 
     @Test

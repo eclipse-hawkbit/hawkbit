@@ -206,45 +206,15 @@ public interface DistributionSetManagement
      *
      * @param pageable
      *            the pagination parameter
-     * @param deleted
-     *            if TRUE, {@link DistributionSet}s marked as deleted are
-     *            returned. If FALSE, on {@link DistributionSet}s with
-     *            {@link DistributionSet#isDeleted()} == FALSE are returned.
-     *            <code>null</code> if both are to be returned
      * @param complete
      *            to <code>true</code> for returning only completed distribution
-     *            sets or <code>false</code> for only incomplete ones nor
-     *            <code>null</code> to return both.
+     *            sets or <code>false</code> for only incomplete ones
      *
      *
      * @return all found {@link DistributionSet}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<DistributionSet> findByDeletedAndOrCompleted(@NotNull Pageable pageable, Boolean deleted, Boolean complete);
-
-    /**
-     * finds all {@link DistributionSet}s.
-     * 
-     * @param pageable
-     *            the pagination parameter
-     * @param rsqlParam
-     *            rsql query string
-     * @param deleted
-     *            if TRUE, {@link DistributionSet}s marked as deleted are
-     *            returned. If FALSE, on {@link DistributionSet}s not marked as
-     *            deleted are returned. <code>null</code> if both are to be
-     *            returned
-     *
-     * @return all found {@link DistributionSet}s
-     * 
-     * @throws RSQLParameterUnsupportedFieldException
-     *             if a field in the RSQL string is used but not provided by the
-     *             given {@code fieldNameProvider}
-     * @throws RSQLParameterSyntaxException
-     *             if the RSQL syntax is wrong
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<DistributionSet> findByRsqlAndDeleted(@NotNull Pageable pageable, @NotNull String rsqlParam, Boolean deleted);
+    Page<DistributionSet> findByCompleted(@NotNull Pageable pageable, boolean complete);
 
     /**
      * method retrieves all {@link DistributionSet}s from the repository in the

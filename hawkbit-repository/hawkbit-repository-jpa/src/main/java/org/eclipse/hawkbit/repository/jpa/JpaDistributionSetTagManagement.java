@@ -33,6 +33,7 @@ import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -53,12 +54,15 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
 
     private final VirtualPropertyReplacer virtualPropertyReplacer;
 
+    private final NoCountPagingRepository criteriaNoCountDao;
+
     JpaDistributionSetTagManagement(final DistributionSetTagRepository distributionSetTagRepository,
             final DistributionSetRepository distributionSetRepository,
-            final VirtualPropertyReplacer virtualPropertyReplacer) {
+            final VirtualPropertyReplacer virtualPropertyReplacer, final NoCountPagingRepository criteriaNoCountDao) {
         this.distributionSetTagRepository = distributionSetTagRepository;
         this.distributionSetRepository = distributionSetRepository;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
+        this.criteriaNoCountDao = criteriaNoCountDao;
     }
 
     @Override
@@ -119,8 +123,8 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     }
 
     @Override
-    public Page<DistributionSetTag> findAll(final Pageable pageable) {
-        return convertDsPage(distributionSetTagRepository.findAll(pageable), pageable);
+    public Slice<DistributionSetTag> findAll(final Pageable pageable) {
+        return convertDsPage(criteriaNoCountDao.findAll(pageable, JpaDistributionSetTag.class), pageable);
     }
 
     @Override
@@ -144,6 +148,11 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     private static Page<DistributionSetTag> convertDsPage(final Page<JpaDistributionSetTag> findAll,
             final Pageable pageable) {
         return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
+    }
+
+    private static Slice<DistributionSetTag> convertDsPage(final Slice<JpaDistributionSetTag> findAll,
+            final Pageable pageable) {
+        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, 0);
     }
 
     @Override

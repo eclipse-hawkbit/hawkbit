@@ -40,6 +40,8 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
+import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -749,11 +751,12 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         }
 
         // verify that deleted attribute is used correctly
-        List<DistributionSet> allFoundDS = distributionSetManagement.findByDeletedAndOrCompleted(PAGE, false, true)
-                .getContent();
+        List<DistributionSet> allFoundDS = distributionSetManagement.findByCompleted(PAGE, true).getContent();
         assertThat(allFoundDS.size()).as("no ds should be founded").isEqualTo(0);
-        allFoundDS = distributionSetManagement.findByDeletedAndOrCompleted(pageRequest, true, true).getContent();
-        assertThat(allFoundDS).as("wrong size of founded ds").hasSize(noOfDistributionSets);
+
+        assertThat(distributionSetRepository.findAll(SpecificationsBuilder.combineWithAnd(Arrays
+                .asList(DistributionSetSpecification.isDeleted(true), DistributionSetSpecification.isCompleted(true))),
+                PAGE).getContent()).as("wrong size of founded ds").hasSize(noOfDistributionSets);
 
         for (final DistributionSet ds : deploymentResult.getDistributionSets()) {
             testdataFactory.sendUpdateActionStatusToTargets(deploymentResult.getDeployedTargets(), Status.FINISHED,
@@ -765,10 +768,11 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // has been installed
         // successfully and no activeAction is referring to created distribution
         // sets
-        allFoundDS = distributionSetManagement.findByDeletedAndOrCompleted(pageRequest, false, true).getContent();
+        allFoundDS = distributionSetManagement.findByCompleted(pageRequest, true).getContent();
         assertThat(allFoundDS.size()).as("no ds should be founded").isEqualTo(0);
-        allFoundDS = distributionSetManagement.findByDeletedAndOrCompleted(pageRequest, true, true).getContent();
-        assertThat(allFoundDS).as("size of founded ds is wrong").hasSize(noOfDistributionSets);
+        assertThat(distributionSetRepository.findAll(SpecificationsBuilder.combineWithAnd(Arrays
+                .asList(DistributionSetSpecification.isDeleted(true), DistributionSetSpecification.isCompleted(true))),
+                PAGE).getContent()).as("wrong size of founded ds").hasSize(noOfDistributionSets);
 
     }
 

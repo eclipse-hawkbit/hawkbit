@@ -190,7 +190,7 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
 
     private Page<DistributionSet> findDistributionSetForTenant(final String tenant) throws Exception {
         return securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", tenant),
-                () -> distributionSetManagement.findByDeletedAndOrCompleted(PAGE, false, true));
+                () -> distributionSetManagement.findByCompleted(PAGE, true));
     }
 
 }

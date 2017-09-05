@@ -63,6 +63,7 @@ import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -104,6 +105,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Autowired
     private ActionRepository actionRepository;
+
+    @Autowired
+    private NoCountPagingRepository criteriaNoCountDao;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -345,6 +349,11 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
+    private static Slice<DistributionSet> convertDsPage(final Slice<JpaDistributionSet> findAll,
+            final Pageable pageable) {
+        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, 0);
+    }
+
     /**
      *
      * @param distributionSetFilter
@@ -363,37 +372,10 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    public Page<DistributionSet> findByDeletedAndOrCompleted(final Pageable pageReq, final Boolean deleted,
-            final Boolean complete) {
-        final List<Specification<JpaDistributionSet>> specList = new ArrayList<>(2);
+    public Page<DistributionSet> findByCompleted(final Pageable pageReq, final boolean complete) {
 
-        if (deleted != null) {
-            final Specification<JpaDistributionSet> spec = DistributionSetSpecification.isDeleted(deleted);
-            specList.add(spec);
-        }
-
-        if (complete != null) {
-            final Specification<JpaDistributionSet> spec = DistributionSetSpecification.isCompleted(complete);
-            specList.add(spec);
-        }
-
-        return convertDsPage(findByCriteriaAPI(pageReq, specList), pageReq);
-    }
-
-    @Override
-    public Page<DistributionSet> findByRsqlAndDeleted(final Pageable pageReq, final String rsqlParam,
-            final Boolean deleted) {
-
-        final Specification<JpaDistributionSet> spec = RSQLUtility.parse(rsqlParam, DistributionSetFields.class,
-                virtualPropertyReplacer);
-
-        final List<Specification<JpaDistributionSet>> specList = new ArrayList<>(2);
-        if (deleted != null) {
-            specList.add(DistributionSetSpecification.isDeleted(deleted));
-        }
-        specList.add(spec);
-
-        return convertDsPage(findByCriteriaAPI(pageReq, specList), pageReq);
+        return convertDsPage(findByCriteriaAPI(pageReq, Arrays.asList(DistributionSetSpecification.isDeleted(false),
+                DistributionSetSpecification.isCompleted(complete))), pageReq);
     }
 
     @Override
@@ -477,8 +459,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public DistributionSetMetadata updateMetaData(final Long dsId, final MetaData md) {
 
         // check if exists otherwise throw entity not found exception
-        final JpaDistributionSetMetadata toUpdate = (JpaDistributionSetMetadata) getMetaDataByDistributionSetId(dsId, md.getKey())
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetMetadata.class, dsId, md.getKey()));
+        final JpaDistributionSetMetadata toUpdate = (JpaDistributionSetMetadata) getMetaDataByDistributionSetId(dsId,
+                md.getKey()).orElseThrow(
+                        () -> new EntityNotFoundException(DistributionSetMetadata.class, dsId, md.getKey()));
         toUpdate.setValue(md.getValue());
         // touch it to update the lock revision because we are modifying the
         // DS indirectly
@@ -491,8 +474,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteMetaData(final Long distributionSetId, final String key) {
-        final JpaDistributionSetMetadata metadata = (JpaDistributionSetMetadata) getMetaDataByDistributionSetId(distributionSetId, key)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetMetadata.class, distributionSetId, key));
+        final JpaDistributionSetMetadata metadata = (JpaDistributionSetMetadata) getMetaDataByDistributionSetId(
+                distributionSetId, key).orElseThrow(
+                        () -> new EntityNotFoundException(DistributionSetMetadata.class, distributionSetId, key));
 
         touch(metadata.getDistributionSet());
         distributionSetMetadataRepository.delete(metadata.getId());
@@ -757,21 +741,24 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         final Specification<JpaDistributionSet> spec = RSQLUtility.parse(rsqlParam, DistributionSetFields.class,
                 virtualPropertyReplacer);
 
-        return convertDsPage(distributionSetRepository.findAll((Specification<JpaDistributionSet>) (root, query,
-                cb) -> cb.and(DistributionSetSpecification.hasTag(tagId).toPredicate(root, query, cb),
-                        spec.toPredicate(root, query, cb)),
-                pageable), pageable);
+        return convertDsPage(findByCriteriaAPI(pageable, Arrays.asList(spec, DistributionSetSpecification.hasTag(tagId),
+                DistributionSetSpecification.isDeleted(false))), pageable);
     }
 
     @Override
-    public Page<DistributionSet> findAll(final Pageable pageable) {
-        return convertDsPage(findByCriteriaAPI(pageable, Arrays.asList(DistributionSetSpecification.isDeleted(false))),
-                pageable);
+    public Slice<DistributionSet> findAll(final Pageable pageable) {
+        return convertDsPage(criteriaNoCountDao.findAll(DistributionSetSpecification.isDeleted(false), pageable,
+                JpaDistributionSet.class), pageable);
     }
 
     @Override
     public Page<DistributionSet> findByRsql(final Pageable pageable, final String rsqlParam) {
-        return findByRsqlAndDeleted(pageable, rsqlParam, false);
+        final Specification<JpaDistributionSet> spec = RSQLUtility.parse(rsqlParam, DistributionSetFields.class,
+                virtualPropertyReplacer);
+
+        return convertDsPage(
+                findByCriteriaAPI(pageable, Arrays.asList(spec, DistributionSetSpecification.isDeleted(false))),
+                pageable);
     }
 
     @Override

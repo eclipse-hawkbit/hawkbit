@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -27,6 +28,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetTypeSpecification;
+import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
@@ -34,10 +36,12 @@ import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -56,14 +60,17 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
     private final VirtualPropertyReplacer virtualPropertyReplacer;
 
+    private final NoCountPagingRepository criteriaNoCountDao;
+
     JpaDistributionSetTypeManagement(final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final DistributionSetRepository distributionSetRepository,
-            final VirtualPropertyReplacer virtualPropertyReplacer) {
+            final VirtualPropertyReplacer virtualPropertyReplacer, final NoCountPagingRepository criteriaNoCountDao) {
         this.distributionSetTypeRepository = distributionSetTypeRepository;
         this.softwareModuleTypeRepository = softwareModuleTypeRepository;
         this.distributionSetRepository = distributionSetRepository;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
+        this.criteriaNoCountDao = criteriaNoCountDao;
     }
 
     @Override
@@ -148,15 +155,16 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
     @Override
     public Page<DistributionSetType> findByRsql(final Pageable pageable, final String rsqlParam) {
-        final Specification<JpaDistributionSetType> spec = RSQLUtility.parse(rsqlParam, DistributionSetTypeFields.class,
-                virtualPropertyReplacer);
-
-        return convertDsTPage(distributionSetTypeRepository.findAll(spec, pageable));
+        return convertPage(findByCriteriaAPI(pageable,
+                Arrays.asList(RSQLUtility.parse(rsqlParam, DistributionSetTypeFields.class, virtualPropertyReplacer),
+                        DistributionSetTypeSpecification.isDeleted(false))),
+                pageable);
     }
 
     @Override
-    public Page<DistributionSetType> findAll(final Pageable pageable) {
-        return convertDsTPage(distributionSetTypeRepository.findByDeleted(pageable, false));
+    public Slice<DistributionSetType> findAll(final Pageable pageable) {
+        return convertPage(criteriaNoCountDao.findAll(DistributionSetTypeSpecification.isDeleted(false), pageable,
+                JpaDistributionSetType.class), pageable);
     }
 
     @Override
@@ -226,8 +234,24 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
         }
     }
 
-    private static Page<DistributionSetType> convertDsTPage(final Page<JpaDistributionSetType> findAll) {
-        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()));
+    private static Page<DistributionSetType> convertPage(final Page<JpaDistributionSetType> findAll,
+            final Pageable pageable) {
+        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
+    }
+
+    private static Slice<DistributionSetType> convertPage(final Slice<JpaDistributionSetType> findAll,
+            final Pageable pageable) {
+        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, 0);
+    }
+
+    private Page<JpaDistributionSetType> findByCriteriaAPI(final Pageable pageable,
+            final List<Specification<JpaDistributionSetType>> specList) {
+
+        if (CollectionUtils.isEmpty(specList)) {
+            return distributionSetTypeRepository.findAll(pageable);
+        }
+
+        return distributionSetTypeRepository.findAll(SpecificationsBuilder.combineWithAnd(specList), pageable);
     }
 
     @Override
