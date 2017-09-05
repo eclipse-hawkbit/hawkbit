@@ -70,7 +70,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetType updateDistributionSetType(final DistributionSetTypeUpdate u) {
+    public DistributionSetType update(final DistributionSetTypeUpdate u) {
         final GenericDistributionSetTypeUpdate update = (GenericDistributionSetTypeUpdate) u;
 
         final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(update.getId());
@@ -82,9 +82,9 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
             checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(update.getId());
 
             update.getMandatory().ifPresent(
-                    mand -> softwareModuleTypeRepository.findByIdIn(mand).forEach(type::addMandatoryModuleType));
-            update.getOptional().ifPresent(
-                    opt -> softwareModuleTypeRepository.findByIdIn(opt).forEach(type::addOptionalModuleType));
+                    mand -> softwareModuleTypeRepository.findAll(mand).forEach(type::addMandatoryModuleType));
+            update.getOptional()
+                    .ifPresent(opt -> softwareModuleTypeRepository.findAll(opt).forEach(type::addOptionalModuleType));
         }
 
         return distributionSetTypeRepository.save(type);
@@ -96,8 +96,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetType assignMandatorySoftwareModuleTypes(final Long dsTypeId,
             final Collection<Long> softwareModulesTypeIds) {
-        final Collection<JpaSoftwareModuleType> modules = softwareModuleTypeRepository
-                .findByIdIn(softwareModulesTypeIds);
+        final Collection<JpaSoftwareModuleType> modules = softwareModuleTypeRepository.findAll(softwareModulesTypeIds);
 
         if (modules.size() < softwareModulesTypeIds.size()) {
             throw new EntityNotFoundException(SoftwareModuleType.class, softwareModulesTypeIds,
@@ -119,8 +118,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     public DistributionSetType assignOptionalSoftwareModuleTypes(final Long dsTypeId,
             final Collection<Long> softwareModulesTypeIds) {
 
-        final Collection<JpaSoftwareModuleType> modules = softwareModuleTypeRepository
-                .findByIdIn(softwareModulesTypeIds);
+        final Collection<JpaSoftwareModuleType> modules = softwareModuleTypeRepository.findAll(softwareModulesTypeIds);
 
         if (modules.size() < softwareModulesTypeIds.size()) {
             throw new EntityNotFoundException(SoftwareModuleType.class, softwareModulesTypeIds,
@@ -149,7 +147,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     }
 
     @Override
-    public Page<DistributionSetType> findDistributionSetTypesAll(final String rsqlParam, final Pageable pageable) {
+    public Page<DistributionSetType> findByRsql(final Pageable pageable, final String rsqlParam) {
         final Specification<JpaDistributionSetType> spec = RSQLUtility.parse(rsqlParam, DistributionSetTypeFields.class,
                 virtualPropertyReplacer);
 
@@ -157,29 +155,23 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     }
 
     @Override
-    public Page<DistributionSetType> findDistributionSetTypesAll(final Pageable pageable) {
+    public Page<DistributionSetType> findAll(final Pageable pageable) {
         return convertDsTPage(distributionSetTypeRepository.findByDeleted(pageable, false));
     }
 
     @Override
-    public Long countDistributionSetTypesAll() {
+    public long count() {
         return distributionSetTypeRepository.countByDeleted(false);
     }
 
     @Override
-    public Optional<DistributionSetType> findDistributionSetTypeByName(final String name) {
+    public Optional<DistributionSetType> getByName(final String name) {
         return Optional
                 .ofNullable(distributionSetTypeRepository.findOne(DistributionSetTypeSpecification.byName(name)));
     }
 
     @Override
-    public Optional<DistributionSetType> findDistributionSetTypeById(final Long typeId) {
-        return Optional
-                .ofNullable(distributionSetTypeRepository.findOne(DistributionSetTypeSpecification.byId(typeId)));
-    }
-
-    @Override
-    public Optional<DistributionSetType> findDistributionSetTypeByKey(final String key) {
+    public Optional<DistributionSetType> getByKey(final String key) {
         return Optional.ofNullable(distributionSetTypeRepository.findOne(DistributionSetTypeSpecification.byKey(key)));
     }
 
@@ -187,7 +179,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetType createDistributionSetType(final DistributionSetTypeCreate c) {
+    public DistributionSetType create(final DistributionSetTypeCreate c) {
         final JpaDistributionSetTypeCreate create = (JpaDistributionSetTypeCreate) c;
 
         return distributionSetTypeRepository.save(create.build());
@@ -197,7 +189,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void deleteDistributionSetType(final Long typeId) {
+    public void delete(final Long typeId) {
 
         final JpaDistributionSetType toDelete = distributionSetTypeRepository.findById(typeId)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, typeId));
@@ -214,21 +206,12 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public List<DistributionSetType> createDistributionSetTypes(final Collection<DistributionSetTypeCreate> types) {
-        return types.stream().map(this::createDistributionSetType).collect(Collectors.toList());
-    }
-
-    @Override
-    public Long countDistributionSetsByType(final Long typeId) {
-        if (!distributionSetTypeRepository.exists(typeId)) {
-            throw new EntityNotFoundException(DistributionSetType.class, typeId);
-        }
-
-        return distributionSetRepository.countByTypeId(typeId);
+    public List<DistributionSetType> create(final Collection<DistributionSetTypeCreate> types) {
+        return types.stream().map(this::create).collect(Collectors.toList());
     }
 
     private JpaDistributionSetType findDistributionSetTypeAndThrowExceptionIfNotFound(final Long setId) {
-        return (JpaDistributionSetType) findDistributionSetTypeById(setId)
+        return (JpaDistributionSetType) get(setId)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, setId));
     }
 
@@ -245,6 +228,36 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
     private static Page<DistributionSetType> convertDsTPage(final Page<JpaDistributionSetType> findAll) {
         return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()));
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public void delete(final Collection<Long> ids) {
+        final List<JpaDistributionSetType> setsFound = distributionSetTypeRepository.findAll(ids);
+
+        if (setsFound.size() < ids.size()) {
+            throw new EntityNotFoundException(DistributionSetType.class, ids,
+                    setsFound.stream().map(DistributionSetType::getId).collect(Collectors.toList()));
+        }
+
+        distributionSetTypeRepository.delete(setsFound);
+    }
+
+    @Override
+    public List<DistributionSetType> get(final Collection<Long> ids) {
+        return Collections.unmodifiableList(distributionSetTypeRepository.findAll(ids));
+    }
+
+    @Override
+    public Optional<DistributionSetType> get(final Long id) {
+        return Optional.ofNullable(distributionSetTypeRepository.findOne(id));
+    }
+
+    @Override
+    public boolean exists(final Long id) {
+        return distributionSetTypeRepository.exists(id);
     }
 
 }

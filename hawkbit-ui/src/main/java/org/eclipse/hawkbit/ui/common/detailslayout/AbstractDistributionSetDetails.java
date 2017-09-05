@@ -132,7 +132,7 @@ public abstract class AbstractDistributionSetDetails
     @Override
     protected void showMetadata(final ClickEvent event) {
         final Optional<DistributionSet> ds = distributionSetManagement
-                .findDistributionSetById(getSelectedBaseEntityId());
+                .get(getSelectedBaseEntityId());
         if (!ds.isPresent()) {
             uiNotification.displayWarning(getI18n().getMessage("distributionset.not.exists"));
             return;

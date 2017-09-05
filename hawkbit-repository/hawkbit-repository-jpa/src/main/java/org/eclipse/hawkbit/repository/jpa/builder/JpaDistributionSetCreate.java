@@ -47,7 +47,7 @@ public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreat
     }
 
     private DistributionSetType findDistributionSetTypeWithExceptionIfNotFound(final String distributionSetTypekey) {
-        return distributionSetTypeManagement.findDistributionSetTypeByKey(distributionSetTypekey)
+        return distributionSetTypeManagement.getByKey(distributionSetTypekey)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, distributionSetTypekey));
     }
 
@@ -57,7 +57,7 @@ public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreat
             return Collections.emptyList();
         }
 
-        final Collection<SoftwareModule> module = softwareModuleManagement.findSoftwareModulesById(softwareModuleId);
+        final Collection<SoftwareModule> module = softwareModuleManagement.get(softwareModuleId);
         if (module.size() < softwareModuleId.size()) {
             throw new EntityNotFoundException(SoftwareModule.class, softwareModuleId);
         }

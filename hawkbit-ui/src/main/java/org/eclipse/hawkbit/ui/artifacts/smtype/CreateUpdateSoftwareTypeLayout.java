@@ -117,7 +117,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
     protected Color getColorForColorPicker() {
 
         final Optional<SoftwareModuleType> typeSelected = softwareModuleTypeManagement
-                .findSoftwareModuleTypeByName(tagNameComboBox.getValue().toString());
+                .getByName(tagNameComboBox.getValue().toString());
         if (typeSelected.isPresent()) {
             return typeSelected.get().getColour() != null
                     ? ColorPickerHelper.rgbToColorConverter(typeSelected.get().getColour())
@@ -194,7 +194,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
     @Override
     protected void setTagDetails(final String targetTagSelected) {
         tagName.setValue(targetTagSelected);
-        softwareModuleTypeManagement.findSoftwareModuleTypeByName(targetTagSelected).ifPresent(selectedTypeTag -> {
+        softwareModuleTypeManagement.getByName(targetTagSelected).ifPresent(selectedTypeTag -> {
             tagDesc.setValue(selectedTypeTag.getDescription());
             typeKey.setValue(selectedTypeTag.getKey());
             if (selectedTypeTag.getMaxAssignments() == 1) {
@@ -234,12 +234,12 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
 
     @Override
     protected Optional<SoftwareModuleType> findEntityByKey() {
-        return softwareModuleTypeManagement.findSoftwareModuleTypeByKey(typeKey.getValue());
+        return softwareModuleTypeManagement.getByKey(typeKey.getValue());
     }
 
     @Override
     protected Optional<SoftwareModuleType> findEntityByName() {
-        return softwareModuleTypeManagement.findSoftwareModuleTypeByName(tagName.getValue());
+        return softwareModuleTypeManagement.getByName(tagName.getValue());
     }
 
     @Override
@@ -261,7 +261,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
         }
 
         if (typeNameValue != null && typeKeyValue != null) {
-            final SoftwareModuleType newSWType = softwareModuleTypeManagement.createSoftwareModuleType(
+            final SoftwareModuleType newSWType = softwareModuleTypeManagement.create(
                     entityFactory.softwareModuleType().create().key(typeKeyValue).name(typeNameValue)
                             .description(typeDescValue).colour(colorPicked).maxAssignments(assignNumber));
             uiNotification
@@ -274,7 +274,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
     }
 
     private void updateSWModuleType(final SoftwareModuleType existingType) {
-        softwareModuleTypeManagement.updateSoftwareModuleType(
+        softwareModuleTypeManagement.update(
                 entityFactory.softwareModuleType().update(existingType.getId()).description(tagDesc.getValue())
                         .colour(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview())));
         uiNotification

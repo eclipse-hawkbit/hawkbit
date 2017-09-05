@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.distributions.disttype;
 
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
@@ -39,11 +40,13 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
     DSTypeFilterHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final ManageDistUIState manageDistUIState, final EntityFactory entityFactory,
             final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement,
-            final DistributionSetTypeManagement distributionSetTypeManagement) {
+            final DistributionSetTypeManagement distributionSetTypeManagement,
+            final DistributionSetManagement distributionSetManagement) {
         super(permChecker, eventBus, i18n);
         this.manageDistUIState = manageDistUIState;
         this.createUpdateDistSetTypeLayout = new CreateUpdateDistSetTypeLayout(i18n, entityFactory, eventBus,
-                permChecker, uiNotification, softwareModuleTypeManagement, distributionSetTypeManagement);
+                permChecker, uiNotification, softwareModuleTypeManagement, distributionSetTypeManagement,
+                distributionSetManagement);
         if (hasCreateUpdatePermission()) {
             createUpdateDistSetTypeLayout.init();
         }

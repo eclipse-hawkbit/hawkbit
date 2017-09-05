@@ -212,7 +212,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     @Override
-    public Long countArtifactsAll() {
+    public long countArtifactsAll() {
         return localArtifactRepository.count();
     }
 

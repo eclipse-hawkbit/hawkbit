@@ -66,10 +66,10 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public SoftwareModuleType updateSoftwareModuleType(final SoftwareModuleTypeUpdate u) {
+    public SoftwareModuleType update(final SoftwareModuleTypeUpdate u) {
         final GenericSoftwareModuleTypeUpdate update = (GenericSoftwareModuleTypeUpdate) u;
 
-        final JpaSoftwareModuleType type = (JpaSoftwareModuleType) findSoftwareModuleTypeById(update.getId())
+        final JpaSoftwareModuleType type = (JpaSoftwareModuleType) get(update.getId())
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, update.getId()));
 
         update.getDescription().ifPresent(type::setDescription);
@@ -79,7 +79,7 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     }
 
     @Override
-    public Page<SoftwareModuleType> findSoftwareModuleTypesAll(final String rsqlParam, final Pageable pageable) {
+    public Page<SoftwareModuleType> findByRsql(final Pageable pageable, final String rsqlParam) {
 
         final Specification<JpaSoftwareModuleType> spec = RSQLUtility.parse(rsqlParam, SoftwareModuleTypeFields.class,
                 virtualPropertyReplacer);
@@ -88,27 +88,22 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     }
 
     @Override
-    public Page<SoftwareModuleType> findSoftwareModuleTypesAll(final Pageable pageable) {
+    public Page<SoftwareModuleType> findAll(final Pageable pageable) {
         return softwareModuleTypeRepository.findByDeleted(pageable, false);
     }
 
     @Override
-    public Long countSoftwareModuleTypesAll() {
+    public long count() {
         return softwareModuleTypeRepository.countByDeleted(false);
     }
 
     @Override
-    public Optional<SoftwareModuleType> findSoftwareModuleTypeByKey(final String key) {
+    public Optional<SoftwareModuleType> getByKey(final String key) {
         return softwareModuleTypeRepository.findByKey(key);
     }
 
     @Override
-    public Optional<SoftwareModuleType> findSoftwareModuleTypeById(final Long smTypeId) {
-        return Optional.ofNullable(softwareModuleTypeRepository.findOne(smTypeId));
-    }
-
-    @Override
-    public Optional<SoftwareModuleType> findSoftwareModuleTypeByName(final String name) {
+    public Optional<SoftwareModuleType> getByName(final String name) {
         return softwareModuleTypeRepository.findByName(name);
     }
 
@@ -116,7 +111,7 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public SoftwareModuleType createSoftwareModuleType(final SoftwareModuleTypeCreate c) {
+    public SoftwareModuleType create(final SoftwareModuleTypeCreate c) {
         final JpaSoftwareModuleTypeCreate create = (JpaSoftwareModuleTypeCreate) c;
 
         return softwareModuleTypeRepository.save(create.build());
@@ -126,7 +121,7 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void deleteSoftwareModuleType(final Long typeId) {
+    public void delete(final Long typeId) {
         final JpaSoftwareModuleType toDelete = softwareModuleTypeRepository.findById(typeId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, typeId));
 
@@ -143,13 +138,43 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public List<SoftwareModuleType> createSoftwareModuleType(final Collection<SoftwareModuleTypeCreate> creates) {
-        return creates.stream().map(this::createSoftwareModuleType).collect(Collectors.toList());
+    public List<SoftwareModuleType> create(final Collection<SoftwareModuleTypeCreate> creates) {
+        return creates.stream().map(this::create).collect(Collectors.toList());
     }
 
     private static Page<SoftwareModuleType> convertSmTPage(final Page<JpaSoftwareModuleType> findAll,
             final Pageable pageable) {
         return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public void delete(final Collection<Long> ids) {
+        final List<JpaSoftwareModuleType> setsFound = softwareModuleTypeRepository.findAll(ids);
+
+        if (setsFound.size() < ids.size()) {
+            throw new EntityNotFoundException(SoftwareModuleType.class, ids,
+                    setsFound.stream().map(SoftwareModuleType::getId).collect(Collectors.toList()));
+        }
+
+        softwareModuleTypeRepository.delete(setsFound);
+    }
+
+    @Override
+    public List<SoftwareModuleType> get(final Collection<Long> ids) {
+        return Collections.unmodifiableList(softwareModuleTypeRepository.findAll(ids));
+    }
+
+    @Override
+    public Optional<SoftwareModuleType> get(final Long id) {
+        return Optional.ofNullable(softwareModuleTypeRepository.findOne(id));
+    }
+
+    @Override
+    public boolean exists(final Long id) {
+        return softwareModuleTypeRepository.exists(id);
     }
 
 }

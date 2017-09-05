@@ -49,8 +49,8 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
 
         // target filter query that matches all targets
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .createTargetFilterQuery(entityFactory.targetFilterQuery().create().name("filterA").query("name==*"));
-        targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(targetFilterQuery.getId(), setA.getId());
+                .create(entityFactory.targetFilterQuery().create().name("filterA").query("name==*"));
+        targetFilterQueryManagement.updateAutoAssignDS(targetFilterQuery.getId(), setA.getId());
 
         final String targetDsAIdPref = "targ";
         final List<Target> targets = testdataFactory.createTargets(100, targetDsAIdPref,
@@ -72,7 +72,7 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         verifyThatTargetsHaveDistributionSetAssignment(setB, targets.subList(10, 20), targetsCount);
 
         // Count the number of targets that will be assigned with setA
-        assertThat(targetManagement.countTargetsByTargetFilterQueryAndNonDS(setA.getId(), targetFilterQuery.getQuery()))
+        assertThat(targetManagement.countByRsqlAndNonDS(setA.getId(), targetFilterQuery.getQuery()))
                 .isEqualTo(90);
 
         // Run the check
@@ -90,7 +90,7 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
     public void checkAutoAssignWithFailures() {
 
         // incomplete distribution set that will be assigned
-        final DistributionSet setF = distributionSetManagement.createDistributionSet(entityFactory.distributionSet()
+        final DistributionSet setF = distributionSetManagement.create(entityFactory.distributionSet()
                 .create().name("dsA").version("1").type(testdataFactory.findOrCreateDefaultTestDsType()));
         final DistributionSet setA = testdataFactory.createDistributionSet("dsA");
         final DistributionSet setB = testdataFactory.createDistributionSet("dsB");
@@ -100,14 +100,14 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
 
         // target filter query that matches first bunch of targets, that should
         // fail
-        targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(
-                targetFilterQueryManagement.createTargetFilterQuery(entityFactory.targetFilterQuery().create()
+        targetFilterQueryManagement.updateAutoAssignDS(
+                targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create()
                         .name("filterA").query("id==" + targetDsFIdPref + "*")).getId(),
                 setF.getId());
 
         // target filter query that matches failed bunch of targets
-        targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(
-                targetFilterQueryManagement.createTargetFilterQuery(entityFactory.targetFilterQuery().create()
+        targetFilterQueryManagement.updateAutoAssignDS(
+                targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create()
                         .name("filterB").query("id==" + targetDsAIdPref + "*")).getId(),
                 setA.getId());
 
@@ -145,7 +145,7 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
             final int count) {
         final List<Long> targetIds = targets.stream().map(Target::getId).collect(Collectors.toList());
 
-        final Slice<Target> targetsAll = targetManagement.findTargetsAll(PAGE);
+        final Slice<Target> targetsAll = targetManagement.findAll(PAGE);
         assertThat(targetsAll).as("Count of targets").hasSize(count);
 
         for (final Target target : targetsAll) {

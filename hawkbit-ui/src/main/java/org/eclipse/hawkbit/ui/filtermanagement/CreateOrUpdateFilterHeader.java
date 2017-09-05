@@ -368,7 +368,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private void createTargetFilterQuery() {
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.createTargetFilterQuery(entityFactory
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(entityFactory
                 .targetFilterQuery().create().name(nameTextField.getValue()).query(queryTextField.getValue()));
         notification.displaySuccess(
                 i18n.getMessage("message.create.filter.success", new Object[] { targetFilterQuery.getName() }));
@@ -382,7 +382,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         }
         final TargetFilterQuery targetFilterQuery = tfQuery.get();
         final TargetFilterQuery updatedTargetFilter = targetFilterQueryManagement
-                .updateTargetFilterQuery(entityFactory.targetFilterQuery().update(targetFilterQuery.getId())
+                .update(entityFactory.targetFilterQuery().update(targetFilterQuery.getId())
                         .name(nameTextField.getValue()).query(queryTextField.getValue()));
         filterManagementUIState.setTfQuery(updatedTargetFilter);
         oldFilterName = nameTextField.getValue();
@@ -400,7 +400,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private boolean doesAlreadyExists() {
-        if (targetFilterQueryManagement.findTargetFilterQueryByName(nameTextField.getValue()).isPresent()) {
+        if (targetFilterQueryManagement.getByName(nameTextField.getValue()).isPresent()) {
             notification.displayValidationError(
                     i18n.getMessage("message.target.filter.duplicate", nameTextField.getValue()));
             return true;

@@ -57,7 +57,7 @@ public class TargetTagBeanQuery extends AbstractBeanQuery<ProxyTag> {
     @Override
     public int size() {
         firstPageTargetTag = getTagManagement()
-                .findAllTargetTags(new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
+                .findAll(new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
         long size = firstPageTargetTag.getTotalElements();
         if (size > Integer.MAX_VALUE) {
             size = Integer.MAX_VALUE;
@@ -79,7 +79,7 @@ public class TargetTagBeanQuery extends AbstractBeanQuery<ProxyTag> {
         if (startIndex == 0 && firstPageTargetTag != null) {
             targetTagBeans = firstPageTargetTag;
         } else {
-            targetTagBeans = getTagManagement().findAllTargetTags(new OffsetBasedPageRequest(startIndex, count, sort));
+            targetTagBeans = getTagManagement().findAll(new OffsetBasedPageRequest(startIndex, count, sort));
         }
         for (final TargetTag tag : targetTagBeans.getContent()) {
             final ProxyTag proxyTargetTag = new ProxyTag();

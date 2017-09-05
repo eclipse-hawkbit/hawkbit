@@ -496,14 +496,14 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    public Long countActionsByTarget(final String controllerId) {
+    public long countActionsByTarget(final String controllerId) {
         throwExceptionIfTargetDoesNotExist(controllerId);
 
         return actionRepository.countByTargetControllerId(controllerId);
     }
 
     @Override
-    public Long countActionsByTarget(final String rsqlParam, final String controllerId) {
+    public long countActionsByTarget(final String rsqlParam, final String controllerId) {
         throwExceptionIfTargetDoesNotExist(controllerId);
 
         return actionRepository.count(createSpecificationFor(controllerId, rsqlParam));
@@ -578,12 +578,12 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    public Long countActionStatusAll() {
+    public long countActionStatusAll() {
         return actionStatusRepository.count();
     }
 
     @Override
-    public Long countActionsAll() {
+    public long countActionsAll() {
         return actionRepository.count();
     }
 

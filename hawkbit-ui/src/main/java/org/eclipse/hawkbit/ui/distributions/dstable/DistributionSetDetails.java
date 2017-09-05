@@ -128,7 +128,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
             }
 
             softwareModuleIdNameList.stream().map(SoftwareModuleIdName::getId)
-                    .map(softwareModuleManagement::findSoftwareModuleById)
+                    .map(softwareModuleManagement::get)
                     .forEach(found -> found.ifPresent(softwareModule -> {
 
                         if (assignedSWModule.containsKey(softwareModule.getType().getName())) {
@@ -158,7 +158,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
 
     private Button assignSoftModuleButton(final String softwareModuleName) {
         if (getPermissionChecker().hasUpdateDistributionPermission() && manageDistUIState.getLastSelectedDistribution()
-                .map(selected -> targetManagement.countTargetByAssignedDistributionSet(selected) <= 0).orElse(false)) {
+                .map(selected -> targetManagement.countByAssignedDistributionSet(selected) <= 0).orElse(false)) {
 
             final Button reassignSoftModule = SPUIComponentProvider.getButton(softwareModuleName, "", "", "", true,
                     FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
@@ -255,7 +255,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
                 assignedSWModule.clear();
             }
 
-            getDistributionSetManagement().findDistributionSetByIdWithDetails(getSelectedBaseEntityId())
+            getDistributionSetManagement().getWithDetails(getSelectedBaseEntityId())
                     .ifPresent(set -> {
                         setSelectedBaseEntity(set);
                         UI.getCurrent().access(this::populateModule);

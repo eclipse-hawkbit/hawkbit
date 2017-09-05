@@ -103,8 +103,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         final String knownTargetControllerId = "target1";
         final String knownCreatedBy = "knownPrincipal";
         testdataFactory.createTarget(knownTargetControllerId);
-        final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownTargetControllerId)
-                .get();
+        final Target findTargetByControllerID = targetManagement.getByControllerID(knownTargetControllerId).get();
         assertThat(findTargetByControllerID.getCreatedBy()).isEqualTo(knownCreatedBy);
         assertThat(findTargetByControllerID.getCreatedAt()).isNotNull();
 
@@ -117,7 +116,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         });
 
         // verify that audit information has not changed
-        final Target targetVerify = targetManagement.findTargetByControllerID(knownTargetControllerId).get();
+        final Target targetVerify = targetManagement.getByControllerID(knownTargetControllerId).get();
         assertThat(targetVerify.getCreatedBy()).isEqualTo(findTargetByControllerID.getCreatedBy());
         assertThat(targetVerify.getCreatedAt()).isEqualTo(findTargetByControllerID.getCreatedAt());
         assertThat(targetVerify.getLastModifiedBy()).isEqualTo(findTargetByControllerID.getLastModifiedBy());
@@ -141,10 +140,10 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(get("/default-tenant/controller/v1/4711")).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")));
-        assertThat(targetManagement.findTargetByControllerID("4711").get().getLastTargetQuery())
+        assertThat(targetManagement.getByControllerID("4711").get().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
 
-        assertThat(targetManagement.findTargetByControllerID("4711").get().getUpdateStatus())
+        assertThat(targetManagement.getByControllerID("4711").get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.REGISTERED);
 
         // not allowed methods
@@ -198,7 +197,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()).header("If-None-Match", etag))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotModified());
 
-        final Target target = targetManagement.findTargetByControllerID("4711").get();
+        final Target target = targetManagement.getByControllerID("4711").get();
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
         assignDistributionSet(ds.getId(), "4711");
@@ -259,7 +258,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     public void rootRsPrecommissioned() throws Exception {
         final Target target = testdataFactory.createTarget("4711");
 
-        assertThat(targetManagement.findTargetByControllerID("4711").get().getUpdateStatus())
+        assertThat(targetManagement.getByControllerID("4711").get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.UNKNOWN);
 
         final long current = System.currentTimeMillis();
@@ -268,12 +267,12 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")));
 
-        assertThat(targetManagement.findTargetByControllerID("4711").get().getLastTargetQuery())
+        assertThat(targetManagement.getByControllerID("4711").get().getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(targetManagement.findTargetByControllerID("4711").get().getLastTargetQuery())
+        assertThat(targetManagement.getByControllerID("4711").get().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
 
-        assertThat(targetManagement.findTargetByControllerID("4711").get().getUpdateStatus())
+        assertThat(targetManagement.getByControllerID("4711").get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.REGISTERED);
     }
 
@@ -295,7 +294,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         });
 
         // verify
-        final Target target = targetManagement.findTargetByControllerID(knownControllerId1).get();
+        final Target target = targetManagement.getByControllerID(knownControllerId1).get();
         assertThat(target.getAddress()).isEqualTo(IpUtil.createHttpUri("127.0.0.1"));
         assertThat(target.getCreatedBy()).isEqualTo("CONTROLLER_PLUG_AND_PLAY");
         assertThat(target.getCreatedAt()).isGreaterThanOrEqualTo(create);
@@ -317,7 +316,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         // verify
-        final Target target = targetManagement.findTargetByControllerID(knownControllerId1).get();
+        final Target target = targetManagement.getByControllerID(knownControllerId1).get();
         assertThat(target.getAddress()).isEqualTo(IpUtil.createHttpUri("***"));
 
         securityProperties.getClients().setTrackRemoteIp(true);
@@ -336,8 +335,8 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         Target savedTarget = testdataFactory.createTarget("911");
         savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
                 .next();
-        final Action savedAction = deploymentManagement
-                .findActiveActionsByTarget(PAGE, savedTarget.getControllerId()).getContent().get(0);
+        final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
+                .getContent().get(0);
         mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
                 tenantAware.getCurrentTenant())
                         .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "proceeding"))

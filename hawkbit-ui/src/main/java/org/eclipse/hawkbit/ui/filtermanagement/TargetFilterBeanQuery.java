@@ -84,10 +84,10 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
             targetFilterQuery = firstPageTargetFilter;
         } else if (StringUtils.isEmpty(searchText)) {
             // if no search filters available
-            targetFilterQuery = getTargetFilterQueryManagement().findAllTargetFilterQuery(
+            targetFilterQuery = getTargetFilterQueryManagement().findAll(
                     new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         } else {
-            targetFilterQuery = getTargetFilterQueryManagement().findTargetFilterQueryByName(
+            targetFilterQuery = getTargetFilterQueryManagement().findByName(
                     new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
                     searchText);
         }
@@ -121,10 +121,10 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
     public int size() {
         if (StringUtils.isEmpty(searchText)) {
             firstPageTargetFilter = getTargetFilterQueryManagement()
-                    .findAllTargetFilterQuery(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
+                    .findAll(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
         } else {
             firstPageTargetFilter = getTargetFilterQueryManagement()
-                    .findTargetFilterQueryByName(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), searchText);
+                    .findByName(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), searchText);
         }
         final long size = firstPageTargetFilter.getTotalElements();
 

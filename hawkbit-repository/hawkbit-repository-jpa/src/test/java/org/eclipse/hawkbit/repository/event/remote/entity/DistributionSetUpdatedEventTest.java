@@ -37,7 +37,7 @@ public class DistributionSetUpdatedEventTest extends AbstractRemoteEntityEventTe
 
     @Override
     protected DistributionSet createEntity() {
-        return distributionSetManagement.createDistributionSet(entityFactory.distributionSet().create()
+        return distributionSetManagement.create(entityFactory.distributionSet().create()
                 .name("incomplete").version("2").description("incomplete").type("os"));
     }
 

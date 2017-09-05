@@ -56,11 +56,11 @@ public class ModelEqualsHashcodeTest extends AbstractJpaIntegrationTest {
     @Description("Verfies that updated entities are not equal.")
     public void changedEntitiesAreNotEqual() {
         final SoftwareModuleType type = softwareModuleTypeManagement
-                .createSoftwareModuleType(entityFactory.softwareModuleType().create().key("test").name("test"));
+                .create(entityFactory.softwareModuleType().create().key("test").name("test"));
         assertThat(type).as("persited entity is not equal to regular object")
                 .isNotEqualTo(entityFactory.softwareModuleType().create().key("test").name("test").build());
 
-        final SoftwareModuleType updated = softwareModuleTypeManagement.updateSoftwareModuleType(
+        final SoftwareModuleType updated = softwareModuleTypeManagement.update(
                 entityFactory.softwareModuleType().update(type.getId()).description("another"));
         assertThat(type).as("Changed entity is not equal to the previous version").isNotEqualTo(updated);
     }
@@ -68,7 +68,7 @@ public class ModelEqualsHashcodeTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verify that no proxy of the entity manager has an influence on the equals or hashcode result.")
     public void managedEntityIsEqualToUnamangedObjectWithSameKey() {
-        final SoftwareModuleType type = softwareModuleTypeManagement.createSoftwareModuleType(
+        final SoftwareModuleType type = softwareModuleTypeManagement.create(
                 entityFactory.softwareModuleType().create().key("test").name("test").description("test"));
 
         final JpaSoftwareModuleType mock = new JpaSoftwareModuleType("test", "test", "test", 1);

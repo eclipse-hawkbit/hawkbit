@@ -41,7 +41,7 @@ public interface TargetTagManagement {
      * @return size of {@link TargetTag}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countTargetTags();
+    long count();
 
     /**
      * Creates a new {@link TargetTag}.
@@ -58,7 +58,7 @@ public interface TargetTagManagement {
      *             {@link TagCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
-    TargetTag createTargetTag(@NotNull TagCreate create);
+    TargetTag create(@NotNull TagCreate create);
 
     /**
      * created multiple {@link TargetTag}s.
@@ -74,7 +74,7 @@ public interface TargetTagManagement {
      *             {@link TagCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
-    List<TargetTag> createTargetTags(@NotNull Collection<TagCreate> creates);
+    List<TargetTag> create(@NotNull Collection<TagCreate> creates);
 
     /**
      * Deletes {@link TargetTag} with given name.
@@ -86,7 +86,7 @@ public interface TargetTagManagement {
      *             if tag with given name does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
-    void deleteTargetTag(@NotEmpty String targetTagName);
+    void delete(@NotEmpty String targetTagName);
 
     /**
      * returns all {@link TargetTag}s.
@@ -97,7 +97,7 @@ public interface TargetTagManagement {
      * @return all {@link TargetTag}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetTag> findAllTargetTags(@NotNull Pageable pageable);
+    Page<TargetTag> findAll(@NotNull Pageable pageable);
 
     /**
      * Returns all {@link TargetTag}s assigned to {@link Target} with given ID.
@@ -105,6 +105,7 @@ public interface TargetTagManagement {
      * @param pageable
      *            page parameter
      * @param controllerId
+     *            of the assigned target
      *
      * @return {@link TargetTag}s assigned to {@link Target} with given ID
      * 
@@ -112,15 +113,15 @@ public interface TargetTagManagement {
      *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetTag> findAllTargetTags(@NotNull Pageable pageable, @NotEmpty String controllerId);
+    Page<TargetTag> findByTarget(@NotNull Pageable pageable, @NotEmpty String controllerId);
 
     /**
      * Retrieves all target tags based on the given specification.
-     *
-     * @param rsqlParam
-     *            rsql query string
      * @param pageable
      *            pagination parameter
+     * @param rsqlParam
+     *            rsql query string
+     *
      * @return the found {@link Target}s, never {@code null}
      * 
      * @throws RSQLParameterUnsupportedFieldException
@@ -130,7 +131,7 @@ public interface TargetTagManagement {
      *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetTag> findAllTargetTags(@NotNull String rsqlParam, @NotNull Pageable pageable);
+    Page<TargetTag> findByRsql(@NotNull Pageable pageable, @NotNull String rsqlParam);
 
     /**
      * Find {@link TargetTag} based on given Name.
@@ -140,7 +141,7 @@ public interface TargetTagManagement {
      * @return {@link TargetTag}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Optional<TargetTag> findTargetTag(@NotEmpty String name);
+    Optional<TargetTag> getByName(@NotEmpty String name);
 
     /**
      * Finds {@link TargetTag} by given id.
@@ -150,7 +151,7 @@ public interface TargetTagManagement {
      * @return the found {@link TargetTag}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Optional<TargetTag> findTargetTagById(@NotNull Long id);
+    Optional<TargetTag> get(@NotNull Long id);
 
     /**
      * updates the {@link TargetTag}.
@@ -167,6 +168,6 @@ public interface TargetTagManagement {
      *             {@link TagUpdate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    TargetTag updateTargetTag(@NotNull TagUpdate update);
+    TargetTag update(@NotNull TagUpdate update);
 
 }

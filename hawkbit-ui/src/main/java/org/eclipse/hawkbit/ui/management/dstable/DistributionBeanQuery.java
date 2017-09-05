@@ -105,18 +105,18 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
                     .setIsDeleted(false).setIsComplete(true).setSearchText(searchText)
                     .setSelectDSWithNoTag(noTagClicked).setTagNames(distributionTags);
 
-            distBeans = getDistributionSetManagement().findDistributionSetsAllOrderedByLinkTarget(
+            distBeans = getDistributionSetManagement().findByFilterAndAssignedInstalledDsOrderedByLinkTarget(
                     new OffsetBasedPageRequest(startIndex, count, sort), distributionSetFilterBuilder,
                     pinnedTarget.getControllerId());
         } else if (distributionTags.isEmpty() && StringUtils.isEmpty(searchText) && !noTagClicked) {
             // if no search filters available
-            distBeans = getDistributionSetManagement().findDistributionSetsByDeletedAndOrCompleted(
+            distBeans = getDistributionSetManagement().findByDeletedAndOrCompleted(
                     new OffsetBasedPageRequest(startIndex, count, sort), false, true);
         } else {
             final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
                     .setIsComplete(true).setSearchText(searchText).setSelectDSWithNoTag(noTagClicked)
                     .setTagNames(distributionTags).build();
-            distBeans = getDistributionSetManagement().findDistributionSetsByFilters(
+            distBeans = getDistributionSetManagement().findByDistributionSetFilter(
                     new OffsetBasedPageRequest(startIndex, count, sort), distributionSetFilter);
         }
 
@@ -146,19 +146,19 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
                     .setIsDeleted(false).setIsComplete(true).setSearchText(searchText)
                     .setSelectDSWithNoTag(noTagClicked).setTagNames(distributionTags);
 
-            firstPageDistributionSets = getDistributionSetManagement().findDistributionSetsAllOrderedByLinkTarget(
+            firstPageDistributionSets = getDistributionSetManagement().findByFilterAndAssignedInstalledDsOrderedByLinkTarget(
                     new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilterBuilder,
                     pinnedTarget.getControllerId());
         } else if (distributionTags.isEmpty() && StringUtils.isEmpty(searchText) && !noTagClicked) {
             // if no search filters available
-            firstPageDistributionSets = getDistributionSetManagement().findDistributionSetsByDeletedAndOrCompleted(
+            firstPageDistributionSets = getDistributionSetManagement().findByDeletedAndOrCompleted(
                     new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), false, true);
         } else {
             final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
                     .setIsComplete(true).setSearchText(searchText).setSelectDSWithNoTag(noTagClicked)
                     .setTagNames(distributionTags).build();
 
-            firstPageDistributionSets = getDistributionSetManagement().findDistributionSetsByFilters(
+            firstPageDistributionSets = getDistributionSetManagement().findByDistributionSetFilter(
                     new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilter);
 
         }

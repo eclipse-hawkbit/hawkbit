@@ -224,7 +224,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         }
 
         private boolean duplicateCheck() {
-            if (rolloutManagement.findRolloutByName(getRolloutName()).isPresent()) {
+            if (rolloutManagement.getByName(getRolloutName()).isPresent()) {
                 uiNotification
                         .displayValidationError(i18n.getMessage("message.rollout.duplicate.check", getRolloutName()));
                 return false;
@@ -252,7 +252,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
             Rollout updatedRollout;
             try {
-                updatedRollout = rolloutManagement.updateRollout(rolloutUpdate);
+                updatedRollout = rolloutManagement.update(rolloutUpdate);
             } catch (final EntityNotFoundException | EntityReadOnlyException e) {
                 LOGGER.warn("Rollout was deleted. Redirect to Rollouts overview.", e);
                 uiNotification.displayWarning(
@@ -268,7 +268,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         private boolean duplicateCheckForEdit() {
             final String rolloutNameVal = getRolloutName();
             if (!rollout.getName().equals(rolloutNameVal)
-                    && rolloutManagement.findRolloutByName(rolloutNameVal).isPresent()) {
+                    && rolloutManagement.getByName(rolloutNameVal).isPresent()) {
                 uiNotification
                         .displayValidationError(i18n.getMessage("message.rollout.duplicate.check", rolloutNameVal));
                 return false;
@@ -304,10 +304,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             }
 
             if (isNumberOfGroups()) {
-                return rolloutManagement.createRollout(rolloutCreate, amountGroup, conditions);
+                return rolloutManagement.create(rolloutCreate, amountGroup, conditions);
             } else if (isGroupsDefinition()) {
                 final List<RolloutGroupCreate> groups = defineGroupsLayout.getSavedRolloutGroups();
-                return rolloutManagement.createRollout(rolloutCreate, groups, conditions);
+                return rolloutManagement.create(rolloutCreate, groups, conditions);
             }
 
             throw new IllegalStateException("Either of the Tabs must be selected");
@@ -717,7 +717,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             groupsLegendLayout.populateTotalTargets(null);
             defineGroupsLayout.setTargetFilter(null);
         } else {
-            totalTargetsCount = targetManagement.countTargetByTargetFilterQuery(filterQueryString);
+            totalTargetsCount = targetManagement.countByRsql(filterQueryString);
             groupsLegendLayout.populateTotalTargets(totalTargetsCount);
             defineGroupsLayout.setTargetFilter(filterQueryString);
         }
@@ -735,7 +735,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private void populateTargetFilterQuery(final Rollout rollout) {
         final Page<TargetFilterQuery> filterQueries = targetFilterQueryManagement
-                .findTargetFilterQueryByQuery(new PageRequest(0, 1), rollout.getTargetFilterQuery());
+                .findByQuery(new PageRequest(0, 1), rollout.getTargetFilterQuery());
         if (filterQueries.getTotalElements() > 0) {
             final TargetFilterQuery filterQuery = filterQueries.getContent().get(0);
             targetFilterQueryCombo.setValue(filterQuery.getName());
@@ -897,7 +897,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             return;
         }
 
-        final Optional<Rollout> rolloutFound = rolloutManagement.findRolloutById(rolloutId);
+        final Optional<Rollout> rolloutFound = rolloutManagement.get(rolloutId);
         if (!rolloutFound.isPresent()) {
             return;
         }
@@ -937,12 +937,12 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             window.setOrginaleValues();
 
             updateGroupsChart(
-                    rolloutGroupManagement.findRolloutGroupsByRolloutId(rollout.getId(),
-                            new PageRequest(0, quotaManagement.getMaxRolloutGroupsPerRollout())).getContent(),
+                    rolloutGroupManagement.findByRollout(new PageRequest(0, quotaManagement.getMaxRolloutGroupsPerRollout()),
+                            rollout.getId()).getContent(),
                     rollout.getTotalTargets());
         }
 
-        totalTargetsCount = targetManagement.countTargetByTargetFilterQuery(rollout.getTargetFilterQuery());
+        totalTargetsCount = targetManagement.countByRsql(rollout.getTargetFilterQuery());
         groupsLegendLayout.populateTotalTargets(totalTargetsCount);
     }
 

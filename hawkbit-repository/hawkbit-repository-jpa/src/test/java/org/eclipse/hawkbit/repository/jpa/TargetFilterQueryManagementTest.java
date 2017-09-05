@@ -51,8 +51,8 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
             + "of Optional not present.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void nonExistingEntityAccessReturnsNotPresent() {
-        assertThat(targetFilterQueryManagement.findTargetFilterQueryById(NOT_EXIST_IDL)).isNotPresent();
-        assertThat(targetFilterQueryManagement.findTargetFilterQueryByName(NOT_EXIST_ID)).isNotPresent();
+        assertThat(targetFilterQueryManagement.get(NOT_EXIST_IDL)).isNotPresent();
+        assertThat(targetFilterQueryManagement.getByName(NOT_EXIST_ID)).isNotPresent();
     }
 
     @Test
@@ -62,50 +62,51 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
     public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         final DistributionSet set = testdataFactory.createDistributionSet();
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.createTargetFilterQuery(
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(
                 entityFactory.targetFilterQuery().create().name("test filter").query("name==PendingTargets001"));
 
-        verifyThrownExceptionBy(() -> targetFilterQueryManagement.deleteTargetFilterQuery(NOT_EXIST_IDL),
+        verifyThrownExceptionBy(() -> targetFilterQueryManagement.delete(NOT_EXIST_IDL),
                 "TargetFilterQuery");
 
-        verifyThrownExceptionBy(() -> targetFilterQueryManagement.findTargetFilterQueryByAutoAssignDS(PAGE,
-                NOT_EXIST_IDL, "name==*"), "DistributionSet");
+        verifyThrownExceptionBy(
+                () -> targetFilterQueryManagement.findByAutoAssignDSAndRsql(PAGE, NOT_EXIST_IDL, "name==*"),
+                "DistributionSet");
 
         verifyThrownExceptionBy(
                 () -> targetFilterQueryManagement
-                        .updateTargetFilterQuery(entityFactory.targetFilterQuery().update(NOT_EXIST_IDL)),
+                        .update(entityFactory.targetFilterQuery().update(NOT_EXIST_IDL)),
                 "TargetFilterQuery");
         verifyThrownExceptionBy(() -> targetFilterQueryManagement
-                .updateTargetFilterQueryAutoAssignDS(targetFilterQuery.getId(), NOT_EXIST_IDL), "DistributionSet");
+                .updateAutoAssignDS(targetFilterQuery.getId(), NOT_EXIST_IDL), "DistributionSet");
         verifyThrownExceptionBy(
-                () -> targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(1234L, set.getId()),
+                () -> targetFilterQueryManagement.updateAutoAssignDS(1234L, set.getId()),
                 "TargetFilterQuery");
         verifyThrownExceptionBy(() -> targetFilterQueryManagement
-                .updateTargetFilterQueryAutoAssignDS(targetFilterQuery.getId(), NOT_EXIST_IDL), "DistributionSet");
+                .updateAutoAssignDS(targetFilterQuery.getId(), NOT_EXIST_IDL), "DistributionSet");
     }
 
     @Test
     @Description("Test creation of target filter query.")
     public void createTargetFilterQuery() {
         final String filterName = "new target filter";
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.createTargetFilterQuery(
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(
                 entityFactory.targetFilterQuery().create().name(filterName).query("name==PendingTargets001"));
         assertEquals("Retrieved newly created custom target filter", targetFilterQuery,
-                targetFilterQueryManagement.findTargetFilterQueryByName(filterName).get());
+                targetFilterQueryManagement.getByName(filterName).get());
     }
 
     @Test
     @Description("Test searching a target filter query.")
     public void searchTargetFilterQuery() {
         final String filterName = "targetFilterQueryName";
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.createTargetFilterQuery(
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(
                 entityFactory.targetFilterQuery().create().name(filterName).query("name==PendingTargets001"));
 
-        targetFilterQueryManagement.createTargetFilterQuery(
+        targetFilterQueryManagement.create(
                 entityFactory.targetFilterQuery().create().name("someOtherFilter").query("name==PendingTargets002"));
 
         final List<TargetFilterQuery> results = targetFilterQueryManagement
-                .findTargetFilterQueryByFilter(new PageRequest(0, 10), "name==" + filterName).getContent();
+                .findByRsql(new PageRequest(0, 10), "name==" + filterName).getContent();
         assertEquals("Search result should have 1 result", 1, results.size());
         assertEquals("Retrieved newly created custom target filter", targetFilterQuery, results.get(0));
     }
@@ -114,7 +115,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
     @Description("Test searching a target filter query with an invalid filter.")
     public void searchTargetFilterQueryInvalidField() {
         // Should throw an exception
-        targetFilterQueryManagement.findTargetFilterQueryByFilter(new PageRequest(0, 10), "unknownField==testValue")
+        targetFilterQueryManagement.findByRsql(new PageRequest(0, 10), "unknownField==testValue")
                 .getContent();
 
     }
@@ -123,11 +124,11 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
     @Description("Checks if the EntityAlreadyExistsException is thrown if a targetfilterquery with the same name are created more than once.")
     public void createDuplicateTargetFilterQuery() {
         final String filterName = "new target filter duplicate";
-        targetFilterQueryManagement.createTargetFilterQuery(
+        targetFilterQueryManagement.create(
                 entityFactory.targetFilterQuery().create().name(filterName).query("name==PendingTargets001"));
 
         try {
-            targetFilterQueryManagement.createTargetFilterQuery(
+            targetFilterQueryManagement.create(
                     entityFactory.targetFilterQuery().create().name(filterName).query("name==PendingTargets001"));
             fail("should not have worked as query already exists");
         } catch (final EntityAlreadyExistsException e) {
@@ -139,11 +140,11 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
     @Description("Test deletion of target filter query.")
     public void deleteTargetFilterQuery() {
         final String filterName = "delete_target_filter_query";
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.createTargetFilterQuery(
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(
                 entityFactory.targetFilterQuery().create().name(filterName).query("name==PendingTargets001"));
-        targetFilterQueryManagement.deleteTargetFilterQuery(targetFilterQuery.getId());
+        targetFilterQueryManagement.delete(targetFilterQuery.getId());
         assertFalse("Returns null as the target filter is deleted",
-                targetFilterQueryManagement.findTargetFilterQueryById(targetFilterQuery.getId()).isPresent());
+                targetFilterQueryManagement.get(targetFilterQuery.getId()).isPresent());
 
     }
 
@@ -151,14 +152,14 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
     @Description("Test updation of target filter query.")
     public void updateTargetFilterQuery() {
         final String filterName = "target_filter_01";
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.createTargetFilterQuery(
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(
                 entityFactory.targetFilterQuery().create().name(filterName).query("name==PendingTargets001"));
 
         final String newQuery = "status==UNKNOWN";
-        targetFilterQueryManagement.updateTargetFilterQuery(
+        targetFilterQueryManagement.update(
                 entityFactory.targetFilterQuery().update(targetFilterQuery.getId()).query(newQuery));
         assertEquals("Returns updated target filter query", newQuery,
-                targetFilterQueryManagement.findTargetFilterQueryByName(filterName).get().getQuery());
+                targetFilterQueryManagement.getByName(filterName).get().getQuery());
 
     }
 
@@ -166,15 +167,15 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
     @Description("Test assigning a distribution set")
     public void assignDistributionSet() {
         final String filterName = "target_filter_02";
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.createTargetFilterQuery(
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(
                 entityFactory.targetFilterQuery().create().name(filterName).query("name==PendingTargets001"));
 
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
 
-        targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(targetFilterQuery.getId(),
+        targetFilterQueryManagement.updateAutoAssignDS(targetFilterQuery.getId(),
                 distributionSet.getId());
 
-        final TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName).get();
+        final TargetFilterQuery tfq = targetFilterQueryManagement.getByName(filterName).get();
 
         assertEquals("Returns correct distribution set", distributionSet, tfq.getAutoAssignDistributionSet());
 
@@ -184,22 +185,22 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
     @Description("Test removing distribution set while it has a relation to a target filter query")
     public void removeAssignDistributionSet() {
         final String filterName = "target_filter_03";
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.createTargetFilterQuery(
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(
                 entityFactory.targetFilterQuery().create().name(filterName).query("name==PendingTargets001"));
 
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
 
-        targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(targetFilterQuery.getId(),
+        targetFilterQueryManagement.updateAutoAssignDS(targetFilterQuery.getId(),
                 distributionSet.getId());
 
         // Check if target filter query is there
-        TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName).get();
+        TargetFilterQuery tfq = targetFilterQueryManagement.getByName(filterName).get();
         assertEquals("Returns correct distribution set", distributionSet, tfq.getAutoAssignDistributionSet());
 
-        distributionSetManagement.deleteDistributionSet(distributionSet.getId());
+        distributionSetManagement.delete(distributionSet.getId());
 
         // Check if auto assign distribution set is null
-        tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName).get();
+        tfq = targetFilterQueryManagement.getByName(filterName).get();
         assertNotNull("Returns target filter query", tfq);
         assertNull("Returns distribution set as null", tfq.getAutoAssignDistributionSet());
 
@@ -216,23 +217,23 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         // later step
         assignDistributionSet(distributionSet.getId(), target.getControllerId());
 
-        targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(targetFilterQueryManagement
-                .createTargetFilterQuery(
+        targetFilterQueryManagement.updateAutoAssignDS(targetFilterQueryManagement
+                .create(
                         entityFactory.targetFilterQuery().create().name(filterName).query("name==PendingTargets001"))
                 .getId(), distributionSet.getId());
 
         // Check if target filter query is there with the distribution set
-        TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName).get();
+        TargetFilterQuery tfq = targetFilterQueryManagement.getByName(filterName).get();
         assertEquals("Returns correct distribution set", distributionSet, tfq.getAutoAssignDistributionSet());
 
-        distributionSetManagement.deleteDistributionSet(distributionSet.getId());
+        distributionSetManagement.delete(distributionSet.getId());
 
         // Check if distribution set is still in the database with deleted flag
         assertTrue("Distribution set should be deleted",
-                distributionSetManagement.findDistributionSetById(distributionSet.getId()).get().isDeleted());
+                distributionSetManagement.get(distributionSet.getId()).get().isDeleted());
 
         // Check if auto assign distribution set is null
-        tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName).get();
+        tfq = targetFilterQueryManagement.getByName(filterName).get();
         assertNotNull("Returns target filter query", tfq);
         assertNull("Returns distribution set as null", tfq.getAutoAssignDistributionSet());
 
@@ -244,40 +245,40 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
 
         final String filterName = "d";
 
-        assertEquals(0L, targetFilterQueryManagement.countAllTargetFilterQuery().longValue());
+        assertEquals(0L, targetFilterQueryManagement.count());
 
         targetFilterQueryManagement
-                .createTargetFilterQuery(entityFactory.targetFilterQuery().create().name("a").query("name==*"));
+                .create(entityFactory.targetFilterQuery().create().name("a").query("name==*"));
         targetFilterQueryManagement
-                .createTargetFilterQuery(entityFactory.targetFilterQuery().create().name("b").query("name==*"));
+                .create(entityFactory.targetFilterQuery().create().name("b").query("name==*"));
 
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
         final DistributionSet distributionSet2 = testdataFactory.createDistributionSet("2");
 
         final TargetFilterQuery tfq = targetFilterQueryManagement
-                .updateTargetFilterQueryAutoAssignDS(
-                        targetFilterQueryManagement.createTargetFilterQuery(
+                .updateAutoAssignDS(
+                        targetFilterQueryManagement.create(
                                 entityFactory.targetFilterQuery().create().name("c").query("name==x")).getId(),
                         distributionSet.getId());
 
-        final TargetFilterQuery tfq2 = targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(
-                targetFilterQueryManagement.createTargetFilterQuery(
+        final TargetFilterQuery tfq2 = targetFilterQueryManagement.updateAutoAssignDS(
+                targetFilterQueryManagement.create(
                         entityFactory.targetFilterQuery().create().name(filterName).query("name==z*")).getId(),
                 distributionSet2.getId());
 
-        assertEquals(4L, targetFilterQueryManagement.countAllTargetFilterQuery().longValue());
+        assertEquals(4L, targetFilterQueryManagement.count());
 
         // check if find works
         Page<TargetFilterQuery> tfqList = targetFilterQueryManagement
-                .findTargetFilterQueryByAutoAssignDS(new PageRequest(0, 500), distributionSet.getId(), null);
+                .findByAutoAssignDSAndRsql(new PageRequest(0, 500), distributionSet.getId(), null);
         assertThat(1L).as("Target filter query").isEqualTo(tfqList.getTotalElements());
 
         assertEquals("Returns correct target filter query", tfq.getId(), tfqList.iterator().next().getId());
 
-        targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(tfq2.getId(), distributionSet.getId());
+        targetFilterQueryManagement.updateAutoAssignDS(tfq2.getId(), distributionSet.getId());
 
         // check if find works for two
-        tfqList = targetFilterQueryManagement.findTargetFilterQueryByAutoAssignDS(new PageRequest(0, 500),
+        tfqList = targetFilterQueryManagement.findByAutoAssignDSAndRsql(new PageRequest(0, 500),
                 distributionSet.getId(), null);
         assertThat(2L).as("Target filter query count").isEqualTo(tfqList.getTotalElements());
         Iterator<TargetFilterQuery> iterator = tfqList.iterator();
@@ -285,14 +286,14 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         assertEquals("Returns correct target filter query 2", tfq2.getId(), iterator.next().getId());
 
         // check if find works with name filter
-        tfqList = targetFilterQueryManagement.findTargetFilterQueryByAutoAssignDS(new PageRequest(0, 500),
+        tfqList = targetFilterQueryManagement.findByAutoAssignDSAndRsql(new PageRequest(0, 500),
                 distributionSet.getId(), "name==" + filterName);
         assertThat(1L).as("Target filter query count").isEqualTo(tfqList.getTotalElements());
 
         assertEquals("Returns correct target filter query", tfq2.getId(), tfqList.iterator().next().getId());
 
         // check if find works for all with auto assign DS
-        tfqList = targetFilterQueryManagement.findTargetFilterQueryWithAutoAssignDS(new PageRequest(0, 500));
+        tfqList = targetFilterQueryManagement.findWithAutoAssignDS(new PageRequest(0, 500));
         assertThat(2L).as("Target filter query count").isEqualTo(tfqList.getTotalElements());
         iterator = tfqList.iterator();
         assertEquals("Returns correct target filter query 1", tfq.getId(), iterator.next().getId());

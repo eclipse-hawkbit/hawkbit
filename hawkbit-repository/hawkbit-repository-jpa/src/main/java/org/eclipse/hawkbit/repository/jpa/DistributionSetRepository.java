@@ -175,4 +175,5 @@ public interface DistributionSetRepository
     @Transactional
     @Query("DELETE FROM JpaDistributionSet t WHERE t.tenant = :tenant")
     void deleteByTenant(@Param("tenant") String tenant);
+
 }

@@ -77,7 +77,7 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
     @Override
     public void populateTagNameCombo() {
         tagNameComboBox.removeAllItems();
-        targetTagManagement.findAllTargetTags(new PageRequest(0, MAX_TAGS))
+        targetTagManagement.findAll(new PageRequest(0, MAX_TAGS))
                 .forEach(value -> tagNameComboBox.addItem(value.getName()));
     }
 
@@ -87,7 +87,7 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
     @Override
     protected Color getColorForColorPicker() {
         return ColorPickerHelper
-                .rgbToColorConverter(targetTagManagement.findTargetTag(tagNameComboBox.getValue().toString())
+                .rgbToColorConverter(targetTagManagement.getByName(tagNameComboBox.getValue().toString())
                         .map(TargetTag::getColour).filter(Objects::nonNull).orElse(ColorPickerConstants.DEFAULT_COLOR));
     }
 
@@ -101,7 +101,7 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
     @Override
     public void setTagDetails(final String targetTagSelected) {
         tagName.setValue(targetTagSelected);
-        final Optional<TargetTag> selectedTargetTag = targetTagManagement.findTargetTag(targetTagSelected);
+        final Optional<TargetTag> selectedTargetTag = targetTagManagement.getByName(targetTagSelected);
         if (selectedTargetTag.isPresent()) {
             tagDesc.setValue(selectedTargetTag.get().getDescription());
             if (null == selectedTargetTag.get().getColour()) {
@@ -125,7 +125,7 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
 
     @Override
     protected Optional<TargetTag> findEntityByName() {
-        return targetTagManagement.findTargetTag(tagName.getValue());
+        return targetTagManagement.getByName(tagName.getValue());
     }
 
     /**
@@ -142,7 +142,7 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
                 colour = getColorPicked();
             }
 
-            final TargetTag newTargetTag = targetTagManagement.createTargetTag(entityFactory.tag().create()
+            final TargetTag newTargetTag = targetTagManagement.create(entityFactory.tag().create()
                     .name(tagNameTrimmed).description(tagDescriptionTrimmed).colour(colour));
             eventBus.publish(this, new TargetTagTableEvent(BaseEntityEventType.ADD_ENTITY, newTargetTag));
             displaySuccess(newTargetTag.getName());
@@ -159,7 +159,7 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
                 .description(tagDesc.getValue())
                 .colour(ColorPickerHelper.getColorPickedString(colorPickerLayout.getSelPreview()));
 
-        targetTagManagement.updateTargetTag(update);
+        targetTagManagement.update(update);
         eventBus.publish(this, new TargetTagTableEvent(BaseEntityEventType.UPDATED_ENTITY, (TargetTag) targetObj));
 
         uiNotification.displaySuccess(i18n.getMessage("message.update.success", new Object[] { targetObj.getName() }));

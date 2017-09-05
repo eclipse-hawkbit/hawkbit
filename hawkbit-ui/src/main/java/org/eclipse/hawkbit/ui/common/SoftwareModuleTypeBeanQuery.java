@@ -14,9 +14,7 @@ import java.util.Map;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
@@ -28,8 +26,8 @@ import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
  */
 public class SoftwareModuleTypeBeanQuery extends AbstractBeanQuery<SoftwareModuleType> {
     private static final long serialVersionUID = 7824925429198339644L;
+
     private final Sort sort = new Sort(Direction.ASC, "name");
-    private transient Page<SoftwareModuleType> firstPageSwModuleType;
     private transient SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
     /**
@@ -47,9 +45,7 @@ public class SoftwareModuleTypeBeanQuery extends AbstractBeanQuery<SoftwareModul
 
     @Override
     public int size() {
-        firstPageSwModuleType = getSoftwareModuleTypeManagement()
-                .findSoftwareModuleTypesAll(new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
-        long size = firstPageSwModuleType.getTotalElements();
+        long size = getSoftwareModuleTypeManagement().count();
         if (size > Integer.MAX_VALUE) {
             size = Integer.MAX_VALUE;
         }
@@ -65,14 +61,9 @@ public class SoftwareModuleTypeBeanQuery extends AbstractBeanQuery<SoftwareModul
 
     @Override
     protected List<SoftwareModuleType> loadBeans(final int startIndex, final int count) {
-        Page<SoftwareModuleType> swModuleTypeBeans;
-        if (startIndex == 0 && firstPageSwModuleType != null) {
-            swModuleTypeBeans = firstPageSwModuleType;
-        } else {
-            swModuleTypeBeans = getSoftwareModuleTypeManagement()
-                    .findSoftwareModuleTypesAll(new OffsetBasedPageRequest(startIndex, count, sort));
-        }
-        return swModuleTypeBeans.getContent();
+
+        return getSoftwareModuleTypeManagement().findAll(new OffsetBasedPageRequest(startIndex, count, sort))
+                .getContent();
     }
 
     @Override

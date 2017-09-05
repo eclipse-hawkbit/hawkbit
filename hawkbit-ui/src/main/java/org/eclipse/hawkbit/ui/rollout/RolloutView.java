@@ -172,7 +172,7 @@ public class RolloutView extends VerticalLayout implements View {
             return true;
         }
 
-        final Optional<Rollout> rollout = rolloutManagement.findRolloutById(rolloutIdInState.get());
+        final Optional<Rollout> rollout = rolloutManagement.get(rolloutIdInState.get());
         return !rollout.isPresent() || rollout.get().isDeleted();
     }
 

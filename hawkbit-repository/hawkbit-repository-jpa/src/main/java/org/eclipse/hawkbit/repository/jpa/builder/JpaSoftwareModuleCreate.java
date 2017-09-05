@@ -40,7 +40,7 @@ public class JpaSoftwareModuleCreate extends AbstractSoftwareModuleUpdateCreate<
             throw new ValidationException("type cannot be null");
         }
 
-        return softwareModuleTypeManagement.findSoftwareModuleTypeByKey(type.trim())
+        return softwareModuleTypeManagement.getByKey(type.trim())
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, type.trim()));
     }
 }

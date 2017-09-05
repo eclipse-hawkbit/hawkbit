@@ -336,7 +336,7 @@ public class TargetTableHeader extends AbstractTableHeader {
             }
             final Long distributionSetId = distributionIdSet.iterator().next();
             final Optional<DistributionSet> distributionSet = distributionSetManagement
-                    .findDistributionSetById(distributionSetId);
+                    .get(distributionSetId);
             if (!distributionSet.isPresent()) {
                 notification.displayWarning(i18n.getMessage("distributionset.not.exists"));
                 return;

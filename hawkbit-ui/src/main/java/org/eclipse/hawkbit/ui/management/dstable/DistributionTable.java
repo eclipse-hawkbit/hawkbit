@@ -306,7 +306,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     @Override
     protected Optional<DistributionSet> findEntityByTableValue(final Long lastSelectedId) {
-        return distributionSetManagement.findDistributionSetByIdWithDetails(lastSelectedId);
+        return distributionSetManagement.getWithDetails(lastSelectedId);
     }
 
     @Override
@@ -394,12 +394,12 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         // get all the targets assigned to the tag
         // assign dist to those targets
 
-        targetTagManagement.findTargetTag(targetTagName).ifPresent(tag -> {
+        targetTagManagement.getByName(targetTagName).ifPresent(tag -> {
             Pageable query = new PageRequest(0, 500);
             Page<Target> assignedTargets;
             boolean assigned = false;
             do {
-                assignedTargets = targetManagement.findTargetsByTag(query, tag.getId());
+                assignedTargets = targetManagement.findByTag(query, tag.getId());
 
                 if (assignedTargets.hasContent()) {
                     assignTargetToDs(getItem(distItemId), assignedTargets.getContent());
@@ -422,7 +422,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
 
         final Object distItemId = dropData.getItemIdOver();
-        assignTargetToDs(getItem(distItemId), targetManagement.findTargetsById(targetIdSet));
+        assignTargetToDs(getItem(distItemId), targetManagement.get(targetIdSet));
 
     }
 
@@ -437,8 +437,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         }
 
         final Long distId = (Long) item.getItemProperty("id").getValue();
-        final Optional<DistributionSet> findDistributionSetById = distributionSetManagement
-                .findDistributionSetById(distId);
+        final Optional<DistributionSet> findDistributionSetById = distributionSetManagement.get(distId);
         if (!findDistributionSetById.isPresent()) {
             notification.displayWarning(i18n.getMessage("distributionset.not.exists"));
             return;
@@ -721,7 +720,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     private void showMetadataDetails(final Object itemId) {
-        final Optional<DistributionSet> ds = distributionSetManagement.findDistributionSetById((Long) itemId);
+        final Optional<DistributionSet> ds = distributionSetManagement.get((Long) itemId);
         if (!ds.isPresent()) {
             notification.displayWarning(i18n.getMessage("distributionset.not.exists"));
             return;

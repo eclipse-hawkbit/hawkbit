@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
@@ -48,7 +50,7 @@ public interface DistributionSetTypeRepository
      *            count or all undeleted.
      * @return number of {@link DistributionSetType}s in the repository.
      */
-    Long countByDeleted(boolean isDeleted);
+    long countByDeleted(boolean isDeleted);
 
     /**
      * Counts all distribution set type where a specific software module type is
@@ -60,7 +62,7 @@ public interface DistributionSetTypeRepository
      * @return the number of {@link DistributionSetType}s in the repository
      *         assigned to the given software module type
      */
-    Long countByElementsSmType(JpaSoftwareModuleType softwareModuleType);
+    long countByElementsSmType(JpaSoftwareModuleType softwareModuleType);
 
     /**
      * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety
@@ -75,4 +77,9 @@ public interface DistributionSetTypeRepository
     @Transactional
     @Query("DELETE FROM JpaDistributionSetType t WHERE t.tenant = :tenant")
     void deleteByTenant(@Param("tenant") String tenant);
+
+    @Override
+    // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
+    @Query("SELECT d FROM JpaDistributionSetType d WHERE d.id IN ?1")
+    List<JpaDistributionSetType> findAll(Iterable<Long> ids);
 }

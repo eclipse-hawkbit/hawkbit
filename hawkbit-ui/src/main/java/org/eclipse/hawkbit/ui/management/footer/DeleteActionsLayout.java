@@ -249,7 +249,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         if (managementUIState.getDistributionTableFilters().getDistSetTags().contains(tagName)) {
             notification.displayValidationError(i18n.getMessage("message.tag.delete", new Object[] { tagName }));
         } else {
-            distributionSetTagManagement.deleteDistributionSetTag(tagName);
+            distributionSetTagManagement.delete(tagName);
 
             if (source instanceof DragAndDropWrapper) {
                 final Long id = DeleteActionsLayoutHelper.getDistributionTagId((DragAndDropWrapper) source);
@@ -266,7 +266,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         if (managementUIState.getTargetTableFilters().getClickedTargetTags().contains(tagName)) {
             notification.displayValidationError(i18n.getMessage("message.tag.delete", new Object[] { tagName }));
         } else {
-            targetTagManagement.deleteTargetTag(tagName);
+            targetTagManagement.delete(tagName);
 
             if (source instanceof DragAndDropWrapper) {
                 final Long id = DeleteActionsLayoutHelper.getTargetTagId((DragAndDropWrapper) source);
@@ -290,8 +290,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
             return;
         }
 
-        final List<DistributionSet> findDistributionSetAllById = distributionSetManagement
-                .findDistributionSetsById(ids);
+        final List<DistributionSet> findDistributionSetAllById = distributionSetManagement.get(ids);
 
         if (findDistributionSetAllById.isEmpty()) {
             notification.displayWarning(i18n.getMessage("distributionsets.not.exists"));
@@ -334,8 +333,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private boolean isDsInUseInBulkUpload(final Set<Long> distributionIdNameSet, final Long dsInBulkUpload) {
         if (distributionIdNameSet.contains(dsInBulkUpload)) {
-            final Optional<DistributionSet> distributionSet = distributionSetManagement
-                    .findDistributionSetById(dsInBulkUpload);
+            final Optional<DistributionSet> distributionSet = distributionSetManagement.get(dsInBulkUpload);
             if (!distributionSet.isPresent()) {
                 notification.displayWarning(i18n.getMessage("distributionset.not.exists"));
                 return true;
@@ -350,7 +348,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
     private void addInDeleteTargetList(final Table sourceTable, final TableTransferable transferable) {
         final TargetTable targetTable = (TargetTable) sourceTable;
         final Set<Long> targetIdSet = targetTable.getDeletedEntityByTransferable(transferable);
-        final Collection<Target> findTargetAllById = targetManagement.findTargetsById(targetIdSet);
+        final Collection<Target> findTargetAllById = targetManagement.get(targetIdSet);
         if (findTargetAllById.isEmpty()) {
             notification.displayWarning(i18n.getMessage("targets.not.exists"));
             return;

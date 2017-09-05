@@ -63,7 +63,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     @Override
     protected Color getColorForColorPicker() {
         return ColorPickerHelper.rgbToColorConverter(distributionSetTagManagement
-                .findDistributionSetTag(tagNameComboBox.getValue().toString()).map(DistributionSetTag::getColour)
+                .getByName(tagNameComboBox.getValue().toString()).map(DistributionSetTag::getColour)
                 .filter(Objects::nonNull).orElse(ColorPickerConstants.DEFAULT_COLOR));
 
     }
@@ -75,7 +75,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
         final TagUpdate update = entityFactory.tag().update(targetObj.getId()).name(tagName.getValue())
                 .description(tagDesc.getValue());
 
-        distributionSetTagManagement.updateDistributionSetTag(update);
+        distributionSetTagManagement.update(update);
         eventBus.publish(this,
                 new DistributionSetTagTableEvent(BaseEntityEventType.UPDATED_ENTITY, (DistributionSetTag) targetObj));
         uiNotification.displaySuccess(i18n.getMessage("message.update.success", new Object[] { targetObj.getName() }));
@@ -90,7 +90,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
 
         tagNameComboBox.removeAllItems();
         final List<DistributionSetTag> distTagNameList = distributionSetTagManagement
-                .findAllDistributionSetTags(new PageRequest(0, MAX_TAGS)).getContent();
+                .findAll(new PageRequest(0, MAX_TAGS)).getContent();
         distTagNameList.forEach(value -> tagNameComboBox.addItem(value.getName()));
     }
 
@@ -114,7 +114,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
 
     @Override
     protected Optional<DistributionSetTag> findEntityByName() {
-        return distributionSetTagManagement.findDistributionSetTag(tagName.getValue());
+        return distributionSetTagManagement.getByName(tagName.getValue());
     }
 
     /**
@@ -132,7 +132,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
                 colour = getColorPicked();
             }
 
-            final DistributionSetTag newDistTag = distributionSetTagManagement.createDistributionSetTag(entityFactory
+            final DistributionSetTag newDistTag = distributionSetTagManagement.create(entityFactory
                     .tag().create().name(tagNameValueTrimmed).description(tagDescriptionTrimmed).colour(colour));
             eventBus.publish(this, new DistributionSetTagTableEvent(BaseEntityEventType.ADD_ENTITY, newDistTag));
             displaySuccess(newDistTag.getName());
@@ -176,7 +176,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     public void setTagDetails(final String distTagSelected) {
         tagName.setValue(distTagSelected);
         final Optional<DistributionSetTag> selectedDistTag = distributionSetTagManagement
-                .findDistributionSetTag(distTagSelected);
+                .getByName(distTagSelected);
         if (selectedDistTag.isPresent()) {
             tagDesc.setValue(selectedDistTag.get().getDescription());
             if (null == selectedDistTag.get().getColour()) {

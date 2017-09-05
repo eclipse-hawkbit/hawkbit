@@ -55,7 +55,7 @@ public interface RolloutManagement {
      * For {@link RolloutStatus#READY} that means switching to
      * {@link RolloutStatus#STARTING} if the {@link Rollout#getStartAt()} is set
      * and time of calling this method is beyond this point in time. This auto
-     * start mechanism is optional. Call {@link #startRollout(Long)} otherwise.
+     * start mechanism is optional. Call {@link #start(Long)} otherwise.
      * 
      * For {@link RolloutStatus#STARTING} that means starting the first
      * {@link RolloutGroup}s in line and when finished switch to
@@ -81,7 +81,7 @@ public interface RolloutManagement {
      * @return number of roll outs
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Long countRolloutsAll();
+    long count();
 
     /**
      * Count rollouts by given text in name or description.
@@ -91,7 +91,7 @@ public interface RolloutManagement {
      * @return total count rollouts for specified filter text.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Long countRolloutsAllByFilters(@NotEmpty String searchText);
+    long countByFilters(@NotEmpty String searchText);
 
     /**
      * Persists a new rollout entity. The filter within the
@@ -107,7 +107,7 @@ public interface RolloutManagement {
      * The RolloutScheduler will start to assign targets to the groups. Once all
      * targets have been assigned to the groups, the rollout status is changed
      * to {@link RolloutStatus#READY} so it can be started with
-     * {@link #startRollout(Rollout)}.
+     * {@link #start(Rollout)}.
      *
      * @param create
      *            the rollout entity to create
@@ -124,7 +124,7 @@ public interface RolloutManagement {
      *             if rollout or group parameters are invalid.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    Rollout createRollout(@NotNull RolloutCreate create, int amountGroup, @NotNull RolloutGroupConditions conditions);
+    Rollout create(@NotNull RolloutCreate create, int amountGroup, @NotNull RolloutGroupConditions conditions);
 
     /**
      * Persists a new rollout entity. The filter within the
@@ -140,7 +140,7 @@ public interface RolloutManagement {
      * The RolloutScheduler will start to assign targets to the groups. Once all
      * targets have been assigned to the groups, the rollout status is changed
      * to {@link RolloutStatus#READY} so it can be started with
-     * {@link #startRollout(Rollout)}.
+     * {@link #start(Rollout)}.
      *
      * @param rollout
      *            the rollout entity to create
@@ -158,7 +158,7 @@ public interface RolloutManagement {
      *             if rollout or group parameters are invalid
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    Rollout createRollout(@NotNull RolloutCreate rollout, @NotNull List<RolloutGroupCreate> groups,
+    Rollout create(@NotNull RolloutCreate rollout, @NotNull List<RolloutGroupCreate> groups,
             RolloutGroupConditions conditions);
 
     /**
@@ -205,17 +205,18 @@ public interface RolloutManagement {
      *         statuses
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<Rollout> findAllRolloutsWithDetailedStatus(@NotNull Pageable pageable, boolean deleted);
+    Page<Rollout> findAllWithDetailedStatus(@NotNull Pageable pageable, boolean deleted);
 
     /**
      * Retrieves all rollouts found by the given specification.
-     *
-     * @param rsqlParam
-     *            the specification to filter rollouts
+     * 
      * @param pageable
      *            the page request to sort and limit the result
+     * @param rsqlParam
+     *            the specification to filter rollouts
      * @param deleted
      *            flag if deleted rollouts should be included
+     *
      * @return a page of found rollouts
      * 
      * @throws RSQLParameterUnsupportedFieldException
@@ -225,7 +226,7 @@ public interface RolloutManagement {
      *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<Rollout> findAllByPredicate(@NotNull String rsqlParam, @NotNull Pageable pageable, boolean deleted);
+    Page<Rollout> findByRsql(@NotNull Pageable pageable, @NotNull String rsqlParam, boolean deleted);
 
     /**
      * Finds rollouts by given text in name or description.
@@ -240,7 +241,7 @@ public interface RolloutManagement {
      *         not exists
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Slice<Rollout> findRolloutWithDetailedStatusByFilters(@NotNull Pageable pageable, @NotEmpty String searchText,
+    Slice<Rollout> findByFiltersWithDetailedStatus(@NotNull Pageable pageable, @NotEmpty String searchText,
             boolean deleted);
 
     /**
@@ -252,7 +253,7 @@ public interface RolloutManagement {
      *         not exists
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Optional<Rollout> findRolloutById(@NotNull Long rolloutId);
+    Optional<Rollout> get(@NotNull Long rolloutId);
 
     /**
      * Retrieves a specific rollout by its name.
@@ -263,7 +264,7 @@ public interface RolloutManagement {
      *         does not exists
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Optional<Rollout> findRolloutByName(@NotEmpty String rolloutName);
+    Optional<Rollout> getByName(@NotEmpty String rolloutName);
 
     /**
      * Get count of targets in different status in rollout.
@@ -277,7 +278,7 @@ public interface RolloutManagement {
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Optional<Rollout> findRolloutWithDetailedStatus(@NotNull Long rolloutId);
+    Optional<Rollout> getWithDetailedStatus(@NotNull Long rolloutId);
 
     /**
      * Checks if rollout with given ID exists.
@@ -350,7 +351,7 @@ public interface RolloutManagement {
      *             ready rollouts can be started.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    Rollout startRollout(@NotNull Long rolloutId);
+    Rollout start(@NotNull Long rolloutId);
 
     /**
      * Update rollout details.
@@ -368,7 +369,7 @@ public interface RolloutManagement {
      * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    Rollout updateRollout(@NotNull RolloutUpdate update);
+    Rollout update(@NotNull RolloutUpdate update);
 
     /**
      * Deletes a rollout. A rollout might be deleted asynchronously by
@@ -379,6 +380,6 @@ public interface RolloutManagement {
      *            the ID of the rollout to be deleted
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    void deleteRollout(long rolloutId);
+    void delete(@NotNull Long rolloutId);
 
 }

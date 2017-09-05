@@ -238,7 +238,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected DistributionSetMetadata createDistributionSetMetadata(final Long dsId, final MetaData md) {
-        return distributionSetManagement.createDistributionSetMetadata(dsId, Collections.singletonList(md)).get(0);
+        return distributionSetManagement.createMetaData(dsId, Collections.singletonList(md)).get(0);
     }
 
     protected Long getOsModule(final DistributionSet ds) {
@@ -271,17 +271,17 @@ public abstract class AbstractIntegrationTest {
 
         osType = securityRule
                 .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_OS));
-        osType = securityRule.runAsPrivileged(() -> softwareModuleTypeManagement.updateSoftwareModuleType(
+        osType = securityRule.runAsPrivileged(() -> softwareModuleTypeManagement.update(
                 entityFactory.softwareModuleType().update(osType.getId()).description(description)));
 
         appType = securityRule.runAsPrivileged(
                 () -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_APP, Integer.MAX_VALUE));
-        appType = securityRule.runAsPrivileged(() -> softwareModuleTypeManagement.updateSoftwareModuleType(
+        appType = securityRule.runAsPrivileged(() -> softwareModuleTypeManagement.update(
                 entityFactory.softwareModuleType().update(appType.getId()).description(description)));
 
         runtimeType = securityRule
                 .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_RT));
-        runtimeType = securityRule.runAsPrivileged(() -> softwareModuleTypeManagement.updateSoftwareModuleType(
+        runtimeType = securityRule.runAsPrivileged(() -> softwareModuleTypeManagement.update(
                 entityFactory.softwareModuleType().update(runtimeType.getId()).description(description)));
 
         standardDsType = securityRule.runAsPrivileged(() -> testdataFactory.findOrCreateDefaultTestDsType());

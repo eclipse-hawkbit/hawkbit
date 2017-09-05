@@ -193,8 +193,8 @@ public class CountMessageLabel extends Label {
      *            as dist ID
      */
     private void displayCountLabel(final Long distId) {
-        final Long targetsWithAssigedDsCount = targetManagement.countTargetByAssignedDistributionSet(distId);
-        final Long targetsWithInstalledDsCount = targetManagement.countTargetByInstalledDistributionSet(distId);
+        final Long targetsWithAssigedDsCount = targetManagement.countByAssignedDistributionSet(distId);
+        final Long targetsWithInstalledDsCount = targetManagement.countByInstalledDistributionSet(distId);
         final StringBuilder message = new StringBuilder(i18n.getMessage("label.target.count"));
         message.append("<span class=\"assigned-count-message\">");
         message.append(i18n.getMessage("label.assigned.count", new Object[] { targetsWithAssigedDsCount }));

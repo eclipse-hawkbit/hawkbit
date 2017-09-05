@@ -68,7 +68,7 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken {
 
     protected void addAlreadySelectedTags() {
         for (final String tagName : managementUIState.getTargetTableFilters().getBulkUpload().getAssignedTagNames()) {
-            tagManagement.findTargetTag(tagName).map(TargetTag::getId).ifPresent(this::addNewToken);
+            tagManagement.getByName(tagName).map(TargetTag::getId).ifPresent(this::addNewToken);
         }
     }
 
@@ -76,7 +76,7 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken {
     protected void populateContainer() {
         container.removeAllItems();
         tagDetails.clear();
-        for (final TargetTag tag : tagManagement.findAllTargetTags(new PageRequest(0, MAX_TAGS))) {
+        for (final TargetTag tag : tagManagement.findAll(new PageRequest(0, MAX_TAGS))) {
             setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour());
         }
 

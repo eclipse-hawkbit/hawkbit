@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.builder;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.builder.AbstractDistributionSetTypeUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -26,10 +26,10 @@ import org.springframework.util.CollectionUtils;
 public class JpaDistributionSetTypeCreate extends AbstractDistributionSetTypeUpdateCreate<DistributionSetTypeCreate>
         implements DistributionSetTypeCreate {
 
-    private final SoftwareModuleManagement softwareModuleManagement;
+    private final SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
-    JpaDistributionSetTypeCreate(final SoftwareModuleManagement softwareManagement) {
-        this.softwareModuleManagement = softwareManagement;
+    JpaDistributionSetTypeCreate(final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
+        this.softwareModuleTypeManagement = softwareModuleTypeManagement;
     }
 
     @Override
@@ -48,8 +48,7 @@ public class JpaDistributionSetTypeCreate extends AbstractDistributionSetTypeUpd
             return Collections.emptyList();
         }
 
-        final Collection<SoftwareModuleType> module = softwareModuleManagement
-                .findSoftwareModuleTypesById(softwareModuleTypeId);
+        final Collection<SoftwareModuleType> module = softwareModuleTypeManagement.get(softwareModuleTypeId);
         if (module.size() < softwareModuleTypeId.size()) {
             throw new EntityNotFoundException(SoftwareModuleType.class, softwareModuleTypeId);
         }

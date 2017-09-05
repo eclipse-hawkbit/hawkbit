@@ -166,8 +166,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      * @return DistributionSetTypeBuilder bean
      */
     @Bean
-    DistributionSetTypeBuilder distributionSetTypeBuilder(final SoftwareModuleManagement softwareManagement) {
-        return new JpaDistributionSetTypeBuilder(softwareManagement);
+    DistributionSetTypeBuilder distributionSetTypeBuilder(
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
+        return new JpaDistributionSetTypeBuilder(softwareModuleTypeManagement);
     }
 
     /**
@@ -437,8 +438,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    TargetTagManagement targetTagManagement() {
-        return new JpaTargetTagManagement();
+    TargetTagManagement targetTagManagement(final TargetTagRepository targetTagRepository,
+            final TargetRepository targetRepository, final VirtualPropertyReplacer virtualPropertyReplacer) {
+        return new JpaTargetTagManagement(targetTagRepository, targetRepository, virtualPropertyReplacer);
     }
 
     /**
@@ -448,8 +450,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    DistributionSetTagManagement distributionSetTagManagement() {
-        return new JpaDistributionSetTagManagement();
+    DistributionSetTagManagement distributionSetTagManagement(
+            final DistributionSetTagRepository distributionSetTagRepository,
+            final DistributionSetRepository distributionSetRepository,
+            final VirtualPropertyReplacer virtualPropertyReplacer) {
+        return new JpaDistributionSetTagManagement(distributionSetTagRepository, distributionSetRepository,
+                virtualPropertyReplacer);
     }
 
     /**
@@ -549,7 +555,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public EntityFactory entityFactory() {
+    EntityFactory entityFactory() {
         return new JpaEntityFactory();
     }
 

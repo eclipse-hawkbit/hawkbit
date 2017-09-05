@@ -91,14 +91,14 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
         final Slice<Target> findTargetsAll;
-        final Long countTargetsAll;
+        final long countTargetsAll;
         if (rsqlParam != null) {
-            final Page<Target> findTargetPage = this.targetManagement.findTargetsAll(rsqlParam, pageable);
+            final Page<Target> findTargetPage = this.targetManagement.findByRsql(pageable, rsqlParam);
             countTargetsAll = findTargetPage.getTotalElements();
             findTargetsAll = findTargetPage;
         } else {
-            findTargetsAll = this.targetManagement.findTargetsAll(pageable);
-            countTargetsAll = this.targetManagement.countTargetsAll();
+            findTargetsAll = this.targetManagement.findAll(pageable);
+            countTargetsAll = this.targetManagement.count();
         }
 
         final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(findTargetsAll.getContent());
@@ -109,7 +109,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     public ResponseEntity<List<MgmtTarget>> createTargets(@RequestBody final List<MgmtTargetRequestBody> targets) {
         LOG.debug("creating {} targets", targets.size());
         final Collection<Target> createdTargets = this.targetManagement
-                .createTargets(MgmtTargetMapper.fromRequest(entityFactory, targets));
+                .create(MgmtTargetMapper.fromRequest(entityFactory, targets));
         LOG.debug("{} targets created, return status {}", targets.size(), HttpStatus.CREATED);
         return new ResponseEntity<>(MgmtTargetMapper.toResponse(createdTargets), HttpStatus.CREATED);
     }
@@ -118,7 +118,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     public ResponseEntity<MgmtTarget> updateTarget(@PathVariable("controllerId") final String controllerId,
             @RequestBody final MgmtTargetRequestBody targetRest) {
 
-        final Target updateTarget = this.targetManagement.updateTarget(entityFactory.target().update(controllerId)
+        final Target updateTarget = this.targetManagement.update(entityFactory.target().update(controllerId)
                 .name(targetRest.getName()).description(targetRest.getDescription()).address(targetRest.getAddress())
                 .securityToken(targetRest.getSecurityToken()));
 
@@ -127,7 +127,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<Void> deleteTarget(@PathVariable("controllerId") final String controllerId) {
-        this.targetManagement.deleteTarget(controllerId);
+        this.targetManagement.deleteByControllerID(controllerId);
         LOG.debug("{} target deleted, return status {}", controllerId, HttpStatus.OK);
         return ResponseEntity.ok().build();
     }
@@ -284,7 +284,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     private Target findTargetWithExceptionIfNotFound(final String controllerId) {
-        return targetManagement.findTargetByControllerID(controllerId)
+        return targetManagement.getByControllerID(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
     }
 

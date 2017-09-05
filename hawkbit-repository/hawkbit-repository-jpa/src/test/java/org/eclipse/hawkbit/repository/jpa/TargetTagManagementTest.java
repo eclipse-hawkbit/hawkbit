@@ -48,8 +48,8 @@ public class TargetTagManagementTest extends AbstractJpaIntegrationTest {
             + "of Optional not present.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void nonExistingEntityAccessReturnsNotPresent() {
-        assertThat(targetTagManagement.findTargetTag(NOT_EXIST_ID)).isNotPresent();
-        assertThat(targetTagManagement.findTargetTagById(NOT_EXIST_IDL)).isNotPresent();
+        assertThat(targetTagManagement.getByName(NOT_EXIST_ID)).isNotPresent();
+        assertThat(targetTagManagement.get(NOT_EXIST_IDL)).isNotPresent();
     }
 
     @Test
@@ -58,12 +58,12 @@ public class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     @ExpectEvents({ @Expect(type = DistributionSetTagUpdatedEvent.class, count = 0),
             @Expect(type = TargetTagUpdatedEvent.class, count = 0) })
     public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
-        verifyThrownExceptionBy(() -> targetTagManagement.deleteTargetTag(NOT_EXIST_ID), "TargetTag");
+        verifyThrownExceptionBy(() -> targetTagManagement.delete(NOT_EXIST_ID), "TargetTag");
 
-        verifyThrownExceptionBy(() -> targetTagManagement.updateTargetTag(entityFactory.tag().update(NOT_EXIST_IDL)),
+        verifyThrownExceptionBy(() -> targetTagManagement.update(entityFactory.tag().update(NOT_EXIST_IDL)),
                 "TargetTag");
 
-        verifyThrownExceptionBy(() -> targetTagManagement.findAllTargetTags(PAGE, NOT_EXIST_ID), "Target");
+        verifyThrownExceptionBy(() -> targetTagManagement.findByTarget(PAGE, NOT_EXIST_ID), "Target");
     }
 
     @Test
@@ -74,13 +74,13 @@ public class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         final List<Target> groupB = testdataFactory.createTargets(20, "groupb", "groupb");
 
         final TargetTag tag = targetTagManagement
-                .createTargetTag(entityFactory.tag().create().name("tag1").description("tagdesc1"));
+                .create(entityFactory.tag().create().name("tag1").description("tagdesc1"));
 
         // toggle A only -> A is now assigned
         TargetTagAssignmentResult result = toggleTagAssignment(groupA, tag);
         assertThat(result.getAlreadyAssigned()).isEqualTo(0);
         assertThat(result.getAssigned()).isEqualTo(20);
-        assertThat(result.getAssignedEntity()).containsAll(targetManagement.findTargetsByControllerID(
+        assertThat(result.getAssignedEntity()).containsAll(targetManagement.getByControllerID(
                 groupA.stream().map(target -> target.getControllerId()).collect(Collectors.toList())));
         assertThat(result.getUnassigned()).isEqualTo(0);
         assertThat(result.getUnassignedEntity()).isEmpty();
@@ -90,7 +90,7 @@ public class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         result = toggleTagAssignment(concat(groupA, groupB), tag);
         assertThat(result.getAlreadyAssigned()).isEqualTo(20);
         assertThat(result.getAssigned()).isEqualTo(20);
-        assertThat(result.getAssignedEntity()).containsAll(targetManagement.findTargetsByControllerID(
+        assertThat(result.getAssignedEntity()).containsAll(targetManagement.getByControllerID(
                 groupB.stream().map(target -> target.getControllerId()).collect(Collectors.toList())));
         assertThat(result.getUnassigned()).isEqualTo(0);
         assertThat(result.getUnassignedEntity()).isEmpty();
@@ -102,8 +102,8 @@ public class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         assertThat(result.getAssigned()).isEqualTo(0);
         assertThat(result.getAssignedEntity()).isEmpty();
         assertThat(result.getUnassigned()).isEqualTo(40);
-        assertThat(result.getUnassignedEntity()).containsAll(targetManagement.findTargetsByControllerID(
-                concat(groupB, groupA).stream().map(target -> target.getControllerId()).collect(Collectors.toList())));
+        assertThat(result.getUnassignedEntity()).containsAll(targetManagement.getByControllerID(
+                concat(groupB, groupA).stream().map(Target::getControllerId).collect(Collectors.toList())));
         assertThat(result.getTargetTag()).isEqualTo(tag);
 
     }
@@ -128,13 +128,13 @@ public class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     @Description("Ensures that a created tag is persisted in the repository as defined.")
     public void createTargetTag() {
         final Tag tag = targetTagManagement
-                .createTargetTag(entityFactory.tag().create().name("kai1").description("kai2").colour("colour"));
+                .create(entityFactory.tag().create().name("kai1").description("kai2").colour("colour"));
 
         assertThat(targetTagRepository.findByNameEquals("kai1").get().getDescription()).as("wrong tag ed")
                 .isEqualTo("kai2");
-        assertThat(targetTagManagement.findTargetTag("kai1").get().getColour()).as("wrong tag found")
+        assertThat(targetTagManagement.getByName("kai1").get().getColour()).as("wrong tag found")
                 .isEqualTo("colour");
-        assertThat(targetTagManagement.findTargetTagById(tag.getId()).get().getColour()).as("wrong tag found")
+        assertThat(targetTagManagement.get(tag.getId()).get().getColour()).as("wrong tag found")
                 .isEqualTo("colour");
     }
 
@@ -147,16 +147,16 @@ public class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         final TargetTag toDelete = tags.iterator().next();
 
         for (final Target target : targetRepository.findAll()) {
-            assertThat(targetTagManagement.findAllTargetTags(PAGE, target.getControllerId()).getContent())
+            assertThat(targetTagManagement.findByTarget(PAGE, target.getControllerId()).getContent())
                     .contains(toDelete);
         }
 
         // delete
-        targetTagManagement.deleteTargetTag(toDelete.getName());
+        targetTagManagement.delete(toDelete.getName());
 
         // check
         for (final Target target : targetRepository.findAll()) {
-            assertThat(targetTagManagement.findAllTargetTags(PAGE, target.getControllerId()).getContent())
+            assertThat(targetTagManagement.findByTarget(PAGE, target.getControllerId()).getContent())
                     .doesNotContain(toDelete);
         }
         assertThat(targetTagRepository.findOne(toDelete.getId())).as("No tag should be found").isNull();
@@ -172,7 +172,7 @@ public class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         final TargetTag savedAssigned = tags.iterator().next();
 
         // persist
-        targetTagManagement.updateTargetTag(entityFactory.tag().update(savedAssigned.getId()).name("test123"));
+        targetTagManagement.update(entityFactory.tag().update(savedAssigned.getId()).name("test123"));
 
         // check data
         assertThat(targetTagRepository.findAll()).as("Wrong target tag size").hasSize(tags.size());
@@ -185,10 +185,10 @@ public class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Ensures that a tag cannot be created if one exists already with that name (ecpects EntityAlreadyExistsException).")
     public void failedDuplicateTargetTagNameException() {
-        targetTagManagement.createTargetTag(entityFactory.tag().create().name("A"));
+        targetTagManagement.create(entityFactory.tag().create().name("A"));
 
         try {
-            targetTagManagement.createTargetTag(entityFactory.tag().create().name("A"));
+            targetTagManagement.create(entityFactory.tag().create().name("A"));
             fail("should not have worked as tag already exists");
         } catch (final EntityAlreadyExistsException e) {
 
@@ -198,11 +198,11 @@ public class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Ensures that a tag cannot be updated to a name that already exists on another tag (ecpects EntityAlreadyExistsException).")
     public void failedDuplicateTargetTagNameExceptionAfterUpdate() {
-        targetTagManagement.createTargetTag(entityFactory.tag().create().name("A"));
-        final TargetTag tag = targetTagManagement.createTargetTag(entityFactory.tag().create().name("B"));
+        targetTagManagement.create(entityFactory.tag().create().name("A"));
+        final TargetTag tag = targetTagManagement.create(entityFactory.tag().create().name("B"));
 
         try {
-            targetTagManagement.updateTargetTag(entityFactory.tag().update(tag.getId()).name("A"));
+            targetTagManagement.update(entityFactory.tag().update(tag.getId()).name("A"));
             fail("should not have worked as tag already exists");
         } catch (final EntityAlreadyExistsException e) {
 
