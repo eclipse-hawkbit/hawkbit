@@ -208,13 +208,14 @@ public interface DistributionSetManagement
      *            the pagination parameter
      * @param complete
      *            to <code>true</code> for returning only completed distribution
-     *            sets or <code>false</code> for only incomplete ones
+     *            sets or <code>false</code> for only incomplete ones nor
+     *            <code>null</code> to return both.
      *
      *
      * @return all found {@link DistributionSet}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<DistributionSet> findByCompleted(@NotNull Pageable pageable, boolean complete);
+    Page<DistributionSet> findByCompleted(@NotNull Pageable pageable, Boolean complete);
 
     /**
      * method retrieves all {@link DistributionSet}s from the repository in the
