@@ -55,6 +55,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
         final TargetFilterQuery findTarget = findFilterWithExceptionIfNotFound(filterId);
         // to single response include poll status
         final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(findTarget);
+        MgmtTargetFilterQueryMapper.addLinks(response);
 
         return ResponseEntity.ok(response);
     }
@@ -74,8 +75,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
         final Slice<TargetFilterQuery> findTargetFiltersAll;
         final Long countTargetsAll;
         if (rsqlParam != null) {
-            final Page<TargetFilterQuery> findFilterPage = filterManagement.findByRsql(pageable,
-                    rsqlParam);
+            final Page<TargetFilterQuery> findFilterPage = filterManagement.findByRsql(pageable, rsqlParam);
             countTargetsAll = findFilterPage.getTotalElements();
             findTargetFiltersAll = findFilterPage;
         } else {
@@ -94,7 +94,10 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
         final TargetFilterQuery createdTarget = filterManagement
                 .create(MgmtTargetFilterQueryMapper.fromRequest(entityFactory, filter));
 
-        return new ResponseEntity<>(MgmtTargetFilterQueryMapper.toResponse(createdTarget), HttpStatus.CREATED);
+        final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(createdTarget);
+        MgmtTargetFilterQueryMapper.addLinks(response);
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @Override
@@ -102,11 +105,13 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
             @RequestBody final MgmtTargetFilterQueryRequestBody targetFilterRest) {
         LOG.debug("updating target filter query {}", filterId);
 
-        final TargetFilterQuery updateFilter = filterManagement
-                .update(entityFactory.targetFilterQuery().update(filterId)
-                        .name(targetFilterRest.getName()).query(targetFilterRest.getQuery()));
+        final TargetFilterQuery updateFilter = filterManagement.update(entityFactory.targetFilterQuery()
+                .update(filterId).name(targetFilterRest.getName()).query(targetFilterRest.getQuery()));
 
-        return ResponseEntity.ok(MgmtTargetFilterQueryMapper.toResponse(updateFilter));
+        final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(updateFilter);
+        MgmtTargetFilterQueryMapper.addLinks(response);
+
+        return ResponseEntity.ok(response);
     }
 
     @Override
@@ -120,10 +125,12 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     public ResponseEntity<MgmtTargetFilterQuery> postAssignedDistributionSet(
             @PathVariable("filterId") final Long filterId, @RequestBody final MgmtId dsId) {
 
-        final TargetFilterQuery updateFilter = filterManagement.updateAutoAssignDS(filterId,
-                dsId.getId());
+        final TargetFilterQuery updateFilter = filterManagement.updateAutoAssignDS(filterId, dsId.getId());
 
-        return ResponseEntity.ok(MgmtTargetFilterQueryMapper.toResponse(updateFilter));
+        final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(updateFilter);
+        MgmtTargetFilterQueryMapper.addLinks(response);
+
+        return ResponseEntity.ok(response);
     }
 
     @Override
@@ -131,9 +138,15 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
             @PathVariable("filterId") final Long filterId) {
         final TargetFilterQuery filter = findFilterWithExceptionIfNotFound(filterId);
         final DistributionSet autoAssignDistributionSet = filter.getAutoAssignDistributionSet();
-        final MgmtDistributionSet distributionSetRest = MgmtDistributionSetMapper.toResponse(autoAssignDistributionSet);
-        final HttpStatus retStatus = distributionSetRest == null ? HttpStatus.NO_CONTENT : HttpStatus.OK;
-        return new ResponseEntity<>(distributionSetRest, retStatus);
+
+        if (autoAssignDistributionSet == null) {
+            return ResponseEntity.noContent().build();
+        }
+
+        final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(autoAssignDistributionSet);
+        MgmtDistributionSetMapper.addLinks(autoAssignDistributionSet, response);
+
+        return ResponseEntity.ok(response);
     }
 
     @Override

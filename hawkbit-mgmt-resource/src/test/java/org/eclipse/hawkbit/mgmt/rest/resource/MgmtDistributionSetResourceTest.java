@@ -528,27 +528,18 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         assertThat(
                 JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
                         .isEqualTo("http://localhost/rest/v1/distributionsets/" + one.getId());
-        assertThat(
-                JsonPath.compile("[0]_links.type.href").read(mvcResult.getResponse().getContentAsString()).toString())
-                        .isEqualTo("http://localhost/rest/v1/distributionsettypes/" + one.getType().getId());
 
         assertThat(JsonPath.compile("[0]id").read(mvcResult.getResponse().getContentAsString()).toString())
                 .isEqualTo(String.valueOf(one.getId()));
         assertThat(
                 JsonPath.compile("[1]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
                         .isEqualTo("http://localhost/rest/v1/distributionsets/" + two.getId());
-        assertThat(
-                JsonPath.compile("[1]_links.type.href").read(mvcResult.getResponse().getContentAsString()).toString())
-                        .isEqualTo("http://localhost/rest/v1/distributionsettypes/" + two.getType().getId());
 
         assertThat(JsonPath.compile("[1]id").read(mvcResult.getResponse().getContentAsString()).toString())
                 .isEqualTo(String.valueOf(two.getId()));
         assertThat(
                 JsonPath.compile("[2]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
                         .isEqualTo("http://localhost/rest/v1/distributionsets/" + three.getId());
-        assertThat(
-                JsonPath.compile("[2]_links.type.href").read(mvcResult.getResponse().getContentAsString()).toString())
-                        .isEqualTo("http://localhost/rest/v1/distributionsettypes/" + three.getType().getId());
 
         assertThat(JsonPath.compile("[2]id").read(mvcResult.getResponse().getContentAsString()).toString())
                 .isEqualTo(String.valueOf(three.getId()));

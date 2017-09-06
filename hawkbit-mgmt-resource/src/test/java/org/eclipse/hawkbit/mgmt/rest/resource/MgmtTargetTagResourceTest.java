@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -72,11 +71,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                 .andExpect(applySelfLinkMatcherOnPagedResult(unassigned, TARGETTAGS_ROOT + unassigned.getId()))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(2)))
-                .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(2)))
-                .andExpect(jsonPath("$.content.[?(@.id==" + assigned.getId() + ")]._links.assignedTargets.href",
-                        contains(TARGETTAGS_ROOT + assigned.getId() + "/assigned?offset=0&limit=50{&sort,q}")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + unassigned.getId() + ")]._links.assignedTargets.href",
-                        contains(TARGETTAGS_ROOT + unassigned.getId() + "/assigned?offset=0&limit=50{&sort,q}")));
+                .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(2)));
 
     }
 

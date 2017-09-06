@@ -83,16 +83,16 @@ final class MgmtRolloutMapper {
                 body.addTotalTargetsPerStatus(status.name().toLowerCase(),
                         rollout.getTotalTargetCountStatus().getTotalTargetCountByStatus(status));
             }
+
+            body.add(linkTo(methodOn(MgmtRolloutRestApi.class).start(rollout.getId())).withRel("start"));
+            body.add(linkTo(methodOn(MgmtRolloutRestApi.class).pause(rollout.getId())).withRel("pause"));
+            body.add(linkTo(methodOn(MgmtRolloutRestApi.class).resume(rollout.getId())).withRel("resume"));
+            body.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRolloutGroups(rollout.getId(),
+                    MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
+                    MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("groups"));
         }
 
         body.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRollout(rollout.getId())).withSelfRel());
-        body.add(linkTo(methodOn(MgmtRolloutRestApi.class).start(rollout.getId())).withRel("start"));
-        body.add(linkTo(methodOn(MgmtRolloutRestApi.class).pause(rollout.getId())).withRel("pause"));
-        body.add(linkTo(methodOn(MgmtRolloutRestApi.class).resume(rollout.getId())).withRel("resume"));
-        body.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRolloutGroups(rollout.getId(),
-                MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
-                MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null))
-                        .withRel("groups"));
         return body;
     }
 

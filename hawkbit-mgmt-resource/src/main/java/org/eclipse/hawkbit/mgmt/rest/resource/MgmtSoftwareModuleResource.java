@@ -82,7 +82,11 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             final Artifact result = artifactManagement.create(file.getInputStream(), softwareModuleId, fileName,
                     md5Sum == null ? null : md5Sum.toLowerCase(), sha1Sum == null ? null : sha1Sum.toLowerCase(), false,
                     file.getContentType());
-            return ResponseEntity.status(HttpStatus.CREATED).body(MgmtSoftwareModuleMapper.toResponse(result));
+
+            final MgmtArtifact reponse = MgmtSoftwareModuleMapper.toResponse(result);
+            MgmtSoftwareModuleMapper.addLinks(result, reponse);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(reponse);
         } catch (final IOException e) {
             LOG.error("Failed to store artifact", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -108,7 +112,10 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
 
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, artifactId);
 
-        return ResponseEntity.ok(MgmtSoftwareModuleMapper.toResponse(module.getArtifact(artifactId).get()));
+        final MgmtArtifact reponse = MgmtSoftwareModuleMapper.toResponse(module.getArtifact(artifactId).get());
+        MgmtSoftwareModuleMapper.addLinks(module.getArtifact(artifactId).get(), reponse);
+
+        return ResponseEntity.ok(reponse);
     }
 
     @Override
@@ -153,8 +160,12 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     public ResponseEntity<MgmtSoftwareModule> getSoftwareModule(
             @PathVariable("softwareModuleId") final Long softwareModuleId) {
 
-        final SoftwareModule findBaseSoftareModule = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
-        return ResponseEntity.ok(MgmtSoftwareModuleMapper.toResponse(findBaseSoftareModule));
+        final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
+
+        final MgmtSoftwareModule response = MgmtSoftwareModuleMapper.toResponse(module);
+        MgmtSoftwareModuleMapper.addLinks(module, response);
+
+        return ResponseEntity.ok(response);
     }
 
     @Override
@@ -174,10 +185,14 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     public ResponseEntity<MgmtSoftwareModule> updateSoftwareModule(
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @RequestBody final MgmtSoftwareModuleRequestBodyPut restSoftwareModule) {
+        final SoftwareModule module = softwareModuleManagement
+                .update(entityFactory.softwareModule().update(softwareModuleId)
+                        .description(restSoftwareModule.getDescription()).vendor(restSoftwareModule.getVendor()));
 
-        return ResponseEntity.ok(MgmtSoftwareModuleMapper
-                .toResponse(softwareModuleManagement.update(entityFactory.softwareModule().update(softwareModuleId)
-                        .description(restSoftwareModule.getDescription()).vendor(restSoftwareModule.getVendor()))));
+        final MgmtSoftwareModule response = MgmtSoftwareModuleMapper.toResponse(module);
+        MgmtSoftwareModuleMapper.addLinks(module, response);
+
+        return ResponseEntity.ok(response);
     }
 
     @Override
@@ -222,8 +237,8 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     public ResponseEntity<MgmtMetadata> getMetadataValue(@PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("metadataKey") final String metadataKey) {
 
-        final SoftwareModuleMetadata findOne = softwareModuleManagement.getMetaDataBySoftwareModuleId(softwareModuleId, metadataKey)
-                .orElseThrow(
+        final SoftwareModuleMetadata findOne = softwareModuleManagement
+                .getMetaDataBySoftwareModuleId(softwareModuleId, metadataKey).orElseThrow(
                         () -> new EntityNotFoundException(SoftwareModuleMetadata.class, softwareModuleId, metadataKey));
 
         return ResponseEntity.ok(MgmtSoftwareModuleMapper.toResponseSwMetadata(findOne));

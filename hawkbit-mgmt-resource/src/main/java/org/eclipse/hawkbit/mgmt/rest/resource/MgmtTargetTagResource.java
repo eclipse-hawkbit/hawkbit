@@ -21,8 +21,8 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTagRestApi;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
-import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -85,7 +85,11 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     @Override
     public ResponseEntity<MgmtTag> getTargetTag(@PathVariable("targetTagId") final Long targetTagId) {
         final TargetTag tag = findTargetTagById(targetTagId);
-        return ResponseEntity.ok(MgmtTagMapper.toResponse(tag));
+
+        final MgmtTag response = MgmtTagMapper.toResponse(tag);
+        MgmtTagMapper.addLinks(tag, response);
+
+        return ResponseEntity.ok(response);
     }
 
     @Override
@@ -107,7 +111,10 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
 
         LOG.debug("target tag updated");
 
-        return ResponseEntity.ok(MgmtTagMapper.toResponse(updateTargetTag));
+        final MgmtTag response = MgmtTagMapper.toResponse(updateTargetTag);
+        MgmtTagMapper.addLinks(updateTargetTag, response);
+
+        return ResponseEntity.ok(response);
     }
 
     @Override

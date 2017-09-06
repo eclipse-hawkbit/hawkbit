@@ -60,11 +60,13 @@ public final class MgmtTargetFilterQueryMapper {
         }
 
         targetRest.add(linkTo(methodOn(MgmtTargetFilterQueryRestApi.class).getFilter(filter.getId())).withSelfRel());
-        targetRest.add(
-                linkTo(methodOn(MgmtTargetFilterQueryRestApi.class).postAssignedDistributionSet(filter.getId(), null))
-                        .withRel("autoAssignDS"));
 
         return targetRest;
+    }
+
+    static void addLinks(final MgmtTargetFilterQuery targetRest) {
+        targetRest.add(linkTo(methodOn(MgmtTargetFilterQueryRestApi.class)
+                .postAssignedDistributionSet(targetRest.getFilterId(), null)).withRel("autoAssignDS"));
     }
 
     static TargetFilterQueryCreate fromRequest(final EntityFactory entityFactory,

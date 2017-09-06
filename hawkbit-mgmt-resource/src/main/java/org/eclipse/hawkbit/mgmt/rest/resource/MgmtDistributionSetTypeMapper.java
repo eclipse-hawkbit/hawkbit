@@ -92,13 +92,16 @@ final class MgmtDistributionSetTypeMapper {
         result.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class).getDistributionSetType(result.getModuleId()))
                 .withSelfRel());
 
+        return result;
+    }
+
+    static void addLinks(final MgmtDistributionSetType result) {
+
         result.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class).getMandatoryModules(result.getModuleId()))
                 .withRel(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULES));
 
         result.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class).getOptionalModules(result.getModuleId()))
                 .withRel(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULES));
-
-        return result;
     }
 
 }
