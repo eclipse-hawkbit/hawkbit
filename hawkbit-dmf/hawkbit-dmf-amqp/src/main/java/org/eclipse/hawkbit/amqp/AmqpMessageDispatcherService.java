@@ -39,6 +39,7 @@ import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.cloud.bus.ServiceMatcher;
@@ -141,6 +142,17 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 createConnectorMessagePropertiesEvent(tenant, target.getControllerId(),
                         EventTopic.DOWNLOAD_AND_INSTALL));
         amqpSenderService.sendMessage(message, targetAdress);
+    }
+
+    void sendPingReponseToDmfReceiver(final Message ping, final String virtualHost, final String tenant) {
+
+        final Message message = MessageBuilder.withBody(String.valueOf(System.currentTimeMillis()).getBytes())
+                .setContentType(MessageProperties.CONTENT_TYPE_TEXT_PLAIN)
+                .setCorrelationId(ping.getMessageProperties().getCorrelationId())
+                .setHeader(MessageHeaderKey.TYPE, MessageType.PING_RESPONSE).setHeader(MessageHeaderKey.TENANT, tenant)
+                .build();
+
+        amqpSenderService.sendMessage(message, ping.getMessageProperties().getReplyTo(), virtualHost);
     }
 
     /**

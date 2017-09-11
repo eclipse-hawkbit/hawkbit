@@ -12,6 +12,7 @@ import java.net.URI;
 
 import javax.validation.constraints.NotNull;
 
+import org.eclipse.hawkbit.util.IpUtil;
 import org.springframework.amqp.core.Message;
 
 /**
@@ -30,6 +31,21 @@ public interface AmqpSenderService {
      *            the reply to uri
      */
     void sendMessage(@NotNull Message message, @NotNull URI replyTo);
+
+    /**
+     * Send the given message to the given host and exchange.
+     * 
+     * @param message
+     *            the amqp message
+     * @param exchange
+     *            to send to
+     * @param virtualHost
+     *            to send to
+     */
+    default void sendMessage(@NotNull final Message message, @NotNull final String exchange,
+            @NotNull final String virtualHost) {
+        sendMessage(message, IpUtil.createAmqpUri(virtualHost, exchange));
+    }
 
     /**
      * Extract the exchange from the uri. Default implementation removes the

@@ -130,6 +130,11 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 final EventTopic eventTopic = EventTopic.valueOf(topicValue);
                 handleIncomingEvent(message, eventTopic);
                 break;
+            case PING:
+                if (isCorrelationIdNotEmpty(message)) {
+                    amqpMessageDispatcherService.sendPingReponseToDmfReceiver(message, virtualHost, tenant);
+                }
+                break;
             default:
                 logAndThrowMessageError(message, "No handle method was found for the given message type.");
             }

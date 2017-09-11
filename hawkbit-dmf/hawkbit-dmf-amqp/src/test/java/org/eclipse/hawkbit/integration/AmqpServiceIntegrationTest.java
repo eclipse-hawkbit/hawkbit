@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -138,6 +139,22 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         assertThat(headers.get(MessageHeaderKey.TYPE)).isEqualTo(MessageType.THING_DELETED.toString());
     }
 
+    protected void assertPingReplyMessage(final String correlationId) {
+
+        verifyReplyToListener();
+        final Message replyMessage = replyToListener.getPingResponseMessages().get(correlationId);
+
+        final Map<String, Object> headers = replyMessage.getMessageProperties().getHeaders();
+
+        assertThat(headers.get(MessageHeaderKey.TENANT)).isEqualTo(TENANT_EXIST);
+        assertThat(correlationId)
+                .isEqualTo(new String(replyMessage.getMessageProperties().getCorrelationId(), StandardCharsets.UTF_8));
+        assertThat(headers.get(MessageHeaderKey.TYPE)).isEqualTo(MessageType.PING_RESPONSE.toString());
+        assertThat(Long.valueOf(new String(replyMessage.getBody(), StandardCharsets.UTF_8)))
+                .isLessThanOrEqualTo(System.currentTimeMillis());
+
+    }
+
     protected void assertDownloadAndInstallMessage(final Set<SoftwareModule> dsModules, final String controllerId) {
         final Message replyMessage = assertReplyMessageHeader(EventTopic.DOWNLOAD_AND_INSTALL, controllerId);
         assertAllTargetsCount(1);
@@ -156,6 +173,12 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
     protected void createAndSendTarget(final String target, final String tenant) {
         final Message message = createTargetMessage(target, tenant);
         getDmfClient().send(message);
+    }
+
+    protected Message createAndSendPingMessage(final String correlationId, final String tenant) {
+        final Message message = createPingMessage(correlationId, tenant);
+        getDmfClient().send(message);
+        return message;
     }
 
     protected void verifyReplyToListener() {
@@ -239,6 +262,15 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         final MessageProperties messageProperties = createMessagePropertiesWithTenant(tenant);
         messageProperties.getHeaders().put(MessageHeaderKey.THING_ID, target);
         messageProperties.getHeaders().put(MessageHeaderKey.TYPE, MessageType.THING_CREATED.toString());
+        messageProperties.setReplyTo(DmfTestConfiguration.REPLY_TO_EXCHANGE);
+
+        return createMessage(null, messageProperties);
+    }
+
+    protected Message createPingMessage(final String correlationId, final String tenant) {
+        final MessageProperties messageProperties = createMessagePropertiesWithTenant(tenant);
+        messageProperties.getHeaders().put(MessageHeaderKey.TYPE, MessageType.PING.toString());
+        messageProperties.setCorrelationId(correlationId.getBytes());
         messageProperties.setReplyTo(DmfTestConfiguration.REPLY_TO_EXCHANGE);
 
         return createMessage(null, messageProperties);

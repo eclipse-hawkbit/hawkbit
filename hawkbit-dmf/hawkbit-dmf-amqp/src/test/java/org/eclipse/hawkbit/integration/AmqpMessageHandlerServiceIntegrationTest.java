@@ -61,6 +61,17 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
 
     @Test
     @Description("Tests register target")
+    public void pingDmfInterface() {
+        final Message pingMessage = createPingMessage(CORRELATION_ID, TENANT_EXIST);
+        getDmfClient().send(pingMessage);
+
+        assertPingReplyMessage(CORRELATION_ID);
+
+        Mockito.verifyZeroInteractions(getDeadletterListener());
+    }
+
+    @Test
+    @Description("Tests register target")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 2),
             @Expect(type = TargetPollEvent.class, count = 3) })
     public void registerTargets() {

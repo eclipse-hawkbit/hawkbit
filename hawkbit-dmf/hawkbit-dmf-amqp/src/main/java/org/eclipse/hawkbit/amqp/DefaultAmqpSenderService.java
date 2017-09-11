@@ -46,8 +46,12 @@ public class DefaultAmqpSenderService implements AmqpSenderService {
         }
 
         final String correlationId = UUID.randomUUID().toString();
+
+        if (isCorrelationIdEmpty(message)) {
+            message.getMessageProperties().setCorrelationId(correlationId.getBytes(StandardCharsets.UTF_8));
+        }
+
         final String exchange = extractExchange(replyTo);
-        message.getMessageProperties().setCorrelationId(correlationId.getBytes(StandardCharsets.UTF_8));
 
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Sending message {} to exchange {} with correlationId {}", message, exchange, correlationId);
@@ -56,6 +60,11 @@ public class DefaultAmqpSenderService implements AmqpSenderService {
         }
 
         internalAmqpTemplate.send(exchange, null, message, new CorrelationData(correlationId));
+    }
+
+    private static boolean isCorrelationIdEmpty(final Message message) {
+        return message.getMessageProperties().getCorrelationId() == null
+                || message.getMessageProperties().getCorrelationId().length <= 0;
     }
 
 }
