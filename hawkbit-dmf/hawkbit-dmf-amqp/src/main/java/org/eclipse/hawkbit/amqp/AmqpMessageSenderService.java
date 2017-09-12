@@ -35,7 +35,7 @@ public interface AmqpMessageSenderService {
             return;
         }
 
-        sendMessage(message, replyTo.getPath().substring(1), replyTo.getHost());
+        sendMessage(message, replyTo.getPath().substring(1));
     }
 
     /**
@@ -48,6 +48,6 @@ public interface AmqpMessageSenderService {
      * @param virtualHost
      *            to send to
      */
-    void sendMessage(@NotNull final Message message, @NotNull final String exchange, @NotNull final String virtualHost);
+    void sendMessage(@NotNull final Message message, @NotNull final String exchange);
 
 }

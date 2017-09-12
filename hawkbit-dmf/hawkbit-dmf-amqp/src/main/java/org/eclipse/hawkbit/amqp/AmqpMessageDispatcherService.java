@@ -84,10 +84,10 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      *            to check in cluster case if the message is from the same
      *            cluster node
      */
-    public AmqpMessageDispatcherService(final RabbitTemplate rabbitTemplate, final AmqpMessageSenderService amqpSenderService,
-            final ArtifactUrlHandler artifactUrlHandler, final SystemSecurityContext systemSecurityContext,
-            final SystemManagement systemManagement, final TargetManagement targetManagement,
-            final ServiceMatcher serviceMatcher) {
+    public AmqpMessageDispatcherService(final RabbitTemplate rabbitTemplate,
+            final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
+            final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
+            final TargetManagement targetManagement, final ServiceMatcher serviceMatcher) {
         super(rabbitTemplate);
         this.artifactUrlHandler = artifactUrlHandler;
         this.amqpSenderService = amqpSenderService;
@@ -151,7 +151,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 .setHeader(MessageHeaderKey.TYPE, MessageType.PING_RESPONSE).setHeader(MessageHeaderKey.TENANT, tenant)
                 .build();
 
-        amqpSenderService.sendMessage(message, ping.getMessageProperties().getReplyTo(), virtualHost);
+        amqpSenderService.sendMessage(message, ping.getMessageProperties().getReplyTo());
     }
 
     /**

@@ -36,12 +36,7 @@ public class DefaultAmqpMessageSenderService extends BaseAmqpService implements 
     }
 
     @Override
-    public void sendMessage(final Message message, final String exchange, final String virtualHost) {
-
-        if (!getRabbitTemplate().getConnectionFactory().getVirtualHost().equalsIgnoreCase(virtualHost)) {
-            throw new IllegalArgumentException(virtualHost + " vhost does not fit to rabbit templates vhost: "
-                    + getRabbitTemplate().getConnectionFactory().getVirtualHost());
-        }
+    public void sendMessage(final Message message, final String exchange) {
 
         final String correlationId = UUID.randomUUID().toString();
 
