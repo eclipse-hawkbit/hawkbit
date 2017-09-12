@@ -109,7 +109,12 @@ public class SpReceiverService extends ReceiverService {
             final String correlationId = new String(message.getMessageProperties().getCorrelationId(),
                     StandardCharsets.UTF_8);
             openPings.remove(correlationId);
-            LOGGER.debug("Got ping response from tenant {} with correlationId {}", tenant, correlationId);
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Got ping response from tenant {} with correlationId {} with timestamp {}", tenant,
+                        correlationId, new String(message.getBody(), StandardCharsets.UTF_8));
+            }
+
             return;
         }
 
@@ -118,7 +123,12 @@ public class SpReceiverService extends ReceiverService {
 
     @Scheduled(fixedDelay = 5_000, initialDelay = 5_000)
     void checkDmfHealth() {
-        LOGGER.debug("Currently {} open pings", openPings.size());
+        if (openPings.size() > 5) {
+            LOGGER.error("Currently {} open pings! DMF does not seem to be reachable.", openPings.size());
+        } else {
+            LOGGER.debug("Currently {} open pings", openPings.size());
+        }
+
         repository.getTenants().forEach(tenant -> {
             final String correlationId = UUID.randomUUID().toString();
             spSenderService.ping(tenant, correlationId);

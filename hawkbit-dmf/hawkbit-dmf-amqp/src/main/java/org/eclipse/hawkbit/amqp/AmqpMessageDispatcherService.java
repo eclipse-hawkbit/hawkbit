@@ -48,7 +48,7 @@ import org.springframework.context.event.EventListener;
 
 /**
  * {@link AmqpMessageDispatcherService} create all outgoing AMQP messages and
- * delegate the messages to a {@link AmqpSenderService}.
+ * delegate the messages to a {@link AmqpMessageSenderService}.
  *
  * Additionally the dispatcher listener/subscribe for some target events e.g.
  * assignment.
@@ -59,7 +59,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private static final Logger LOG = LoggerFactory.getLogger(AmqpMessageDispatcherService.class);
 
     private final ArtifactUrlHandler artifactUrlHandler;
-    private final AmqpSenderService amqpSenderService;
+    private final AmqpMessageSenderService amqpSenderService;
     private final SystemSecurityContext systemSecurityContext;
     private final SystemManagement systemManagement;
     private final TargetManagement targetManagement;
@@ -84,7 +84,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      *            to check in cluster case if the message is from the same
      *            cluster node
      */
-    public AmqpMessageDispatcherService(final RabbitTemplate rabbitTemplate, final AmqpSenderService amqpSenderService,
+    public AmqpMessageDispatcherService(final RabbitTemplate rabbitTemplate, final AmqpMessageSenderService amqpSenderService,
             final ArtifactUrlHandler artifactUrlHandler, final SystemSecurityContext systemSecurityContext,
             final SystemManagement systemManagement, final TargetManagement targetManagement,
             final ServiceMatcher serviceMatcher) {

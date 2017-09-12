@@ -60,7 +60,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     private AmqpProperties amqpProperties;
 
     @Test
-    @Description("Tests register target")
+    @Description("Tests DMF PING request and expected reponse.")
     public void pingDmfInterface() {
         final Message pingMessage = createPingMessage(CORRELATION_ID, TENANT_EXIST);
         getDmfClient().send(pingMessage);

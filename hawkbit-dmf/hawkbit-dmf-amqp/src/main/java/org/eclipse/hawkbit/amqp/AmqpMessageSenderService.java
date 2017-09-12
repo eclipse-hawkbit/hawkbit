@@ -19,7 +19,7 @@ import org.springframework.amqp.core.Message;
  * Interface to send a amqp message.
  */
 @FunctionalInterface
-public interface AmqpSenderService {
+public interface AmqpMessageSenderService {
 
     /**
      * Send the given message to the given uri. The uri contains the (virtual)

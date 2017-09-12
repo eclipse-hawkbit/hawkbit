@@ -22,8 +22,8 @@ import org.springframework.amqp.rabbit.support.CorrelationData;
  * message to the configured spring rabbitmq connections. The exchange is
  * extracted from the uri.
  */
-public class DefaultAmqpSenderService extends BaseAmqpService implements AmqpSenderService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultAmqpSenderService.class);
+public class DefaultAmqpMessageSenderService extends BaseAmqpService implements AmqpMessageSenderService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultAmqpMessageSenderService.class);
 
     /**
      * Constructor.
@@ -31,7 +31,7 @@ public class DefaultAmqpSenderService extends BaseAmqpService implements AmqpSen
      * @param rabbitTemplate
      *            the AMQP template
      */
-    public DefaultAmqpSenderService(final RabbitTemplate rabbitTemplate) {
+    public DefaultAmqpMessageSenderService(final RabbitTemplate rabbitTemplate) {
         super(rabbitTemplate);
     }
 
