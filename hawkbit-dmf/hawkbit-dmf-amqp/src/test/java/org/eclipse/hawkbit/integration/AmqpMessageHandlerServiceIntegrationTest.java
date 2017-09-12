@@ -461,7 +461,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         final String controllerId = TARGET_PREFIX + "receiveDownLoadAndInstallMessageAfterAssignment";
 
         // setup
-        controllerManagement.findOrRegisterTargetIfItDoesNotexist(controllerId, TEST_URI);
+        createAndSendTarget(controllerId, TENANT_EXIST);
         final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         assignDistributionSet(distributionSet.getId(), controllerId);
 
@@ -487,7 +487,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         final String controllerId = TARGET_PREFIX + "receiveCancelUpdateMessageAfterAssignmentWasCanceled";
 
         // Setup
-        controllerManagement.findOrRegisterTargetIfItDoesNotexist(controllerId, TEST_URI);
+        createAndSendTarget(controllerId, TENANT_EXIST);
         final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         final DistributionSetAssignmentResult distributionSetAssignmentResult = assignDistributionSet(
                 distributionSet.getId(), controllerId);

@@ -8,12 +8,10 @@
  */
 package org.eclipse.hawkbit.rabbitmq.test;
 
-import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
-import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.Before;
 import org.junit.Rule;
 import org.springframework.amqp.core.Message;
@@ -36,8 +34,6 @@ import com.jayway.awaitility.core.ConditionFactory;
 // beans after every test class.
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTest {
-
-    protected static final URI TEST_URI = IpUtil.createAmqpUri("testHost", "testExcange");
 
     @Rule
     @Autowired

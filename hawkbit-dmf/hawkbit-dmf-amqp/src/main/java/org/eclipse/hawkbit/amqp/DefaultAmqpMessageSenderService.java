@@ -39,8 +39,8 @@ public class DefaultAmqpMessageSenderService extends BaseAmqpService implements 
     public void sendMessage(final Message message, final String exchange, final String virtualHost) {
 
         if (!getRabbitTemplate().getConnectionFactory().getVirtualHost().equalsIgnoreCase(virtualHost)) {
-            throw new IllegalArgumentException(virtualHost + " host does not fit to rabbit templates host: "
-                    + getRabbitTemplate().getConnectionFactory().getHost());
+            throw new IllegalArgumentException(virtualHost + " vhost does not fit to rabbit templates vhost: "
+                    + getRabbitTemplate().getConnectionFactory().getVirtualHost());
         }
 
         final String correlationId = UUID.randomUUID().toString();
