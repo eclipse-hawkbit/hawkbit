@@ -9,10 +9,11 @@
 package org.eclipse.hawkbit.simulator;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -27,8 +28,7 @@ public class DeviceSimulatorRepository {
 
     private final Map<DeviceKey, AbstractSimulatedDevice> devices = new ConcurrentHashMap<>();
 
-    @Autowired
-    private SimulatedDeviceFactory deviceFactory;
+    private final Set<String> tenants = new HashSet<>();
 
     /**
      * Adds a simulated device to the repository.
@@ -39,6 +39,7 @@ public class DeviceSimulatorRepository {
      */
     public AbstractSimulatedDevice add(final AbstractSimulatedDevice simulatedDevice) {
         devices.put(new DeviceKey(simulatedDevice.getTenant().toLowerCase(), simulatedDevice.getId()), simulatedDevice);
+        tenants.add(simulatedDevice.getTenant().toLowerCase());
         return simulatedDevice;
     }
 
@@ -78,12 +79,17 @@ public class DeviceSimulatorRepository {
         return devices.remove(new DeviceKey(tenant.toLowerCase(), id));
     }
 
+    public Set<String> getTenants() {
+        return tenants;
+    }
+
     /**
      * Clears all stored devices.
      */
     public void clear() {
-        devices.values().forEach(device -> device.clean());
+        devices.values().forEach(AbstractSimulatedDevice::clean);
         devices.clear();
+        tenants.clear();
     }
 
     private static final class DeviceKey {

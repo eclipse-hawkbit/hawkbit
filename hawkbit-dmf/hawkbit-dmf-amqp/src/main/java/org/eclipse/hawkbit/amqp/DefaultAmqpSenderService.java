@@ -8,11 +8,9 @@
  */
 package org.eclipse.hawkbit.amqp;
 
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
-import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
@@ -24,25 +22,25 @@ import org.springframework.amqp.rabbit.support.CorrelationData;
  * message to the configured spring rabbitmq connections. The exchange is
  * extracted from the uri.
  */
-public class DefaultAmqpSenderService implements AmqpSenderService {
+public class DefaultAmqpSenderService extends BaseAmqpService implements AmqpSenderService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultAmqpSenderService.class);
-
-    private final RabbitTemplate internalAmqpTemplate;
 
     /**
      * Constructor.
      * 
-     * @param internalAmqpTemplate
-     *            the amqp template
+     * @param rabbitTemplate
+     *            the AMQP template
      */
-    public DefaultAmqpSenderService(final RabbitTemplate internalAmqpTemplate) {
-        this.internalAmqpTemplate = internalAmqpTemplate;
+    public DefaultAmqpSenderService(final RabbitTemplate rabbitTemplate) {
+        super(rabbitTemplate);
     }
 
     @Override
-    public void sendMessage(final Message message, final URI replyTo) {
-        if (!IpUtil.isAmqpUri(replyTo)) {
-            return;
+    public void sendMessage(final Message message, final String exchange, final String virtualHost) {
+
+        if (!getRabbitTemplate().getConnectionFactory().getVirtualHost().equalsIgnoreCase(virtualHost)) {
+            throw new IllegalArgumentException(virtualHost + " host does not fit to rabbit templates host: "
+                    + getRabbitTemplate().getConnectionFactory().getHost());
         }
 
         final String correlationId = UUID.randomUUID().toString();
@@ -51,18 +49,16 @@ public class DefaultAmqpSenderService implements AmqpSenderService {
             message.getMessageProperties().setCorrelationId(correlationId.getBytes(StandardCharsets.UTF_8));
         }
 
-        final String exchange = extractExchange(replyTo);
-
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Sending message {} to exchange {} with correlationId {}", message, exchange, correlationId);
         } else {
             LOGGER.debug("Sending message to exchange {} with correlationId {}", exchange, correlationId);
         }
 
-        internalAmqpTemplate.send(exchange, null, message, new CorrelationData(correlationId));
+        getRabbitTemplate().send(exchange, null, message, new CorrelationData(correlationId));
     }
 
-    private static boolean isCorrelationIdEmpty(final Message message) {
+    protected static boolean isCorrelationIdEmpty(final Message message) {
         return message.getMessageProperties().getCorrelationId() == null
                 || message.getMessageProperties().getCorrelationId().length <= 0;
     }

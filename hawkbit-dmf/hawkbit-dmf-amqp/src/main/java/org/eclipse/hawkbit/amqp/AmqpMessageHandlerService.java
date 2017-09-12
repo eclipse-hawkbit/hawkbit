@@ -115,16 +115,18 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      * @return the rpc message back to supplier.
      */
     public Message onMessage(final Message message, final String type, final String tenant, final String virtualHost) {
-        checkContentTypeJson(message);
+
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         try {
             final MessageType messageType = MessageType.valueOf(type);
             switch (messageType) {
             case THING_CREATED:
+                checkContentTypeJson(message);
                 setTenantSecurityContext(tenant);
                 registerTarget(message, virtualHost);
                 break;
             case EVENT:
+                checkContentTypeJson(message);
                 setTenantSecurityContext(tenant);
                 final String topicValue = getStringHeaderKey(message, MessageHeaderKey.TOPIC, "EventTopic is null");
                 final EventTopic eventTopic = EventTopic.valueOf(topicValue);
@@ -132,7 +134,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 break;
             case PING:
                 if (isCorrelationIdNotEmpty(message)) {
-                    amqpMessageDispatcherService.sendPingReponseToDmfReceiver(message, virtualHost, tenant);
+                    amqpMessageDispatcherService.sendPingReponseToDmfReceiver(message, tenant, virtualHost);
                 }
                 break;
             default:

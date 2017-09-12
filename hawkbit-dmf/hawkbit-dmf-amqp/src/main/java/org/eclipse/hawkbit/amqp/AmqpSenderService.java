@@ -30,7 +30,13 @@ public interface AmqpSenderService {
      * @param replyTo
      *            the reply to uri
      */
-    void sendMessage(@NotNull Message message, @NotNull URI replyTo);
+    default void sendMessage(@NotNull final Message message, @NotNull final URI replyTo) {
+        if (!IpUtil.isAmqpUri(replyTo)) {
+            return;
+        }
+
+        sendMessage(message, replyTo.getPath().substring(1), replyTo.getHost());
+    }
 
     /**
      * Send the given message to the given host and exchange.
@@ -42,21 +48,6 @@ public interface AmqpSenderService {
      * @param virtualHost
      *            to send to
      */
-    default void sendMessage(@NotNull final Message message, @NotNull final String exchange,
-            @NotNull final String virtualHost) {
-        sendMessage(message, IpUtil.createAmqpUri(virtualHost, exchange));
-    }
-
-    /**
-     * Extract the exchange from the uri. Default implementation removes the
-     * first /.
-     * 
-     * @param amqpUri
-     *            the amqp uri
-     * @return the exchange.
-     */
-    default String extractExchange(final URI amqpUri) {
-        return amqpUri.getPath().substring(1);
-    }
+    void sendMessage(@NotNull final Message message, @NotNull final String exchange, @NotNull final String virtualHost);
 
 }
