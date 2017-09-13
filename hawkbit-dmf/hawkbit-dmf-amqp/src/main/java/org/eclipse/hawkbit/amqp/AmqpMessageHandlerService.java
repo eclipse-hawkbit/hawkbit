@@ -128,13 +128,12 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             case EVENT:
                 checkContentTypeJson(message);
                 setTenantSecurityContext(tenant);
-                final String topicValue = getStringHeaderKey(message, MessageHeaderKey.TOPIC, "EventTopic is null");
-                final EventTopic eventTopic = EventTopic.valueOf(topicValue);
-                handleIncomingEvent(message, eventTopic);
+                handleIncomingEvent(message,
+                        EventTopic.valueOf(getStringHeaderKey(message, MessageHeaderKey.TOPIC, "EventTopic is null")));
                 break;
             case PING:
                 if (isCorrelationIdNotEmpty(message)) {
-                    amqpMessageDispatcherService.sendPingReponseToDmfReceiver(message, tenant, virtualHost);
+                    amqpMessageDispatcherService.sendPingReponseToDmfReceiver(message, tenant);
                 }
                 break;
             default:
