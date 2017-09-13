@@ -128,8 +128,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             case EVENT:
                 checkContentTypeJson(message);
                 setTenantSecurityContext(tenant);
-                handleIncomingEvent(message,
-                        EventTopic.valueOf(getStringHeaderKey(message, MessageHeaderKey.TOPIC, "EventTopic is null")));
+                handleIncomingEvent(message);
                 break;
             case PING:
                 if (isCorrelationIdNotEmpty(message)) {
@@ -212,8 +211,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      * @param topic
      *            the topic of the event.
      */
-    private void handleIncomingEvent(final Message message, final EventTopic topic) {
-        switch (topic) {
+    private void handleIncomingEvent(final Message message) {
+        switch (EventTopic.valueOf(getStringHeaderKey(message, MessageHeaderKey.TOPIC, "EventTopic is null"))) {
         case UPDATE_ACTION_STATUS:
             updateActionStatus(message);
             break;
