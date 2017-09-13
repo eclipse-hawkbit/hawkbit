@@ -123,6 +123,10 @@ public class SpReceiverService extends ReceiverService {
 
     @Scheduled(fixedDelay = 5_000, initialDelay = 5_000)
     void checkDmfHealth() {
+        if (!amqpProperties.isCheckDmfHealth()) {
+            return;
+        }
+
         if (openPings.size() > 5) {
             LOGGER.error("Currently {} open pings! DMF does not seem to be reachable.", openPings.size());
         } else {
