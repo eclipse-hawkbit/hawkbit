@@ -249,7 +249,12 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     public ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(
             @PathVariable("controllerId") final String controllerId) {
         final MgmtDistributionSet distributionSetRest = deploymentManagement.getAssignedDistributionSet(controllerId)
-                .map(MgmtDistributionSetMapper::toResponse).orElse(null);
+                .map(ds -> {
+                    final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(ds);
+                    MgmtDistributionSetMapper.addLinks(ds, response);
+
+                    return response;
+                }).orElse(null);
 
         if (distributionSetRest == null) {
             return ResponseEntity.noContent().build();
