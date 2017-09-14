@@ -111,9 +111,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
 
         final byte random[] = RandomUtils.nextBytes(5 * 1024);
-        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random), getOsModule(ds),
+        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds),
                 "test1", false);
-        final Artifact artifactSignature = artifactManagement.createArtifact(new ByteArrayInputStream(random),
+        final Artifact artifactSignature = artifactManagement.create(new ByteArrayInputStream(random),
                 getOsModule(ds), "test1.signature", false);
 
         final Target savedTarget = testdataFactory.createTarget("4712");
@@ -267,9 +267,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
 
         final byte random[] = RandomUtils.nextBytes(5 * 1024);
-        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random), getOsModule(ds),
+        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds),
                 "test1", false);
-        final Artifact artifactSignature = artifactManagement.createArtifact(new ByteArrayInputStream(random),
+        final Artifact artifactSignature = artifactManagement.create(new ByteArrayInputStream(random),
                 getOsModule(ds), "test1.signature", false);
 
         final Target savedTarget = testdataFactory.createTarget("4712");
@@ -381,9 +381,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
 
         final byte random[] = RandomUtils.nextBytes(5 * 1024);
-        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random), getOsModule(ds),
+        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds),
                 "test1", false);
-        final Artifact artifactSignature = artifactManagement.createArtifact(new ByteArrayInputStream(random),
+        final Artifact artifactSignature = artifactManagement.create(new ByteArrayInputStream(random),
                 getOsModule(ds), "test1.signature", false);
 
         final Target savedTarget = testdataFactory.createTarget("4712");

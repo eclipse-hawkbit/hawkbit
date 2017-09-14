@@ -282,7 +282,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                 i18n.getMessage("message.delete.artifact", new Object[] { fileName }), i18n.getMessage("button.ok"),
                 i18n.getMessage("button.cancel"), ok -> {
                     if (ok) {
-                        artifactManagement.deleteArtifact(id);
+                        artifactManagement.delete(id);
                         uINotification.displaySuccess(i18n.getMessage("message.artifact.deleted", fileName));
                         final Optional<SoftwareModule> softwareModule = findSelectedSoftwareModule();
                         if (softwareModule.isPresent()) {

@@ -49,15 +49,6 @@ public interface DistributionSetTypeManagement
     Optional<DistributionSetType> getByName(@NotEmpty String name);
 
     /**
-     * @param id
-     *            as {@link DistributionSetType#getId()}
-     * @return {@link DistributionSetType}
-     */
-    @Override
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Optional<DistributionSetType> get(@NotNull Long id);
-
-    /**
      * Assigns {@link DistributionSetType#getMandatoryModuleTypes()}.
      * 
      * @param dsTypeId

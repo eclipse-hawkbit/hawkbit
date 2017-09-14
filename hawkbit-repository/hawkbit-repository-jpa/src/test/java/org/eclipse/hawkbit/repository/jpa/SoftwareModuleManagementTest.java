@@ -358,7 +358,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         SoftwareModule moduleX = createSoftwareModuleWithArtifacts(osType, "modulex", "v1.0", 0);
 
         // [STEP2]: Create newArtifactX and add it to SoftwareModuleX
-        artifactManagement.createArtifact(new ByteArrayInputStream(source), moduleX.getId(), "artifactx", false);
+        artifactManagement.create(new ByteArrayInputStream(source), moduleX.getId(), "artifactx", false);
         moduleX = softwareModuleManagement.get(moduleX.getId()).get();
         final Artifact artifactX = moduleX.getArtifacts().iterator().next();
 
@@ -366,7 +366,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         SoftwareModule moduleY = createSoftwareModuleWithArtifacts(osType, "moduley", "v1.0", 0);
 
         // [STEP4]: Assign the same ArtifactX to SoftwareModuleY
-        artifactManagement.createArtifact(new ByteArrayInputStream(source), moduleY.getId(), "artifactx", false);
+        artifactManagement.create(new ByteArrayInputStream(source), moduleY.getId(), "artifactx", false);
         moduleY = softwareModuleManagement.get(moduleY.getId()).get();
         final Artifact artifactY = moduleY.getArtifacts().iterator().next();
 
@@ -400,14 +400,14 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         // [STEP1]: Create SoftwareModuleX and add a new ArtifactX
         SoftwareModule moduleX = createSoftwareModuleWithArtifacts(osType, "modulex", "v1.0", 0);
 
-        artifactManagement.createArtifact(new ByteArrayInputStream(source), moduleX.getId(), "artifactx", false);
+        artifactManagement.create(new ByteArrayInputStream(source), moduleX.getId(), "artifactx", false);
         moduleX = softwareModuleManagement.get(moduleX.getId()).get();
         final Artifact artifactX = moduleX.getArtifacts().iterator().next();
 
         // [STEP2]: Create SoftwareModuleY and add the same ArtifactX
         SoftwareModule moduleY = createSoftwareModuleWithArtifacts(osType, "moduley", "v1.0", 0);
 
-        artifactManagement.createArtifact(new ByteArrayInputStream(source), moduleY.getId(), "artifactx", false);
+        artifactManagement.create(new ByteArrayInputStream(source), moduleY.getId(), "artifactx", false);
         moduleY = softwareModuleManagement.get(moduleY.getId()).get();
         final Artifact artifactY = moduleY.getArtifacts().iterator().next();
 
@@ -454,7 +454,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
                 .type(type).name(name).version(version).description("description of artifact " + name));
 
         for (int i = 0; i < numberArtifacts; i++) {
-            artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024), softwareModule.getId(),
+            artifactManagement.create(new RandomGeneratedInputStream(5 * 1024), softwareModule.getId(),
                     "file" + (i + 1), false);
         }
 

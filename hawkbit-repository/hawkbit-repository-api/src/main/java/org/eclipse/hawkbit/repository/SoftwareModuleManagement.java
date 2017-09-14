@@ -176,7 +176,7 @@ public interface SoftwareModuleManagement
      * 
      * @param pageable
      *            the page request to page the result
-     * @param swId
+     * @param moduleId
      *            the software module id to retrieve the meta data from
      *
      * @return a paged result of all meta data entries for a given software
@@ -186,7 +186,7 @@ public interface SoftwareModuleManagement
      *             if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleId(@NotNull Pageable pageable, @NotNull Long swId);
+    Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleId(@NotNull Pageable pageable, @NotNull Long moduleId);
 
     /**
      * finds all meta data by the given software module id.

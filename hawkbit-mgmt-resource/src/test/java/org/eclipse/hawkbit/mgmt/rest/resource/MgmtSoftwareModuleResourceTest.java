@@ -168,10 +168,10 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         }
 
         // hashes
-        assertThat(artifactManagement.findArtifactByFilename("origFilename").get().getSha1Hash()).as("Wrong sha1 hash")
+        assertThat(artifactManagement.getByFilename("origFilename").get().getSha1Hash()).as("Wrong sha1 hash")
                 .isEqualTo(HashGeneratorUtils.generateSHA1(random));
 
-        assertThat(artifactManagement.findArtifactByFilename("origFilename").get().getMd5Hash()).as("Wrong md5 hash")
+        assertThat(artifactManagement.getByFilename("origFilename").get().getMd5Hash()).as("Wrong md5 hash")
                 .isEqualTo(HashGeneratorUtils.generateMD5(random));
 
         // metadata
@@ -238,7 +238,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         assertThat(artifactManagement.countArtifactsAll()).isEqualTo(1);
 
         // hashes
-        assertThat(artifactManagement.findArtifactByFilename("customFilename")).as("Local artifact is wrong")
+        assertThat(artifactManagement.getByFilename("customFilename")).as("Local artifact is wrong")
                 .isPresent();
     }
 
@@ -292,9 +292,9 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
-        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(),
+        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(),
                 "file1", false);
-        final Artifact artifact2 = artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(),
+        final Artifact artifact2 = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(),
                 "file2", false);
 
         downloadAndVerify(sm, random, artifact);
@@ -322,7 +322,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
-        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(),
+        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(),
                 "file1", false);
 
         // perform test
@@ -348,9 +348,9 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
-        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(),
+        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(),
                 "file1", false);
-        final Artifact artifact2 = artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(),
+        final Artifact artifact2 = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(),
                 "file2", false);
 
         mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).accept(MediaType.APPLICATION_JSON))
@@ -394,7 +394,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
 
         // SM does not exist
-        artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(), "file1", false);
+        artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1", false);
         mvc.perform(get("/rest/v1/softwaremodules/1234567890/artifacts")).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
@@ -725,7 +725,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
-        artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(), "file1", false);
+        artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1", false);
 
         assertThat(softwareModuleManagement.findAll(PAGE)).as("Softwaremoudle size is wrong").hasSize(1);
         assertThat(artifactManagement.countArtifactsAll()).isEqualTo(1);
@@ -745,7 +745,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
-        artifactManagement.createArtifact(new ByteArrayInputStream(random),
+        artifactManagement.create(new ByteArrayInputStream(random),
                 ds1.findFirstModuleByType(appType).get().getId(), "file1", false);
 
         assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(3);
@@ -773,9 +773,9 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
         // Create 2 artifacts
-        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(),
+        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(),
                 "file1", false);
-        artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(), "file2", false);
+        artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file2", false);
 
         // check repo before delete
         assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(1);

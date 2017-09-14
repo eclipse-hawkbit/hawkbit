@@ -79,7 +79,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
         }
 
         try {
-            final Artifact result = artifactManagement.createArtifact(file.getInputStream(), softwareModuleId, fileName,
+            final Artifact result = artifactManagement.create(file.getInputStream(), softwareModuleId, fileName,
                     md5Sum == null ? null : md5Sum.toLowerCase(), sha1Sum == null ? null : sha1Sum.toLowerCase(), false,
                     file.getContentType());
             return ResponseEntity.status(HttpStatus.CREATED).body(MgmtSoftwareModuleMapper.toResponse(result));
@@ -117,7 +117,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             @PathVariable("artifactId") final Long artifactId) {
 
         findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, artifactId);
-        artifactManagement.deleteArtifact(artifactId);
+        artifactManagement.delete(artifactId);
 
         return ResponseEntity.ok().build();
     }

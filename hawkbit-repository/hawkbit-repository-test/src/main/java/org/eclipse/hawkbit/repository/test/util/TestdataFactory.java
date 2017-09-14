@@ -434,7 +434,7 @@ public class TestdataFactory {
         final List<Artifact> artifacts = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             final InputStream stubInputStream = IOUtils.toInputStream("some test data" + i, Charset.forName("UTF-8"));
-            artifacts.add(artifactManagement.createArtifact(stubInputStream, moduleId, "filename" + i, false));
+            artifacts.add(artifactManagement.create(stubInputStream, moduleId, "filename" + i, false));
 
         }
 

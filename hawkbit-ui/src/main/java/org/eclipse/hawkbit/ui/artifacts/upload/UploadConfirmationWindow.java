@@ -191,7 +191,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
         final Item item = uploadDetailsTable.getItem(itemId);
         if (HawkbitCommonUtil.trimAndNullIfEmpty(fileName) != null) {
             final Long baseSwId = (Long) item.getItemProperty(BASE_SOFTWARE_ID).getValue();
-            final Optional<Artifact> artifact = artifactManagement.findByFilenameAndSoftwareModule(fileName, baseSwId);
+            final Optional<Artifact> artifact = artifactManagement.getByFilenameAndSoftwareModule(fileName, baseSwId);
             if (artifact.isPresent()) {
                 warningIconLabel.setVisible(true);
                 if (isErrorIcon(warningIconLabel)) {
@@ -431,7 +431,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             final Label errorLabel, final String oldFileName, final Long currentSwId) {
         if (warningLabel == null && (errorLabelCount > 1 || (duplicateCount == 1 && errorLabelCount == 1))) {
 
-            final Optional<Artifact> artifactList = artifactManagement.findByFilenameAndSoftwareModule(oldFileName,
+            final Optional<Artifact> artifactList = artifactManagement.getByFilenameAndSoftwareModule(oldFileName,
                     currentSwId);
             if (errorLabel == null) {
                 return;
@@ -629,7 +629,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
 
         try (FileInputStream fis = new FileInputStream(newFile)) {
 
-            artifactManagement.createArtifact(fis, baseSw.getId(), providedFileName,
+            artifactManagement.create(fis, baseSw.getId(), providedFileName,
                     HawkbitCommonUtil.trimAndNullIfEmpty(md5Checksum),
                     HawkbitCommonUtil.trimAndNullIfEmpty(sha1Checksum), true, customFile.getMimeType());
             saveUploadStatus(providedFileName, swModuleNameVersion, SPUILabelDefinitions.SUCCESS, "");

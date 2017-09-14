@@ -67,12 +67,12 @@ public interface ControllerManagement {
     /**
      * Retrieves assigned {@link SoftwareModule} of a target.
      * 
-     * @param id
+     * @param moduleId
      *            of the {@link SoftwareModule}
      * @return {@link SoftwareModule} identified by ID
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Optional<SoftwareModule> getSoftwareModule(@NotNull final Long id);
+    Optional<SoftwareModule> getSoftwareModule(@NotNull final Long moduleId);
 
     /**
      * Simple addition of a new {@link ActionStatus} entry to the {@link Action}
