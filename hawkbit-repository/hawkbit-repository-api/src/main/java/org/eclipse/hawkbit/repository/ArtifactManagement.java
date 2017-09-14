@@ -39,7 +39,7 @@ public interface ArtifactManagement {
      *         management
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    long countArtifactsAll();
+    long count();
 
     /**
      * Persists artifact binary as provided by given InputStream. assign the

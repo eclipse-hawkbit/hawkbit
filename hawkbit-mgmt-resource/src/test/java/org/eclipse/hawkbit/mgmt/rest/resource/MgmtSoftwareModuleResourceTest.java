@@ -157,7 +157,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     private void assertArtifact(final SoftwareModule sm, final byte[] random) throws IOException {
         // check result in db...
         // repo
-        assertThat(artifactManagement.countArtifactsAll()).as("Wrong artifact size").isEqualTo(1);
+        assertThat(artifactManagement.count()).as("Wrong artifact size").isEqualTo(1);
 
         // binary
         try (InputStream fileInputStream = artifactManagement.loadArtifactBinary(
@@ -184,7 +184,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     @Description("Verfies that the system does not accept empty artifact uploads. Expected response: BAD REQUEST")
     public void emptyUploadArtifact() throws Exception {
         assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(0);
-        assertThat(artifactManagement.countArtifactsAll()).isEqualTo(0);
+        assertThat(artifactManagement.count()).isEqualTo(0);
 
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
@@ -220,7 +220,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     @Description("verfies that option to upload artifacts with a custom defined by metadata, i.e. not the file name of the binary itself.")
     public void uploadArtifactWithCustomName() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
-        assertThat(artifactManagement.countArtifactsAll()).isEqualTo(0);
+        assertThat(artifactManagement.count()).isEqualTo(0);
 
         // create test file
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
@@ -235,7 +235,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         // check result in db...
         // repo
-        assertThat(artifactManagement.countArtifactsAll()).isEqualTo(1);
+        assertThat(artifactManagement.count()).isEqualTo(1);
 
         // hashes
         assertThat(artifactManagement.getByFilename("customFilename")).as("Local artifact is wrong")
@@ -246,7 +246,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     @Description("Verfies that the system refuses upload of an artifact where the provided hash sums do not match. Expected result: BAD REQUEST")
     public void uploadArtifactWithHashCheck() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
-        assertThat(artifactManagement.countArtifactsAll()).isEqualTo(0);
+        assertThat(artifactManagement.count()).isEqualTo(0);
 
         // create test file
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
@@ -301,7 +301,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         downloadAndVerify(sm, random, artifact2);
 
         assertThat(softwareModuleManagement.findAll(PAGE)).as("Softwaremodule size is wrong").hasSize(1);
-        assertThat(artifactManagement.countArtifactsAll()).isEqualTo(2);
+        assertThat(artifactManagement.count()).isEqualTo(2);
     }
 
     private void downloadAndVerify(final SoftwareModule sm, final byte[] random, final Artifact artifact)
@@ -728,14 +728,14 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1", false);
 
         assertThat(softwareModuleManagement.findAll(PAGE)).as("Softwaremoudle size is wrong").hasSize(1);
-        assertThat(artifactManagement.countArtifactsAll()).isEqualTo(1);
+        assertThat(artifactManagement.count()).isEqualTo(1);
 
         mvc.perform(delete("/rest/v1/softwaremodules/{smId}", sm.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         assertThat(softwareModuleManagement.findAll(PAGE))
                 .as("After delete no softwarmodule should be available").isEmpty();
-        assertThat(artifactManagement.countArtifactsAll()).isEqualTo(0);
+        assertThat(artifactManagement.count()).isEqualTo(0);
     }
 
     @Test
@@ -749,7 +749,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 ds1.findFirstModuleByType(appType).get().getId(), "file1", false);
 
         assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(3);
-        assertThat(artifactManagement.countArtifactsAll()).isEqualTo(1);
+        assertThat(artifactManagement.count()).isEqualTo(1);
 
         mvc.perform(delete("/rest/v1/softwaremodules/{smId}", ds1.findFirstModuleByType(appType).get().getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
@@ -761,7 +761,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         // all 3 are now marked as deleted
         assertThat(softwareModuleManagement.findAll(PAGE).getNumber())
                 .as("After delete no softwarmodule should be available").isEqualTo(0);
-        assertThat(artifactManagement.countArtifactsAll()).isEqualTo(1);
+        assertThat(artifactManagement.count()).isEqualTo(1);
     }
 
     @Test
@@ -781,7 +781,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(1);
 
         assertThat(softwareModuleManagement.get(sm.getId()).get().getArtifacts()).hasSize(2);
-        assertThat(artifactManagement.countArtifactsAll()).isEqualTo(2);
+        assertThat(artifactManagement.count()).isEqualTo(2);
 
         // delete
         mvc.perform(delete("/rest/v1/softwaremodules/{smId}/artifacts/{artId}", sm.getId(), artifact.getId()))
@@ -790,7 +790,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         // check that only one artifact is still alive and still assigned
         assertThat(softwareModuleManagement.findAll(PAGE)).as("After the sm should be marked as deleted")
                 .hasSize(1);
-        assertThat(artifactManagement.countArtifactsAll()).isEqualTo(1);
+        assertThat(artifactManagement.count()).isEqualTo(1);
         assertThat(softwareModuleManagement.get(sm.getId()).get().getArtifacts())
                 .as("After delete artifact should available for marked as deleted sm's").hasSize(1);
 
