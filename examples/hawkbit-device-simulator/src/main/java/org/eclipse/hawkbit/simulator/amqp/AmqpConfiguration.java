@@ -122,8 +122,7 @@ public class AmqpConfiguration {
      */
     @Bean
     public Queue receiverConnectorQueueFromHawkBit() {
-        final Map<String, Object> arguments = getDeadLetterExchangeArgs();
-        arguments.putAll(getTTLMaxArgs());
+        final Map<String, Object> arguments = getTTLMaxArgs();
 
         return QueueBuilder.nonDurable(amqpProperties.getReceiverConnectorQueueFromSp()).autoDelete()
                 .withArguments(arguments).build();
@@ -152,36 +151,6 @@ public class AmqpConfiguration {
     }
 
     /**
-     * Create dead letter queue.
-     *
-     * @return the queue
-     */
-    @Bean
-    public Queue deadLetterQueue() {
-        return QueueBuilder.nonDurable(amqpProperties.getDeadLetterQueue()).withArguments(getTTLMaxArgs()).build();
-    }
-
-    /**
-     * Create the dead letter fanout exchange.
-     *
-     * @return the fanout exchange
-     */
-    @Bean
-    public FanoutExchange exchangeDeadLetter() {
-        return new FanoutExchange(amqpProperties.getDeadLetterExchange(), false, true);
-    }
-
-    /**
-     * Create the Binding deadLetterQueue to exchangeDeadLetter.
-     *
-     * @return the binding
-     */
-    @Bean
-    public Binding bindDeadLetterQueueToLwm2mExchange() {
-        return BindingBuilder.bind(deadLetterQueue()).to(exchangeDeadLetter());
-    }
-
-    /**
      * Returns the Listener factory.
      *
      * @return the {@link SimpleMessageListenerContainer} that gets used receive
@@ -196,12 +165,6 @@ public class AmqpConfiguration {
         containerFactory.setMaxConcurrentConsumers(10);
         containerFactory.setPrefetchCount(20);
         return containerFactory;
-    }
-
-    private Map<String, Object> getDeadLetterExchangeArgs() {
-        final Map<String, Object> args = Maps.newHashMapWithExpectedSize(1);
-        args.put("x-dead-letter-exchange", amqpProperties.getDeadLetterExchange());
-        return args;
     }
 
     private static Map<String, Object> getTTLMaxArgs() {

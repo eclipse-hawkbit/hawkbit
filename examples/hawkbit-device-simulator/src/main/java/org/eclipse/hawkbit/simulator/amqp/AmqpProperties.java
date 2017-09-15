@@ -31,6 +31,11 @@ public class AmqpProperties {
     private boolean enabled;
 
     /**
+     * Set to true for the simulator run DMF health check.
+     */
+    private boolean checkDmfHealth = false;
+
+    /**
      * Queue for receiving DMF messages from update server.
      */
     private String receiverConnectorQueueFromSp = "simulator_receiver";
@@ -41,20 +46,18 @@ public class AmqpProperties {
     private String senderForSpExchange = "simulator.replyTo";
 
     /**
-     * Simulator dead letter queue.
-     */
-    private String deadLetterQueue = "simulator_deadletter";
-
-    /**
-     * Simulator dead letter exchange.
-     */
-    private String deadLetterExchange = "simulator.deadletter";
-
-    /**
      * Message time to live (ttl) for the deadletter queue. Default ttl is 1
      * hour.
      */
     private int deadLetterTtl = 60_000;
+
+    public boolean isCheckDmfHealth() {
+        return checkDmfHealth;
+    }
+
+    public void setCheckDmfHealth(final boolean checkDmfHealth) {
+        this.checkDmfHealth = checkDmfHealth;
+    }
 
     public String getReceiverConnectorQueueFromSp() {
         return receiverConnectorQueueFromSp;
@@ -62,22 +65,6 @@ public class AmqpProperties {
 
     public void setReceiverConnectorQueueFromSp(final String receiverConnectorQueueFromSp) {
         this.receiverConnectorQueueFromSp = receiverConnectorQueueFromSp;
-    }
-
-    public String getDeadLetterExchange() {
-        return deadLetterExchange;
-    }
-
-    public void setDeadLetterExchange(final String deadLetterExchange) {
-        this.deadLetterExchange = deadLetterExchange;
-    }
-
-    public String getDeadLetterQueue() {
-        return deadLetterQueue;
-    }
-
-    public void setDeadLetterQueue(final String deadLetterQueue) {
-        this.deadLetterQueue = deadLetterQueue;
     }
 
     public String getSenderForSpExchange() {

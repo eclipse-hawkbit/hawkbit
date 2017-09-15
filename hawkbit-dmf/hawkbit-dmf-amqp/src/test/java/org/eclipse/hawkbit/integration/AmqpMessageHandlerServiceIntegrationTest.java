@@ -60,6 +60,17 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     private AmqpProperties amqpProperties;
 
     @Test
+    @Description("Tests DMF PING request and expected reponse.")
+    public void pingDmfInterface() {
+        final Message pingMessage = createPingMessage(CORRELATION_ID, TENANT_EXIST);
+        getDmfClient().send(pingMessage);
+
+        assertPingReplyMessage(CORRELATION_ID);
+
+        Mockito.verifyZeroInteractions(getDeadletterListener());
+    }
+
+    @Test
     @Description("Tests register target")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 2),
             @Expect(type = TargetPollEvent.class, count = 3) })
@@ -450,7 +461,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         final String controllerId = TARGET_PREFIX + "receiveDownLoadAndInstallMessageAfterAssignment";
 
         // setup
-        controllerManagement.findOrRegisterTargetIfItDoesNotexist(controllerId, TEST_URI);
+        createAndSendTarget(controllerId, TENANT_EXIST);
         final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         assignDistributionSet(distributionSet.getId(), controllerId);
 
@@ -476,7 +487,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         final String controllerId = TARGET_PREFIX + "receiveCancelUpdateMessageAfterAssignmentWasCanceled";
 
         // Setup
-        controllerManagement.findOrRegisterTargetIfItDoesNotexist(controllerId, TEST_URI);
+        createAndSendTarget(controllerId, TENANT_EXIST);
         final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         final DistributionSetAssignmentResult distributionSetAssignmentResult = assignDistributionSet(
                 distributionSet.getId(), controllerId);

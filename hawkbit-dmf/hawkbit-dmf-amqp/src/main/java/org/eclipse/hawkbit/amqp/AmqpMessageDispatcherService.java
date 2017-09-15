@@ -39,6 +39,7 @@ import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.cloud.bus.ServiceMatcher;
@@ -47,7 +48,7 @@ import org.springframework.context.event.EventListener;
 
 /**
  * {@link AmqpMessageDispatcherService} create all outgoing AMQP messages and
- * delegate the messages to a {@link AmqpSenderService}.
+ * delegate the messages to a {@link AmqpMessageSenderService}.
  *
  * Additionally the dispatcher listener/subscribe for some target events e.g.
  * assignment.
@@ -58,7 +59,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private static final Logger LOG = LoggerFactory.getLogger(AmqpMessageDispatcherService.class);
 
     private final ArtifactUrlHandler artifactUrlHandler;
-    private final AmqpSenderService amqpSenderService;
+    private final AmqpMessageSenderService amqpSenderService;
     private final SystemSecurityContext systemSecurityContext;
     private final SystemManagement systemManagement;
     private final TargetManagement targetManagement;
@@ -83,10 +84,10 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      *            to check in cluster case if the message is from the same
      *            cluster node
      */
-    public AmqpMessageDispatcherService(final RabbitTemplate rabbitTemplate, final AmqpSenderService amqpSenderService,
-            final ArtifactUrlHandler artifactUrlHandler, final SystemSecurityContext systemSecurityContext,
-            final SystemManagement systemManagement, final TargetManagement targetManagement,
-            final ServiceMatcher serviceMatcher) {
+    public AmqpMessageDispatcherService(final RabbitTemplate rabbitTemplate,
+            final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
+            final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
+            final TargetManagement targetManagement, final ServiceMatcher serviceMatcher) {
         super(rabbitTemplate);
         this.artifactUrlHandler = artifactUrlHandler;
         this.amqpSenderService = amqpSenderService;
@@ -141,6 +142,16 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 createConnectorMessagePropertiesEvent(tenant, target.getControllerId(),
                         EventTopic.DOWNLOAD_AND_INSTALL));
         amqpSenderService.sendMessage(message, targetAdress);
+    }
+
+    void sendPingReponseToDmfReceiver(final Message ping, final String tenant) {
+        final Message message = MessageBuilder.withBody(String.valueOf(System.currentTimeMillis()).getBytes())
+                .setContentType(MessageProperties.CONTENT_TYPE_TEXT_PLAIN)
+                .setCorrelationId(ping.getMessageProperties().getCorrelationId())
+                .setHeader(MessageHeaderKey.TYPE, MessageType.PING_RESPONSE).setHeader(MessageHeaderKey.TENANT, tenant)
+                .build();
+
+        amqpSenderService.sendMessage(message, ping.getMessageProperties().getReplyTo());
     }
 
     /**

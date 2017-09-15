@@ -12,13 +12,14 @@ import java.net.URI;
 
 import javax.validation.constraints.NotNull;
 
+import org.eclipse.hawkbit.util.IpUtil;
 import org.springframework.amqp.core.Message;
 
 /**
  * Interface to send a amqp message.
  */
 @FunctionalInterface
-public interface AmqpSenderService {
+public interface AmqpMessageSenderService {
 
     /**
      * Send the given message to the given uri. The uri contains the (virtual)
@@ -29,18 +30,24 @@ public interface AmqpSenderService {
      * @param replyTo
      *            the reply to uri
      */
-    void sendMessage(@NotNull Message message, @NotNull URI replyTo);
+    default void sendMessage(@NotNull final Message message, @NotNull final URI replyTo) {
+        if (!IpUtil.isAmqpUri(replyTo)) {
+            return;
+        }
+
+        sendMessage(message, replyTo.getPath().substring(1));
+    }
 
     /**
-     * Extract the exchange from the uri. Default implementation removes the
-     * first /.
+     * Send the given message to the given host and exchange.
      * 
-     * @param amqpUri
-     *            the amqp uri
-     * @return the exchange.
+     * @param message
+     *            the amqp message
+     * @param exchange
+     *            to send to
+     * @param virtualHost
+     *            to send to
      */
-    default String extractExchange(final URI amqpUri) {
-        return amqpUri.getPath().substring(1);
-    }
+    void sendMessage(@NotNull final Message message, @NotNull final String exchange);
 
 }

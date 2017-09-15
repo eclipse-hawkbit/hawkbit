@@ -58,8 +58,12 @@ public abstract class SenderService extends MessageService {
             return;
         }
         message.getMessageProperties().getHeaders().remove(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME);
+
         final String correlationId = UUID.randomUUID().toString();
-        message.getMessageProperties().setCorrelationId(correlationId.getBytes(StandardCharsets.UTF_8));
+
+        if (isCorrelationIdEmpty(message)) {
+            message.getMessageProperties().setCorrelationId(correlationId.getBytes(StandardCharsets.UTF_8));
+        }
 
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Sending message {} to exchange {} with correlationId {}", message, address, correlationId);
@@ -68,6 +72,11 @@ public abstract class SenderService extends MessageService {
         }
 
         rabbitTemplate.send(address, null, message, new CorrelationData(correlationId));
+    }
+
+    private static boolean isCorrelationIdEmpty(final Message message) {
+        return message.getMessageProperties().getCorrelationId() == null
+                || message.getMessageProperties().getCorrelationId().length <= 0;
     }
 
     /**

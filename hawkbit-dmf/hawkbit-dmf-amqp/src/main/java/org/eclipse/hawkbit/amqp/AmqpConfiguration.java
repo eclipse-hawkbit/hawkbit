@@ -264,8 +264,8 @@ public class AmqpConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public AmqpSenderService amqpSenderServiceBean() {
-        return new DefaultAmqpSenderService(rabbitTemplate());
+    public AmqpMessageSenderService amqpSenderServiceBean() {
+        return new DefaultAmqpMessageSenderService(rabbitTemplate());
     }
 
     @Bean
@@ -325,7 +325,7 @@ public class AmqpConfiguration {
     @Bean
     @ConditionalOnMissingBean(AmqpMessageDispatcherService.class)
     public AmqpMessageDispatcherService amqpMessageDispatcherService(final RabbitTemplate rabbitTemplate,
-            final AmqpSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
+            final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
             final TargetManagement targetManagement) {
         return new AmqpMessageDispatcherService(rabbitTemplate, amqpSenderService, artifactUrlHandler,
