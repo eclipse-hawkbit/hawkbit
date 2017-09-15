@@ -108,7 +108,9 @@ public class SpReceiverService extends ReceiverService {
         if (MessageType.PING_RESPONSE.equals(messageType)) {
             final String correlationId = new String(message.getMessageProperties().getCorrelationId(),
                     StandardCharsets.UTF_8);
-            openPings.remove(correlationId);
+            if (!openPings.remove(correlationId)) {
+                LOGGER.error("Unknown PING_RESPONSE received for correlationId: {}.", correlationId);
+            }
 
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Got ping response from tenant {} with correlationId {} with timestamp {}", tenant,
