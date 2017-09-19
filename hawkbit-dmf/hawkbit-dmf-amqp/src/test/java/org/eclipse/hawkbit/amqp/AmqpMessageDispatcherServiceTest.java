@@ -81,7 +81,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     private RabbitTemplate rabbitTemplate;
 
-    private DefaultAmqpSenderService senderService;
+    private DefaultAmqpMessageSenderService senderService;
 
     private Target testTarget;
 
@@ -94,7 +94,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         this.rabbitTemplate = Mockito.mock(RabbitTemplate.class);
         when(rabbitTemplate.getMessageConverter()).thenReturn(new Jackson2JsonMessageConverter());
 
-        senderService = Mockito.mock(DefaultAmqpSenderService.class);
+        senderService = Mockito.mock(DefaultAmqpMessageSenderService.class);
 
         final ArtifactUrlHandler artifactUrlHandlerMock = Mockito.mock(ArtifactUrlHandler.class);
         when(artifactUrlHandlerMock.getUrls(anyObject(), anyObject()))

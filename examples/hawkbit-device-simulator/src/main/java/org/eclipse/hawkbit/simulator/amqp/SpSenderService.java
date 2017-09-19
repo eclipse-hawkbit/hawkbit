@@ -57,6 +57,17 @@ public class SpSenderService extends SenderService {
         this.simulationProperties = simulationProperties;
     }
 
+    public void ping(final String tenant, final String correlationId) {
+        final MessageProperties messageProperties = new MessageProperties();
+        messageProperties.getHeaders().put(MessageHeaderKey.TENANT, tenant);
+        messageProperties.getHeaders().put(MessageHeaderKey.TYPE, MessageType.PING.toString());
+        messageProperties.setCorrelationId(correlationId.getBytes());
+        messageProperties.setReplyTo(amqpProperties.getSenderForSpExchange());
+        messageProperties.setContentType(MessageProperties.CONTENT_TYPE_TEXT_PLAIN);
+
+        sendMessage(spExchange, new Message(null, messageProperties));
+    }
+
     /**
      * Finish the update process. This will send a action status to SP.
      *
@@ -96,7 +107,8 @@ public class SpSenderService extends SenderService {
      *            the ID of the action for the error message
      */
     public void sendErrorMessage(final String tenant, final List<String> updateResultMessages, final Long actionId) {
-        final Message message = createActionStatusMessage(tenant, DmfActionStatus.ERROR, updateResultMessages, actionId);
+        final Message message = createActionStatusMessage(tenant, DmfActionStatus.ERROR, updateResultMessages,
+                actionId);
         sendMessage(spExchange, message);
     }
 
@@ -240,7 +252,8 @@ public class SpSenderService extends SenderService {
             final List<String> updateResultMessages) {
         final MessageProperties messageProperties = new MessageProperties();
         final Map<String, Object> headers = messageProperties.getHeaders();
-        final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(cacheValue.getActionId(), actionStatus);
+        final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(cacheValue.getActionId(),
+                actionStatus);
         headers.put(MessageHeaderKey.TYPE, MessageType.EVENT.name());
         headers.put(MessageHeaderKey.TENANT, cacheValue.getTenant());
         headers.put(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
