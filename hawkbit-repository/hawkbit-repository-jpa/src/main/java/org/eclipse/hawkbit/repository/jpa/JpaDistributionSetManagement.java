@@ -374,8 +374,15 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     public Page<DistributionSet> findByCompleted(final Pageable pageReq, final Boolean complete) {
 
-        return convertDsPage(findByCriteriaAPI(pageReq, Arrays.asList(DistributionSetSpecification.isDeleted(false),
-                DistributionSetSpecification.isCompleted(complete))), pageReq);
+        List<Specification<JpaDistributionSet>> specList;
+        if (complete != null) {
+            specList = Arrays.asList(DistributionSetSpecification.isDeleted(false),
+                    DistributionSetSpecification.isCompleted(complete));
+        } else {
+            specList = Arrays.asList(DistributionSetSpecification.isDeleted(false));
+        }
+
+        return convertDsPage(findByCriteriaAPI(pageReq, specList), pageReq);
     }
 
     @Override
