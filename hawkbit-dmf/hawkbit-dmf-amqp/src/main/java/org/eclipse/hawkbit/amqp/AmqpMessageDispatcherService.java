@@ -144,14 +144,15 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         amqpSenderService.sendMessage(message, targetAdress);
     }
 
-    void sendPingReponseToDmfReceiver(final Message ping, final String tenant) {
+    void sendPingReponseToDmfReceiver(final Message ping, final String tenant, final String virtualHost) {
         final Message message = MessageBuilder.withBody(String.valueOf(System.currentTimeMillis()).getBytes())
                 .setContentType(MessageProperties.CONTENT_TYPE_TEXT_PLAIN)
                 .setCorrelationId(ping.getMessageProperties().getCorrelationId())
                 .setHeader(MessageHeaderKey.TYPE, MessageType.PING_RESPONSE).setHeader(MessageHeaderKey.TENANT, tenant)
                 .build();
 
-        amqpSenderService.sendMessage(message, ping.getMessageProperties().getReplyTo());
+        amqpSenderService.sendMessage(message,
+                IpUtil.createAmqpUri(virtualHost, ping.getMessageProperties().getReplyTo()));
     }
 
     /**
