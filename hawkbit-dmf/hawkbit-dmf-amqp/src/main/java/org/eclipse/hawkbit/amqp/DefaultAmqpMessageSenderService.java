@@ -8,11 +8,9 @@
  */
 package org.eclipse.hawkbit.amqp;
 
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
-import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
@@ -24,30 +22,27 @@ import org.springframework.amqp.rabbit.support.CorrelationData;
  * message to the configured spring rabbitmq connections. The exchange is
  * extracted from the uri.
  */
-public class DefaultAmqpSenderService implements AmqpSenderService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultAmqpSenderService.class);
-
-    private final RabbitTemplate internalAmqpTemplate;
+public class DefaultAmqpMessageSenderService extends BaseAmqpService implements AmqpMessageSenderService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultAmqpMessageSenderService.class);
 
     /**
      * Constructor.
      * 
-     * @param internalAmqpTemplate
-     *            the amqp template
+     * @param rabbitTemplate
+     *            the AMQP template
      */
-    public DefaultAmqpSenderService(final RabbitTemplate internalAmqpTemplate) {
-        this.internalAmqpTemplate = internalAmqpTemplate;
+    public DefaultAmqpMessageSenderService(final RabbitTemplate rabbitTemplate) {
+        super(rabbitTemplate);
     }
 
     @Override
-    public void sendMessage(final Message message, final URI replyTo) {
-        if (!IpUtil.isAmqpUri(replyTo)) {
-            return;
-        }
+    public void sendMessage(final Message message, final String exchange) {
 
         final String correlationId = UUID.randomUUID().toString();
-        final String exchange = extractExchange(replyTo);
-        message.getMessageProperties().setCorrelationId(correlationId.getBytes(StandardCharsets.UTF_8));
+
+        if (isCorrelationIdEmpty(message)) {
+            message.getMessageProperties().setCorrelationId(correlationId.getBytes(StandardCharsets.UTF_8));
+        }
 
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Sending message {} to exchange {} with correlationId {}", message, exchange, correlationId);
@@ -55,7 +50,12 @@ public class DefaultAmqpSenderService implements AmqpSenderService {
             LOGGER.debug("Sending message to exchange {} with correlationId {}", exchange, correlationId);
         }
 
-        internalAmqpTemplate.send(exchange, null, message, new CorrelationData(correlationId));
+        getRabbitTemplate().send(exchange, null, message, new CorrelationData(correlationId));
+    }
+
+    protected static boolean isCorrelationIdEmpty(final Message message) {
+        return message.getMessageProperties().getCorrelationId() == null
+                || message.getMessageProperties().getCorrelationId().length <= 0;
     }
 
 }

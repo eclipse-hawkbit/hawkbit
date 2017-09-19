@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.integration.listener;
 
 import static org.junit.Assert.fail;
 
+import java.nio.charset.StandardCharsets;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,8 +27,9 @@ public class ReplyToListener implements TestRabbitListener {
     public static final String LISTENER_ID = "replyto";
     public static final String REPLY_TO_QUEUE = "reply_queue";
 
-    private final Map<EventTopic, Message> eventTopicMessages = new HashMap<>();
+    private final Map<EventTopic, Message> eventTopicMessages = new EnumMap<>(EventTopic.class);
     private final Map<String, Message> deleteMessages = new HashMap<>();
+    private final Map<String, Message> pingResponseMessages = new HashMap<>();
 
     @Override
     @RabbitListener(id = LISTENER_ID, queues = REPLY_TO_QUEUE)
@@ -49,6 +52,13 @@ public class ReplyToListener implements TestRabbitListener {
             return;
         }
 
+        if (messageType == MessageType.PING_RESPONSE) {
+            final String correlationId = new String(message.getMessageProperties().getCorrelationId(),
+                    StandardCharsets.UTF_8);
+            pingResponseMessages.put(correlationId, message);
+            return;
+        }
+
         // if message type is not EVENT or THING_DELETED something unexpected
         // happened
         fail("Unexpected message type");
@@ -61,6 +71,10 @@ public class ReplyToListener implements TestRabbitListener {
 
     public Map<String, Message> getDeleteMessages() {
         return deleteMessages;
+    }
+
+    public Map<String, Message> getPingResponseMessages() {
+        return pingResponseMessages;
     }
 
 }

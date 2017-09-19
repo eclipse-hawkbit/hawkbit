@@ -8,8 +8,11 @@
  */
 package org.eclipse.hawkbit.simulator.amqp;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
@@ -17,6 +20,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.simulator.DeviceSimulatorRepository;
 import org.eclipse.hawkbit.simulator.DeviceSimulatorUpdater;
+import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
@@ -26,6 +30,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
@@ -42,6 +47,8 @@ public class SpReceiverService extends ReceiverService {
     private final DeviceSimulatorUpdater deviceUpdater;
 
     private final DeviceSimulatorRepository repository;
+
+    private final Set<String> openPings = new ConcurrentHashSet<>();
 
     /**
      * Constructor.
@@ -82,26 +89,58 @@ public class SpReceiverService extends ReceiverService {
      */
     @RabbitListener(queues = "${hawkbit.device.simulator.amqp.receiverConnectorQueueFromSp}", containerFactory = "listenerContainerFactory")
     public void recieveMessageSp(final Message message, @Header(MessageHeaderKey.TYPE) final String type,
-            @Header(MessageHeaderKey.THING_ID) final String thingId,
+            @Header(name = MessageHeaderKey.THING_ID, required = false) final String thingId,
             @Header(MessageHeaderKey.TENANT) final String tenant) {
-        checkContentTypeJson(message);
-        delegateMessage(message, type, thingId, tenant);
-    }
-
-    private void delegateMessage(final Message message, final String type, final String thingId, final String tenant) {
         final MessageType messageType = MessageType.valueOf(type);
 
         if (MessageType.EVENT.equals(messageType)) {
+            checkContentTypeJson(message);
             handleEventMessage(message, thingId);
             return;
         }
 
         if (MessageType.THING_DELETED.equals(messageType)) {
+            checkContentTypeJson(message);
             repository.remove(tenant, thingId);
             return;
         }
 
+        if (MessageType.PING_RESPONSE.equals(messageType)) {
+            final String correlationId = new String(message.getMessageProperties().getCorrelationId(),
+                    StandardCharsets.UTF_8);
+            if (!openPings.remove(correlationId)) {
+                LOGGER.error("Unknown PING_RESPONSE received for correlationId: {}.", correlationId);
+            }
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Got ping response from tenant {} with correlationId {} with timestamp {}", tenant,
+                        correlationId, new String(message.getBody(), StandardCharsets.UTF_8));
+            }
+
+            return;
+        }
+
         LOGGER.info("No valid message type property.");
+    }
+
+    @Scheduled(fixedDelay = 5_000, initialDelay = 5_000)
+    void checkDmfHealth() {
+        if (!amqpProperties.isCheckDmfHealth()) {
+            return;
+        }
+
+        if (openPings.size() > 5) {
+            LOGGER.error("Currently {} open pings! DMF does not seem to be reachable.", openPings.size());
+        } else {
+            LOGGER.debug("Currently {} open pings", openPings.size());
+        }
+
+        repository.getTenants().forEach(tenant -> {
+            final String correlationId = UUID.randomUUID().toString();
+            spSenderService.ping(tenant, correlationId);
+            openPings.add(correlationId);
+            LOGGER.debug("Ping tenant {} with correlationId {}", tenant, correlationId);
+        });
     }
 
     private void handleEventMessage(final Message message, final String thingId) {
