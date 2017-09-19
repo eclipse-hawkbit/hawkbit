@@ -46,6 +46,7 @@ public class ClientConfigurationProperties {
      */
     public static class Scenario {
         private boolean cleanRepository;
+        private boolean waitTillRolloutComplete = true;
         private int targets = 100;
         private int distributionSets = 10;
         private int appModulesPerDistributionSet = 2;
@@ -99,6 +100,14 @@ public class ClientConfigurationProperties {
 
         public void setCleanRepository(final boolean cleanRepository) {
             this.cleanRepository = cleanRepository;
+        }
+
+        public boolean isWaitTillRolloutComplete() {
+            return waitTillRolloutComplete;
+        }
+
+        public void setWaitTillRolloutComplete(final boolean waitTillRolloutComplete) {
+            this.waitTillRolloutComplete = waitTillRolloutComplete;
         }
 
         public int getRolloutDeploymentGroups() {
@@ -225,6 +234,10 @@ public class ClientConfigurationProperties {
 
     public List<Scenario> getScenarios() {
         return scenarios;
+    }
+
+    public void addScenarios(final Scenario scenario) {
+        scenarios.add(scenario);
     }
 
     public String getUrl() {

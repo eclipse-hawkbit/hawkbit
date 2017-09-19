@@ -278,11 +278,14 @@ public class ConfigurableScenario {
         // start the created Rollout
         rolloutResource.start(rolloutResponseBody.getRolloutId());
 
-        waitUntilRolloutIsComplete(rolloutResponseBody.getRolloutId());
+        if (scenario.isWaitTillRolloutComplete()) {
+            waitUntilRolloutIsComplete(rolloutResponseBody.getRolloutId());
+        }
         LOGGER.info("Run rollout for set {} -> Done", set.getDsId());
     }
 
     private void waitUntilRolloutNoLongerExists(final Long id) {
+
         do {
             try {
                 TimeUnit.SECONDS.sleep(5);
