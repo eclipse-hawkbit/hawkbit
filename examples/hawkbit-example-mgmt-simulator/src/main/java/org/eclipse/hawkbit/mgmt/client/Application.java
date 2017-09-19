@@ -96,7 +96,7 @@ public class Application implements CommandLineRunner {
         final ObjectMapper mapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .registerModule(new Jackson2HalModule());
-        return Feign.builder().contract(new IgnoreMultipleConsumersProducersSpringMvcContract())
+        return Feign.builder().contract(new IgnoreMultipleConsumersProducersSpringMvcContract()).decode404()
                 .requestInterceptor(
                         new BasicAuthRequestInterceptor(configuration.getUsername(), configuration.getPassword()))
                 .logger(new Slf4jLogger()).encoder(new FeignMultipartEncoder())

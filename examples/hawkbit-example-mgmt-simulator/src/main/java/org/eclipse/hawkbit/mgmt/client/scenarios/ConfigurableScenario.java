@@ -43,11 +43,8 @@ import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import com.google.common.collect.Lists;
-
-import feign.FeignException;
 
 /**
  * 
@@ -289,7 +286,6 @@ public class ConfigurableScenario {
 
     private void waitUntilRolloutNoLongerExists(final Long id) {
 
-        HttpStatus httpStatus;
         do {
             try {
                 TimeUnit.SECONDS.sleep(5);
@@ -297,14 +293,7 @@ public class ConfigurableScenario {
                 LOGGER.warn("Interrupted!");
                 Thread.currentThread().interrupt();
             }
-            try {
-                final ResponseEntity<MgmtRolloutResponseBody> rollout = rolloutResource.getRollout(id);
-                httpStatus = rollout.getStatusCode();
-            } catch (final FeignException e) {
-                LOGGER.info("FeignException " + e);
-                httpStatus = HttpStatus.valueOf(e.status());
-            }
-        } while (httpStatus != HttpStatus.NOT_FOUND);
+        } while (rolloutResource.getRollout(id).getStatusCode() != HttpStatus.NOT_FOUND);
     }
 
     private void waitUntilRolloutIsComplete(final Long id) {
