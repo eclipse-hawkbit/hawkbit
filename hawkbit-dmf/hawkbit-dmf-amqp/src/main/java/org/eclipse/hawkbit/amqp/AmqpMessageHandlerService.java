@@ -132,7 +132,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 break;
             case PING:
                 if (isCorrelationIdNotEmpty(message)) {
-                    amqpMessageDispatcherService.sendPingReponseToDmfReceiver(message, tenant);
+                    amqpMessageDispatcherService.sendPingReponseToDmfReceiver(message, tenant, virtualHost);
                 }
                 break;
             default:

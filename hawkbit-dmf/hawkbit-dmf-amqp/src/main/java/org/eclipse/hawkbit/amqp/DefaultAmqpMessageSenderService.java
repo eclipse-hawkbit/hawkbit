@@ -8,9 +8,11 @@
  */
 package org.eclipse.hawkbit.amqp;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
+import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
@@ -36,8 +38,12 @@ public class DefaultAmqpMessageSenderService extends BaseAmqpService implements 
     }
 
     @Override
-    public void sendMessage(final Message message, final String exchange) {
+    public void sendMessage(final Message message, final URI sendTo) {
+        if (!IpUtil.isAmqpUri(sendTo)) {
+            return;
+        }
 
+        final String exchange = sendTo.getPath().substring(1);
         final String correlationId = UUID.randomUUID().toString();
 
         if (isCorrelationIdEmpty(message)) {
