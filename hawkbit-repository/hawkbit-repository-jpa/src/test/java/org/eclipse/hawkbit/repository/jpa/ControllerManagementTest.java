@@ -439,6 +439,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     public void targetPollEventNotSendIfDisabled() {
         repositoryProperties.setPublishTargetPollEvent(false);
         controllerManagement.findOrRegisterTargetIfItDoesNotexist("AA", LOCALHOST);
+        repositoryProperties.setPublishTargetPollEvent(true);
     }
 
     @Test
