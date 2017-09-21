@@ -203,8 +203,10 @@ public class JpaControllerManagement implements ControllerManagement {
                     .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
                     .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build());
 
-            afterCommit.afterCommit(
-                    () -> eventPublisher.publishEvent(new TargetPollEvent(result, applicationContext.getId())));
+            if (repositoryProperties.isPublishTargetPollEvent()) {
+                afterCommit.afterCommit(
+                        () -> eventPublisher.publishEvent(new TargetPollEvent(result, applicationContext.getId())));
+            }
 
             return result;
         }
@@ -221,8 +223,10 @@ public class JpaControllerManagement implements ControllerManagement {
         toUpdate.setAddress(address.toString());
         toUpdate.setLastTargetQuery(System.currentTimeMillis());
 
-        afterCommit.afterCommit(
-                () -> eventPublisher.publishEvent(new TargetPollEvent(toUpdate, applicationContext.getId())));
+        if (repositoryProperties.isPublishTargetPollEvent()) {
+            afterCommit.afterCommit(
+                    () -> eventPublisher.publishEvent(new TargetPollEvent(toUpdate, applicationContext.getId())));
+        }
 
         return targetRepository.save(toUpdate);
     }
