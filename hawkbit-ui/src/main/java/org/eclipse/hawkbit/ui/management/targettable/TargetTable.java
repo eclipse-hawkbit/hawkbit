@@ -21,8 +21,8 @@ import java.util.stream.Stream;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.FilterParams;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.RemoteEntityEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Tag;
@@ -104,7 +104,7 @@ public class TargetTable extends AbstractTable<Target> {
 
     private final transient DistributionSetManagement distributionSetManagement;
 
-    private final transient TagManagement tagManagement;
+    private final transient TargetTagManagement tagManagement;
 
     private final SpPermissionChecker permChecker;
 
@@ -119,7 +119,7 @@ public class TargetTable extends AbstractTable<Target> {
     public TargetTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification notification,
             final TargetManagement targetManagement, final ManagementUIState managementUIState,
             final SpPermissionChecker permChecker, final ManagementViewClientCriterion managementViewClientCriterion,
-            final DistributionSetManagement distributionSetManagement, final TagManagement tagManagement) {
+            final DistributionSetManagement distributionSetManagement, final TargetTagManagement tagManagement) {
         super(eventBus, i18n, notification);
         this.targetManagement = targetManagement;
         this.permChecker = permChecker;
@@ -152,16 +152,15 @@ public class TargetTable extends AbstractTable<Target> {
             refreshTargets();
         } else {
             eventContainer.getEvents().stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
-                    .filter(Objects::nonNull)
-                    .forEach(event -> updateVisibleItemOnEvent(event.getEntity()));
+                    .filter(Objects::nonNull).forEach(event -> updateVisibleItemOnEvent(event.getEntity()));
         }
         publishTargetSelectedEntityForRefresh(eventContainer.getEvents().stream());
     }
 
     private void publishTargetSelectedEntityForRefresh(
             final Stream<? extends RemoteEntityEvent<Target>> targetEntityEventStream) {
-        targetEntityEventStream.filter(event -> isLastSelectedTarget(event.getEntityId()))
-                .filter(Objects::nonNull).findAny().ifPresent(event -> eventBus.publish(this,
+        targetEntityEventStream.filter(event -> isLastSelectedTarget(event.getEntityId())).filter(Objects::nonNull)
+                .findAny().ifPresent(event -> eventBus.publish(this,
                         new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, event.getEntity())));
     }
 
@@ -299,7 +298,7 @@ public class TargetTable extends AbstractTable<Target> {
 
     @Override
     protected Optional<Target> findEntityByTableValue(final Long lastSelectedId) {
-        return targetManagement.findTargetById(lastSelectedId);
+        return targetManagement.get(lastSelectedId);
     }
 
     @Override
@@ -519,15 +518,15 @@ public class TargetTable extends AbstractTable<Target> {
      * @return TagAssigmentResult with all meta data of the assignment outcome.
      */
     public TargetTagAssignmentResult toggleTagAssignment(final Collection<Long> targetIds, final String targTagName) {
-        final List<String> controllerIds = targetManagement.findTargetsById(targetIds).stream()
-                .map(Target::getControllerId).collect(Collectors.toList());
+        final List<String> controllerIds = targetManagement.get(targetIds).stream().map(Target::getControllerId)
+                .collect(Collectors.toList());
         if (controllerIds.isEmpty()) {
             notification.displayWarning(i18n.getMessage("targets.not.exists"));
             return new TargetTagAssignmentResult(0, 0, 0, Lists.newArrayListWithCapacity(0),
                     Lists.newArrayListWithCapacity(0), null);
         }
 
-        final Optional<TargetTag> tag = tagManagement.findTargetTag(targTagName);
+        final Optional<TargetTag> tag = tagManagement.getByName(targTagName);
         if (!tag.isPresent()) {
             notification.displayWarning(i18n.getMessage("targettag.not.exists", new Object[] { targTagName }));
             return new TargetTagAssignmentResult(0, 0, 0, Lists.newArrayListWithCapacity(0),
@@ -580,15 +579,14 @@ public class TargetTable extends AbstractTable<Target> {
             return;
         }
         final Long targetId = (Long) targetItemId;
-        final Optional<Target> target = targetManagement.findTargetById(targetId);
+        final Optional<Target> target = targetManagement.get(targetId);
         if (!target.isPresent()) {
             getNotification().displayWarning(i18n.getMessage("target.not.exists", new Object[] { "" }));
             return;
         }
         final TargetIdName createTargetIdName = new TargetIdName(target.get());
 
-        final List<DistributionSet> findDistributionSetAllById = distributionSetManagement
-                .findDistributionSetsById(ids);
+        final List<DistributionSet> findDistributionSetAllById = distributionSetManagement.get(ids);
 
         if (findDistributionSetAllById.isEmpty()) {
             notification.displayWarning(i18n.getMessage("distributionsets.not.exists"));
@@ -848,7 +846,7 @@ public class TargetTable extends AbstractTable<Target> {
         }
 
         final long size = getTargetsCountWithFilter(totalTargetsCount, pinnedDistId,
-                new FilterParams(distributionId, status, overdueState, searchText, noTagClicked, targetTags));
+                new FilterParams(status, overdueState, searchText, distributionId, noTagClicked, targetTags));
 
         if (size > SPUIDefinitions.MAX_TABLE_ENTRIES) {
             managementUIState.setTargetsTruncated(size - SPUIDefinitions.MAX_TABLE_ENTRIES);
@@ -861,16 +859,15 @@ public class TargetTable extends AbstractTable<Target> {
 
         final long size;
         if (query.isPresent()) {
-            size = targetManagement.countTargetByTargetFilterQuery(query.get());
+            size = targetManagement.countByTargetFilterQuery(query.get());
         } else if (noFilterSelected(filterParams.getFilterByStatus(), pinnedDistId,
                 filterParams.getSelectTargetWithNoTag(), filterParams.getFilterByTagNames(),
                 filterParams.getFilterBySearchText())) {
             size = totalTargetsCount;
         } else {
-            size = targetManagement.countTargetByFilters(filterParams.getFilterByStatus(),
-                    filterParams.getOverdueState(), filterParams.getFilterBySearchText(),
-                    filterParams.getFilterByDistributionId(), filterParams.getSelectTargetWithNoTag(),
-                    filterParams.getFilterByTagNames());
+            size = targetManagement.countByFilters(filterParams.getFilterByStatus(), filterParams.getOverdueState(),
+                    filterParams.getFilterBySearchText(), filterParams.getFilterByDistributionId(),
+                    filterParams.getSelectTargetWithNoTag(), filterParams.getFilterByTagNames());
         }
         return size;
     }
@@ -886,7 +883,7 @@ public class TargetTable extends AbstractTable<Target> {
     }
 
     private long getTotalTargetsCount() {
-        return targetManagement.countTargetsAll();
+        return targetManagement.count();
     }
 
     private boolean isFilteredByStatus() {

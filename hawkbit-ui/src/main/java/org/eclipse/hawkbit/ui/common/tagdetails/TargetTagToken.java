@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.common.tagdetails;
 import java.util.Arrays;
 import java.util.Optional;
 
-import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -46,7 +46,7 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
 
     public TargetTagToken(final SpPermissionChecker checker, final VaadinMessageSource i18n,
             final UINotification uinotification, final UIEventBus eventBus, final ManagementUIState managementUIState,
-            final TagManagement tagManagement, final TargetManagement targetManagement) {
+            final TargetTagManagement tagManagement, final TargetManagement targetManagement) {
         super(checker, i18n, uinotification, eventBus, managementUIState, tagManagement);
         this.targetManagement = targetManagement;
     }
@@ -98,7 +98,7 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
     protected void displayAlreadyAssignedTags() {
         removePreviouslyAddedTokens();
         if (selectedEntity != null) {
-            for (final TargetTag tag : tagManagement.findAllTargetTags(new PageRequest(0, MAX_TAGS),
+            for (final TargetTag tag : tagManagement.findByTarget(new PageRequest(0, MAX_TAGS),
                     selectedEntity.getControllerId())) {
                 addNewToken(tag.getId());
             }
@@ -109,7 +109,7 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
     protected void populateContainer() {
         container.removeAllItems();
         tagDetails.clear();
-        for (final TargetTag tag : tagManagement.findAllTargetTags(new PageRequest(0, MAX_TAGS))) {
+        for (final TargetTag tag : tagManagement.findAll(new PageRequest(0, MAX_TAGS))) {
             setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour());
         }
     }

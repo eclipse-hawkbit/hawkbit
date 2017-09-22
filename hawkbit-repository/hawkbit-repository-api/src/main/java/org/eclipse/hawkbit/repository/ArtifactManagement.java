@@ -39,7 +39,7 @@ public interface ArtifactManagement {
      *         management
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Long countArtifactsAll();
+    long count();
 
     /**
      * Persists artifact binary as provided by given InputStream. assign the
@@ -63,7 +63,7 @@ public interface ArtifactManagement {
      *             if given software module does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    Artifact createArtifact(@NotNull InputStream inputStream, @NotNull Long moduleId, final String filename,
+    Artifact create(@NotNull InputStream inputStream, @NotNull Long moduleId, final String filename,
             final boolean overrideExisting);
 
     /**
@@ -99,7 +99,7 @@ public interface ArtifactManagement {
      *             if check against provided SHA1 checksum failed
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    Artifact createArtifact(@NotNull InputStream stream, @NotNull Long moduleId, @NotEmpty String filename,
+    Artifact create(@NotNull InputStream stream, @NotNull Long moduleId, @NotEmpty String filename,
             String providedMd5Sum, String providedSha1Sum, boolean overrideExisting, String contentType);
 
     /**
@@ -129,7 +129,7 @@ public interface ArtifactManagement {
      *             if artifact with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
-    void deleteArtifact(@NotNull Long id);
+    void delete(@NotNull Long id);
 
     /**
      * Searches for {@link Artifact} with given {@link Identifiable}.
@@ -140,7 +140,7 @@ public interface ArtifactManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    Optional<Artifact> findArtifact(@NotNull Long id);
+    Optional<Artifact> get(@NotNull Long id);
 
     /**
      * Find by artifact by software module id and filename.
@@ -156,7 +156,7 @@ public interface ArtifactManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    Optional<Artifact> findByFilenameAndSoftwareModule(@NotNull String filename, @NotNull Long softwareModuleId);
+    Optional<Artifact> getByFilenameAndSoftwareModule(@NotNull String filename, @NotNull Long softwareModuleId);
 
     /**
      * Find all local artifact by sha1 and return the first artifact.
@@ -167,7 +167,7 @@ public interface ArtifactManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    Optional<Artifact> findFirstArtifactBySHA1(@NotNull String sha1);
+    Optional<Artifact> findFirstBySHA1(@NotNull String sha1);
 
     /**
      * Searches for {@link Artifact} with given file name.
@@ -178,13 +178,13 @@ public interface ArtifactManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    Optional<Artifact> findArtifactByFilename(@NotNull String filename);
+    Optional<Artifact> getByFilename(@NotNull String filename);
 
     /**
      * Get local artifact for a base software module.
      *
      * @param pageReq
-     *            Pageable
+     *            Pageable parameter
      * @param swId
      *            software module id
      * @return Page<Artifact>
@@ -193,7 +193,7 @@ public interface ArtifactManagement {
      *             if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<Artifact> findArtifactBySoftwareModule(@NotNull Pageable pageReq, @NotNull Long swId);
+    Page<Artifact> findBySoftwareModule(@NotNull Pageable pageReq, @NotNull Long swId);
 
     /**
      * Loads {@link AbstractDbArtifact} from store for given {@link Artifact}.

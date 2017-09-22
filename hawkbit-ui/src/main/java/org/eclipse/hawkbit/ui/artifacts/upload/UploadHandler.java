@@ -217,7 +217,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
 
         final Optional<Long> selectedBaseSwModuleId = artifactUploadState.getSelectedBaseSwModuleId();
         if (selectedBaseSwModuleId.isPresent()) {
-            selectedSwForUpload = softwareModuleManagement.findSoftwareModuleById(selectedBaseSwModuleId.get()).orElse(null);
+            selectedSwForUpload = softwareModuleManagement.get(selectedBaseSwModuleId.get()).orElse(null);
         }
 
         if (selectedSwForUpload != null && view.checkIfSoftwareModuleIsSelected()

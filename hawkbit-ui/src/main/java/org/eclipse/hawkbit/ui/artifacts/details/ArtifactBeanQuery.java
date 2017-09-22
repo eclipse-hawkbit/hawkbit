@@ -78,7 +78,7 @@ public class ArtifactBeanQuery extends AbstractBeanQuery<Artifact> {
             artifactBeans = firstPagetArtifacts;
         } else {
             artifactBeans = getArtifactManagement()
-                    .findArtifactBySoftwareModule(new OffsetBasedPageRequest(startIndex, count, sort), baseSwModuleId);
+                    .findBySoftwareModule(new OffsetBasedPageRequest(startIndex, count, sort), baseSwModuleId);
         }
 
         return artifactBeans.getContent();
@@ -95,7 +95,7 @@ public class ArtifactBeanQuery extends AbstractBeanQuery<Artifact> {
         long size = 0;
         if (baseSwModuleId != null) {
             firstPagetArtifacts = getArtifactManagement()
-                    .findArtifactBySoftwareModule(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), baseSwModuleId);
+                    .findBySoftwareModule(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), baseSwModuleId);
             size = firstPagetArtifacts.getTotalElements();
         }
         if (size > Integer.MAX_VALUE) {

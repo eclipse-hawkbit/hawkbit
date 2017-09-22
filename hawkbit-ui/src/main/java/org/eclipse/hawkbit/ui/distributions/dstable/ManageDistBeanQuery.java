@@ -72,7 +72,7 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
             }
         }
 
-        if (sortStates!= null && sortStates.length > 0) {
+        if (sortStates != null && sortStates.length > 0) {
             // Initialize sort
             sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortPropertyIds[0]);
             // Add sort
@@ -96,13 +96,13 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
             distBeans = firstPageDistributionSets;
         } else if (StringUtils.isEmpty(searchText)) {
             // if no search filters available
-            distBeans = getDistributionSetManagement().findDistributionSetsByDeletedAndOrCompleted(
-                    new OffsetBasedPageRequest(startIndex, count, sort), false, dsComplete);
+            distBeans = getDistributionSetManagement()
+                    .findByCompleted(new OffsetBasedPageRequest(startIndex, count, sort), dsComplete);
         } else {
             final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
                     .setIsComplete(dsComplete).setSearchText(searchText).setSelectDSWithNoTag(Boolean.FALSE)
                     .setType(distributionSetType).build();
-            distBeans = getDistributionSetManagement().findDistributionSetsByFilters(
+            distBeans = getDistributionSetManagement().findByDistributionSetFilter(
                     new PageRequest(startIndex / count, count, sort), distributionSetFilter);
         }
 
@@ -122,13 +122,13 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
     public int size() {
         if (StringUtils.isEmpty(searchText) && null == distributionSetType) {
             // if no search filters available
-            firstPageDistributionSets = getDistributionSetManagement().findDistributionSetsByDeletedAndOrCompleted(
-                    new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), false, dsComplete);
+            firstPageDistributionSets = getDistributionSetManagement()
+                    .findByCompleted(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), dsComplete);
         } else {
             final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
                     .setIsComplete(dsComplete).setSearchText(searchText).setSelectDSWithNoTag(Boolean.FALSE)
                     .setType(distributionSetType).build();
-            firstPageDistributionSets = getDistributionSetManagement().findDistributionSetsByFilters(
+            firstPageDistributionSets = getDistributionSetManagement().findByDistributionSetFilter(
                     new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilter);
         }
         final long size = firstPageDistributionSets.getTotalElements();

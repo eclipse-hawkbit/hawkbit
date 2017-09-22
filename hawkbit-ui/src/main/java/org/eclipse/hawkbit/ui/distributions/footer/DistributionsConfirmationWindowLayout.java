@@ -176,7 +176,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
             removeAssignedSoftwareModules();
         }
 
-        softwareModuleManagement.deleteSoftwareModules(swmoduleIds);
+        softwareModuleManagement.delete(swmoduleIds);
         eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.REMOVE_ENTITY, swmoduleIds));
 
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
@@ -292,8 +292,8 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         final int deleteSWModuleTypeCount = manageDistUIState.getSelectedDeleteSWModuleTypes().size();
         for (final String swModuleTypeName : manageDistUIState.getSelectedDeleteSWModuleTypes()) {
 
-            softwareModuleTypeManagement.findSoftwareModuleTypeByName(swModuleTypeName).map(SoftwareModuleType::getId)
-                    .ifPresent(softwareModuleTypeManagement::deleteSoftwareModuleType);
+            softwareModuleTypeManagement.getByName(swModuleTypeName).map(SoftwareModuleType::getId)
+                    .ifPresent(softwareModuleTypeManagement::delete);
         }
         addToConsolitatedMsg(FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.getMessage("message.sw.module.type.delete", new Object[] { deleteSWModuleTypeCount }));
@@ -383,7 +383,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
             });
         }
 
-        distributionSetManagement.deleteDistributionSet(Arrays.asList(deletedIds));
+        distributionSetManagement.delete(Arrays.asList(deletedIds));
         eventBus.publish(this,
                 new DistributionTableEvent(BaseEntityEventType.REMOVE_ENTITY, Arrays.asList(deletedIds)));
 
@@ -474,8 +474,8 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         final int deleteDistTypeCount = manageDistUIState.getSelectedDeleteDistSetTypes().size();
         manageDistUIState.getSelectedDeleteDistSetTypes().stream()
                 .map(deleteDistTypeName -> distributionSetTypeManagement
-                        .findDistributionSetTypeByName(deleteDistTypeName).get().getId())
-                .forEach(distributionSetTypeManagement::deleteDistributionSetType);
+                        .getByName(deleteDistTypeName).get().getId())
+                .forEach(distributionSetTypeManagement::delete);
 
         addToConsolitatedMsg(FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.getMessage("message.dist.type.delete", new Object[] { deleteDistTypeCount }));

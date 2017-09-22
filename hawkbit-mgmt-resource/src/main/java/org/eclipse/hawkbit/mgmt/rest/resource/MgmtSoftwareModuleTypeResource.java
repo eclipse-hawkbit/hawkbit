@@ -64,11 +64,11 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
         final Slice<SoftwareModuleType> findModuleTypessAll;
         Long countModulesAll;
         if (rsqlParam != null) {
-            findModuleTypessAll = softwareModuleTypeManagement.findSoftwareModuleTypesAll(rsqlParam, pageable);
+            findModuleTypessAll = softwareModuleTypeManagement.findByRsql(pageable, rsqlParam);
             countModulesAll = ((Page<SoftwareModuleType>) findModuleTypessAll).getTotalElements();
         } else {
-            findModuleTypessAll = softwareModuleTypeManagement.findSoftwareModuleTypesAll(pageable);
-            countModulesAll = softwareModuleTypeManagement.countSoftwareModuleTypesAll();
+            findModuleTypessAll = softwareModuleTypeManagement.findAll(pageable);
+            countModulesAll = softwareModuleTypeManagement.count();
         }
 
         final List<MgmtSoftwareModuleType> rest = MgmtSoftwareModuleTypeMapper
@@ -87,7 +87,7 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
     @Override
     public ResponseEntity<Void> deleteSoftwareModuleType(
             @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId) {
-        softwareModuleTypeManagement.deleteSoftwareModuleType(softwareModuleTypeId);
+        softwareModuleTypeManagement.delete(softwareModuleTypeId);
         return ResponseEntity.ok().build();
     }
 
@@ -97,7 +97,7 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
             @RequestBody final MgmtSoftwareModuleTypeRequestBodyPut restSoftwareModuleType) {
 
         final SoftwareModuleType updatedSoftwareModuleType = softwareModuleTypeManagement
-                .updateSoftwareModuleType(entityFactory.softwareModuleType().update(softwareModuleTypeId)
+                .update(entityFactory.softwareModuleType().update(softwareModuleTypeId)
                         .description(restSoftwareModuleType.getDescription())
                         .colour(restSoftwareModuleType.getColour()));
 
@@ -108,7 +108,7 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
     public ResponseEntity<List<MgmtSoftwareModuleType>> createSoftwareModuleTypes(
             @RequestBody final List<MgmtSoftwareModuleTypeRequestBodyPost> softwareModuleTypes) {
 
-        final List<SoftwareModuleType> createdSoftwareModules = softwareModuleTypeManagement.createSoftwareModuleType(
+        final List<SoftwareModuleType> createdSoftwareModules = softwareModuleTypeManagement.create(
                 MgmtSoftwareModuleTypeMapper.smFromRequest(entityFactory, softwareModuleTypes));
 
         return new ResponseEntity<>(MgmtSoftwareModuleTypeMapper.toTypesResponse(createdSoftwareModules),
@@ -116,7 +116,7 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
     }
 
     private SoftwareModuleType findSoftwareModuleTypeWithExceptionIfNotFound(final Long softwareModuleTypeId) {
-        return softwareModuleTypeManagement.findSoftwareModuleTypeById(softwareModuleTypeId)
+        return softwareModuleTypeManagement.get(softwareModuleTypeId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, softwareModuleTypeId));
     }
 

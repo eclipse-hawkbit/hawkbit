@@ -85,7 +85,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
         // create artifact
         final byte random[] = RandomUtils.nextBytes(5 * 1024);
-        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random),
+        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).get().getId(), "file1", false);
 
         // no artifact available
@@ -160,7 +160,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
     public void downloadArtifactThroughFileName() throws Exception {
         downLoadProgress = 1;
         shippedBytes = 0;
-        assertThat(softwareModuleManagement.findSoftwareModulesAll(PAGE)).hasSize(0);
+        assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(0);
 
         // create target
         final Target target = testdataFactory.createTarget();
@@ -171,7 +171,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
         // create artifact
         final byte random[] = RandomUtils.nextBytes(ARTIFACT_SIZE);
-        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random),
+        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).get().getId(), "file1", false);
 
         // download fails as artifact is not yet assigned
@@ -210,7 +210,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
         // create artifact
         final byte random[] = RandomUtils.nextBytes(5 * 1024);
-        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random), getOsModule(ds),
+        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds),
                 "file1", false);
 
         // download
@@ -242,7 +242,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
         // create artifact
         final byte random[] = RandomUtils.nextBytes(resultLength);
-        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random), getOsModule(ds),
+        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds),
                 "file1", false);
 
         assertThat(random.length).isEqualTo(resultLength);

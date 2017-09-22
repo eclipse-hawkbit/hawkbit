@@ -77,11 +77,11 @@ public class BaseSwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSoftwareMo
 
         if (type == null && StringUtils.isEmpty(searchText)) {
             swModuleBeans = getSoftwareManagementService()
-                    .findSoftwareModulesAll(new OffsetBasedPageRequest(startIndex, count, sort));
+                    .findAll(new OffsetBasedPageRequest(startIndex, count, sort));
 
         } else {
             swModuleBeans = getSoftwareManagementService()
-                    .findSoftwareModuleByFilters(new OffsetBasedPageRequest(startIndex, count, sort), searchText, type);
+                    .findByTextAndType(new OffsetBasedPageRequest(startIndex, count, sort), searchText, type);
         }
 
         return swModuleBeans.getContent().stream().map(this::getProxyBean).collect(Collectors.toList());
@@ -107,9 +107,9 @@ public class BaseSwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSoftwareMo
     public int size() {
         long size;
         if (type == null && StringUtils.isEmpty(searchText)) {
-            size = getSoftwareManagementService().countSoftwareModulesAll();
+            size = getSoftwareManagementService().count();
         } else {
-            size = getSoftwareManagementService().countSoftwareModuleByFilters(searchText, type);
+            size = getSoftwareManagementService().countByTextAndType(searchText, type);
         }
 
         if (size > Integer.MAX_VALUE) {

@@ -131,7 +131,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
      */
     public void updateTarget() {
         /* save updated entity */
-        final Target target = targetManagement.updateTarget(entityFactory.target().update(controllerId)
+        final Target target = targetManagement.update(entityFactory.target().update(controllerId)
                 .name(nameTextField.getValue()).description(descTextArea.getValue()));
         /* display success msg */
         uINotification.displaySuccess(i18n.getMessage("message.update.success", new Object[] { target.getName() }));
@@ -144,7 +144,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         final String newName = HawkbitCommonUtil.trimAndNullIfEmpty(nameTextField.getValue());
         final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
 
-        final Target newTarget = targetManagement.createTarget(
+        final Target newTarget = targetManagement.create(
                 entityFactory.target().create().controllerId(newControllerId).name(newName).description(newDesc));
 
         eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.ADD_ENTITY, newTarget));
@@ -169,9 +169,9 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
      * @return window or {@code null} if target is not exists.
      */
     public Window getWindow(final String controllerId) {
-        final Optional<Target> target = targetManagement.findTargetByControllerID(controllerId);
+        final Optional<Target> target = targetManagement.getByControllerID(controllerId);
         if (!target.isPresent()) {
-            uINotification.displayWarning(i18n.getMessage("target.not.exists", new Object[] { controllerId }));
+            uINotification.displayWarning(i18n.getMessage("target.not.exists", controllerId));
             return null;
         }
         populateValuesOfTarget(target.get());
@@ -195,10 +195,9 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     private boolean isDuplicate() {
         final String newControlllerId = controllerIDTextField.getValue();
-        final Optional<Target> existingTarget = targetManagement.findTargetByControllerID(newControlllerId.trim());
+        final Optional<Target> existingTarget = targetManagement.getByControllerID(newControlllerId.trim());
         if (existingTarget.isPresent()) {
-            uINotification.displayValidationError(
-                    i18n.getMessage("message.target.duplicate.check", new Object[] { newControlllerId }));
+            uINotification.displayValidationError(i18n.getMessage("message.target.duplicate.check", newControlllerId));
             return true;
         } else {
             return false;

@@ -165,7 +165,7 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         Assert.assertThat(dsModules,
                 SoftwareModuleJsonMatcher.containsExactly(downloadAndUpdateRequest.getSoftwareModules()));
 
-        final Target updatedTarget = waitUntilIsPresent(() -> targetManagement.findTargetByControllerID(controllerId));
+        final Target updatedTarget = waitUntilIsPresent(() -> targetManagement.getByControllerID(controllerId));
 
         assertThat(updatedTarget.getSecurityToken()).isEqualTo(downloadAndUpdateRequest.getTargetSecurityToken());
     }
@@ -199,7 +199,7 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
     }
 
     protected void assertAllTargetsCount(final long expectedTargetsCount) {
-        assertThat(targetManagement.countTargetsAll()).isEqualTo(expectedTargetsCount);
+        assertThat(targetManagement.count()).isEqualTo(expectedTargetsCount);
     }
 
     private Message assertReplyMessageHeader(final EventTopic eventTopic, final String controllerId) {
@@ -226,14 +226,14 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
             final int existingTargetsAfterCreation, final TargetUpdateStatus expectedTargetStatus,
             final String createdBy) {
         createAndSendTarget(target, TENANT_EXIST);
-        final Target registerdTarget = waitUntilIsPresent(() -> targetManagement.findTargetByControllerID(target));
+        final Target registerdTarget = waitUntilIsPresent(() -> targetManagement.getByControllerID(target));
         assertAllTargetsCount(existingTargetsAfterCreation);
         assertTarget(registerdTarget, expectedTargetStatus, createdBy);
     }
 
     protected void registerSameTargetAndAssertBasedOnVersion(final String controllerId,
             final int existingTargetsAfterCreation, final TargetUpdateStatus expectedTargetStatus) {
-        final int version = controllerManagement.findByControllerId(controllerId).get().getOptLockRevision();
+        final int version = controllerManagement.getByControllerId(controllerId).get().getOptLockRevision();
         createAndSendTarget(controllerId, TENANT_EXIST);
         final Target registeredTarget = waitUntilIsPresent(() -> findTargetBasedOnNewVersion(controllerId, version));
         assertAllTargetsCount(existingTargetsAfterCreation);
@@ -241,7 +241,7 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
     }
 
     private Optional<Target> findTargetBasedOnNewVersion(final String controllerId, final int version) {
-        final Optional<Target> target2 = controllerManagement.findByControllerId(controllerId);
+        final Optional<Target> target2 = controllerManagement.getByControllerId(controllerId);
         if (version < target2.get().getOptLockRevision()) {
             return target2;
         }
@@ -305,7 +305,7 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
 
     protected void assertUpdateAttributes(final String controllerId, final Map<String, String> attributes) {
         final Target findByControllerId = waitUntilIsPresent(
-                () -> controllerManagement.findByControllerId(controllerId));
+                () -> controllerManagement.getByControllerId(controllerId));
         final Map<String, String> controllerAttributes = targetManagement
                 .getControllerAttributes(findByControllerId.getControllerId());
         assertThat(controllerAttributes.size()).isEqualTo(attributes.size());

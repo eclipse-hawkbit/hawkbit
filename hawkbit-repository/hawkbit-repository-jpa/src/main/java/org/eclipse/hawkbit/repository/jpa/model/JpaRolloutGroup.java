@@ -17,7 +17,6 @@ import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
-import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -44,9 +43,8 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
  *
  */
 @Entity
-@Table(name = "sp_rolloutgroup", indexes = {
-        @Index(name = "sp_idx_rolloutgroup_01", columnList = "tenant,name") }, uniqueConstraints = @UniqueConstraint(columnNames = {
-                "name", "rollout", "tenant" }, name = "uk_rolloutgroup"))
+@Table(name = "sp_rolloutgroup", uniqueConstraints = @UniqueConstraint(columnNames = { "name", "rollout",
+        "tenant" }, name = "uk_rolloutgroup"))
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")

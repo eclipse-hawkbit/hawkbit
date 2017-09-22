@@ -69,8 +69,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     @Description("Verifies that the target update event is published when a target has been updated")
     public void targetUpdateEventIsPublished() throws InterruptedException {
         final Target createdTarget = testdataFactory.createTarget("12345");
-        targetManagement
-                .updateTarget(entityFactory.target().update(createdTarget.getControllerId()).name("updateName"));
+        targetManagement.update(entityFactory.target().update(createdTarget.getControllerId()).name("updateName"));
 
         final TargetUpdatedEvent targetUpdatedEvent = eventListener.waitForEvent(TargetUpdatedEvent.class);
         assertThat(targetUpdatedEvent).isNotNull();
@@ -82,7 +81,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     public void targetDeletedEventIsPublished() throws InterruptedException {
         final Target createdTarget = testdataFactory.createTarget("12345");
 
-        targetManagement.deleteTarget("12345");
+        targetManagement.deleteByControllerID("12345");
 
         final TargetDeletedEvent targetDeletedEvent = eventListener.waitForEvent(TargetDeletedEvent.class);
         assertThat(targetDeletedEvent).isNotNull();
@@ -104,7 +103,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
         final Rollout createdRollout = testdataFactory.createRolloutByVariables(rolloutName, "desc", amountGroups,
                 "controllerId==" + targetPrefixName + "-*", distributionSet, successCondition, errorCondition);
 
-        rolloutManagement.deleteRollout(createdRollout.getId());
+        rolloutManagement.delete(createdRollout.getId());
         rolloutManagement.handleRollouts();
 
         final RolloutDeletedEvent rolloutDeletedEvent = eventListener.waitForEvent(RolloutDeletedEvent.class);
@@ -128,7 +127,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     public void distributionSetDeletedEventIsPublished() throws InterruptedException {
         final DistributionSet createDistributionSet = testdataFactory.createDistributionSet();
 
-        distributionSetManagement.deleteDistributionSet(createDistributionSet.getId());
+        distributionSetManagement.delete(createDistributionSet.getId());
 
         final DistributionSetDeletedEvent dsDeletedEvent = eventListener
                 .waitForEvent(DistributionSetDeletedEvent.class);
@@ -152,7 +151,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     public void softwareModuleUpdateEventIsPublished() throws InterruptedException {
         final SoftwareModule softwareModule = testdataFactory.createSoftwareModuleApp();
         softwareModuleManagement
-                .updateSoftwareModule(entityFactory.softwareModule().update(softwareModule.getId()).description("New"));
+                .update(entityFactory.softwareModule().update(softwareModule.getId()).description("New"));
 
         final SoftwareModuleUpdatedEvent softwareModuleUpdatedEvent = eventListener
                 .waitForEvent(SoftwareModuleUpdatedEvent.class);
@@ -164,7 +163,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     @Description("Verifies that the software module deleted event is published when a software module has been deleted")
     public void softwareModuleDeletedEventIsPublished() throws InterruptedException {
         final SoftwareModule softwareModule = testdataFactory.createSoftwareModuleApp();
-        softwareModuleManagement.deleteSoftwareModule(softwareModule.getId());
+        softwareModuleManagement.delete(softwareModule.getId());
 
         final SoftwareModuleDeletedEvent softwareModuleDeletedEvent = eventListener
                 .waitForEvent(SoftwareModuleDeletedEvent.class);

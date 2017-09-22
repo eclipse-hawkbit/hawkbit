@@ -34,10 +34,10 @@ public class RolloutEventTest extends AbstractRemoteEntityEventTest<Rollout> {
     @Override
     protected Rollout createEntity() {
         testdataFactory.createTarget("12345");
-        final DistributionSet ds = distributionSetManagement.createDistributionSet(entityFactory.distributionSet()
+        final DistributionSet ds = distributionSetManagement.create(entityFactory.distributionSet()
                 .create().name("incomplete").version("2").description("incomplete").type("os"));
 
-        return rolloutManagement.createRollout(
+        return rolloutManagement.create(
                 entityFactory.rollout().create().name("exampleRollout").targetFilterQuery("controllerId==*").set(ds),
                 10, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "10").build());

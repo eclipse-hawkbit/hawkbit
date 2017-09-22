@@ -91,15 +91,15 @@ public class RolloutGroupEventTest extends AbstractRemoteEntityEventTest<Rollout
     protected RolloutGroup createEntity() {
         testdataFactory.createTarget(UUID.randomUUID().toString());
 
-        final DistributionSet ds = distributionSetManagement.createDistributionSet(entityFactory.distributionSet()
+        final DistributionSet ds = distributionSetManagement.create(entityFactory.distributionSet()
                 .create().name("incomplete").version("2").description("incomplete").type("os"));
 
-        final Rollout entity = rolloutManagement.createRollout(
+        final Rollout entity = rolloutManagement.create(
                 entityFactory.rollout().create().name("exampleRollout").targetFilterQuery("controllerId==*").set(ds),
                 10, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "10").build());
 
-        return rolloutGroupManagement.findRolloutGroupsByRolloutId(entity.getId(), PAGE).getContent().get(0);
+        return rolloutGroupManagement.findByRollout(PAGE, entity.getId()).getContent().get(0);
     }
 
 }

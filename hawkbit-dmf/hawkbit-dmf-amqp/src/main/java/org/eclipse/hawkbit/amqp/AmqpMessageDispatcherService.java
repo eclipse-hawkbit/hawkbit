@@ -113,7 +113,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         LOG.debug("targetAssignDistributionSet retrieved for controller {}. I will forward it to DMF broker.",
                 assignedEvent.getControllerId());
 
-        targetManagement.findTargetByControllerID(assignedEvent.getControllerId())
+        targetManagement.getByControllerID(assignedEvent.getControllerId())
                 .ifPresent(target -> sendUpdateMessageToTarget(assignedEvent.getTenant(), target,
                         assignedEvent.getActionId(), assignedEvent.getModules()));
 

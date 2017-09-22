@@ -88,7 +88,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     @Override
     public void before() throws Exception {
         super.before();
-        testTarget = targetManagement.createTarget(entityFactory.target().create().controllerId(CONTROLLER_ID)
+        testTarget = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID)
                 .securityToken(TEST_TOKEN).address(AMQP_URI.toString()));
 
         this.rabbitTemplate = Mockito.mock(RabbitTemplate.class);
@@ -128,8 +128,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     }
 
     private Message getCaptureAdressEvent(final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
-        final Target target = targetManagement
-                .findTargetByControllerID(targetAssignDistributionSetEvent.getControllerId()).get();
+        final Target target = targetManagement.getByControllerID(targetAssignDistributionSetEvent.getControllerId())
+                .get();
         final Message sendMessage = createArgumentCapture(target.getAddress());
         return sendMessage;
     }
@@ -181,8 +181,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
             receivedList.add(new ArtifactFilesystem(new File("./test"), artifact.getSha1Hash(),
                     new DbArtifactHash(artifact.getSha1Hash(), null), artifact.getSize(), null));
         }
-        module = softwareModuleManagement.findSoftwareModuleById(module.getId()).get();
-        dsA = distributionSetManagement.findDistributionSetById(dsA.getId()).get();
+        module = softwareModuleManagement.get(module.getId()).get();
+        dsA = distributionSetManagement.get(dsA.getId()).get();
 
         final Action action = createAction(dsA);
 

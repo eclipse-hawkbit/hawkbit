@@ -15,7 +15,7 @@ import java.util.concurrent.Executor;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -81,7 +81,7 @@ public class TargetTableHeader extends AbstractTableHeader {
             final UINotification notification, final ManagementUIState managementUIState,
             final ManagementViewClientCriterion managementViewClientCriterion, final TargetManagement targetManagement,
             final DeploymentManagement deploymentManagement, final UiProperties uiproperties, final UIEventBus eventBus,
-            final EntityFactory entityFactory, final UINotification uinotification, final TagManagement tagManagement,
+            final EntityFactory entityFactory, final UINotification uinotification, final TargetTagManagement tagManagement,
             final DistributionSetManagement distributionSetManagement, final Executor uiExecutor,
             final TargetTable targetTable) {
         super(i18n, permChecker, eventbus, managementUIState, null, null);
@@ -336,7 +336,7 @@ public class TargetTableHeader extends AbstractTableHeader {
             }
             final Long distributionSetId = distributionIdSet.iterator().next();
             final Optional<DistributionSet> distributionSet = distributionSetManagement
-                    .findDistributionSetById(distributionSetId);
+                    .get(distributionSetId);
             if (!distributionSet.isPresent()) {
                 notification.displayWarning(i18n.getMessage("distributionset.not.exists"));
                 return;

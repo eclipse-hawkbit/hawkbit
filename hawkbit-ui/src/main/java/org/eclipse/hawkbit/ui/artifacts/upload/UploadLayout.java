@@ -251,7 +251,7 @@ public class UploadLayout extends VerticalLayout {
                 artifactUploadState.getSelectedBaseSwModuleId().ifPresent(selectedSwId -> {
                     // reset the flag
                     hasDirectory = false;
-                    final SoftwareModule softwareModule = softwareModuleManagement.findSoftwareModuleById(selectedSwId)
+                    final SoftwareModule softwareModule = softwareModuleManagement.get(selectedSwId)
                             .orElse(null);
                     for (final Html5File file : files) {
                         processFile(file, softwareModule);
@@ -730,7 +730,7 @@ public class UploadLayout extends VerticalLayout {
     }
 
     void refreshArtifactDetailsLayout(final Long selectedBaseSoftwareModuleId) {
-        final SoftwareModule softwareModule = softwareModuleManagement.findSoftwareModuleById(selectedBaseSoftwareModuleId)
+        final SoftwareModule softwareModule = softwareModuleManagement.get(selectedBaseSoftwareModuleId)
                 .orElse(null);
         eventBus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.ARTIFACTS_CHANGED, softwareModule));
     }

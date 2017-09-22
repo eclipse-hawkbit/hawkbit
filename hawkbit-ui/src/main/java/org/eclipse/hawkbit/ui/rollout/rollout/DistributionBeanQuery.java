@@ -82,7 +82,7 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
         if (startIndex == 0 && firstPageDistributionSets != null) {
             distBeans = firstPageDistributionSets;
         } else {
-            distBeans = getDistributionSetManagement().findDistributionSetsByFilters(
+            distBeans = getDistributionSetManagement().findByDistributionSetFilter(
                     new PageRequest(startIndex / count, count, sort), distributionSetFilter);
         }
         return createProxyDistributions(distBeans);
@@ -119,7 +119,7 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
         final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
                 .setIsComplete(true).build();
 
-        firstPageDistributionSets = getDistributionSetManagement().findDistributionSetsByFilters(
+        firstPageDistributionSets = getDistributionSetManagement().findByDistributionSetFilter(
                 new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilter);
         final long size = firstPageDistributionSets.getTotalElements();
         if (size > Integer.MAX_VALUE) {

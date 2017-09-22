@@ -238,8 +238,8 @@ public class DefineGroupsLayout extends GridLayout {
 
         removeAllRows();
 
-        final List<RolloutGroup> groups = rolloutGroupManagement.findRolloutGroupsByRolloutId(rollout.getId(),
-                new PageRequest(0, quotaManagement.getMaxRolloutGroupsPerRollout())).getContent();
+        final List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(new PageRequest(0, quotaManagement.getMaxRolloutGroupsPerRollout()),
+                rollout.getId()).getContent();
         for (final RolloutGroup group : groups) {
             final GroupRow groupRow = addGroupRow();
             groupRow.populateByGroup(group);
@@ -493,7 +493,7 @@ public class DefineGroupsLayout extends GridLayout {
                 targetFilterQueryCombo.setValue(null);
             } else {
                 final Page<TargetFilterQuery> filterQueries = targetFilterQueryManagement
-                        .findTargetFilterQueryByQuery(new PageRequest(0, 1), group.getTargetFilterQuery());
+                        .findByQuery(new PageRequest(0, 1), group.getTargetFilterQuery());
                 if (filterQueries.getTotalElements() > 0) {
                     final TargetFilterQuery filterQuery = filterQueries.getContent().get(0);
                     targetFilterQueryCombo.setValue(filterQuery.getName());

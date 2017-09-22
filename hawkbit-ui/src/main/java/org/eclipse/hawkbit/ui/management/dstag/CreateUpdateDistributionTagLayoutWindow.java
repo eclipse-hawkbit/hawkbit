@@ -9,12 +9,15 @@
 package org.eclipse.hawkbit.ui.management.dstag;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.builder.TagUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
@@ -31,6 +34,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.util.StringUtils;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
+import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.ui.UI;
 
 /**
@@ -39,15 +43,43 @@ import com.vaadin.ui.UI;
 public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdateTagLayout<DistributionSetTag>
         implements RefreshableContainer {
 
-    private static final long serialVersionUID = 444276149954167545L;
+    private static final long serialVersionUID = 1L;
 
     private static final String TARGET_TAG_NAME_DYNAMIC_STYLE = "new-target-tag-name";
     private static final String MSG_TEXTFIELD_NAME = "textfield.name";
 
-    CreateUpdateDistributionTagLayoutWindow(final VaadinMessageSource i18n, final TagManagement tagManagement,
-            final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
-            final UINotification uiNotification) {
-        super(i18n, tagManagement, entityFactory, eventBus, permChecker, uiNotification);
+    private final transient DistributionSetTagManagement distributionSetTagManagement;
+
+    CreateUpdateDistributionTagLayoutWindow(final VaadinMessageSource i18n,
+            final DistributionSetTagManagement distributionSetTagManagement, final EntityFactory entityFactory,
+            final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification) {
+        super(i18n, entityFactory, eventBus, permChecker, uiNotification);
+        this.distributionSetTagManagement = distributionSetTagManagement;
+    }
+
+    /**
+     * @return the color which should be selected in the color-picker component.
+     */
+    @Override
+    protected Color getColorForColorPicker() {
+        return ColorPickerHelper.rgbToColorConverter(distributionSetTagManagement
+                .getByName(tagNameComboBox.getValue().toString()).map(DistributionSetTag::getColour)
+                .filter(Objects::nonNull).orElse(ColorPickerConstants.DEFAULT_COLOR));
+
+    }
+
+    /**
+     * update tag.
+     */
+    protected void updateExistingTag(final Tag targetObj) {
+        final TagUpdate update = entityFactory.tag().update(targetObj.getId()).name(tagName.getValue())
+                .description(tagDesc.getValue());
+
+        distributionSetTagManagement.update(update);
+        eventBus.publish(this,
+                new DistributionSetTagTableEvent(BaseEntityEventType.UPDATED_ENTITY, (DistributionSetTag) targetObj));
+        uiNotification.displaySuccess(i18n.getMessage("message.update.success", new Object[] { targetObj.getName() }));
+
     }
 
     @Override
@@ -57,8 +89,8 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
         }
 
         tagNameComboBox.removeAllItems();
-        final List<DistributionSetTag> distTagNameList = tagManagement
-                .findAllDistributionSetTags(new PageRequest(0, MAX_TAGS)).getContent();
+        final List<DistributionSetTag> distTagNameList = distributionSetTagManagement
+                .findAll(new PageRequest(0, MAX_TAGS)).getContent();
         distTagNameList.forEach(value -> tagNameComboBox.addItem(value.getName()));
     }
 
@@ -82,7 +114,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
 
     @Override
     protected Optional<DistributionSetTag> findEntityByName() {
-        return tagManagement.findDistributionSetTag(tagName.getValue());
+        return distributionSetTagManagement.getByName(tagName.getValue());
     }
 
     /**
@@ -100,8 +132,8 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
                 colour = getColorPicked();
             }
 
-            final DistributionSetTag newDistTag = tagManagement.createDistributionSetTag(entityFactory.tag().create()
-                    .name(tagNameValueTrimmed).description(tagDescriptionTrimmed).colour(colour));
+            final DistributionSetTag newDistTag = distributionSetTagManagement.create(entityFactory
+                    .tag().create().name(tagNameValueTrimmed).description(tagDescriptionTrimmed).colour(colour));
             eventBus.publish(this, new DistributionSetTagTableEvent(BaseEntityEventType.ADD_ENTITY, newDistTag));
             displaySuccess(newDistTag.getName());
             resetDistTagValues();
@@ -143,7 +175,8 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     @Override
     public void setTagDetails(final String distTagSelected) {
         tagName.setValue(distTagSelected);
-        final Optional<DistributionSetTag> selectedDistTag = tagManagement.findDistributionSetTag(distTagSelected);
+        final Optional<DistributionSetTag> selectedDistTag = distributionSetTagManagement
+                .getByName(distTagSelected);
         if (selectedDistTag.isPresent()) {
             tagDesc.setValue(selectedDistTag.get().getDescription());
             if (null == selectedDistTag.get().getColour()) {

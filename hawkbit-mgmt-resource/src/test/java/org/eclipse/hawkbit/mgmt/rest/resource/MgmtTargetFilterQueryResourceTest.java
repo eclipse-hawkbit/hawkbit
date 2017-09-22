@@ -74,7 +74,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         mvc.perform(delete(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId()))
                 .andExpect(status().isOk());
 
-        assertThat(targetFilterQueryManagement.findTargetFilterQueryById(filterQuery.getId())).isNotPresent();
+        assertThat(targetFilterQueryManagement.get(filterQuery.getId())).isNotPresent();
     }
 
     @Test
@@ -112,7 +112,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 .andExpect(jsonPath("$.query", equalTo(filterQuery2)))
                 .andExpect(jsonPath("$.name", equalTo(filterName)));
 
-        final TargetFilterQuery tfqCheck = targetFilterQueryManagement.findTargetFilterQueryById(tfq.getId()).get();
+        final TargetFilterQuery tfqCheck = targetFilterQueryManagement.get(tfq.getId()).get();
         assertThat(tfqCheck.getQuery()).isEqualTo(filterQuery2);
         assertThat(tfqCheck.getName()).isEqualTo(filterName);
     }
@@ -126,7 +126,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final String body = new JSONObject().put("name", filterName2).toString();
 
         // prepare
-        final TargetFilterQuery tfq = targetFilterQueryManagement.createTargetFilterQuery(
+        final TargetFilterQuery tfq = targetFilterQueryManagement.create(
                 entityFactory.targetFilterQuery().create().name(filterName).query(filterQuery));
 
         mvc.perform(put(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId()).content(body)
@@ -135,7 +135,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 .andExpect(jsonPath("$.query", equalTo(filterQuery)))
                 .andExpect(jsonPath("$.name", equalTo(filterName2)));
 
-        final TargetFilterQuery tfqCheck = targetFilterQueryManagement.findTargetFilterQueryById(tfq.getId()).get();
+        final TargetFilterQuery tfqCheck = targetFilterQueryManagement.get(tfq.getId()).get();
         assertThat(tfqCheck.getQuery()).isEqualTo(filterQuery);
         assertThat(tfqCheck.getName()).isEqualTo(filterName2);
     }
@@ -270,7 +270,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest()).andReturn();
 
-        assertThat(targetFilterQueryManagement.countAllTargetFilterQuery()).isEqualTo(0);
+        assertThat(targetFilterQueryManagement.count()).isEqualTo(0);
 
         // verify response json exception message
         final ExceptionInfo exceptionInfo = ResourceUtility
@@ -293,7 +293,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         assertThat(
-                targetFilterQueryManagement.findTargetFilterQueryById(tfq.getId()).get().getAutoAssignDistributionSet())
+                targetFilterQueryManagement.get(tfq.getId()).get().getAutoAssignDistributionSet())
                         .isEqualTo(set);
 
         final String hrefPrefix = "http://localhost" + MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/"
@@ -317,10 +317,10 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
 
         final DistributionSet set = testdataFactory.createDistributionSet(dsName);
         final TargetFilterQuery tfq = createSingleTargetFilterQuery(knownName, knownQuery);
-        targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(tfq.getId(), set.getId());
+        targetFilterQueryManagement.updateAutoAssignDS(tfq.getId(), set.getId());
 
         assertThat(
-                targetFilterQueryManagement.findTargetFilterQueryById(tfq.getId()).get().getAutoAssignDistributionSet())
+                targetFilterQueryManagement.get(tfq.getId()).get().getAutoAssignDistributionSet())
                         .isEqualTo(set);
 
         mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS"))
@@ -330,7 +330,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 .andExpect(status().isNoContent());
 
         assertThat(
-                targetFilterQueryManagement.findTargetFilterQueryById(tfq.getId()).get().getAutoAssignDistributionSet())
+                targetFilterQueryManagement.get(tfq.getId()).get().getAutoAssignDistributionSet())
                         .isNull();
 
         mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS"))
@@ -340,7 +340,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
 
     private TargetFilterQuery createSingleTargetFilterQuery(final String name, final String query) {
         return targetFilterQueryManagement
-                .createTargetFilterQuery(entityFactory.targetFilterQuery().create().name(name).query(query));
+                .create(entityFactory.targetFilterQuery().create().name(name).query(query));
     }
 
 }

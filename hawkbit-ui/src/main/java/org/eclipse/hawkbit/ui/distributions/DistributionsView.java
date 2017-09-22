@@ -14,12 +14,12 @@ import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -100,7 +100,7 @@ public class DistributionsView extends AbstractNotificationView implements Brows
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final DistributionSetManagement distributionSetManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement, final TargetManagement targetManagement,
-            final EntityFactory entityFactory, final TagManagement tagManagement,
+            final EntityFactory entityFactory, final DistributionSetTagManagement distributionSetTagManagement,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final ArtifactUploadState artifactUploadState, final SystemManagement systemManagement,
             final ArtifactManagement artifactManagement, final NotificationUnreadButton notificationUnreadButton,
@@ -110,17 +110,17 @@ public class DistributionsView extends AbstractNotificationView implements Brows
         this.i18n = i18n;
         this.uiNotification = uiNotification;
         this.filterByDSTypeLayout = new DSTypeFilterLayout(manageDistUIState, i18n, permChecker, eventBus,
-                tagManagement, entityFactory, uiNotification, softwareModuleTypeManagement,
-                distributionSetTypeManagement, distributionsViewClientCriterion);
+                entityFactory, uiNotification, softwareModuleTypeManagement, distributionSetTypeManagement,
+                distributionSetManagement, distributionsViewClientCriterion);
         this.distributionTableLayout = new DistributionSetTableLayout(i18n, eventBus, permChecker, manageDistUIState,
                 softwareModuleManagement, distributionSetManagement, distributionSetTypeManagement, targetManagement,
-                entityFactory, uiNotification, tagManagement, distributionsViewClientCriterion, systemManagement);
+                entityFactory, uiNotification, distributionSetTagManagement, distributionsViewClientCriterion,
+                systemManagement);
         this.softwareModuleTableLayout = new SwModuleTableLayout(i18n, uiNotification, eventBus,
                 softwareModuleManagement, softwareModuleTypeManagement, entityFactory, manageDistUIState, permChecker,
                 distributionsViewClientCriterion, artifactUploadState, artifactManagement);
         this.filterBySMTypeLayout = new DistSMTypeFilterLayout(eventBus, i18n, permChecker, manageDistUIState,
-                tagManagement, entityFactory, uiNotification, softwareModuleTypeManagement,
-                distributionsViewClientCriterion);
+                entityFactory, uiNotification, softwareModuleTypeManagement, distributionsViewClientCriterion);
         this.deleteActionsLayout = new DSDeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
                 systemManagement, manageDistUIState, distributionsViewClientCriterion, distributionSetManagement,
                 distributionSetTypeManagement, softwareModuleManagement, softwareModuleTypeManagement);

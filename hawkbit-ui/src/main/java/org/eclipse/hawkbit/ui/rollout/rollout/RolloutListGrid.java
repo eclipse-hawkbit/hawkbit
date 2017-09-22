@@ -183,7 +183,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
             return;
         }
         final Optional<Rollout> rollout = rolloutManagement
-                .findRolloutWithDetailedStatus(rolloutChangeEvent.getRolloutId());
+                .getWithDetailedStatus(rolloutChangeEvent.getRolloutId());
 
         if (!rollout.isPresent()) {
             return;
@@ -472,7 +472,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         final String rolloutName = (String) row.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
 
         if (RolloutStatus.READY.equals(rolloutStatus)) {
-            rolloutManagement.startRollout(rolloutId);
+            rolloutManagement.start(rolloutId);
             uiNotification.displaySuccess(i18n.getMessage("message.rollout.started", rolloutName));
             return;
         }
@@ -499,7 +499,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     private void deleteRollout(final Long rolloutId) {
-        final Optional<Rollout> rollout = rolloutManagement.findRolloutWithDetailedStatus(rolloutId);
+        final Optional<Rollout> rollout = rolloutManagement.getWithDetailedStatus(rolloutId);
 
         if (!rollout.isPresent()) {
             return;
@@ -514,7 +514,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
                     }
                     final Item row = getContainerDataSource().getItem(rolloutId);
                     final String rolloutName = (String) row.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
-                    rolloutManagement.deleteRollout(rolloutId);
+                    rolloutManagement.delete(rolloutId);
                     uiNotification.displaySuccess(i18n.getMessage("message.rollout.deleted", rolloutName));
                 }, UIComponentIdProvider.ROLLOUT_DELETE_CONFIRMATION_DIALOG);
         UI.getCurrent().addWindow(confirmationDialog.getWindow());

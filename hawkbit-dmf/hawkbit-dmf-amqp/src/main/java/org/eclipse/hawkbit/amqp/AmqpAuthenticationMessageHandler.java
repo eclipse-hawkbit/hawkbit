@@ -168,19 +168,19 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
         }
 
         if (fileResource.getSha1() != null) {
-            return artifactManagement.findFirstArtifactBySHA1(fileResource.getSha1());
+            return artifactManagement.findFirstBySHA1(fileResource.getSha1());
         }
 
         if (fileResource.getFilename() != null) {
-            return artifactManagement.findArtifactByFilename(fileResource.getFilename());
+            return artifactManagement.getByFilename(fileResource.getFilename());
         }
 
         if (fileResource.getArtifactId() != null) {
-            return artifactManagement.findArtifact(fileResource.getArtifactId());
+            return artifactManagement.get(fileResource.getArtifactId());
         }
 
         if (fileResource.getSoftwareModuleFilenameResource() != null) {
-            return artifactManagement.findByFilenameAndSoftwareModule(
+            return artifactManagement.getByFilenameAndSoftwareModule(
                     fileResource.getSoftwareModuleFilenameResource().getFilename(),
                     fileResource.getSoftwareModuleFilenameResource().getSoftwareModuleId());
         }

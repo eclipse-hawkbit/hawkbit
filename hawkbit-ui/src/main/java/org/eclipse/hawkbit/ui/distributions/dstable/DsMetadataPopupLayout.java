@@ -45,13 +45,13 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
 
     @Override
     protected boolean checkForDuplicate(final DistributionSet entity, final String value) {
-        return distributionSetManagement.findDistributionSetMetadata(entity.getId(), value).isPresent();
+        return distributionSetManagement.getMetaDataByDistributionSetId(entity.getId(), value).isPresent();
     }
 
     @Override
     protected DistributionSetMetadata createMetadata(final DistributionSet entity, final String key,
             final String value) {
-        final DistributionSetMetadata dsMetaData = distributionSetManagement.createDistributionSetMetadata(
+        final DistributionSetMetadata dsMetaData = distributionSetManagement.createMetaData(
                 entity.getId(), Arrays.asList(entityFactory.generateMetadata(key, value))).get(0);
         setSelectedEntity(dsMetaData.getDistributionSet());
         return dsMetaData;
@@ -61,7 +61,7 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
     protected DistributionSetMetadata updateMetadata(final DistributionSet entity, final String key,
             final String value) {
         final DistributionSetMetadata dsMetaData = distributionSetManagement
-                .updateDistributionSetMetadata(entity.getId(), entityFactory.generateMetadata(key, value));
+                .updateMetaData(entity.getId(), entityFactory.generateMetadata(key, value));
         setSelectedEntity(dsMetaData.getDistributionSet());
         return dsMetaData;
     }
@@ -69,13 +69,13 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
     @Override
     protected List<MetaData> getMetadataList() {
         return Collections.unmodifiableList(distributionSetManagement
-                .findDistributionSetMetadataByDistributionSetId(getSelectedEntity().getId(), new PageRequest(0, 500))
+                .findMetaDataByDistributionSetId(new PageRequest(0, 500), getSelectedEntity().getId())
                 .getContent());
     }
 
     @Override
     protected void deleteMetadata(final DistributionSet entity, final String key, final String value) {
-        distributionSetManagement.deleteDistributionSetMetadata(entity.getId(), key);
+        distributionSetManagement.deleteMetaData(entity.getId(), key);
     }
 
     @Override

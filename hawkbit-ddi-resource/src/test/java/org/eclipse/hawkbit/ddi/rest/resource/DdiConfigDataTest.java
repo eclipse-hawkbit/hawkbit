@@ -60,9 +60,9 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         Thread.sleep(1); // is required: otherwise processing the next line is
                          // often too fast and
                          // the following assert will fail
-        assertThat(targetManagement.findTargetByControllerID("4712").get().getLastTargetQuery())
+        assertThat(targetManagement.getByControllerID("4712").get().getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(targetManagement.findTargetByControllerID("4712").get().getLastTargetQuery())
+        assertThat(targetManagement.getByControllerID("4712").get().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
 
         final Map<String, String> attributes = Maps.newHashMapWithExpectedSize(1);

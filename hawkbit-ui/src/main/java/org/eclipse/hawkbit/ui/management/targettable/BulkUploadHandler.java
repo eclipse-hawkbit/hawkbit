@@ -29,7 +29,7 @@ import java.util.concurrent.Executor;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -81,7 +81,7 @@ public class BulkUploadHandler extends CustomComponent
     private static final Splitter SPLITTER = Splitter.on(',').omitEmptyStrings().trimResults();
 
     private final transient TargetManagement targetManagement;
-    private final transient TagManagement tagManagement;
+    private final transient TargetTagManagement tagManagement;
 
     private final ComboBox comboBox;
     private final TextArea descTextArea;
@@ -106,7 +106,7 @@ public class BulkUploadHandler extends CustomComponent
     private final UI uiInstance;
 
     BulkUploadHandler(final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout,
-            final TargetManagement targetManagement, final TagManagement tagManagement,
+            final TargetManagement targetManagement, final TargetTagManagement tagManagement,
             final EntityFactory entityFactory, final DistributionSetManagement distributionSetManagement,
             final ManagementUIState managementUIState, final DeploymentManagement deploymentManagement, final VaadinMessageSource i18n,
             final UI uiInstance, final Executor uiExecutor) {
@@ -304,7 +304,7 @@ public class BulkUploadHandler extends CustomComponent
             final TargetBulkUpload targetBulkUpload = managementUIState.getTargetTableFilters().getBulkUpload();
             final List<String> targetsList = targetBulkUpload.getTargetsCreated();
             final Long dsSelected = (Long) comboBox.getValue();
-            if (!distributionSetManagement.findDistributionSetById(dsSelected).isPresent()) {
+            if (!distributionSetManagement.get(dsSelected).isPresent()) {
                 return i18n.getMessage("message.bulk.upload.assignment.failed");
             }
             deploymentManagement.assignDistributionSet(targetBulkUpload.getDsNameAndVersion(), actionType,
@@ -316,7 +316,7 @@ public class BulkUploadHandler extends CustomComponent
             final Map<Long, TagData> tokensSelected = targetBulkTokenTags.getTokensAdded();
             final List<String> deletedTags = new ArrayList<>();
             for (final TagData tagData : tokensSelected.values()) {
-                if (!tagManagement.findTargetTagById(tagData.getId()).isPresent()) {
+                if (!tagManagement.get(tagData.getId()).isPresent()) {
                     deletedTags.add(tagData.getName());
                 } else {
                     targetManagement.toggleTagAssignment(
@@ -368,7 +368,7 @@ public class BulkUploadHandler extends CustomComponent
             final String description = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
 
             try {
-                targetManagement.createTarget(entityFactory.target().create().controllerId(newControllerId).name(name)
+                targetManagement.create(entityFactory.target().create().controllerId(newControllerId).name(name)
                         .description(description));
 
                 managementUIState.getTargetTableFilters().getBulkUpload().getTargetsCreated().add(newControllerId);

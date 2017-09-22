@@ -399,7 +399,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     }
 
     private Target createTarget(final String controllerId) {
-        return targetManagement.createTarget(
+        return targetManagement.create(
                 entityFactory.target().create().controllerId(controllerId).securityToken(TARGET_SECRUITY_TOKEN));
     }
 

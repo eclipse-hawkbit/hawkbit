@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
-import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.management.tag.ProxyTag;
 import org.eclipse.hawkbit.ui.management.tag.TagIdName;
@@ -34,7 +34,7 @@ public class TargetTagBeanQuery extends AbstractBeanQuery<ProxyTag> {
     private static final long serialVersionUID = -4791426170440663033L;
     private final Sort sort = new Sort(Direction.ASC, "name");
     private transient Page<TargetTag> firstPageTargetTag = null;
-    private transient TagManagement tagManagementService;
+    private transient TargetTagManagement tagManagementService;
 
     /**
      * Parametric constructor.
@@ -57,7 +57,7 @@ public class TargetTagBeanQuery extends AbstractBeanQuery<ProxyTag> {
     @Override
     public int size() {
         firstPageTargetTag = getTagManagement()
-                .findAllTargetTags(new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
+                .findAll(new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
         long size = firstPageTargetTag.getTotalElements();
         if (size > Integer.MAX_VALUE) {
             size = Integer.MAX_VALUE;
@@ -65,9 +65,9 @@ public class TargetTagBeanQuery extends AbstractBeanQuery<ProxyTag> {
         return (int) size;
     }
 
-    private TagManagement getTagManagement() {
+    private TargetTagManagement getTagManagement() {
         if (tagManagementService == null) {
-            tagManagementService = SpringContextHelper.getBean(TagManagement.class);
+            tagManagementService = SpringContextHelper.getBean(TargetTagManagement.class);
         }
         return tagManagementService;
     }
@@ -79,7 +79,7 @@ public class TargetTagBeanQuery extends AbstractBeanQuery<ProxyTag> {
         if (startIndex == 0 && firstPageTargetTag != null) {
             targetTagBeans = firstPageTargetTag;
         } else {
-            targetTagBeans = getTagManagement().findAllTargetTags(new OffsetBasedPageRequest(startIndex, count, sort));
+            targetTagBeans = getTagManagement().findAll(new OffsetBasedPageRequest(startIndex, count, sort));
         }
         for (final TargetTag tag : targetTagBeans.getContent()) {
             final ProxyTag proxyTargetTag = new ProxyTag();

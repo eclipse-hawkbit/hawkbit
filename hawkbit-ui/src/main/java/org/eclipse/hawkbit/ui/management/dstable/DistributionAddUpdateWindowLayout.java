@@ -141,8 +141,8 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             final boolean isMigStepReq = reqMigStepCheckbox.getValue();
             final Long distSetTypeId = (Long) distsetTypeNameComboBox.getValue();
 
-            distributionSetTypeManagement.findDistributionSetTypeById(distSetTypeId).ifPresent(type -> {
-                final DistributionSet currentDS = distributionSetManagement.updateDistributionSet(
+            distributionSetTypeManagement.get(distSetTypeId).ifPresent(type -> {
+                final DistributionSet currentDS = distributionSetManagement.update(
                         entityFactory.distributionSet().update(editDistId).name(distNameTextField.getValue())
                                 .description(descTextArea.getValue()).version(distVersionTextField.getValue())
                                 .requiredMigrationStep(isMigStepReq).type(type));
@@ -166,10 +166,10 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             final boolean isMigStepReq = reqMigStepCheckbox.getValue();
 
             final DistributionSetType distributionSetType = distributionSetTypeManagement
-                    .findDistributionSetTypeById(distSetTypeId)
+                    .get(distSetTypeId)
                     .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, distSetTypeId));
             final DistributionSet newDist = distributionSetManagement
-                    .createDistributionSet(entityFactory.distributionSet().create().name(name).version(version)
+                    .create(entityFactory.distributionSet().create().name(name).version(version)
                             .description(desc).type(distributionSetType).requiredMigrationStep(isMigStepReq));
 
             eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.ADD_ENTITY, newDist));
@@ -183,7 +183,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             final String version = distVersionTextField.getValue();
 
             final Optional<DistributionSet> existingDs = distributionSetManagement
-                    .findDistributionSetByNameAndVersion(name, version);
+                    .getByNameAndVersion(name, version);
             /*
              * Distribution should not exists with the same name & version.
              * Display error message, when the "existingDs" is not null and it
@@ -297,7 +297,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         }
 
         final Optional<DistributionSet> distSet = distributionSetManagement
-                .findDistributionSetByIdWithDetails(editDistId);
+                .getWithDetails(editDistId);
         if (!distSet.isPresent()) {
             return;
         }

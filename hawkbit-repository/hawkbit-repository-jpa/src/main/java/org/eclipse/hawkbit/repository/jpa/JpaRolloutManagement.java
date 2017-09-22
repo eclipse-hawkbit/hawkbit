@@ -165,7 +165,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    public Page<Rollout> findAllByPredicate(final String rsqlParam, final Pageable pageable, final boolean deleted) {
+    public Page<Rollout> findByRsql(final Pageable pageable, final String rsqlParam, final boolean deleted) {
         final List<Specification<JpaRollout>> specList = Lists.newArrayListWithExpectedSize(2);
         specList.add(RSQLUtility.parse(rsqlParam, RolloutFields.class, virtualPropertyReplacer));
         specList.add(RolloutSpecification.isDeletedWithDistributionSet(deleted));
@@ -186,7 +186,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    public Optional<Rollout> findRolloutById(final Long rolloutId) {
+    public Optional<Rollout> get(final Long rolloutId) {
         return Optional.ofNullable(rolloutRepository.findOne(rolloutId));
     }
 
@@ -194,8 +194,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Rollout createRollout(final RolloutCreate rollout, final int amountGroup,
-            final RolloutGroupConditions conditions) {
+    public Rollout create(final RolloutCreate rollout, final int amountGroup, final RolloutGroupConditions conditions) {
         RolloutHelper.verifyRolloutGroupParameter(amountGroup, quotaManagement);
         final JpaRollout savedRollout = createRollout((JpaRollout) rollout.build());
         return createRolloutGroups(amountGroup, conditions, savedRollout);
@@ -205,7 +204,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Rollout createRollout(final RolloutCreate rollout, final List<RolloutGroupCreate> groups,
+    public Rollout create(final RolloutCreate rollout, final List<RolloutGroupCreate> groups,
             final RolloutGroupConditions conditions) {
         RolloutHelper.verifyRolloutGroupParameter(groups.size(), quotaManagement);
         final JpaRollout savedRollout = createRollout((JpaRollout) rollout.build());
@@ -214,7 +213,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     private JpaRollout createRollout(final JpaRollout rollout) {
 
-        final Long totalTargets = targetManagement.countTargetByTargetFilterQuery(rollout.getTargetFilterQuery());
+        final Long totalTargets = targetManagement.countByRsql(rollout.getTargetFilterQuery());
         if (totalTargets == 0) {
             throw new ValidationException("Rollout does not match any existing targets");
         }
@@ -320,9 +319,9 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     private void handleCreateRollout(final JpaRollout rollout) {
         LOGGER.debug("handleCreateRollout called for rollout {}", rollout.getId());
 
-        final List<RolloutGroup> rolloutGroups = rolloutGroupManagement.findRolloutGroupsByRolloutId(rollout.getId(),
-                new PageRequest(0, quotaManagement.getMaxRolloutGroupsPerRollout(), new Sort(Direction.ASC, "id")))
-                .getContent();
+        final List<RolloutGroup> rolloutGroups = rolloutGroupManagement.findByRollout(
+                new PageRequest(0, quotaManagement.getMaxRolloutGroupsPerRollout(), new Sort(Direction.ASC, "id")),
+                rollout.getId()).getContent();
 
         int readyGroups = 0;
         int totalTargets = 0;
@@ -368,7 +367,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
                 RolloutGroupStatus.READY, group);
 
         final long targetsInGroupFilter = runInNewTransaction("countAllTargetsByTargetFilterQueryAndNotInRolloutGroups",
-                count -> targetManagement.countAllTargetsByTargetFilterQueryAndNotInRolloutGroups(readyGroups,
+                count -> targetManagement.countByRsqlAndNotInRolloutGroups(readyGroups,
                         groupTargetFilter));
         final long expectedInGroup = Math.round(group.getTargetPercentage() / 100 * (double) targetsInGroupFilter);
         final long currentlyInGroup = runInNewTransaction("countRolloutTargetGroupByRolloutGroup",
@@ -410,7 +409,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout.getRolloutGroups(),
                     RolloutGroupStatus.READY, group);
             final Page<Target> targets = targetManagement
-                    .findAllTargetsByTargetFilterQueryAndNotInRolloutGroups(pageRequest, readyGroups, targetFilter);
+                    .findByTargetFilterQueryAndNotInRolloutGroups(pageRequest, readyGroups, targetFilter);
 
             createAssignmentOfTargetsToGroup(targets, group);
 
@@ -428,7 +427,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             final String targetFilter, final Long createdAt) {
 
         final String baseFilter = RolloutHelper.getTargetFilterQuery(targetFilter, createdAt);
-        final long totalTargets = targetManagement.countTargetByTargetFilterQuery(baseFilter);
+        final long totalTargets = targetManagement.countByRsql(baseFilter);
         if (totalTargets == 0) {
             throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
         }
@@ -441,7 +440,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Rollout startRollout(final Long rolloutId) {
+    public Rollout start(final Long rolloutId) {
         LOGGER.debug("startRollout called for rollout {}", rolloutId);
 
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
@@ -531,7 +530,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             final ActionType actionType = rollout.getActionType();
             final long forceTime = rollout.getForcedTime();
 
-            final Page<Target> targets = targetManagement.findAllTargetsInRolloutGroupWithoutAction(pageRequest,
+            final Page<Target> targets = targetManagement.findByInRolloutGroupWithoutAction(pageRequest,
                     groupId);
             if (targets.getTotalElements() > 0) {
                 createScheduledAction(targets.getContent(), distributionSet, actionType, forceTime, rollout, group);
@@ -812,7 +811,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             LOGGER.debug(
                     "handleReadyRollout called for rollout {} with autostart beyond define time. Switch to STARTING",
                     rollout.getId());
-            startRollout(rollout.getId());
+            start(rollout.getId());
         }
     }
 
@@ -820,7 +819,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void deleteRollout(final long rolloutId) {
+    public void delete(final Long rolloutId) {
         final JpaRollout jpaRollout = rolloutRepository.findOne(rolloutId);
 
         if (jpaRollout == null) {
@@ -915,17 +914,17 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    public Long countRolloutsAll() {
+    public long count() {
         return rolloutRepository.count(RolloutSpecification.isDeletedWithDistributionSet(false));
     }
 
     @Override
-    public Long countRolloutsAllByFilters(final String searchText) {
+    public long countByFilters(final String searchText) {
         return rolloutRepository.count(JpaRolloutHelper.likeNameOrDescription(searchText, false));
     }
 
     @Override
-    public Slice<Rollout> findRolloutWithDetailedStatusByFilters(final Pageable pageable, final String searchText,
+    public Slice<Rollout> findByFiltersWithDetailedStatus(final Pageable pageable, final String searchText,
             final boolean deleted) {
         final Slice<JpaRollout> findAll = findByCriteriaAPI(pageable,
                 Arrays.asList(JpaRolloutHelper.likeNameOrDescription(searchText, deleted)));
@@ -934,7 +933,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    public Optional<Rollout> findRolloutByName(final String rolloutName) {
+    public Optional<Rollout> getByName(final String rolloutName) {
         return rolloutRepository.findByName(rolloutName);
     }
 
@@ -942,7 +941,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Rollout updateRollout(final RolloutUpdate u) {
+    public Rollout update(final RolloutUpdate u) {
         final GenericRolloutUpdate update = (GenericRolloutUpdate) u;
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(update.getId());
 
@@ -954,7 +953,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         update.getForcedTime().ifPresent(rollout::setForcedTime);
         update.getStartAt().ifPresent(rollout::setStartAt);
         update.getSet().ifPresent(setId -> {
-            final DistributionSet set = distributionSetManagement.findDistributionSetById(setId)
+            final DistributionSet set = distributionSetManagement.get(setId)
                     .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, setId));
 
             rollout.setDistributionSet(set);
@@ -975,7 +974,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    public Page<Rollout> findAllRolloutsWithDetailedStatus(final Pageable pageable, final boolean deleted) {
+    public Page<Rollout> findAllWithDetailedStatus(final Pageable pageable, final boolean deleted) {
         Page<JpaRollout> rollouts;
         final Specification<JpaRollout> spec = RolloutSpecification.isDeletedWithDistributionSet(deleted);
         rollouts = rolloutRepository.findAll(spec, pageable);
@@ -984,8 +983,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    public Optional<Rollout> findRolloutWithDetailedStatus(final Long rolloutId) {
-        final Optional<Rollout> rollout = findRolloutById(rolloutId);
+    public Optional<Rollout> getWithDetailedStatus(final Long rolloutId) {
+        final Optional<Rollout> rollout = get(rolloutId);
 
         if (!rollout.isPresent()) {
             return rollout;

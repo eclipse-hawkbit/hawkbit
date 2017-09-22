@@ -39,9 +39,9 @@ public class RSQLRolloutGroupFields extends AbstractJpaIntegrationTest {
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
-        rollout = rolloutManagement.findRolloutById(rollout.getId()).get();
+        rollout = rolloutManagement.get(rollout.getId()).get();
 
-        this.rolloutGroupId = rolloutGroupManagement.findRolloutGroupsByRolloutId(rollout.getId(), PAGE).getContent()
+        this.rolloutGroupId = rolloutGroupManagement.findByRollout(PAGE, rollout.getId()).getContent()
                 .get(0).getId();
     }
 
@@ -75,8 +75,8 @@ public class RSQLRolloutGroupFields extends AbstractJpaIntegrationTest {
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long expcetedTargets) {
-        final Page<RolloutGroup> findTargetPage = rolloutGroupManagement.findRolloutGroupsAll(rollout.getId(),
-                rsqlParam, new PageRequest(0, 100));
+        final Page<RolloutGroup> findTargetPage = rolloutGroupManagement.findByRolloutAndRsql(new PageRequest(0, 100),
+                rollout.getId(), rsqlParam);
         final long countTargetsAll = findTargetPage.getTotalElements();
         assertThat(findTargetPage).isNotNull();
         assertThat(countTargetsAll).isEqualTo(expcetedTargets);
@@ -84,9 +84,9 @@ public class RSQLRolloutGroupFields extends AbstractJpaIntegrationTest {
 
     private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId,
             final String targetFilterQuery) {
-        return rolloutManagement.createRollout(
+        return rolloutManagement.create(
                 entityFactory.rollout().create()
-                        .set(distributionSetManagement.findDistributionSetById(distributionSetId).get()).name(name)
+                        .set(distributionSetManagement.get(distributionSetId).get()).name(name)
                         .targetFilterQuery(targetFilterQuery),
                 amountGroups, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
