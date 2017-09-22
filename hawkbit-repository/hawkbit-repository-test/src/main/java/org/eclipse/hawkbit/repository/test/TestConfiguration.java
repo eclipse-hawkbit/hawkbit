@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.event.BusProtoStuffMessageConverter;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
+import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
@@ -44,6 +45,7 @@ import org.springframework.cache.guava.GuavaCacheManager;
 import org.springframework.cloud.bus.ConditionalOnBusEnabled;
 import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,6 +53,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.core.ResolvableType;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.integration.support.locks.DefaultLockRegistry;
 import org.springframework.integration.support.locks.LockRegistry;
@@ -82,43 +85,43 @@ public class TestConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public LockRegistry lockRegistry() {
+    LockRegistry lockRegistry() {
         return new DefaultLockRegistry();
     }
 
     @Bean
-    public SecurityTokenGenerator securityTokenGenerator() {
+    SecurityTokenGenerator securityTokenGenerator() {
         return new SecurityTokenGenerator();
     }
 
     @Bean
-    public SystemSecurityContext systemSecurityContext(final TenantAware tenantAware) {
+    SystemSecurityContext systemSecurityContext(final TenantAware tenantAware) {
         return new SystemSecurityContext(tenantAware);
     }
 
     @Bean
-    public ArtifactRepository artifactRepository(final ArtifactFilesystemProperties artifactFilesystemProperties) {
+    ArtifactRepository artifactRepository(final ArtifactFilesystemProperties artifactFilesystemProperties) {
         return new ArtifactFilesystemRepository(artifactFilesystemProperties);
     }
 
     @Bean
-    public TestdataFactory testdataFactory() {
+    TestdataFactory testdataFactory() {
         return new TestdataFactory();
     }
 
     @Bean
-    public PropertyBasedArtifactUrlHandler testPropertyBasedArtifactUrlHandler(
+    PropertyBasedArtifactUrlHandler testPropertyBasedArtifactUrlHandler(
             final ArtifactUrlHandlerProperties urlHandlerProperties) {
         return new PropertyBasedArtifactUrlHandler(urlHandlerProperties);
     }
 
     @Bean
-    public TenantAware tenantAware() {
+    TenantAware tenantAware() {
         return new SecurityContextTenantAware();
     }
 
     @Bean
-    public TenantAwareCacheManager cacheManager() {
+    TenantAwareCacheManager cacheManager() {
         return new TenantAwareCacheManager(new GuavaCacheManager(), tenantAware());
     }
 
@@ -128,29 +131,48 @@ public class TestConfiguration implements AsyncConfigurer {
      * @return the cache
      */
     @Bean
-    public DownloadIdCache downloadIdCache() {
+    DownloadIdCache downloadIdCache() {
         return new DefaultDownloadIdCache(cacheManager());
     }
 
     @Bean(name = AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME)
-    public SimpleApplicationEventMulticaster applicationEventMulticaster() {
-        final SimpleApplicationEventMulticaster simpleApplicationEventMulticaster = new SimpleApplicationEventMulticaster();
+    SimpleApplicationEventMulticaster applicationEventMulticaster(final ApplicationEventFilter applicationEventFilter) {
+        final SimpleApplicationEventMulticaster simpleApplicationEventMulticaster = new FilterEnabledApplicationEventPublisher(
+                applicationEventFilter);
         simpleApplicationEventMulticaster.setTaskExecutor(asyncExecutor());
         return simpleApplicationEventMulticaster;
     }
 
+    private static class FilterEnabledApplicationEventPublisher extends SimpleApplicationEventMulticaster {
+
+        private final ApplicationEventFilter applicationEventFilter;
+
+        FilterEnabledApplicationEventPublisher(final ApplicationEventFilter applicationEventFilter) {
+            this.applicationEventFilter = applicationEventFilter;
+        }
+
+        @Override
+        public void multicastEvent(final ApplicationEvent event, final ResolvableType eventType) {
+            if (applicationEventFilter.filter(event)) {
+                return;
+            }
+
+            super.multicastEvent(event, eventType);
+        }
+    }
+
     @Bean
-    public EventPublisherHolder eventBusHolder() {
+    EventPublisherHolder eventBusHolder() {
         return EventPublisherHolder.getInstance();
     }
 
     @Bean
-    public Executor asyncExecutor() {
+    Executor asyncExecutor() {
         return new DelegatingSecurityContextExecutorService(Executors.newSingleThreadExecutor());
     }
 
     @Bean
-    public AuditorAware<String> auditorAware() {
+    AuditorAware<String> auditorAware() {
         return new SpringSecurityAuditorAware();
     }
 
@@ -169,13 +191,13 @@ public class TestConfiguration implements AsyncConfigurer {
      * @return returns a VirtualPropertyReplacer
      */
     @Bean
-    public VirtualPropertyReplacer virtualPropertyReplacer() {
+    VirtualPropertyReplacer virtualPropertyReplacer() {
         return new VirtualPropertyResolver();
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ServiceMatcher serviceMatcher(final ApplicationContext applicationContext) {
+    ServiceMatcher serviceMatcher(final ApplicationContext applicationContext) {
         final ServiceMatcher serviceMatcher = new ServiceMatcher();
         serviceMatcher.setMatcher(new AntPathMatcher(":"));
         serviceMatcher.setApplicationContext(applicationContext);
@@ -188,7 +210,7 @@ public class TestConfiguration implements AsyncConfigurer {
      */
     @Bean
     @ConditionalOnBusEnabled
-    public MessageConverter busProtoBufConverter() {
+    MessageConverter busProtoBufConverter() {
         return new BusProtoStuffMessageConverter();
     }
 }

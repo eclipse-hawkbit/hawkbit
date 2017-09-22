@@ -48,7 +48,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,9 +99,6 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Autowired
     private TenantConfigurationManagement tenantConfigurationManagement;
-
-    @Autowired
-    private TenantAware tenantAware;
 
     @Autowired
     private SystemSecurityContext systemSecurityContext;
@@ -203,10 +199,8 @@ public class JpaControllerManagement implements ControllerManagement {
                     .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
                     .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build());
 
-            if (repositoryProperties.isPublishTargetPollEvent()) {
-                afterCommit.afterCommit(
-                        () -> eventPublisher.publishEvent(new TargetPollEvent(result, applicationContext.getId())));
-            }
+            afterCommit.afterCommit(
+                    () -> eventPublisher.publishEvent(new TargetPollEvent(result, applicationContext.getId())));
 
             return result;
         }
@@ -223,10 +217,8 @@ public class JpaControllerManagement implements ControllerManagement {
         toUpdate.setAddress(address.toString());
         toUpdate.setLastTargetQuery(System.currentTimeMillis());
 
-        if (repositoryProperties.isPublishTargetPollEvent()) {
-            afterCommit.afterCommit(
-                    () -> eventPublisher.publishEvent(new TargetPollEvent(toUpdate, applicationContext.getId())));
-        }
+        afterCommit.afterCommit(
+                () -> eventPublisher.publishEvent(new TargetPollEvent(toUpdate, applicationContext.getId())));
 
         return targetRepository.save(toUpdate);
     }
