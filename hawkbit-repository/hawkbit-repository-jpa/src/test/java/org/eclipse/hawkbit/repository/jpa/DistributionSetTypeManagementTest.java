@@ -48,9 +48,9 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
             + "of Optional not present.")
     @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 0) })
     public void nonExistingEntityAccessReturnsNotPresent() {
-        assertThat(distributionSetTypeManagement.findDistributionSetTypeById(NOT_EXIST_IDL)).isNotPresent();
-        assertThat(distributionSetTypeManagement.findDistributionSetTypeByKey(NOT_EXIST_ID)).isNotPresent();
-        assertThat(distributionSetTypeManagement.findDistributionSetTypeByName(NOT_EXIST_ID)).isNotPresent();
+        assertThat(distributionSetTypeManagement.get(NOT_EXIST_IDL)).isNotPresent();
+        assertThat(distributionSetTypeManagement.getByKey(NOT_EXIST_ID)).isNotPresent();
+        assertThat(distributionSetTypeManagement.getByName(NOT_EXIST_ID)).isNotPresent();
     }
 
     @Test
@@ -71,15 +71,10 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
                 testdataFactory.findOrCreateDistributionSetType("xxx", "xxx").getId(), Arrays.asList(NOT_EXIST_IDL)),
                 "SoftwareModuleType");
 
-        verifyThrownExceptionBy(() -> distributionSetTypeManagement.countDistributionSetsByType(NOT_EXIST_IDL),
-                "DistributionSet");
-
-        verifyThrownExceptionBy(() -> distributionSetTypeManagement.deleteDistributionSetType(NOT_EXIST_IDL),
-                "DistributionSetType");
+        verifyThrownExceptionBy(() -> distributionSetTypeManagement.delete(NOT_EXIST_IDL), "DistributionSetType");
 
         verifyThrownExceptionBy(
-                () -> distributionSetTypeManagement
-                        .updateDistributionSetType(entityFactory.distributionSetType().update(NOT_EXIST_IDL)),
+                () -> distributionSetTypeManagement.update(entityFactory.distributionSetType().update(NOT_EXIST_IDL)),
                 "DistributionSet");
     }
 
@@ -100,12 +95,12 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
     private void createAndUpdateDistributionSetWithInvalidDescription(final DistributionSet set) {
 
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> distributionSetManagement.createDistributionSet(entityFactory.distributionSet()
+                .isThrownBy(() -> distributionSetManagement.create(entityFactory.distributionSet()
                         .create().name("a").version("a").description(RandomStringUtils.randomAlphanumeric(513))))
                 .as("set with too long description should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> distributionSetManagement.updateDistributionSet(entityFactory.distributionSet()
+                .isThrownBy(() -> distributionSetManagement.update(entityFactory.distributionSet()
                         .update(set.getId()).description(RandomStringUtils.randomAlphanumeric(513))))
                 .as("set with too long description should not be updated");
 
@@ -115,28 +110,28 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
     private void createAndUpdateDistributionSetWithInvalidName(final DistributionSet set) {
 
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> distributionSetManagement.createDistributionSet(entityFactory.distributionSet()
+                .isThrownBy(() -> distributionSetManagement.create(entityFactory.distributionSet()
                         .create().version("a").name(RandomStringUtils.randomAlphanumeric(65))))
                 .as("set with too long name should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> distributionSetManagement
-                        .createDistributionSet(entityFactory.distributionSet().create().version("a").name("")))
+                        .create(entityFactory.distributionSet().create().version("a").name("")))
                 .as("set with too short name should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> distributionSetManagement
-                        .createDistributionSet(entityFactory.distributionSet().create().version("a").name(null)))
+                        .create(entityFactory.distributionSet().create().version("a").name(null)))
                 .as("set with null name should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> distributionSetManagement.updateDistributionSet(entityFactory.distributionSet()
+                .isThrownBy(() -> distributionSetManagement.update(entityFactory.distributionSet()
                         .update(set.getId()).name(RandomStringUtils.randomAlphanumeric(65))))
                 .as("set with too long name should not be updated");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> distributionSetManagement
-                        .updateDistributionSet(entityFactory.distributionSet().update(set.getId()).name("")))
+                        .update(entityFactory.distributionSet().update(set.getId()).name("")))
                 .as("set with too short name should not be updated");
     }
 
@@ -144,85 +139,80 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
     private void createAndUpdateDistributionSetWithInvalidVersion(final DistributionSet set) {
 
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> distributionSetManagement.createDistributionSet(entityFactory.distributionSet()
+                .isThrownBy(() -> distributionSetManagement.create(entityFactory.distributionSet()
                         .create().name("a").version(RandomStringUtils.randomAlphanumeric(65))))
                 .as("set with too long name should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> distributionSetManagement
-                        .createDistributionSet(entityFactory.distributionSet().create().name("a").version("")))
+                        .create(entityFactory.distributionSet().create().name("a").version("")))
                 .as("set with too short name should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> distributionSetManagement
-                        .createDistributionSet(entityFactory.distributionSet().create().name("a").version(null)))
+                        .create(entityFactory.distributionSet().create().name("a").version(null)))
                 .as("set with null name should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> distributionSetManagement.updateDistributionSet(entityFactory.distributionSet()
+                .isThrownBy(() -> distributionSetManagement.update(entityFactory.distributionSet()
                         .update(set.getId()).version(RandomStringUtils.randomAlphanumeric(65))))
                 .as("set with too long name should not be updated");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> distributionSetManagement
-                        .updateDistributionSet(entityFactory.distributionSet().update(set.getId()).version("")))
+                        .update(entityFactory.distributionSet().update(set.getId()).version("")))
                 .as("set with too short name should not be updated");
     }
 
     @Test
     @Description("Tests the successfull module update of unused distribution set type which is in fact allowed.")
     public void updateUnassignedDistributionSetTypeModules() {
-        final DistributionSetType updatableType = distributionSetTypeManagement.createDistributionSetType(
-                entityFactory.distributionSetType().create().key("updatableType").name("to be deleted"));
-        assertThat(distributionSetTypeManagement.findDistributionSetTypeByKey("updatableType").get()
-                .getMandatoryModuleTypes()).isEmpty();
+        final DistributionSetType updatableType = distributionSetTypeManagement
+                .create(entityFactory.distributionSetType().create().key("updatableType").name("to be deleted"));
+        assertThat(distributionSetTypeManagement.getByKey("updatableType").get().getMandatoryModuleTypes()).isEmpty();
 
         // add OS
         distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(updatableType.getId(),
                 Sets.newHashSet(osType.getId()));
-        assertThat(distributionSetTypeManagement.findDistributionSetTypeByKey("updatableType").get()
-                .getMandatoryModuleTypes()).containsOnly(osType);
+        assertThat(distributionSetTypeManagement.getByKey("updatableType").get().getMandatoryModuleTypes())
+                .containsOnly(osType);
 
         // add JVM
         distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(updatableType.getId(),
                 Sets.newHashSet(runtimeType.getId()));
-        assertThat(distributionSetTypeManagement.findDistributionSetTypeByKey("updatableType").get()
-                .getMandatoryModuleTypes()).containsOnly(osType, runtimeType);
+        assertThat(distributionSetTypeManagement.getByKey("updatableType").get().getMandatoryModuleTypes())
+                .containsOnly(osType, runtimeType);
 
         // remove OS
         distributionSetTypeManagement.unassignSoftwareModuleType(updatableType.getId(), osType.getId());
-        assertThat(distributionSetTypeManagement.findDistributionSetTypeByKey("updatableType").get()
-                .getMandatoryModuleTypes()).containsOnly(runtimeType);
+        assertThat(distributionSetTypeManagement.getByKey("updatableType").get().getMandatoryModuleTypes())
+                .containsOnly(runtimeType);
     }
 
     @Test
     @Description("Tests the successfull update of used distribution set type meta data which is in fact allowed.")
     public void updateAssignedDistributionSetTypeMetaData() {
-        final DistributionSetType nonUpdatableType = distributionSetTypeManagement
-                .createDistributionSetType(entityFactory.distributionSetType().create().key("updatableType")
-                        .name("to be deleted").colour("test123"));
-        assertThat(distributionSetTypeManagement.findDistributionSetTypeByKey("updatableType").get()
-                .getMandatoryModuleTypes()).isEmpty();
-        distributionSetManagement.createDistributionSet(entityFactory.distributionSet().create().name("newtypesoft")
+        final DistributionSetType nonUpdatableType = distributionSetTypeManagement.create(entityFactory
+                .distributionSetType().create().key("updatableType").name("to be deleted").colour("test123"));
+        assertThat(distributionSetTypeManagement.getByKey("updatableType").get().getMandatoryModuleTypes()).isEmpty();
+        distributionSetManagement.create(entityFactory.distributionSet().create().name("newtypesoft")
                 .version("1").type(nonUpdatableType.getKey()));
 
-        distributionSetTypeManagement.updateDistributionSetType(
+        distributionSetTypeManagement.update(
                 entityFactory.distributionSetType().update(nonUpdatableType.getId()).description("a new description"));
 
-        assertThat(distributionSetTypeManagement.findDistributionSetTypeByKey("updatableType").get().getDescription())
+        assertThat(distributionSetTypeManagement.getByKey("updatableType").get().getDescription())
                 .isEqualTo("a new description");
-        assertThat(distributionSetTypeManagement.findDistributionSetTypeByKey("updatableType").get().getColour())
-                .isEqualTo("test123");
+        assertThat(distributionSetTypeManagement.getByKey("updatableType").get().getColour()).isEqualTo("test123");
     }
 
     @Test
     @Description("Tests the unsuccessfull update of used distribution set type (module addition).")
     public void addModuleToAssignedDistributionSetTypeFails() {
-        final DistributionSetType nonUpdatableType = distributionSetTypeManagement.createDistributionSetType(
-                entityFactory.distributionSetType().create().key("updatableType").name("to be deleted"));
-        assertThat(distributionSetTypeManagement.findDistributionSetTypeByKey("updatableType").get()
-                .getMandatoryModuleTypes()).isEmpty();
-        distributionSetManagement.createDistributionSet(entityFactory.distributionSet().create().name("newtypesoft")
+        final DistributionSetType nonUpdatableType = distributionSetTypeManagement
+                .create(entityFactory.distributionSetType().create().key("updatableType").name("to be deleted"));
+        assertThat(distributionSetTypeManagement.getByKey("updatableType").get().getMandatoryModuleTypes()).isEmpty();
+        distributionSetManagement.create(entityFactory.distributionSet().create().name("newtypesoft")
                 .version("1").type(nonUpdatableType.getKey()));
 
         assertThatThrownBy(() -> distributionSetTypeManagement
@@ -233,14 +223,13 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
     @Test
     @Description("Tests the unsuccessfull update of used distribution set type (module removal).")
     public void removeModuleToAssignedDistributionSetTypeFails() {
-        DistributionSetType nonUpdatableType = distributionSetTypeManagement.createDistributionSetType(
-                entityFactory.distributionSetType().create().key("updatableType").name("to be deleted"));
-        assertThat(distributionSetTypeManagement.findDistributionSetTypeByKey("updatableType").get()
-                .getMandatoryModuleTypes()).isEmpty();
+        DistributionSetType nonUpdatableType = distributionSetTypeManagement
+                .create(entityFactory.distributionSetType().create().key("updatableType").name("to be deleted"));
+        assertThat(distributionSetTypeManagement.getByKey("updatableType").get().getMandatoryModuleTypes()).isEmpty();
 
         nonUpdatableType = distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(nonUpdatableType.getId(),
                 Sets.newHashSet(osType.getId()));
-        distributionSetManagement.createDistributionSet(entityFactory.distributionSet().create().name("newtypesoft")
+        distributionSetManagement.create(entityFactory.distributionSet().create().name("newtypesoft")
                 .version("1").type(nonUpdatableType.getKey()));
 
         final Long typeId = nonUpdatableType.getId();
@@ -252,11 +241,10 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
     @Description("Tests the successfull deletion of unused (hard delete) distribution set types.")
     public void deleteUnassignedDistributionSetType() {
         final JpaDistributionSetType hardDelete = (JpaDistributionSetType) distributionSetTypeManagement
-                .createDistributionSetType(
-                        entityFactory.distributionSetType().create().key("delete").name("to be deleted"));
+                .create(entityFactory.distributionSetType().create().key("delete").name("to be deleted"));
 
         assertThat(distributionSetTypeRepository.findAll()).contains(hardDelete);
-        distributionSetTypeManagement.deleteDistributionSetType(hardDelete.getId());
+        distributionSetTypeManagement.delete(hardDelete.getId());
 
         assertThat(distributionSetTypeRepository.findAll()).doesNotContain(hardDelete);
     }
@@ -265,16 +253,14 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
     @Description("Tests the successfull deletion of used (soft delete) distribution set types.")
     public void deleteAssignedDistributionSetType() {
         final JpaDistributionSetType softDelete = (JpaDistributionSetType) distributionSetTypeManagement
-                .createDistributionSetType(
-                        entityFactory.distributionSetType().create().key("softdeleted").name("to be deleted"));
+                .create(entityFactory.distributionSetType().create().key("softdeleted").name("to be deleted"));
 
         assertThat(distributionSetTypeRepository.findAll()).contains(softDelete);
-        distributionSetManagement.createDistributionSet(
+        distributionSetManagement.create(
                 entityFactory.distributionSet().create().name("softdeleted").version("1").type(softDelete.getKey()));
 
-        distributionSetTypeManagement.deleteDistributionSetType(softDelete.getId());
-        assertThat(distributionSetTypeManagement.findDistributionSetTypeByKey("softdeleted").get().isDeleted())
-                .isEqualTo(true);
+        distributionSetTypeManagement.delete(softDelete.getId());
+        assertThat(distributionSetTypeManagement.getByKey("softdeleted").get().isDeleted()).isEqualTo(true);
     }
 
 }

@@ -137,8 +137,8 @@ public class AmqpControllerAuthenticationTest {
                 .thenReturn(CONFIG_VALUE_FALSE);
 
         final ControllerManagement controllerManagement = mock(ControllerManagement.class);
-        when(controllerManagement.findByControllerId(anyString())).thenReturn(Optional.of(targteMock));
-        when(controllerManagement.findByTargetId(any(Long.class))).thenReturn(Optional.of(targteMock));
+        when(controllerManagement.getByControllerId(anyString())).thenReturn(Optional.of(targteMock));
+        when(controllerManagement.get(any(Long.class))).thenReturn(Optional.of(targteMock));
 
         when(targteMock.getSecurityToken()).thenReturn(CONTROLLER_ID);
         when(targteMock.getControllerId()).thenReturn(CONTROLLER_ID);
@@ -159,8 +159,8 @@ public class AmqpControllerAuthenticationTest {
                 new JpaSoftwareModuleType("a key", "a name", null, 1), "a name", null, null, null));
         testArtifact.setId(1L);
 
-        when(artifactManagementMock.findArtifact(ARTIFACT_ID)).thenReturn(Optional.of(testArtifact));
-        when(artifactManagementMock.findFirstArtifactBySHA1(SHA1)).thenReturn(Optional.of(testArtifact));
+        when(artifactManagementMock.get(ARTIFACT_ID)).thenReturn(Optional.of(testArtifact));
+        when(artifactManagementMock.findFirstBySHA1(SHA1)).thenReturn(Optional.of(testArtifact));
 
         final AbstractDbArtifact artifact = new ArtifactFilesystem(new File("does not exist"), SHA1,
                 new DbArtifactHash(SHA1, "md5 test"), ARTIFACT_SIZE, null);

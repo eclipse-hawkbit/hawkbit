@@ -183,7 +183,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     }
 
     private void createTarget(final String controllerId) {
-        targetManagement.createTarget(entityFactory.target().create().controllerId(controllerId)
+        targetManagement.create(entityFactory.target().create().controllerId(controllerId)
                 .address(IpUtil.createHttpUri("127.0.0.1").toString()));
     }
 
@@ -311,7 +311,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId))
                 .andExpect(status().isOk());
 
-        assertThat(targetManagement.findTargetByControllerID(knownControllerId)).isNotPresent();
+        assertThat(targetManagement.getByControllerID(knownControllerId)).isNotPresent();
     }
 
     @Test
@@ -341,8 +341,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final String body = new JSONObject().put("description", knownNewDescription).toString();
 
         // prepare
-        targetManagement.createTarget(entityFactory.target().create().controllerId(knownControllerId)
-                .name(knownNameNotModiy).description("old description"));
+        targetManagement.create(entityFactory.target().create().controllerId(knownControllerId).name(knownNameNotModiy)
+                .description("old description"));
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content(body)
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -350,7 +350,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath("$.description", equalTo(knownNewDescription)))
                 .andExpect(jsonPath("$.name", equalTo(knownNameNotModiy)));
 
-        final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownControllerId).get();
+        final Target findTargetByControllerID = targetManagement.getByControllerID(knownControllerId).get();
         assertThat(findTargetByControllerID.getDescription()).isEqualTo(knownNewDescription);
         assertThat(findTargetByControllerID.getName()).isEqualTo(knownNameNotModiy);
     }
@@ -364,14 +364,14 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final String body = new JSONObject().put("description", knownNewDescription).toString();
 
         // prepare
-        targetManagement.createTarget(entityFactory.target().create().controllerId(knownControllerId)
-                .name(knownNameNotModiy).description("old description"));
+        targetManagement.create(entityFactory.target().create().controllerId(knownControllerId).name(knownNameNotModiy)
+                .description("old description"));
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content(body)
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
-        final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownControllerId).get();
+        final Target findTargetByControllerID = targetManagement.getByControllerID(knownControllerId).get();
         assertThat(findTargetByControllerID.getDescription()).isEqualTo("old description");
     }
 
@@ -385,7 +385,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
 
         // prepare
         targetManagement
-                .createTarget(entityFactory.target().create().controllerId(knownControllerId).name(knownNameNotModiy));
+                .create(entityFactory.target().create().controllerId(knownControllerId).name(knownNameNotModiy));
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content(body)
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -393,7 +393,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath("$.securityToken", equalTo(knownNewToken)))
                 .andExpect(jsonPath("$.name", equalTo(knownNameNotModiy)));
 
-        final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownControllerId).get();
+        final Target findTargetByControllerID = targetManagement.getByControllerID(knownControllerId).get();
         assertThat(findTargetByControllerID.getSecurityToken()).isEqualTo(knownNewToken);
         assertThat(findTargetByControllerID.getName()).isEqualTo(knownNameNotModiy);
     }
@@ -407,8 +407,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final String body = new JSONObject().put("address", knownNewAddress).toString();
 
         // prepare
-        targetManagement.createTarget(entityFactory.target().create().controllerId(knownControllerId)
-                .name(knownNameNotModiy).address(knownNewAddress));
+        targetManagement.create(entityFactory.target().create().controllerId(knownControllerId).name(knownNameNotModiy)
+                .address(knownNewAddress));
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content(body)
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -416,7 +416,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath("$.address", equalTo(knownNewAddress)))
                 .andExpect(jsonPath("$.name", equalTo(knownNameNotModiy)));
 
-        final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownControllerId).get();
+        final Target findTargetByControllerID = targetManagement.getByControllerID(knownControllerId).get();
         assertThat(findTargetByControllerID.getAddress().toString()).isEqualTo(knownNewAddress);
         assertThat(findTargetByControllerID.getName()).isEqualTo(knownNameNotModiy);
     }
@@ -665,7 +665,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest()).andReturn();
 
-        assertThat(targetManagement.countTargetsAll()).isEqualTo(0);
+        assertThat(targetManagement.count()).isEqualTo(0);
 
         // verify response json exception message
         final ExceptionInfo exceptionInfo = ResourceUtility
@@ -684,7 +684,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest()).andReturn();
 
-        assertThat(targetManagement.countTargetsAll()).isEqualTo(0);
+        assertThat(targetManagement.count()).isEqualTo(0);
 
         // verify response json exception message
         final ExceptionInfo exceptionInfo = ResourceUtility
@@ -701,7 +701,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest()).andReturn();
 
-        assertThat(targetManagement.countTargetsAll()).isEqualTo(0);
+        assertThat(targetManagement.count()).isEqualTo(0);
 
         // verify response json exception message
         final ExceptionInfo exceptionInfo = ResourceUtility
@@ -720,7 +720,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .content(JsonBuilder.targets(Arrays.asList(test1), true)).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest()).andReturn();
 
-        assertThat(targetManagement.countTargetsAll()).isEqualTo(0);
+        assertThat(targetManagement.count()).isEqualTo(0);
 
         // verify response json exception message
         final ExceptionInfo exceptionInfo = ResourceUtility
@@ -775,18 +775,18 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 JsonPath.compile("[2]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
                         .isEqualTo("http://localhost/rest/v1/targets/id3");
 
-        assertThat(targetManagement.findTargetByControllerID("id1")).isNotNull();
-        assertThat(targetManagement.findTargetByControllerID("id1").get().getName()).isEqualTo("testname1");
-        assertThat(targetManagement.findTargetByControllerID("id1").get().getDescription()).isEqualTo("testid1");
-        assertThat(targetManagement.findTargetByControllerID("id1").get().getSecurityToken()).isEqualTo("token");
-        assertThat(targetManagement.findTargetByControllerID("id1").get().getAddress().toString())
+        assertThat(targetManagement.getByControllerID("id1")).isNotNull();
+        assertThat(targetManagement.getByControllerID("id1").get().getName()).isEqualTo("testname1");
+        assertThat(targetManagement.getByControllerID("id1").get().getDescription()).isEqualTo("testid1");
+        assertThat(targetManagement.getByControllerID("id1").get().getSecurityToken()).isEqualTo("token");
+        assertThat(targetManagement.getByControllerID("id1").get().getAddress().toString())
                 .isEqualTo("amqp://test123/foobar");
-        assertThat(targetManagement.findTargetByControllerID("id2")).isNotNull();
-        assertThat(targetManagement.findTargetByControllerID("id2").get().getName()).isEqualTo("testname2");
-        assertThat(targetManagement.findTargetByControllerID("id2").get().getDescription()).isEqualTo("testid2");
-        assertThat(targetManagement.findTargetByControllerID("id3")).isNotNull();
-        assertThat(targetManagement.findTargetByControllerID("id3").get().getName()).isEqualTo("testname3");
-        assertThat(targetManagement.findTargetByControllerID("id3").get().getDescription()).isEqualTo("testid3");
+        assertThat(targetManagement.getByControllerID("id2")).isNotNull();
+        assertThat(targetManagement.getByControllerID("id2").get().getName()).isEqualTo("testname2");
+        assertThat(targetManagement.getByControllerID("id2").get().getDescription()).isEqualTo("testid2");
+        assertThat(targetManagement.getByControllerID("id3")).isNotNull();
+        assertThat(targetManagement.getByControllerID("id3").get().getName()).isEqualTo("testname3");
+        assertThat(targetManagement.getByControllerID("id3").get().getDescription()).isEqualTo("testid3");
     }
 
     @Test
@@ -801,9 +801,9 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().is2xxSuccessful());
 
-        final Slice<Target> findTargetsAll = targetManagement.findTargetsAll(new PageRequest(0, 100));
+        final Slice<Target> findTargetsAll = targetManagement.findAll(new PageRequest(0, 100));
         final Target target = findTargetsAll.getContent().get(0);
-        assertThat(targetManagement.countTargetsAll()).isEqualTo(1);
+        assertThat(targetManagement.count()).isEqualTo(1);
         assertThat(target.getControllerId()).isEqualTo(knownControllerId);
         assertThat(target.getName()).isEqualTo(knownName);
         assertThat(target.getDescription()).isEqualTo(knownDescription);
@@ -829,7 +829,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(status().is(HttpStatus.CONFLICT.value())).andReturn();
 
         // verify only one entry
-        assertThat(targetManagement.countTargetsAll()).isEqualTo(1);
+        assertThat(targetManagement.count()).isEqualTo(1);
 
         // verify response json exception message
         final ExceptionInfo exceptionInfo = ResourceUtility
@@ -1151,7 +1151,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath("total", equalTo(1)));
 
         assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get()).isEqualTo(set);
-        target = targetManagement.findTargetByControllerID(target.getControllerId()).get();
+        target = targetManagement.getByControllerID(target.getControllerId()).get();
 
         // repeating DS assignment leads again to OK
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
@@ -1161,7 +1161,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath("total", equalTo(1)));
 
         // ...but does not change the target
-        assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).get()).isEqualTo(target);
+        assertThat(targetManagement.getByControllerID(target.getControllerId()).get()).isEqualTo(target);
     }
 
     @Test
@@ -1181,7 +1181,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
 
         assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get()).isEqualTo(set);
         assertThat(deploymentManagement.getInstalledDistributionSet(target.getControllerId()).get()).isEqualTo(set);
-        target = targetManagement.findTargetByControllerID(target.getControllerId()).get();
+        target = targetManagement.getByControllerID(target.getControllerId()).get();
         assertThat(target.getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         // repeating DS assignment leads again to OK
@@ -1193,7 +1193,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath("total", equalTo(1)));
 
         // ...but does not change the target
-        assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).get()).isEqualTo(target);
+        assertThat(targetManagement.getByControllerID(target.getControllerId()).get()).isEqualTo(target);
     }
 
     @Test
@@ -1359,7 +1359,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     }
 
     private Target createSingleTarget(final String controllerId, final String name) {
-        targetManagement.createTarget(entityFactory.target().create().controllerId(controllerId).name(name)
+        targetManagement.create(entityFactory.target().create().controllerId(controllerId).name(name)
                 .description(TARGET_DESCRIPTION_TEST));
         return controllerManagement.findOrRegisterTargetIfItDoesNotexist(controllerId, LOCALHOST);
     }
@@ -1376,7 +1376,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         char character = 'a';
         for (int index = 0; index < amount; index++) {
             final String str = String.valueOf(character);
-            targetManagement.createTarget(entityFactory.target().create().controllerId(str).name(str).description(str));
+            targetManagement.create(entityFactory.target().create().controllerId(str).name(str).description(str));
             controllerManagement.findOrRegisterTargetIfItDoesNotexist(str, LOCALHOST);
             character++;
         }
@@ -1396,6 +1396,6 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         // verify active action
         final Slice<Action> actionsByTarget = deploymentManagement.findActionsByTarget(tA.getControllerId(), PAGE);
         assertThat(actionsByTarget.getContent()).hasSize(1);
-        return targetManagement.findTargetByControllerID(tA.getControllerId()).get();
+        return targetManagement.getByControllerID(tA.getControllerId()).get();
     }
 }

@@ -129,7 +129,7 @@ public class AmqpMessageHandlerServiceTest {
     public void before() throws Exception {
         messageConverter = new Jackson2JsonMessageConverter();
         when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
-        when(artifactManagementMock.findFirstArtifactBySHA1(SHA1)).thenReturn(Optional.empty());
+        when(artifactManagementMock.findFirstBySHA1(SHA1)).thenReturn(Optional.empty());
 
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherServiceMock,
                 controllerManagementMock, entityFactoryMock);
@@ -344,7 +344,7 @@ public class AmqpMessageHandlerServiceTest {
                 messageProperties);
 
         final Artifact localArtifactMock = mock(Artifact.class);
-        when(artifactManagementMock.findFirstArtifactBySHA1(anyString())).thenReturn(Optional.of(localArtifactMock));
+        when(artifactManagementMock.findFirstBySHA1(anyString())).thenReturn(Optional.of(localArtifactMock));
         when(controllerManagementMock.getActionForDownloadByTargetAndSoftwareModule(anyObject(), anyObject()))
                 .thenThrow(EntityNotFoundException.class);
 
@@ -372,7 +372,7 @@ public class AmqpMessageHandlerServiceTest {
         when(localArtifactMock.getSha1Hash()).thenReturn(SHA1);
 
         final AbstractDbArtifact dbArtifactMock = mock(AbstractDbArtifact.class);
-        when(artifactManagementMock.findFirstArtifactBySHA1(SHA1)).thenReturn(Optional.of(localArtifactMock));
+        when(artifactManagementMock.findFirstBySHA1(SHA1)).thenReturn(Optional.of(localArtifactMock));
         when(controllerManagementMock.hasTargetArtifactAssigned(securityToken.getControllerId(), SHA1))
                 .thenReturn(true);
         when(artifactManagementMock.loadArtifactBinary(anyString())).thenReturn(Optional.of(dbArtifactMock));

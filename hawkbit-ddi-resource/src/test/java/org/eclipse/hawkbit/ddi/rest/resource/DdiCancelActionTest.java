@@ -92,8 +92,9 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                 .isEqualTo(ds);
         assertThat(deploymentManagement.getInstalledDistributionSet(TestdataFactory.DEFAULT_CONTROLLER_ID).get())
                 .isEqualTo(ds);
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getInstallationDate()).isGreaterThanOrEqualTo(current);
+        assertThat(
+                targetManagement.getByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get().getInstallationDate())
+                        .isGreaterThanOrEqualTo(current);
 
     }
 
@@ -117,10 +118,10 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         Thread.sleep(1); // is required: otherwise processing the next line is
         // often too fast and
         // the following assert will fail
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getLastTargetQuery()).isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getLastTargetQuery()).isGreaterThanOrEqualTo(current);
+        assertThat(targetManagement.getByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
+                .isLessThanOrEqualTo(System.currentTimeMillis());
+        assertThat(targetManagement.getByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
+                .isGreaterThanOrEqualTo(current);
 
         // Retrieved is reported
 
@@ -150,22 +151,22 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         Thread.sleep(1); // is required: otherwise processing the next line is
         // often too fast and
         // the following assert will fail
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getLastTargetQuery()).isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getLastTargetQuery()).isGreaterThanOrEqualTo(current);
+        assertThat(targetManagement.getByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
+                .isLessThanOrEqualTo(System.currentTimeMillis());
+        assertThat(targetManagement.getByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
+                .isGreaterThanOrEqualTo(current);
 
         current = System.currentTimeMillis();
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getLastTargetQuery()).isLessThanOrEqualTo(System.currentTimeMillis());
+        assertThat(targetManagement.getByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
+                .isLessThanOrEqualTo(System.currentTimeMillis());
         mvc.perform(get("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
                 + cancelAction.getId(), tenantAware.getCurrentTenant()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.id", equalTo(String.valueOf(cancelAction.getId()))))
                 .andExpect(jsonPath("$.cancelAction.stopId", equalTo(String.valueOf(actionId))));
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getLastTargetQuery()).isLessThanOrEqualTo(System.currentTimeMillis());
+        assertThat(targetManagement.getByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
+                .isLessThanOrEqualTo(System.currentTimeMillis());
 
         // controller confirmed cancelled action, should not be active anymore
         mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"

@@ -21,17 +21,17 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
  */
 public class FilterParams {
 
-    private Collection<TargetUpdateStatus> filterByStatus;
-    private Boolean overdueState;
-    private String filterBySearchText;
-    private Boolean selectTargetWithNoTag;
-    private String[] filterByTagNames;
-    private Long filterByDistributionId;
+    private final Collection<TargetUpdateStatus> filterByStatus;
+    private final Boolean overdueState;
+    private final String filterBySearchText;
+    private final Boolean selectTargetWithNoTag;
+    private final String[] filterByTagNames;
+    private final Long filterByDistributionId;
 
     /**
      * Constructor.
      *
-     * @param filterByDistributionId
+     * @param filterByInstalledOrAssignedDistributionSetId
      *            if set, a filter is added for the given
      *            {@link DistributionSet#getId()}
      * @param filterByStatus
@@ -47,13 +47,13 @@ public class FilterParams {
      *            if tag-filtering is enabled, a filter is added for the given
      *            tag-names
      */
-    public FilterParams(Long filterByDistributionId, Collection<TargetUpdateStatus> filterByStatus,
-            Boolean overdueState, String filterBySearchText, Boolean selectTargetWithNoTag,
-            String... filterByTagNames) {
+    public FilterParams(final Collection<TargetUpdateStatus> filterByStatus, final Boolean overdueState,
+            final String filterBySearchText, final Long filterByInstalledOrAssignedDistributionSetId,
+            final Boolean selectTargetWithNoTag, final String... filterByTagNames) {
         this.filterByStatus = filterByStatus;
         this.overdueState = overdueState;
         this.filterBySearchText = filterBySearchText;
-        this.filterByDistributionId = filterByDistributionId;
+        this.filterByDistributionId = filterByInstalledOrAssignedDistributionSetId;
         this.selectTargetWithNoTag = selectTargetWithNoTag;
         this.filterByTagNames = filterByTagNames;
     }
@@ -69,16 +69,6 @@ public class FilterParams {
     }
 
     /**
-     * Sets {@link DistributionSet#getId()} to filter the result.
-     *
-     * @param filterByDistributionId
-     *            the distribution set id
-     */
-    public void setFilterByDistributionId(Long filterByDistributionId) {
-        this.filterByDistributionId = filterByDistributionId;
-    }
-
-    /**
      * Gets a collection of target states to filter for. <br>
      * If set to <code>null</code> this filter is disabled.
      *
@@ -86,16 +76,6 @@ public class FilterParams {
      */
     public Collection<TargetUpdateStatus> getFilterByStatus() {
         return filterByStatus;
-    }
-
-    /**
-     * Sets the collection of target states to filter for.
-     *
-     * @param filterByStatus
-     *            collection of target update status
-     */
-    public void setFilterByStatus(Collection<TargetUpdateStatus> filterByStatus) {
-        this.filterByStatus = filterByStatus;
     }
 
     /**
@@ -111,17 +91,6 @@ public class FilterParams {
     }
 
     /**
-     * Sets the flag for overdue filter; if set to <code>true</code>, the
-     * overdue filter is activated.
-     *
-     * @param overdueState
-     *            if the overdue filter should be activates
-     */
-    public void setOverdueState(Boolean overdueState) {
-        this.overdueState = overdueState;
-    }
-
-    /**
      * Gets the search text to filter for. This is used to find targets having
      * the text anywhere in name or description <br>
      * If set to <code>null</code> this filter is disabled.
@@ -130,16 +99,6 @@ public class FilterParams {
      */
     public String getFilterBySearchText() {
         return filterBySearchText;
-    }
-
-    /**
-     * Sets the search text to filter for.
-     *
-     * @param filterBySearchText
-     *            search text
-     */
-    public void setFilterBySearchText(String filterBySearchText) {
-        this.filterBySearchText = filterBySearchText;
     }
 
     /**
@@ -153,16 +112,6 @@ public class FilterParams {
     }
 
     /**
-     * Sets the flag indicating if tagging filter is used.
-     *
-     * @param selectTargetWithNoTag
-     *            should the tagging filter be used?
-     */
-    public void setSelectTargetWithNoTag(Boolean selectTargetWithNoTag) {
-        this.selectTargetWithNoTag = selectTargetWithNoTag;
-    }
-
-    /**
      * Gets the tags that are used to filter for. The activation of this filter
      * is done by {@link #setSelectTargetWithNoTag(Boolean)}.
      *
@@ -170,15 +119,5 @@ public class FilterParams {
      */
     public String[] getFilterByTagNames() {
         return filterByTagNames;
-    }
-
-    /**
-     * Sets the tags that are used to filter for.
-     *
-     * @param filterByTagNames
-     *            array of tag names
-     */
-    public void setFilterByTagNames(String[] filterByTagNames) {
-        this.filterByTagNames = filterByTagNames;
     }
 }

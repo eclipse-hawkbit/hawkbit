@@ -89,10 +89,10 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         Slice<Target> targetBeans;
         final List<ProxyTarget> proxyTargetBeans = new ArrayList<>();
         if (!StringUtils.isEmpty(filterQuery)) {
-            targetBeans = targetManagement.findTargetsAll(filterQuery,
-                    new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
+            targetBeans = targetManagement.findByRsql(new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
+                    filterQuery);
         } else {
-            targetBeans = targetManagement.findTargetsAll(
+            targetBeans = targetManagement.findAll(
                     new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         }
 
@@ -129,7 +129,7 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
     public int size() {
         long size = 0;
         if (!StringUtils.isEmpty(filterQuery)) {
-            size = getTargetManagement().countTargetByTargetFilterQuery(filterQuery);
+            size = getTargetManagement().countByRsql(filterQuery);
         }
         getFilterManagementUIState().setTargetsCountAll(size);
         if (size > SPUIDefinitions.MAX_TABLE_ENTRIES) {

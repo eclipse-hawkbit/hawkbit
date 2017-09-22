@@ -63,7 +63,7 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
     public ResponseEntity<InputStream> downloadArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("artifactId") final Long artifactId) {
 
-        final SoftwareModule module = softwareModuleManagement.findSoftwareModuleById(softwareModuleId)
+        final SoftwareModule module = softwareModuleManagement.get(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
         final Artifact artifact = module.getArtifact(artifactId)
                 .orElseThrow(() -> new EntityNotFoundException(Artifact.class, artifactId));

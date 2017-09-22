@@ -65,6 +65,16 @@ public interface ControllerManagement {
     Action addCancelActionStatus(@NotNull ActionStatusCreate create);
 
     /**
+     * Retrieves assigned {@link SoftwareModule} of a target.
+     * 
+     * @param moduleId
+     *            of the {@link SoftwareModule}
+     * @return {@link SoftwareModule} identified by ID
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    Optional<SoftwareModule> getSoftwareModule(@NotNull final Long moduleId);
+
+    /**
      * Simple addition of a new {@link ActionStatus} entry to the {@link Action}
      * . No state changes.
      * 
@@ -282,7 +292,7 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
-    Optional<Target> findByControllerId(@NotEmpty String controllerId);
+    Optional<Target> getByControllerId(@NotEmpty String controllerId);
 
     /**
      * Finds {@link Target} based on given ID returns found Target without
@@ -296,7 +306,7 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
-    Optional<Target> findByTargetId(@NotNull Long targetId);
+    Optional<Target> get(@NotNull Long targetId);
 
     /**
      * Retrieves the specified number of messages from action history of the

@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.common.tagdetails;
 import java.util.List;
 import java.util.Objects;
 
-import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
@@ -37,11 +37,11 @@ public abstract class AbstractTargetTagToken<T extends BaseEntity> extends Abstr
 
     private static final long serialVersionUID = 7772876588903171201L;
 
-    protected final transient TagManagement tagManagement;
+    protected final transient TargetTagManagement tagManagement;
 
     protected AbstractTargetTagToken(final SpPermissionChecker checker, final VaadinMessageSource i18n,
             final UINotification uinotification, final UIEventBus eventBus, final ManagementUIState managementUIState,
-            final TagManagement tagManagement) {
+            final TargetTagManagement tagManagement) {
         super(checker, i18n, uinotification, eventBus, managementUIState);
         this.tagManagement = tagManagement;
     }

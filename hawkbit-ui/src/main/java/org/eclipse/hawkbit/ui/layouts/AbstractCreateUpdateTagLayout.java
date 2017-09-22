@@ -8,16 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.layouts;
 
-import java.util.Objects;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.TagManagement;
-import org.eclipse.hawkbit.repository.builder.TagUpdate;
-import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
-import org.eclipse.hawkbit.repository.model.Tag;
-import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
@@ -28,10 +22,7 @@ import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
-import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
-import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -79,8 +70,6 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     protected static final int MAX_TAGS = 500;
 
     protected VaadinMessageSource i18n;
-
-    protected transient TagManagement tagManagement;
 
     protected transient EntityFactory entityFactory;
 
@@ -131,11 +120,9 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
      * @param uiNotification
      *            UINotification
      */
-    public AbstractCreateUpdateTagLayout(final VaadinMessageSource i18n, final TagManagement tagManagement,
-            final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
-            final UINotification uiNotification) {
+    public AbstractCreateUpdateTagLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
+            final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification) {
         this.i18n = i18n;
-        this.tagManagement = tagManagement;
         this.entityFactory = entityFactory;
         this.eventBus = eventBus;
         this.permChecker = permChecker;
@@ -295,22 +282,7 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
         colorPickerLayout.setVisible(tagPreviewBtnClicked);
     }
 
-    /**
-     * @return the color which should be selected in the color-picker component.
-     */
-    protected Color getColorForColorPicker() {
-        final Optional<TargetTag> targetTagSelected = tagManagement
-                .findTargetTag(tagNameComboBox.getValue().toString());
-        if (targetTagSelected.isPresent()) {
-            return ColorPickerHelper.rgbToColorConverter(targetTagSelected.map(TargetTag::getColour)
-                    .filter(Objects::nonNull).orElse(ColorPickerConstants.DEFAULT_COLOR));
-        }
-
-        return ColorPickerHelper.rgbToColorConverter(tagManagement
-                .findDistributionSetTag(tagNameComboBox.getValue().toString()).map(DistributionSetTag::getColour)
-                .filter(Objects::nonNull).orElse(ColorPickerConstants.DEFAULT_COLOR));
-
-    }
+    protected abstract Color getColorForColorPicker();
 
     private void tagNameChosen(final ValueChangeEvent event) {
         final String tagSelected = (String) event.getProperty().getValue();
@@ -571,25 +543,6 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
         colorPicked = ColorPickerHelper.getColorPickedString(colorPickerLayout.getSelPreview());
         tagNameValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagName.getValue());
         tagDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
-    }
-
-    /**
-     * update tag.
-     */
-    protected void updateExistingTag(final Tag targetObj) {
-        final TagUpdate update = entityFactory.tag().update(targetObj.getId()).name(tagName.getValue())
-                .description(tagDesc.getValue())
-                .colour(ColorPickerHelper.getColorPickedString(colorPickerLayout.getSelPreview()));
-        if (targetObj instanceof TargetTag) {
-            tagManagement.updateTargetTag(update);
-            eventBus.publish(this, new TargetTagTableEvent(BaseEntityEventType.UPDATED_ENTITY, (TargetTag) targetObj));
-        } else if (targetObj instanceof DistributionSetTag) {
-            tagManagement.updateDistributionSetTag(update);
-            eventBus.publish(this, new DistributionSetTagTableEvent(BaseEntityEventType.UPDATED_ENTITY,
-                    (DistributionSetTag) targetObj));
-        }
-        uiNotification.displaySuccess(i18n.getMessage("message.update.success", new Object[] { targetObj.getName() }));
-
     }
 
     protected void displaySuccess(final String tagName) {

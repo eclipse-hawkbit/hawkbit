@@ -14,7 +14,7 @@ import java.util.concurrent.Executor;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
@@ -65,7 +65,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
 
     private final transient TargetManagement targetManagement;
     private final transient DistributionSetManagement distributionSetManagement;
-    private final transient TagManagement tagManagement;
+    private final transient TargetTagManagement tagManagement;
 
     private final transient EntityFactory entityFactory;
 
@@ -98,7 +98,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     TargetBulkUpdateWindowLayout(final VaadinMessageSource i18n, final TargetManagement targetManagement,
             final UIEventBus eventBus, final ManagementUIState managementUIState,
             final DeploymentManagement deploymentManagement, final UiProperties uiproperties,
-            final SpPermissionChecker checker, final UINotification uinotification, final TagManagement tagManagement,
+            final SpPermissionChecker checker, final UINotification uinotification, final TargetTagManagement tagManagement,
             final DistributionSetManagement distributionSetManagement, final EntityFactory entityFactory,
             final Executor uiExecutor) {
         this.i18n = i18n;

@@ -139,7 +139,7 @@ public abstract class AbstractSoftwareModuleDetails
 
     @Override
     protected void showMetadata(final ClickEvent event) {
-        softwareModuleManagement.findSoftwareModuleById(getSelectedBaseEntityId())
+        softwareModuleManagement.get(getSelectedBaseEntityId())
                 .ifPresent(swmodule -> UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null)));
     }
 

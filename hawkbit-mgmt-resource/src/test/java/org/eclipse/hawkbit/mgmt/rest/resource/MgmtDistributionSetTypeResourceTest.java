@@ -59,9 +59,9 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     public void getDistributionSetTypes() throws Exception {
 
         DistributionSetType testType = distributionSetTypeManagement
-                .createDistributionSetType(entityFactory.distributionSetType().create().key("test123")
+                .create(entityFactory.distributionSetType().create().key("test123")
                         .name("TestName123").description("Desc123").colour("col12"));
-        testType = distributionSetTypeManagement.updateDistributionSetType(
+        testType = distributionSetTypeManagement.update(
                 entityFactory.distributionSetType().update(testType.getId()).description("Desc1234"));
 
         // 4 types overall (2 hawkbit tenant default, 1 test default and 1
@@ -100,9 +100,9 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     public void getDistributionSetTypesSortedByKey() throws Exception {
 
         DistributionSetType testType = distributionSetTypeManagement
-                .createDistributionSetType(entityFactory.distributionSetType().create().key("zzzzz").name("TestName123")
+                .create(entityFactory.distributionSetType().create().key("zzzzz").name("TestName123")
                         .description("Desc123").colour("col12"));
-        testType = distributionSetTypeManagement.updateDistributionSetType(
+        testType = distributionSetTypeManagement.update(
                 entityFactory.distributionSetType().update(testType.getId()).description("Desc1234"));
 
         // descending
@@ -148,11 +148,11 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
     @Step
     private void verifyCreatedDistributionSetTypes(final MvcResult mvcResult) throws UnsupportedEncodingException {
-        final DistributionSetType created1 = distributionSetTypeManagement.findDistributionSetTypeByKey("testKey1")
+        final DistributionSetType created1 = distributionSetTypeManagement.getByKey("testKey1")
                 .get();
-        final DistributionSetType created2 = distributionSetTypeManagement.findDistributionSetTypeByKey("testKey2")
+        final DistributionSetType created2 = distributionSetTypeManagement.getByKey("testKey2")
                 .get();
-        final DistributionSetType created3 = distributionSetTypeManagement.findDistributionSetTypeByKey("testKey3")
+        final DistributionSetType created3 = distributionSetTypeManagement.getByKey("testKey3")
                 .get();
 
         assertThat(created1.getMandatoryModuleTypes()).containsOnly(osType);
@@ -190,7 +190,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 .toString()).isEqualTo(
                         "http://localhost/rest/v1/distributionsettypes/" + created3.getId() + "/optionalmoduletypes");
 
-        assertThat(distributionSetTypeManagement.countDistributionSetTypesAll()).isEqualTo(6);
+        assertThat(distributionSetTypeManagement.count()).isEqualTo(6);
     }
 
     @Step
@@ -217,7 +217,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
     @Step
     private List<DistributionSetType> createTestDistributionSetTestTypes() {
-        assertThat(distributionSetTypeManagement.countDistributionSetTypesAll()).isEqualTo(DEFAULT_DS_TYPES);
+        assertThat(distributionSetTypeManagement.count()).isEqualTo(DEFAULT_DS_TYPES);
 
         return Arrays.asList(
                 entityFactory.distributionSetType().create().key("testKey1").name("TestName1").description("Desc1")
@@ -235,7 +235,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/mandatorymoduletypes POST requests.")
     public void addMandatoryModuleToDistributionSetType() throws Exception {
         DistributionSetType testType = distributionSetTypeManagement
-                .createDistributionSetType(entityFactory.distributionSetType().create().key("test123")
+                .create(entityFactory.distributionSetType().create().key("test123")
                         .name("TestName123").description("Desc123").colour("col12"));
         assertThat(testType.getOptLockRevision()).isEqualTo(1);
 
@@ -243,7 +243,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 .content("{\"id\":" + osType.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        testType = distributionSetTypeManagement.findDistributionSetTypeById(testType.getId()).get();
+        testType = distributionSetTypeManagement.get(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
         assertThat(testType.getOptLockRevision()).isEqualTo(2);
         assertThat(testType.getMandatoryModuleTypes()).containsExactly(osType);
@@ -255,7 +255,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/optionalmoduletypes POST requests.")
     public void addOptionalModuleToDistributionSetType() throws Exception {
         DistributionSetType testType = distributionSetTypeManagement
-                .createDistributionSetType(entityFactory.distributionSetType().create().key("test123")
+                .create(entityFactory.distributionSetType().create().key("test123")
                         .name("TestName123").description("Desc123").colour("col12"));
         assertThat(testType.getOptLockRevision()).isEqualTo(1);
 
@@ -263,7 +263,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 .content("{\"id\":" + osType.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        testType = distributionSetTypeManagement.findDistributionSetTypeById(testType.getId()).get();
+        testType = distributionSetTypeManagement.get(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
         assertThat(testType.getOptLockRevision()).isEqualTo(2);
         assertThat(testType.getOptionalModuleTypes()).containsExactly(osType);
@@ -318,7 +318,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     }
 
     private DistributionSetType generateTestType() {
-        final DistributionSetType testType = distributionSetTypeManagement.createDistributionSetType(entityFactory
+        final DistributionSetType testType = distributionSetTypeManagement.create(entityFactory
                 .distributionSetType().create().key("test123").name("TestName123").description("Desc123").colour("col")
                 .mandatory(Arrays.asList(osType.getId())).optional(Arrays.asList(appType.getId())));
         assertThat(testType.getOptLockRevision()).isEqualTo(1);
@@ -354,7 +354,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 osType.getId()).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        testType = distributionSetTypeManagement.findDistributionSetTypeById(testType.getId()).get();
+        testType = distributionSetTypeManagement.get(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
         assertThat(testType.getOptLockRevision()).isEqualTo(2);
         assertThat(testType.getOptionalModuleTypes()).containsExactly(appType);
@@ -371,7 +371,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 appType.getId()).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        testType = distributionSetTypeManagement.findDistributionSetTypeById(testType.getId()).get();
+        testType = distributionSetTypeManagement.get(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
         assertThat(testType.getOptLockRevision()).isEqualTo(2);
         assertThat(testType.getOptionalModuleTypes()).isEmpty();
@@ -384,9 +384,9 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     public void getDistributionSetType() throws Exception {
 
         DistributionSetType testType = distributionSetTypeManagement
-                .createDistributionSetType(entityFactory.distributionSetType().create().key("test123")
+                .create(entityFactory.distributionSetType().create().key("test123")
                         .name("TestName123").description("Desc123").colour("col12"));
-        testType = distributionSetTypeManagement.updateDistributionSetType(
+        testType = distributionSetTypeManagement.update(
                 entityFactory.distributionSetType().update(testType.getId()).description("Desc1234"));
 
         mvc.perform(get("/rest/v1/distributionsettypes/{dstId}", testType.getId()).accept(MediaType.APPLICATION_JSON))
@@ -404,15 +404,15 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Description("Checks the correct behaviour of /rest/v1/DistributionSetTypes/{ID} DELETE requests (hard delete scenario).")
     public void deleteDistributionSetTypeUnused() throws Exception {
         final DistributionSetType testType = distributionSetTypeManagement
-                .createDistributionSetType(entityFactory.distributionSetType().create().key("test123")
+                .create(entityFactory.distributionSetType().create().key("test123")
                         .name("TestName123").description("Desc123").colour("col12"));
 
-        assertThat(distributionSetTypeManagement.countDistributionSetTypesAll()).isEqualTo(DEFAULT_DS_TYPES + 1);
+        assertThat(distributionSetTypeManagement.count()).isEqualTo(DEFAULT_DS_TYPES + 1);
 
         mvc.perform(delete("/rest/v1/distributionsettypes/{dsId}", testType.getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        assertThat(distributionSetTypeManagement.countDistributionSetTypesAll()).isEqualTo(DEFAULT_DS_TYPES);
+        assertThat(distributionSetTypeManagement.count()).isEqualTo(DEFAULT_DS_TYPES);
     }
 
     @Test
@@ -427,27 +427,27 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Description("Checks the correct behaviour of /rest/v1/DistributionSetTypes/{ID} DELETE requests (soft delete scenario).")
     public void deleteDistributionSetTypeUsed() throws Exception {
         final DistributionSetType testType = distributionSetTypeManagement
-                .createDistributionSetType(entityFactory.distributionSetType().create().key("test123")
+                .create(entityFactory.distributionSetType().create().key("test123")
                         .name("TestName123").description("Desc123").colour("col12"));
 
-        distributionSetManagement.createDistributionSet(entityFactory.distributionSet().create().name("sdfsd")
+        distributionSetManagement.create(entityFactory.distributionSet().create().name("sdfsd")
                 .description("dsfsdf").version("1").type(testType));
 
-        assertThat(distributionSetTypeManagement.countDistributionSetTypesAll()).isEqualTo(DEFAULT_DS_TYPES + 1);
-        assertThat(distributionSetManagement.countDistributionSetsAll()).isEqualTo(1);
+        assertThat(distributionSetTypeManagement.count()).isEqualTo(DEFAULT_DS_TYPES + 1);
+        assertThat(distributionSetManagement.count()).isEqualTo(1);
 
         mvc.perform(delete("/rest/v1/distributionsettypes/{smId}", testType.getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        assertThat(distributionSetManagement.countDistributionSetsAll()).isEqualTo(1);
-        assertThat(distributionSetTypeManagement.countDistributionSetTypesAll()).isEqualTo(DEFAULT_DS_TYPES);
+        assertThat(distributionSetManagement.count()).isEqualTo(1);
+        assertThat(distributionSetTypeManagement.count()).isEqualTo(DEFAULT_DS_TYPES);
     }
 
     @Test
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID} PUT requests.")
     public void updateDistributionSetTypeOnlyDescriptionAndNameUntouched() throws Exception {
         final DistributionSetType testType = distributionSetTypeManagement
-                .createDistributionSetType(entityFactory.distributionSetType().create().key("test123")
+                .create(entityFactory.distributionSetType().create().key("test123")
                         .name("TestName123").description("Desc123").colour("col"));
 
         final String body = new JSONObject().put("id", testType.getId()).put("description", "foobardesc")
@@ -510,7 +510,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
         // .createDistributionSetType(entityFactory.distributionSetType().create().key("test123")
         // .name("TestName123").description("Desc123").colour("col"));
 
-        final SoftwareModuleType testSmType = softwareModuleTypeManagement.createSoftwareModuleType(
+        final SoftwareModuleType testSmType = softwareModuleTypeManagement.create(
                 entityFactory.softwareModuleType().create().key("test123").name("TestName123"));
 
         // DST does not exist
@@ -598,9 +598,9 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Test
     @Description("Search erquest of software module types.")
     public void searchDistributionSetTypeRsql() throws Exception {
-        distributionSetTypeManagement.createDistributionSetType(
+        distributionSetTypeManagement.create(
                 entityFactory.distributionSetType().create().key("test123").name("TestName123"));
-        distributionSetTypeManagement.createDistributionSetType(
+        distributionSetTypeManagement.create(
                 entityFactory.distributionSetType().create().key("test1234").name("TestName1234"));
 
         final String rsqlFindLikeDs1OrDs2 = "name==TestName123,name==TestName1234";
@@ -615,7 +615,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
         char character = 'a';
         for (int index = 0; index < amount; index++) {
             final String str = String.valueOf(character);
-            softwareModuleManagement.createSoftwareModule(
+            softwareModuleManagement.create(
                     entityFactory.softwareModule().create().name(str).description(str).vendor(str).version(str));
             character++;
         }

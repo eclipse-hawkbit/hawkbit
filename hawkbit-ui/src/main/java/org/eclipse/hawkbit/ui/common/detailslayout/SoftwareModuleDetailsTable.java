@@ -185,7 +185,7 @@ public class SoftwareModuleDetailsTable extends Table {
     private void unassignSW(final ClickEvent event, final DistributionSet distributionSet,
             final Set<SoftwareModule> alreadyAssignedSwModules) {
         final SoftwareModule unAssignedSw = getSoftwareModule(event.getButton().getId(), alreadyAssignedSwModules);
-        if (distributionSetManagement.isDistributionSetInUse(distributionSet.getId())) {
+        if (distributionSetManagement.isInUse(distributionSet.getId())) {
             uiNotification.displayValidationError(i18n.getMessage("message.error.notification.ds.target.assigned",
                     distributionSet.getName(), distributionSet.getVersion()));
         } else {

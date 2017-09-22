@@ -36,7 +36,7 @@ public class TargetTagEventTest extends AbstractRemoteEntityEventTest<TargetTag>
 
     @Override
     protected TargetTag createEntity() {
-        return tagManagement.createTargetTag(entityFactory.tag().create().name("tag1"));
+        return targetTagManagement.create(entityFactory.tag().create().name("tag1"));
     }
 
 }

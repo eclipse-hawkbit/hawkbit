@@ -13,7 +13,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -45,7 +45,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
 
     private static final long serialVersionUID = -8022738301736043396L;
 
-    private final transient TagManagement tagManagement;
+    private final transient DistributionSetTagManagement distributionSetTagManagement;
 
     private final transient DistributionSetManagement distributionSetManagement;
 
@@ -54,9 +54,10 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
 
     public DistributionTagToken(final SpPermissionChecker checker, final VaadinMessageSource i18n,
             final UINotification uinotification, final UIEventBus eventBus, final ManagementUIState managementUIState,
-            final TagManagement tagManagement, final DistributionSetManagement distributionSetManagement) {
+            final DistributionSetTagManagement distributionSetTagManagement,
+            final DistributionSetManagement distributionSetManagement) {
         super(checker, i18n, uinotification, eventBus, managementUIState);
-        this.tagManagement = tagManagement;
+        this.distributionSetTagManagement = distributionSetTagManagement;
         this.distributionSetManagement = distributionSetManagement;
     }
 
@@ -107,8 +108,8 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
     public void displayAlreadyAssignedTags() {
         removePreviouslyAddedTokens();
         if (selectedEntity != null) {
-            tagManagement
-                    .findDistributionSetTagsByDistributionSet(new PageRequest(0, MAX_TAG_QUERY), selectedEntity.getId())
+            distributionSetTagManagement
+                    .findByDistributionSet(new PageRequest(0, MAX_TAG_QUERY), selectedEntity.getId())
                     .getContent().stream().forEach(tag -> addNewToken(tag.getId()));
         }
     }
@@ -117,7 +118,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
     protected void populateContainer() {
         container.removeAllItems();
         tagDetails.clear();
-        tagManagement.findAllDistributionSetTags(new PageRequest(0, MAX_TAG_QUERY)).getContent().stream()
+        distributionSetTagManagement.findAll(new PageRequest(0, MAX_TAG_QUERY)).getContent().stream()
                 .forEach(tag -> setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour()));
 
     }
@@ -129,8 +130,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedEventContainer eventContainer) {
-        eventContainer.getEvents().stream().filter(Objects::nonNull)
-                .map(DistributionSetTagCreatedEvent::getEntity)
+        eventContainer.getEvents().stream().filter(Objects::nonNull).map(DistributionSetTagCreatedEvent::getEntity)
                 .forEach(distributionSetTag -> setContainerPropertValues(distributionSetTag.getId(),
                         distributionSetTag.getName(), distributionSetTag.getColour()));
     }
@@ -143,8 +143,8 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdatedEventContainer eventContainer) {
-        eventContainer.getEvents().stream().filter(Objects::nonNull)
-                .map(DistributionSetTagUpdatedEvent::getEntity).forEach(entity -> {
+        eventContainer.getEvents().stream().filter(Objects::nonNull).map(DistributionSetTagUpdatedEvent::getEntity)
+                .forEach(entity -> {
                     final Item item = container.getItem(entity.getId());
                     if (item != null) {
                         updateItem(entity.getName(), entity.getColour(), item);

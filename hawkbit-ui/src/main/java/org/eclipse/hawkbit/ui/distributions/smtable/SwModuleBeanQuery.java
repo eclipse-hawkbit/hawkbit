@@ -81,7 +81,7 @@ public class SwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSwModuleItem> 
     @Override
     protected List<ProxyBaseSwModuleItem> loadBeans(final int startIndex, final int count) {
         return getSoftwareModuleManagement()
-                .findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(
+                .findAllOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(
                         new OffsetBasedPageRequest(startIndex, count), orderByDistId, searchText, type)
                 .getContent().stream().map(SwModuleBeanQuery::getProxyBean).collect(Collectors.toList());
     }
@@ -110,9 +110,9 @@ public class SwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSwModuleItem> 
     public int size() {
         long size;
         if (type == null && StringUtils.isEmpty(searchText)) {
-            size = getSoftwareModuleManagement().countSoftwareModulesAll();
+            size = getSoftwareModuleManagement().count();
         } else {
-            size = getSoftwareModuleManagement().countSoftwareModuleByFilters(searchText, type);
+            size = getSoftwareModuleManagement().countByTextAndType(searchText, type);
         }
 
         if (size > Integer.MAX_VALUE) {

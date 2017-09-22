@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTagRestApi;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
-import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -50,7 +50,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     private static final Logger LOG = LoggerFactory.getLogger(MgmtTargetTagResource.class);
 
     @Autowired
-    private TagManagement tagManagement;
+    private TargetTagManagement tagManagement;
 
     @Autowired
     private TargetManagement targetManagement;
@@ -72,10 +72,10 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
         Page<TargetTag> findTargetsAll;
         if (rsqlParam == null) {
-            findTargetsAll = this.tagManagement.findAllTargetTags(pageable);
+            findTargetsAll = this.tagManagement.findAll(pageable);
 
         } else {
-            findTargetsAll = this.tagManagement.findAllTargetTags(rsqlParam, pageable);
+            findTargetsAll = this.tagManagement.findByRsql(pageable, rsqlParam);
         }
 
         final List<MgmtTag> rest = MgmtTagMapper.toResponse(findTargetsAll.getContent());
@@ -92,7 +92,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     public ResponseEntity<List<MgmtTag>> createTargetTags(@RequestBody final List<MgmtTagRequestBodyPut> tags) {
         LOG.debug("creating {} target tags", tags.size());
         final List<TargetTag> createdTargetTags = this.tagManagement
-                .createTargetTags(MgmtTagMapper.mapTagFromRequest(entityFactory, tags));
+                .create(MgmtTagMapper.mapTagFromRequest(entityFactory, tags));
         return new ResponseEntity<>(MgmtTagMapper.toResponse(createdTargetTags), HttpStatus.CREATED);
     }
 
@@ -102,7 +102,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
         LOG.debug("update {} target tag", restTargetTagRest);
 
         final TargetTag updateTargetTag = tagManagement
-                .updateTargetTag(entityFactory.tag().update(targetTagId).name(restTargetTagRest.getName())
+                .update(entityFactory.tag().update(targetTagId).name(restTargetTagRest.getName())
                         .description(restTargetTagRest.getDescription()).colour(restTargetTagRest.getColour()));
 
         LOG.debug("target tag updated");
@@ -115,7 +115,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
         LOG.debug("Delete {} target tag", targetTagId);
         final TargetTag targetTag = findTargetTagById(targetTagId);
 
-        this.tagManagement.deleteTargetTag(targetTag.getName());
+        this.tagManagement.delete(targetTag.getName());
 
         return ResponseEntity.ok().build();
     }
@@ -124,7 +124,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     public ResponseEntity<List<MgmtTarget>> getAssignedTargets(@PathVariable("targetTagId") final Long targetTagId) {
 
         return ResponseEntity.ok(MgmtTargetMapper.toResponse(targetManagement
-                .findTargetsByTag(new PageRequest(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT), targetTagId)
+                .findByTag(new PageRequest(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT), targetTagId)
                 .getContent()));
     }
 
@@ -142,10 +142,10 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
         Page<Target> findTargetsAll;
         if (rsqlParam == null) {
-            findTargetsAll = targetManagement.findTargetsByTag(pageable, targetTagId);
+            findTargetsAll = targetManagement.findByTag(pageable, targetTagId);
 
         } else {
-            findTargetsAll = targetManagement.findTargetsByTag(pageable, rsqlParam, targetTagId);
+            findTargetsAll = targetManagement.findByRsqlAndTag(pageable, rsqlParam, targetTagId);
         }
 
         final Long countTargetsAll = findTargetsAll.getTotalElements();
@@ -188,7 +188,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     private TargetTag findTargetTagById(final Long targetTagId) {
-        return tagManagement.findTargetTagById(targetTagId)
+        return tagManagement.get(targetTagId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagId));
     }
 

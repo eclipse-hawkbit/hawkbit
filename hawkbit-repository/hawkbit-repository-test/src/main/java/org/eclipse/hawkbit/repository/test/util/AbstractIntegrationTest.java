@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -37,9 +38,9 @@ import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -143,7 +144,10 @@ public abstract class AbstractIntegrationTest {
     protected TargetFilterQueryManagement targetFilterQueryManagement;
 
     @Autowired
-    protected TagManagement tagManagement;
+    protected TargetTagManagement targetTagManagement;
+
+    @Autowired
+    protected DistributionSetTagManagement distributionSetTagManagement;
 
     @Autowired
     protected DeploymentManagement deploymentManagement;
@@ -234,7 +238,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected DistributionSetMetadata createDistributionSetMetadata(final Long dsId, final MetaData md) {
-        return distributionSetManagement.createDistributionSetMetadata(dsId, Collections.singletonList(md)).get(0);
+        return distributionSetManagement.createMetaData(dsId, Collections.singletonList(md)).get(0);
     }
 
     protected Long getOsModule(final DistributionSet ds) {
@@ -267,17 +271,17 @@ public abstract class AbstractIntegrationTest {
 
         osType = securityRule
                 .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_OS));
-        osType = securityRule.runAsPrivileged(() -> softwareModuleTypeManagement.updateSoftwareModuleType(
+        osType = securityRule.runAsPrivileged(() -> softwareModuleTypeManagement.update(
                 entityFactory.softwareModuleType().update(osType.getId()).description(description)));
 
         appType = securityRule.runAsPrivileged(
                 () -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_APP, Integer.MAX_VALUE));
-        appType = securityRule.runAsPrivileged(() -> softwareModuleTypeManagement.updateSoftwareModuleType(
+        appType = securityRule.runAsPrivileged(() -> softwareModuleTypeManagement.update(
                 entityFactory.softwareModuleType().update(appType.getId()).description(description)));
 
         runtimeType = securityRule
                 .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_RT));
-        runtimeType = securityRule.runAsPrivileged(() -> softwareModuleTypeManagement.updateSoftwareModuleType(
+        runtimeType = securityRule.runAsPrivileged(() -> softwareModuleTypeManagement.update(
                 entityFactory.softwareModuleType().update(runtimeType.getId()).description(description)));
 
         standardDsType = securityRule.runAsPrivileged(() -> testdataFactory.findOrCreateDefaultTestDsType());

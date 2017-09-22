@@ -36,21 +36,19 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
     public void seuptBeforeTest() {
 
         DistributionSet ds = testdataFactory.createDistributionSet("DS");
-        ds = distributionSetManagement
-                .updateDistributionSet(entityFactory.distributionSet().update(ds.getId()).description("DS"));
+        ds = distributionSetManagement.update(entityFactory.distributionSet().update(ds.getId()).description("DS"));
         createDistributionSetMetadata(ds.getId(), entityFactory.generateMetadata("metaKey", "metaValue"));
 
         DistributionSet ds2 = testdataFactory.createDistributionSets("NewDS", 3).get(0);
 
-        ds2 = distributionSetManagement
-                .updateDistributionSet(entityFactory.distributionSet().update(ds2.getId()).description("DS%"));
+        ds2 = distributionSetManagement.update(entityFactory.distributionSet().update(ds2.getId()).description("DS%"));
         createDistributionSetMetadata(ds2.getId(), entityFactory.generateMetadata("metaKey", "value"));
 
-        final DistributionSetTag targetTag = tagManagement
-                .createDistributionSetTag(entityFactory.tag().create().name("Tag1"));
-        tagManagement.createDistributionSetTag(entityFactory.tag().create().name("Tag2"));
-        tagManagement.createDistributionSetTag(entityFactory.tag().create().name("Tag3"));
-        tagManagement.createDistributionSetTag(entityFactory.tag().create().name("Tag4"));
+        final DistributionSetTag targetTag = distributionSetTagManagement
+                .create(entityFactory.tag().create().name("Tag1"));
+        distributionSetTagManagement.create(entityFactory.tag().create().name("Tag2"));
+        distributionSetTagManagement.create(entityFactory.tag().create().name("Tag3"));
+        distributionSetTagManagement.create(entityFactory.tag().create().name("Tag4"));
 
         distributionSetManagement.assignTag(Arrays.asList(ds.getId(), ds2.getId()), targetTag.getId());
     }
@@ -138,8 +136,7 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long excpectedEntity) {
-        final Page<DistributionSet> find = distributionSetManagement.findDistributionSetsAll(rsqlParam,
-                new PageRequest(0, 100), false);
+        final Page<DistributionSet> find = distributionSetManagement.findByRsql(new PageRequest(0, 100), rsqlParam);
         final long countAll = find.getTotalElements();
         assertThat(find).as("Founded entity is should not be null").isNotNull();
         assertThat(countAll).as("Founded entity size is wrong").isEqualTo(excpectedEntity);

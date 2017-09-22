@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.distributions.smtype;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.smtype.CreateUpdateSoftwareTypeLayout;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
@@ -37,13 +36,12 @@ public class DistSMTypeFilterHeader extends AbstractFilterHeader {
     private final CreateUpdateSoftwareTypeLayout createUpdateSWTypeLayout;
 
     DistSMTypeFilterHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
-            final UIEventBus eventBus, final ManageDistUIState manageDistUIState, final TagManagement tagManagement,
-            final EntityFactory entityFactory, final UINotification uiNotification,
-            final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
+            final UIEventBus eventBus, final ManageDistUIState manageDistUIState, final EntityFactory entityFactory,
+            final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
         super(permChecker, eventBus, i18n);
         this.manageDistUIState = manageDistUIState;
-        this.createUpdateSWTypeLayout = new CreateUpdateSoftwareTypeLayout(i18n, tagManagement, entityFactory, eventBus,
-                permChecker, uiNotification, softwareModuleTypeManagement);
+        this.createUpdateSWTypeLayout = new CreateUpdateSoftwareTypeLayout(i18n, entityFactory, eventBus, permChecker,
+                uiNotification, softwareModuleTypeManagement);
 
         if (hasCreateUpdatePermission()) {
             createUpdateSWTypeLayout.init();

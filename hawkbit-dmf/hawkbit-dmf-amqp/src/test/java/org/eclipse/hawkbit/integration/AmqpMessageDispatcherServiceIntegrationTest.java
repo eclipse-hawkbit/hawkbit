@@ -108,13 +108,13 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
         final String controllerId = TARGET_PREFIX + "sendDeleteMessage";
 
         registerAndAssertTargetWithExistingTenant(controllerId, 1);
-        targetManagement.deleteTarget(controllerId);
+        targetManagement.deleteByControllerID(controllerId);
         assertDeleteMessage(controllerId);
     }
 
     private void waitUntilTargetStatusIsPending(final String controllerId) {
         waitUntil(() -> {
-            final Optional<Target> findTargetByControllerID = targetManagement.findTargetByControllerID(controllerId);
+            final Optional<Target> findTargetByControllerID = targetManagement.getByControllerID(controllerId);
             return findTargetByControllerID.isPresent()
                     && TargetUpdateStatus.PENDING.equals(findTargetByControllerID.get().getUpdateStatus());
         });

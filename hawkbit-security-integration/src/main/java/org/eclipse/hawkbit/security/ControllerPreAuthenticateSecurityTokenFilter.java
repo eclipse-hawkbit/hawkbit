@@ -80,9 +80,9 @@ public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractContro
     public HeaderAuthentication getPreAuthenticatedCredentials(final DmfTenantSecurityToken securityToken) {
         final Optional<Target> target = systemSecurityContext.runAsSystemAsTenant(() -> {
             if (securityToken.getTargetId() != null) {
-                return controllerManagement.findByTargetId(securityToken.getTargetId());
+                return controllerManagement.get(securityToken.getTargetId());
             }
-            return controllerManagement.findByControllerId(securityToken.getControllerId());
+            return controllerManagement.getByControllerId(securityToken.getControllerId());
         }, securityToken.getTenant());
 
         return target.map(t -> new HeaderAuthentication(t.getControllerId(),
@@ -95,7 +95,7 @@ public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractContro
             return securityToken.getControllerId();
         }
         final Optional<Target> foundTarget = systemSecurityContext.runAsSystemAsTenant(
-                () -> controllerManagement.findByTargetId(securityToken.getTargetId()), securityToken.getTenant());
+                () -> controllerManagement.get(securityToken.getTargetId()), securityToken.getTenant());
         if (!foundTarget.isPresent()) {
             return null;
         }

@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.artifacts.smtype;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
@@ -32,12 +31,11 @@ public class SMTypeFilterLayout extends AbstractFilterLayout {
     private final ArtifactUploadState artifactUploadState;
 
     public SMTypeFilterLayout(final ArtifactUploadState artifactUploadState, final VaadinMessageSource i18n,
-            final SpPermissionChecker permChecker, final UIEventBus eventBus, final TagManagement tagManagement,
-            final EntityFactory entityFactory, final UINotification uiNotification,
-            final SoftwareModuleTypeManagement softwareModuleTypeManagement,
+            final SpPermissionChecker permChecker, final UIEventBus eventBus, final EntityFactory entityFactory,
+            final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final UploadViewClientCriterion uploadViewClientCriterion) {
-        super(new SMTypeFilterHeader(i18n, permChecker, eventBus, artifactUploadState, tagManagement, entityFactory,
-                uiNotification, softwareModuleTypeManagement),
+        super(new SMTypeFilterHeader(i18n, permChecker, eventBus, artifactUploadState, entityFactory, uiNotification,
+                softwareModuleTypeManagement),
                 new SMTypeFilterButtons(eventBus, artifactUploadState, uploadViewClientCriterion,
                         softwareModuleTypeManagement));
 

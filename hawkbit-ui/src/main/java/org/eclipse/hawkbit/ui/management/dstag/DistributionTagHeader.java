@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.management.dstag;
 
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
@@ -36,12 +36,13 @@ public class DistributionTagHeader extends AbstractFilterHeader implements Refre
     private final CreateUpdateDistributionTagLayoutWindow createORUpdateDistributionTagLayout;
 
     DistributionTagHeader(final VaadinMessageSource i18n, final ManagementUIState managementUIState,
-            final SpPermissionChecker permChecker, final UIEventBus eventBus, final TagManagement tagManagement,
-            final EntityFactory entityFactory, final UINotification uiNotification) {
+            final SpPermissionChecker permChecker, final UIEventBus eventBus,
+            final DistributionSetTagManagement distributionSetTagManagement, final EntityFactory entityFactory,
+            final UINotification uiNotification) {
         super(permChecker, eventBus, i18n);
         this.managementUIState = managementUIState;
-        this.createORUpdateDistributionTagLayout = new CreateUpdateDistributionTagLayoutWindow(i18n, tagManagement,
-                entityFactory, eventBus, permChecker, uiNotification);
+        this.createORUpdateDistributionTagLayout = new CreateUpdateDistributionTagLayoutWindow(i18n,
+                distributionSetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
         if (hasCreateUpdatePermission()) {
             createORUpdateDistributionTagLayout.init();
         }

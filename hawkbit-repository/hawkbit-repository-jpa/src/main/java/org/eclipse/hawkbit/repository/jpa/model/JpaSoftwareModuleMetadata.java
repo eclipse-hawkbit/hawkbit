@@ -32,9 +32,9 @@ public class JpaSoftwareModuleMetadata extends JpaMetaData implements SoftwareMo
     private static final long serialVersionUID = 1L;
 
     @Id
-    @ManyToOne(optional = false, targetEntity = JpaSoftwareModule.class, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "sw_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_metadata_sw"))
-    private SoftwareModule softwareModule;
+    private JpaSoftwareModule softwareModule;
 
     public JpaSoftwareModuleMetadata() {
         // default public constructor for JPA
@@ -42,7 +42,7 @@ public class JpaSoftwareModuleMetadata extends JpaMetaData implements SoftwareMo
 
     public JpaSoftwareModuleMetadata(final String key, final SoftwareModule softwareModule, final String value) {
         super(key, value);
-        this.softwareModule = softwareModule;
+        this.softwareModule = (JpaSoftwareModule) softwareModule;
     }
 
     public SwMetadataCompositeKey getId() {
@@ -54,7 +54,7 @@ public class JpaSoftwareModuleMetadata extends JpaMetaData implements SoftwareMo
         return softwareModule;
     }
 
-    public void setSoftwareModule(final SoftwareModule softwareModule) {
+    public void setSoftwareModule(final JpaSoftwareModule softwareModule) {
         this.softwareModule = softwareModule;
     }
 

@@ -75,7 +75,7 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
             }
         }
 
-        if (sortStates!= null && sortStates.length > 0) {
+        if (sortStates != null && sortStates.length > 0) {
             // Initalize sort
             sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortPropertyIds[0]);
             // Add sort
@@ -105,18 +105,18 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
                     .setIsDeleted(false).setIsComplete(true).setSearchText(searchText)
                     .setSelectDSWithNoTag(noTagClicked).setTagNames(distributionTags);
 
-            distBeans = getDistributionSetManagement().findDistributionSetsAllOrderedByLinkTarget(
+            distBeans = getDistributionSetManagement().findByFilterAndAssignedInstalledDsOrderedByLinkTarget(
                     new OffsetBasedPageRequest(startIndex, count, sort), distributionSetFilterBuilder,
                     pinnedTarget.getControllerId());
         } else if (distributionTags.isEmpty() && StringUtils.isEmpty(searchText) && !noTagClicked) {
             // if no search filters available
-            distBeans = getDistributionSetManagement().findDistributionSetsByDeletedAndOrCompleted(
-                    new OffsetBasedPageRequest(startIndex, count, sort), false, true);
+            distBeans = getDistributionSetManagement()
+                    .findByCompleted(new OffsetBasedPageRequest(startIndex, count, sort), true);
         } else {
             final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
                     .setIsComplete(true).setSearchText(searchText).setSelectDSWithNoTag(noTagClicked)
                     .setTagNames(distributionTags).build();
-            distBeans = getDistributionSetManagement().findDistributionSetsByFilters(
+            distBeans = getDistributionSetManagement().findByDistributionSetFilter(
                     new OffsetBasedPageRequest(startIndex, count, sort), distributionSetFilter);
         }
 
@@ -146,19 +146,20 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
                     .setIsDeleted(false).setIsComplete(true).setSearchText(searchText)
                     .setSelectDSWithNoTag(noTagClicked).setTagNames(distributionTags);
 
-            firstPageDistributionSets = getDistributionSetManagement().findDistributionSetsAllOrderedByLinkTarget(
-                    new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilterBuilder,
-                    pinnedTarget.getControllerId());
+            firstPageDistributionSets = getDistributionSetManagement()
+                    .findByFilterAndAssignedInstalledDsOrderedByLinkTarget(
+                            new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilterBuilder,
+                            pinnedTarget.getControllerId());
         } else if (distributionTags.isEmpty() && StringUtils.isEmpty(searchText) && !noTagClicked) {
             // if no search filters available
-            firstPageDistributionSets = getDistributionSetManagement().findDistributionSetsByDeletedAndOrCompleted(
-                    new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), false, true);
+            firstPageDistributionSets = getDistributionSetManagement()
+                    .findByCompleted(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), true);
         } else {
             final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
                     .setIsComplete(true).setSearchText(searchText).setSelectDSWithNoTag(noTagClicked)
                     .setTagNames(distributionTags).build();
 
-            firstPageDistributionSets = getDistributionSetManagement().findDistributionSetsByFilters(
+            firstPageDistributionSets = getDistributionSetManagement().findByDistributionSetFilter(
                     new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilter);
 
         }

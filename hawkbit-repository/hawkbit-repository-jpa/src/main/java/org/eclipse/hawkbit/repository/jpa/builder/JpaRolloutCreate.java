@@ -44,7 +44,7 @@ public class JpaRolloutCreate extends AbstractRolloutUpdateCreate<RolloutCreate>
     }
 
     private DistributionSet findDistributionSetAndThrowExceptionIfNotFound(final Long setId) {
-        return distributionSetManagement.findDistributionSetById(setId)
+        return distributionSetManagement.get(setId)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, setId));
     }
 }

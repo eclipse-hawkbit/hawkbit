@@ -54,8 +54,7 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
 
         final Target targetToBeCreated = testdataFactory.createTarget("targetToBeCreated");
 
-        final Target loadedTarget = targetManagement.findTargetByControllerID(targetToBeCreated.getControllerId())
-                .get();
+        final Target loadedTarget = targetManagement.getByControllerID(targetToBeCreated.getControllerId()).get();
         assertThat(postLoadEntityListener.getEntity()).isNotNull();
         assertThat(postLoadEntityListener.getEntity()).isEqualTo(loadedTarget);
     }
@@ -95,7 +94,7 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
         Target updateTarget = addListenerAndCreateTarget(entityInterceptor, "targetToBeCreated");
 
         updateTarget = targetManagement
-                .updateTarget(entityFactory.target().update(updateTarget.getControllerId()).name("New"));
+                .update(entityFactory.target().update(updateTarget.getControllerId()).name("New"));
 
         assertThat(entityInterceptor.getEntity()).isNotNull();
         assertThat(entityInterceptor.getEntity()).isEqualTo(updateTarget);
@@ -104,9 +103,9 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
     private void executeDeleteAndAssertCallbackResult(final AbstractEntityListener entityInterceptor) {
         EntityInterceptorHolder.getInstance().getEntityInterceptors().add(entityInterceptor);
         final SoftwareModuleType type = softwareModuleTypeManagement
-                .createSoftwareModuleType(entityFactory.softwareModuleType().create().name("test").key("test"));
+                .create(entityFactory.softwareModuleType().create().name("test").key("test"));
 
-        softwareModuleTypeManagement.deleteSoftwareModuleType(type.getId());
+        softwareModuleTypeManagement.delete(type.getId());
         assertThat(entityInterceptor.getEntity()).isNotNull();
         assertThat(entityInterceptor.getEntity()).isEqualTo(type);
     }

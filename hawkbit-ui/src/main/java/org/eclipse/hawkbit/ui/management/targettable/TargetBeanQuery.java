@@ -109,19 +109,20 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         Slice<Target> targetBeans;
         final List<ProxyTarget> proxyTargetBeans = new ArrayList<>();
         if (pinnedDistId != null) {
-            targetBeans = getTargetManagement().findTargetsAllOrderByLinkedDistributionSet(
+            targetBeans = getTargetManagement().findByFilterOrderByLinkedDistributionSet(
                     new OffsetBasedPageRequest(startIndex, SPUIDefinitions.PAGE_SIZE, sort), pinnedDistId,
-                    new FilterParams(distributionId, status, overdueState, searchText, noTagClicked, targetTags));
+                    new FilterParams(status, overdueState, searchText, distributionId, noTagClicked, targetTags));
         } else if (null != targetFilterQueryId) {
-            targetBeans = getTargetManagement().findTargetsByTargetFilterQuery(targetFilterQueryId,
-                    new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
+            targetBeans = getTargetManagement().findByTargetFilterQuery(
+                    new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
+                    targetFilterQueryId);
         } else if (!isAnyFilterSelected()) {
-            targetBeans = getTargetManagement().findTargetsAll(
-                    new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
+            targetBeans = getTargetManagement()
+                    .findAll(new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         } else {
-            targetBeans = getTargetManagement().findTargetByFilters(
-                    new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort), status,
-                    overdueState, searchText, distributionId, noTagClicked, targetTags);
+            targetBeans = getTargetManagement().findByFilters(
+                    new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
+                    new FilterParams(status, overdueState, searchText, distributionId, noTagClicked, targetTags));
         }
         for (final Target targ : targetBeans) {
             final ProxyTarget prxyTarget = new ProxyTarget();
@@ -176,15 +177,15 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
     @Override
     public int size() {
-        final long totSize = getTargetManagement().countTargetsAll();
+        final long totSize = getTargetManagement().count();
         long size;
         if (null != targetFilterQueryId) {
-            size = getTargetManagement().countTargetByTargetFilterQuery(targetFilterQueryId);
+            size = getTargetManagement().countByTargetFilterQuery(targetFilterQueryId);
         } else if (!isAnyFilterSelected()) {
             size = totSize;
         } else {
-            size = getTargetManagement().countTargetByFilters(status, overdueState, searchText, distributionId,
-                    noTagClicked, targetTags);
+            size = getTargetManagement().countByFilters(status, overdueState, searchText, distributionId, noTagClicked,
+                    targetTags);
         }
 
         final ManagementUIState tmpManagementUIState = getManagementUIState();
