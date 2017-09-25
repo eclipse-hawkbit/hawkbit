@@ -101,6 +101,19 @@ public class ConfigurableScenario {
         clientConfigurationProperties.getScenarios().forEach(this::createScenario);
     }
 
+    /**
+     * Run the default getting started scenario including rollout
+     */
+    public void runWithRollout() {
+
+        LOGGER.info("Running Configurable Scenario...");
+
+        clientConfigurationProperties.getScenarios().forEach(scenario -> {
+            scenario.setRunRollouts(true);
+            createScenario(scenario);
+        });
+    }
+
     private void createScenario(final Scenario scenario) {
         if (scenario.isCleanRepository()) {
             cleanRepository();
@@ -204,11 +217,19 @@ public class ConfigurableScenario {
     }
 
     private void runRollouts(final Scenario scenario) {
+        if (scenario.getDistributionSets() <= 0) {
+            return;
+        }
+
         distributionSetResource.getDistributionSets(0, scenario.getDistributionSets(), null, null).getBody()
                 .getContent().forEach(set -> runRollout(set, scenario));
     }
 
     private void runSemiAutomaticRollouts(final Scenario scenario) {
+        if (scenario.getDistributionSets() <= 0) {
+            return;
+        }
+
         distributionSetResource.getDistributionSets(0, scenario.getDistributionSets(), null, null).getBody()
                 .getContent().forEach(set -> runSemiAutomaticRollout(set, scenario));
     }
@@ -319,6 +340,10 @@ public class ConfigurableScenario {
     }
 
     private void createDistributionSets(final Scenario scenario) {
+        if (scenario.getDistributionSets() <= 0) {
+            return;
+        }
+
         LOGGER.info("Creating {} distribution sets", scenario.getDistributionSets());
         final BigDecimal pages = new BigDecimal(scenario.getDistributionSets())
                 .divide(new BigDecimal(PAGE_SIZE), BigDecimal.ROUND_UP).max(new BigDecimal(1));
@@ -389,6 +414,10 @@ public class ConfigurableScenario {
     }
 
     private void createTargets(final Scenario scenario, final List<Long> deviceGroupTags) {
+        if (scenario.getTargets() <= 0) {
+            return;
+        }
+
         LOGGER.info("Creating {} targets", scenario.getTargets());
         final BigDecimal pages = new BigDecimal(scenario.getTargets())
                 .divide(new BigDecimal(PAGE_SIZE), BigDecimal.ROUND_UP).max(new BigDecimal(1));
