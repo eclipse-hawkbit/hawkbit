@@ -151,9 +151,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     ApplicationEventFilter applicationEventFilter(final RepositoryProperties repositoryProperties) {
-        return e -> {
-            return (e instanceof TargetPollEvent) && !repositoryProperties.isPublishTargetPollEvent();
-        };
+        return e -> (e instanceof TargetPollEvent) && !repositoryProperties.isPublishTargetPollEvent();
     }
 
     /**
