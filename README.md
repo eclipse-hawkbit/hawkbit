@@ -21,7 +21,7 @@ see [hawkBit Documentation](https://www.eclipse.org/hawkbit/documentation/overvi
 
 We offer a sandbox installation that is free for everyone to try out hawkBit. However, keep in mind that the sandbox database will be reset from time to time. It is also not possible to upload any artifacts into the sandbox. But you can use it to try out the Management UI, Management API and DDI API.
 
-https://hawkbit.eu-gb.mybluemix.net/UI/ (currently unavailable - will be back soon)
+https://hawkbit.eu-gb.mybluemix.net/UI/
 
 # Device Integration
 

@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.mgmt.client.resource.MgmtSoftwareModuleClientResource
 import org.eclipse.hawkbit.mgmt.client.resource.MgmtTargetClientResource;
 import org.eclipse.hawkbit.mgmt.client.resource.MgmtTargetTagClientResource;
 import org.eclipse.hawkbit.mgmt.client.scenarios.ConfigurableScenario;
-import org.eclipse.hawkbit.mgmt.client.scenarios.CreateStartedRolloutExample;
 import org.eclipse.hawkbit.mgmt.client.scenarios.upload.FeignMultipartEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.Banner.Mode;
@@ -51,9 +50,6 @@ public class Application implements CommandLineRunner {
     @Autowired
     private ConfigurableScenario configuredScenario;
 
-    @Autowired
-    private CreateStartedRolloutExample gettingStartedRolloutScenario;
-
     public static void main(final String[] args) {
         new SpringApplicationBuilder().bannerMode(Mode.OFF).sources(Application.class).run(args);
     }
@@ -62,7 +58,7 @@ public class Application implements CommandLineRunner {
     public void run(final String... args) throws Exception {
         if (containsArg("--createrollout", args)) {
             // run the create and start rollout example
-            gettingStartedRolloutScenario.run();
+            configuredScenario.runWithRollout();
         } else {
             // run the configured scenario from properties
             configuredScenario.run();
@@ -84,11 +80,6 @@ public class Application implements CommandLineRunner {
         return new ConfigurableScenario(distributionSetResource, softwareModuleResource,
                 uploadSoftwareModule(clientConfigurationProperties), targetResource, rolloutResource, targetTagResource,
                 distributionSetTagResource, clientConfigurationProperties);
-    }
-
-    @Bean
-    public CreateStartedRolloutExample createStartedRolloutExample() {
-        return new CreateStartedRolloutExample();
     }
 
     private static MgmtSoftwareModuleClientResource uploadSoftwareModule(
