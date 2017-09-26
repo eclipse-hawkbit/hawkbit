@@ -484,7 +484,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .allMatch(action -> action.getDistributionSet().getId() == ds1.getId()).as("Is running")
                 .allMatch(action -> action.getStatus() == Status.RUNNING);
 
-        // Second assigmnet
+        // Second assignment
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2");
         assignDistributionSet(ds2, targets);
 
