@@ -67,9 +67,14 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    Set<Long> findTargetIdsToCancel(final List<List<Long>> targetIds) {
+    Set<Long> cancelActiveActions(final List<List<Long>> targetIds) {
         return targetIds.stream().map(this::overrideObsoleteUpdateActions).flatMap(Collection::stream)
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    void closeActiveActions(final List<List<Long>> targetIds) {
+        targetIds.forEach(this::closeObsoleteUpdateActions);
     }
 
     @Override

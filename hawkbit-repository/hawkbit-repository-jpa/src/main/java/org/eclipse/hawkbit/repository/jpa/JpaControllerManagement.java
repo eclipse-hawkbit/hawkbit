@@ -48,7 +48,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,9 +99,6 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Autowired
     private TenantConfigurationManagement tenantConfigurationManagement;
-
-    @Autowired
-    private TenantAware tenantAware;
 
     @Autowired
     private SystemSecurityContext systemSecurityContext;

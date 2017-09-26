@@ -219,8 +219,21 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      */
     @EntityGraph(attributePaths = { "target" }, type = EntityGraphType.LOAD)
     @Query("SELECT a FROM JpaAction a WHERE a.active = true AND a.distributionSet.requiredMigrationStep = false AND a.target IN ?1 AND a.status != ?2")
-    List<JpaAction> findByActiveAndTargetIdInAndActionStatusNotEqualToAndDistributionSetRequiredMigrationStep(
+    List<JpaAction> findByActiveAndTargetIdInAndActionStatusNotEqualToAndDistributionSetNotRequiredMigrationStep(
             Collection<Long> targetIds, Action.Status notStatus);
+
+    /**
+     *
+     * Retrieves all {@link Action}s which are active and referring to the given
+     * target Ids and distribution set required migration step.
+     *
+     * @param targetIds
+     *            the IDs of targets for the actions
+     * @return the found list of {@link Action}s
+     */
+    @EntityGraph(attributePaths = { "target" }, type = EntityGraphType.LOAD)
+    @Query("SELECT a FROM JpaAction a WHERE a.active = true AND a.distributionSet.requiredMigrationStep = false AND a.target IN ?1")
+    List<JpaAction> findByActiveAndTargetIdInAndDistributionSetNotRequiredMigrationStep(Collection<Long> targetIds);
 
     /**
      * Counts all {@link Action}s referring to the given target.
