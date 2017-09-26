@@ -70,7 +70,7 @@ public class RepositoryConfigurationView extends BaseConfigurationView
         gridLayout.setSizeFull();
 
         actionAutocloseCheckBox = SPUIComponentProvider.getCheckBox("", DIST_CHECKBOX_STYLE, null, false, "");
-        actionAutocloseCheckBox.setId(UIComponentIdProvider.DOWNLOAD_ANONYMOUS_CHECKBOX);
+        actionAutocloseCheckBox.setId(UIComponentIdProvider.REPOSITORY_ACTIONS_AUTOCLOSE_CHECKBOX);
         actionAutocloseCheckBox.setValue(actionAutocloseConfigurationItem.isConfigEnabled());
         actionAutocloseCheckBox.addValueChangeListener(this);
         actionAutocloseConfigurationItem.addChangeListener(this);
