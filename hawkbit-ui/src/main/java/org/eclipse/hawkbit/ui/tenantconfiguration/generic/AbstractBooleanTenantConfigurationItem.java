@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
+package org.eclipse.hawkbit.ui.tenantconfiguration.generic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +21,8 @@ import com.vaadin.ui.VerticalLayout;
 /**
  * abstract authentication configuration item.
  */
-abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLayout
-        implements AuthenticationConfigurationItem {
+public abstract class AbstractBooleanTenantConfigurationItem extends VerticalLayout
+        implements BooleanConfigurationItem {
 
     private static final long serialVersionUID = 1L;
 
@@ -40,7 +40,7 @@ abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLay
      *            the tenant configuration management to retrieve the
      *            configuration value
      */
-    public AbstractAuthenticationTenantConfigurationItem(final String configurationKey,
+    protected AbstractBooleanTenantConfigurationItem(final String configurationKey,
             final TenantConfigurationManagement tenantConfigurationManagement, final VaadinMessageSource i18n) {
         this.configurationKey = configurationKey;
         this.tenantConfigurationManagement = tenantConfigurationManagement;

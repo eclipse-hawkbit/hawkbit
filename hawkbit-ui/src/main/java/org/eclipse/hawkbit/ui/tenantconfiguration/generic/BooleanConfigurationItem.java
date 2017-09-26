@@ -6,19 +6,15 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
+package org.eclipse.hawkbit.ui.tenantconfiguration.generic;
 
 import org.eclipse.hawkbit.ui.tenantconfiguration.ConfigurationGroup;
 
 /**
  * Interface to be implemented by any tenant specific configuration to show on
  * the UI.
- *
- *
- *
- *
  */
-public interface AuthenticationConfigurationItem extends ConfigurationGroup {
+public interface BooleanConfigurationItem extends ConfigurationGroup {
 
     /**
      * @return {@code true} if configuration is enabled, otherwise {@code false}

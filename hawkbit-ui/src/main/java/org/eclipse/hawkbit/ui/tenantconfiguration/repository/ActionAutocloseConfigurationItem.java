@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
+package org.eclipse.hawkbit.ui.tenantconfiguration.repository;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
@@ -17,19 +17,18 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
  * This class represents the UI item for the target security token section in
  * the authentication configuration view.
  */
-public class TargetSecurityTokenAuthenticationConfigurationItem extends AbstractBooleanTenantConfigurationItem {
+public class ActionAutocloseConfigurationItem extends AbstractBooleanTenantConfigurationItem {
 
     private static final long serialVersionUID = 1L;
 
     private boolean configurationEnabled;
     private boolean configurationEnabledChange;
 
-    public TargetSecurityTokenAuthenticationConfigurationItem(
-            final TenantConfigurationManagement tenantConfigurationManagement, final VaadinMessageSource i18n) {
-        super(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, tenantConfigurationManagement,
-                i18n);
+    public ActionAutocloseConfigurationItem(final TenantConfigurationManagement tenantConfigurationManagement,
+            final VaadinMessageSource i18n) {
+        super(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, tenantConfigurationManagement, i18n);
 
-        super.init("label.configuration.auth.targettoken");
+        super.init("label.configuration.repository.autoclose.action");
         configurationEnabled = isConfigEnabled();
     }
 
