@@ -433,6 +433,16 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Verify that controller registration does not result in a TargetPollEvent if feature is disabled")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 0) })
+    public void targetPollEventNotSendIfDisabled() {
+        repositoryProperties.setPublishTargetPollEvent(false);
+        controllerManagement.findOrRegisterTargetIfItDoesNotexist("AA", LOCALHOST);
+        repositoryProperties.setPublishTargetPollEvent(true);
+    }
+
+    @Test
     @Description("Controller trys to finish an update process after it has been finished by an error action status.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),

@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -24,7 +25,14 @@ public class RepositoryProperties {
      * is enforced you have to make sure that the feedback channel from the
      * devices i in order.
      */
-    private boolean rejectActionStatusForClosedAction = false;
+    private boolean rejectActionStatusForClosedAction;
+
+    /**
+     * Set to <code>true</code> if the repository should publish
+     * {@link TargetPollEvent}s in case a target connects to the repository.
+     * Activated by default but may be worth to disable if not needed.
+     */
+    private boolean publishTargetPollEvent = true;
 
     public boolean isRejectActionStatusForClosedAction() {
         return rejectActionStatusForClosedAction;
@@ -32,6 +40,14 @@ public class RepositoryProperties {
 
     public void setRejectActionStatusForClosedAction(final boolean rejectActionStatusForClosedAction) {
         this.rejectActionStatusForClosedAction = rejectActionStatusForClosedAction;
+    }
+
+    public boolean isPublishTargetPollEvent() {
+        return publishTargetPollEvent;
+    }
+
+    public void setPublishTargetPollEvent(final boolean publishTargetPollEvent) {
+        this.publishTargetPollEvent = publishTargetPollEvent;
     }
 
 }

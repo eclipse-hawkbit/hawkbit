@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.PropertiesQuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryDefaultConfiguration;
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
@@ -39,8 +40,10 @@ import org.eclipse.hawkbit.repository.builder.DistributionSetTypeBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
+import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
+import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignScheduler;
@@ -143,6 +146,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnMissingBean
     RolloutStatusCache rolloutStatusCache(final TenantAware tenantAware) {
         return new RolloutStatusCache(tenantAware);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    ApplicationEventFilter applicationEventFilter(final RepositoryProperties repositoryProperties) {
+        return e -> (e instanceof TargetPollEvent) && !repositoryProperties.isPublishTargetPollEvent();
     }
 
     /**
