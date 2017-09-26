@@ -63,7 +63,7 @@ public class RepositoryConfigurationView extends BaseConfigurationView
         headerDisSetType.addStyleName("config-panel-header");
         vLayout.addComponent(headerDisSetType);
 
-        final GridLayout gridLayout = new GridLayout(2, 4);
+        final GridLayout gridLayout = new GridLayout(2, 1);
         gridLayout.setSpacing(true);
         gridLayout.setImmediate(true);
         gridLayout.setColumnExpandRatio(1, 1.0F);
