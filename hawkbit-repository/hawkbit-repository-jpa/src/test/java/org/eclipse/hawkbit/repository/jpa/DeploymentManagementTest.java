@@ -462,7 +462,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verifies that if an account is set to action autoclose running actions in case of a new assigned get closed and set to CANCELED.")
+    @Description("Verifies that if an account is set to action autoclose running actions in case of a new assigned set get closed and set to CANCELED.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 10),
             @Expect(type = TargetUpdatedEvent.class, count = 20), @Expect(type = ActionCreatedEvent.class, count = 20),
             @Expect(type = ActionUpdatedEvent.class, count = 10),
@@ -475,19 +475,24 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         final List<Target> targets = testdataFactory.createTargets(10);
 
+        // First assignment
         final DistributionSet ds1 = testdataFactory.createDistributionSet("1");
         assignDistributionSet(ds1, targets);
 
         List<Action> assignmentOne = actionRepository.findByDistributionSetId(PAGE, ds1.getId()).getContent();
         assertThat(assignmentOne).hasSize(10).as("Is active").allMatch(Action::isActive).as("Is assigned DS")
-                .allMatch(action -> action.getDistributionSet().getId() == ds1.getId());
+                .allMatch(action -> action.getDistributionSet().getId() == ds1.getId()).as("Is running")
+                .allMatch(action -> action.getStatus() == Status.RUNNING);
 
+        // Second assigmnet
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2");
         assignDistributionSet(ds2, targets);
+
         final List<Action> assignmentTwo = actionRepository.findByDistributionSetId(PAGE, ds2.getId()).getContent();
         assignmentOne = actionRepository.findByDistributionSetId(PAGE, ds1.getId()).getContent();
         assertThat(assignmentTwo).hasSize(10).as("Is active").allMatch(Action::isActive).as("Is assigned DS")
-                .allMatch(action -> action.getDistributionSet().getId() == ds2.getId());
+                .allMatch(action -> action.getDistributionSet().getId() == ds2.getId()).as("Is running")
+                .allMatch(action -> action.getStatus() == Status.RUNNING);
         assertThat(assignmentOne).hasSize(10).as("Is active").allMatch(action -> !action.isActive())
                 .as("Is assigned to DS").allMatch(action -> action.getDistributionSet().getId() == ds1.getId())
                 .as("Is cancelled").allMatch(action -> action.getStatus() == Status.CANCELED);
