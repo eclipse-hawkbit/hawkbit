@@ -85,8 +85,9 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final Long targetFilterQueryId) {
-        get(targetFilterQueryId)
-                .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));
+        if (!targetFilterQueryRepository.exists(targetFilterQueryId)) {
+            throw new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId);
+        }
 
         targetFilterQueryRepository.delete(targetFilterQueryId);
     }

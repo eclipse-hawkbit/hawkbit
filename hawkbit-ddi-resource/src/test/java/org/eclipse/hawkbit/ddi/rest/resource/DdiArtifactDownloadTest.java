@@ -208,10 +208,12 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         // create ds
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
+        assignDistributionSet(ds, target);
+
         // create artifact
         final byte random[] = RandomUtils.nextBytes(5 * 1024);
-        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds),
-                "file1", false);
+        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds), "file1",
+                false);
 
         // download
         final MvcResult result = mvc
@@ -242,8 +244,8 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
         // create artifact
         final byte random[] = RandomUtils.nextBytes(resultLength);
-        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds),
-                "file1", false);
+        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds), "file1",
+                false);
 
         assertThat(random.length).isEqualTo(resultLength);
 
