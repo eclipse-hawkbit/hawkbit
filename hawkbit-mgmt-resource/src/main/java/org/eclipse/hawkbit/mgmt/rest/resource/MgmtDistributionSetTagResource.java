@@ -91,8 +91,12 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     @Override
     public ResponseEntity<MgmtTag> getDistributionSetTag(
             @PathVariable("distributionsetTagId") final Long distributionsetTagId) {
-        final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);
-        return ResponseEntity.ok(MgmtTagMapper.toResponse(tag));
+        final DistributionSetTag distributionSetTag = findDistributionTagById(distributionsetTagId);
+
+        final MgmtTag response = MgmtTagMapper.toResponse(distributionSetTag);
+        MgmtTagMapper.addLinks(distributionSetTag, response);
+
+        return ResponseEntity.ok(response);
     }
 
     @Override
@@ -111,9 +115,14 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
             @PathVariable("distributionsetTagId") final Long distributionsetTagId,
             @RequestBody final MgmtTagRequestBodyPut restDSTagRest) {
 
-        return ResponseEntity.ok(MgmtTagMapper.toResponse(distributionSetTagManagement
+        final DistributionSetTag distributionSetTag = distributionSetTagManagement
                 .update(entityFactory.tag().update(distributionsetTagId).name(restDSTagRest.getName())
-                        .description(restDSTagRest.getDescription()).colour(restDSTagRest.getColour()))));
+                        .description(restDSTagRest.getDescription()).colour(restDSTagRest.getColour()));
+
+        final MgmtTag response = MgmtTagMapper.toResponse(distributionSetTag);
+        MgmtTagMapper.addLinks(distributionSetTag, response);
+
+        return ResponseEntity.ok(response);
     }
 
     @Override

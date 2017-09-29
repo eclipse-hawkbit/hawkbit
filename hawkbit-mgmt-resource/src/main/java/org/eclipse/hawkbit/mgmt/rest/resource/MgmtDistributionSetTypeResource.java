@@ -89,7 +89,11 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId) {
 
         final DistributionSetType foundType = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
-        return ResponseEntity.ok(MgmtDistributionSetTypeMapper.toResponse(foundType));
+
+        final MgmtDistributionSetType reponse = MgmtDistributionSetTypeMapper.toResponse(foundType);
+        MgmtDistributionSetTypeMapper.addLinks(reponse);
+
+        return ResponseEntity.ok(reponse);
     }
 
     @Override
@@ -105,10 +109,14 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
             @RequestBody final MgmtDistributionSetTypeRequestBodyPut restDistributionSetType) {
 
-        return ResponseEntity.ok(MgmtDistributionSetTypeMapper
-                .toResponse(distributionSetTypeManagement.update(entityFactory.distributionSetType()
-                        .update(distributionSetTypeId).description(restDistributionSetType.getDescription())
-                        .colour(restDistributionSetType.getColour()))));
+        final DistributionSetType updated = distributionSetTypeManagement.update(entityFactory.distributionSetType()
+                .update(distributionSetTypeId).description(restDistributionSetType.getDescription())
+                .colour(restDistributionSetType.getColour()));
+
+        final MgmtDistributionSetType reponse = MgmtDistributionSetTypeMapper.toResponse(updated);
+        MgmtDistributionSetTypeMapper.addLinks(reponse);
+
+        return ResponseEntity.ok(reponse);
     }
 
     @Override

@@ -117,7 +117,10 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @PathVariable("distributionSetId") final Long distributionSetId) {
         final DistributionSet foundDs = findDistributionSetWithExceptionIfNotFound(distributionSetId);
 
-        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(foundDs));
+        final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(foundDs);
+        MgmtDistributionSetMapper.addLinks(foundDs, response);
+
+        return ResponseEntity.ok(response);
     }
 
     @Override
@@ -149,10 +152,14 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @PathVariable("distributionSetId") final Long distributionSetId,
             @RequestBody final MgmtDistributionSetRequestBodyPut toUpdate) {
 
-        return ResponseEntity.ok(
-                MgmtDistributionSetMapper.toResponse(distributionSetManagement.update(entityFactory.distributionSet()
-                        .update(distributionSetId).name(toUpdate.getName()).description(toUpdate.getDescription())
-                        .version(toUpdate.getVersion()).requiredMigrationStep(toUpdate.isRequiredMigrationStep()))));
+        final DistributionSet updated = distributionSetManagement.update(entityFactory.distributionSet()
+                .update(distributionSetId).name(toUpdate.getName()).description(toUpdate.getDescription())
+                .version(toUpdate.getVersion()).requiredMigrationStep(toUpdate.isRequiredMigrationStep()));
+
+        final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(updated);
+        MgmtDistributionSetMapper.addLinks(updated, response);
+
+        return ResponseEntity.ok(response);
     }
 
     @Override

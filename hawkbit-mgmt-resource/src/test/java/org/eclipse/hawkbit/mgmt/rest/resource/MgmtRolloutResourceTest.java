@@ -345,14 +345,6 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(jsonPath("content[0].totalTargets", equalTo(20)))
                 .andExpect(jsonPath("content[0].totalTargetsPerStatus").doesNotExist())
                 .andExpect(jsonPath("content[0]._links.self.href", startsWith(HREF_ROLLOUT_PREFIX)))
-                .andExpect(jsonPath("content[0]._links.start.href",
-                        allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/start"))))
-                .andExpect(jsonPath("content[0]._links.pause.href",
-                        allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/pause"))))
-                .andExpect(jsonPath("content[0]._links.resume.href",
-                        allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/resume"))))
-                .andExpect(jsonPath("content[0]._links.groups.href",
-                        allOf(startsWith(HREF_ROLLOUT_PREFIX), containsString("/deploygroups"))))
                 .andExpect(jsonPath("content[1].name", equalTo("rollout2")))
                 .andExpect(jsonPath("content[1].status", equalTo("ready")))
                 .andExpect(jsonPath("content[1].targetFilterQuery", equalTo("id==target-0001*")))
@@ -363,15 +355,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(jsonPath("content[1].lastModifiedAt", not(equalTo(0))))
                 .andExpect(jsonPath("content[1].totalTargets", equalTo(10)))
                 .andExpect(jsonPath("content[1].totalTargetsPerStatus").doesNotExist())
-                .andExpect(jsonPath("content[1]._links.self.href", startsWith(HREF_ROLLOUT_PREFIX)))
-                .andExpect(jsonPath("content[1]._links.start.href",
-                        allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/start"))))
-                .andExpect(jsonPath("content[1]._links.pause.href",
-                        allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/pause"))))
-                .andExpect(jsonPath("content[1]._links.resume.href",
-                        allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/resume"))))
-                .andExpect(jsonPath("content[1]._links.groups.href",
-                        allOf(startsWith(HREF_ROLLOUT_PREFIX), containsString("/deploygroups"))));
+                .andExpect(jsonPath("content[1]._links.self.href", startsWith(HREF_ROLLOUT_PREFIX)));
     }
 
     @Test
@@ -599,11 +583,9 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
 
         final RolloutGroup firstGroup = rolloutGroupManagement
-                .findByRollout(new PageRequest(0, 1, Direction.ASC, "id"), rollout.getId()).getContent()
-                .get(0);
+                .findByRollout(new PageRequest(0, 1, Direction.ASC, "id"), rollout.getId()).getContent().get(0);
         final RolloutGroup secondGroup = rolloutGroupManagement
-                .findByRollout(new PageRequest(1, 1, Direction.ASC, "id"), rollout.getId()).getContent()
-                .get(0);
+                .findByRollout(new PageRequest(1, 1, Direction.ASC, "id"), rollout.getId()).getContent().get(0);
 
         retrieveAndVerifyRolloutGroupInCreating(rollout, firstGroup);
         retrieveAndVerifyRolloutGroupInReady(rollout, firstGroup);
@@ -696,8 +678,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
 
         final RolloutGroup firstGroup = rolloutGroupManagement
-                .findByRollout(new PageRequest(0, 1, Direction.ASC, "id"), rollout.getId()).getContent()
-                .get(0);
+                .findByRollout(new PageRequest(0, 1, Direction.ASC, "id"), rollout.getId()).getContent().get(0);
 
         // retrieve targets from the first rollout group with known ID
         mvc.perform(
@@ -720,8 +701,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
 
         final RolloutGroup firstGroup = rolloutGroupManagement
-                .findByRollout(new PageRequest(0, 1, Direction.ASC, "id"), rollout.getId()).getContent()
-                .get(0);
+                .findByRollout(new PageRequest(0, 1, Direction.ASC, "id"), rollout.getId()).getContent().get(0);
 
         final String targetInGroup = rolloutGroupManagement.findTargetsOfRolloutGroup(PAGE, firstGroup.getId())
                 .getContent().get(0).getControllerId();
@@ -752,8 +732,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         rolloutManagement.handleRollouts();
 
         final RolloutGroup firstGroup = rolloutGroupManagement
-                .findByRollout(new PageRequest(0, 1, Direction.ASC, "id"), rollout.getId()).getContent()
-                .get(0);
+                .findByRollout(new PageRequest(0, 1, Direction.ASC, "id"), rollout.getId()).getContent().get(0);
 
         // retrieve targets from the first rollout group with known ID
         mvc.perform(

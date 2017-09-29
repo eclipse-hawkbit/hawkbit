@@ -122,7 +122,11 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                 .name(targetRest.getName()).description(targetRest.getDescription()).address(targetRest.getAddress())
                 .securityToken(targetRest.getSecurityToken()));
 
-        return ResponseEntity.ok(MgmtTargetMapper.toResponse(updateTarget));
+        final MgmtTarget response = MgmtTargetMapper.toResponse(updateTarget);
+        MgmtTargetMapper.addPollStatus(updateTarget, response);
+        MgmtTargetMapper.addTargetLinks(response);
+
+        return ResponseEntity.ok(response);
     }
 
     @Override
@@ -245,7 +249,12 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     public ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(
             @PathVariable("controllerId") final String controllerId) {
         final MgmtDistributionSet distributionSetRest = deploymentManagement.getAssignedDistributionSet(controllerId)
-                .map(MgmtDistributionSetMapper::toResponse).orElse(null);
+                .map(ds -> {
+                    final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(ds);
+                    MgmtDistributionSetMapper.addLinks(ds, response);
+
+                    return response;
+                }).orElse(null);
 
         if (distributionSetRest == null) {
             return ResponseEntity.noContent().build();
@@ -275,11 +284,17 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     public ResponseEntity<MgmtDistributionSet> getInstalledDistributionSet(
             @PathVariable("controllerId") final String controllerId) {
         final MgmtDistributionSet distributionSetRest = deploymentManagement.getInstalledDistributionSet(controllerId)
-                .map(MgmtDistributionSetMapper::toResponse).orElse(null);
+                .map(set -> {
+                    final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(set);
+                    MgmtDistributionSetMapper.addLinks(set, response);
+
+                    return response;
+                }).orElse(null);
 
         if (distributionSetRest == null) {
             return ResponseEntity.noContent().build();
         }
+
         return ResponseEntity.ok(distributionSetRest);
     }
 

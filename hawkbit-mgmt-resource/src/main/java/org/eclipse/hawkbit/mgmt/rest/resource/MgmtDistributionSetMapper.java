@@ -117,6 +117,10 @@ public final class MgmtDistributionSetMapper {
         response.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getDistributionSet(response.getDsId()))
                 .withSelfRel());
 
+        return response;
+    }
+
+    static void addLinks(final DistributionSet distributionSet, final MgmtDistributionSet response) {
         response.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getAssignedSoftwareModules(response.getDsId(),
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null))
@@ -128,8 +132,6 @@ public final class MgmtDistributionSetMapper {
         response.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getMetadata(response.getDsId(),
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("metadata"));
-
-        return response;
     }
 
     static MgmtTargetAssignmentResponseBody toResponse(final DistributionSetAssignmentResult dsAssignmentResult) {

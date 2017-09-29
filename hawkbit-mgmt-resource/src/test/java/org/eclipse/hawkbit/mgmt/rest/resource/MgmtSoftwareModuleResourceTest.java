@@ -70,8 +70,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
     @Before
     public void assertPreparationOfRepo() {
-        assertThat(softwareModuleManagement.findAll(PAGE)).as("no softwaremodule should be founded")
-                .hasSize(0);
+        assertThat(softwareModuleManagement.findAll(PAGE)).as("no softwaremodule should be founded").hasSize(0);
     }
 
     @Test
@@ -361,9 +360,6 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(jsonPath("$.[0].hashes.md5", equalTo(artifact.getMd5Hash())))
                 .andExpect(jsonPath("$.[0].hashes.sha1", equalTo(artifact.getSha1Hash())))
                 .andExpect(jsonPath("$.[0].providedFilename", equalTo("file1")))
-                .andExpect(jsonPath("$.[0]._links.download.href",
-                        equalTo("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/"
-                                + artifact.getId() + "/download")))
                 .andExpect(jsonPath("$.[0]._links.self.href",
                         equalTo("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/"
                                 + artifact.getId())))
@@ -371,9 +367,6 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(jsonPath("$.[1].hashes.md5", equalTo(artifact2.getMd5Hash())))
                 .andExpect(jsonPath("$.[1].hashes.sha1", equalTo(artifact2.getSha1Hash())))
                 .andExpect(jsonPath("$.[1].providedFilename", equalTo("file2")))
-                .andExpect(jsonPath("$.[1]._links.download.href",
-                        equalTo("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/"
-                                + artifact2.getId() + "/download")))
                 .andExpect(jsonPath("$.[1]._links.self.href", equalTo(
                         "http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artifact2.getId())));
     }
@@ -521,15 +514,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")].type", contains("os")))
                 .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")].createdBy", contains("uploadTester")))
                 .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")].createdAt", contains(os.getCreatedAt())))
-                .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")]._links.type.href",
-                        contains("http://localhost/rest/v1/softwaremoduletypes/" + osType.getId())))
                 .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")]._links.self.href",
                         contains("http://localhost/rest/v1/softwaremodules/" + os.getId())))
-                .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")]._links.artifacts.href",
-                        contains("http://localhost/rest/v1/softwaremodules/" + os.getId() + "/artifacts")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")]._links.metadata.href",
-                        contains("http://localhost/rest/v1/softwaremodules/" + os.getId()
-                                + "/metadata?offset=0&limit=50")))
                 .andExpect(jsonPath("$.content.[?(@.id==" + app.getId() + ")].name", contains(app.getName())))
                 .andExpect(jsonPath("$.content.[?(@.id==" + app.getId() + ")].version", contains(app.getVersion())))
                 .andExpect(jsonPath("$.content.[?(@.id==" + app.getId() + ")].description",
@@ -538,13 +524,6 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(jsonPath("$.content.[?(@.id==" + app.getId() + ")].type", contains("application")))
                 .andExpect(jsonPath("$.content.[?(@.id==" + app.getId() + ")].createdBy", contains("uploadTester")))
                 .andExpect(jsonPath("$.content.[?(@.id==" + app.getId() + ")].createdAt", contains(app.getCreatedAt())))
-                .andExpect(jsonPath("$.content.[?(@.id==" + app.getId() + ")]._links.artifacts.href",
-                        contains("http://localhost/rest/v1/softwaremodules/" + app.getId() + "/artifacts")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + app.getId() + ")]._links.metadata.href",
-                        contains("http://localhost/rest/v1/softwaremodules/" + app.getId()
-                                + "/metadata?offset=0&limit=50")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + app.getId() + ")]._links.type.href",
-                        contains("http://localhost/rest/v1/softwaremoduletypes/" + appType.getId())))
                 .andExpect(jsonPath("$.content.[?(@.id==" + app.getId() + ")]._links.self.href",
                         contains("http://localhost/rest/v1/softwaremodules/" + app.getId())));
 
@@ -692,17 +671,11 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
                         .as("Response contains invalid self href")
                         .isEqualTo("http://localhost/rest/v1/softwaremodules/" + osCreated.getId());
-        assertThat(JsonPath.compile("[0]_links.artifacts.href").read(mvcResult.getResponse().getContentAsString())
-                .toString()).as("Response contains invalid artifacts href")
-                        .isEqualTo("http://localhost/rest/v1/softwaremodules/" + osCreated.getId() + "/artifacts");
 
         assertThat(
                 JsonPath.compile("[1]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
                         .as("Response contains links self href")
                         .isEqualTo("http://localhost/rest/v1/softwaremodules/" + appCreated.getId());
-        assertThat(JsonPath.compile("[1]_links.artifacts.href").read(mvcResult.getResponse().getContentAsString())
-                .toString()).as("Response contains invalid artifacts href")
-                        .isEqualTo("http://localhost/rest/v1/softwaremodules/" + appCreated.getId() + "/artifacts");
 
         assertThat(softwareModuleManagement.findAll(PAGE)).as("Wrong softwaremodule size").hasSize(2);
         assertThat(
