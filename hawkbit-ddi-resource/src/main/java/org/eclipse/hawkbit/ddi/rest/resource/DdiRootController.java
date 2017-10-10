@@ -221,7 +221,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("controllerId") final String controllerId,
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("fileName") final String fileName) {
-        controllerManagement.getByControllerId(controllerId)
+        final Target target = controllerManagement.getByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         final SoftwareModule module = controllerManagement.getSoftwareModule(softwareModuleId)
@@ -234,6 +234,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         final Artifact artifact = module.getArtifactByFilename(fileName)
                 .orElseThrow(() -> new EntityNotFoundException(Artifact.class, fileName));
+
+        checkAndLogDownload(requestResponseContextHolder.getHttpServletRequest(), target, module.getId());
 
         try {
             FileStreamingUtil.writeMD5FileResponse(requestResponseContextHolder.getHttpServletResponse(),

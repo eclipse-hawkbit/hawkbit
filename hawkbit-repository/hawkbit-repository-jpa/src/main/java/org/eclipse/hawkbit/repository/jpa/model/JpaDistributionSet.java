@@ -272,7 +272,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
         if (allready >= softwareModule.getType().getMaxAssignments()) {
             modules.stream().filter(module -> module.getType().getKey().equals(softwareModule.getType().getKey()))
-                    .findAny().map(modules::remove);
+                    .findAny().ifPresent(modules::remove);
         }
 
         if (modules.add(softwareModule)) {

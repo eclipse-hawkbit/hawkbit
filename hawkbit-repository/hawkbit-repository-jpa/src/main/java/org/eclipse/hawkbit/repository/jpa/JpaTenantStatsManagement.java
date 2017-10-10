@@ -44,7 +44,7 @@ public class JpaTenantStatsManagement implements TenantStatsManagement {
 
         result.setTargets(targetRepository.count());
         result.setArtifacts(artifactRepository.countBySoftwareModuleDeleted(false));
-        artifactRepository.getSumOfUndeletedArtifactSize().map(result::setOverallArtifactVolumeInBytes);
+        artifactRepository.getSumOfUndeletedArtifactSize().ifPresent(result::setOverallArtifactVolumeInBytes);
         result.setActions(actionRepository.count());
 
         return result;

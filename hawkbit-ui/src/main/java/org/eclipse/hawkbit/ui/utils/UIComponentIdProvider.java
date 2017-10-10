@@ -9,6 +9,8 @@
 
 package org.eclipse.hawkbit.ui.utils;
 
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
+
 /**
  * Interface to provide the unchanged constants.
  */
@@ -1038,6 +1040,12 @@ public final class UIComponentIdProvider {
      * Details header caption id of the Artifacts Table
      */
     public static final String ARTIFACT_DETAILS_HEADER_LABEL_ID = "artifact.details.header.caption";
+
+    /**
+     * Configuration checkbox for
+     * {@link TenantConfigurationKey#REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED}.
+     */
+    public static final String REPOSITORY_ACTIONS_AUTOCLOSE_CHECKBOX = "repositoryactionsautoclosecheckbox";
 
     /**
      * /* Private Constructor.

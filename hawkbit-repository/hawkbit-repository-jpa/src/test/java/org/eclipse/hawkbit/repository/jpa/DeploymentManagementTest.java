@@ -55,6 +55,7 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -458,6 +459,52 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .allMatch(target -> TargetUpdateStatus.IN_SYNC.equals(target.getUpdateStatus()))
                 .as("InstallationDate equal to LastModifiedAt")
                 .allMatch(target -> target.getLastModifiedAt().equals(target.getInstallationDate()));
+    }
+
+    @Test
+    @Description("Verifies that if an account is set to action autoclose running actions in case of a new assigned set get closed and set to CANCELED.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 10),
+            @Expect(type = TargetUpdatedEvent.class, count = 20), @Expect(type = ActionCreatedEvent.class, count = 20),
+            @Expect(type = ActionUpdatedEvent.class, count = 10),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 20) })
+    public void assigneDistributionSetAndAutoCloseActiveActions() {
+        tenantConfigurationManagement
+                .addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, true);
+
+        try {
+            final List<Target> targets = testdataFactory.createTargets(10);
+
+            // First assignment
+            final DistributionSet ds1 = testdataFactory.createDistributionSet("1");
+            assignDistributionSet(ds1, targets);
+
+            List<Action> assignmentOne = actionRepository.findByDistributionSetId(PAGE, ds1.getId()).getContent();
+            assertThat(assignmentOne).hasSize(10).as("Is active").allMatch(Action::isActive).as("Is assigned DS")
+                    .allMatch(action -> action.getDistributionSet().getId() == ds1.getId()).as("Is running")
+                    .allMatch(action -> action.getStatus() == Status.RUNNING);
+
+            // Second assignment
+            final DistributionSet ds2 = testdataFactory.createDistributionSet("2");
+            assignDistributionSet(ds2, targets);
+
+            final List<Action> assignmentTwo = actionRepository.findByDistributionSetId(PAGE, ds2.getId()).getContent();
+            assignmentOne = actionRepository.findByDistributionSetId(PAGE, ds1.getId()).getContent();
+            assertThat(assignmentTwo).hasSize(10).as("Is active").allMatch(Action::isActive).as("Is assigned DS")
+                    .allMatch(action -> action.getDistributionSet().getId() == ds2.getId()).as("Is running")
+                    .allMatch(action -> action.getStatus() == Status.RUNNING);
+            assertThat(assignmentOne).hasSize(10).as("Is active").allMatch(action -> !action.isActive())
+                    .as("Is assigned to DS").allMatch(action -> action.getDistributionSet().getId() == ds1.getId())
+                    .as("Is cancelled").allMatch(action -> action.getStatus() == Status.CANCELED);
+
+            assertThat(targetManagement.findByAssignedDistributionSet(PAGE, ds2.getId()).getContent()).hasSize(10)
+                    .as("InstallationDate not set").allMatch(target -> (target.getInstallationDate() == null));
+
+        } finally {
+            tenantConfigurationManagement
+                    .addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, false);
+        }
     }
 
     /**

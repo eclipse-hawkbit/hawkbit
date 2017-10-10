@@ -67,8 +67,13 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    public Set<Long> findTargetIdsToCancel(final List<List<Long>> targetIds) {
+    public Set<Long> cancelActiveActions(final List<List<Long>> targetIds) {
         return Collections.emptySet();
+    }
+
+    @Override
+    void closeActiveActions(final List<List<Long>> targetIds) {
+        // Not supported by offline case
     }
 
     @Override

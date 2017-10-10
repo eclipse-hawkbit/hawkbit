@@ -102,6 +102,12 @@ public class TenantConfigurationProperties {
          */
         public static final String ANONYMOUS_DOWNLOAD_MODE_ENABLED = "anonymous.download.enabled";
 
+        /**
+         * Repository on autoclose mode instead of canceling in case of new DS
+         * assignment over active actions.
+         */
+        public static final String REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED = "repository.actions.autoclose.enabled";
+
         private String keyName;
         private String defaultValue = "";
         private Class<?> dataType = String.class;

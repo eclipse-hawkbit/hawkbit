@@ -56,6 +56,8 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
 
     private final DefaultDistributionSetTypeLayout defaultDistributionSetTypeLayout;
 
+    private final RepositoryConfigurationView repositoryConfigurationView;
+
     private final AuthenticationConfigurationView authenticationConfigurationView;
 
     private final PollingConfigurationView pollingConfigurationView;
@@ -87,6 +89,8 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
                 securityTokenGenerator);
         this.pollingConfigurationView = new PollingConfigurationView(i18n, controllerPollProperties,
                 tenantConfigurationManagement);
+        this.repositoryConfigurationView = new RepositoryConfigurationView(i18n, tenantConfigurationManagement);
+
         this.i18n = i18n;
         this.uiProperties = uiProperties;
         this.uINotification = uINotification;
@@ -100,6 +104,8 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
         if (defaultDistributionSetTypeLayout.getComponentCount() > 0) {
             configurationViews.add(defaultDistributionSetTypeLayout);
         }
+        configurationViews.add(repositoryConfigurationView);
+
         configurationViews.add(authenticationConfigurationView);
         configurationViews.add(pollingConfigurationView);
         if (customConfigurationViews != null) {

@@ -30,6 +30,7 @@ import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -57,6 +58,8 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -109,13 +112,17 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private final PlatformTransactionManager txManager;
     private final OnlineDsAssignmentStrategy onlineDsAssignmentStrategy;
     private final OfflineDsAssignmentStrategy offlineDsAssignmentStrategy;
+    private final TenantConfigurationManagement tenantConfigurationManagement;
+    private final SystemSecurityContext systemSecurityContext;
 
     JpaDeploymentManagement(final EntityManager entityManager, final ActionRepository actionRepository,
             final DistributionSetRepository distributionSetRepository, final TargetRepository targetRepository,
             final ActionStatusRepository actionStatusRepository, final TargetManagement targetManagement,
             final AuditorAware<String> auditorProvider, final ApplicationEventPublisher eventPublisher,
             final ApplicationContext applicationContext, final AfterTransactionCommitExecutor afterCommit,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager) {
+            final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
+            final TenantConfigurationManagement tenantConfigurationManagement,
+            final SystemSecurityContext systemSecurityContext) {
         this.entityManager = entityManager;
         this.actionRepository = actionRepository;
         this.distributionSetRepository = distributionSetRepository;
@@ -132,6 +139,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 applicationContext, actionRepository, actionStatusRepository);
         offlineDsAssignmentStrategy = new OfflineDsAssignmentStrategy(targetRepository, afterCommit, eventPublisher,
                 applicationContext, actionRepository, actionStatusRepository);
+        this.tenantConfigurationManagement = tenantConfigurationManagement;
+        this.systemSecurityContext = systemSecurityContext;
     }
 
     @Override
@@ -254,7 +263,16 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         // need to remember which one we have been switched to canceling state
         // because for targets which we have changed to canceling we don't want
         // to publish the new action update event.
-        final Set<Long> targetIdsCancellList = assignmentStrategy.findTargetIdsToCancel(targetIds);
+        final Set<Long> targetIdsCancellList;
+
+        if (systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
+                .getConfigurationValue(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, Boolean.class)
+                .getValue())) {
+            targetIdsCancellList = Collections.emptySet();
+            assignmentStrategy.closeActiveActions(targetIds);
+        } else {
+            targetIdsCancellList = assignmentStrategy.cancelActiveActions(targetIds);
+        }
 
         // cancel all scheduled actions which are in-active, these actions were
         // not active before and the manual assignment which has been done

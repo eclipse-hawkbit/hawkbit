@@ -6,21 +6,15 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
+package org.eclipse.hawkbit.ui.tenantconfiguration.generic;
 
-import org.eclipse.hawkbit.ui.tenantconfiguration.ConfigurationItem;
-
-import com.vaadin.ui.Component;
+import org.eclipse.hawkbit.ui.tenantconfiguration.ConfigurationGroup;
 
 /**
  * Interface to be implemented by any tenant specific configuration to show on
  * the UI.
- *
- *
- *
- *
  */
-public interface AuthenticationConfigurationItem extends Component, ConfigurationItem {
+public interface BooleanConfigurationItem extends ConfigurationGroup {
 
     /**
      * @return {@code true} if configuration is enabled, otherwise {@code false}
@@ -36,15 +30,5 @@ public interface AuthenticationConfigurationItem extends Component, Configuratio
      * called when the configuration is disabled.
      */
     void configDisable();
-
-    /**
-     * called to save the configuration.
-     */
-    void save();
-
-    /**
-     * called to rollback made changes.
-     */
-    void undo();
 
 }

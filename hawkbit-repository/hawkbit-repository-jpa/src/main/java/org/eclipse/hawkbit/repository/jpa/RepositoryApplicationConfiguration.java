@@ -531,10 +531,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final TargetManagement targetManagement, final AuditorAware<String> auditorProvider,
             final ApplicationEventPublisher eventPublisher, final ApplicationContext applicationContext,
             final AfterTransactionCommitExecutor afterCommit, final VirtualPropertyReplacer virtualPropertyReplacer,
-            final PlatformTransactionManager txManager) {
+            final PlatformTransactionManager txManager,
+            final TenantConfigurationManagement tenantConfigurationManagement,
+            final SystemSecurityContext systemSecurityContext) {
         return new JpaDeploymentManagement(entityManager, actionRepository, distributionSetRepository, targetRepository,
                 actionStatusRepository, targetManagement, auditorProvider, eventPublisher, applicationContext,
-                afterCommit, virtualPropertyReplacer, txManager);
+                afterCommit, virtualPropertyReplacer, txManager, tenantConfigurationManagement, systemSecurityContext);
     }
 
     /**
