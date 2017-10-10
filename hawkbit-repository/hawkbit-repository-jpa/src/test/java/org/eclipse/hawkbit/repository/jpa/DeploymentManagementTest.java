@@ -473,35 +473,38 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         tenantConfigurationManagement
                 .addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, true);
 
-        final List<Target> targets = testdataFactory.createTargets(10);
+        try {
+            final List<Target> targets = testdataFactory.createTargets(10);
 
-        // First assignment
-        final DistributionSet ds1 = testdataFactory.createDistributionSet("1");
-        assignDistributionSet(ds1, targets);
+            // First assignment
+            final DistributionSet ds1 = testdataFactory.createDistributionSet("1");
+            assignDistributionSet(ds1, targets);
 
-        List<Action> assignmentOne = actionRepository.findByDistributionSetId(PAGE, ds1.getId()).getContent();
-        assertThat(assignmentOne).hasSize(10).as("Is active").allMatch(Action::isActive).as("Is assigned DS")
-                .allMatch(action -> action.getDistributionSet().getId() == ds1.getId()).as("Is running")
-                .allMatch(action -> action.getStatus() == Status.RUNNING);
+            List<Action> assignmentOne = actionRepository.findByDistributionSetId(PAGE, ds1.getId()).getContent();
+            assertThat(assignmentOne).hasSize(10).as("Is active").allMatch(Action::isActive).as("Is assigned DS")
+                    .allMatch(action -> action.getDistributionSet().getId() == ds1.getId()).as("Is running")
+                    .allMatch(action -> action.getStatus() == Status.RUNNING);
 
-        // Second assignment
-        final DistributionSet ds2 = testdataFactory.createDistributionSet("2");
-        assignDistributionSet(ds2, targets);
+            // Second assignment
+            final DistributionSet ds2 = testdataFactory.createDistributionSet("2");
+            assignDistributionSet(ds2, targets);
 
-        final List<Action> assignmentTwo = actionRepository.findByDistributionSetId(PAGE, ds2.getId()).getContent();
-        assignmentOne = actionRepository.findByDistributionSetId(PAGE, ds1.getId()).getContent();
-        assertThat(assignmentTwo).hasSize(10).as("Is active").allMatch(Action::isActive).as("Is assigned DS")
-                .allMatch(action -> action.getDistributionSet().getId() == ds2.getId()).as("Is running")
-                .allMatch(action -> action.getStatus() == Status.RUNNING);
-        assertThat(assignmentOne).hasSize(10).as("Is active").allMatch(action -> !action.isActive())
-                .as("Is assigned to DS").allMatch(action -> action.getDistributionSet().getId() == ds1.getId())
-                .as("Is cancelled").allMatch(action -> action.getStatus() == Status.CANCELED);
+            final List<Action> assignmentTwo = actionRepository.findByDistributionSetId(PAGE, ds2.getId()).getContent();
+            assignmentOne = actionRepository.findByDistributionSetId(PAGE, ds1.getId()).getContent();
+            assertThat(assignmentTwo).hasSize(10).as("Is active").allMatch(Action::isActive).as("Is assigned DS")
+                    .allMatch(action -> action.getDistributionSet().getId() == ds2.getId()).as("Is running")
+                    .allMatch(action -> action.getStatus() == Status.RUNNING);
+            assertThat(assignmentOne).hasSize(10).as("Is active").allMatch(action -> !action.isActive())
+                    .as("Is assigned to DS").allMatch(action -> action.getDistributionSet().getId() == ds1.getId())
+                    .as("Is cancelled").allMatch(action -> action.getStatus() == Status.CANCELED);
 
-        assertThat(targetManagement.findByAssignedDistributionSet(PAGE, ds2.getId()).getContent()).hasSize(10)
-                .as("InstallationDate not set").allMatch(target -> (target.getInstallationDate() == null));
+            assertThat(targetManagement.findByAssignedDistributionSet(PAGE, ds2.getId()).getContent()).hasSize(10)
+                    .as("InstallationDate not set").allMatch(target -> (target.getInstallationDate() == null));
 
-        tenantConfigurationManagement
-                .addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, false);
+        } finally {
+            tenantConfigurationManagement
+                    .addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, false);
+        }
     }
 
     /**
