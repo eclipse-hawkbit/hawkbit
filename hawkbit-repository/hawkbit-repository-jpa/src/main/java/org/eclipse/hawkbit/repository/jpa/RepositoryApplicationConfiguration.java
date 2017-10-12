@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
@@ -546,8 +547,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    ControllerManagement controllerManagement() {
-        return new JpaControllerManagement();
+    ControllerManagement controllerManagement(final ScheduledExecutorService executorService) {
+        return new JpaControllerManagement(executorService);
     }
 
     @Bean

@@ -37,6 +37,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>, JpaSpecificationExecutor<JpaTarget> {
 
+    @Modifying
+    @Transactional
+    @Query("UPDATE JpaTarget t SET t.lastTargetQuery = :time WHERE t.id = :id")
+    void setLastTargetQuery(@Param("time") long time, @Param("id") long id);
+
     /**
      * Sets {@link JpaTarget#getAssignedDistributionSet()}.
      *
@@ -213,6 +218,9 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("SELECT t FROM JpaTarget t WHERE t.id IN ?1")
     List<JpaTarget> findAll(Iterable<Long> ids);
+
+    @Query("SELECT t FROM JpaTarget t WHERE t.id IN ?1")
+    List<JpaTarget> findAllWithoutLock(Iterable<Long> ids);
 
     /**
      * 

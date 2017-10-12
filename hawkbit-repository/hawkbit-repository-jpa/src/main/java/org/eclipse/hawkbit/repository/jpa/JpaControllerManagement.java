@@ -9,10 +9,18 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.net.URI;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -48,6 +56,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,9 +72,16 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.validation.annotation.Validated;
+
+import com.google.common.collect.Lists;
 
 /**
  * JPA based {@link ControllerManagement} implementation.
@@ -75,6 +91,10 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class JpaControllerManagement implements ControllerManagement {
     private static final Logger LOG = LoggerFactory.getLogger(ControllerManagement.class);
+
+    private static final int BLOCK_SIZE = 10_000;
+    private final BlockingDeque<TargetPoll> queue = new LinkedBlockingDeque<>(BLOCK_SIZE);
+    private volatile long lastFlush;
 
     @Autowired
     private EntityManager entityManager;
@@ -114,6 +134,24 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
+
+    @Autowired
+    private PlatformTransactionManager txManager;
+
+    @Autowired
+    private TenantAware tenantAware;
+
+    JpaControllerManagement(final ScheduledExecutorService executorService) {
+        executorService.scheduleWithFixedDelay(this::flushUpdateQueue, 1, 1, TimeUnit.SECONDS);
+    }
+
+    private <T> T runInNewTransaction(final String transactionName, final TransactionCallback<T> action) {
+        final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+        def.setName(transactionName);
+        def.setReadOnly(false);
+        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        return new TransactionTemplate(txManager, def).execute(action);
+    }
 
     @Override
     public String getPollingTime() {
@@ -208,19 +246,54 @@ public class JpaControllerManagement implements ControllerManagement {
         return updateTargetStatus(target, address);
     }
 
+    private void flushUpdateQueue() {
+        final long oneMinuteAgo = Date.from(Instant.now().minus(1, ChronoUnit.MINUTES)).getTime();
+
+        final int size = queue.size();
+        if (size <= 0 || (size <= 1000 && lastFlush > oneMinuteAgo)) {
+            return;
+        }
+
+        final List<TargetPoll> events = Lists.newArrayListWithExpectedSize(queue.size());
+        queue.drainTo(events);
+
+        events.stream().collect(Collectors.groupingBy(TargetPoll::getTenant)).forEach((tenant, polls) -> {
+            final TransactionCallback<Void> createTransaction = status -> updateLastTargetQueries(polls);
+            tenantAware.runAsTenant(tenant, () -> runInNewTransaction("flushUpdateQueue", createTransaction));
+        });
+
+        lastFlush = System.currentTimeMillis();
+    }
+
+    private Void updateLastTargetQueries(final List<TargetPoll> polls) {
+        polls.forEach(poll -> targetRepository.setLastTargetQuery(poll.getTime(), poll.getId()));
+        return null;
+    }
+
+    /**
+     * Stores target directly to DB in case either {@link Target#getAddress()}
+     * or {@link Target#getUpdateStatus()} changes or the buffer queue is full.
+     * 
+     */
     private Target updateTargetStatus(final JpaTarget toUpdate, final URI address) {
+        boolean storeImmediatly = toUpdate.getAddress() == null ? true : !toUpdate.getAddress().equals(address);
 
         if (TargetUpdateStatus.UNKNOWN.equals(toUpdate.getUpdateStatus())) {
             toUpdate.setUpdateStatus(TargetUpdateStatus.REGISTERED);
+            storeImmediatly = true;
         }
 
-        toUpdate.setAddress(address.toString());
-        toUpdate.setLastTargetQuery(System.currentTimeMillis());
+        if (storeImmediatly || !queue.offer(new TargetPoll(toUpdate))) {
+            toUpdate.setAddress(address.toString());
+            toUpdate.setLastTargetQuery(System.currentTimeMillis());
 
-        afterCommit.afterCommit(
-                () -> eventPublisher.publishEvent(new TargetPollEvent(toUpdate, applicationContext.getId())));
+            afterCommit.afterCommit(
+                    () -> eventPublisher.publishEvent(new TargetPollEvent(toUpdate, applicationContext.getId())));
 
-        return targetRepository.save(toUpdate);
+            return targetRepository.save(toUpdate);
+        }
+
+        return toUpdate;
     }
 
     @Override
@@ -522,5 +595,29 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     public Optional<SoftwareModule> getSoftwareModule(final Long id) {
         return Optional.ofNullable(softwareModuleRepository.findOne(id));
+    }
+
+    private static class TargetPoll {
+        private final String tenant;
+        private final Long id;
+        private final long time = System.currentTimeMillis();
+
+        TargetPoll(final Target target) {
+            this.tenant = target.getTenant();
+            this.id = target.getId();
+        }
+
+        public String getTenant() {
+            return tenant;
+        }
+
+        public Long getId() {
+            return id;
+        }
+
+        public long getTime() {
+            return time;
+        }
+
     }
 }
