@@ -201,10 +201,7 @@
          <groupId>org.springframework.security</groupId>
          <artifactId>spring-security-web</artifactId>
       </dependency>
-      <dependency>
-         <groupId>org.apache.httpcomponents</groupId>
-         <artifactId>httpclient</artifactId>
-      </dependency>
+
       <dependency>
          <groupId>com.vaadin</groupId>
          <artifactId>vaadin-themes</artifactId>

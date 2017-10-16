@@ -10,13 +10,16 @@ package org.eclipse.hawkbit.ui.login;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.List;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.Cookie;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.eclipse.hawkbit.im.authentication.MultitenancyIndicator;
 import org.eclipse.hawkbit.im.authentication.TenantUserPasswordAuthenticationToken;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
@@ -34,6 +37,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.util.StringUtils;
 import org.vaadin.spring.security.VaadinSecurity;
 
 import com.vaadin.annotations.Theme;
@@ -100,6 +104,8 @@ public abstract class AbstractHawkbitLoginUI extends UI {
     private PasswordField password;
     private Button signin;
 
+    private Map<String, String> params;
+
     @Autowired
     protected AbstractHawkbitLoginUI(final ApplicationContext context, final VaadinSecurity vaadinSecurity,
             final VaadinMessageSource i18n, final UiProperties uiProperties,
@@ -115,17 +121,20 @@ public abstract class AbstractHawkbitLoginUI extends UI {
     protected void init(final VaadinRequest request) {
         SpringContextHelper.setContext(context);
 
-        final List<NameValuePair> params = URLEncodedUtils.parse(Page.getCurrent().getLocation(),
-                Charset.defaultCharset());
+        try {
+            params = getQueryParams(Page.getCurrent().getLocation().toURL());
+        } catch (final MalformedURLException e) {
+            // Ignore params silently
+        }
 
-        if (params.stream().anyMatch(p -> p.getName().equals(DEMO_PARAMETER))) {
+        if (params.containsKey(DEMO_PARAMETER)) {
             login(uiProperties.getDemo().getTenant(), uiProperties.getDemo().getUser(),
                     uiProperties.getDemo().getPassword(), false);
         }
 
         setContent(buildContent());
 
-        filloutUsernameTenantFields(params);
+        filloutUsernameTenantFields();
         readCookie();
     }
 
@@ -190,20 +199,18 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         notification.show(Page.getCurrent());
     }
 
-    private void filloutUsernameTenantFields(final List<NameValuePair> params) {
+    private void filloutUsernameTenantFields() {
         if (tenant != null) {
-            params.stream().filter(p -> p.getName().equals(TENANT_PARAMETER)).findAny().map(NameValuePair::getValue)
-                    .ifPresent(value -> {
-                        tenant.setValue(value);
-                        useCookie = false;
-                    });
+            if (params.containsKey(TENANT_PARAMETER)) {
+                tenant.setValue(params.get(TENANT_PARAMETER));
+                useCookie = false;
+            }
         }
 
-        params.stream().filter(p -> p.getName().equals(USER_PARAMETER)).findAny().map(NameValuePair::getValue)
-                .ifPresent(value -> {
-                    username.setValue(value);
-                    useCookie = false;
-                });
+        if (params.containsKey(USER_PARAMETER)) {
+            tenant.setValue(params.get(USER_PARAMETER));
+            useCookie = false;
+        }
     }
 
     protected Component buildLoginForm() {
@@ -211,7 +218,6 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         final VerticalLayout loginPanel = new VerticalLayout();
         loginPanel.setSizeUndefined();
         loginPanel.setSpacing(true);
-        loginPanel.addStyleName("dashboard-view");
         loginPanel.addStyleName("login-panel");
         Responsive.makeResponsive(loginPanel);
         loginPanel.addComponent(buildFields());
@@ -446,5 +452,24 @@ public abstract class AbstractHawkbitLoginUI extends UI {
             LOG.debug("Login failed", e);
             loginAuthenticationFailedNotification();
         }
+    }
+
+    protected Map<String, String> getParams() {
+        return params;
+    }
+
+    private static Map<String, String> getQueryParams(final URL url) {
+        if (!StringUtils.hasLength(url.getQuery())) {
+            return Collections.emptyMap();
+        }
+        return Arrays.stream(url.getQuery().split("&")).map(AbstractHawkbitLoginUI::splitQueryParameter)
+                .collect(Collectors.toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
+    }
+
+    private static SimpleImmutableEntry<String, String> splitQueryParameter(final String it) {
+        final int idx = it.indexOf("=");
+        final String key = idx > 0 ? it.substring(0, idx) : it;
+        final String value = idx > 0 && it.length() > idx + 1 ? it.substring(idx + 1) : null;
+        return new SimpleImmutableEntry<>(key.toLowerCase(), value);
     }
 }
