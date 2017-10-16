@@ -8,20 +8,28 @@
  */
 package org.eclipse.hawkbit.app;
 
-import org.eclipse.hawkbit.ui.HawkbitUI;
+import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
+import org.eclipse.hawkbit.ui.ErrorView;
+import org.eclipse.hawkbit.ui.components.NotificationUnreadButton;
+import org.eclipse.hawkbit.ui.menu.DashboardMenu;
 import org.eclipse.hawkbit.ui.push.EventPushStrategy;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.annotations.Push;
 import com.vaadin.shared.communication.PushMode;
 import com.vaadin.shared.ui.ui.Transport;
 import com.vaadin.spring.annotation.SpringUI;
+import com.vaadin.spring.navigator.SpringViewProvider;
 
 /**
  * Example hawkBit UI implementation.
  * 
  * A {@link SpringUI} annotated class must be present in the classpath. The
- * easiest way to get an hawkBit UI running is to extend the {@link HawkbitUI}
- * and to annotated it with {@link SpringUI} as in this example.
+ * easiest way to get an hawkBit UI running is to extend the
+ * {@link AbstractHawkbitUI} and to annotated it with {@link SpringUI} as in
+ * this example.
  *
  */
 @SpringUI
@@ -29,19 +37,14 @@ import com.vaadin.spring.annotation.SpringUI;
 // Exception squid:MaximumInheritanceDepth - Most of the inheritance comes from
 // Vaadin.
 @SuppressWarnings({ "squid:MaximumInheritanceDepth" })
-public class MyUI extends HawkbitUI {
+public class MyUI extends AbstractHawkbitUI {
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor
-     * 
-     * @param pushStrategy
-     *            the push strategy
-     * @param eventBus
-     *            the event bus
-     */
-    public MyUI(final EventPushStrategy pushStrategy) {
-        super(pushStrategy);
+    @Autowired
+    MyUI(final EventPushStrategy pushStrategy, final UIEventBus eventBus, final SpringViewProvider viewProvider,
+            final ApplicationContext context, final DashboardMenu dashboardMenu, final ErrorView errorview,
+            final NotificationUnreadButton notificationUnreadButton) {
+        super(pushStrategy, eventBus, viewProvider, context, dashboardMenu, errorview, notificationUnreadButton);
     }
 
 }

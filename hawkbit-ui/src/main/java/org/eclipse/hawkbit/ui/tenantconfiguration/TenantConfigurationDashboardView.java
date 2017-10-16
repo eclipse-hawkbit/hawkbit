@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
-import org.eclipse.hawkbit.ui.HawkbitUI;
+import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -48,7 +48,7 @@ import com.vaadin.ui.VerticalLayout;
  * Main UI for the system configuration view.
  */
 @UIScope
-@SpringView(name = TenantConfigurationDashboardView.VIEW_NAME, ui = HawkbitUI.class)
+@SpringView(name = TenantConfigurationDashboardView.VIEW_NAME, ui = AbstractHawkbitUI.class)
 public class TenantConfigurationDashboardView extends CustomComponent implements View, ConfigurationItemChangeListener {
 
     public static final String VIEW_NAME = "spSystemConfig";

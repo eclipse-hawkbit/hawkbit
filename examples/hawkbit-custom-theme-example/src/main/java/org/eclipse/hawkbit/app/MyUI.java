@@ -8,7 +8,7 @@ package org.eclipse.hawkbit.app;
  * http://www.eclipse.org/legal/epl-v10.html
  */
 
-import org.eclipse.hawkbit.ui.HawkbitUI;
+import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.push.EventPushStrategy;
 
 import com.vaadin.annotations.Push;
@@ -22,7 +22,7 @@ import com.vaadin.spring.annotation.SpringUI;
  * Example hawkBit UI implementation.
  * 
  * A {@link SpringUI} annotated class must be present in the classpath. The
- * easiest way to get an hawkBit UI running is to extend the {@link HawkbitUI}
+ * easiest way to get an hawkBit UI running is to extend the {@link AbstractHawkbitUI}
  * and to annotated it with {@link SpringUI} as in this example.
  *
  */
@@ -30,7 +30,7 @@ import com.vaadin.spring.annotation.SpringUI;
 @Push(value = PushMode.AUTOMATIC, transport = Transport.WEBSOCKET)
 @Title("hawkBit Theme example")
 @Theme(value = "exampletheme")
-public class MyUI extends HawkbitUI {
+public class MyUI extends AbstractHawkbitUI {
 
     private static final long serialVersionUID = 1L;
 

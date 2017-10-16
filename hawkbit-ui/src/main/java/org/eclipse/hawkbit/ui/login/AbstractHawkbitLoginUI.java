@@ -8,66 +8,82 @@
  */
 package org.eclipse.hawkbit.ui.login;
 
-import java.net.URI;
-import java.util.Map;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.List;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.eclipse.hawkbit.im.authentication.MultitenancyIndicator;
 import org.eclipse.hawkbit.im.authentication.TenantUserPasswordAuthenticationToken;
+import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.themes.HawkbitTheme;
+import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.Resource;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.util.AntPathMatcher;
 import org.vaadin.spring.security.VaadinSecurity;
 
+import com.vaadin.annotations.Theme;
+import com.vaadin.annotations.Title;
+import com.vaadin.annotations.Widgetset;
 import com.vaadin.event.ShortcutAction.KeyCode;
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.Responsive;
+import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinService;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.shared.Position;
-import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.CssLayout;
+import com.vaadin.ui.CustomLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * Login view for login credentials.
+ * Login UI window that is independent of the {@link AbstractHawkbitUI} itself.
+ *
  */
-@SpringView(name = "")
-public class LoginView extends VerticalLayout implements View {
-    private static final String TENANT_PATTERN_PLACEHOLDER = "tenant";
-    private static final String USER_PATTERN_PLACEHOLDER = "user";
-    private static final String LOGIN_TENANT_USER_URL_PATTERN = "**/#/{" + TENANT_PATTERN_PLACEHOLDER + "}/{"
-            + USER_PATTERN_PLACEHOLDER + "}";
-    private static final String LOGIN_USER_URL_PATTERN = "**/#/{" + USER_PATTERN_PLACEHOLDER + "}";
+@Title("hawkBit UI - Login")
+@Widgetset(value = HawkbitTheme.WIDGET_SET_NAME)
+@Theme(HawkbitTheme.THEME_NAME)
+public abstract class AbstractHawkbitLoginUI extends UI {
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractHawkbitLoginUI.class);
 
-    private static final String LOGIN_TEXTFIELD = "login-textfield";
     private static final long serialVersionUID = 1L;
-    private static final Logger LOGGER = LoggerFactory.getLogger(LoginView.class);
+
+    private static final String USER_PARAMETER = "user";
+    private static final String TENANT_PARAMETER = "tenant";
+    private static final String DEMO_PARAMETER = "demo";
+    private static final int HUNDRED_DAYS_IN_SECONDS = 3600 * 24 * 100;
+    private static final String LOGIN_TEXTFIELD = "login-textfield";
 
     private static final String SP_LOGIN_USER = "sp-login-user";
     private static final String SP_LOGIN_TENANT = "sp-login-tenant";
+
+    private final transient ApplicationContext context;
 
     private final transient VaadinSecurity vaadinSecurity;
 
@@ -77,7 +93,6 @@ public class LoginView extends VerticalLayout implements View {
 
     private final transient MultitenancyIndicator multiTenancyIndicator;
 
-    private final transient AntPathMatcher matcher = new AntPathMatcher();
     private boolean useCookie = true;
 
     private TextField username;
@@ -86,82 +101,112 @@ public class LoginView extends VerticalLayout implements View {
     private Button signin;
 
     @Autowired
-    LoginView(final VaadinSecurity vaadinSecurity, final VaadinMessageSource i18n, final UiProperties uiProperties,
+    protected AbstractHawkbitLoginUI(final ApplicationContext context, final VaadinSecurity vaadinSecurity,
+            final VaadinMessageSource i18n, final UiProperties uiProperties,
             final MultitenancyIndicator multiTenancyIndicator) {
+        this.context = context;
         this.vaadinSecurity = vaadinSecurity;
         this.i18n = i18n;
         this.uiProperties = uiProperties;
         this.multiTenancyIndicator = multiTenancyIndicator;
     }
 
-    void loginAuthenticationFailedNotification() {
+    @Override
+    protected void init(final VaadinRequest request) {
+        SpringContextHelper.setContext(context);
+
+        final List<NameValuePair> params = URLEncodedUtils.parse(Page.getCurrent().getLocation(),
+                Charset.defaultCharset());
+
+        if (params.stream().anyMatch(p -> p.getName().equals(DEMO_PARAMETER))) {
+            login(uiProperties.getDemo().getTenant(), uiProperties.getDemo().getUser(),
+                    uiProperties.getDemo().getPassword(), false);
+        }
+
+        setContent(buildContent());
+
+        filloutUsernameTenantFields(params);
+        readCookie();
+    }
+
+    private VerticalLayout buildContent() {
+        final VerticalLayout rootLayout = new VerticalLayout();
+        rootLayout.setSizeFull();
+        rootLayout.setStyleName("main-content");
+
+        rootLayout.addComponent(buildHeader());
+
+        addLoginForm(rootLayout);
+
+        addFooter(rootLayout);
+
+        return rootLayout;
+    }
+
+    private void addLoginForm(final VerticalLayout rootLayout) {
+        final Component loginForm = buildLoginForm();
+        rootLayout.addComponent(loginForm);
+        rootLayout.setComponentAlignment(loginForm, Alignment.MIDDLE_CENTER);
+    }
+
+    private void addFooter(final VerticalLayout rootLayout) {
+        final Resource resource = context
+                .getResource("classpath:/VAADIN/themes/" + UI.getCurrent().getTheme() + "/layouts/footer.html");
+
+        try (InputStream resourceStream = resource.getInputStream()) {
+            final CustomLayout customLayout = new CustomLayout(resourceStream);
+            customLayout.setSizeUndefined();
+            rootLayout.addComponent(customLayout);
+            rootLayout.setComponentAlignment(customLayout, Alignment.BOTTOM_LEFT);
+        } catch (final IOException ex) {
+            LOG.error("Footer file cannot be loaded", ex);
+        }
+    }
+
+    private static Component buildHeader() {
+        final CssLayout cssLayout = new CssLayout();
+        cssLayout.setStyleName("view-header");
+        return cssLayout;
+    }
+
+    private void loginAuthenticationFailedNotification() {
         final Notification notification = new Notification(i18n.getMessage("notification.login.failed.title"));
         notification.setDescription(i18n.getMessage("notification.login.failed.description"));
         notification.setHtmlContentAllowed(true);
         notification.setStyleName("error closable");
         notification.setPosition(Position.BOTTOM_CENTER);
-        notification.setDelayMsec(1000);
+        notification.setDelayMsec(1_000);
         notification.show(Page.getCurrent());
     }
 
-    void loginCredentialsExpiredNotification() {
+    private void loginCredentialsExpiredNotification() {
         final Notification notification = new Notification(
                 i18n.getMessage("notification.login.failed.credentialsexpired.title"));
         notification.setDescription(i18n.getMessage("notification.login.failed.credentialsexpired.description"));
-        notification.setDelayMsec(10000);
+        notification.setDelayMsec(10_000);
         notification.setHtmlContentAllowed(true);
         notification.setStyleName("error closeable");
         notification.setPosition(Position.BOTTOM_CENTER);
         notification.show(Page.getCurrent());
     }
 
-    /**
-     * Renders the {@link View}.
-     */
-    @PostConstruct
-    public void render() {
-        final URI spURI = Page.getCurrent().getLocation();
-        final String uriPath = spURI.toString();
-        if (uriPath.contains("?demo")) {
-            login(uiProperties.getDemo().getTenant(), uiProperties.getDemo().getUser(),
-                    uiProperties.getDemo().getPassword(), false);
+    private void filloutUsernameTenantFields(final List<NameValuePair> params) {
+        if (tenant != null) {
+            params.stream().filter(p -> p.getName().equals(TENANT_PARAMETER)).findAny().map(NameValuePair::getValue)
+                    .ifPresent(value -> {
+                        tenant.setValue(value);
+                        useCookie = false;
+                    });
         }
-        final Component loginForm = buildLoginForm();
-        addComponent(loginForm);
-        setComponentAlignment(loginForm, Alignment.MIDDLE_CENTER);
 
-        readCredentialsFromUriPath(uriPath);
+        params.stream().filter(p -> p.getName().equals(USER_PARAMETER)).findAny().map(NameValuePair::getValue)
+                .ifPresent(value -> {
+                    username.setValue(value);
+                    useCookie = false;
+                });
     }
 
-    private void readCredentialsFromUriPath(final String uriPath) {
-        String urlTenant = null;
-        String urlUser = null;
-        if (matcher.match(LOGIN_USER_URL_PATTERN, uriPath)) {
-            urlUser = matcher.extractUriTemplateVariables(LOGIN_USER_URL_PATTERN, uriPath)
-                    .get(USER_PATTERN_PLACEHOLDER);
-        } else if (matcher.match(LOGIN_TENANT_USER_URL_PATTERN, uriPath)) {
-            final Map<String, String> extractUriTemplateVariables = matcher
-                    .extractUriTemplateVariables(LOGIN_TENANT_USER_URL_PATTERN, uriPath);
-            urlTenant = extractUriTemplateVariables.get(TENANT_PATTERN_PLACEHOLDER);
-            urlUser = extractUriTemplateVariables.get(USER_PATTERN_PLACEHOLDER);
-        }
-
-        if (urlUser != null) {
-            useCookie = false;
-            filloutUsernameTenantFields(urlTenant, urlUser);
-        }
-    }
-
-    private void filloutUsernameTenantFields(final String tenantValue, final String userValue) {
-        if (tenant != null && tenantValue != null) {
-            tenant.setValue(tenantValue);
-        }
-        if (userValue != null) {
-            username.setValue(userValue);
-        }
-    }
-
-    private Component buildLoginForm() {
+    protected Component buildLoginForm() {
 
         final VerticalLayout loginPanel = new VerticalLayout();
         loginPanel.setSizeUndefined();
@@ -172,17 +217,21 @@ public class LoginView extends VerticalLayout implements View {
         loginPanel.addComponent(buildFields());
         loginPanel.addComponent(buildLinks());
 
+        checkBrowserSupport(loginPanel);
+
+        return loginPanel;
+    }
+
+    protected void checkBrowserSupport(final VerticalLayout loginPanel) {
         // Check if IE browser is not supported ( < IE11 )
         if (isUnsupportedBrowser()) {
             // Disable sign-in button and display a message
             signin.setEnabled(Boolean.FALSE);
             loginPanel.addComponent(buildUnsupportedMessage());
         }
-
-        return loginPanel;
     }
 
-    private Component buildFields() {
+    protected Component buildFields() {
         final HorizontalLayout fields = new HorizontalLayout();
         fields.setSpacing(true);
         fields.addStyleName("fields");
@@ -259,7 +308,7 @@ public class LoginView extends VerticalLayout implements View {
         }
     }
 
-    private Component buildLinks() {
+    protected Component buildLinks() {
 
         final HorizontalLayout links = new HorizontalLayout();
         links.setSpacing(true);
@@ -306,23 +355,12 @@ public class LoginView extends VerticalLayout implements View {
         return label;
     }
 
-    private boolean isUnsupportedBrowser() {
+    private static boolean isUnsupportedBrowser() {
         final WebBrowser webBrowser = Page.getCurrent().getWebBrowser();
-        if (webBrowser.isIE() && webBrowser.getBrowserMajorVersion() < 11) {
-            return true;
-        }
-        return false;
+        return webBrowser.isIE() && webBrowser.getBrowserMajorVersion() < 11;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.navigator.View#enter(com.vaadin.navigator.ViewChangeListener.
-     * ViewChangeEvent)
-     */
-    @Override
-    public void enter(final ViewChangeEvent event) {
+    private void readCookie() {
         if (!useCookie) {
             return;
         }
@@ -354,7 +392,7 @@ public class LoginView extends VerticalLayout implements View {
             final Cookie tenantCookie = new Cookie(SP_LOGIN_TENANT, tenant.getValue().toUpperCase());
             tenantCookie.setPath("/");
             // 100 days
-            tenantCookie.setMaxAge(3600 * 24 * 100);
+            tenantCookie.setMaxAge(HUNDRED_DAYS_IN_SECONDS);
             tenantCookie.setHttpOnly(true);
             tenantCookie.setSecure(uiProperties.getLogin().getCookie().isSecure());
             VaadinService.getCurrentResponse().addCookie(tenantCookie);
@@ -363,13 +401,13 @@ public class LoginView extends VerticalLayout implements View {
         final Cookie usernameCookie = new Cookie(SP_LOGIN_USER, username.getValue());
         usernameCookie.setPath("/");
         // 100 days
-        usernameCookie.setMaxAge(3600 * 24 * 100);
+        usernameCookie.setMaxAge(HUNDRED_DAYS_IN_SECONDS);
         usernameCookie.setHttpOnly(true);
         usernameCookie.setSecure(uiProperties.getLogin().getCookie().isSecure());
         VaadinService.getCurrentResponse().addCookie(usernameCookie);
     }
 
-    private Cookie getCookieByName(final String name) {
+    private static Cookie getCookieByName(final String name) {
         // Fetch all cookies from the request
         final Cookie[] cookies = VaadinService.getCurrentRequest().getCookies();
 
@@ -398,14 +436,14 @@ public class LoginView extends VerticalLayout implements View {
             }
 
         } catch (final CredentialsExpiredException e) {
-            LOGGER.debug("Credential expired", e);
+            LOG.debug("Credential expired", e);
             loginCredentialsExpiredNotification();
         } catch (final AuthenticationException e) {
-            LOGGER.debug("Authentication failed", e);
+            LOG.debug("Authentication failed", e);
             /* if not successful */
             loginAuthenticationFailedNotification();
         } catch (final Exception e) {
-            LOGGER.debug("Login failed", e);
+            LOG.debug("Login failed", e);
             loginAuthenticationFailedNotification();
         }
     }
