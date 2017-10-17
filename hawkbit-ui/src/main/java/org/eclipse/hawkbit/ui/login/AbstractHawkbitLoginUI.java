@@ -457,6 +457,18 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         return params;
     }
 
+    protected TextField getUsername() {
+        return username;
+    }
+
+    protected TextField getTenant() {
+        return tenant;
+    }
+
+    protected PasswordField getPassword() {
+        return password;
+    }
+
     private static Map<String, String> getQueryParams(final URL url) {
         if (!StringUtils.hasLength(url.getQuery())) {
             return Collections.emptyMap();
