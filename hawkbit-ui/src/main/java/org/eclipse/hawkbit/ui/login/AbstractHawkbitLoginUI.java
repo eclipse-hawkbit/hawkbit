@@ -200,15 +200,14 @@ public abstract class AbstractHawkbitLoginUI extends UI {
     }
 
     private void filloutUsernameTenantFields() {
-        if (tenant != null) {
-            if (params.containsKey(TENANT_PARAMETER)) {
-                tenant.setValue(params.get(TENANT_PARAMETER));
-                useCookie = false;
-            }
+        if (tenant != null && params.containsKey(TENANT_PARAMETER)) {
+            tenant.setValue(params.get(TENANT_PARAMETER));
+            tenant.setVisible(false);
+            useCookie = false;
         }
 
         if (params.containsKey(USER_PARAMETER)) {
-            tenant.setValue(params.get(USER_PARAMETER));
+            username.setValue(params.get(USER_PARAMETER));
             useCookie = false;
         }
     }
