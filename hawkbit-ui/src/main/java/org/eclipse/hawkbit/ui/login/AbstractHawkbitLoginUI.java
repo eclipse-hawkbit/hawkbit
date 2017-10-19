@@ -469,6 +469,10 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         return password;
     }
 
+    protected VaadinMessageSource getI18n() {
+        return i18n;
+    }
+
     private static Map<String, String> getQueryParams(final URL url) {
         if (!StringUtils.hasLength(url.getQuery())) {
             return Collections.emptyMap();
