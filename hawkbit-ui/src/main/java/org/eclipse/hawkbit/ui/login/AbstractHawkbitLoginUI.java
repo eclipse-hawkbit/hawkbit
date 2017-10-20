@@ -10,13 +10,7 @@ package org.eclipse.hawkbit.ui.login;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.Cookie;
 
@@ -37,7 +31,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.util.StringUtils;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.vaadin.spring.security.VaadinSecurity;
 
 import com.vaadin.annotations.Theme;
@@ -81,7 +76,7 @@ public abstract class AbstractHawkbitLoginUI extends UI {
     private static final String USER_PARAMETER = "user";
     private static final String TENANT_PARAMETER = "tenant";
     private static final String DEMO_PARAMETER = "demo";
-    private static final int HUNDRED_DAYS_IN_SECONDS = 3600 * 24 * 100;
+    private static final int HUNDRED_DAYS_IN_SECONDS = Math.toIntExact(TimeUnit.DAYS.toSeconds(100));
     private static final String LOGIN_TEXTFIELD = "login-textfield";
 
     private static final String SP_LOGIN_USER = "sp-login-user";
@@ -104,7 +99,7 @@ public abstract class AbstractHawkbitLoginUI extends UI {
     private PasswordField password;
     private Button signin;
 
-    private Map<String, String> params;
+    private MultiValueMap<String, String> params;
 
     @Autowired
     protected AbstractHawkbitLoginUI(final ApplicationContext context, final VaadinSecurity vaadinSecurity,
@@ -121,11 +116,7 @@ public abstract class AbstractHawkbitLoginUI extends UI {
     protected void init(final VaadinRequest request) {
         SpringContextHelper.setContext(context);
 
-        try {
-            params = getQueryParams(Page.getCurrent().getLocation().toURL());
-        } catch (final MalformedURLException e) {
-            // Ignore params silently
-        }
+        params = UriComponentsBuilder.fromUri(Page.getCurrent().getLocation()).build().getQueryParams();
 
         if (params.containsKey(DEMO_PARAMETER)) {
             login(uiProperties.getDemo().getTenant(), uiProperties.getDemo().getUser(),
@@ -200,14 +191,14 @@ public abstract class AbstractHawkbitLoginUI extends UI {
     }
 
     private void filloutUsernameTenantFields() {
-        if (tenant != null && params.containsKey(TENANT_PARAMETER)) {
-            tenant.setValue(params.get(TENANT_PARAMETER));
+        if (tenant != null && params.containsKey(TENANT_PARAMETER) && !params.get(TENANT_PARAMETER).isEmpty()) {
+            tenant.setValue(params.get(TENANT_PARAMETER).get(0));
             tenant.setVisible(false);
             useCookie = false;
         }
 
-        if (params.containsKey(USER_PARAMETER)) {
-            username.setValue(params.get(USER_PARAMETER));
+        if (params.containsKey(USER_PARAMETER) && !params.get(USER_PARAMETER).isEmpty()) {
+            username.setValue(params.get(USER_PARAMETER).get(0));
             useCookie = false;
         }
     }
@@ -453,7 +444,7 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         }
     }
 
-    protected Map<String, String> getParams() {
+    protected MultiValueMap<String, String> getParams() {
         return params;
     }
 
@@ -473,18 +464,4 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         return i18n;
     }
 
-    private static Map<String, String> getQueryParams(final URL url) {
-        if (!StringUtils.hasLength(url.getQuery())) {
-            return Collections.emptyMap();
-        }
-        return Arrays.stream(url.getQuery().split("&")).map(AbstractHawkbitLoginUI::splitQueryParameter)
-                .collect(Collectors.toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
-    }
-
-    private static SimpleImmutableEntry<String, String> splitQueryParameter(final String it) {
-        final int idx = it.indexOf("=");
-        final String key = idx > 0 ? it.substring(0, idx) : it;
-        final String value = idx > 0 && it.length() > idx + 1 ? it.substring(idx + 1) : null;
-        return new SimpleImmutableEntry<>(key.toLowerCase(), value);
-    }
 }
