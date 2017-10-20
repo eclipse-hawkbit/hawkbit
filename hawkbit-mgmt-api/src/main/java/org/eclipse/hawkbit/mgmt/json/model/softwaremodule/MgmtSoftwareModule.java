@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.mgmt.json.model.softwaremodule;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -23,6 +24,33 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtSoftwareModule extends MgmtNamedEntity {
+
+    @JsonCreator
+    public MgmtSoftwareModule() {
+        super();
+    }
+
+    /**
+     * Constructor for Software Module JSON model.
+     *
+     * @param moduleId
+     *            is the ID for the module
+     * @param version
+     *            is the version number or name for the software module
+     * @param type
+     *            of software module
+     * @param vendor
+     *            name for the software module
+     */
+    @JsonCreator
+    public MgmtSoftwareModule(Long moduleId, String version, String type, String vendor) {
+        super();
+        this.moduleId = moduleId;
+        this.version = version;
+        this.type = type;
+        this.vendor = vendor;
+    }
+
     @JsonProperty(value = "id", required = true)
     private Long moduleId;
 
