@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.ui.HawkbitUI;
+import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
@@ -64,7 +64,7 @@ import com.vaadin.ui.GridLayout;
  * Manage distributions and distributions type view.
  */
 @UIScope
-@SpringView(name = DistributionsView.VIEW_NAME, ui = HawkbitUI.class)
+@SpringView(name = DistributionsView.VIEW_NAME, ui = AbstractHawkbitUI.class)
 public class DistributionsView extends AbstractNotificationView implements BrowserWindowResizeListener {
 
     private static final long serialVersionUID = 1L;
