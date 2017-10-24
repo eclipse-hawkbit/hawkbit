@@ -13,7 +13,7 @@ The mechanism described below is the rather simple case by customizing the theme
 
 # Example App
 
-An example application with customized theme can be found [here](https://github.com/eclipse/hawkbit/tree/master/examples/hawkbit-custom-theme-example).
+An example application with customized theme can be found [here](https://github.com/eclipse/hawkbit-examples/tree/master/hawkbit-custom-theme-example).
 
 # Overview
 Vaadin separates the appearance of the user interface from its logic using themes. Themes can include Sass or CSS style sheets, custom HTML layouts, and any necessary graphics.
@@ -46,7 +46,7 @@ Every custom theme should always refer the base theme and customization can be d
   }
   ```
 
-- Finally the structure should be as in the [example app](https://github.com/eclipse/hawkbit/tree/master/examples/hawkbit-custom-theme-example/src/main/resources/VAADIN).
+- Finally the structure should be as in the [example app](https://github.com/eclipse/hawkbit-examples/tree/master/hawkbit-custom-theme-example/src/main/resources/VAADIN).
 
 # Procedure to add a custom footer
 - Any footer can be added by creating  "footer.html" in **src/main/resources --> VAADIN -- themes --> {XXXtheme} --> layouts** folder. An example can be found [here](https://github.com/eclipse/hawkbit/blob/master/hawkbit-ui/src/main/resources/VAADIN/themes/hawkbit/layouts/footer.html).

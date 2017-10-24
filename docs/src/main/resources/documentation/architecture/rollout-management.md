@@ -8,7 +8,7 @@ title: Rollout Management
 Software update operations in large scale IoT scenarios with hundreds of thousands of devices require special handling.
 
 That includes:
-- _Technical Scalability_ by means of horizontal scale of the _Rollouts_ server cluster in the cloud.
+- _Technical Scalability_ by means of horizontal scale of the _hawkBit_ server cluster in the cloud.
 - _Global_ artifact _content delivery_ capacities.
 - _Functional Scalability_ by means of:
   - Secure handling of large volumes of devices at rollout creation time.

@@ -5,7 +5,7 @@ title: Interfaces
 
 {% include base.html %}
 
-![](../images/interfaces.png){:width="100%"}
+![](../images/hawkBit_overview.jpeg){:width="100%"}
 
 
 # Graphical User Interface
