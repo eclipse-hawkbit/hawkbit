@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.app;
 
-import org.eclipse.hawkbit.ui.login.HawkbitLoginUI;
+import org.eclipse.hawkbit.ui.login.AbstractHawkbitLoginUI;
 import org.eclipse.hawkbit.ui.themes.HawkbitTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -23,14 +23,14 @@ import com.vaadin.spring.navigator.SpringViewProvider;
  * 
  * A {@link SpringUI} annotated class must be present in the classpath for the
  * login path. The easiest way to get an hawkBit login UI running is to extend
- * the {@link HawkbitLoginUI} and to annotated it with {@link SpringUI} as in
+ * the {@link AbstractHawkbitLoginUI} and to annotated it with {@link SpringUI} as in
  * this example to the defined {@link HawkbitTheme#LOGIN_UI_PATH}.
  * 
  */
 @SpringUI(path = HawkbitTheme.LOGIN_UI_PATH)
 @Title("hawkBit Theme example")
 @Theme(value = "exampletheme")
-public class MyLoginUI extends HawkbitLoginUI {
+public class MyLoginUI extends AbstractHawkbitLoginUI {
 
     private static final long serialVersionUID = 1L;
 

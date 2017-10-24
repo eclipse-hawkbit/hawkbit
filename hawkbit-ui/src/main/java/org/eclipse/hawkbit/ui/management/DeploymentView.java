@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
-import org.eclipse.hawkbit.ui.HawkbitUI;
+import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
@@ -82,7 +82,7 @@ import com.vaadin.ui.UI;
  * Target status and deployment management view
  */
 @UIScope
-@SpringView(name = DeploymentView.VIEW_NAME, ui = HawkbitUI.class)
+@SpringView(name = DeploymentView.VIEW_NAME, ui = AbstractHawkbitUI.class)
 public class DeploymentView extends AbstractNotificationView implements BrowserWindowResizeListener {
 
     private static final long serialVersionUID = 1L;

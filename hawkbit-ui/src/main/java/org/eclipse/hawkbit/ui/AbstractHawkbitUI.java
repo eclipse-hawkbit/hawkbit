@@ -19,16 +19,19 @@ import org.eclipse.hawkbit.ui.menu.DashboardEvent.PostViewChangeEvent;
 import org.eclipse.hawkbit.ui.menu.DashboardMenu;
 import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
 import org.eclipse.hawkbit.ui.push.EventPushStrategy;
+import org.eclipse.hawkbit.ui.themes.HawkbitTheme;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
+import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
+import com.vaadin.annotations.Widgetset;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
@@ -53,43 +56,41 @@ import com.vaadin.ui.themes.ValoTheme;
  *
  */
 @Title("hawkBit Update Server")
-public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
+@Widgetset(value = HawkbitTheme.WIDGET_SET_NAME)
+@Theme(HawkbitTheme.THEME_NAME)
+public abstract class AbstractHawkbitUI extends UI implements DetachListener {
     private static final long serialVersionUID = 1L;
 
-    private static final Logger LOG = LoggerFactory.getLogger(HawkbitUI.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractHawkbitUI.class);
 
     private static final String EMPTY_VIEW = "";
 
     private transient EventPushStrategy pushStrategy;
 
-    @Autowired
-    protected transient EventBus.UIEventBus eventBus;
+    protected final transient EventBus.UIEventBus eventBus;
 
-    @Autowired
-    private SpringViewProvider viewProvider;
+    private final SpringViewProvider viewProvider;
 
-    @Autowired
-    private transient ApplicationContext context;
+    private final transient ApplicationContext context;
 
-    @Autowired
-    private DashboardMenu dashboardMenu;
+    private final DashboardMenu dashboardMenu;
 
-    @Autowired
-    private ErrorView errorview;
+    private final ErrorView errorview;
 
-    @Autowired
-    private NotificationUnreadButton notificationUnreadButton;
+    private final NotificationUnreadButton notificationUnreadButton;
 
     private Label viewTitle;
 
-    /**
-     * Constructor taking the push strategy.
-     *
-     * @param pushStrategy
-     *            the strategy to push events from the backend to the UI
-     */
-    public HawkbitUI(final EventPushStrategy pushStrategy) {
+    protected AbstractHawkbitUI(final EventPushStrategy pushStrategy, final UIEventBus eventBus,
+            final SpringViewProvider viewProvider, final ApplicationContext context, final DashboardMenu dashboardMenu,
+            final ErrorView errorview, final NotificationUnreadButton notificationUnreadButton) {
         this.pushStrategy = pushStrategy;
+        this.eventBus = eventBus;
+        this.viewProvider = viewProvider;
+        this.context = context;
+        this.dashboardMenu = dashboardMenu;
+        this.errorview = errorview;
+        this.notificationUnreadButton = notificationUnreadButton;
     }
 
     @Override
