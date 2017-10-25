@@ -142,7 +142,7 @@ public class JpaControllerManagement implements ControllerManagement {
     private TenantAware tenantAware;
 
     JpaControllerManagement(final ScheduledExecutorService executorService) {
-        executorService.scheduleWithFixedDelay(this::flushUpdateQueue, 1, 1, TimeUnit.SECONDS);
+        executorService.scheduleWithFixedDelay(this::flushUpdateQueue, 10, 10, TimeUnit.SECONDS);
     }
 
     private <T> T runInNewTransaction(final String transactionName, final TransactionCallback<T> action) {
