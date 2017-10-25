@@ -19,7 +19,7 @@ see [hawkBit Documentation](https://www.eclipse.org/hawkbit/documentation/overvi
 
 # Examples and Extensions
 
-Next to the hawkBit core hosted here the project maintains as well an [examples](https://github.com/eclipse/hawkbit-examples) and [extensions](https://github.com/eclipse/hawkbit-extensions) repositories.
+Next to the hawkBit core hosted here the project maintains as well [examples](https://github.com/eclipse/hawkbit-examples) and [extension](https://github.com/eclipse/hawkbit-extensions) repositories.
 
 # hawkBit sandbox
 
@@ -66,7 +66,7 @@ $ mvn clean install
 $ java -jar ./hawkbit-runtime/hawkbit-update-server/target/hawkbit-update-server-#version#.jar
 ```
 
-## Start hawkBit [Device Simulator](https://github.com/eclipse/hawkbit-examples/hawkbit-device-simulator) (optional)
+## Start hawkBit [Device Simulator](https://github.com/eclipse/hawkbit-examples/tree/master/hawkbit-device-simulator) (optional)
 
 ```
 $ git clone https://github.com/eclipse/hawkbit-examples.git
@@ -78,7 +78,7 @@ $ mvn clean install
 $ java -jar ./hawkbit-device-simulator/target/hawkbit-device-simulator-#version#.jar
 ```
 
-## Generate getting started data with the [Management API example](https://github.com/eclipse/hawkbit-examples/hawkbit-example-mgmt-simulator) (optional)
+## Generate getting started data with the [Management API example](https://github.com/eclipse/hawkbit-examples/tree/master/hawkbit-example-mgmt-simulator) (optional)
 
 ```
 $ java -jar ./hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulator-#version#.jar
