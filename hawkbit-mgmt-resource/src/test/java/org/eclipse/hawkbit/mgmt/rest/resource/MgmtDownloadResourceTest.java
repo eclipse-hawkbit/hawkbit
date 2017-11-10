@@ -9,8 +9,16 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+
+import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.cache.DownloadArtifactCache;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.cache.DownloadType;
@@ -22,6 +30,7 @@ import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -34,18 +43,25 @@ public class MgmtDownloadResourceTest extends AbstractManagementApiIntegrationTe
     @Autowired
     private DownloadIdCache downloadIdCache;
 
-    private final String downloadIdSha1 = "downloadIdSha1";
+    private static final String DOWNLOADID_SHA1 = "downloadIdSha1";
 
-    private final String downloadIdNotAvailable = "downloadIdNotAvailable";
+    private static final String DOWNLOADID_NOT_AVAILABLE = "downloadIdNotAvailable";
+
+    private Artifact artifact;
+    private AbstractDbArtifact file;
+
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH);
 
     @Before
-    public void setupCache() {
+    public void setup() {
 
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("Test");
         final SoftwareModule softwareModule = distributionSet.getModules().stream().findAny().get();
-        final Artifact artifact = testdataFactory.createArtifacts(softwareModule.getId()).stream().findAny().get();
+        artifact = testdataFactory.createArtifacts(softwareModule.getId()).stream().findAny().get();
+        file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash()).get();
 
-        downloadIdCache.put(downloadIdSha1, new DownloadArtifactCache(DownloadType.BY_SHA1, artifact.getSha1Hash()));
+        downloadIdCache.put(DOWNLOADID_SHA1, new DownloadArtifactCache(DownloadType.BY_SHA1, artifact.getSha1Hash()));
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
     @Test
@@ -54,7 +70,7 @@ public class MgmtDownloadResourceTest extends AbstractManagementApiIntegrationTe
         mvc.perform(get(
                 MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE
                         + MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING,
-                tenantAware.getCurrentTenant(), downloadIdNotAvailable)).andDo(MockMvcResultPrinter.print())
+                tenantAware.getCurrentTenant(), DOWNLOADID_NOT_AVAILABLE)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
     }
@@ -65,14 +81,17 @@ public class MgmtDownloadResourceTest extends AbstractManagementApiIntegrationTe
         mvc.perform(get(
                 MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE
                         + MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING,
-                tenantAware.getCurrentTenant(), downloadIdSha1)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                tenantAware.getCurrentTenant(), DOWNLOADID_SHA1)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
+                .andExpect(header().string("Accept-Ranges", "bytes"))
+                .andExpect(header().string("Last-Modified", dateFormat.format(new Date(artifact.getCreatedAt()))))
+                .andExpect(header().string("Content-Disposition", "attachment;filename=" + DOWNLOADID_SHA1));
 
         // because cache is empty
         mvc.perform(get(
                 MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE
                         + MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING,
-                tenantAware.getCurrentTenant(), downloadIdSha1)).andDo(MockMvcResultPrinter.print())
+                tenantAware.getCurrentTenant(), DOWNLOADID_SHA1)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
     }

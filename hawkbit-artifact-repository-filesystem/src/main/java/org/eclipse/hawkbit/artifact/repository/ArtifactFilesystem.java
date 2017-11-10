@@ -29,8 +29,8 @@ public class ArtifactFilesystem extends AbstractDbArtifact {
     private final File file;
 
     public ArtifactFilesystem(final File file, final String artifactId, final DbArtifactHash hashes, final Long size,
-            final String contentType) {
-        super(artifactId, hashes, size, contentType);
+            final String contentType, final long lastModified) {
+        super(artifactId, hashes, size, contentType, lastModified);
         Assert.notNull(file, "File cannot be null");
         this.file = file;
     }

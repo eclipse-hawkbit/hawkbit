@@ -104,7 +104,8 @@ public class ArtifactFilesystemRepository implements ArtifactRepository {
             return null;
         }
 
-        return new ArtifactFilesystem(file, sha1, new DbArtifactHash(sha1, null), file.length(), null);
+        return new ArtifactFilesystem(file, sha1, new DbArtifactHash(sha1, null), file.length(), null,
+                file.lastModified());
     }
 
     private AbstractDbArtifact store(final InputStream content, final String contentType, final DbArtifactHash hash,
@@ -117,7 +118,7 @@ public class ArtifactFilesystemRepository implements ArtifactRepository {
             final String md5Hash = BaseEncoding.base16().lowerCase().encode(mdMD5.digest());
 
             artifact = new ArtifactFilesystem(file, sha1Hash, new DbArtifactHash(sha1Hash, md5Hash), artifactSize,
-                    contentType);
+                    contentType, file.lastModified());
 
             checkHashes(artifact, hash);
         } catch (final IOException e) {
@@ -135,7 +136,7 @@ public class ArtifactFilesystemRepository implements ArtifactRepository {
             final AbstractDbArtifact artifact) {
         final File fileSHA1Naming = getFile(tenant, artifact.getHashes().getSha1());
         final ArtifactFilesystem fileSystemArtifact = new ArtifactFilesystem(fileSHA1Naming, artifact.getArtifactId(),
-                artifact.getHashes(), artifact.getSize(), artifact.getContentType());
+                artifact.getHashes(), artifact.getSize(), artifact.getContentType(), file.lastModified());
         if (fileSHA1Naming.exists()) {
             FileUtils.deleteQuietly(file);
         } else {

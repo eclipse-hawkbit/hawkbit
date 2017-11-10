@@ -18,9 +18,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * JSON representation of artifact.
- *
- *
- *
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -32,7 +29,10 @@ public class DmfArtifact {
     private DmfArtifactHash hashes;
 
     @JsonProperty
-    private Long size;
+    private long size;
+
+    @JsonProperty
+    private long lastModified;
 
     @JsonProperty
     private Map<String, String> urls;
@@ -43,6 +43,14 @@ public class DmfArtifact {
         }
 
         return Collections.unmodifiableMap(urls);
+    }
+
+    public long getLastModified() {
+        return lastModified;
+    }
+
+    public void setLastModified(final long lastModified) {
+        this.lastModified = lastModified;
     }
 
     public void setUrls(final Map<String, String> urls) {
@@ -65,11 +73,11 @@ public class DmfArtifact {
         this.hashes = hashes;
     }
 
-    public Long getSize() {
+    public long getSize() {
         return size;
     }
 
-    public void setSize(final Long size) {
+    public void setSize(final long size) {
         this.size = size;
     }
 

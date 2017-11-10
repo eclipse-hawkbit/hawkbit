@@ -376,10 +376,12 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
 
     }
 
-    private void verifyOkResult(Message returnMessage, Artifact artifact) {
+    private void verifyOkResult(final Message returnMessage, final Artifact artifact) {
         final DmfDownloadResponse convertedMessage = verifyResult(returnMessage, HttpStatus.OK, null);
         assertThat(convertedMessage.getDownloadUrl()).isNotNull();
         assertThat(convertedMessage.getArtifact()).isNotNull();
+        assertThat(convertedMessage.getArtifact().getLastModified())
+                .isEqualTo(artifactManagement.loadArtifactBinary(artifact.getSha1Hash()).get().getLastModified());
         assertThat(convertedMessage.getArtifact().getHashes().getSha1()).isEqualTo(artifact.getSha1Hash());
 
     }
@@ -405,15 +407,16 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
 
     private DmfTenantSecurityToken createTenantSecurityToken(final String tenant, final String controllerId,
             final FileResource fileResource) {
-        final DmfTenantSecurityToken tenantSecurityToken = new DmfTenantSecurityToken(tenant, controllerId, fileResource);
+        final DmfTenantSecurityToken tenantSecurityToken = new DmfTenantSecurityToken(tenant, controllerId,
+                fileResource);
         tenantSecurityToken.putHeader(DmfTenantSecurityToken.AUTHORIZATION_HEADER, TARGET_TOKEN_HEADER);
         return tenantSecurityToken;
     }
 
     private DmfTenantSecurityToken createTenantSecurityToken(final String tenant, final Long targetId,
             final String controllerId, final FileResource fileResource) {
-        final DmfTenantSecurityToken tenantSecurityToken = new DmfTenantSecurityToken(tenant, null, controllerId, targetId,
-                fileResource);
+        final DmfTenantSecurityToken tenantSecurityToken = new DmfTenantSecurityToken(tenant, null, controllerId,
+                targetId, fileResource);
         tenantSecurityToken.putHeader(DmfTenantSecurityToken.AUTHORIZATION_HEADER, TARGET_TOKEN_HEADER);
         return tenantSecurityToken;
     }

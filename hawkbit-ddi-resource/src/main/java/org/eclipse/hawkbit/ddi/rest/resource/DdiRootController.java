@@ -178,8 +178,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
                 final Long statusId = action.getId();
 
-                result = FileStreamingUtil.writeFileResponse(file, artifact.getFilename(),
-                        artifact.getLastModifiedAt() != null ? artifact.getLastModifiedAt() : artifact.getCreatedAt(),
+                result = FileStreamingUtil.writeFileResponse(file, artifact.getFilename(), file.getLastModified(),
                         requestResponseContextHolder.getHttpServletResponse(),
                         requestResponseContextHolder.getHttpServletRequest(),
                         (length, shippedSinceLastEvent, total) -> eventPublisher

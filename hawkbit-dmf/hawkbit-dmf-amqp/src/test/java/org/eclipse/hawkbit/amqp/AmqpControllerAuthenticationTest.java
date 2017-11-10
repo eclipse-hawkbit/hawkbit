@@ -79,6 +79,7 @@ public class AmqpControllerAuthenticationTest {
     private static final String SHA1 = "12345";
     private static final Long ARTIFACT_ID = 1123L;
     private static final Long ARTIFACT_SIZE = 6666L;
+    private static final long ARTIFACT_LAST_MODIFIED = 123456L;
     private static final String TENANT = "DEFAULT";
     private static final Long TENANT_ID = 123L;
     private static final String CONTROLLER_ID = "123";
@@ -163,7 +164,7 @@ public class AmqpControllerAuthenticationTest {
         when(artifactManagementMock.findFirstBySHA1(SHA1)).thenReturn(Optional.of(testArtifact));
 
         final AbstractDbArtifact artifact = new ArtifactFilesystem(new File("does not exist"), SHA1,
-                new DbArtifactHash(SHA1, "md5 test"), ARTIFACT_SIZE, null);
+                new DbArtifactHash(SHA1, "md5 test"), ARTIFACT_SIZE, null, ARTIFACT_LAST_MODIFIED);
         when(artifactManagementMock.loadArtifactBinary(SHA1)).thenReturn(Optional.of(artifact));
 
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate,
