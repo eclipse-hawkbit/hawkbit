@@ -14,7 +14,7 @@ import javax.annotation.PreDestroy;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.ui.HawkbitUI;
+import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
@@ -43,7 +43,7 @@ import com.vaadin.ui.VerticalLayout;
  * View for custom target filter management.
  */
 @UIScope
-@SpringView(name = FilterManagementView.VIEW_NAME, ui = HawkbitUI.class)
+@SpringView(name = FilterManagementView.VIEW_NAME, ui = AbstractHawkbitUI.class)
 public class FilterManagementView extends VerticalLayout implements View {
 
     private static final long serialVersionUID = 8751545414237389386L;

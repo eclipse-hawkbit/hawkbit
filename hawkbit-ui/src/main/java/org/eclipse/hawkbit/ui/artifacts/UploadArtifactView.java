@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
-import org.eclipse.hawkbit.ui.HawkbitUI;
+import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsLayout;
 import org.eclipse.hawkbit.ui.artifacts.event.ArtifactDetailsEvent;
@@ -54,7 +54,7 @@ import com.vaadin.ui.VerticalLayout;
  * Display artifacts upload view.
  */
 @UIScope
-@SpringView(name = UploadArtifactView.VIEW_NAME, ui = HawkbitUI.class)
+@SpringView(name = UploadArtifactView.VIEW_NAME, ui = AbstractHawkbitUI.class)
 public class UploadArtifactView extends VerticalLayout implements View, BrowserWindowResizeListener {
 
     private static final long serialVersionUID = 1L;
