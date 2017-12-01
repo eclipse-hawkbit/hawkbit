@@ -29,7 +29,7 @@ services:
       MYSQL_ALLOW_EMPTY_PASSWORD: "true"
     restart: always
     ports:
-      - "3302:3306"
+      - "3306:3306"
     labels:
       NAME: "mysql"
   
