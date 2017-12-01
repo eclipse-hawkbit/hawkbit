@@ -12,8 +12,8 @@ services:
       RABBITMQ_DEFAULT_VHOST: "/"
     restart: always
     ports:
-      - "15679:15672"
-      - "5679:5672"
+      - "15672:15672"
+      - "5672:5672"
     labels:
       NAME: "rabbitmq"
       
@@ -29,7 +29,7 @@ services:
       MYSQL_ALLOW_EMPTY_PASSWORD: "true"
     restart: always
     ports:
-      - "3309:3306"
+      - "3302:3306"
     labels:
       NAME: "mysql"
   
