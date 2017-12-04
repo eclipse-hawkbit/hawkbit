@@ -65,6 +65,7 @@ services:
         - rabbitmq    
     environment:
       - 'SPRING_RABBITMQ_HOST=rabbitmq'
+      - 'SERVER_SESSION_COOKIE_NAME=hawkbitsimu'
     restart: always
     ports:
       - "8083:8083"
