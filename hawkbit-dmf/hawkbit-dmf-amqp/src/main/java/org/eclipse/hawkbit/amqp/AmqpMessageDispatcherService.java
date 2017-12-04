@@ -136,6 +136,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         for (final SoftwareModule softwareModule : modules) {
             final DmfSoftwareModule amqpSoftwareModule = convertToAmqpSoftwareModule(target, softwareModule);
             downloadAndUpdateRequest.addSoftwareModule(amqpSoftwareModule);
+            // FIXME add metadata in secure way
         }
 
         final Message message = getMessageConverter().toMessage(downloadAndUpdateRequest,

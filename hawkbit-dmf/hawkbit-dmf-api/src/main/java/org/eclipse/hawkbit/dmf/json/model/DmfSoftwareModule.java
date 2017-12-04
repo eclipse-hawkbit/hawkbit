@@ -20,9 +20,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * JSON representation of a software module.
  *
- *
- *
- *
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -36,6 +33,9 @@ public class DmfSoftwareModule {
     private String moduleVersion;
     @JsonProperty
     private List<DmfArtifact> artifacts;
+    @JsonProperty
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<DmfMetadata> metadata;
 
     public String getModuleType() {
         return moduleType;
@@ -72,6 +72,14 @@ public class DmfSoftwareModule {
 
     public void setArtifacts(final List<DmfArtifact> artifacts) {
         this.artifacts = artifacts;
+    }
+
+    public List<DmfMetadata> getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(final List<DmfMetadata> metadata) {
+        this.metadata = metadata;
     }
 
 }

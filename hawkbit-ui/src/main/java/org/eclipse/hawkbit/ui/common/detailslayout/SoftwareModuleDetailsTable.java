@@ -145,7 +145,7 @@ public class SoftwareModuleDetailsTable extends Table {
     public void populateModule(final DistributionSet distributionSet) {
         removeAllItems();
         if (distributionSet != null) {
-            if (isUnassignSoftModAllowed && permissionChecker.hasUpdateDistributionPermission()) {
+            if (isUnassignSoftModAllowed && permissionChecker.hasUpdateRepositoryPermission()) {
                 try {
                     isTargetAssigned = false;
                 } catch (final EntityReadOnlyException exception) {
@@ -229,7 +229,7 @@ public class SoftwareModuleDetailsTable extends Table {
                 softwareModule.setId(sw.getName() + "-label");
                 horizontalLayout.addComponent(softwareModule);
                 horizontalLayout.setExpandRatio(softwareModule, 1F);
-                if (isUnassignSoftModAllowed && permissionChecker.hasUpdateDistributionPermission() && !isTargetAssigned
+                if (isUnassignSoftModAllowed && permissionChecker.hasUpdateRepositoryPermission() && !isTargetAssigned
                         && (isSoftModAvaiableForSoftType(alreadyAssignedSwModules, swModType))) {
                     horizontalLayout.addComponent(reassignSoftModule);
                 }

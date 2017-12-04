@@ -100,14 +100,14 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected boolean hasDeletePermission() {
-        return permChecker.hasDeleteDistributionPermission();
+        return permChecker.hasDeleteRepositoryPermission();
 
     }
 
     @Override
     protected boolean hasUpdatePermission() {
 
-        return permChecker.hasUpdateDistributionPermission();
+        return permChecker.hasUpdateRepositoryPermission();
     }
 
     @Override

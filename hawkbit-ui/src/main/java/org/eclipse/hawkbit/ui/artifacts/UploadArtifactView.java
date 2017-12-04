@@ -157,7 +157,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
     }
 
     private void buildLayout() {
-        if (permChecker.hasReadDistributionPermission() || permChecker.hasCreateDistributionPermission()) {
+        if (permChecker.hasReadRepositoryPermission() || permChecker.hasCreateRepositoryPermission()) {
             setSizeFull();
             createMainLayout();
             addComponents(mainLayout);
@@ -170,7 +170,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         detailAndUploadLayout.addComponent(artifactDetailsLayout);
         detailAndUploadLayout.setComponentAlignment(artifactDetailsLayout, Alignment.MIDDLE_CENTER);
 
-        if (permChecker.hasCreateDistributionPermission()) {
+        if (permChecker.hasCreateRepositoryPermission()) {
             dadw = uploadLayout.getDropAreaWrapper();
             detailAndUploadLayout.addComponent(dadw);
             detailAndUploadLayout.setComponentAlignment(dadw, Alignment.MIDDLE_CENTER);
@@ -204,7 +204,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
 
     private void createUploadButtonLayout() {
         uplaodButtonsLayout = new HorizontalLayout();
-        if (permChecker.hasCreateDistributionPermission()) {
+        if (permChecker.hasCreateRepositoryPermission()) {
             uplaodButtonsLayout = uploadLayout.getFileUploadLayout();
         }
     }

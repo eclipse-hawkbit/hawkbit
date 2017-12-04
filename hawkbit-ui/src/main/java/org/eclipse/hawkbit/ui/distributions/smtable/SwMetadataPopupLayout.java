@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.distributions.smtable;
 
+import static org.eclipse.hawkbit.ui.common.AbstractMetadataPopupLayout.KEY;
+import static org.eclipse.hawkbit.ui.common.AbstractMetadataPopupLayout.VALUE;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -22,6 +25,12 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.PageRequest;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
+import com.vaadin.data.Item;
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.event.SelectionEvent;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.VerticalLayout;
+
 /**
  * Pop up layout to display software module metadata.
  */
@@ -32,6 +41,7 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
     private final transient SoftwareModuleManagement softwareModuleManagement;
 
     private final transient EntityFactory entityFactory;
+    private CheckBox targetVisibleField;
 
     public SwMetadataPopupLayout(final VaadinMessageSource i18n, final UINotification uiNotification,
             final UIEventBus eventBus, final SoftwareModuleManagement softwareManagement,
@@ -76,11 +86,99 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
 
     @Override
     protected boolean hasCreatePermission() {
-        return permChecker.hasCreateDistributionPermission();
+        return permChecker.hasCreateRepositoryPermission();
     }
 
     @Override
     protected boolean hasUpdatePermission() {
-        return permChecker.hasUpdateDistributionPermission();
+        return permChecker.hasUpdateRepositoryPermission();
+    }
+
+    private CheckBox createTargetVisibleField() {
+        final CheckBox checkBox = new CheckBox();
+        checkBox.setCaption(i18n.getMessage("textfield.key"));
+        checkBox.addValueChangeListener(this::onCheckBoxChange);
+
+        return checkBox;
+    }
+
+    public void onCheckBoxChange(final ValueChangeEvent event) {
+        if (hasCreatePermission() || hasUpdatePermission()) {
+            if (!getValueTextArea().getValue().isEmpty() && !getKeyTextField().getValue().isEmpty()) {
+                getMetadataWindow().setSaveButtonEnabled(true);
+            } else {
+                getMetadataWindow().setSaveButtonEnabled(false);
+            }
+        }
+
+    }
+
+    @Override
+    protected void createComponents() {
+        super.createComponents();
+        targetVisibleField = createTargetVisibleField();
+    }
+
+    @Override
+    protected VerticalLayout createMetadataFieldsLayout() {
+        final VerticalLayout metadataFieldsLayout = new VerticalLayout();
+        metadataFieldsLayout.setSizeFull();
+        metadataFieldsLayout.setHeight("100%");
+        metadataFieldsLayout.addComponent(getKeyTextField());
+        metadataFieldsLayout.addComponent(targetVisibleField);
+        metadataFieldsLayout.addComponent(getValueTextArea());
+        metadataFieldsLayout.setSpacing(true);
+        metadataFieldsLayout.setExpandRatio(getKeyTextField(), 1F);
+        return metadataFieldsLayout;
+    }
+
+    @Override
+    protected void popualateKeyValue(final Object metadataCompositeKey) {
+        super.popualateKeyValue(metadataCompositeKey);
+        if (metadataCompositeKey != null) {
+            final Item item = metaDataGrid.getContainerDataSource().getItem(metadataCompositeKey);
+            keyTextField.setValue((String) item.getItemProperty(KEY).getValue());
+            valueTextArea.setValue((String) item.getItemProperty(VALUE).getValue());
+            keyTextField.setEnabled(false);
+            if (hasUpdatePermission()) {
+                valueTextArea.setEnabled(true);
+            }
+        }
+    }
+
+    @Override
+    protected void clearTextFields() {
+        super.clearTextFields();
+        // FIXME
+    }
+
+    @Override
+    protected void onAdd() {
+        super.onAdd();
+        // FIXME
+    }
+
+    @Override
+    protected void onSave() {
+        super.onSave();
+        // FIXME
+    }
+
+    @Override
+    protected void onRowClick(final SelectionEvent event) {
+        super.onRowClick(event);
+        // FIXME
+    }
+
+    @Override
+    protected void setUpDetails(final Long swId, final String metaDatakey) {
+        super.setUpDetails(swId, metaDatakey);
+        // FIXME
+    }
+
+    @Override
+    protected void resetDetails() {
+        super.resetDetails();
+        // FIXME
     }
 }

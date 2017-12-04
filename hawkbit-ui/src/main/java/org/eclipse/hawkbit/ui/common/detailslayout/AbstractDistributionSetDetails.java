@@ -105,7 +105,7 @@ public abstract class AbstractDistributionSetDetails
 
     @Override
     protected boolean hasEditPermission() {
-        return getPermissionChecker().hasUpdateDistributionPermission();
+        return getPermissionChecker().hasUpdateRepositoryPermission();
     }
 
     @Override

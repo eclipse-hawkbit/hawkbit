@@ -54,7 +54,7 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
 
     @Override
     protected boolean hasCreateUpdatePermission() {
-        return permChecker.hasCreateDistributionPermission() || permChecker.hasUpdateDistributionPermission();
+        return permChecker.hasCreateRepositoryPermission() || permChecker.hasUpdateRepositoryPermission();
     }
 
     @Override

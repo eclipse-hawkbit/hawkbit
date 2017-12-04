@@ -176,7 +176,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     protected abstract boolean hasUpdatePermission();
 
-    private void createComponents() {
+    protected void createComponents() {
         keyTextField = createKeyTextField();
         valueTextArea = createValueTextField();
         metaDataGrid = createMetadataGrid();
@@ -211,13 +211,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         tableLayout.addStyleName("table-layout");
         tableLayout.setExpandRatio(metaDataGrid, 1.0F);
 
-        final VerticalLayout metadataFieldsLayout = new VerticalLayout();
-        metadataFieldsLayout.setSizeFull();
-        metadataFieldsLayout.setHeight("100%");
-        metadataFieldsLayout.addComponent(keyTextField);
-        metadataFieldsLayout.addComponent(valueTextArea);
-        metadataFieldsLayout.setSpacing(true);
-        metadataFieldsLayout.setExpandRatio(valueTextArea, 1F);
+        final VerticalLayout metadataFieldsLayout = createMetadataFieldsLayout();
 
         mainLayout = new HorizontalLayout();
         mainLayout.addComponent(tableLayout);
@@ -228,6 +222,17 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         mainLayout.setSpacing(true);
         setCompositionRoot(mainLayout);
         setSizeFull();
+    }
+
+    protected VerticalLayout createMetadataFieldsLayout() {
+        final VerticalLayout metadataFieldsLayout = new VerticalLayout();
+        metadataFieldsLayout.setSizeFull();
+        metadataFieldsLayout.setHeight("100%");
+        metadataFieldsLayout.addComponent(keyTextField);
+        metadataFieldsLayout.addComponent(valueTextArea);
+        metadataFieldsLayout.setSpacing(true);
+        metadataFieldsLayout.setExpandRatio(valueTextArea, 1F);
+        return metadataFieldsLayout;
     }
 
     private TextField createKeyTextField() {
@@ -310,7 +315,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         }
     }
 
-    private void clearTextFields() {
+    protected void clearTextFields() {
         keyTextField.clear();
         valueTextArea.clear();
         metaDataGrid.select(null);
@@ -341,7 +346,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         return swcontactContainer;
     }
 
-    private void popualateKeyValue(final Object metadataCompositeKey) {
+    protected void popualateKeyValue(final Object metadataCompositeKey) {
         if (metadataCompositeKey != null) {
             final Item item = metaDataGrid.getContainerDataSource().getItem(metadataCompositeKey);
             keyTextField.setValue((String) item.getItemProperty(KEY).getValue());
@@ -373,7 +378,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         item.getItemProperty(VALUE).setValue(valueTextArea.getValue());
     }
 
-    private void onAdd() {
+    protected void onAdd() {
         metaDataGrid.deselect(metaDataGrid.getSelectedRow());
         valueTextArea.clear();
         keyTextField.clear();
@@ -382,7 +387,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         addIcon.setEnabled(true);
     }
 
-    private void onSave() {
+    protected void onSave() {
         final String key = keyTextField.getValue();
         final String value = valueTextArea.getValue();
         if (mandatoryCheck()) {
@@ -456,7 +461,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         }
     }
 
-    private void onRowClick(final SelectionEvent event) {
+    protected void onRowClick(final SelectionEvent event) {
         final Set<Object> itemsSelected = event.getSelected();
         if (!itemsSelected.isEmpty()) {
             popualateKeyValue(itemsSelected.iterator().next());
@@ -486,7 +491,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         }
     }
 
-    private void setUpDetails(final Long swId, final String metaDatakey) {
+    protected void setUpDetails(final Long swId, final String metaDatakey) {
         resetDetails();
         if (swId != null) {
             metaDataGrid.getContainerDataSource().removeAllItems();
@@ -506,13 +511,25 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         }
     }
 
-    private void resetDetails() {
+    protected void resetDetails() {
         keyTextField.clear();
         valueTextArea.clear();
         keyTextField.setEnabled(false);
         valueTextArea.setEnabled(false);
         metadataWindow.setSaveButtonEnabled(false);
         addIcon.setEnabled(true);
+    }
+
+    protected TextField getKeyTextField() {
+        return keyTextField;
+    }
+
+    protected TextArea getValueTextArea() {
+        return valueTextArea;
+    }
+
+    protected CommonDialogWindow getMetadataWindow() {
+        return metadataWindow;
     }
 
 }

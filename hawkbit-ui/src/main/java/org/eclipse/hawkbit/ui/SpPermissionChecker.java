@@ -52,7 +52,7 @@ public class SpPermissionChecker implements Serializable {
      * @return TARGET_REPOSITORY_READ boolean value
      */
     public boolean hasTargetAndRepositoryReadPermission() {
-        return hasTargetReadPermission() && hasReadDistributionPermission();
+        return hasTargetReadPermission() && hasReadRepositoryPermission();
     }
 
     /**
@@ -92,39 +92,39 @@ public class SpPermissionChecker implements Serializable {
     }
 
     /**
-     * Gets the SP READ Distribution Permission.
+     * Gets the SP READ Repository Permission.
      * 
      * @return READ_REPOSITORY boolean value
      */
-    public boolean hasReadDistributionPermission() {
+    public boolean hasReadRepositoryPermission() {
         return permissionService.hasPermission(SpPermission.READ_REPOSITORY);
     }
 
     /**
-     * Gets the SP create Distribution Permission.
+     * Gets the SP create Repository Permission.
      * 
      * @return CREATE_REPOSITORY boolean value
      */
-    public boolean hasCreateDistributionPermission() {
-        return hasReadDistributionPermission() && permissionService.hasPermission(SpPermission.CREATE_REPOSITORY);
+    public boolean hasCreateRepositoryPermission() {
+        return hasReadRepositoryPermission() && permissionService.hasPermission(SpPermission.CREATE_REPOSITORY);
     }
 
     /**
-     * Gets the SP update Distribution Permission.
+     * Gets the SP update Repository Permission.
      * 
      * @return UPDATE_REPOSITORY boolean value
      */
-    public boolean hasUpdateDistributionPermission() {
-        return hasReadDistributionPermission() && permissionService.hasPermission(SpPermission.UPDATE_REPOSITORY);
+    public boolean hasUpdateRepositoryPermission() {
+        return hasReadRepositoryPermission() && permissionService.hasPermission(SpPermission.UPDATE_REPOSITORY);
     }
 
     /**
-     * Gets the SP delete Distribution Permission.
+     * Gets the SP delete Repository Permission.
      * 
      * @return DELETE_REPOSITORY boolean value
      */
-    public boolean hasDeleteDistributionPermission() {
-        return hasReadDistributionPermission() && permissionService.hasPermission(SpPermission.DELETE_REPOSITORY);
+    public boolean hasDeleteRepositoryPermission() {
+        return hasReadRepositoryPermission() && permissionService.hasPermission(SpPermission.DELETE_REPOSITORY);
     }
 
     /**
@@ -133,7 +133,7 @@ public class SpPermissionChecker implements Serializable {
      * @return permission for rollout update
      */
     public boolean hasRolloutUpdatePermission() {
-        return hasUpdateTargetPermission() && hasReadDistributionPermission()
+        return hasUpdateTargetPermission() && hasReadRepositoryPermission()
                 && permissionService.hasPermission(SpPermission.ROLLOUT_MANAGEMENT);
     }
 
@@ -143,7 +143,7 @@ public class SpPermissionChecker implements Serializable {
      * @return permission for rollout create
      */
     public boolean hasRolloutCreatePermission() {
-        return hasUpdateTargetPermission() && hasReadDistributionPermission()
+        return hasUpdateTargetPermission() && hasReadRepositoryPermission()
                 && permissionService.hasPermission(SpPermission.ROLLOUT_MANAGEMENT);
     }
 

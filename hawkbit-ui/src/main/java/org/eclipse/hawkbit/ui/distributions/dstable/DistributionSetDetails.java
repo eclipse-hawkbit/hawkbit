@@ -154,7 +154,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
     }
 
     private Button assignSoftModuleButton(final String softwareModuleName) {
-        if (getPermissionChecker().hasUpdateDistributionPermission() && manageDistUIState.getLastSelectedDistribution()
+        if (getPermissionChecker().hasUpdateRepositoryPermission() && manageDistUIState.getLastSelectedDistribution()
                 .map(selected -> targetManagement.countByAssignedDistributionSet(selected) <= 0).orElse(false)) {
 
             final Button reassignSoftModule = SPUIComponentProvider.getButton(softwareModuleName, "", "", "", true,

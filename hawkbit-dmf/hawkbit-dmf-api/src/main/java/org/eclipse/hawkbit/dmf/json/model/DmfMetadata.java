@@ -6,9 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ddi.json.model;
-
-import javax.validation.constraints.NotNull;
+package org.eclipse.hawkbit.dmf.json.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -16,16 +14,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Additional metadata to be provided for the target/device.
  *
  */
-public class DdiMetadata {
+public class DmfMetadata {
     @JsonProperty
-    @NotNull
     private final String key;
 
     @JsonProperty
-    @NotNull
     private final String value;
 
-    public DdiMetadata(final String key, final String value) {
+    public DmfMetadata(final String key, final String value) {
         this.key = key;
         this.value = value;
     }

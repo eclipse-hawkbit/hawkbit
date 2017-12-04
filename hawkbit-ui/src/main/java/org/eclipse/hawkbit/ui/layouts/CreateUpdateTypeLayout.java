@@ -78,7 +78,7 @@ public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends Abst
         getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
         tagColorPreviewBtn.setStyleName(TAG_DYNAMIC_STYLE);
 
-        createOptionGroup(permChecker.hasCreateDistributionPermission(), permChecker.hasUpdateDistributionPermission());
+        createOptionGroup(permChecker.hasCreateRepositoryPermission(), permChecker.hasUpdateRepositoryPermission());
     }
 
     @Override
@@ -128,8 +128,8 @@ public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends Abst
         super.reset();
         typeKey.clear();
         restoreComponentStyles();
-        setOptionGroupDefaultValue(permChecker.hasCreateDistributionPermission(),
-                permChecker.hasUpdateDistributionPermission());
+        setOptionGroupDefaultValue(permChecker.hasCreateRepositoryPermission(),
+                permChecker.hasUpdateRepositoryPermission());
     }
 
     /**

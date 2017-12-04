@@ -79,11 +79,11 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
 
     @Override
     protected boolean hasCreatePermission() {
-        return permChecker.hasCreateDistributionPermission();
+        return permChecker.hasCreateRepositoryPermission();
     }
 
     @Override
     protected boolean hasUpdatePermission() {
-        return permChecker.hasUpdateDistributionPermission();
+        return permChecker.hasUpdateRepositoryPermission();
     }
 }
