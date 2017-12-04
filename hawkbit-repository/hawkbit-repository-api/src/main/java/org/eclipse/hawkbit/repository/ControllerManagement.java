@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
@@ -72,7 +73,10 @@ public interface ControllerManagement {
      * @return {@link SoftwareModule} identified by ID
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Optional<SoftwareModule> getSoftwareModule(@NotNull final Long moduleId);
+    Optional<SoftwareModule> getSoftwareModule(@NotNull Long moduleId);
+
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    List<SoftwareModuleMetadata> findTargetVisbileMetaDataBySoftwareModuleId(@NotNull Long moduleId);
 
     /**
      * Simple addition of a new {@link ActionStatus} entry to the {@link Action}

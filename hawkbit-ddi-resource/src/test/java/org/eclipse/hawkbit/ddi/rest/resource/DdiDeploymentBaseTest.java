@@ -111,10 +111,10 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
 
         final byte random[] = RandomUtils.nextBytes(5 * 1024);
-        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds),
-                "test1", false);
-        final Artifact artifactSignature = artifactManagement.create(new ByteArrayInputStream(random),
-                getOsModule(ds), "test1.signature", false);
+        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds), "test1",
+                false);
+        final Artifact artifactSignature = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds),
+                "test1.signature", false);
 
         final Target savedTarget = testdataFactory.createTarget("4712");
 
@@ -265,12 +265,19 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         // Prepare test data
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
+        final String visibleMetadataOsKey = "metaDataVisible";
+        final String visibleMetadataOsValue = "withValue";
 
         final byte random[] = RandomUtils.nextBytes(5 * 1024);
-        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds),
-                "test1", false);
-        final Artifact artifactSignature = artifactManagement.create(new ByteArrayInputStream(random),
-                getOsModule(ds), "test1.signature", false);
+        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds), "test1",
+                false);
+        final Artifact artifactSignature = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds),
+                "test1.signature", false);
+
+        softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
+                .key(visibleMetadataOsKey).value(visibleMetadataOsValue).targetVisible(true));
+        softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
+                .key("metaDataNotVisible").value("withValue").targetVisible(false));
 
         final Target savedTarget = testdataFactory.createTarget("4712");
 
@@ -328,6 +335,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                         contains(ds.findFirstModuleByType(osType).get().getName())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].version",
                         contains(ds.findFirstModuleByType(osType).get().getVersion())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].metadata[0].key").value(visibleMetadataOsKey))
+                .andExpect(
+                        jsonPath("$.deployment.chunks[?(@.part==os)].metadata[0].value").value(visibleMetadataOsValue))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].size", contains(5 * 1024)))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].filename", contains("test1")))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].hashes.md5",
@@ -362,8 +372,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                                 + "/artifacts/test1.signature.MD5SUM")))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].version",
                         contains(ds.findFirstModuleByType(appType).get().getVersion())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].name",
-                        contains(ds.findFirstModuleByType(appType).get().getName())));
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].metadata").doesNotExist())
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].name")
+                        .value(ds.findFirstModuleByType(appType).get().getName()));
 
         // Retrieved is reported
         final List<ActionStatus> actionStatusMessages = deploymentManagement
@@ -381,10 +392,10 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
 
         final byte random[] = RandomUtils.nextBytes(5 * 1024);
-        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds),
-                "test1", false);
-        final Artifact artifactSignature = artifactManagement.create(new ByteArrayInputStream(random),
-                getOsModule(ds), "test1.signature", false);
+        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds), "test1",
+                false);
+        final Artifact artifactSignature = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds),
+                "test1.signature", false);
 
         final Target savedTarget = testdataFactory.createTarget("4712");
 

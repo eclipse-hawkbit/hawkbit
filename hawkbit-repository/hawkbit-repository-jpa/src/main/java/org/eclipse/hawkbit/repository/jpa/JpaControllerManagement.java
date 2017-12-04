@@ -45,6 +45,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -114,6 +115,9 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
+
+    @Autowired
+    private SoftwareModuleMetadataRepository softwareModuleMetadataRepository;
 
     @Override
     public String getPollingTime() {
@@ -522,5 +526,11 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     public Optional<SoftwareModule> getSoftwareModule(final Long id) {
         return Optional.ofNullable(softwareModuleRepository.findOne(id));
+    }
+
+    @Override
+    public List<SoftwareModuleMetadata> findTargetVisbileMetaDataBySoftwareModuleId(final Long moduleId) {
+        return Collections.unmodifiableList(softwareModuleMetadataRepository.findBySoftwareModuleIdAndTargetVisible(
+                new PageRequest(0, RepositoryConstants.MAX_META_DATA_COUNT), moduleId, true));
     }
 }
