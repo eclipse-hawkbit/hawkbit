@@ -34,8 +34,7 @@ public class DistributionDetails extends AbstractDistributionSetDetails {
             final UINotification uiNotification, final DistributionSetTagManagement distributionSetTagManagement,
             final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout) {
         super(i18n, eventBus, permissionChecker, managementUIState, distributionAddUpdateWindowLayout,
-                distributionSetManagement, dsMetadataPopupLayout, entityFactory, uiNotification,
-                distributionSetTagManagement,
+                distributionSetManagement, dsMetadataPopupLayout, uiNotification, distributionSetTagManagement,
                 createSoftwareModuleDetailsTable(i18n, permissionChecker, uiNotification));
         restoreState();
     }

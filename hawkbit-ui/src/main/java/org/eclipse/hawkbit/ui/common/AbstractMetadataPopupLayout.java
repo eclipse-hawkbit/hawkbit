@@ -133,11 +133,11 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
      * 
      * @param entity
      *            entity for which metadata data is displayed
-     * @param metaData
-     *            metadata to be selected
+     * @param metaDatakey
+     *            metadata key to be selected
      * @return @link{CommonDialogWindow}
      */
-    public CommonDialogWindow getWindow(final E entity, final M metaData) {
+    public CommonDialogWindow getWindow(final E entity, final String metaDatakey) {
         selectedEntity = entity;
         final String nameVersion = HawkbitCommonUtil.getFormattedNameVersion(entity.getName(), entity.getVersion());
 
@@ -150,7 +150,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         metadataWindow.setWidth(800, Unit.PIXELS);
         metadataWindow.getMainLayout().setSizeFull();
         metadataWindow.getButtonsLayout().setHeight("45px");
-        setUpDetails(entity.getId(), metaData);
+        setUpDetails(entity.getId(), metaDatakey);
         return metadataWindow;
     }
 
@@ -170,7 +170,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     protected abstract List<M> getMetadataList();
 
-    protected abstract void deleteMetadata(E entity, String key, String value);
+    protected abstract void deleteMetadata(E entity, String key);
 
     protected abstract boolean hasCreatePermission();
 
@@ -291,7 +291,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     }
 
     private void handleOkDeleteMetadata(final RendererClickEvent event, final String key, final String value) {
-        deleteMetadata(getSelectedEntity(), key, value);
+        deleteMetadata(getSelectedEntity(), key);
         uiNotification.displaySuccess(i18n.getMessage("message.metadata.deleted.successfully", key));
         final Object selectedRow = metaDataGrid.getSelectedRow();
         metaDataGrid.getContainerDataSource().removeItem(event.getItemId());
@@ -486,17 +486,17 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         }
     }
 
-    private void setUpDetails(final Long swId, final M metaData) {
+    private void setUpDetails(final Long swId, final String metaDatakey) {
         resetDetails();
         if (swId != null) {
             metaDataGrid.getContainerDataSource().removeAllItems();
             populateGrid();
             metaDataGrid.getSelectionModel().reset();
             if (!metaDataGrid.getContainerDataSource().getItemIds().isEmpty()) {
-                if (metaData == null) {
+                if (metaDatakey == null) {
                     metaDataGrid.select(metaDataGrid.getContainerDataSource().getIdByIndex(0));
                 } else {
-                    metaDataGrid.select(metaData.getKey());
+                    metaDataGrid.select(metaDatakey);
                 }
             } else if (hasCreatePermission()) {
                 keyTextField.setEnabled(true);

@@ -12,10 +12,11 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
+import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleMetadataBodyPost;
+import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleMetadataBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
@@ -205,7 +206,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     @Override
-    public ResponseEntity<PagedList<MgmtMetadata>> getMetadata(
+    public ResponseEntity<PagedList<MgmtSoftwareModuleMetadataBodyPost>> getMetadata(
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
@@ -234,7 +235,8 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtMetadata> getMetadataValue(@PathVariable("softwareModuleId") final Long softwareModuleId,
+    public ResponseEntity<MgmtSoftwareModuleMetadataBodyPost> getMetadataValue(
+            @PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("metadataKey") final String metadataKey) {
 
         final SoftwareModuleMetadata findOne = softwareModuleManagement
@@ -245,10 +247,13 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("softwareModuleId") final Long softwareModuleId,
-            @PathVariable("metadataKey") final String metadataKey, @RequestBody final MgmtMetadata metadata) {
-        final SoftwareModuleMetadata updated = softwareModuleManagement.updateMetaData(softwareModuleId,
-                entityFactory.generateMetadata(metadataKey, metadata.getValue()));
+    public ResponseEntity<MgmtSoftwareModuleMetadataBodyPost> updateMetadata(
+            @PathVariable("softwareModuleId") final Long softwareModuleId,
+            @PathVariable("metadataKey") final String metadataKey,
+            @RequestBody final MgmtSoftwareModuleMetadataBodyPut metadata) {
+        final SoftwareModuleMetadata updated = softwareModuleManagement
+                .updateMetaData(entityFactory.softwareModuleMetadata().update(softwareModuleId, metadataKey)
+                        .value(metadata.getValue()).targetVisible(metadata.isTargetVisible()));
 
         return ResponseEntity.ok(MgmtSoftwareModuleMapper.toResponseSwMetadata(updated));
     }
@@ -262,12 +267,12 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     @Override
-    public ResponseEntity<List<MgmtMetadata>> createMetadata(
+    public ResponseEntity<List<MgmtSoftwareModuleMetadataBodyPost>> createMetadata(
             @PathVariable("softwareModuleId") final Long softwareModuleId,
-            @RequestBody final List<MgmtMetadata> metadataRest) {
+            @RequestBody final List<MgmtSoftwareModuleMetadataBodyPost> metadataRest) {
 
-        final List<SoftwareModuleMetadata> created = softwareModuleManagement.createMetaData(softwareModuleId,
-                MgmtSoftwareModuleMapper.fromRequestSwMetadata(entityFactory, metadataRest));
+        final List<SoftwareModuleMetadata> created = softwareModuleManagement.createMetaData(
+                MgmtSoftwareModuleMapper.fromRequestSwMetadata(entityFactory, softwareModuleId, metadataRest));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(MgmtSoftwareModuleMapper.toResponseSwMetadata(created));
     }

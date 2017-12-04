@@ -12,7 +12,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPost;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPost;
@@ -257,7 +258,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<PagedList<MgmtMetadata>> getMetadata(
+    public ResponseEntity<PagedList<MgmtMetadataBodyPost>> getMetadata(
             @PathVariable("distributionSetId") final Long distributionSetId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
@@ -285,7 +286,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtMetadata> getMetadataValue(
+    public ResponseEntity<MgmtMetadataBodyPost> getMetadataValue(
             @PathVariable("distributionSetId") final Long distributionSetId,
             @PathVariable("metadataKey") final String metadataKey) {
         // check if distribution set exists otherwise throw exception
@@ -298,8 +299,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("distributionSetId") final Long distributionSetId,
-            @PathVariable("metadataKey") final String metadataKey, @RequestBody final MgmtMetadata metadata) {
+    public ResponseEntity<MgmtMetadataBodyPost> updateMetadata(
+            @PathVariable("distributionSetId") final Long distributionSetId,
+            @PathVariable("metadataKey") final String metadataKey, @RequestBody final MgmtMetadataBodyPut metadata) {
         // check if distribution set exists otherwise throw exception
         // immediately
         final DistributionSetMetadata updated = distributionSetManagement.updateMetaData(distributionSetId,
@@ -317,9 +319,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<List<MgmtMetadata>> createMetadata(
+    public ResponseEntity<List<MgmtMetadataBodyPost>> createMetadata(
             @PathVariable("distributionSetId") final Long distributionSetId,
-            @RequestBody final List<MgmtMetadata> metadataRest) {
+            @RequestBody final List<MgmtMetadataBodyPost> metadataRest) {
         // check if distribution set exists otherwise throw exception
         // immediately
         final List<DistributionSetMetadata> created = distributionSetManagement.createMetaData(distributionSetId,

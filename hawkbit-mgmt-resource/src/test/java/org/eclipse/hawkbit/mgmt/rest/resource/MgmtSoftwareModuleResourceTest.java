@@ -85,9 +85,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final String updateVendor = "newVendor1";
         final String updateDescription = "newDescription1";
 
-        SoftwareModule sm = softwareModuleManagement
-                .create(entityFactory.softwareModule().create().type(osType).name(knownSWName)
-                        .version(knownSWVersion).description(knownSWDescription).vendor(knownSWVendor));
+        SoftwareModule sm = softwareModuleManagement.create(entityFactory.softwareModule().create().type(osType)
+                .name(knownSWName).version(knownSWVersion).description(knownSWDescription).vendor(knownSWVendor));
 
         assertThat(sm.getName()).as("Wrong name of the software module").isEqualTo(knownSWName);
 
@@ -140,8 +139,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         // check rest of response compared to DB
         final MgmtArtifact artResult = ResourceUtility
                 .convertArtifactResponse(mvcResult.getResponse().getContentAsString());
-        final Long artId = softwareModuleManagement.get(sm.getId()).get().getArtifacts().get(0)
-                .getId();
+        final Long artId = softwareModuleManagement.get(sm.getId()).get().getArtifacts().get(0).getId();
         assertThat(artResult.getArtifactId()).as("Wrong artifact id").isEqualTo(artId);
         assertThat(JsonPath.compile("$._links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
                 .as("Link contains no self url")
@@ -159,8 +157,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         assertThat(artifactManagement.count()).as("Wrong artifact size").isEqualTo(1);
 
         // binary
-        try (InputStream fileInputStream = artifactManagement.loadArtifactBinary(
-                softwareModuleManagement.get(sm.getId()).get().getArtifacts().get(0).getSha1Hash())
+        try (InputStream fileInputStream = artifactManagement
+                .loadArtifactBinary(softwareModuleManagement.get(sm.getId()).get().getArtifacts().get(0).getSha1Hash())
                 .get().getFileInputStream()) {
             assertTrue("Wrong artifact content",
                     IOUtils.contentEquals(new ByteArrayInputStream(random), fileInputStream));
@@ -174,9 +172,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .isEqualTo(HashGeneratorUtils.generateMD5(random));
 
         // metadata
-        assertThat(
-                softwareModuleManagement.get(sm.getId()).get().getArtifacts().get(0).getFilename())
-                        .as("wrong metadata of the filename").isEqualTo("origFilename");
+        assertThat(softwareModuleManagement.get(sm.getId()).get().getArtifacts().get(0).getFilename())
+                .as("wrong metadata of the filename").isEqualTo("origFilename");
     }
 
     @Test
@@ -237,8 +234,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         assertThat(artifactManagement.count()).isEqualTo(1);
 
         // hashes
-        assertThat(artifactManagement.getByFilename("customFilename")).as("Local artifact is wrong")
-                .isPresent();
+        assertThat(artifactManagement.getByFilename("customFilename")).as("Local artifact is wrong").isPresent();
     }
 
     @Test
@@ -291,10 +287,10 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
-        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(),
-                "file1", false);
-        final Artifact artifact2 = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(),
-                "file2", false);
+        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1",
+                false);
+        final Artifact artifact2 = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file2",
+                false);
 
         downloadAndVerify(sm, random, artifact);
         downloadAndVerify(sm, random, artifact2);
@@ -321,8 +317,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
-        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(),
-                "file1", false);
+        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1",
+                false);
 
         // perform test
         mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}", sm.getId(), artifact.getId())
@@ -347,10 +343,10 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
-        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(),
-                "file1", false);
-        final Artifact artifact2 = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(),
-                "file2", false);
+        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1",
+                false);
+        final Artifact artifact2 = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file2",
+                false);
 
         mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -678,16 +674,14 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                         .isEqualTo("http://localhost/rest/v1/softwaremodules/" + appCreated.getId());
 
         assertThat(softwareModuleManagement.findAll(PAGE)).as("Wrong softwaremodule size").hasSize(2);
-        assertThat(
-                softwareModuleManagement.findByType(PAGE, osType.getId()).getContent().get(0).getName())
-                        .as("Softwaremoudle name is wrong").isEqualTo(os.getName());
-        assertThat(softwareModuleManagement.findByType(PAGE, osType.getId()).getContent().get(0)
-                .getCreatedBy()).as("Softwaremoudle created by is wrong").isEqualTo("uploadTester");
-        assertThat(softwareModuleManagement.findByType(PAGE, osType.getId()).getContent().get(0)
-                .getCreatedAt()).as("Softwaremoudle created at is wrong").isGreaterThanOrEqualTo(current);
-        assertThat(
-                softwareModuleManagement.findByType(PAGE, appType.getId()).getContent().get(0).getName())
-                        .as("Softwaremoudle name is wrong").isEqualTo(ah.getName());
+        assertThat(softwareModuleManagement.findByType(PAGE, osType.getId()).getContent().get(0).getName())
+                .as("Softwaremoudle name is wrong").isEqualTo(os.getName());
+        assertThat(softwareModuleManagement.findByType(PAGE, osType.getId()).getContent().get(0).getCreatedBy())
+                .as("Softwaremoudle created by is wrong").isEqualTo("uploadTester");
+        assertThat(softwareModuleManagement.findByType(PAGE, osType.getId()).getContent().get(0).getCreatedAt())
+                .as("Softwaremoudle created at is wrong").isGreaterThanOrEqualTo(current);
+        assertThat(softwareModuleManagement.findByType(PAGE, appType.getId()).getContent().get(0).getName())
+                .as("Softwaremoudle name is wrong").isEqualTo(ah.getName());
     }
 
     @Test
@@ -706,8 +700,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         mvc.perform(delete("/rest/v1/softwaremodules/{smId}", sm.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        assertThat(softwareModuleManagement.findAll(PAGE))
-                .as("After delete no softwarmodule should be available").isEmpty();
+        assertThat(softwareModuleManagement.findAll(PAGE)).as("After delete no softwarmodule should be available")
+                .isEmpty();
         assertThat(artifactManagement.count()).isEqualTo(0);
     }
 
@@ -718,8 +712,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
-        artifactManagement.create(new ByteArrayInputStream(random),
-                ds1.findFirstModuleByType(appType).get().getId(), "file1", false);
+        artifactManagement.create(new ByteArrayInputStream(random), ds1.findFirstModuleByType(appType).get().getId(),
+                "file1", false);
 
         assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(3);
         assertThat(artifactManagement.count()).isEqualTo(1);
@@ -746,8 +740,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
         // Create 2 artifacts
-        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(),
-                "file1", false);
+        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1",
+                false);
         artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file2", false);
 
         // check repo before delete
@@ -761,8 +755,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         // check that only one artifact is still alive and still assigned
-        assertThat(softwareModuleManagement.findAll(PAGE)).as("After the sm should be marked as deleted")
-                .hasSize(1);
+        assertThat(softwareModuleManagement.findAll(PAGE)).as("After the sm should be marked as deleted").hasSize(1);
         assertThat(artifactManagement.count()).isEqualTo(1);
         assertThat(softwareModuleManagement.get(sm.getId()).get().getArtifacts())
                 .as("After delete artifact should available for marked as deleted sm's").hasSize(1);
@@ -775,22 +768,23 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         final String knownKey1 = "knownKey1";
         final String knownValue1 = "knownValue1";
-        final String knownKey2 = "knownKey1";
+        final String knownKey2 = "knownKey2";
         final String knownValue2 = "knownValue1";
 
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final JSONArray jsonArray = new JSONArray();
         jsonArray.put(new JSONObject().put("key", knownKey1).put("value", knownValue1));
-        jsonArray.put(new JSONObject().put("key", knownKey2).put("value", knownValue2));
+        jsonArray.put(new JSONObject().put("key", knownKey2).put("value", knownValue2).put("targetVisible", true));
 
         mvc.perform(post("/rest/v1/softwaremodules/{swId}/metadata", sm.getId()).accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON).content(jsonArray.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("[0]key", equalTo(knownKey1))).andExpect(jsonPath("[0]value", equalTo(knownValue1)))
-                .andExpect(jsonPath("[1]key", equalTo(knownKey2)))
-                .andExpect(jsonPath("[1]value", equalTo(knownValue2)));
+                .andExpect(jsonPath("[0]targetVisible", equalTo(false)))
+                .andExpect(jsonPath("[1]key", equalTo(knownKey2))).andExpect(jsonPath("[1]value", equalTo(knownValue2)))
+                .andExpect(jsonPath("[1]targetVisible", equalTo(true)));
 
         final SoftwareModuleMetadata metaKey1 = softwareModuleManagement
                 .getMetaDataBySoftwareModuleId(sm.getId(), knownKey1).get();
@@ -810,10 +804,11 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final String updateValue = "valueForUpdate";
 
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
-        softwareModuleManagement.createMetaData(sm.getId(),
-                entityFactory.generateMetadata(knownKey, knownValue));
+        softwareModuleManagement.createMetaData(
+                entityFactory.softwareModuleMetadata().create(sm.getId()).key(knownKey).value(knownValue));
 
-        final JSONObject jsonObject = new JSONObject().put("key", knownKey).put("value", updateValue);
+        final JSONObject jsonObject = new JSONObject().put("key", knownKey).put("value", updateValue)
+                .put("targetVisible", true);
 
         mvc.perform(put("/rest/v1/softwaremodules/{swId}/metadata/{key}", sm.getId(), knownKey)
                 .accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
@@ -824,6 +819,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final SoftwareModuleMetadata assertDS = softwareModuleManagement
                 .getMetaDataBySoftwareModuleId(sm.getId(), knownKey).get();
         assertThat(assertDS.getValue()).as("Metadata is wrong").isEqualTo(updateValue);
+        assertThat(assertDS.isTargetVisible()).as("target visible is wrong").isTrue();
     }
 
     @Test
@@ -834,8 +830,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final String knownValue = "knownValue";
 
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
-        softwareModuleManagement.createMetaData(sm.getId(),
-                entityFactory.generateMetadata(knownKey, knownValue));
+        softwareModuleManagement.createMetaData(
+                entityFactory.softwareModuleMetadata().create(sm.getId()).key(knownKey).value(knownValue));
 
         mvc.perform(delete("/rest/v1/softwaremodules/{swId}/metadata/{key}", sm.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
@@ -851,8 +847,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final String knownValue = "knownValue";
 
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
-        softwareModuleManagement.createMetaData(sm.getId(),
-                entityFactory.generateMetadata(knownKey, knownValue));
+        softwareModuleManagement.createMetaData(
+                entityFactory.softwareModuleMetadata().create(sm.getId()).key(knownKey).value(knownValue));
 
         mvc.perform(delete("/rest/v1/softwaremodules/{swId}/metadata/XXX", sm.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
@@ -879,8 +875,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         for (int index = 0; index < totalMetadata; index++) {
-            softwareModuleManagement.createMetaData(sm.getId(),
-                    entityFactory.generateMetadata(knownKeyPrefix + index, knownValuePrefix + index));
+            softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(sm.getId())
+                    .key(knownKeyPrefix + index).value(knownValuePrefix + index));
         }
 
         final String rsqlSearchValue1 = "value==knownValue1";

@@ -14,7 +14,6 @@ import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -71,13 +70,12 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
             final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout,
             final SoftwareModuleManagement softwareManagement,
             final DistributionSetManagement distributionSetManagement, final TargetManagement targetManagement,
-            final EntityFactory entityFactory, final UINotification uiNotification,
-            final DistributionSetTagManagement distributionSetTagManagement,
+            final UINotification uiNotification, final DistributionSetTagManagement distributionSetTagManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout) {
         super(i18n, eventBus, permissionChecker, managementUIState, distributionAddUpdateWindowLayout,
-                distributionSetManagement, dsMetadataPopupLayout, entityFactory, uiNotification,
-                distributionSetTagManagement, createSoftwareModuleDetailsTable(i18n, permissionChecker,
-                        distributionSetManagement, eventBus, manageDistUIState, uiNotification));
+                distributionSetManagement, dsMetadataPopupLayout, uiNotification, distributionSetTagManagement,
+                createSoftwareModuleDetailsTable(i18n, permissionChecker, distributionSetManagement, eventBus,
+                        manageDistUIState, uiNotification));
         this.manageDistUIState = manageDistUIState;
         this.softwareModuleManagement = softwareManagement;
         this.targetManagement = targetManagement;
@@ -127,8 +125,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
                 assignedSWModule = new HashMap<>();
             }
 
-            softwareModuleIdNameList.stream().map(SoftwareModuleIdName::getId)
-                    .map(softwareModuleManagement::get)
+            softwareModuleIdNameList.stream().map(SoftwareModuleIdName::getId).map(softwareModuleManagement::get)
                     .forEach(found -> found.ifPresent(softwareModule -> {
 
                         if (assignedSWModule.containsKey(softwareModule.getType().getName())) {
@@ -255,11 +252,10 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
                 assignedSWModule.clear();
             }
 
-            getDistributionSetManagement().getWithDetails(getSelectedBaseEntityId())
-                    .ifPresent(set -> {
-                        setSelectedBaseEntity(set);
-                        UI.getCurrent().access(this::populateModule);
-                    });
+            getDistributionSetManagement().getWithDetails(getSelectedBaseEntityId()).ifPresent(set -> {
+                setSelectedBaseEntity(set);
+                UI.getCurrent().access(this::populateModule);
+            });
         }
     }
 

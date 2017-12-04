@@ -15,6 +15,15 @@ import java.io.Serializable;
  *
  */
 public interface MetaData extends Serializable {
+    /**
+     * Maximum length of metadata key.
+     */
+    int KEY_MAX_SIZE = 256;
+
+    /**
+     * Maximum length of metadata value.
+     */
+    int VALUE_MAX_SIZE = 4000;
 
     /**
      * @return the key

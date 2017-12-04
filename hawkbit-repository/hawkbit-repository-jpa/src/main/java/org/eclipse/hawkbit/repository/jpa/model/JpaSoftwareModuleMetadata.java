@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -36,6 +37,9 @@ public class JpaSoftwareModuleMetadata extends JpaMetaData implements SoftwareMo
     @JoinColumn(name = "sw_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_metadata_sw"))
     private JpaSoftwareModule softwareModule;
 
+    @Column(name = "target_visible")
+    private boolean targetVisible;
+
     public JpaSoftwareModuleMetadata() {
         // default public constructor for JPA
     }
@@ -43,6 +47,18 @@ public class JpaSoftwareModuleMetadata extends JpaMetaData implements SoftwareMo
     public JpaSoftwareModuleMetadata(final String key, final SoftwareModule softwareModule, final String value) {
         super(key, value);
         this.softwareModule = (JpaSoftwareModule) softwareModule;
+    }
+
+    public JpaSoftwareModuleMetadata(final String key, final SoftwareModule softwareModule, final String value,
+            final boolean targetVisible) {
+        super(key, value);
+        this.softwareModule = (JpaSoftwareModule) softwareModule;
+        this.targetVisible = targetVisible;
+    }
+
+    public JpaSoftwareModuleMetadata(final String key, final String value, final boolean targetVisible) {
+        super(key, value);
+        this.targetVisible = targetVisible;
     }
 
     public SwMetadataCompositeKey getId() {
@@ -56,6 +72,15 @@ public class JpaSoftwareModuleMetadata extends JpaMetaData implements SoftwareMo
 
     public void setSoftwareModule(final JpaSoftwareModule softwareModule) {
         this.softwareModule = softwareModule;
+    }
+
+    @Override
+    public boolean isTargetVisible() {
+        return targetVisible;
+    }
+
+    public void setTargetVisible(final boolean targetVisible) {
+        this.targetVisible = targetVisible;
     }
 
     @Override

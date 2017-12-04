@@ -15,6 +15,7 @@ import org.eclipse.hawkbit.repository.builder.DistributionSetTypeBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupBuilder;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleBuilder;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataBuilder;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeBuilder;
 import org.eclipse.hawkbit.repository.builder.TagBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetBuilder;
@@ -50,6 +51,9 @@ public class JpaEntityFactory implements EntityFactory {
 
     @Autowired
     private TargetFilterQueryBuilder targetFilterQueryBuilder;
+
+    @Autowired
+    private SoftwareModuleMetadataBuilder softwareModuleMetadataBuilder;
 
     @Override
     public MetaData generateMetadata(final String key, final String value) {
@@ -104,6 +108,11 @@ public class JpaEntityFactory implements EntityFactory {
     @Override
     public RolloutGroupBuilder rolloutGroup() {
         return new JpaRolloutGroupBuilder();
+    }
+
+    @Override
+    public SoftwareModuleMetadataBuilder softwareModuleMetadata() {
+        return softwareModuleMetadataBuilder;
     }
 
 }

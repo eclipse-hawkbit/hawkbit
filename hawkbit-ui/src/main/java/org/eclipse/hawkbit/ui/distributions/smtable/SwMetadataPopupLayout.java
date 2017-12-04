@@ -13,13 +13,10 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
-import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.AbstractMetadataPopupLayout;
-import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
-import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent.MetadataUIEvent;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.PageRequest;
@@ -28,7 +25,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 /**
  * Pop up layout to display software module metadata.
  */
-public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareModule, MetaData> {
+public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareModule, SoftwareModuleMetadata> {
 
     private static final long serialVersionUID = -1252090014161012563L;
 
@@ -49,43 +46,32 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
         return softwareModuleManagement.getMetaDataBySoftwareModuleId(entity.getId(), value).isPresent();
     }
 
-    /**
-     * Create metadata for SWModule.
-     */
     @Override
     protected SoftwareModuleMetadata createMetadata(final SoftwareModule entity, final String key, final String value) {
-        final SoftwareModuleMetadata swMetadata = softwareModuleManagement.createMetaData(entity.getId(),
-                entityFactory.generateMetadata(key, value));
+        final SoftwareModuleMetadata swMetadata = softwareModuleManagement
+                .createMetaData(entityFactory.softwareModuleMetadata().create(entity.getId()).key(key).value(value));
         setSelectedEntity(swMetadata.getSoftwareModule());
-        eventBus.publish(this, new MetadataEvent(MetadataUIEvent.CREATE_SOFTWARE_MODULE_METADATA, swMetadata, entity));
         return swMetadata;
     }
 
-    /**
-     * Update metadata for SWModule.
-     */
     @Override
     protected SoftwareModuleMetadata updateMetadata(final SoftwareModule entity, final String key, final String value) {
-        final SoftwareModuleMetadata swMetadata = softwareModuleManagement.updateMetaData(entity.getId(),
-                entityFactory.generateMetadata(key, value));
+        final SoftwareModuleMetadata swMetadata = softwareModuleManagement
+                .updateMetaData(entityFactory.softwareModuleMetadata().update(entity.getId(), key).value(value));
         setSelectedEntity(swMetadata.getSoftwareModule());
         return swMetadata;
     }
 
     @Override
-    protected List<MetaData> getMetadataList() {
+    protected List<SoftwareModuleMetadata> getMetadataList() {
         return Collections.unmodifiableList(softwareModuleManagement
-                .findMetaDataBySoftwareModuleId(new PageRequest(0, MAX_METADATA_QUERY), getSelectedEntity().getId()).getContent());
+                .findMetaDataBySoftwareModuleId(new PageRequest(0, MAX_METADATA_QUERY), getSelectedEntity().getId())
+                .getContent());
     }
 
-    /**
-     * delete metadata for SWModule.
-     */
     @Override
-    protected void deleteMetadata(final SoftwareModule entity, final String key, final String value) {
+    protected void deleteMetadata(final SoftwareModule entity, final String key) {
         softwareModuleManagement.deleteMetaData(entity.getId(), key);
-        eventBus.publish(this, new MetadataEvent(MetadataUIEvent.DELETE_SOFTWARE_MODULE_METADATA,
-                entityFactory.generateMetadata(key, value), entity));
     }
 
     @Override

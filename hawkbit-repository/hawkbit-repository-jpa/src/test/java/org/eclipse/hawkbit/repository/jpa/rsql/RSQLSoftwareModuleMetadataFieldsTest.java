@@ -10,12 +10,11 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleMetadataFields;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
@@ -23,6 +22,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+
+import com.google.common.collect.Lists;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -40,12 +41,13 @@ public class RSQLSoftwareModuleMetadataFieldsTest extends AbstractJpaIntegration
 
         softwareModuleId = softwareModule.getId();
 
-        final List<MetaData> metadata = new ArrayList<>(5);
+        final List<SoftwareModuleMetadataCreate> metadata = Lists.newArrayListWithExpectedSize(5);
         for (int i = 0; i < 5; i++) {
-            metadata.add(entityFactory.generateMetadata("" + i, "" + i));
+            metadata.add(
+                    entityFactory.softwareModuleMetadata().create(softwareModule.getId()).key("" + i).value("" + i));
         }
 
-        softwareModuleManagement.createMetaData(softwareModule.getId(), metadata);
+        softwareModuleManagement.createMetaData(metadata);
 
     }
 

@@ -12,10 +12,10 @@ import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.MetaData;
-import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Meta data for entities.
@@ -26,13 +26,13 @@ public class JpaMetaData implements MetaData {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @Column(name = "meta_key", nullable = false, length = 128)
-    @Size(min = 1, max = 128)
-    @NotEmpty
+    @Column(name = "meta_key", nullable = false, length = MetaData.KEY_MAX_SIZE)
+    @Size(min = 1, max = MetaData.KEY_MAX_SIZE)
+    @NotNull
     private String key;
 
-    @Column(name = "meta_value", length = 4000)
-    @Size(max = 4000)
+    @Column(name = "meta_value", length = MetaData.VALUE_MAX_SIZE)
+    @Size(max = MetaData.VALUE_MAX_SIZE)
     @Basic
     private String value;
 

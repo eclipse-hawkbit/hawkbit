@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.mgmt.json.model;
+package org.eclipse.hawkbit.mgmt.json.model.softwaremodule;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -14,45 +14,31 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * The representation of an meta data in the REST API.
+ * The representation of an meta data in the REST API for PUT/Update.
  *
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MgmtMetadata {
+public class MgmtSoftwareModuleMetadataBodyPut {
 
-    @JsonProperty(required = true)
-    private String key;
     @JsonProperty
     private String value;
+    @JsonProperty
+    private Boolean targetVisible;
 
-    /**
-     * @return the key
-     */
-    public String getKey() {
-        return key;
-    }
-
-    /**
-     * @param key
-     *            the key to set
-     */
-    public void setKey(final String key) {
-        this.key = key;
-    }
-
-    /**
-     * @return the value
-     */
     public String getValue() {
         return value;
     }
 
-    /**
-     * @param value
-     *            the value to set
-     */
     public void setValue(final String value) {
         this.value = value;
+    }
+
+    public Boolean isTargetVisible() {
+        return targetVisible;
+    }
+
+    public void setTargetVisible(final Boolean targetVisible) {
+        this.targetVisible = targetVisible;
     }
 }
