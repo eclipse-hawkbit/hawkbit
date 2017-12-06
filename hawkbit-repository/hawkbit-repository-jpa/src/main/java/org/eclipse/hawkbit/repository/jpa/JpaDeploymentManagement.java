@@ -404,8 +404,9 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final String tenant = rolloutGroupActions.getContent().get(0).getTenant();
 
             final List<Action> targetAssignments = rolloutGroupActions.getContent().stream()
-                    .map(action -> (JpaAction) action).map(this::closeActionIfSetWasAlreadyAssigned).filter(Objects::nonNull)
-                    .map(this::startScheduledActionIfNoCancelationHasToBeHandledFirst).filter(Objects::nonNull).collect(Collectors.toList());
+                    .map(action -> (JpaAction) action).map(this::closeActionIfSetWasAlreadyAssigned)
+                    .filter(Objects::nonNull).map(this::startScheduledActionIfNoCancelationHasToBeHandledFirst)
+                    .filter(Objects::nonNull).collect(Collectors.toList());
 
             if (!CollectionUtils.isEmpty(targetAssignments)) {
                 afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetAssignDistributionSetEvent(tenant,
@@ -446,8 +447,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private JpaAction startScheduledActionIfNoCancelationHasToBeHandledFirst(final JpaAction action) {
-        JpaTarget target = (JpaTarget) action.getTarget();
-
         // check if we need to override running update actions
         final List<Long> overrideObsoleteUpdateActions = onlineDsAssignmentStrategy
                 .overrideObsoleteUpdateActions(Collections.singletonList(action.getTarget().getId()));
@@ -458,7 +457,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         actionStatusRepository.save(onlineDsAssignmentStrategy.createActionStatus(savedAction, null));
 
-        target = (JpaTarget) entityManager.merge(savedAction.getTarget());
+        final JpaTarget target = (JpaTarget) entityManager.merge(savedAction.getTarget());
 
         target.setAssignedDistributionSet(savedAction.getDistributionSet());
         target.setUpdateStatus(TargetUpdateStatus.PENDING);
