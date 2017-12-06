@@ -404,8 +404,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final String tenant = rolloutGroupActions.getContent().get(0).getTenant();
 
             final List<Action> targetAssignments = rolloutGroupActions.getContent().stream()
-                    .map(action -> (JpaAction) action).map(this::closeifAlreadyAssigned).filter(Objects::nonNull)
-                    .map(this::startScheduledAction).filter(Objects::nonNull).collect(Collectors.toList());
+                    .map(action -> (JpaAction) action).map(this::closeActionIfSetWasAlreadyAssigned).filter(Objects::nonNull)
+                    .map(this::startScheduledActionIfNoCancelationHasToBeHandledFirst).filter(Objects::nonNull).collect(Collectors.toList());
 
             if (!CollectionUtils.isEmpty(targetAssignments)) {
                 afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetAssignDistributionSetEvent(tenant,
@@ -429,7 +429,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         }
     }
 
-    private JpaAction closeifAlreadyAssigned(final JpaAction action) {
+    private JpaAction closeActionIfSetWasAlreadyAssigned(final JpaAction action) {
         final JpaTarget target = (JpaTarget) action.getTarget();
         if (target.getAssignedDistributionSet() != null
                 && action.getDistributionSet().getId().equals(target.getAssignedDistributionSet().getId())) {
@@ -445,7 +445,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return action;
     }
 
-    private JpaAction startScheduledAction(final JpaAction action) {
+    private JpaAction startScheduledActionIfNoCancelationHasToBeHandledFirst(final JpaAction action) {
         JpaTarget target = (JpaTarget) action.getTarget();
 
         // check if we need to override running update actions

@@ -19,7 +19,6 @@ import org.springframework.util.MimeType;
 
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtobufIOUtil;
-import io.protostuff.ProtostuffIOUtil;
 import io.protostuff.Schema;
 import io.protostuff.runtime.RuntimeSchema;
 
@@ -140,17 +139,6 @@ public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
         final Schema<Object> schema = (Schema<Object>) RuntimeSchema
                 .getSchema((Class<? extends Object>) EventType.class);
         final LinkedBuffer buffer = LinkedBuffer.allocate();
-        return writeProtoBuf(clazzEventType, schema, buffer);
-    }
-
-    private static byte[] writeProtoBuf(final Object payload, final Schema<Object> schema, final LinkedBuffer buffer) {
-        final byte[] serializeByte;
-        try {
-            serializeByte = ProtostuffIOUtil.toByteArray(payload, schema, buffer);
-        } finally {
-            buffer.clear();
-        }
-
-        return serializeByte;
+        return ProtobufIOUtil.toByteArray(clazzEventType, schema, buffer);
     }
 }
