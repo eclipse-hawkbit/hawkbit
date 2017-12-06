@@ -108,28 +108,14 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         when(systemManagement.getTenantMetadata()).thenReturn(tenantMetaData);
 
         amqpMessageDispatcherService = new AmqpMessageDispatcherService(rabbitTemplate, senderService,
-                artifactUrlHandlerMock, systemSecurityContext, systemManagement, targetManagement, serviceMatcher);
+                artifactUrlHandlerMock, systemSecurityContext, systemManagement, targetManagement, serviceMatcher,
+                distributionSetManagement);
 
-    }
-
-    @Test
-    @Description("Verifies that download and install event with no software modul works")
-    public void testSendDownloadRequesWithEmptySoftwareModules() {
-
-        final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
-                "DEFAULT", 1L, 1L, CONTROLLER_ID, serviceMatcher.getServiceId());
-        amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
-
-        final Message sendMessage = getCaptureAdressEvent(targetAssignDistributionSetEvent);
-        final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage, 1L);
-        assertThat(downloadAndUpdateRequest.getTargetSecurityToken()).isEqualTo(TEST_TOKEN);
-        assertTrue("No softwaremmodule should be contained in the request",
-                downloadAndUpdateRequest.getSoftwareModules().isEmpty());
     }
 
     private Message getCaptureAdressEvent(final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
-        final Target target = targetManagement.getByControllerID(targetAssignDistributionSetEvent.getControllerId())
-                .get();
+        final Target target = targetManagement
+                .getByControllerID(targetAssignDistributionSetEvent.getActions().keySet().iterator().next()).get();
         final Message sendMessage = createArgumentCapture(target.getAddress());
         return sendMessage;
     }

@@ -127,7 +127,7 @@ public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
         @SuppressWarnings("unchecked")
         final Schema<Object> schema = (Schema<Object>) RuntimeSchema.getSchema(serializeClass);
         final LinkedBuffer buffer = LinkedBuffer.allocate();
-        return writeProtoBuf(payload, schema, buffer);
+        return ProtobufIOUtil.toByteArray(payload, schema, buffer);
     }
 
     private static byte[] writeClassHeader(final Class<?> clazz) {

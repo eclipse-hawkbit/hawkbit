@@ -8,15 +8,13 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.Target;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * TenantAwareEvent that gets sent when a distribution set gets assigned to a
@@ -26,13 +24,9 @@ public class TargetAssignDistributionSetEvent extends RemoteTenantAwareEvent {
 
     private static final long serialVersionUID = 1L;
 
-    private Long actionId;
+    private long distributionSetId;
 
-    private Long distributionSetId;
-
-    private String controllerId;
-
-    private transient Collection<SoftwareModule> modules;
+    private final Map<String, Long> actions = new HashMap<>();
 
     /**
      * Default constructor.
@@ -49,55 +43,25 @@ public class TargetAssignDistributionSetEvent extends RemoteTenantAwareEvent {
      * @param applicationId
      *            the application id.
      */
-    public TargetAssignDistributionSetEvent(final Action action, final String applicationId) {
-        this(action.getTenant(), action.getId(), action.getDistributionSet().getId(),
-                action.getTarget().getControllerId(), applicationId);
-        this.modules = action.getDistributionSet().getModules();
-
-    }
-
-    /**
-     * Constructor.
-     * 
-     * @param tenant
-     *            the event belongs to
-     * @param actionId
-     *            to the action
-     * @param distributionSetId
-     *            of the assigned {@link DistributionSet}
-     * @param controllerId
-     *            of the assignment {@link Target}
-     * @param applicationId
-     */
-    public TargetAssignDistributionSetEvent(final String tenant, final Long actionId, final Long distributionSetId,
-            final String controllerId, final String applicationId) {
-        super(actionId, tenant, applicationId);
-        this.actionId = actionId;
+    public TargetAssignDistributionSetEvent(final String tenant, final long distributionSetId, final List<Action> a,
+            final String applicationId) {
+        super(distributionSetId, tenant, applicationId);
         this.distributionSetId = distributionSetId;
-        this.controllerId = controllerId;
+        actions.putAll(a.stream().filter(action -> action.getDistributionSet().getId().longValue() == distributionSetId)
+                .collect(Collectors.toMap(action -> action.getTarget().getControllerId(), Action::getId)));
+
     }
 
-    public Long getActionId() {
-        return actionId;
-    }
-
-    public String getControllerId() {
-        return controllerId;
+    public TargetAssignDistributionSetEvent(final Action action, final String applicationId) {
+        this(action.getTenant(), action.getDistributionSet().getId(), Arrays.asList(action), applicationId);
     }
 
     public Long getDistributionSetId() {
         return distributionSetId;
     }
 
-    /**
-     * @return modules if Event has been published by same node otherwise empty.
-     */
-    @JsonIgnore
-    public Collection<SoftwareModule> getModules() {
-        if (modules == null) {
-            return Collections.emptyList();
-        }
-
-        return modules;
+    public Map<String, Long> getActions() {
+        return actions;
     }
+
 }

@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.dmf.json.model.DmfArtifact;
 import org.eclipse.hawkbit.dmf.json.model.DmfArtifactHash;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
@@ -64,6 +65,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private final SystemManagement systemManagement;
     private final TargetManagement targetManagement;
     private final ServiceMatcher serviceMatcher;
+    private final DistributionSetManagement distributionSetManagement;
 
     /**
      * Constructor.
@@ -83,11 +85,14 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      * @param serviceMatcher
      *            to check in cluster case if the message is from the same
      *            cluster node
+     * @param distributionSetManagement
+     *            to retrieve modules
      */
     protected AmqpMessageDispatcherService(final RabbitTemplate rabbitTemplate,
             final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
-            final TargetManagement targetManagement, final ServiceMatcher serviceMatcher) {
+            final TargetManagement targetManagement, final ServiceMatcher serviceMatcher,
+            final DistributionSetManagement distributionSetManagement) {
         super(rabbitTemplate);
         this.artifactUrlHandler = artifactUrlHandler;
         this.amqpSenderService = amqpSenderService;
@@ -95,6 +100,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         this.systemManagement = systemManagement;
         this.targetManagement = targetManagement;
         this.serviceMatcher = serviceMatcher;
+        this.distributionSetManagement = distributionSetManagement;
     }
 
     /**
@@ -110,13 +116,13 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
 
-        LOG.debug("targetAssignDistributionSet retrieved for controller {}. I will forward it to DMF broker.",
-                assignedEvent.getControllerId());
+        LOG.debug("targetAssignDistributionSet retrieved. I will forward it to DMF broker.");
 
-        targetManagement.getByControllerID(assignedEvent.getControllerId())
-                .ifPresent(target -> sendUpdateMessageToTarget(assignedEvent.getTenant(), target,
-                        assignedEvent.getActionId(), assignedEvent.getModules()));
+        distributionSetManagement.get(assignedEvent.getDistributionSetId()).ifPresent(set ->
 
+        targetManagement.getByControllerID(assignedEvent.getActions().keySet())
+                .forEach(target -> sendUpdateMessageToTarget(assignedEvent.getTenant(), target,
+                        assignedEvent.getActions().get(target.getControllerId()), set.getModules())));
     }
 
     /**

@@ -21,7 +21,10 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.springframework.context.ApplicationContext;
@@ -44,18 +47,19 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    void sendAssignmentEvents(final List<JpaTarget> targets, final Set<Long> targetIdsCancellList,
-            final Map<String, JpaAction> targetIdsToActions) {
+    void sendAssignmentEvents(final DistributionSet set, final List<JpaTarget> targets,
+            final Set<Long> targetIdsCancellList, final Map<String, JpaAction> targetIdsToActions) {
 
-        targets.forEach(target -> {
+        final List<Action> actions = targets.stream().map(target -> {
             target.setUpdateStatus(TargetUpdateStatus.PENDING);
             sendTargetUpdatedEvent(target);
-            if (targetIdsCancellList.contains(target.getId())) {
-                return;
-            }
 
-            sendTargetAssignDistributionSetEvent(targetIdsToActions.get(target.getControllerId()));
-        });
+            return target;
+        }).filter(target -> !targetIdsCancellList.contains(target.getId())).map(Target::getControllerId)
+                .map(targetIdsToActions::get).collect(Collectors.toList());
+
+        sendTargetAssignDistributionSetEvent(set.getTenant(), set.getId(), actions);
+
     }
 
     @Override
