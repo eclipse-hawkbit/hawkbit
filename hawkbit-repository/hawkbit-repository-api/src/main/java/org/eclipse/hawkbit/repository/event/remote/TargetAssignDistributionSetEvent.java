@@ -37,9 +37,13 @@ public class TargetAssignDistributionSetEvent extends RemoteTenantAwareEvent {
 
     /**
      * Constructor.
-     *
-     * @param action
-     *            the action
+     * 
+     * @param tenant
+     *            of the event
+     * @param distributionSetId
+     *            of the set that was assigned
+     * @param a
+     *            the actions and the targets
      * @param applicationId
      *            the application id.
      */
