@@ -407,7 +407,8 @@ public interface DeploymentManagement {
      * @return the amount of started actions
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long startScheduledActionsByRolloutGroupParent(@NotNull Long rolloutId, Long rolloutGroupParentId);
+    long startScheduledActionsByRolloutGroupParent(@NotNull Long rolloutId, @NotNull Long distributionSetId,
+            Long rolloutGroupParentId);
 
     /**
      * All {@link ActionStatus} entries in the repository.

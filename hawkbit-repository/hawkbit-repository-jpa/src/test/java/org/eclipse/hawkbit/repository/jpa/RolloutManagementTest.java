@@ -164,8 +164,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 amountOtherTargets, amountGroups, successCondition, errorCondition);
 
         // verify the split of the target and targetGroup
-        final Page<RolloutGroup> rolloutGroups = rolloutGroupManagement
-                .findByRollout(PAGE, createdRollout.getId());
+        final Page<RolloutGroup> rolloutGroups = rolloutGroupManagement.findByRollout(PAGE, createdRollout.getId());
         // we have total of #amountTargetsForRollout in rollouts splitted in
         // group size #groupSize
         assertThat(rolloutGroups).hasSize(amountGroups);
@@ -183,8 +182,9 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 successCondition, errorCondition);
 
         // verify first group is running
-        final RolloutGroup firstGroup = rolloutGroupManagement.findByRollout(new OffsetBasedPageRequest(0, 1, new Sort(Direction.ASC, "id")),
-                createdRollout.getId()).getContent().get(0);
+        final RolloutGroup firstGroup = rolloutGroupManagement
+                .findByRollout(new OffsetBasedPageRequest(0, 1, new Sort(Direction.ASC, "id")), createdRollout.getId())
+                .getContent().get(0);
         assertThat(firstGroup.getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
 
         // verify other groups are scheduled
@@ -224,15 +224,17 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutManagement.handleRollouts();
 
         // verify that now the first and the second group are in running state
-        final List<RolloutGroup> runningRolloutGroups = rolloutGroupManagement.findByRollout(
-                new OffsetBasedPageRequest(0, 2, new Sort(Direction.ASC, "id")), createdRollout.getId()).getContent();
+        final List<RolloutGroup> runningRolloutGroups = rolloutGroupManagement
+                .findByRollout(new OffsetBasedPageRequest(0, 2, new Sort(Direction.ASC, "id")), createdRollout.getId())
+                .getContent();
         runningRolloutGroups.forEach(group -> assertThat(group.getStatus()).isEqualTo(RolloutGroupStatus.RUNNING)
                 .as("group should be in running state because it should be started but it is in " + group.getStatus()
                         + " state"));
 
         // verify that the other groups are still in schedule state
-        final List<RolloutGroup> scheduledRolloutGroups = rolloutGroupManagement.findByRollout(
-                new OffsetBasedPageRequest(2, 10, new Sort(Direction.ASC, "id")), createdRollout.getId()).getContent();
+        final List<RolloutGroup> scheduledRolloutGroups = rolloutGroupManagement
+                .findByRollout(new OffsetBasedPageRequest(2, 10, new Sort(Direction.ASC, "id")), createdRollout.getId())
+                .getContent();
         scheduledRolloutGroups.forEach(group -> assertThat(group.getStatus()).isEqualTo(RolloutGroupStatus.SCHEDULED)
                 .as("group should be in scheduled state because it should not be started but it is in "
                         + group.getStatus() + " state"));
@@ -293,8 +295,9 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     @Step("Check the status of the rollout groups, second group should be in running status")
     private void checkSecondGroupStatusIsRunning(final Rollout createdRollout) {
         rolloutManagement.handleRollouts();
-        final List<RolloutGroup> runningRolloutGroups = rolloutGroupManagement.findByRollout(
-                new OffsetBasedPageRequest(0, 10, new Sort(Direction.ASC, "id")), createdRollout.getId()).getContent();
+        final List<RolloutGroup> runningRolloutGroups = rolloutGroupManagement
+                .findByRollout(new OffsetBasedPageRequest(0, 10, new Sort(Direction.ASC, "id")), createdRollout.getId())
+                .getContent();
         assertThat(runningRolloutGroups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.FINISHED);
         assertThat(runningRolloutGroups.get(1).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
         assertThat(runningRolloutGroups.get(2).getStatus()).isEqualTo(RolloutGroupStatus.SCHEDULED);
@@ -330,8 +333,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         assertThat(runningRolloutGroups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.FINISHED);
         assertThat(runningRolloutGroups.get(1).getStatus()).isEqualTo(RolloutGroupStatus.FINISHED);
         assertThat(runningRolloutGroups.get(2).getStatus()).isEqualTo(RolloutGroupStatus.FINISHED);
-        assertThat(rolloutManagement.get(createdRollout.getId()).get().getStatus())
-                .isEqualTo(RolloutStatus.FINISHED);
+        assertThat(rolloutManagement.get(createdRollout.getId()).get().getStatus()).isEqualTo(RolloutStatus.FINISHED);
 
     }
 
@@ -370,8 +372,9 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         assertThat(rollout.getStatus()).isEqualTo(RolloutStatus.PAUSED);
 
         // the first rollout group should be in error state
-        final List<RolloutGroup> errorGroup = rolloutGroupManagement.findByRollout(
-                new OffsetBasedPageRequest(0, 1, new Sort(Direction.ASC, "id")), createdRollout.getId()).getContent();
+        final List<RolloutGroup> errorGroup = rolloutGroupManagement
+                .findByRollout(new OffsetBasedPageRequest(0, 1, new Sort(Direction.ASC, "id")), createdRollout.getId())
+                .getContent();
         assertThat(errorGroup).hasSize(1);
         assertThat(errorGroup.get(0).getStatus()).isEqualTo(RolloutGroupStatus.ERROR);
 
@@ -418,15 +421,15 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutManagement.resumeRollout(createdRollout.getId());
 
         // the rollout should be running again
-        assertThat(rolloutManagement.get(createdRollout.getId()).get().getStatus())
-                .isEqualTo(RolloutStatus.RUNNING);
+        assertThat(rolloutManagement.get(createdRollout.getId()).get().getStatus()).isEqualTo(RolloutStatus.RUNNING);
 
         // checking rollouts again
         rolloutManagement.handleRollouts();
 
         // next group should be running again after resuming the rollout
-        final List<RolloutGroup> resumedGroups = rolloutGroupManagement.findByRollout(
-                new OffsetBasedPageRequest(1, 1, new Sort(Direction.ASC, "id")), createdRollout.getId()).getContent();
+        final List<RolloutGroup> resumedGroups = rolloutGroupManagement
+                .findByRollout(new OffsetBasedPageRequest(1, 1, new Sort(Direction.ASC, "id")), createdRollout.getId())
+                .getContent();
         assertThat(resumedGroups).hasSize(1);
         assertThat(resumedGroups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
     }
@@ -590,8 +593,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         // round(5/2)=3 targets SCHEDULED (Group 3)
         // round(2/1)=2 targets SCHEDULED (Group 4)
         createdRollout = rolloutManagement.get(createdRollout.getId()).get();
-        final List<RolloutGroup> rolloutGroups = rolloutGroupManagement
-                .findByRollout(PAGE, createdRollout.getId()).getContent();
+        final List<RolloutGroup> rolloutGroups = rolloutGroupManagement.findByRollout(PAGE, createdRollout.getId())
+                .getContent();
 
         Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus = createInitStatusMap();
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.FINISHED, 2L);
@@ -630,9 +633,10 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         assertThat(runningActions.size()).isEqualTo(5);
 
         // 5 targets are in the group and the DS has been assigned
-        final List<RolloutGroup> rolloutGroups = rolloutGroupManagement
-                .findByRollout(PAGE, createdRollout.getId()).getContent();
-        final Page<Target> targets = rolloutGroupManagement.findTargetsOfRolloutGroup(PAGE, rolloutGroups.get(0).getId());
+        final List<RolloutGroup> rolloutGroups = rolloutGroupManagement.findByRollout(PAGE, createdRollout.getId())
+                .getContent();
+        final Page<Target> targets = rolloutGroupManagement.findTargetsOfRolloutGroup(PAGE,
+                rolloutGroups.get(0).getId());
         final List<Target> targetList = targets.getContent();
         assertThat(targetList.size()).isEqualTo(5);
 
@@ -769,8 +773,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         changeStatusForRunningActions(rolloutOne, Status.FINISHED, 3);
         rolloutManagement.handleRollouts();
         // verify: 40% error but 60% finished -> should move to next group
-        final List<RolloutGroup> rolloutGruops = rolloutGroupManagement
-                .findByRollout(PAGE, rolloutOne.getId()).getContent();
+        final List<RolloutGroup> rolloutGruops = rolloutGroupManagement.findByRollout(PAGE, rolloutOne.getId())
+                .getContent();
         final Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus = createInitStatusMap();
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 5L);
         validateRolloutGroupActionStatus(rolloutGruops.get(1), expectedTargetCountStatus);
@@ -795,8 +799,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutManagement.handleRollouts();
         // verify: 40% error and 60% finished -> should not move to next group
         // because successCondition 80%
-        final List<RolloutGroup> rolloutGruops = rolloutGroupManagement
-                .findByRollout(PAGE, rolloutOne.getId()).getContent();
+        final List<RolloutGroup> rolloutGruops = rolloutGroupManagement.findByRollout(PAGE, rolloutOne.getId())
+                .getContent();
         final Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus = createInitStatusMap();
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.SCHEDULED, 5L);
         validateRolloutGroupActionStatus(rolloutGruops.get(1), expectedTargetCountStatus);
@@ -868,8 +872,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         changeStatusForAllRunningActions(rolloutD, Status.FINISHED);
         rolloutManagement.handleRollouts();
 
-        final Page<Rollout> rolloutPage = rolloutManagement.findAllWithDetailedStatus(
-                new OffsetBasedPageRequest(0, 100, new Sort(Direction.ASC, "name")), false);
+        final Page<Rollout> rolloutPage = rolloutManagement
+                .findAllWithDetailedStatus(new OffsetBasedPageRequest(0, 100, new Sort(Direction.ASC, "name")), false);
         final List<Rollout> rolloutList = rolloutPage.getContent();
 
         // validate rolloutA -> 6 running and 6 ready
@@ -1003,8 +1007,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         myRollout = rolloutManagement.get(myRollout.getId()).get();
 
         float percent = rolloutGroupManagement
-                .getWithDetailedStatus(rolloutGroupManagement
-                        .findByRollout(PAGE, myRollout.getId()).getContent().get(0).getId())
+                .getWithDetailedStatus(
+                        rolloutGroupManagement.findByRollout(PAGE, myRollout.getId()).getContent().get(0).getId())
                 .get().getTotalTargetCountStatus().getFinishedPercent();
         assertThat(percent).isEqualTo(40);
 
@@ -1012,8 +1016,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutManagement.handleRollouts();
 
         percent = rolloutGroupManagement
-                .getWithDetailedStatus(rolloutGroupManagement
-                        .findByRollout(PAGE, myRollout.getId()).getContent().get(0).getId())
+                .getWithDetailedStatus(
+                        rolloutGroupManagement.findByRollout(PAGE, myRollout.getId()).getContent().get(0).getId())
                 .get().getTotalTargetCountStatus().getFinishedPercent();
         assertThat(percent).isEqualTo(100);
 
@@ -1022,8 +1026,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutManagement.handleRollouts();
 
         percent = rolloutGroupManagement
-                .getWithDetailedStatus(rolloutGroupManagement
-                        .findByRollout(PAGE, myRollout.getId()).getContent().get(1).getId())
+                .getWithDetailedStatus(
+                        rolloutGroupManagement.findByRollout(PAGE, myRollout.getId()).getContent().get(1).getId())
                 .get().getTotalTargetCountStatus().getFinishedPercent();
         assertThat(percent).isEqualTo(80);
     }
@@ -1054,25 +1058,25 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 "Target belongs into rollout");
 
         myRollout = rolloutManagement.get(myRollout.getId()).get();
-        final List<RolloutGroup> rolloutGroups = rolloutGroupManagement
-                .findByRollout(PAGE, myRollout.getId()).getContent();
+        final List<RolloutGroup> rolloutGroups = rolloutGroupManagement.findByRollout(PAGE, myRollout.getId())
+                .getContent();
 
-        Page<Target> targetPage = rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(new OffsetBasedPageRequest(0, 100),
-                rolloutGroups.get(0).getId(), rsqlParam);
+        Page<Target> targetPage = rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(
+                new OffsetBasedPageRequest(0, 100), rolloutGroups.get(0).getId(), rsqlParam);
         final List<Target> targetlistGroup1 = targetPage.getContent();
         assertThat(targetlistGroup1.size()).isEqualTo(5);
         assertThat(targetlistGroup1.stream().map(Target::getControllerId).collect(Collectors.toList()))
                 .are(targetBelongsInRollout);
 
-        targetPage = rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(new OffsetBasedPageRequest(0, 100), rolloutGroups.get(1).getId(),
-                rsqlParam);
+        targetPage = rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(new OffsetBasedPageRequest(0, 100),
+                rolloutGroups.get(1).getId(), rsqlParam);
         final List<Target> targetlistGroup2 = targetPage.getContent();
         assertThat(targetlistGroup2.size()).isEqualTo(5);
         assertThat(targetlistGroup2.stream().map(Target::getControllerId).collect(Collectors.toList()))
                 .are(targetBelongsInRollout);
 
-        targetPage = rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(new OffsetBasedPageRequest(0, 100), rolloutGroups.get(2).getId(),
-                rsqlParam);
+        targetPage = rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(new OffsetBasedPageRequest(0, 100),
+                rolloutGroups.get(2).getId(), rsqlParam);
         final List<Target> targetlistGroup3 = targetPage.getContent();
         assertThat(targetlistGroup3.size()).isEqualTo(5);
         assertThat(targetlistGroup3.stream().map(Target::getControllerId).collect(Collectors.toList()))
@@ -1135,8 +1139,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.READY);
 
-        final List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(PAGE, myRollout.getId())
-                .getContent();
+        final List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(PAGE, myRollout.getId()).getContent();
 
         assertThat(groups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.READY);
         assertThat(groups.get(0).getTotalTargets()).isEqualTo(1);
@@ -1228,8 +1231,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.READY);
 
         // schedule rollout auto start into the future
-        rolloutManagement.update(
-                entityFactory.rollout().update(myRollout.getId()).startAt(System.currentTimeMillis() + 60000));
+        rolloutManagement
+                .update(entityFactory.rollout().update(myRollout.getId()).startAt(System.currentTimeMillis() + 60000));
         rolloutManagement.handleRollouts();
 
         // rollout should not have been started
@@ -1237,8 +1240,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.READY);
 
         // schedule to now
-        rolloutManagement
-                .update(entityFactory.rollout().update(myRollout.getId()).startAt(System.currentTimeMillis()));
+        rolloutManagement.update(entityFactory.rollout().update(myRollout.getId()).startAt(System.currentTimeMillis()));
         rolloutManagement.handleRollouts();
 
         myRollout = rolloutManagement.get(myRollout.getId()).get();
@@ -1292,8 +1294,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         myRollout = rolloutManagement.get(myRollout.getId()).get();
 
         assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.CREATING);
-        for (final RolloutGroup group : rolloutGroupManagement.findByRollout(PAGE, myRollout.getId())
-                .getContent()) {
+        for (final RolloutGroup group : rolloutGroupManagement.findByRollout(PAGE, myRollout.getId()).getContent()) {
             assertThat(group.getStatus()).isEqualTo(RolloutGroupStatus.CREATING);
         }
 
@@ -1308,8 +1309,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.READY);
         assertThat(myRollout.getTotalTargets()).isEqualTo(amountTargetsInGroup1and2 + amountTargetsInGroup1);
 
-        final List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(PAGE, myRollout.getId())
-                .getContent();
+        final List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(PAGE, myRollout.getId()).getContent();
         ;
         assertThat(groups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.READY);
         assertThat(groups.get(0).getTotalTargets()).isEqualTo(amountTargetsInGroup1);
@@ -1446,7 +1446,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = RolloutUpdatedEvent.class, count = 6),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 25), @Expect(type = TargetUpdatedEvent.class, count = 2),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 5),
             @Expect(type = RolloutGroupDeletedEvent.class, count = 5),
             @Expect(type = ActionCreatedEvent.class, count = 10), @Expect(type = ActionUpdatedEvent.class, count = 2),
@@ -1485,8 +1485,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(rolloutManagement.findAll(PAGE, true).getContent()).hasSize(1);
         assertThat(rolloutManagement.findAll(PAGE, false).getContent()).hasSize(0);
-        assertThat(rolloutGroupManagement.findByRolloutWithDetailedStatus(PAGE, createdRollout.getId())
-                .getContent()).hasSize(amountGroups);
+        assertThat(rolloutGroupManagement.findByRolloutWithDetailedStatus(PAGE, createdRollout.getId()).getContent())
+                .hasSize(amountGroups);
 
         // verify that all scheduled actions are deleted
         assertThat(actionRepository.findByRolloutIdAndStatus(PAGE, deletedRollout.getId(), Status.SCHEDULED)
@@ -1516,8 +1516,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
     private void validateRolloutGroupActionStatus(final RolloutGroup rolloutGroup,
             final Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus) {
-        final RolloutGroup rolloutGroupWithDetail = rolloutGroupManagement
-                .getWithDetailedStatus(rolloutGroup.getId()).get();
+        final RolloutGroup rolloutGroupWithDetail = rolloutGroupManagement.getWithDetailedStatus(rolloutGroup.getId())
+                .get();
         validateStatus(rolloutGroupWithDetail.getTotalTargetCountStatus(), expectedTargetCountStatus);
     }
 

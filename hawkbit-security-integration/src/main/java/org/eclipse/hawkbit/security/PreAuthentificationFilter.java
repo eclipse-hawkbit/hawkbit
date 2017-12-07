@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.security;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 

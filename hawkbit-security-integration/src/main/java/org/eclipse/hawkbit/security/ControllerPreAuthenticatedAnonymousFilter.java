@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.security;
 
-import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken;
-
 /**
  * An anonymous controller filter which is only enabled in case of anonymous
  * access is granted. This should only be for development purposes.

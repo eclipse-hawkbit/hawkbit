@@ -28,8 +28,6 @@ import java.util.Optional;
 
 import org.eclipse.hawkbit.api.HostnameResolver;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
-import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
@@ -38,8 +36,6 @@ import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadResponse;
-import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken;
-import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -52,6 +48,8 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.security.DmfTenantSecurityToken;
+import org.eclipse.hawkbit.security.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.Before;
@@ -370,15 +368,12 @@ public class AmqpMessageHandlerServiceTest {
         // mock
         final Artifact localArtifactMock = mock(Artifact.class);
         when(localArtifactMock.getSha1Hash()).thenReturn(SHA1);
+        when(localArtifactMock.getMd5Hash()).thenReturn("md5");
+        when(localArtifactMock.getSize()).thenReturn(1L);
 
-        final AbstractDbArtifact dbArtifactMock = mock(AbstractDbArtifact.class);
         when(artifactManagementMock.findFirstBySHA1(SHA1)).thenReturn(Optional.of(localArtifactMock));
         when(controllerManagementMock.hasTargetArtifactAssigned(securityToken.getControllerId(), SHA1))
                 .thenReturn(true);
-        when(artifactManagementMock.loadArtifactBinary(anyString())).thenReturn(Optional.of(dbArtifactMock));
-        when(dbArtifactMock.getArtifactId()).thenReturn("artifactId");
-        when(dbArtifactMock.getSize()).thenReturn(1L);
-        when(dbArtifactMock.getHashes()).thenReturn(new DbArtifactHash(SHA1, "md5"));
         when(hostnameResolverMock.resolveHostname()).thenReturn(new URL("http://localhost"));
 
         // test
