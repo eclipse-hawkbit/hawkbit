@@ -12,7 +12,6 @@ import java.io.Serializable;
 
 import org.eclipse.hawkbit.im.authentication.PermissionService;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Bean which contains all SP permissions.
@@ -23,7 +22,6 @@ public class SpPermissionChecker implements Serializable {
 
     protected transient PermissionService permissionService;
 
-    @Autowired
     protected SpPermissionChecker(final PermissionService permissionService) {
         this.permissionService = permissionService;
     }

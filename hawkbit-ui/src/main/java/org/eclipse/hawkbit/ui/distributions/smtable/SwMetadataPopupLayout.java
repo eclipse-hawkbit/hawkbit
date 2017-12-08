@@ -8,9 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.distributions.smtable;
 
-import static org.eclipse.hawkbit.ui.common.AbstractMetadataPopupLayout.KEY;
-import static org.eclipse.hawkbit.ui.common.AbstractMetadataPopupLayout.VALUE;
-
 import java.util.Collections;
 import java.util.List;
 
@@ -27,8 +24,8 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.event.SelectionEvent;
 import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.VerticalLayout;
 
 /**
@@ -36,7 +33,9 @@ import com.vaadin.ui.VerticalLayout;
  */
 public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareModule, SoftwareModuleMetadata> {
 
-    private static final long serialVersionUID = -1252090014161012563L;
+    private static final long serialVersionUID = 1L;
+
+    protected static final String TARGET_VISIBLE = "targetVisible";
 
     private final transient SoftwareModuleManagement softwareModuleManagement;
 
@@ -77,6 +76,15 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
         return Collections.unmodifiableList(softwareModuleManagement
                 .findMetaDataBySoftwareModuleId(new PageRequest(0, MAX_METADATA_QUERY), getSelectedEntity().getId())
                 .getContent());
+    }
+
+    @Override
+    protected Grid createMetadataGrid() {
+        final Grid metadataGrid = super.createMetadataGrid();
+        metadataGrid.getContainerDataSource().addContainerProperty(TARGET_VISIBLE, Boolean.class, Boolean.FALSE);
+        metadataGrid.getColumn(TARGET_VISIBLE).setHeaderCaption(i18n.getMessage("header.metadata.targetvisible"));
+        metadataGrid.getColumn(TARGET_VISIBLE).setHidden(true);
+        return metadataGrid;
     }
 
     @Override
@@ -121,64 +129,48 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
 
     @Override
     protected VerticalLayout createMetadataFieldsLayout() {
-        final VerticalLayout metadataFieldsLayout = new VerticalLayout();
-        metadataFieldsLayout.setSizeFull();
-        metadataFieldsLayout.setHeight("100%");
-        metadataFieldsLayout.addComponent(getKeyTextField());
+
+        final VerticalLayout metadataFieldsLayout = super.createMetadataFieldsLayout();
         metadataFieldsLayout.addComponent(targetVisibleField);
-        metadataFieldsLayout.addComponent(getValueTextArea());
-        metadataFieldsLayout.setSpacing(true);
-        metadataFieldsLayout.setExpandRatio(getKeyTextField(), 1F);
         return metadataFieldsLayout;
     }
 
     @Override
-    protected void popualateKeyValue(final Object metadataCompositeKey) {
-        super.popualateKeyValue(metadataCompositeKey);
-        if (metadataCompositeKey != null) {
-            final Item item = metaDataGrid.getContainerDataSource().getItem(metadataCompositeKey);
-            keyTextField.setValue((String) item.getItemProperty(KEY).getValue());
-            valueTextArea.setValue((String) item.getItemProperty(VALUE).getValue());
-            keyTextField.setEnabled(false);
+    protected Item popualateKeyValue(final Object metadataCompositeKey) {
+        final Item item = super.popualateKeyValue(metadataCompositeKey);
+
+        if (item != null) {
+            targetVisibleField.setValue((Boolean) item.getItemProperty(TARGET_VISIBLE).getValue());
             if (hasUpdatePermission()) {
-                valueTextArea.setEnabled(true);
+                targetVisibleField.setEnabled(true);
             }
         }
+
+        return item;
     }
 
     @Override
-    protected void clearTextFields() {
-        super.clearTextFields();
-        // FIXME
+    protected Item addItemToGrid(final SoftwareModuleMetadata metaData) {
+        final Item item = super.addItemToGrid(metaData);
+        item.getItemProperty(TARGET_VISIBLE).setValue(metaData.isTargetVisible());
+        return item;
     }
 
     @Override
-    protected void onAdd() {
-        super.onAdd();
-        // FIXME
+    protected void enableEditing() {
+        super.enableEditing();
+        targetVisibleField.setEnabled(true);
     }
 
     @Override
-    protected void onSave() {
-        super.onSave();
-        // FIXME
+    protected void clearFields() {
+        super.clearFields();
+        targetVisibleField.clear();
     }
 
     @Override
-    protected void onRowClick(final SelectionEvent event) {
-        super.onRowClick(event);
-        // FIXME
-    }
-
-    @Override
-    protected void setUpDetails(final Long swId, final String metaDatakey) {
-        super.setUpDetails(swId, metaDatakey);
-        // FIXME
-    }
-
-    @Override
-    protected void resetDetails() {
-        super.resetDetails();
-        // FIXME
+    protected void disableEditing() {
+        super.disableEditing();
+        targetVisibleField.setEnabled(false);
     }
 }

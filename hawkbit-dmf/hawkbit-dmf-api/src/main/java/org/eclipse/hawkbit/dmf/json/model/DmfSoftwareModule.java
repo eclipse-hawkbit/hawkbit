@@ -79,7 +79,9 @@ public class DmfSoftwareModule {
     }
 
     public void setMetadata(final List<DmfMetadata> metadata) {
-        this.metadata = metadata;
+        if (metadata != null && !metadata.isEmpty()) {
+            this.metadata = metadata;
+        }
     }
 
 }

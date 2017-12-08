@@ -67,9 +67,9 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     private static final long serialVersionUID = -1491218218453167613L;
 
-    private static final String VALUE = "value";
+    protected static final String VALUE = "value";
 
-    private static final String KEY = "key";
+    protected static final String KEY = "key";
 
     protected static final int MAX_METADATA_QUERY = 500;
 
@@ -257,7 +257,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         return valueTextArea;
     }
 
-    private Grid createMetadataGrid() {
+    protected Grid createMetadataGrid() {
         final Grid metadataGrid = new Grid();
         metadataGrid.addStyleName(SPUIStyleDefinitions.METADATA_GRID);
         metadataGrid.setImmediate(true);
@@ -311,17 +311,15 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
                 }
             }
         } else {
-            clearTextFields();
+            resetFields();
         }
     }
 
-    protected void clearTextFields() {
-        keyTextField.clear();
-        valueTextArea.clear();
+    private void resetFields() {
+        clearFields();
         metaDataGrid.select(null);
         if (hasCreatePermission()) {
-            keyTextField.setEnabled(true);
-            valueTextArea.setEnabled(true);
+            enableEditing();
             addIcon.setEnabled(false);
         }
     }
@@ -346,7 +344,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         return swcontactContainer;
     }
 
-    protected void popualateKeyValue(final Object metadataCompositeKey) {
+    protected Item popualateKeyValue(final Object metadataCompositeKey) {
         if (metadataCompositeKey != null) {
             final Item item = metaDataGrid.getContainerDataSource().getItem(metadataCompositeKey);
             keyTextField.setValue((String) item.getItemProperty(KEY).getValue());
@@ -355,21 +353,25 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
             if (hasUpdatePermission()) {
                 valueTextArea.setEnabled(true);
             }
+            return item;
         }
+
+        return null;
     }
 
     private void populateGrid() {
         final List<M> metadataList = getMetadataList();
         for (final M metaData : metadataList) {
-            addItemToGrid(metaData.getKey(), metaData.getValue());
+            addItemToGrid(metaData);
         }
     }
 
-    private void addItemToGrid(final String key, final String value) {
+    protected Item addItemToGrid(final M metaData) {
         final IndexedContainer metadataContainer = (IndexedContainer) metaDataGrid.getContainerDataSource();
-        final Item item = metadataContainer.addItem(key);
-        item.getItemProperty(VALUE).setValue(value);
-        item.getItemProperty(KEY).setValue(key);
+        final Item item = metadataContainer.addItem(metaData.getKey());
+        item.getItemProperty(VALUE).setValue(metaData.getValue());
+        item.getItemProperty(KEY).setValue(metaData.getKey());
+        return item;
     }
 
     private void updateItemInGrid(final String key) {
@@ -378,13 +380,16 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         item.getItemProperty(VALUE).setValue(valueTextArea.getValue());
     }
 
-    protected void onAdd() {
+    private void onAdd() {
         metaDataGrid.deselect(metaDataGrid.getSelectedRow());
+        clearFields();
+        enableEditing();
+        addIcon.setEnabled(true);
+    }
+
+    protected void clearFields() {
         valueTextArea.clear();
         keyTextField.clear();
-        keyTextField.setEnabled(true);
-        valueTextArea.setEnabled(true);
-        addIcon.setEnabled(true);
     }
 
     protected void onSave() {
@@ -396,7 +401,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
                 if (!duplicateCheck(entity)) {
                     final M metadata = createMetadata(entity, key, value);
                     uiNotification.displaySuccess(i18n.getMessage("message.metadata.saved", metadata.getKey()));
-                    addItemToGrid(metadata.getKey(), metadata.getValue());
+                    addItemToGrid(metadata);
                     metaDataGrid.scrollToEnd();
                     metaDataGrid.select(metadata.getKey());
                     addIcon.setEnabled(true);
@@ -467,11 +472,9 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
             popualateKeyValue(itemsSelected.iterator().next());
             addIcon.setEnabled(true);
         } else {
-            keyTextField.clear();
-            valueTextArea.clear();
+            clearFields();
             if (hasCreatePermission()) {
-                keyTextField.setEnabled(true);
-                valueTextArea.setEnabled(true);
+                enableEditing();
                 addIcon.setEnabled(false);
             } else {
                 keyTextField.setEnabled(false);
@@ -479,6 +482,11 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
             }
         }
         metadataWindow.setSaveButtonEnabled(false);
+    }
+
+    protected void enableEditing() {
+        keyTextField.setEnabled(true);
+        valueTextArea.setEnabled(true);
     }
 
     private void onValueChange(final TextChangeEvent event) {
@@ -491,7 +499,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         }
     }
 
-    protected void setUpDetails(final Long swId, final String metaDatakey) {
+    private void setUpDetails(final Long swId, final String metaDatakey) {
         resetDetails();
         if (swId != null) {
             metaDataGrid.getContainerDataSource().removeAllItems();
@@ -504,28 +512,30 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
                     metaDataGrid.select(metaDatakey);
                 }
             } else if (hasCreatePermission()) {
-                keyTextField.setEnabled(true);
-                valueTextArea.setEnabled(true);
+                enableEditing();
                 addIcon.setEnabled(false);
             }
         }
     }
 
-    protected void resetDetails() {
-        keyTextField.clear();
-        valueTextArea.clear();
-        keyTextField.setEnabled(false);
-        valueTextArea.setEnabled(false);
+    private void resetDetails() {
+        clearFields();
+        disableEditing();
         metadataWindow.setSaveButtonEnabled(false);
         addIcon.setEnabled(true);
     }
 
-    protected TextField getKeyTextField() {
-        return keyTextField;
+    protected void disableEditing() {
+        keyTextField.setEnabled(false);
+        valueTextArea.setEnabled(false);
     }
 
     protected TextArea getValueTextArea() {
         return valueTextArea;
+    }
+
+    protected TextField getKeyTextField() {
+        return keyTextField;
     }
 
     protected CommonDialogWindow getMetadataWindow() {

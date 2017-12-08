@@ -28,6 +28,7 @@ import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleMetadataFields;
@@ -64,6 +65,7 @@ import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -594,6 +596,15 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     @Override
     public boolean exists(final Long id) {
         return softwareModuleRepository.exists(id);
+    }
+
+    @Override
+    public Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleIdAndTargetVisible(final Pageable pageable,
+            final Long moduleId) {
+        throwExceptionIfSoftwareModuleDoesNotExist(moduleId);
+
+        return convertMdPage(softwareModuleMetadataRepository.findBySoftwareModuleIdAndTargetVisible(
+                new PageRequest(0, RepositoryConstants.MAX_META_DATA_COUNT), moduleId, true), pageable);
     }
 
 }

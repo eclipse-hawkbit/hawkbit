@@ -777,13 +777,13 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         for (int index = 0; index < 20; index++) {
             sw2 = softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(sw2.getId())
-                    .key("key" + index).value("value" + index).targetVisible(true)).getSoftwareModule();
+                    .key("key" + index).value("value" + index).targetVisible(false)).getSoftwareModule();
         }
 
-        final Page<SoftwareModuleMetadata> metadataOfSw1 = softwareModuleManagement
+        Page<SoftwareModuleMetadata> metadataOfSw1 = softwareModuleManagement
                 .findMetaDataBySoftwareModuleId(new PageRequest(0, 100), sw1.getId());
 
-        final Page<SoftwareModuleMetadata> metadataOfSw2 = softwareModuleManagement
+        Page<SoftwareModuleMetadata> metadataOfSw2 = softwareModuleManagement
                 .findMetaDataBySoftwareModuleId(new PageRequest(0, 100), sw2.getId());
 
         assertThat(metadataOfSw1.getNumberOfElements()).isEqualTo(10);
@@ -791,5 +791,17 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(metadataOfSw2.getNumberOfElements()).isEqualTo(20);
         assertThat(metadataOfSw2.getTotalElements()).isEqualTo(20);
+
+        metadataOfSw1 = softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(new PageRequest(0, 100),
+                sw1.getId());
+
+        metadataOfSw2 = softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(new PageRequest(0, 100),
+                sw2.getId());
+
+        assertThat(metadataOfSw1.getNumberOfElements()).isEqualTo(10);
+        assertThat(metadataOfSw1.getTotalElements()).isEqualTo(10);
+
+        assertThat(metadataOfSw2.getNumberOfElements()).isEqualTo(0);
+        assertThat(metadataOfSw2.getTotalElements()).isEqualTo(0);
     }
 }

@@ -8,11 +8,10 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.List;
-
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.SwMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -27,7 +26,7 @@ public interface SoftwareModuleMetadataRepository
         extends PagingAndSortingRepository<JpaSoftwareModuleMetadata, SwMetadataCompositeKey>,
         JpaSpecificationExecutor<JpaSoftwareModuleMetadata> {
 
-    List<SoftwareModuleMetadata> findBySoftwareModuleIdAndTargetVisible(Pageable page, Long moduleId,
+    Page<JpaSoftwareModuleMetadata> findBySoftwareModuleIdAndTargetVisible(Pageable page, Long moduleId,
             boolean targetVisible);
 
 }

@@ -109,7 +109,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
         amqpMessageDispatcherService = new AmqpMessageDispatcherService(rabbitTemplate, senderService,
                 artifactUrlHandlerMock, systemSecurityContext, systemManagement, targetManagement, serviceMatcher,
-                distributionSetManagement);
+                distributionSetManagement, softwareModuleManagement);
 
     }
 
