@@ -58,7 +58,8 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
     @Override
     protected SoftwareModuleMetadata createMetadata(final SoftwareModule entity, final String key, final String value) {
         final SoftwareModuleMetadata swMetadata = softwareModuleManagement
-                .createMetaData(entityFactory.softwareModuleMetadata().create(entity.getId()).key(key).value(value));
+                .createMetaData(entityFactory.softwareModuleMetadata().create(entity.getId()).key(key).value(value)
+                        .targetVisible(targetVisibleField.getValue()));
         setSelectedEntity(swMetadata.getSoftwareModule());
         return swMetadata;
     }
@@ -66,7 +67,8 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
     @Override
     protected SoftwareModuleMetadata updateMetadata(final SoftwareModule entity, final String key, final String value) {
         final SoftwareModuleMetadata swMetadata = softwareModuleManagement
-                .updateMetaData(entityFactory.softwareModuleMetadata().update(entity.getId(), key).value(value));
+                .updateMetaData(entityFactory.softwareModuleMetadata().update(entity.getId(), key).value(value)
+                        .targetVisible(targetVisibleField.getValue()));
         setSelectedEntity(swMetadata.getSoftwareModule());
         return swMetadata;
     }
@@ -82,7 +84,7 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
     protected Grid createMetadataGrid() {
         final Grid metadataGrid = super.createMetadataGrid();
         metadataGrid.getContainerDataSource().addContainerProperty(TARGET_VISIBLE, Boolean.class, Boolean.FALSE);
-        metadataGrid.getColumn(TARGET_VISIBLE).setHeaderCaption(i18n.getMessage("header.metadata.targetvisible"));
+        metadataGrid.getColumn(TARGET_VISIBLE).setHeaderCaption(i18n.getMessage("metadata.targetvisible"));
         metadataGrid.getColumn(TARGET_VISIBLE).setHidden(true);
         return metadataGrid;
     }
@@ -104,7 +106,7 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
 
     private CheckBox createTargetVisibleField() {
         final CheckBox checkBox = new CheckBox();
-        checkBox.setCaption(i18n.getMessage("textfield.key"));
+        checkBox.setCaption(i18n.getMessage("metadata.targetvisible"));
         checkBox.addValueChangeListener(this::onCheckBoxChange);
 
         return checkBox;
@@ -145,6 +147,14 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
                 targetVisibleField.setEnabled(true);
             }
         }
+
+        return item;
+    }
+
+    @Override
+    protected Item updateItemInGrid(final String key) {
+        final Item item = super.updateItemInGrid(key);
+        item.getItemProperty(TARGET_VISIBLE).setValue(targetVisibleField.getValue());
 
         return item;
     }

@@ -374,10 +374,11 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         return item;
     }
 
-    private void updateItemInGrid(final String key) {
+    protected Item updateItemInGrid(final String key) {
         final IndexedContainer metadataContainer = (IndexedContainer) metaDataGrid.getContainerDataSource();
         final Item item = metadataContainer.getItem(key);
         item.getItemProperty(VALUE).setValue(valueTextArea.getValue());
+        return item;
     }
 
     private void onAdd() {

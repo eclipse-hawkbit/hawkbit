@@ -54,6 +54,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCond
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -70,6 +71,11 @@ import net._01001111.text.LoremIpsum;
  */
 public class TestdataFactory {
     private static final LoremIpsum LOREM = new LoremIpsum();
+
+    public static final String VISIBLE_SM_MD_KEY = "visibleMetdataKey";
+    public static final String VISIBLE_SM_MD_VALUE = "visibleMetdataValue";
+    public static final String INVISIBLE_SM_MD_KEY = "invisibleMetdataKey";
+    public static final String INVISIBLE_SM_MD_VALUE = "invisibleMetdataValue";
 
     /**
      * default {@link Target#getControllerId()}.
@@ -266,16 +272,16 @@ public class TestdataFactory {
     public DistributionSet createDistributionSet(final String prefix, final String version,
             final boolean isRequiredMigrationStep) {
 
-        final SoftwareModule appMod = softwareModuleManagement.create(entityFactory.softwareModule()
-                .create().type(findOrCreateSoftwareModuleType(SM_TYPE_APP, Integer.MAX_VALUE))
-                .name(prefix + SM_TYPE_APP).version(version + "." + new SecureRandom().nextInt(100))
-                .description(LOREM.words(20)).vendor(prefix + " vendor Limited, California"));
-        final SoftwareModule runtimeMod = softwareModuleManagement.create(
-                entityFactory.softwareModule().create().type(findOrCreateSoftwareModuleType(SM_TYPE_RT))
+        final SoftwareModule appMod = softwareModuleManagement.create(entityFactory.softwareModule().create()
+                .type(findOrCreateSoftwareModuleType(SM_TYPE_APP, Integer.MAX_VALUE)).name(prefix + SM_TYPE_APP)
+                .version(version + "." + new SecureRandom().nextInt(100)).description(LOREM.words(20))
+                .vendor(prefix + " vendor Limited, California"));
+        final SoftwareModule runtimeMod = softwareModuleManagement
+                .create(entityFactory.softwareModule().create().type(findOrCreateSoftwareModuleType(SM_TYPE_RT))
                         .name(prefix + "app runtime").version(version + "." + new SecureRandom().nextInt(100))
                         .description(LOREM.words(20)).vendor(prefix + " vendor GmbH, Stuttgart, Germany"));
-        final SoftwareModule osMod = softwareModuleManagement.create(
-                entityFactory.softwareModule().create().type(findOrCreateSoftwareModuleType(SM_TYPE_OS))
+        final SoftwareModule osMod = softwareModuleManagement
+                .create(entityFactory.softwareModule().create().type(findOrCreateSoftwareModuleType(SM_TYPE_OS))
                         .name(prefix + " Firmware").version(version + "." + new SecureRandom().nextInt(100))
                         .description(LOREM.words(20)).vendor(prefix + " vendor Limited Inc, California"));
 
@@ -284,6 +290,30 @@ public class TestdataFactory {
                         .version(version).description(LOREM.words(10)).type(findOrCreateDefaultTestDsType())
                         .modules(Arrays.asList(osMod.getId(), runtimeMod.getId(), appMod.getId()))
                         .requiredMigrationStep(isRequiredMigrationStep));
+    }
+
+    /**
+     * Adds {@link SoftwareModuleMetadata} to every module of given
+     * {@link DistributionSet}.
+     * 
+     * {@link #VISIBLE_SM_MD_VALUE}, {@link #VISIBLE_SM_MD_KEY} with
+     * {@link SoftwareModuleMetadata#isTargetVisible()} and
+     * {@link #INVISIBLE_SM_MD_KEY}, {@link #INVISIBLE_SM_MD_VALUE} without
+     * {@link SoftwareModuleMetadata#isTargetVisible()}
+     * 
+     * @param set
+     *            to add metadata to
+     */
+    public void addSoftwareModuleMetadata(final DistributionSet set) {
+        set.getModules().forEach(this::addTestModuleMetadata);
+    }
+
+    private SoftwareModule addTestModuleMetadata(final SoftwareModule module) {
+        softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(module.getId())
+                .key(VISIBLE_SM_MD_KEY).value(VISIBLE_SM_MD_VALUE).targetVisible(true));
+        return softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(module.getId())
+                .key(INVISIBLE_SM_MD_KEY).value(INVISIBLE_SM_MD_VALUE).targetVisible(false)).getSoftwareModule();
+
     }
 
     /**
@@ -370,8 +400,8 @@ public class TestdataFactory {
 
         final List<DistributionSet> sets = Lists.newArrayListWithExpectedSize(number);
         for (int i = 0; i < number; i++) {
-            sets.add(distributionSetManagement.create(
-                    entityFactory.distributionSet().create().name("DS" + i).version(DEFAULT_VERSION + "." + i)
+            sets.add(distributionSetManagement
+                    .create(entityFactory.distributionSet().create().name("DS" + i).version(DEFAULT_VERSION + "." + i)
                             .description(LOREM.words(10)).type(findOrCreateDefaultTestDsType())));
         }
 
@@ -417,8 +447,8 @@ public class TestdataFactory {
      */
     public DistributionSet createDistributionSetWithNoSoftwareModules(final String name, final String version) {
 
-        return distributionSetManagement.create(entityFactory.distributionSet().create().name(name)
-                .version(version).description(DEFAULT_DESCRIPTION).type(findOrCreateDefaultTestDsType()));
+        return distributionSetManagement.create(entityFactory.distributionSet().create().name(name).version(version)
+                .description(DEFAULT_DESCRIPTION).type(findOrCreateDefaultTestDsType()));
     }
 
     /**
@@ -608,9 +638,9 @@ public class TestdataFactory {
      * @return persisted {@link DistributionSetType}
      */
     public DistributionSetType findOrCreateDistributionSetType(final String dsTypeKey, final String dsTypeName) {
-        return distributionSetTypeManagement.getByKey(dsTypeKey).orElseGet(
-                () -> distributionSetTypeManagement.create(entityFactory.distributionSetType()
-                        .create().key(dsTypeKey).name(dsTypeName).description(LOREM.words(10)).colour("black")));
+        return distributionSetTypeManagement.getByKey(dsTypeKey)
+                .orElseGet(() -> distributionSetTypeManagement.create(entityFactory.distributionSetType().create()
+                        .key(dsTypeKey).name(dsTypeName).description(LOREM.words(10)).colour("black")));
     }
 
     /**
@@ -631,9 +661,8 @@ public class TestdataFactory {
     public DistributionSetType findOrCreateDistributionSetType(final String dsTypeKey, final String dsTypeName,
             final Collection<SoftwareModuleType> mandatory, final Collection<SoftwareModuleType> optional) {
         return distributionSetTypeManagement.getByKey(dsTypeKey)
-                .orElseGet(() -> distributionSetTypeManagement.create(entityFactory
-                        .distributionSetType().create().key(dsTypeKey).name(dsTypeName).description(LOREM.words(10))
-                        .colour("black")
+                .orElseGet(() -> distributionSetTypeManagement.create(entityFactory.distributionSetType().create()
+                        .key(dsTypeKey).name(dsTypeName).description(LOREM.words(10)).colour("black")
                         .optional(optional.stream().map(SoftwareModuleType::getId).collect(Collectors.toList()))
                         .mandatory(mandatory.stream().map(SoftwareModuleType::getId).collect(Collectors.toList()))));
     }
@@ -664,8 +693,8 @@ public class TestdataFactory {
      * @return persisted {@link SoftwareModuleType}
      */
     public SoftwareModuleType findOrCreateSoftwareModuleType(final String key, final int maxAssignments) {
-        return softwareModuleTypeManagement.getByKey(key).orElseGet(
-                () -> softwareModuleTypeManagement.create(entityFactory.softwareModuleType().create()
+        return softwareModuleTypeManagement.getByKey(key)
+                .orElseGet(() -> softwareModuleTypeManagement.create(entityFactory.softwareModuleType().create()
                         .key(key).name(key).description(LOREM.words(10)).maxAssignments(maxAssignments)));
     }
 

@@ -312,6 +312,7 @@
                      <exclude>**/VAADIN/widgetsets/**</exclude>
                      <exclude>.sonar</exclude>
                      <exclude>**/Dockerfile</exclude>
+                     <exclude>**/docker-compose.yml</exclude>
                      <exclude>**/.sonar/**</exclude>
                      <exclude>docs/src/main/resources/**</exclude>
                      <exclude>**/LICENSE*</exclude>
