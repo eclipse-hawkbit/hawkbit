@@ -164,7 +164,7 @@
       <json.version>20141113</json.version>
       <rsql-parser.version>2.1.0</rsql-parser.version>
       <jayway.awaitility.version>1.7.0</jayway.awaitility.version>
-      <io-protostuff.version>1.5.3</io-protostuff.version>
+      <io-protostuff.version>1.5.6</io-protostuff.version>
       <!-- Misc libraries versions - END -->
 
       <!-- Release - START -->

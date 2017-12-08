@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.dmf.json.model.DmfArtifact;
 import org.eclipse.hawkbit.dmf.json.model.DmfArtifactHash;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
@@ -64,6 +65,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private final SystemManagement systemManagement;
     private final TargetManagement targetManagement;
     private final ServiceMatcher serviceMatcher;
+    private final DistributionSetManagement distributionSetManagement;
 
     /**
      * Constructor.
@@ -83,11 +85,14 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      * @param serviceMatcher
      *            to check in cluster case if the message is from the same
      *            cluster node
+     * @param distributionSetManagement
+     *            to retrieve modules
      */
-    public AmqpMessageDispatcherService(final RabbitTemplate rabbitTemplate,
+    protected AmqpMessageDispatcherService(final RabbitTemplate rabbitTemplate,
             final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
-            final TargetManagement targetManagement, final ServiceMatcher serviceMatcher) {
+            final TargetManagement targetManagement, final ServiceMatcher serviceMatcher,
+            final DistributionSetManagement distributionSetManagement) {
         super(rabbitTemplate);
         this.artifactUrlHandler = artifactUrlHandler;
         this.amqpSenderService = amqpSenderService;
@@ -95,6 +100,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         this.systemManagement = systemManagement;
         this.targetManagement = targetManagement;
         this.serviceMatcher = serviceMatcher;
+        this.distributionSetManagement = distributionSetManagement;
     }
 
     /**
@@ -105,21 +111,54 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      *            the object to be send.
      */
     @EventListener(classes = TargetAssignDistributionSetEvent.class)
-    public void targetAssignDistributionSet(final TargetAssignDistributionSetEvent assignedEvent) {
+    protected void targetAssignDistributionSet(final TargetAssignDistributionSetEvent assignedEvent) {
         if (isNotFromSelf(assignedEvent)) {
             return;
         }
 
-        LOG.debug("targetAssignDistributionSet retrieved for controller {}. I will forward it to DMF broker.",
-                assignedEvent.getControllerId());
+        LOG.debug("targetAssignDistributionSet retrieved. I will forward it to DMF broker.");
 
-        targetManagement.getByControllerID(assignedEvent.getControllerId())
-                .ifPresent(target -> sendUpdateMessageToTarget(assignedEvent.getTenant(), target,
-                        assignedEvent.getActionId(), assignedEvent.getModules()));
+        distributionSetManagement.get(assignedEvent.getDistributionSetId()).ifPresent(set ->
 
+        targetManagement.getByControllerID(assignedEvent.getActions().keySet())
+                .forEach(target -> sendUpdateMessageToTarget(assignedEvent.getTenant(), target,
+                        assignedEvent.getActions().get(target.getControllerId()), set.getModules())));
     }
 
-    void sendUpdateMessageToTarget(final String tenant, final Target target, final Long actionId,
+    /**
+     * Method to send a message to a RabbitMQ Exchange after the assignment of
+     * the Distribution set to a Target has been canceled.
+     *
+     * @param cancelEvent
+     *            the object to be send.
+     */
+    @EventListener(classes = CancelTargetAssignmentEvent.class)
+    protected void targetCancelAssignmentToDistributionSet(final CancelTargetAssignmentEvent cancelEvent) {
+        if (isNotFromSelf(cancelEvent)) {
+            return;
+        }
+
+        sendCancelMessageToTarget(cancelEvent.getTenant(), cancelEvent.getEntity().getControllerId(),
+                cancelEvent.getActionId(), cancelEvent.getEntity().getAddress());
+    }
+
+    /**
+     * Method to send a message to a RabbitMQ Exchange after a Target was
+     * deleted.
+     *
+     * @param deleteEvent
+     *            the TargetDeletedEvent which holds the necessary data for
+     *            sending a target delete message.
+     */
+    @EventListener(classes = TargetDeletedEvent.class)
+    protected void targetDelete(final TargetDeletedEvent deleteEvent) {
+        if (isNotFromSelf(deleteEvent)) {
+            return;
+        }
+        sendDeleteMessage(deleteEvent.getTenant(), deleteEvent.getControllerId(), deleteEvent.getTargetAddress());
+    }
+
+    protected void sendUpdateMessageToTarget(final String tenant, final Target target, final Long actionId,
             final Collection<SoftwareModule> modules) {
 
         final URI targetAdress = target.getAddress();
@@ -145,7 +184,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         amqpSenderService.sendMessage(message, targetAdress);
     }
 
-    void sendPingReponseToDmfReceiver(final Message ping, final String tenant, final String virtualHost) {
+    protected void sendPingReponseToDmfReceiver(final Message ping, final String tenant, final String virtualHost) {
         final Message message = MessageBuilder.withBody(String.valueOf(System.currentTimeMillis()).getBytes())
                 .setContentType(MessageProperties.CONTENT_TYPE_TEXT_PLAIN)
                 .setCorrelationId(ping.getMessageProperties().getCorrelationId())
@@ -156,40 +195,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 IpUtil.createAmqpUri(virtualHost, ping.getMessageProperties().getReplyTo()));
     }
 
-    /**
-     * Method to send a message to a RabbitMQ Exchange after the assignment of
-     * the Distribution set to a Target has been canceled.
-     *
-     * @param cancelEvent
-     *            the object to be send.
-     */
-    @EventListener(classes = CancelTargetAssignmentEvent.class)
-    public void targetCancelAssignmentToDistributionSet(final CancelTargetAssignmentEvent cancelEvent) {
-        if (isNotFromSelf(cancelEvent)) {
-            return;
-        }
-
-        sendCancelMessageToTarget(cancelEvent.getTenant(), cancelEvent.getEntity().getControllerId(),
-                cancelEvent.getActionId(), cancelEvent.getEntity().getAddress());
-    }
-
-    /**
-     * Method to send a message to a RabbitMQ Exchange after a Target was
-     * deleted.
-     *
-     * @param deleteEvent
-     *            the TargetDeletedEvent which holds the necessary data for
-     *            sending a target delete message.
-     */
-    @EventListener(classes = TargetDeletedEvent.class)
-    public void targetDelete(final TargetDeletedEvent deleteEvent) {
-        if (isNotFromSelf(deleteEvent)) {
-            return;
-        }
-        sendDeleteMessage(deleteEvent.getTenant(), deleteEvent.getControllerId(), deleteEvent.getTargetAddress());
-    }
-
-    void sendDeleteMessage(final String tenant, final String controllerId, final String targetAddress) {
+    protected void sendDeleteMessage(final String tenant, final String controllerId, final String targetAddress) {
 
         if (!hasValidAddress(targetAddress)) {
             return;
@@ -207,7 +213,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         return serviceMatcher != null && !serviceMatcher.isFromSelf(event);
     }
 
-    void sendCancelMessageToTarget(final String tenant, final String controllerId, final Long actionId,
+    protected void sendCancelMessageToTarget(final String tenant, final String controllerId, final Long actionId,
             final URI address) {
         if (!IpUtil.isAmqpUri(address)) {
             return;

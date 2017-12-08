@@ -367,8 +367,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
                 RolloutGroupStatus.READY, group);
 
         final long targetsInGroupFilter = runInNewTransaction("countAllTargetsByTargetFilterQueryAndNotInRolloutGroups",
-                count -> targetManagement.countByRsqlAndNotInRolloutGroups(readyGroups,
-                        groupTargetFilter));
+                count -> targetManagement.countByRsqlAndNotInRolloutGroups(readyGroups, groupTargetFilter));
         final long expectedInGroup = Math.round(group.getTargetPercentage() / 100 * (double) targetsInGroupFilter);
         final long currentlyInGroup = runInNewTransaction("countRolloutTargetGroupByRolloutGroup",
                 count -> rolloutTargetGroupRepository.countByRolloutGroup(group));
@@ -408,8 +407,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             final PageRequest pageRequest = new PageRequest(0, Math.toIntExact(limit));
             final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout.getRolloutGroups(),
                     RolloutGroupStatus.READY, group);
-            final Page<Target> targets = targetManagement
-                    .findByTargetFilterQueryAndNotInRolloutGroups(pageRequest, readyGroups, targetFilter);
+            final Page<Target> targets = targetManagement.findByTargetFilterQueryAndNotInRolloutGroups(pageRequest,
+                    readyGroups, targetFilter);
 
             createAssignmentOfTargetsToGroup(targets, group);
 
@@ -461,7 +460,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             throw new RolloutIllegalStateException("First Group is not the first group.");
         }
 
-        deploymentManagement.startScheduledActionsByRolloutGroupParent(rollout.getId(), null);
+        deploymentManagement.startScheduledActionsByRolloutGroupParent(rollout.getId(),
+                rollout.getDistributionSet().getId(), null);
 
         rolloutGroup.setStatus(RolloutGroupStatus.RUNNING);
         rolloutGroupRepository.save(rolloutGroup);
@@ -530,8 +530,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             final ActionType actionType = rollout.getActionType();
             final long forceTime = rollout.getForcedTime();
 
-            final Page<Target> targets = targetManagement.findByInRolloutGroupWithoutAction(pageRequest,
-                    groupId);
+            final Page<Target> targets = targetManagement.findByInRolloutGroupWithoutAction(pageRequest, groupId);
             if (targets.getTotalElements() > 0) {
                 createScheduledAction(targets.getContent(), distributionSet, actionType, forceTime, rollout, group);
             }
