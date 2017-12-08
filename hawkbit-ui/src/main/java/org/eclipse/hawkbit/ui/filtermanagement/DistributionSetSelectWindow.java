@@ -44,7 +44,7 @@ import com.vaadin.ui.Window;
  * query.
  */
 public class DistributionSetSelectWindow
-        implements CommonDialogWindow.SaveDialogCloseListener, Property.ValueChangeListener {
+implements CommonDialogWindow.SaveDialogCloseListener, Property.ValueChangeListener {
 
     private static final long serialVersionUID = 4752345414134989396L;
 
@@ -61,6 +61,7 @@ public class DistributionSetSelectWindow
     private CommonDialogWindow window;
     private CheckBox checkBox;
     private Long tfqId;
+    private VerticalLayout verticalLayout;
 
     DistributionSetSelectWindow(final VaadinMessageSource i18n, final UIEventBus eventBus, final TargetManagement targetManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final ManageDistUIState manageDistUIState) {
@@ -71,7 +72,7 @@ public class DistributionSetSelectWindow
         this.targetFilterQueryManagement = targetFilterQueryManagement;
     }
 
-    private void initLocal() {
+    private void initView() {
         final Label label = new Label(i18n.getMessage("label.auto.assign.description"));
 
         checkBox = new CheckBox(i18n.getMessage("label.auto.assign.enable"));
@@ -79,27 +80,24 @@ public class DistributionSetSelectWindow
         checkBox.setImmediate(true);
         checkBox.addValueChangeListener(this);
 
-        final VerticalLayout verticalLayout = new VerticalLayout();
+        setTableEnabled(false);
+
+        verticalLayout = new VerticalLayout();
         verticalLayout.addComponent(label);
         verticalLayout.addComponent(checkBox);
         verticalLayout.addComponent(dsTable);
-
-        window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
-                .caption(i18n.getMessage("caption.select.auto.assign.dist")).content(verticalLayout).layout(verticalLayout)
-                .i18n(i18n).saveDialogCloseListener(this).buildCommonDialogWindow();
-        window.setId(UIComponentIdProvider.DIST_SET_SELECT_WINDOW_ID);
     }
 
-    public void setValue(final Long distSet) {
-        dsTable.setVisible(distSet != null);
+    private void setValue(final Long distSet) {
         checkBox.setValue(distSet != null);
         dsTable.setValue(distSet);
         dsTable.setCurrentPageFirstItemId(distSet);
+        dsTable.setNullSelectionAllowed(false);
     }
 
     /**
      * Shows a distribution set select window for the given target filter query
-     * 
+     *
      * @param tfqId
      *            target filter query id
      */
@@ -108,7 +106,7 @@ public class DistributionSetSelectWindow
         final TargetFilterQuery tfq = targetFilterQueryManagement.get(tfqId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, tfqId));
 
-        initLocal();
+        initView();
 
         final DistributionSet distributionSet = tfq.getAutoAssignDistributionSet();
         if (distributionSet != null) {
@@ -117,6 +115,12 @@ public class DistributionSetSelectWindow
             setValue(null);
         }
 
+        // build window after values are set to view elements
+        window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
+                .caption(i18n.getMessage("caption.select.auto.assign.dist")).content(verticalLayout)
+                .layout(verticalLayout).i18n(i18n).saveDialogCloseListener(this).buildCommonDialogWindow();
+        window.setId(UIComponentIdProvider.DIST_SET_SELECT_WINDOW_ID);
+
         window.setWidth(40.0F, Sizeable.Unit.PERCENTAGE);
         UI.getCurrent().addWindow(window);
         window.setVisible(true);
@@ -124,27 +128,43 @@ public class DistributionSetSelectWindow
 
     /**
      * Is triggered when the checkbox value changes
-     * 
+     *
      * @param event
      *            change event
      */
     @Override
     public void valueChange(final Property.ValueChangeEvent event) {
-        dsTable.setVisible(checkBox.getValue());
-        if (window != null) {
-            window.center();
-
+        if (checkBox.getValue()) {
+            setTableEnabled(true);
+        } else {
+            dsTable.select(null);
+            setTableEnabled(false);
         }
+    }
+
+    private void setTableEnabled(final boolean enabled) {
+        dsTable.setEnabled(enabled);
+        dsTable.setRequired(enabled);
     }
 
     /**
      * Is triggered when the save button is clicked
-     * 
+     *
      * @return whether the click should be allowed
      */
     @Override
     public boolean canWindowSaveOrUpdate() {
-        return !checkBox.getValue() || dsTable.getValue() != null;
+        return isFormularValid();
+    }
+
+    private boolean isFormularValid() {
+        boolean isValid = false;
+        if (checkBox.getValue() && dsTable.getValue() != null) {
+            isValid = true;
+        } else if (!checkBox.getValue()) {
+            isValid = true;
+        }
+        return isValid;
     }
 
     /**
