@@ -46,7 +46,6 @@ public abstract class AbstractMetadataDetailslayout extends Table {
     private void createMetadataTable() {
         addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
         addStyleName(ValoTheme.TABLE_NO_STRIPES);
-        // addStyleName(SPUIStyleDefinitions.SW_MODULE_TABLE);
         setSelectable(false);
         setImmediate(true);
         setContainerDataSource(getContainer());

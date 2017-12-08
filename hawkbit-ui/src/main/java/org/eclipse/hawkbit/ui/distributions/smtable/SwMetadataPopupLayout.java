@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.AbstractMetadataPopupLayout;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.PageRequest;
@@ -106,12 +107,15 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
 
     private CheckBox createTargetVisibleField() {
         final CheckBox checkBox = new CheckBox();
+        checkBox.setId(UIComponentIdProvider.METADATA_VALUE_ID);
         checkBox.setCaption(i18n.getMessage("metadata.targetvisible"));
         checkBox.addValueChangeListener(this::onCheckBoxChange);
 
         return checkBox;
     }
 
+    // Exception for squid:S1172 - parameter defined by Vaadin
+    @SuppressWarnings("squid:S1172")
     public void onCheckBoxChange(final ValueChangeEvent event) {
         if (hasCreatePermission() || hasUpdatePermission()) {
             if (!getValueTextArea().getValue().isEmpty() && !getKeyTextField().getValue().isEmpty()) {

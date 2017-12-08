@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.common.detailslayout;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -50,7 +49,7 @@ public abstract class AbstractSoftwareModuleDetails
     protected AbstractSoftwareModuleDetails(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState,
             final SoftwareModuleManagement softwareManagement, final SwMetadataPopupLayout swMetadataPopupLayout,
-            final EntityFactory entityFactory, final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow) {
+            final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow) {
         super(i18n, eventBus, permissionChecker, managementUIState);
         this.softwareModuleAddUpdateWindow = softwareModuleAddUpdateWindow;
         this.softwareModuleManagement = softwareManagement;

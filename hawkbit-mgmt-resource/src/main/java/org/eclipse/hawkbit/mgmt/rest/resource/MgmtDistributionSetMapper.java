@@ -17,7 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPost;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentResponseBody;
@@ -87,7 +87,7 @@ public final class MgmtDistributionSetMapper {
                 .requiredMigrationStep(dsRest.isRequiredMigrationStep());
     }
 
-    static List<MetaData> fromRequestDsMetadata(final List<MgmtMetadataBodyPost> metadata, final EntityFactory entityFactory) {
+    static List<MetaData> fromRequestDsMetadata(final List<MgmtMetadata> metadata, final EntityFactory entityFactory) {
         if (metadata == null) {
             return Collections.emptyList();
         }
@@ -151,16 +151,16 @@ public final class MgmtDistributionSetMapper {
                 sets.stream().map(MgmtDistributionSetMapper::toResponse).collect(Collectors.toList()));
     }
 
-    static MgmtMetadataBodyPost toResponseDsMetadata(final DistributionSetMetadata metadata) {
-        final MgmtMetadataBodyPost metadataRest = new MgmtMetadataBodyPost();
+    static MgmtMetadata toResponseDsMetadata(final DistributionSetMetadata metadata) {
+        final MgmtMetadata metadataRest = new MgmtMetadata();
         metadataRest.setKey(metadata.getKey());
         metadataRest.setValue(metadata.getValue());
         return metadataRest;
     }
 
-    static List<MgmtMetadataBodyPost> toResponseDsMetadata(final List<DistributionSetMetadata> metadata) {
+    static List<MgmtMetadata> toResponseDsMetadata(final List<DistributionSetMetadata> metadata) {
 
-        final List<MgmtMetadataBodyPost> mappedList = new ArrayList<>(metadata.size());
+        final List<MgmtMetadata> mappedList = new ArrayList<>(metadata.size());
         for (final DistributionSetMetadata distributionSetMetadata : metadata) {
             mappedList.add(toResponseDsMetadata(distributionSetMetadata));
         }

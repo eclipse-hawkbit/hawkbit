@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifactHash;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
-import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleMetadataBodyPost;
+import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleRestApi;
@@ -49,7 +49,7 @@ public final class MgmtSoftwareModuleMapper {
     }
 
     static List<SoftwareModuleMetadataCreate> fromRequestSwMetadata(final EntityFactory entityFactory,
-            final Long softwareModuleId, final Collection<MgmtSoftwareModuleMetadataBodyPost> metadata) {
+            final Long softwareModuleId, final Collection<MgmtSoftwareModuleMetadata> metadata) {
         if (metadata == null) {
             return Collections.emptyList();
         }
@@ -79,7 +79,7 @@ public final class MgmtSoftwareModuleMapper {
                 softwareModules.stream().map(MgmtSoftwareModuleMapper::toResponse).collect(Collectors.toList()));
     }
 
-    static List<MgmtSoftwareModuleMetadataBodyPost> toResponseSwMetadata(
+    static List<MgmtSoftwareModuleMetadata> toResponseSwMetadata(
             final Collection<SoftwareModuleMetadata> metadata) {
         if (metadata == null) {
             return Collections.emptyList();
@@ -88,8 +88,8 @@ public final class MgmtSoftwareModuleMapper {
         return metadata.stream().map(MgmtSoftwareModuleMapper::toResponseSwMetadata).collect(Collectors.toList());
     }
 
-    static MgmtSoftwareModuleMetadataBodyPost toResponseSwMetadata(final SoftwareModuleMetadata metadata) {
-        final MgmtSoftwareModuleMetadataBodyPost metadataRest = new MgmtSoftwareModuleMetadataBodyPost();
+    static MgmtSoftwareModuleMetadata toResponseSwMetadata(final SoftwareModuleMetadata metadata) {
+        final MgmtSoftwareModuleMetadata metadataRest = new MgmtSoftwareModuleMetadata();
         metadataRest.setKey(metadata.getKey());
         metadataRest.setValue(metadata.getValue());
         metadataRest.setTargetVisible(metadata.isTargetVisible());

@@ -281,21 +281,20 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     private void onDelete(final RendererClickEvent event) {
         final Item item = metaDataGrid.getContainerDataSource().getItem(event.getItemId());
         final String key = (String) item.getItemProperty(KEY).getValue();
-        final String value = (String) item.getItemProperty(VALUE).getValue();
 
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
                 i18n.getMessage("caption.metadata.delete.action.confirmbox"),
                 i18n.getMessage("message.confirm.delete.metadata", key), i18n.getMessage("button.ok"),
                 i18n.getMessage("button.cancel"), ok -> {
                     if (ok) {
-                        handleOkDeleteMetadata(event, key, value);
+                        handleOkDeleteMetadata(event, key);
                     }
                 });
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
     }
 
-    private void handleOkDeleteMetadata(final RendererClickEvent event, final String key, final String value) {
+    private void handleOkDeleteMetadata(final RendererClickEvent event, final String key) {
         deleteMetadata(getSelectedEntity(), key);
         uiNotification.displaySuccess(i18n.getMessage("message.metadata.deleted.successfully", key));
         final Object selectedRow = metaDataGrid.getSelectedRow();

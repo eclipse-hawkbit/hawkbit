@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.mgmt.rest.api;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPost;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
@@ -257,7 +257,7 @@ public interface MgmtDistributionSetRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetId}/metadata", produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<PagedList<MgmtMetadataBodyPost>> getMetadata(
+    ResponseEntity<PagedList<MgmtMetadata>> getMetadata(
             @PathVariable("distributionSetId") Long distributionSetId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
@@ -276,7 +276,7 @@ public interface MgmtDistributionSetRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetId}/metadata/{metadataKey}", produces = {
             MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtMetadataBodyPost> getMetadataValue(@PathVariable("distributionSetId") Long distributionSetId,
+    ResponseEntity<MgmtMetadata> getMetadataValue(@PathVariable("distributionSetId") Long distributionSetId,
             @PathVariable("metadataKey") String metadataKey);
 
     /**
@@ -293,7 +293,7 @@ public interface MgmtDistributionSetRestApi {
      */
     @RequestMapping(method = RequestMethod.PUT, value = "/{distributionSetId}/metadata/{metadataKey}", produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtMetadataBodyPost> updateMetadata(@PathVariable("distributionSetId") Long distributionSetId,
+    ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("distributionSetId") Long distributionSetId,
             @PathVariable("metadataKey") String metadataKey, MgmtMetadataBodyPut metadata);
 
     /**
@@ -322,8 +322,8 @@ public interface MgmtDistributionSetRestApi {
     @RequestMapping(method = RequestMethod.POST, value = "/{distributionSetId}/metadata", consumes = {
             MediaType.APPLICATION_JSON_VALUE,
             MediaTypes.HAL_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtMetadataBodyPost>> createMetadata(@PathVariable("distributionSetId") Long distributionSetId,
-            List<MgmtMetadataBodyPost> metadataRest);
+    ResponseEntity<List<MgmtMetadata>> createMetadata(@PathVariable("distributionSetId") Long distributionSetId,
+            List<MgmtMetadata> metadataRest);
 
     /**
      * Assigns a list of software modules to a distribution set.

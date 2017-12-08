@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MgmtSoftwareModuleMetadataBodyPost {
+public class MgmtSoftwareModuleMetadata {
 
     @JsonProperty(required = true)
     private String key;
