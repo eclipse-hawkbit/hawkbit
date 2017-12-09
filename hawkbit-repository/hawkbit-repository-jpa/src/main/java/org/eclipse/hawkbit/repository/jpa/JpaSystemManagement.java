@@ -302,6 +302,11 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
                         org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_OS_ONLY_NAME,
                         "Default type with Firmware/OS only.").addMandatoryModuleType(os));
 
+        distributionSetTypeRepository
+                .save(new JpaDistributionSetType(org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_APP_ONLY_KEY,
+                        org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_APP_ONLY_NAME,
+                        "Default type with app(s) only.").addMandatoryModuleType(app));
+
         return distributionSetTypeRepository
                 .save(new JpaDistributionSetType(org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_OS_WITH_APPS_KEY,
                         org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_OS_WITH_APPS_NAME,

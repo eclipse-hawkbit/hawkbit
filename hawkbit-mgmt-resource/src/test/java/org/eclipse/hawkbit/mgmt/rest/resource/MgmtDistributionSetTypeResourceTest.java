@@ -85,7 +85,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 .andExpect(jsonPath("$.content.[?(@.key==test123)]$..key", contains("test123")))
                 .andExpect(jsonPath("$.content.[?(@.key==test123)]$.._links.self.href",
                         contains("http://localhost/rest/v1/distributionsettypes/" + testType.getId())))
-                .andExpect(jsonPath("$.total", equalTo(4)));
+                .andExpect(jsonPath("$.total", equalTo(5)));
     }
 
     @Test
@@ -116,14 +116,14 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
         mvc.perform(get("/rest/v1/distributionsettypes").accept(MediaType.APPLICATION_JSON)
                 .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "KEY:ASC")).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(jsonPath("$.content.[3].id", equalTo(testType.getId().intValue())))
-                .andExpect(jsonPath("$.content.[3].name", equalTo("TestName123")))
-                .andExpect(jsonPath("$.content.[3].description", equalTo("Desc1234")))
-                .andExpect(jsonPath("$.content.[3].createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$.content.[3].createdAt", equalTo(testType.getCreatedAt())))
-                .andExpect(jsonPath("$.content.[3].lastModifiedBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$.content.[3].lastModifiedAt", equalTo(testType.getLastModifiedAt())))
-                .andExpect(jsonPath("$.content.[3].key", equalTo("zzzzz")))
+                .andExpect(jsonPath("$.content.[4].id", equalTo(testType.getId().intValue())))
+                .andExpect(jsonPath("$.content.[4].name", equalTo("TestName123")))
+                .andExpect(jsonPath("$.content.[4].description", equalTo("Desc1234")))
+                .andExpect(jsonPath("$.content.[4].createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$.content.[4].createdAt", equalTo(testType.getCreatedAt())))
+                .andExpect(jsonPath("$.content.[4].lastModifiedBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$.content.[4].lastModifiedAt", equalTo(testType.getLastModifiedAt())))
+                .andExpect(jsonPath("$.content.[4].key", equalTo("zzzzz")))
                 .andExpect(jsonPath("$.total", equalTo(DEFAULT_DS_TYPES + 1)));
     }
 
@@ -160,7 +160,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 JsonPath.compile("[2]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
                         .isEqualTo("http://localhost/rest/v1/distributionsettypes/" + created3.getId());
 
-        assertThat(distributionSetTypeManagement.count()).isEqualTo(6);
+        assertThat(distributionSetTypeManagement.count()).isEqualTo(7);
     }
 
     @Step
@@ -428,8 +428,8 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes GET requests with paging.")
     public void getDistributionSetTypesWithoutAddtionalRequestParameters() throws Exception {
 
-        // 3 types overall (2 hawkbit tenant default, 1 test default
-        final int types = 3;
+        // 4 types overall (3 hawkbit tenant default, 1 test default
+        final int types = 4;
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(types)))
