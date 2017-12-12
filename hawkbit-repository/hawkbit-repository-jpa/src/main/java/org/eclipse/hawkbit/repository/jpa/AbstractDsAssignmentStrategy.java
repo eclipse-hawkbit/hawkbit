@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.util.CollectionUtils;
 
 /**
  * {@link DistributionSet} to {@link Target} assignment strategy as utility for
@@ -109,6 +110,8 @@ public abstract class AbstractDsAssignmentStrategy {
     /**
      * Handles event sending related to the assignment.
      * 
+     * @param set
+     *            that has been assigned
      * @param targets
      *            to send events for
      * @param targetIdsCancelList
@@ -117,12 +120,17 @@ public abstract class AbstractDsAssignmentStrategy {
      *            mapping of {@link Target#getControllerId()} to new
      *            {@link Action} that was created as part of the assignment.
      */
-    abstract void sendAssignmentEvents(final List<JpaTarget> targets, final Set<Long> targetIdsCancelList,
-            final Map<String, JpaAction> controllerIdsToActions);
+    abstract void sendAssignmentEvents(DistributionSet set, final List<JpaTarget> targets,
+            final Set<Long> targetIdsCancelList, final Map<String, JpaAction> controllerIdsToActions);
 
-    protected void sendTargetAssignDistributionSetEvent(final Action action) {
-        afterCommit.afterCommit(() -> eventPublisher
-                .publishEvent(new TargetAssignDistributionSetEvent(action, applicationContext.getId())));
+    protected void sendTargetAssignDistributionSetEvent(final String tenant, final long distributionSetId,
+            final List<Action> actions) {
+        if (CollectionUtils.isEmpty(actions)) {
+            return;
+        }
+
+        afterCommit.afterCommit(() -> eventPublisher.publishEvent(
+                new TargetAssignDistributionSetEvent(tenant, distributionSetId, actions, applicationContext.getId())));
     }
 
     protected void sendTargetUpdatedEvent(final JpaTarget target) {

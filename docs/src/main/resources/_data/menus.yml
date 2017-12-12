@@ -1,6 +1,2 @@
-- name: News
-  url: news/index.html
-- name: Blog
-  url: blog/index.html
 - name: Documentation
   url: documentation/overview/introduction.html

@@ -319,6 +319,7 @@ public final class SPUIComponentProvider {
         final Link link = new Link(name, new ExternalResource(resource));
         link.setId(id);
         link.setIcon(icon);
+        link.setDescription(name);
 
         link.setTargetName(targetOpen);
         if (style != null) {

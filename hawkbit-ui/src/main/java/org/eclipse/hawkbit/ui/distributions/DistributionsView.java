@@ -276,7 +276,7 @@ public class DistributionsView extends AbstractNotificationView implements Brows
 
     @Override
     protected Map<Class<?>, RefreshableContainer> getSupportedPushEvents() {
-        final Map<Class<?>, RefreshableContainer> supportedEvents = Maps.newHashMapWithExpectedSize(2);
+        final Map<Class<?>, RefreshableContainer> supportedEvents = Maps.newHashMapWithExpectedSize(4);
 
         supportedEvents.put(DistributionSetCreatedEventContainer.class, distributionTableLayout.getTable());
         supportedEvents.put(DistributionSetDeletedEventContainer.class, distributionTableLayout.getTable());

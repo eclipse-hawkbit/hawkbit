@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -305,31 +306,14 @@ public class AmqpConfiguration {
                 tenantAware, ddiSecruityProperties, systemSecurityContext);
     }
 
-    /**
-     * Create the dispatcher bean.
-     *
-     * @param rabbitTemplate
-     *            the rabbitTemplate
-     * @param amqpSenderService
-     *            to send AMQP message
-     * @param artifactUrlHandler
-     *            for generating download URLs
-     * @param systemSecurityContext
-     *            for execution with system permissions
-     * @param systemManagement
-     *            the systemManagement
-     * @param targetManagement
-     *            to access target information
-     * @return the bean
-     */
     @Bean
     @ConditionalOnMissingBean(AmqpMessageDispatcherService.class)
-    public AmqpMessageDispatcherService amqpMessageDispatcherService(final RabbitTemplate rabbitTemplate,
+    AmqpMessageDispatcherService amqpMessageDispatcherService(final RabbitTemplate rabbitTemplate,
             final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
-            final TargetManagement targetManagement) {
+            final TargetManagement targetManagement, final DistributionSetManagement distributionSetManagement) {
         return new AmqpMessageDispatcherService(rabbitTemplate, amqpSenderService, artifactUrlHandler,
-                systemSecurityContext, systemManagement, targetManagement, serviceMatcher);
+                systemSecurityContext, systemManagement, targetManagement, serviceMatcher, distributionSetManagement);
     }
 
     private static Map<String, Object> getTTLMaxArgsAuthenticationQueue() {

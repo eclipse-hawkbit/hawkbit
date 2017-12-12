@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.tenantconfiguration;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.tenantconfiguration.authentication.AnonymousDownloadAuthenticationConfigurationItem;
 import org.eclipse.hawkbit.ui.tenantconfiguration.authentication.CertificateAuthenticationConfigurationItem;
@@ -24,6 +25,7 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Link;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 
@@ -47,6 +49,8 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
 
     private final AnonymousDownloadAuthenticationConfigurationItem anonymousDownloadAuthenticationConfigurationItem;
 
+    private final UiProperties uiProperties;
+
     private CheckBox gatewaySecTokenCheckBox;
 
     private CheckBox targetSecTokenCheckBox;
@@ -57,8 +61,9 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
 
     AuthenticationConfigurationView(final VaadinMessageSource i18n,
             final TenantConfigurationManagement tenantConfigurationManagement,
-            final SecurityTokenGenerator securityTokenGenerator) {
+            final SecurityTokenGenerator securityTokenGenerator, final UiProperties uiProperties) {
         this.i18n = i18n;
+        this.uiProperties = uiProperties;
         this.certificateAuthenticationConfigurationItem = new CertificateAuthenticationConfigurationItem(
                 tenantConfigurationManagement, i18n);
         this.targetSecurityTokenAuthenticationConfigurationItem = new TargetSecurityTokenAuthenticationConfigurationItem(
@@ -86,11 +91,14 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
         headerDisSetType.addStyleName("config-panel-header");
         vLayout.addComponent(headerDisSetType);
 
+        final Link linkToSecurityHelp = SPUIComponentProvider
+                .getHelpLink(uiProperties.getLinks().getDocumentation().getSecurity());
+        vLayout.addComponent(linkToSecurityHelp);
+
         final GridLayout gridLayout = new GridLayout(2, 4);
         gridLayout.setSpacing(true);
         gridLayout.setImmediate(true);
         gridLayout.setColumnExpandRatio(1, 1.0F);
-        gridLayout.setSizeFull();
 
         certificateAuthCheckbox = SPUIComponentProvider.getCheckBox("", DIST_CHECKBOX_STYLE, null, false, "");
         certificateAuthCheckbox.setValue(certificateAuthenticationConfigurationItem.isConfigEnabled());

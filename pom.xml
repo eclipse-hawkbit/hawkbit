@@ -48,8 +48,6 @@
       <module>hawkbit-test-report</module>
       <module>hawkbit-runtime</module>
       <module>hawkbit-starters</module>
-      <module>examples</module>
-      <module>extensions</module>
    </modules>
 
    <scm>
@@ -166,7 +164,7 @@
       <json.version>20141113</json.version>
       <rsql-parser.version>2.1.0</rsql-parser.version>
       <jayway.awaitility.version>1.7.0</jayway.awaitility.version>
-      <io-protostuff.version>1.5.3</io-protostuff.version>
+      <io-protostuff.version>1.5.6</io-protostuff.version>
       <!-- Misc libraries versions - END -->
 
       <!-- Release - START -->
@@ -209,32 +207,6 @@
          <plugin>
             <groupId>com.mycila</groupId>
             <artifactId>license-maven-plugin</artifactId>
-            <version>2.11</version>
-            <configuration>
-               <header>licenses/LICENSE_HEADER_TEMPLATE_BOSCH.txt</header>
-               <validHeaders>
-                   <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS.txt</validHeader>
-               </validHeaders>
-               <excludes>
-                  <exclude>**/README</exclude>
-                  <exclude>3rd-dependencies/**</exclude>
-                  <exclude>**/.git*</exclude>
-                  <exclude>.git*</exclude>
-                  <exclude>**/*.sql</exclude>
-                  <exclude>**/*.sql</exclude>
-                  <exclude>eclipse_codeformatter.xml</exclude>
-                  <exclude>**/addons.scss</exclude>
-                  <exclude>**/VAADIN/widgetsets/**</exclude>
-                  <exclude>.sonar</exclude>
-                  <exclude>**/Dockerfile</exclude>
-                  <exclude>**/.sonar/**</exclude>
-                  <exclude>docs/src/main/resources/**</exclude>
-                  <exclude>**/LICENSE*</exclude>
-               </excludes>
-               <mapping>
-                  <scss>JAVADOC_STYLE</scss>
-               </mapping>
-            </configuration>
          </plugin>
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -319,6 +291,37 @@
 
       <pluginManagement>
          <plugins>
+            <plugin>
+               <groupId>com.mycila</groupId>
+               <artifactId>license-maven-plugin</artifactId>
+               <version>2.11</version>
+               <configuration>
+                  <header>licenses/LICENSE_HEADER_TEMPLATE_BOSCH.txt</header>
+                  <validHeaders>
+                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS.txt</validHeader>
+                  </validHeaders>
+                  <excludes>
+                     <exclude>**/README</exclude>
+                     <exclude>3rd-dependencies/**</exclude>
+                     <exclude>**/.git*</exclude>
+                     <exclude>.git*</exclude>
+                     <exclude>**/*.sql</exclude>
+                     <exclude>**/*.sql</exclude>
+                     <exclude>eclipse_codeformatter.xml</exclude>
+                     <exclude>**/addons.scss</exclude>
+                     <exclude>**/VAADIN/widgetsets/**</exclude>
+                     <exclude>.sonar</exclude>
+                     <exclude>**/Dockerfile</exclude>
+                     <exclude>**/docker-compose.yml</exclude>
+                     <exclude>**/.sonar/**</exclude>
+                     <exclude>docs/src/main/resources/**</exclude>
+                     <exclude>**/LICENSE*</exclude>
+                  </excludes>
+                  <mapping>
+                     <scss>JAVADOC_STYLE</scss>
+                  </mapping>
+               </configuration>
+            </plugin>
             <plugin>
                <groupId>org.eclipse.m2e</groupId>
                <artifactId>lifecycle-mapping</artifactId>

@@ -10,6 +10,10 @@ package org.eclipse.hawkbit.repository.event.remote;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Arrays;
+import java.util.Map.Entry;
+
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -50,8 +54,8 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
         generateAction.setStatus(Status.RUNNING);
         final Action action = actionRepository.save(generateAction);
 
-        final TargetAssignDistributionSetEvent assignmentEvent = new TargetAssignDistributionSetEvent(action,
-                serviceMatcher.getServiceId());
+        final TargetAssignDistributionSetEvent assignmentEvent = new TargetAssignDistributionSetEvent(
+                action.getTenant(), dsA.getId(), Arrays.asList(action), serviceMatcher.getServiceId());
 
         TargetAssignDistributionSetEvent underTest = (TargetAssignDistributionSetEvent) createProtoStuffEvent(
                 assignmentEvent);
@@ -63,12 +67,11 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
 
     private void assertTargetAssignDistributionSetEvent(final Action action,
             final TargetAssignDistributionSetEvent underTest) {
-        assertThat(underTest.getActionId()).isNotNull();
-        assertThat(underTest.getControllerId()).isNotNull();
-        assertThat(underTest.getDistributionSetId()).isNotNull();
 
-        assertThat(underTest.getActionId()).isEqualTo(action.getId());
-        assertThat(underTest.getControllerId()).isEqualTo(action.getTarget().getControllerId());
+        final Entry<String, Long> entry = new SimpleImmutableEntry(action.getTarget().getControllerId(),
+                action.getId());
+
+        assertThat(underTest.getActions()).containsExactly(entry);
         assertThat(underTest.getDistributionSetId()).isEqualTo(action.getDistributionSet().getId());
     }
 
