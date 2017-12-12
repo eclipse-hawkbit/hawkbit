@@ -105,7 +105,7 @@ public class DistributionSetSelectWindow
      */
     public void showForTargetFilter(final Long tfqId) {
         this.tfqId = tfqId;
-        final TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryById(tfqId)
+        final TargetFilterQuery tfq = targetFilterQueryManagement.get(tfqId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, tfqId));
 
         initLocal();
@@ -164,13 +164,13 @@ public class DistributionSetSelectWindow
     }
 
     private void updateTargetFilterQueryDS(final Long targetFilterQueryId, final Long dsId) {
-        final TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryById(targetFilterQueryId)
+        final TargetFilterQuery tfq = targetFilterQueryManagement.get(targetFilterQueryId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));
 
         if (dsId != null) {
             confirmWithConsequencesDialog(tfq, dsId);
         } else {
-            targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(targetFilterQueryId, null);
+            targetFilterQueryManagement.updateAutoAssignDS(targetFilterQueryId, null);
             eventBus.publish(this, CustomFilterUIEvent.UPDATED_TARGET_FILTER_QUERY);
         }
 
@@ -182,7 +182,7 @@ public class DistributionSetSelectWindow
             @Override
             public void onConfirmResult(final boolean accepted) {
                 if (accepted) {
-                    targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(tfq.getId(), dsId);
+                    targetFilterQueryManagement.updateAutoAssignDS(tfq.getId(), dsId);
                     eventBus.publish(this, CustomFilterUIEvent.UPDATED_TARGET_FILTER_QUERY);
                 }
             }
@@ -232,7 +232,7 @@ public class DistributionSetSelectWindow
             layout.setMargin(true);
             setContent(layout);
 
-            final Long targetsCount = targetManagement.countTargetsByTargetFilterQueryAndNonDS(distributionSetId,
+            final Long targetsCount = targetManagement.countByRsqlAndNonDS(distributionSetId,
                     targetFilterQuery.getQuery());
             Label mainTextLabel;
             if (targetsCount == 0) {

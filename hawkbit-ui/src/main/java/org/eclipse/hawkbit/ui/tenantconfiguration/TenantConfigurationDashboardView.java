@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
-import org.eclipse.hawkbit.ui.HawkbitUI;
+import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -48,13 +48,15 @@ import com.vaadin.ui.VerticalLayout;
  * Main UI for the system configuration view.
  */
 @UIScope
-@SpringView(name = TenantConfigurationDashboardView.VIEW_NAME, ui = HawkbitUI.class)
+@SpringView(name = TenantConfigurationDashboardView.VIEW_NAME, ui = AbstractHawkbitUI.class)
 public class TenantConfigurationDashboardView extends CustomComponent implements View, ConfigurationItemChangeListener {
 
     public static final String VIEW_NAME = "spSystemConfig";
     private static final long serialVersionUID = 1L;
 
     private final DefaultDistributionSetTypeLayout defaultDistributionSetTypeLayout;
+
+    private final RepositoryConfigurationView repositoryConfigurationView;
 
     private final AuthenticationConfigurationView authenticationConfigurationView;
 
@@ -84,9 +86,11 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
         this.defaultDistributionSetTypeLayout = new DefaultDistributionSetTypeLayout(systemManagement,
                 distributionSetTypeManagement, i18n, permChecker);
         this.authenticationConfigurationView = new AuthenticationConfigurationView(i18n, tenantConfigurationManagement,
-                securityTokenGenerator);
+                securityTokenGenerator, uiProperties);
         this.pollingConfigurationView = new PollingConfigurationView(i18n, controllerPollProperties,
                 tenantConfigurationManagement);
+        this.repositoryConfigurationView = new RepositoryConfigurationView(i18n, tenantConfigurationManagement);
+
         this.i18n = i18n;
         this.uiProperties = uiProperties;
         this.uINotification = uINotification;
@@ -100,6 +104,8 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
         if (defaultDistributionSetTypeLayout.getComponentCount() > 0) {
             configurationViews.add(defaultDistributionSetTypeLayout);
         }
+        configurationViews.add(repositoryConfigurationView);
+
         configurationViews.add(authenticationConfigurationView);
         configurationViews.add(pollingConfigurationView);
         if (customConfigurationViews != null) {

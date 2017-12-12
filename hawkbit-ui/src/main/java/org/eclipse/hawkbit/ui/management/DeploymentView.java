@@ -15,13 +15,14 @@ import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.ui.HawkbitUI;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
@@ -81,7 +82,7 @@ import com.vaadin.ui.UI;
  * Target status and deployment management view
  */
 @UIScope
-@SpringView(name = DeploymentView.VIEW_NAME, ui = HawkbitUI.class)
+@SpringView(name = DeploymentView.VIEW_NAME, ui = AbstractHawkbitUI.class)
 public class DeploymentView extends AbstractNotificationView implements BrowserWindowResizeListener {
 
     private static final long serialVersionUID = 1L;
@@ -124,7 +125,9 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
             final DistributionSetManagement distributionSetManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement, final TargetManagement targetManagement,
             final EntityFactory entityFactory, final UiProperties uiproperties,
-            final ManagementViewClientCriterion managementViewClientCriterion, final TagManagement tagManagement,
+            final ManagementViewClientCriterion managementViewClientCriterion,
+            final TargetTagManagement targetTagManagement,
+            final DistributionSetTagManagement distributionSetTagManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement,
             final NotificationUnreadButton notificationUnreadButton,
             final DeploymentViewMenuItem deploymentViewMenuItem, @Qualifier("uiExecutor") final Executor uiExecutor) {
@@ -138,27 +141,28 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
         this.actionStatusLayout = new ActionStatusLayout(i18n, eventBus, managementUIState);
         this.actionStatusMsgLayout = new ActionStatusMsgLayout(i18n, eventBus, managementUIState);
         final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout = new CreateUpdateTargetTagLayoutWindow(
-                i18n, tagManagement, entityFactory, eventBus, permChecker, uiNotification);
+                i18n, targetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
         this.targetTagFilterLayout = new TargetTagFilterLayout(i18n, createUpdateTargetTagLayout, managementUIState,
                 managementViewClientCriterion, permChecker, eventBus, uiNotification, entityFactory,
                 targetFilterQueryManagement);
         final TargetTable targetTable = new TargetTable(eventBus, i18n, uiNotification, targetManagement,
                 managementUIState, permChecker, managementViewClientCriterion, distributionSetManagement,
-                tagManagement);
+                targetTagManagement);
 
         this.targetTableLayout = new TargetTableLayout(eventbus, targetTable, targetManagement, entityFactory, i18n,
                 eventBus, uiNotification, managementUIState, managementViewClientCriterion, deploymentManagement,
-                uiproperties, permChecker, uiNotification, tagManagement, distributionSetManagement, uiExecutor);
+                uiproperties, permChecker, uiNotification, targetTagManagement, distributionSetManagement, uiExecutor);
 
         this.distributionTagLayout = new DistributionTagLayout(eventbus, managementUIState, i18n, permChecker, eventBus,
-                tagManagement, entityFactory, uiNotification, distFilterParameters, distributionSetManagement,
-                managementViewClientCriterion);
+                distributionSetTagManagement, entityFactory, uiNotification, distFilterParameters,
+                distributionSetManagement, managementViewClientCriterion);
         this.distributionTableLayout = new DistributionTableLayout(i18n, eventBus, permChecker, managementUIState,
                 distributionSetManagement, distributionSetTypeManagement, managementViewClientCriterion, entityFactory,
-                uiNotification, tagManagement, systemManagement, targetManagement, deploymentManagement);
+                uiNotification, distributionSetTagManagement, targetTagManagement, systemManagement, targetManagement,
+                deploymentManagement);
         this.deleteAndActionsLayout = new DeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
-                tagManagement, managementViewClientCriterion, managementUIState, targetManagement, targetTable,
-                deploymentManagement, distributionSetManagement);
+                targetTagManagement, distributionSetTagManagement, managementViewClientCriterion, managementUIState,
+                targetManagement, targetTable, deploymentManagement, distributionSetManagement);
 
         this.deploymentViewMenuItem = deploymentViewMenuItem;
 

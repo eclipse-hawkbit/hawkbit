@@ -85,7 +85,7 @@ public class DistributionSetMetadatadetailsLayout extends Table {
         }
         selectedDistSetId = distributionSet.getId();
         final List<DistributionSetMetadata> dsMetadataList = distributionSetManagement
-                .findDistributionSetMetadataByDistributionSetId(selectedDistSetId, new PageRequest(0, 500))
+                .findMetaDataByDistributionSetId(new PageRequest(0, 500), selectedDistSetId)
                 .getContent();
         if (null != dsMetadataList && !dsMetadataList.isEmpty()) {
             dsMetadataList.forEach(dsMetadata -> setDSMetadataProperties(dsMetadata));
@@ -151,7 +151,7 @@ public class DistributionSetMetadatadetailsLayout extends Table {
     }
 
     private void showMetadataDetails(final Long selectedDistSetId, final String metadataKey) {
-        final Optional<DistributionSet> distSet = distributionSetManagement.findDistributionSetById(selectedDistSetId);
+        final Optional<DistributionSet> distSet = distributionSetManagement.get(selectedDistSetId);
         if (!distSet.isPresent()) {
             notification.displayWarning(i18n.getMessage("distributionset.not.exists"));
             return;

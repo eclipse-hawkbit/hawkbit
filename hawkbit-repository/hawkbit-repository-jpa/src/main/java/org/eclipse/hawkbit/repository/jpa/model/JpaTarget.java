@@ -74,7 +74,6 @@ import org.slf4j.LoggerFactory;
 @Entity
 @Table(name = "sp_target", indexes = {
         @Index(name = "sp_idx_target_01", columnList = "tenant,name,assigned_distribution_set"),
-        @Index(name = "sp_idx_target_02", columnList = "tenant,name"),
         @Index(name = "sp_idx_target_03", columnList = "tenant,controller_id,assigned_distribution_set"),
         @Index(name = "sp_idx_target_04", columnList = "tenant,created_at"),
         @Index(name = "sp_idx_target_prim", columnList = "tenant,id") }, uniqueConstraints = @UniqueConstraint(columnNames = {

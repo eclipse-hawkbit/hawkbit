@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.util.Map;
 
-import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.tagdetails.AbstractTargetTagToken;
@@ -30,7 +30,7 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken {
     private static final int MAX_TAGS = 500;
 
     TargetBulkTokenTags(final SpPermissionChecker checker, final VaadinMessageSource i18n, final UINotification uinotification,
-            final UIEventBus eventBus, final ManagementUIState managementUIState, final TagManagement tagManagement) {
+            final UIEventBus eventBus, final ManagementUIState managementUIState, final TargetTagManagement tagManagement) {
         super(checker, i18n, uinotification, eventBus, managementUIState, tagManagement);
     }
 
@@ -68,7 +68,7 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken {
 
     protected void addAlreadySelectedTags() {
         for (final String tagName : managementUIState.getTargetTableFilters().getBulkUpload().getAssignedTagNames()) {
-            tagManagement.findTargetTag(tagName).map(TargetTag::getId).ifPresent(this::addNewToken);
+            tagManagement.getByName(tagName).map(TargetTag::getId).ifPresent(this::addNewToken);
         }
     }
 
@@ -76,7 +76,7 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken {
     protected void populateContainer() {
         container.removeAllItems();
         tagDetails.clear();
-        for (final TargetTag tag : tagManagement.findAllTargetTags(new PageRequest(0, MAX_TAGS))) {
+        for (final TargetTag tag : tagManagement.findAll(new PageRequest(0, MAX_TAGS))) {
             setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour());
         }
 

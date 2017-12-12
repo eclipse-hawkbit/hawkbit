@@ -373,7 +373,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         final Collection<Long> deletedIds = managementUIState.getDeletedDistributionList().stream()
                 .map(DistributionSetIdName::getId).collect(Collectors.toList());
 
-        distributionSetManagement.deleteDistributionSet(deletedIds);
+        distributionSetManagement.delete(deletedIds);
         eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.REMOVE_ENTITY, deletedIds));
 
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
@@ -463,7 +463,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
         final Set<Long> targetIds = targetIdNames.stream().map(TargetIdName::getTargetId).collect(Collectors.toSet());
 
-        targetManagement.deleteTargets(targetIds);
+        targetManagement.delete(targetIds);
 
         eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.REMOVE_ENTITY, targetIds));
 

@@ -79,10 +79,14 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
         }
 
         try {
-            final Artifact result = artifactManagement.createArtifact(file.getInputStream(), softwareModuleId, fileName,
+            final Artifact result = artifactManagement.create(file.getInputStream(), softwareModuleId, fileName,
                     md5Sum == null ? null : md5Sum.toLowerCase(), sha1Sum == null ? null : sha1Sum.toLowerCase(), false,
                     file.getContentType());
-            return ResponseEntity.status(HttpStatus.CREATED).body(MgmtSoftwareModuleMapper.toResponse(result));
+
+            final MgmtArtifact reponse = MgmtSoftwareModuleMapper.toResponse(result);
+            MgmtSoftwareModuleMapper.addLinks(result, reponse);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(reponse);
         } catch (final IOException e) {
             LOG.error("Failed to store artifact", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -108,7 +112,10 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
 
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, artifactId);
 
-        return ResponseEntity.ok(MgmtSoftwareModuleMapper.toResponse(module.getArtifact(artifactId).get()));
+        final MgmtArtifact reponse = MgmtSoftwareModuleMapper.toResponse(module.getArtifact(artifactId).get());
+        MgmtSoftwareModuleMapper.addLinks(module.getArtifact(artifactId).get(), reponse);
+
+        return ResponseEntity.ok(reponse);
     }
 
     @Override
@@ -117,7 +124,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             @PathVariable("artifactId") final Long artifactId) {
 
         findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, artifactId);
-        artifactManagement.deleteArtifact(artifactId);
+        artifactManagement.delete(artifactId);
 
         return ResponseEntity.ok().build();
     }
@@ -136,13 +143,13 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
 
         final Slice<SoftwareModule> findModulesAll;
-        Long countModulesAll;
+        long countModulesAll;
         if (rsqlParam != null) {
-            findModulesAll = softwareModuleManagement.findSoftwareModulesByPredicate(rsqlParam, pageable);
+            findModulesAll = softwareModuleManagement.findByRsql(pageable, rsqlParam);
             countModulesAll = ((Page<SoftwareModule>) findModulesAll).getTotalElements();
         } else {
-            findModulesAll = softwareModuleManagement.findSoftwareModulesAll(pageable);
-            countModulesAll = softwareModuleManagement.countSoftwareModulesAll();
+            findModulesAll = softwareModuleManagement.findAll(pageable);
+            countModulesAll = softwareModuleManagement.count();
         }
 
         final List<MgmtSoftwareModule> rest = MgmtSoftwareModuleMapper.toResponse(findModulesAll.getContent());
@@ -153,8 +160,12 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     public ResponseEntity<MgmtSoftwareModule> getSoftwareModule(
             @PathVariable("softwareModuleId") final Long softwareModuleId) {
 
-        final SoftwareModule findBaseSoftareModule = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
-        return ResponseEntity.ok(MgmtSoftwareModuleMapper.toResponse(findBaseSoftareModule));
+        final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
+
+        final MgmtSoftwareModule response = MgmtSoftwareModuleMapper.toResponse(module);
+        MgmtSoftwareModuleMapper.addLinks(module, response);
+
+        return ResponseEntity.ok(response);
     }
 
     @Override
@@ -163,7 +174,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
 
         LOG.debug("creating {} softwareModules", softwareModules.size());
         final Collection<SoftwareModule> createdSoftwareModules = softwareModuleManagement
-                .createSoftwareModule(MgmtSoftwareModuleMapper.smFromRequest(entityFactory, softwareModules));
+                .create(MgmtSoftwareModuleMapper.smFromRequest(entityFactory, softwareModules));
         LOG.debug("{} softwareModules created, return status {}", softwareModules.size(), HttpStatus.CREATED);
 
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -174,17 +185,21 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     public ResponseEntity<MgmtSoftwareModule> updateSoftwareModule(
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @RequestBody final MgmtSoftwareModuleRequestBodyPut restSoftwareModule) {
+        final SoftwareModule module = softwareModuleManagement
+                .update(entityFactory.softwareModule().update(softwareModuleId)
+                        .description(restSoftwareModule.getDescription()).vendor(restSoftwareModule.getVendor()));
 
-        return ResponseEntity.ok(MgmtSoftwareModuleMapper.toResponse(
-                softwareModuleManagement.updateSoftwareModule(entityFactory.softwareModule().update(softwareModuleId)
-                        .description(restSoftwareModule.getDescription()).vendor(restSoftwareModule.getVendor()))));
+        final MgmtSoftwareModule response = MgmtSoftwareModuleMapper.toResponse(module);
+        MgmtSoftwareModuleMapper.addLinks(module, response);
+
+        return ResponseEntity.ok(response);
     }
 
     @Override
     public ResponseEntity<Void> deleteSoftwareModule(@PathVariable("softwareModuleId") final Long softwareModuleId) {
 
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
-        softwareModuleManagement.deleteSoftwareModule(module.getId());
+        softwareModuleManagement.delete(module.getId());
 
         return ResponseEntity.ok().build();
     }
@@ -208,11 +223,9 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
         final Page<SoftwareModuleMetadata> metaDataPage;
 
         if (rsqlParam != null) {
-            metaDataPage = softwareModuleManagement.findSoftwareModuleMetadataBySoftwareModuleId(softwareModuleId,
-                    rsqlParam, pageable);
+            metaDataPage = softwareModuleManagement.findMetaDataByRsql(pageable, softwareModuleId, rsqlParam);
         } else {
-            metaDataPage = softwareModuleManagement.findSoftwareModuleMetadataBySoftwareModuleId(softwareModuleId,
-                    pageable);
+            metaDataPage = softwareModuleManagement.findMetaDataBySoftwareModuleId(pageable, softwareModuleId);
         }
 
         return ResponseEntity
@@ -225,7 +238,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             @PathVariable("metadataKey") final String metadataKey) {
 
         final SoftwareModuleMetadata findOne = softwareModuleManagement
-                .findSoftwareModuleMetadata(softwareModuleId, metadataKey).orElseThrow(
+                .getMetaDataBySoftwareModuleId(softwareModuleId, metadataKey).orElseThrow(
                         () -> new EntityNotFoundException(SoftwareModuleMetadata.class, softwareModuleId, metadataKey));
 
         return ResponseEntity.ok(MgmtSoftwareModuleMapper.toResponseSwMetadata(findOne));
@@ -234,7 +247,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     @Override
     public ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("metadataKey") final String metadataKey, @RequestBody final MgmtMetadata metadata) {
-        final SoftwareModuleMetadata updated = softwareModuleManagement.updateSoftwareModuleMetadata(softwareModuleId,
+        final SoftwareModuleMetadata updated = softwareModuleManagement.updateMetaData(softwareModuleId,
                 entityFactory.generateMetadata(metadataKey, metadata.getValue()));
 
         return ResponseEntity.ok(MgmtSoftwareModuleMapper.toResponseSwMetadata(updated));
@@ -243,7 +256,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     @Override
     public ResponseEntity<Void> deleteMetadata(@PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("metadataKey") final String metadataKey) {
-        softwareModuleManagement.deleteSoftwareModuleMetadata(softwareModuleId, metadataKey);
+        softwareModuleManagement.deleteMetaData(softwareModuleId, metadataKey);
 
         return ResponseEntity.ok().build();
     }
@@ -253,8 +266,8 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @RequestBody final List<MgmtMetadata> metadataRest) {
 
-        final List<SoftwareModuleMetadata> created = softwareModuleManagement.createSoftwareModuleMetadata(
-                softwareModuleId, MgmtSoftwareModuleMapper.fromRequestSwMetadata(entityFactory, metadataRest));
+        final List<SoftwareModuleMetadata> created = softwareModuleManagement.createMetaData(softwareModuleId,
+                MgmtSoftwareModuleMapper.fromRequestSwMetadata(entityFactory, metadataRest));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(MgmtSoftwareModuleMapper.toResponseSwMetadata(created));
     }
@@ -262,7 +275,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     private SoftwareModule findSoftwareModuleWithExceptionIfNotFound(final Long softwareModuleId,
             final Long artifactId) {
 
-        final SoftwareModule module = softwareModuleManagement.findSoftwareModuleById(softwareModuleId)
+        final SoftwareModule module = softwareModuleManagement.get(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
 
         if (artifactId != null && !module.getArtifact(artifactId).isPresent()) {

@@ -74,8 +74,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final SoftwareModule module = testdataFactory.createSoftwareModuleOs();
 
         assertThat(controllerManagement.findActionWithDetails(NOT_EXIST_IDL)).isNotPresent();
-        assertThat(controllerManagement.findByControllerId(NOT_EXIST_ID)).isNotPresent();
-        assertThat(controllerManagement.findByTargetId(NOT_EXIST_IDL)).isNotPresent();
+        assertThat(controllerManagement.getByControllerId(NOT_EXIST_ID)).isNotPresent();
+        assertThat(controllerManagement.get(NOT_EXIST_IDL)).isNotPresent();
         assertThat(controllerManagement.getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(),
                 module.getId())).isNotPresent();
 
@@ -308,8 +308,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long dsId = testdataFactory.createDistributionSet().getId();
         testdataFactory.createTarget();
         assignDistributionSet(dsId, TestdataFactory.DEFAULT_CONTROLLER_ID);
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
+        assertThat(targetManagement.getByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
+                .isEqualTo(TargetUpdateStatus.PENDING);
 
         return deploymentManagement.findActiveActionsByTarget(PAGE, TestdataFactory.DEFAULT_CONTROLLER_ID).getContent()
                 .get(0).getId();
@@ -364,7 +364,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     private void assertActionStatus(final Long actionId, final String controllerId,
             final TargetUpdateStatus expectedTargetUpdateStatus, final Action.Status expectedActionActionStatus,
             final Action.Status expectedActionStatus, final boolean actionActive) {
-        final TargetUpdateStatus targetStatus = targetManagement.findTargetByControllerID(controllerId).get()
+        final TargetUpdateStatus targetStatus = targetManagement.getByControllerID(controllerId).get()
                 .getUpdateStatus();
         assertThat(targetStatus).isEqualTo(expectedTargetUpdateStatus);
         final Action action = deploymentManagement.findAction(actionId).get();
@@ -396,9 +396,9 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         Target savedTarget = testdataFactory.createTarget();
 
         // create two artifacts with identical SHA1 hash
-        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random),
+        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).get().getId(), "file1", false);
-        final Artifact artifact2 = artifactManagement.createArtifact(new ByteArrayInputStream(random),
+        final Artifact artifact2 = artifactManagement.create(new ByteArrayInputStream(random),
                 ds2.findFirstModuleByType(osType).get().getId(), "file1", false);
         assertThat(artifact.getSha1Hash()).isEqualTo(artifact2.getSha1Hash());
 
@@ -430,6 +430,16 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotexist("", LOCALHOST))
                 .as("register target with empty controllerId should fail");
+    }
+
+    @Test
+    @Description("Verify that controller registration does not result in a TargetPollEvent if feature is disabled")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 0) })
+    public void targetPollEventNotSendIfDisabled() {
+        repositoryProperties.setPublishTargetPollEvent(false);
+        controllerManagement.findOrRegisterTargetIfItDoesNotexist("AA", LOCALHOST);
+        repositoryProperties.setPublishTargetPollEvent(true);
     }
 
     @Test
@@ -531,8 +541,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 entityFactory.actionStatus().create(action.getId()).status(Action.Status.RUNNING));
 
         // nothing changed as "feedback after close" is disabled
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
+        assertThat(targetManagement.getByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
+                .isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         assertThat(actionStatusRepository.count()).isEqualTo(3);
         assertThat(controllerManagement.findActionStatusByAction(PAGE, action.getId()).getNumberOfElements())
@@ -556,8 +566,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 entityFactory.actionStatus().create(action.getId()).status(Action.Status.RUNNING));
 
         // nothing changed as "feedback after close" is disabled
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
-                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
+        assertThat(targetManagement.getByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
+                .isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         // however, additional action status has been stored
         assertThat(actionStatusRepository.findAll(PAGE).getNumberOfElements()).isEqualTo(4);
@@ -581,7 +591,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         });
 
         // verify that audit information has not changed
-        final Target targetVerify = targetManagement.findTargetByControllerID(controllerId).get();
+        final Target targetVerify = targetManagement.getByControllerID(controllerId).get();
         assertThat(targetVerify.getCreatedBy()).isEqualTo(target.getCreatedBy());
         assertThat(targetVerify.getCreatedAt()).isEqualTo(target.getCreatedAt());
         assertThat(targetVerify.getLastModifiedBy()).isEqualTo(target.getLastModifiedBy());

@@ -11,8 +11,8 @@ package org.eclipse.hawkbit.ui.common.detailslayout;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.tagdetails.DistributionTagToken;
@@ -64,7 +64,7 @@ public abstract class AbstractDistributionSetDetails
             final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout,
             final DistributionSetManagement distributionSetManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout, final EntityFactory entityFactory,
-            final UINotification uiNotification, final TagManagement tagManagement,
+            final UINotification uiNotification, final DistributionSetTagManagement distributionSetTagManagement,
             final SoftwareModuleDetailsTable softwareModuleDetailsTable) {
         super(i18n, eventBus, permissionChecker, managementUIState);
         this.distributionAddUpdateWindowLayout = distributionAddUpdateWindowLayout;
@@ -72,7 +72,7 @@ public abstract class AbstractDistributionSetDetails
         this.distributionSetManagement = distributionSetManagement;
         this.dsMetadataPopupLayout = dsMetadataPopupLayout;
         this.distributionTagToken = new DistributionTagToken(permissionChecker, i18n, uiNotification, eventBus,
-                managementUIState, tagManagement, distributionSetManagement);
+                managementUIState, distributionSetTagManagement, distributionSetManagement);
         this.softwareModuleDetailsTable = softwareModuleDetailsTable;
 
         dsMetadataTable = new DistributionSetMetadatadetailsLayout(i18n, permissionChecker, distributionSetManagement,
@@ -132,7 +132,7 @@ public abstract class AbstractDistributionSetDetails
     @Override
     protected void showMetadata(final ClickEvent event) {
         final Optional<DistributionSet> ds = distributionSetManagement
-                .findDistributionSetById(getSelectedBaseEntityId());
+                .get(getSelectedBaseEntityId());
         if (!ds.isPresent()) {
             uiNotification.displayWarning(getI18n().getMessage("distributionset.not.exists"));
             return;

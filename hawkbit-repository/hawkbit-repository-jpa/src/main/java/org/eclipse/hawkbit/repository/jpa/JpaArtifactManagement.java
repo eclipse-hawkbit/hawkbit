@@ -85,7 +85,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Artifact createArtifact(final InputStream stream, final Long moduleId, final String filename,
+    public Artifact create(final InputStream stream, final Long moduleId, final String filename,
             final String providedMd5Sum, final String providedSha1Sum, final boolean overrideExisting,
             final String contentType) {
         AbstractDbArtifact result = null;
@@ -137,8 +137,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void deleteArtifact(final Long id) {
-        final JpaArtifact existing = (JpaArtifact) findArtifact(id)
+    public void delete(final Long id) {
+        final JpaArtifact existing = (JpaArtifact) get(id)
                 .orElseThrow(() -> new EntityNotFoundException(Artifact.class, id));
 
         clearArtifactBinary(existing.getSha1Hash(), existing.getSoftwareModule().getId());
@@ -149,29 +149,29 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     @Override
-    public Optional<Artifact> findArtifact(final Long id) {
+    public Optional<Artifact> get(final Long id) {
         return Optional.ofNullable(localArtifactRepository.findOne(id));
     }
 
     @Override
-    public Optional<Artifact> findByFilenameAndSoftwareModule(final String filename, final Long softwareModuleId) {
+    public Optional<Artifact> getByFilenameAndSoftwareModule(final String filename, final Long softwareModuleId) {
         throwExceptionIfSoftwareModuleDoesNotExist(softwareModuleId);
 
         return localArtifactRepository.findFirstByFilenameAndSoftwareModuleId(filename, softwareModuleId);
     }
 
     @Override
-    public Optional<Artifact> findFirstArtifactBySHA1(final String sha1Hash) {
+    public Optional<Artifact> findFirstBySHA1(final String sha1Hash) {
         return localArtifactRepository.findFirstBySha1Hash(sha1Hash);
     }
 
     @Override
-    public Optional<Artifact> findArtifactByFilename(final String filename) {
+    public Optional<Artifact> getByFilename(final String filename) {
         return localArtifactRepository.findFirstByFilename(filename);
     }
 
     @Override
-    public Page<Artifact> findArtifactBySoftwareModule(final Pageable pageReq, final Long swId) {
+    public Page<Artifact> findBySoftwareModule(final Pageable pageReq, final Long swId) {
         throwExceptionIfSoftwareModuleDoesNotExist(swId);
 
         return localArtifactRepository.findBySoftwareModuleId(pageReq, swId);
@@ -206,13 +206,13 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Artifact createArtifact(final InputStream inputStream, final Long moduleId, final String filename,
+    public Artifact create(final InputStream inputStream, final Long moduleId, final String filename,
             final boolean overrideExisting) {
-        return createArtifact(inputStream, moduleId, filename, null, null, overrideExisting, null);
+        return create(inputStream, moduleId, filename, null, null, overrideExisting, null);
     }
 
     @Override
-    public Long countArtifactsAll() {
+    public long count() {
         return localArtifactRepository.count();
     }
 

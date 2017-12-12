@@ -41,7 +41,7 @@ public interface TargetFilterQueryManagement {
      *             {@link TargetFilterQueryCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
-    TargetFilterQuery createTargetFilterQuery(@NotNull TargetFilterQueryCreate create);
+    TargetFilterQuery create(@NotNull TargetFilterQueryCreate create);
 
     /**
      * Delete target filter query.
@@ -53,7 +53,7 @@ public interface TargetFilterQueryManagement {
      *             if filter with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
-    void deleteTargetFilterQuery(@NotNull Long targetFilterQueryId);
+    void delete(@NotNull Long targetFilterQueryId);
 
     /**
      * Verifies provided filter syntax.
@@ -81,7 +81,7 @@ public interface TargetFilterQueryManagement {
      * @return the found {@link TargetFilterQuery}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetFilterQuery> findAllTargetFilterQuery(@NotNull Pageable pageable);
+    Page<TargetFilterQuery> findAll(@NotNull Pageable pageable);
 
     /**
      * Counts all target filter queries
@@ -89,7 +89,7 @@ public interface TargetFilterQueryManagement {
      * @return the number of all target filter queries
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Long countAllTargetFilterQuery();
+    long count();
 
     /**
      * Retrieves all target filter query which {@link TargetFilterQuery}.
@@ -102,7 +102,7 @@ public interface TargetFilterQueryManagement {
      * @return the page with the found {@link TargetFilterQuery}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetFilterQuery> findTargetFilterQueryByName(@NotNull Pageable pageable, @NotNull String name);
+    Page<TargetFilterQuery> findByName(@NotNull Pageable pageable, @NotNull String name);
 
     /**
      * Retrieves all target filter query which {@link TargetFilterQuery}.
@@ -115,7 +115,7 @@ public interface TargetFilterQueryManagement {
      * @return the page with the found {@link TargetFilterQuery}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetFilterQuery> findTargetFilterQueryByFilter(@NotNull Pageable pageable, @NotNull String rsqlFilter);
+    Page<TargetFilterQuery> findByRsql(@NotNull Pageable pageable, @NotNull String rsqlFilter);
 
     /**
      * Retrieves all target filter query which have exactly the provided query.
@@ -127,7 +127,7 @@ public interface TargetFilterQueryManagement {
      * @return the page with the found {@link TargetFilterQuery}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetFilterQuery> findTargetFilterQueryByQuery(@NotNull Pageable pageable, @NotNull String query);
+    Page<TargetFilterQuery> findByQuery(@NotNull Pageable pageable, @NotNull String query);
 
     /**
      * Retrieves all target filter query which {@link TargetFilterQuery}.
@@ -145,7 +145,7 @@ public interface TargetFilterQueryManagement {
      *             if DS with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetFilterQuery> findTargetFilterQueryByAutoAssignDS(@NotNull Pageable pageable, @NotNull Long setId,
+    Page<TargetFilterQuery> findByAutoAssignDSAndRsql(@NotNull Pageable pageable, @NotNull Long setId,
             String rsqlParam);
 
     /**
@@ -157,7 +157,7 @@ public interface TargetFilterQueryManagement {
      * @param pageable
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetFilterQuery> findTargetFilterQueryWithAutoAssignDS(@NotNull Pageable pageable);
+    Page<TargetFilterQuery> findWithAutoAssignDS(@NotNull Pageable pageable);
 
     /**
      * Find target filter query by id.
@@ -168,7 +168,7 @@ public interface TargetFilterQueryManagement {
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Optional<TargetFilterQuery> findTargetFilterQueryById(@NotNull Long targetFilterQueryId);
+    Optional<TargetFilterQuery> get(@NotNull Long targetFilterQueryId);
 
     /**
      * Find target filter query by name.
@@ -179,7 +179,7 @@ public interface TargetFilterQueryManagement {
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Optional<TargetFilterQuery> findTargetFilterQueryByName(@NotNull String targetFilterQueryName);
+    Optional<TargetFilterQuery> getByName(@NotNull String targetFilterQueryName);
 
     /**
      * updates the {@link TargetFilterQuery}.
@@ -197,7 +197,7 @@ public interface TargetFilterQueryManagement {
      *             {@link TargetFilterQueryUpdate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    TargetFilterQuery updateTargetFilterQuery(@NotNull TargetFilterQueryUpdate update);
+    TargetFilterQuery update(@NotNull TargetFilterQueryUpdate update);
 
     /**
      * updates the {@link TargetFilterQuery#getAutoAssignDistributionSet()}.
@@ -213,6 +213,6 @@ public interface TargetFilterQueryManagement {
      *             provided but not found
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    TargetFilterQuery updateTargetFilterQueryAutoAssignDS(@NotNull Long queryId, Long dsId);
+    TargetFilterQuery updateAutoAssignDS(@NotNull Long queryId, Long dsId);
 
 }

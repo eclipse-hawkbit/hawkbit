@@ -15,13 +15,17 @@ see [hawkBit Documentation](https://www.eclipse.org/hawkbit/documentation/overvi
 
 * Want to chat with the team behind hawkBit? [![Join the chat at https://gitter.im/eclipse/hawkbit](https://badges.gitter.im/eclipse/hawkbit.svg)](https://gitter.im/eclipse/hawkbit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 * Having issues with hawkBit? Open a [GitHub issue](https://github.com/eclipse/hawkbit/issues).
-* You can also check out our [Project Homepage](https://projects.eclipse.org/projects/iot.hawkbit) for further contact options.
+* You can also check out our [Project Homepage](https://www.eclipse.org/hawkbit) for further contact options.
+
+# Examples and Extensions
+
+Next to the hawkBit core hosted here the project maintains as well [examples](https://github.com/eclipse/hawkbit-examples) and [extension](https://github.com/eclipse/hawkbit-extensions) repositories.
 
 # hawkBit sandbox
 
 We offer a sandbox installation that is free for everyone to try out hawkBit. However, keep in mind that the sandbox database will be reset from time to time. It is also not possible to upload any artifacts into the sandbox. But you can use it to try out the Management UI, Management API and DDI API.
 
-https://hawkbit.eu-gb.mybluemix.net/UI/ (currently unavailable - will be back soon)
+https://hawkbit.eu-gb.mybluemix.net/UI/
 
 # Device Integration
 
@@ -30,6 +34,8 @@ hawkBit does not provide off the shelf clients for devices as part of the projec
 There are clients outside of the Eclipse IoT eco system as well, e.g.:
 
 * [SWupdate](https://github.com/sbabic/swupdate) which is a Linux Update agent with focus on a efficient and safe way to update embedded systems.
+
+* [rauc-hawkbit](https://github.com/rauc/rauc-hawkbit) which is a python-based hawkBit client application and library for the [RAUC](https://github.com/rauc/rauc) update framework.
 
 # Getting Started
 
@@ -53,30 +59,31 @@ Next to the [Update Server](hawkbit-runtime/hawkbit-update-server) we are also p
 
 # Clone, build and run hawkBit
 
-## Build
+## Build and start hawkBit [Update Server](hawkbit-runtime/hawkbit-update-server)
 
 ```
 $ git clone https://github.com/eclipse/hawkbit.git
 $ cd hawkbit
 $ mvn clean install
-```
-
-## Start hawkBit [Update Server](hawkbit-runtime/hawkbit-update-server)
-
-```
 $ java -jar ./hawkbit-runtime/hawkbit-update-server/target/hawkbit-update-server-#version#.jar
 ```
 
-## Start hawkBit [Device Simulator](examples/hawkbit-device-simulator) (optional)
+## Start hawkBit [Device Simulator](https://github.com/eclipse/hawkbit-examples/tree/master/hawkbit-device-simulator) (optional)
 
 ```
-$ java -jar ./examples/hawkbit-device-simulator/target/hawkbit-device-simulator-#version#.jar
+$ git clone https://github.com/eclipse/hawkbit-examples.git
+$ cd hawkbit-examples
+$ mvn clean install
 ```
 
-## Generate getting started data with the [Management API example](examples/hawkbit-example-mgmt-simulator) (optional)
+```
+$ java -jar ./hawkbit-device-simulator/target/hawkbit-device-simulator-#version#.jar
+```
+
+## Generate getting started data with the [Management API example](https://github.com/eclipse/hawkbit-examples/tree/master/hawkbit-example-mgmt-simulator) (optional)
 
 ```
-$ java -jar ./examples/hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulator-#version#.jar
+$ java -jar ./hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulator-#version#.jar
 ```
 
 # Releases and Roadmap

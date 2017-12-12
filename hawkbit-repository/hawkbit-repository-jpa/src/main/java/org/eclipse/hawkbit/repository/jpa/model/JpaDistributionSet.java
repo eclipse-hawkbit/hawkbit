@@ -60,8 +60,7 @@ import org.springframework.context.ApplicationEvent;
 @Entity
 @Table(name = "sp_distribution_set", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "name", "version", "tenant" }, name = "uk_distrib_set") }, indexes = {
-                @Index(name = "sp_idx_distribution_set_01", columnList = "tenant,deleted,name,complete"),
-                @Index(name = "sp_idx_distribution_set_02", columnList = "tenant,required_migration_step"),
+                @Index(name = "sp_idx_distribution_set_01", columnList = "tenant,deleted,complete"),
                 @Index(name = "sp_idx_distribution_set_prim", columnList = "tenant,id") })
 @NamedEntityGraph(name = "DistributionSet.detail", attributeNodes = { @NamedAttributeNode("modules"),
         @NamedAttributeNode("tags"), @NamedAttributeNode("type") })
@@ -273,7 +272,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
         if (allready >= softwareModule.getType().getMaxAssignments()) {
             modules.stream().filter(module -> module.getType().getKey().equals(softwareModule.getType().getKey()))
-                    .findAny().map(modules::remove);
+                    .findAny().ifPresent(modules::remove);
         }
 
         if (modules.add(softwareModule)) {

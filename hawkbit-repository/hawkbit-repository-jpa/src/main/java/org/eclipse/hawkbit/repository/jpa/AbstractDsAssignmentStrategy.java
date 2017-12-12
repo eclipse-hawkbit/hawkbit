@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.util.CollectionUtils;
 
 /**
  * {@link DistributionSet} to {@link Target} assignment strategy as utility for
@@ -92,11 +93,25 @@ public abstract class AbstractDsAssignmentStrategy {
      *            to cancel actions for
      * @return {@link Set} of {@link Target#getId()}s
      */
-    abstract Set<Long> findTargetIdsToCancel(List<List<Long>> targetIds);
+    abstract Set<Long> cancelActiveActions(List<List<Long>> targetIds);
+
+    /**
+     * Cancels actions that can be canceled (i.e.
+     * {@link DistributionSet#isRequiredMigrationStep() is <code>false</code>})
+     * as a result of the new assignment and returns all {@link Target}s where
+     * such actions existed.
+     * 
+     * @param targetIds
+     *            to cancel actions for
+     * @return {@link Set} of {@link Target#getId()}s
+     */
+    abstract void closeActiveActions(List<List<Long>> targetIds);
 
     /**
      * Handles event sending related to the assignment.
      * 
+     * @param set
+     *            that has been assigned
      * @param targets
      *            to send events for
      * @param targetIdsCancelList
@@ -105,12 +120,17 @@ public abstract class AbstractDsAssignmentStrategy {
      *            mapping of {@link Target#getControllerId()} to new
      *            {@link Action} that was created as part of the assignment.
      */
-    abstract void sendAssignmentEvents(final List<JpaTarget> targets, final Set<Long> targetIdsCancelList,
-            final Map<String, JpaAction> controllerIdsToActions);
+    abstract void sendAssignmentEvents(DistributionSet set, final List<JpaTarget> targets,
+            final Set<Long> targetIdsCancelList, final Map<String, JpaAction> controllerIdsToActions);
 
-    protected void sendTargetAssignDistributionSetEvent(final Action action) {
-        afterCommit.afterCommit(() -> eventPublisher
-                .publishEvent(new TargetAssignDistributionSetEvent(action, applicationContext.getId())));
+    protected void sendTargetAssignDistributionSetEvent(final String tenant, final long distributionSetId,
+            final List<Action> actions) {
+        if (CollectionUtils.isEmpty(actions)) {
+            return;
+        }
+
+        afterCommit.afterCommit(() -> eventPublisher.publishEvent(
+                new TargetAssignDistributionSetEvent(tenant, distributionSetId, actions, applicationContext.getId())));
     }
 
     protected void sendTargetUpdatedEvent(final JpaTarget target) {
@@ -119,7 +139,7 @@ public abstract class AbstractDsAssignmentStrategy {
     }
 
     /**
-     * Removes {@link Action}s that are no longer necessary and sends
+     * Cancels {@link Action}s that are no longer necessary and sends
      * cancellations to the controller.
      *
      * @param targetsIds
@@ -130,8 +150,8 @@ public abstract class AbstractDsAssignmentStrategy {
         // Figure out if there are potential target/action combinations that
         // need to be considered for cancellation
         final List<JpaAction> activeActions = actionRepository
-                .findByActiveAndTargetIdInAndActionStatusNotEqualToAndDistributionSetRequiredMigrationStep(targetsIds,
-                        Action.Status.CANCELING);
+                .findByActiveAndTargetIdInAndActionStatusNotEqualToAndDistributionSetNotRequiredMigrationStep(
+                        targetsIds, Action.Status.CANCELING);
 
         return activeActions.stream().map(action -> {
             action.setStatus(Status.CANCELING);
@@ -142,6 +162,34 @@ public abstract class AbstractDsAssignmentStrategy {
             actionRepository.save(action);
 
             cancelAssignDistributionSetEvent(action.getTarget(), action.getId());
+
+            return action.getTarget().getId();
+        }).collect(Collectors.toList());
+
+    }
+
+    /**
+     * Closes {@link Action}s that are no longer necessary without sending a
+     * hint to the controller.
+     *
+     * @param targetsIds
+     *            to override {@link Action}s
+     */
+    protected List<Long> closeObsoleteUpdateActions(final Collection<Long> targetsIds) {
+
+        // Figure out if there are potential target/action combinations that
+        // need to be considered for cancellation
+        final List<JpaAction> activeActions = actionRepository
+                .findByActiveAndTargetIdInAndDistributionSetNotRequiredMigrationStep(targetsIds);
+
+        return activeActions.stream().map(action -> {
+            action.setStatus(Status.CANCELED);
+            action.setActive(false);
+
+            // document that the status has been retrieved
+            actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELED, System.currentTimeMillis(),
+                    RepositoryConstants.SERVER_MESSAGE_PREFIX + "close obsolete action due to new update"));
+            actionRepository.save(action);
 
             return action.getTarget().getId();
         }).collect(Collectors.toList());

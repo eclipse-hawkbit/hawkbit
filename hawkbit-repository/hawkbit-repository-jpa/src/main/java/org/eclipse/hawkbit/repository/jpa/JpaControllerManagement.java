@@ -48,7 +48,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,9 +99,6 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Autowired
     private TenantConfigurationManagement tenantConfigurationManagement;
-
-    @Autowired
-    private TenantAware tenantAware;
 
     @Autowired
     private SystemSecurityContext systemSecurityContext;
@@ -483,12 +479,12 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public Optional<Target> findByControllerId(final String controllerId) {
+    public Optional<Target> getByControllerId(final String controllerId) {
         return targetRepository.findByControllerId(controllerId);
     }
 
     @Override
-    public Optional<Target> findByTargetId(final Long targetId) {
+    public Optional<Target> get(final Long targetId) {
         return Optional.ofNullable(targetRepository.findOne(targetId));
     }
 
@@ -521,5 +517,10 @@ public class JpaControllerManagement implements ControllerManagement {
                 actionId);
 
         return messages.getContent();
+    }
+
+    @Override
+    public Optional<SoftwareModule> getSoftwareModule(final Long id) {
+        return Optional.ofNullable(softwareModuleRepository.findOne(id));
     }
 }

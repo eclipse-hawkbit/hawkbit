@@ -179,9 +179,9 @@ public class TargetFilterTable extends Table {
                 i18n.getMessage("message.delete.filter.confirm"), i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
                     if (ok) {
                         final Long rowId = (Long) ((Button) event.getComponent()).getData();
-                        final String deletedFilterName = targetFilterQueryManagement.findTargetFilterQueryById(rowId)
+                        final String deletedFilterName = targetFilterQueryManagement.get(rowId)
                                 .get().getName();
-                        targetFilterQueryManagement.deleteTargetFilterQuery(rowId);
+                        targetFilterQueryManagement.delete(rowId);
 
                         /*
                          * Refresh the custom filter table to show latest change
@@ -252,7 +252,7 @@ public class TargetFilterTable extends Table {
 
     private void onClickOfDetailButton(final ClickEvent event) {
         final String targetFilterName = (String) ((Button) event.getComponent()).getData();
-        targetFilterQueryManagement.findTargetFilterQueryByName(targetFilterName).ifPresent(targetFilterQuery -> {
+        targetFilterQueryManagement.getByName(targetFilterName).ifPresent(targetFilterQuery -> {
             filterManagementUIState.setFilterQueryValue(targetFilterQuery.getQuery());
             filterManagementUIState.setTfQuery(targetFilterQuery);
             filterManagementUIState.setEditViewDisplayed(true);

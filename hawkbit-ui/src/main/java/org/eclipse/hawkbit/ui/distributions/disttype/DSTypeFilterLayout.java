@@ -8,10 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.distributions.disttype;
 
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterLayout;
 import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
@@ -33,13 +33,13 @@ public class DSTypeFilterLayout extends AbstractFilterLayout {
     private final ManageDistUIState manageDistUIState;
 
     public DSTypeFilterLayout(final ManageDistUIState manageDistUIState, final VaadinMessageSource i18n,
-            final SpPermissionChecker permChecker, final UIEventBus eventBus, final TagManagement tagManagement,
-            final EntityFactory entityFactory, final UINotification uiNotification,
-            final SoftwareModuleTypeManagement softwareModuleTypeManagement,
+            final SpPermissionChecker permChecker, final UIEventBus eventBus, final EntityFactory entityFactory,
+            final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement,
+            final DistributionSetManagement distributionSetManagement,
             final DistributionsViewClientCriterion distributionsViewClientCriterion) {
-        super(new DSTypeFilterHeader(i18n, permChecker, eventBus, manageDistUIState, tagManagement, entityFactory,
-                uiNotification, softwareModuleTypeManagement, distributionSetTypeManagement),
+        super(new DSTypeFilterHeader(i18n, permChecker, eventBus, manageDistUIState, entityFactory, uiNotification,
+                softwareModuleTypeManagement, distributionSetTypeManagement, distributionSetManagement),
                 new DSTypeFilterButtons(eventBus, manageDistUIState, distributionsViewClientCriterion,
                         distributionSetTypeManagement));
         this.manageDistUIState = manageDistUIState;

@@ -43,7 +43,7 @@ public class RSQLDistributionSetMetadataFieldsTest extends AbstractJpaIntegratio
             metadata.add(entityFactory.generateMetadata("" + i, "" + i));
         }
 
-        distributionSetManagement.createDistributionSetMetadata(distributionSetId, metadata);
+        distributionSetManagement.createMetaData(distributionSetId, metadata);
     }
 
     @Test
@@ -67,7 +67,7 @@ public class RSQLDistributionSetMetadataFieldsTest extends AbstractJpaIntegratio
     private void assertRSQLQuery(final String rsqlParam, final long expectedEntities) {
 
         final Page<DistributionSetMetadata> findEnitity = distributionSetManagement
-                .findDistributionSetMetadataByDistributionSetId(distributionSetId, rsqlParam, new PageRequest(0, 100));
+                .findMetaDataByDistributionSetIdAndRsql(new PageRequest(0, 100), distributionSetId, rsqlParam);
         final long countAllEntities = findEnitity.getTotalElements();
         assertThat(findEnitity).isNotNull();
         assertThat(countAllEntities).isEqualTo(expectedEntities);

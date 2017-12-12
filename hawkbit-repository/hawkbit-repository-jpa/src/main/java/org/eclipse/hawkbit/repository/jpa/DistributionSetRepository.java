@@ -47,21 +47,8 @@ public interface DistributionSetRepository
      *            to be found
      * @return list of found {@link DistributionSet}s
      */
-    @Query(value = "Select Distinct ds from JpaDistributionSet ds join ds.tags dst where dst.id = :tag")
+    @Query(value = "Select Distinct ds from JpaDistributionSet ds join ds.tags dst where dst.id = :tag and ds.deleted = 0")
     Page<JpaDistributionSet> findByTag(Pageable pageable, @Param("tag") final Long tagId);
-
-    /**
-     * Finds {@link DistributionSet}s by assigned {@link Tag}.
-     * 
-     * @param pageable
-     *            paging and sorting information
-     *
-     * @param tagId
-     *            to be found
-     * @return page of found {@link DistributionSet}s
-     */
-    @Query(value = "Select Distinct ds from JpaDistributionSet ds join ds.tags dst where dst.id = :tagId")
-    Page<JpaDistributionSet> findByTagId(Pageable pageable, @Param("tagId") final Long tagId);
 
     /**
      * deletes the {@link DistributionSet}s with the given IDs.
@@ -175,4 +162,5 @@ public interface DistributionSetRepository
     @Transactional
     @Query("DELETE FROM JpaDistributionSet t WHERE t.tenant = :tenant")
     void deleteByTenant(@Param("tenant") String tenant);
+
 }

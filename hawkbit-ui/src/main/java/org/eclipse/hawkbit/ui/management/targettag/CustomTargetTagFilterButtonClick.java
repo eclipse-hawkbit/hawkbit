@@ -50,7 +50,7 @@ public class CustomTargetTagFilterButtonClick extends AbstractFilterSingleButton
 
     @Override
     protected void filterClicked(final Button clickedButton) {
-        targetFilterQueryManagement.findTargetFilterQueryById((Long) clickedButton.getData())
+        targetFilterQueryManagement.get((Long) clickedButton.getData())
                 .ifPresent(targetFilterQuery -> {
                     this.managementUIState.getTargetTableFilters().setTargetFilterQuery(targetFilterQuery.getId());
                     this.eventBus.publish(this, TargetFilterEvent.FILTER_BY_TARGET_FILTER_QUERY);

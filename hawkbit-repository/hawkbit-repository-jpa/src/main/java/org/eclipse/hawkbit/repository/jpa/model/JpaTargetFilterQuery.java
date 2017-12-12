@@ -13,7 +13,6 @@ import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
-import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -30,9 +29,8 @@ import org.hibernate.validator.constraints.NotEmpty;
  *
  */
 @Entity
-@Table(name = "sp_target_filter_query", indexes = {
-        @Index(name = "sp_idx_target_filter_query_01", columnList = "tenant,name") }, uniqueConstraints = @UniqueConstraint(columnNames = {
-                "name", "tenant" }, name = "uk_tenant_custom_filter_name"))
+@Table(name = "sp_target_filter_query", uniqueConstraints = @UniqueConstraint(columnNames = { "name",
+        "tenant" }, name = "uk_tenant_custom_filter_name"))
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")

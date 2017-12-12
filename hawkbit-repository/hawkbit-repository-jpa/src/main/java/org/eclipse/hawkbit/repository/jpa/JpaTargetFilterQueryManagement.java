@@ -74,7 +74,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public TargetFilterQuery createTargetFilterQuery(final TargetFilterQueryCreate c) {
+    public TargetFilterQuery create(final TargetFilterQueryCreate c) {
         final JpaTargetFilterQueryCreate create = (JpaTargetFilterQueryCreate) c;
 
         return targetFilterQueryRepository.save(create.build());
@@ -84,20 +84,21 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void deleteTargetFilterQuery(final Long targetFilterQueryId) {
-        findTargetFilterQueryById(targetFilterQueryId)
-                .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));
+    public void delete(final Long targetFilterQueryId) {
+        if (!targetFilterQueryRepository.exists(targetFilterQueryId)) {
+            throw new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId);
+        }
 
         targetFilterQueryRepository.delete(targetFilterQueryId);
     }
 
     @Override
-    public Page<TargetFilterQuery> findAllTargetFilterQuery(final Pageable pageable) {
+    public Page<TargetFilterQuery> findAll(final Pageable pageable) {
         return convertPage(targetFilterQueryRepository.findAll(pageable), pageable);
     }
 
     @Override
-    public Long countAllTargetFilterQuery() {
+    public long count() {
         return targetFilterQueryRepository.count();
     }
 
@@ -107,7 +108,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-    public Page<TargetFilterQuery> findTargetFilterQueryByName(final Pageable pageable, final String name) {
+    public Page<TargetFilterQuery> findByName(final Pageable pageable, final String name) {
         List<Specification<JpaTargetFilterQuery>> specList = Collections.emptyList();
         if (!StringUtils.isEmpty(name)) {
             specList = Collections.singletonList(TargetFilterQuerySpecification.likeName(name));
@@ -116,7 +117,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-    public Page<TargetFilterQuery> findTargetFilterQueryByFilter(final Pageable pageable, final String rsqlFilter) {
+    public Page<TargetFilterQuery> findByRsql(final Pageable pageable, final String rsqlFilter) {
         List<Specification<JpaTargetFilterQuery>> specList = Collections.emptyList();
         if (!StringUtils.isEmpty(rsqlFilter)) {
             specList = Collections.singletonList(
@@ -126,7 +127,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-    public Page<TargetFilterQuery> findTargetFilterQueryByQuery(final Pageable pageable, final String query) {
+    public Page<TargetFilterQuery> findByQuery(final Pageable pageable, final String query) {
         List<Specification<JpaTargetFilterQuery>> specList = Collections.emptyList();
         if (!StringUtils.isEmpty(query)) {
             specList = Collections.singletonList(TargetFilterQuerySpecification.equalsQuery(query));
@@ -135,7 +136,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-    public Page<TargetFilterQuery> findTargetFilterQueryByAutoAssignDS(final Pageable pageable, final Long setId,
+    public Page<TargetFilterQuery> findByAutoAssignDSAndRsql(final Pageable pageable, final Long setId,
             final String rsqlFilter) {
         final List<Specification<JpaTargetFilterQuery>> specList = Lists.newArrayListWithExpectedSize(2);
 
@@ -150,7 +151,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-    public Page<TargetFilterQuery> findTargetFilterQueryWithAutoAssignDS(final Pageable pageable) {
+    public Page<TargetFilterQuery> findWithAutoAssignDS(final Pageable pageable) {
         final List<Specification<JpaTargetFilterQuery>> specList = Collections
                 .singletonList(TargetFilterQuerySpecification.withAutoAssignDS());
         return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList), pageable);
@@ -167,18 +168,18 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-    public Optional<TargetFilterQuery> findTargetFilterQueryByName(final String targetFilterQueryName) {
+    public Optional<TargetFilterQuery> getByName(final String targetFilterQueryName) {
         return targetFilterQueryRepository.findByName(targetFilterQueryName);
     }
 
     @Override
-    public Optional<TargetFilterQuery> findTargetFilterQueryById(final Long targetFilterQueryId) {
+    public Optional<TargetFilterQuery> get(final Long targetFilterQueryId) {
         return Optional.ofNullable(targetFilterQueryRepository.findOne(targetFilterQueryId));
     }
 
     @Override
     @Transactional
-    public TargetFilterQuery updateTargetFilterQuery(final TargetFilterQueryUpdate u) {
+    public TargetFilterQuery update(final TargetFilterQueryUpdate u) {
         final GenericTargetFilterQueryUpdate update = (GenericTargetFilterQueryUpdate) u;
 
         final JpaTargetFilterQuery targetFilterQuery = findTargetFilterQueryOrThrowExceptionIfNotFound(update.getId());
@@ -191,7 +192,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     @Transactional
-    public TargetFilterQuery updateTargetFilterQueryAutoAssignDS(final Long queryId, final Long dsId) {
+    public TargetFilterQuery updateAutoAssignDS(final Long queryId, final Long dsId) {
         final JpaTargetFilterQuery targetFilterQuery = findTargetFilterQueryOrThrowExceptionIfNotFound(queryId);
 
         targetFilterQuery.setAutoAssignDistributionSet(
@@ -201,7 +202,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     private JpaDistributionSet findDistributionSetAndThrowExceptionIfNotFound(final Long setId) {
-        return (JpaDistributionSet) distributionSetManagement.findDistributionSetByIdWithDetails(setId)
+        return (JpaDistributionSet) distributionSetManagement.getWithDetails(setId)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, setId));
     }
 

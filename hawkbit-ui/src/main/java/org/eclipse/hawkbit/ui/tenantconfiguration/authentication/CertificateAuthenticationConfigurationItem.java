@@ -12,6 +12,7 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
+import org.eclipse.hawkbit.ui.tenantconfiguration.generic.AbstractBooleanTenantConfigurationItem;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.ui.HorizontalLayout;
@@ -23,7 +24,7 @@ import com.vaadin.ui.VerticalLayout;
  * This class represents the UI item for the certificate authenticated by an
  * reverse proxy in the authentication configuration view.
  */
-public class CertificateAuthenticationConfigurationItem extends AbstractAuthenticationTenantConfigurationItem {
+public class CertificateAuthenticationConfigurationItem extends AbstractBooleanTenantConfigurationItem {
 
     private static final long serialVersionUID = 1L;
 

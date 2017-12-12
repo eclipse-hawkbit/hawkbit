@@ -35,7 +35,6 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
-import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
@@ -95,9 +94,6 @@ public class DdiRootController implements DdiRootControllerRestApi {
     private ControllerManagement controllerManagement;
 
     @Autowired
-    private SoftwareModuleManagement softwareModuleManagement;
-
-    @Autowired
     private ArtifactManagement artifactManagement;
 
     @Autowired
@@ -124,10 +120,10 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("softwareModuleId") final Long softwareModuleId) {
         LOG.debug("getSoftwareModulesArtifacts({})", controllerId);
 
-        final Target target = controllerManagement.findByControllerId(controllerId)
+        final Target target = controllerManagement.getByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
-        final SoftwareModule softwareModule = softwareModuleManagement.findSoftwareModuleById(softwareModuleId)
+        final SoftwareModule softwareModule = controllerManagement.getSoftwareModule(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
 
         return new ResponseEntity<>(
@@ -155,9 +151,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("fileName") final String fileName) {
         final ResponseEntity<InputStream> result;
 
-        final Target target = controllerManagement.findByControllerId(controllerId)
+        final Target target = controllerManagement.getByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
-        final SoftwareModule module = softwareModuleManagement.findSoftwareModuleById(softwareModuleId)
+        final SoftwareModule module = controllerManagement.getSoftwareModule(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
 
         if (checkModule(fileName, module)) {
@@ -225,10 +221,10 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("controllerId") final String controllerId,
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("fileName") final String fileName) {
-        controllerManagement.findByControllerId(controllerId)
+        final Target target = controllerManagement.getByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
-        final SoftwareModule module = softwareModuleManagement.findSoftwareModuleById(softwareModuleId)
+        final SoftwareModule module = controllerManagement.getSoftwareModule(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
 
         if (checkModule(fileName, module)) {
@@ -238,6 +234,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         final Artifact artifact = module.getArtifactByFilename(fileName)
                 .orElseThrow(() -> new EntityNotFoundException(Artifact.class, fileName));
+
+        checkAndLogDownload(requestResponseContextHolder.getHttpServletRequest(), target, module.getId());
 
         try {
             FileStreamingUtil.writeMD5FileResponse(requestResponseContextHolder.getHttpServletResponse(),
@@ -259,7 +257,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @RequestParam(value = "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) final Integer actionHistoryMessageCount) {
         LOG.debug("getControllerBasedeploymentAction({},{})", controllerId, resource);
 
-        final Target target = controllerManagement.findByControllerId(controllerId)
+        final Target target = controllerManagement.getByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         final Action action = findActionWithExceptionIfNotFound(actionId);
@@ -303,7 +301,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("actionId") @NotEmpty final Long actionId) {
         LOG.debug("provideBasedeploymentActionFeedback for target [{},{}]: {}", controllerId, actionId, feedback);
 
-        final Target target = controllerManagement.findByControllerId(controllerId)
+        final Target target = controllerManagement.getByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         if (!actionId.equals(feedback.getId())) {
@@ -404,7 +402,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("actionId") @NotEmpty final Long actionId) {
         LOG.debug("getControllerCancelAction({})", controllerId);
 
-        final Target target = controllerManagement.findByControllerId(controllerId)
+        final Target target = controllerManagement.getByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         final Action action = findActionWithExceptionIfNotFound(actionId);
@@ -435,7 +433,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("actionId") @NotEmpty final Long actionId) {
         LOG.debug("provideCancelActionFeedback for target [{}]: {}", controllerId, feedback);
 
-        final Target target = controllerManagement.findByControllerId(controllerId)
+        final Target target = controllerManagement.getByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         if (!actionId.equals(feedback.getId())) {

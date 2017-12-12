@@ -81,20 +81,20 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     private RabbitTemplate rabbitTemplate;
 
-    private DefaultAmqpSenderService senderService;
+    private DefaultAmqpMessageSenderService senderService;
 
     private Target testTarget;
 
     @Override
     public void before() throws Exception {
         super.before();
-        testTarget = targetManagement.createTarget(entityFactory.target().create().controllerId(CONTROLLER_ID)
+        testTarget = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID)
                 .securityToken(TEST_TOKEN).address(AMQP_URI.toString()));
 
         this.rabbitTemplate = Mockito.mock(RabbitTemplate.class);
         when(rabbitTemplate.getMessageConverter()).thenReturn(new Jackson2JsonMessageConverter());
 
-        senderService = Mockito.mock(DefaultAmqpSenderService.class);
+        senderService = Mockito.mock(DefaultAmqpMessageSenderService.class);
 
         final ArtifactUrlHandler artifactUrlHandlerMock = Mockito.mock(ArtifactUrlHandler.class);
         when(artifactUrlHandlerMock.getUrls(anyObject(), anyObject()))
@@ -108,28 +108,14 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         when(systemManagement.getTenantMetadata()).thenReturn(tenantMetaData);
 
         amqpMessageDispatcherService = new AmqpMessageDispatcherService(rabbitTemplate, senderService,
-                artifactUrlHandlerMock, systemSecurityContext, systemManagement, targetManagement, serviceMatcher);
+                artifactUrlHandlerMock, systemSecurityContext, systemManagement, targetManagement, serviceMatcher,
+                distributionSetManagement);
 
-    }
-
-    @Test
-    @Description("Verifies that download and install event with no software modul works")
-    public void testSendDownloadRequesWithEmptySoftwareModules() {
-
-        final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
-                "DEFAULT", 1L, 1L, CONTROLLER_ID, serviceMatcher.getServiceId());
-        amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
-
-        final Message sendMessage = getCaptureAdressEvent(targetAssignDistributionSetEvent);
-        final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage, 1L);
-        assertThat(downloadAndUpdateRequest.getTargetSecurityToken()).isEqualTo(TEST_TOKEN);
-        assertTrue("No softwaremmodule should be contained in the request",
-                downloadAndUpdateRequest.getSoftwareModules().isEmpty());
     }
 
     private Message getCaptureAdressEvent(final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
         final Target target = targetManagement
-                .findTargetByControllerID(targetAssignDistributionSetEvent.getControllerId()).get();
+                .getByControllerID(targetAssignDistributionSetEvent.getActions().keySet().iterator().next()).get();
         final Message sendMessage = createArgumentCapture(target.getAddress());
         return sendMessage;
     }
@@ -181,8 +167,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
             receivedList.add(new ArtifactFilesystem(new File("./test"), artifact.getSha1Hash(),
                     new DbArtifactHash(artifact.getSha1Hash(), null), artifact.getSize(), null));
         }
-        module = softwareModuleManagement.findSoftwareModuleById(module.getId()).get();
-        dsA = distributionSetManagement.findDistributionSetById(dsA.getId()).get();
+        module = softwareModuleManagement.get(module.getId()).get();
+        dsA = distributionSetManagement.get(dsA.getId()).get();
 
         final Action action = createAction(dsA);
 
@@ -306,7 +292,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         assertEquals(downloadAndUpdateRequest.getActionId(), action);
         assertEquals("The topic of the event shuold contain DOWNLOAD_AND_INSTALL", EventTopic.DOWNLOAD_AND_INSTALL,
                 sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC));
-        assertEquals("Security token of target", downloadAndUpdateRequest.getTargetSecurityToken(), TEST_TOKEN);
+        assertEquals("Security token of target", TEST_TOKEN, downloadAndUpdateRequest.getTargetSecurityToken());
 
         return downloadAndUpdateRequest;
 

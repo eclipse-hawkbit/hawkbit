@@ -1,3 +1,0 @@
-# Auto Configure
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-org.eclipse.hawkbit.artifact.repository.S3RepositoryAutoConfiguration

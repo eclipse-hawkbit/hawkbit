@@ -8,10 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.distributions.disttype;
 
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
@@ -38,14 +38,15 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
     private final CreateUpdateDistSetTypeLayout createUpdateDistSetTypeLayout;
 
     DSTypeFilterHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
-            final ManageDistUIState manageDistUIState, final TagManagement tagManagement,
-            final EntityFactory entityFactory, final UINotification uiNotification,
-            final SoftwareModuleTypeManagement softwareModuleTypeManagement,
-            final DistributionSetTypeManagement distributionSetTypeManagement) {
+            final ManageDistUIState manageDistUIState, final EntityFactory entityFactory,
+            final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement,
+            final DistributionSetTypeManagement distributionSetTypeManagement,
+            final DistributionSetManagement distributionSetManagement) {
         super(permChecker, eventBus, i18n);
         this.manageDistUIState = manageDistUIState;
-        this.createUpdateDistSetTypeLayout = new CreateUpdateDistSetTypeLayout(i18n, tagManagement, entityFactory,
-                eventBus, permChecker, uiNotification, softwareModuleTypeManagement, distributionSetTypeManagement);
+        this.createUpdateDistSetTypeLayout = new CreateUpdateDistSetTypeLayout(i18n, entityFactory, eventBus,
+                permChecker, uiNotification, softwareModuleTypeManagement, distributionSetTypeManagement,
+                distributionSetManagement);
         if (hasCreateUpdatePermission()) {
             createUpdateDistSetTypeLayout.init();
         }

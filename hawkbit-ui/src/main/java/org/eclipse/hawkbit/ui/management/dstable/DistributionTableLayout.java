@@ -10,11 +10,12 @@ package org.eclipse.hawkbit.ui.management.dstable;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
@@ -38,9 +39,9 @@ public class DistributionTableLayout extends AbstractTableLayout<DistributionTab
             final DistributionSetManagement distributionSetManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement,
             final ManagementViewClientCriterion managementViewClientCriterion, final EntityFactory entityFactory,
-            final UINotification notification, final TagManagement tagManagement,
-            final SystemManagement systemManagement, final TargetManagement targetManagement,
-            final DeploymentManagement deploymentManagement) {
+            final UINotification notification, final DistributionSetTagManagement distributionSetTagManagement,
+            final TargetTagManagement targetTagManagement, final SystemManagement systemManagement,
+            final TargetManagement targetManagement, final DeploymentManagement deploymentManagement) {
 
         final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout = new DistributionAddUpdateWindowLayout(
                 i18n, notification, eventBus, distributionSetManagement, distributionSetTypeManagement,
@@ -51,11 +52,11 @@ public class DistributionTableLayout extends AbstractTableLayout<DistributionTab
 
         this.distributionTable = new DistributionTable(eventBus, i18n, permissionChecker, notification,
                 managementUIState, managementViewClientCriterion, targetManagement, dsMetadataPopupLayout,
-                distributionSetManagement, deploymentManagement, tagManagement);
+                distributionSetManagement, deploymentManagement, targetTagManagement);
 
         super.init(new DistributionTableHeader(i18n, permissionChecker, eventBus, managementUIState), distributionTable,
                 new DistributionDetails(i18n, eventBus, permissionChecker, managementUIState, distributionSetManagement,
-                        dsMetadataPopupLayout, entityFactory, notification, tagManagement,
+                        dsMetadataPopupLayout, entityFactory, notification, distributionSetTagManagement,
                         distributionAddUpdateWindowLayout));
     }
 

@@ -16,8 +16,7 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
-import org.eclipse.hawkbit.repository.TagManagement;
-import org.eclipse.hawkbit.ui.HawkbitUI;
+import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsLayout;
 import org.eclipse.hawkbit.ui.artifacts.event.ArtifactDetailsEvent;
@@ -55,7 +54,7 @@ import com.vaadin.ui.VerticalLayout;
  * Display artifacts upload view.
  */
 @UIScope
-@SpringView(name = UploadArtifactView.VIEW_NAME, ui = HawkbitUI.class)
+@SpringView(name = UploadArtifactView.VIEW_NAME, ui = AbstractHawkbitUI.class)
 public class UploadArtifactView extends VerticalLayout implements View, BrowserWindowResizeListener {
 
     private static final long serialVersionUID = 1L;
@@ -93,8 +92,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
     @Autowired
     UploadArtifactView(final UIEventBus eventBus, final SpPermissionChecker permChecker, final VaadinMessageSource i18n,
             final UINotification uiNotification, final ArtifactUploadState artifactUploadState,
-            final TagManagement tagManagement, final EntityFactory entityFactory,
-            final SoftwareModuleManagement softwareModuleManagement,
+            final EntityFactory entityFactory, final SoftwareModuleManagement softwareModuleManagement,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final UploadViewClientCriterion uploadViewClientCriterion,
             final MultipartConfigElement multipartConfigElement, final ArtifactManagement artifactManagement) {
@@ -104,9 +102,10 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         this.uiNotification = uiNotification;
         this.artifactUploadState = artifactUploadState;
         this.filterByTypeLayout = new SMTypeFilterLayout(artifactUploadState, i18n, permChecker, eventBus,
-                tagManagement, entityFactory, uiNotification, softwareModuleTypeManagement, uploadViewClientCriterion);
+                entityFactory, uiNotification, softwareModuleTypeManagement, uploadViewClientCriterion);
         this.smTableLayout = new SoftwareModuleTableLayout(i18n, permChecker, artifactUploadState, uiNotification,
-                eventBus, softwareModuleManagement, softwareModuleTypeManagement, entityFactory, uploadViewClientCriterion);
+                eventBus, softwareModuleManagement, softwareModuleTypeManagement, entityFactory,
+                uploadViewClientCriterion);
         this.artifactDetailsLayout = new ArtifactDetailsLayout(i18n, eventBus, artifactUploadState, uiNotification,
                 artifactManagement, softwareModuleManagement);
         this.uploadLayout = new UploadLayout(i18n, uiNotification, eventBus, artifactUploadState,

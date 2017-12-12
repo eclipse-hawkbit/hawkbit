@@ -115,20 +115,25 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      * @return the rpc message back to supplier.
      */
     public Message onMessage(final Message message, final String type, final String tenant, final String virtualHost) {
-        checkContentTypeJson(message);
+
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         try {
             final MessageType messageType = MessageType.valueOf(type);
             switch (messageType) {
             case THING_CREATED:
+                checkContentTypeJson(message);
                 setTenantSecurityContext(tenant);
                 registerTarget(message, virtualHost);
                 break;
             case EVENT:
+                checkContentTypeJson(message);
                 setTenantSecurityContext(tenant);
-                final String topicValue = getStringHeaderKey(message, MessageHeaderKey.TOPIC, "EventTopic is null");
-                final EventTopic eventTopic = EventTopic.valueOf(topicValue);
-                handleIncomingEvent(message, eventTopic);
+                handleIncomingEvent(message);
+                break;
+            case PING:
+                if (isCorrelationIdNotEmpty(message)) {
+                    amqpMessageDispatcherService.sendPingReponseToDmfReceiver(message, tenant, virtualHost);
+                }
                 break;
             default:
                 logAndThrowMessageError(message, "No handle method was found for the given message type.");
@@ -206,8 +211,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      * @param topic
      *            the topic of the event.
      */
-    private void handleIncomingEvent(final Message message, final EventTopic topic) {
-        switch (topic) {
+    private void handleIncomingEvent(final Message message) {
+        switch (EventTopic.valueOf(getStringHeaderKey(message, MessageHeaderKey.TOPIC, "EventTopic is null"))) {
         case UPDATE_ACTION_STATUS:
             updateActionStatus(message);
             break;

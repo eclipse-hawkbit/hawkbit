@@ -10,13 +10,14 @@ package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
+import org.eclipse.hawkbit.ui.tenantconfiguration.generic.AbstractBooleanTenantConfigurationItem;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 /**
  * This class represents the UI item for the target security token section in
  * the authentication configuration view.
  */
-public class TargetSecurityTokenAuthenticationConfigurationItem extends AbstractAuthenticationTenantConfigurationItem {
+public class TargetSecurityTokenAuthenticationConfigurationItem extends AbstractBooleanTenantConfigurationItem {
 
     private static final long serialVersionUID = 1L;
 

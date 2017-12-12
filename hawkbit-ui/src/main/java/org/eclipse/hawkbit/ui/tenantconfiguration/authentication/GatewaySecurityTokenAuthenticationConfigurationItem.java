@@ -15,6 +15,7 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.T
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
+import org.eclipse.hawkbit.ui.tenantconfiguration.generic.AbstractBooleanTenantConfigurationItem;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.server.FontAwesome;
@@ -28,7 +29,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * This class represents the UI item for the gateway security token section in
  * the authentication configuration view.
  */
-public class GatewaySecurityTokenAuthenticationConfigurationItem extends AbstractAuthenticationTenantConfigurationItem {
+public class GatewaySecurityTokenAuthenticationConfigurationItem extends AbstractBooleanTenantConfigurationItem {
 
     private static final long serialVersionUID = 1L;
 

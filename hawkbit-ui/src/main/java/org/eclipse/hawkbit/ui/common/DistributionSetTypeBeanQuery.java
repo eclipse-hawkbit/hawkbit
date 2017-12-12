@@ -14,11 +14,9 @@ import java.util.Map;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
@@ -38,7 +36,6 @@ public class DistributionSetTypeBeanQuery extends AbstractBeanQuery<Distribution
     private static final Logger LOG = LoggerFactory.getLogger(DistributionSetTypeBeanQuery.class);
 
     private final Sort sort = new Sort(Direction.ASC, "name");
-    private transient Page<DistributionSetType> firstPageDistSetType;
     private transient DistributionSetTypeManagement distributionSetTypeManagement;
 
     /**
@@ -62,9 +59,7 @@ public class DistributionSetTypeBeanQuery extends AbstractBeanQuery<Distribution
     @Override
     public int size() {
 
-        firstPageDistSetType = getDistributionSetManagement()
-                .findDistributionSetTypesAll(new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
-        long size = firstPageDistSetType.getTotalElements();
+        long size = getDistributionSetManagement().count();
         if (size > Integer.MAX_VALUE) {
             size = Integer.MAX_VALUE;
         }
@@ -80,15 +75,7 @@ public class DistributionSetTypeBeanQuery extends AbstractBeanQuery<Distribution
 
     @Override
     protected List<DistributionSetType> loadBeans(final int startIndex, final int count) {
-        Page<DistributionSetType> typeBeans;
-        if (startIndex == 0 && firstPageDistSetType != null) {
-            typeBeans = firstPageDistSetType;
-        } else {
-            typeBeans = getDistributionSetManagement()
-                    .findDistributionSetTypesAll(new OffsetBasedPageRequest(startIndex, count, sort));
-        }
-
-        return typeBeans.getContent();
+        return getDistributionSetManagement().findAll(new OffsetBasedPageRequest(startIndex, count, sort)).getContent();
     }
 
     @Override

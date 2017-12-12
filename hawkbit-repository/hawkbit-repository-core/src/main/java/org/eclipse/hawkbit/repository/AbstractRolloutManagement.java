@@ -90,7 +90,7 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
         final List<Long> groupTargetCounts = new ArrayList<>(groups.size());
         final Map<String, Long> targetFilterCounts = groups.stream()
                 .map(group -> RolloutHelper.getGroupTargetFilter(baseFilter, group)).distinct()
-                .collect(Collectors.toMap(Function.identity(), targetManagement::countTargetByTargetFilterQuery));
+                .collect(Collectors.toMap(Function.identity(), targetManagement::countByRsql));
 
         long unusedTargetsCount = 0;
 
@@ -136,7 +136,7 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
         if (targetFilterCounts.containsKey(overlappingTargetsFilter)) {
             return targetFilterCounts.get(overlappingTargetsFilter);
         } else {
-            final long overlappingTargets = targetManagement.countTargetByTargetFilterQuery(overlappingTargetsFilter);
+            final long overlappingTargets = targetManagement.countByRsql(overlappingTargetsFilter);
             targetFilterCounts.put(overlappingTargetsFilter, overlappingTargets);
             return overlappingTargets;
         }
@@ -145,7 +145,7 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
     protected long calculateRemainingTargets(final List<RolloutGroup> groups, final String targetFilter,
             final Long createdAt) {
         final String baseFilter = RolloutHelper.getTargetFilterQuery(targetFilter, createdAt);
-        final long totalTargets = targetManagement.countTargetByTargetFilterQuery(baseFilter);
+        final long totalTargets = targetManagement.countByRsql(baseFilter);
         if (totalTargets == 0) {
             throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
         }
@@ -161,7 +161,7 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
             final String targetFilter, final Long createdAt) {
 
         final String baseFilter = RolloutHelper.getTargetFilterQuery(targetFilter, createdAt);
-        final long totalTargets = targetManagement.countTargetByTargetFilterQuery(baseFilter);
+        final long totalTargets = targetManagement.countByRsql(baseFilter);
         if (totalTargets == 0) {
             throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
         }

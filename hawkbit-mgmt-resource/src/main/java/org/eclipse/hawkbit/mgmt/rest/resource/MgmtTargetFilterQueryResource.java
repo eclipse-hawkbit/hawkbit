@@ -55,6 +55,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
         final TargetFilterQuery findTarget = findFilterWithExceptionIfNotFound(filterId);
         // to single response include poll status
         final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(findTarget);
+        MgmtTargetFilterQueryMapper.addLinks(response);
 
         return ResponseEntity.ok(response);
     }
@@ -74,13 +75,12 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
         final Slice<TargetFilterQuery> findTargetFiltersAll;
         final Long countTargetsAll;
         if (rsqlParam != null) {
-            final Page<TargetFilterQuery> findFilterPage = filterManagement.findTargetFilterQueryByFilter(pageable,
-                    rsqlParam);
+            final Page<TargetFilterQuery> findFilterPage = filterManagement.findByRsql(pageable, rsqlParam);
             countTargetsAll = findFilterPage.getTotalElements();
             findTargetFiltersAll = findFilterPage;
         } else {
-            findTargetFiltersAll = filterManagement.findAllTargetFilterQuery(pageable);
-            countTargetsAll = filterManagement.countAllTargetFilterQuery();
+            findTargetFiltersAll = filterManagement.findAll(pageable);
+            countTargetsAll = filterManagement.count();
         }
 
         final List<MgmtTargetFilterQuery> rest = MgmtTargetFilterQueryMapper
@@ -92,9 +92,12 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     public ResponseEntity<MgmtTargetFilterQuery> createFilter(
             @RequestBody final MgmtTargetFilterQueryRequestBody filter) {
         final TargetFilterQuery createdTarget = filterManagement
-                .createTargetFilterQuery(MgmtTargetFilterQueryMapper.fromRequest(entityFactory, filter));
+                .create(MgmtTargetFilterQueryMapper.fromRequest(entityFactory, filter));
 
-        return new ResponseEntity<>(MgmtTargetFilterQueryMapper.toResponse(createdTarget), HttpStatus.CREATED);
+        final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(createdTarget);
+        MgmtTargetFilterQueryMapper.addLinks(response);
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @Override
@@ -102,16 +105,18 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
             @RequestBody final MgmtTargetFilterQueryRequestBody targetFilterRest) {
         LOG.debug("updating target filter query {}", filterId);
 
-        final TargetFilterQuery updateFilter = filterManagement
-                .updateTargetFilterQuery(entityFactory.targetFilterQuery().update(filterId)
-                        .name(targetFilterRest.getName()).query(targetFilterRest.getQuery()));
+        final TargetFilterQuery updateFilter = filterManagement.update(entityFactory.targetFilterQuery()
+                .update(filterId).name(targetFilterRest.getName()).query(targetFilterRest.getQuery()));
 
-        return ResponseEntity.ok(MgmtTargetFilterQueryMapper.toResponse(updateFilter));
+        final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(updateFilter);
+        MgmtTargetFilterQueryMapper.addLinks(response);
+
+        return ResponseEntity.ok(response);
     }
 
     @Override
     public ResponseEntity<Void> deleteFilter(@PathVariable("filterId") final Long filterId) {
-        filterManagement.deleteTargetFilterQuery(filterId);
+        filterManagement.delete(filterId);
         LOG.debug("{} target filter query deleted, return status {}", filterId, HttpStatus.OK);
         return ResponseEntity.ok().build();
     }
@@ -120,10 +125,12 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     public ResponseEntity<MgmtTargetFilterQuery> postAssignedDistributionSet(
             @PathVariable("filterId") final Long filterId, @RequestBody final MgmtId dsId) {
 
-        final TargetFilterQuery updateFilter = filterManagement.updateTargetFilterQueryAutoAssignDS(filterId,
-                dsId.getId());
+        final TargetFilterQuery updateFilter = filterManagement.updateAutoAssignDS(filterId, dsId.getId());
 
-        return ResponseEntity.ok(MgmtTargetFilterQueryMapper.toResponse(updateFilter));
+        final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(updateFilter);
+        MgmtTargetFilterQueryMapper.addLinks(response);
+
+        return ResponseEntity.ok(response);
     }
 
     @Override
@@ -131,20 +138,26 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
             @PathVariable("filterId") final Long filterId) {
         final TargetFilterQuery filter = findFilterWithExceptionIfNotFound(filterId);
         final DistributionSet autoAssignDistributionSet = filter.getAutoAssignDistributionSet();
-        final MgmtDistributionSet distributionSetRest = MgmtDistributionSetMapper.toResponse(autoAssignDistributionSet);
-        final HttpStatus retStatus = distributionSetRest == null ? HttpStatus.NO_CONTENT : HttpStatus.OK;
-        return new ResponseEntity<>(distributionSetRest, retStatus);
+
+        if (autoAssignDistributionSet == null) {
+            return ResponseEntity.noContent().build();
+        }
+
+        final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(autoAssignDistributionSet);
+        MgmtDistributionSetMapper.addLinks(autoAssignDistributionSet, response);
+
+        return ResponseEntity.ok(response);
     }
 
     @Override
     public ResponseEntity<Void> deleteAssignedDistributionSet(@PathVariable("filterId") final Long filterId) {
-        filterManagement.updateTargetFilterQueryAutoAssignDS(filterId, null);
+        filterManagement.updateAutoAssignDS(filterId, null);
 
         return ResponseEntity.noContent().build();
     }
 
     private TargetFilterQuery findFilterWithExceptionIfNotFound(final Long filterId) {
-        return filterManagement.findTargetFilterQueryById(filterId)
+        return filterManagement.get(filterId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, filterId));
     }
 

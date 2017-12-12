@@ -8,18 +8,17 @@
  */
 package org.eclipse.hawkbit.ui.management.dstag;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.management.tag.ProxyTag;
 import org.eclipse.hawkbit.ui.management.tag.TagIdName;
-import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
@@ -33,8 +32,8 @@ public class DistributionTagBeanQuery extends AbstractBeanQuery<ProxyTag> {
 
     private static final long serialVersionUID = -4791426170440663033L;
     private final Sort sort = new Sort(Direction.ASC, "name");
-    private transient Page<DistributionSetTag> firstPageDsTag = null;
-    private transient TagManagement tagManagementService;
+
+    private transient DistributionSetTagManagement distributionSetTagManagement;
 
     /**
      * Parametric Constructor.
@@ -56,33 +55,26 @@ public class DistributionTagBeanQuery extends AbstractBeanQuery<ProxyTag> {
 
     @Override
     public int size() {
-        firstPageDsTag = getTagManagement()
-                .findAllDistributionSetTags(new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
-        long size = firstPageDsTag.getTotalElements();
+        long size = getTagManagement().count();
         if (size > Integer.MAX_VALUE) {
             size = Integer.MAX_VALUE;
         }
         return (int) size;
     }
 
-    private TagManagement getTagManagement() {
-        if (tagManagementService == null) {
-            tagManagementService = SpringContextHelper.getBean(TagManagement.class);
+    private DistributionSetTagManagement getTagManagement() {
+        if (distributionSetTagManagement == null) {
+            distributionSetTagManagement = SpringContextHelper.getBean(DistributionSetTagManagement.class);
         }
-        return tagManagementService;
+        return distributionSetTagManagement;
     }
 
     @Override
     protected List<ProxyTag> loadBeans(final int startIndex, final int count) {
-        Page<DistributionSetTag> dsTagBeans;
-        final List<ProxyTag> tagList = new ArrayList<>();
-        if (startIndex == 0 && firstPageDsTag != null) {
-            dsTagBeans = firstPageDsTag;
-        } else {
-            dsTagBeans = getTagManagement()
-                    .findAllDistributionSetTags(new OffsetBasedPageRequest(startIndex, count, sort));
-        }
-        for (final DistributionSetTag tag : dsTagBeans) {
+        final Slice<DistributionSetTag> dsTagBeans = getTagManagement()
+                .findAll(new OffsetBasedPageRequest(startIndex, count, sort));
+
+        return dsTagBeans.getContent().stream().map(tag -> {
             final ProxyTag proxyTargetTag = new ProxyTag();
             proxyTargetTag.setColour(tag.getColour());
             proxyTargetTag.setDescription(tag.getDescription());
@@ -90,9 +82,10 @@ public class DistributionTagBeanQuery extends AbstractBeanQuery<ProxyTag> {
             proxyTargetTag.setId(tag.getId());
             final TagIdName tagIdName = new TagIdName(tag.getName(), tag.getId());
             proxyTargetTag.setTagIdName(tagIdName);
-            tagList.add(proxyTargetTag);
-        }
-        return tagList;
+
+            return proxyTargetTag;
+
+        }).collect(Collectors.toList());
     }
 
     @Override

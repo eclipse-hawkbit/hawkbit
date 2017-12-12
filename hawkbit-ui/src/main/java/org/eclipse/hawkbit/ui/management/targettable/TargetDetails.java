@@ -12,7 +12,7 @@ import java.net.URI;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -65,7 +65,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
     TargetDetails(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState,
-            final UINotification uiNotification, final TagManagement tagManagement,
+            final UINotification uiNotification, final TargetTagManagement tagManagement,
             final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
             final EntityFactory entityFactory, final TargetTable targetTable) {
         super(i18n, eventBus, permissionChecker, managementUIState);

@@ -18,19 +18,21 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.PropertiesQuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryDefaultConfiguration;
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetBuilder;
@@ -38,8 +40,10 @@ import org.eclipse.hawkbit.repository.builder.DistributionSetTypeBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
+import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
+import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignScheduler;
@@ -144,6 +148,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         return new RolloutStatusCache(tenantAware);
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    ApplicationEventFilter applicationEventFilter(final RepositoryProperties repositoryProperties) {
+        return e -> (e instanceof TargetPollEvent) && !repositoryProperties.isPublishTargetPollEvent();
+    }
+
     /**
      * @param distributionSetTypeManagement
      *            to loading the {@link DistributionSetType}
@@ -165,8 +175,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      * @return DistributionSetTypeBuilder bean
      */
     @Bean
-    DistributionSetTypeBuilder distributionSetTypeBuilder(final SoftwareModuleManagement softwareManagement) {
-        return new JpaDistributionSetTypeBuilder(softwareManagement);
+    DistributionSetTypeBuilder distributionSetTypeBuilder(
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
+        return new JpaDistributionSetTypeBuilder(softwareModuleTypeManagement);
     }
 
     /**
@@ -369,9 +380,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final DistributionSetRepository distributionSetRepository,
-            final VirtualPropertyReplacer virtualPropertyReplacer) {
+            final VirtualPropertyReplacer virtualPropertyReplacer, final NoCountPagingRepository criteriaNoCountDao) {
         return new JpaDistributionSetTypeManagement(distributionSetTypeRepository, softwareModuleTypeRepository,
-                distributionSetRepository, virtualPropertyReplacer);
+                distributionSetRepository, virtualPropertyReplacer, criteriaNoCountDao);
     }
 
     /**
@@ -430,14 +441,30 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * {@link JpaTagManagement} bean.
+     * {@link JpaTargetTagManagement} bean.
      *
-     * @return a new {@link TagManagement}
+     * @return a new {@link TargetTagManagement}
      */
     @Bean
     @ConditionalOnMissingBean
-    TagManagement tagManagement() {
-        return new JpaTagManagement();
+    TargetTagManagement targetTagManagement(final TargetTagRepository targetTagRepository,
+            final TargetRepository targetRepository, final VirtualPropertyReplacer virtualPropertyReplacer) {
+        return new JpaTargetTagManagement(targetTagRepository, targetRepository, virtualPropertyReplacer);
+    }
+
+    /**
+     * {@link JpaDistributionSetTagManagement} bean.
+     *
+     * @return a new {@link JpaDistributionSetTagManagement}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    DistributionSetTagManagement distributionSetTagManagement(
+            final DistributionSetTagRepository distributionSetTagRepository,
+            final DistributionSetRepository distributionSetRepository,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final NoCountPagingRepository criteriaNoCountDao) {
+        return new JpaDistributionSetTagManagement(distributionSetTagRepository, distributionSetRepository,
+                virtualPropertyReplacer, criteriaNoCountDao);
     }
 
     /**
@@ -462,9 +489,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer,
-            final SoftwareModuleRepository softwareModuleRepository) {
+            final SoftwareModuleRepository softwareModuleRepository, final NoCountPagingRepository criteriaNoCountDao) {
         return new JpaSoftwareModuleTypeManagement(distributionSetTypeRepository, softwareModuleTypeRepository,
-                virtualPropertyReplacer, softwareModuleRepository);
+                virtualPropertyReplacer, softwareModuleRepository, criteriaNoCountDao);
     }
 
     @Bean
@@ -504,10 +531,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final TargetManagement targetManagement, final AuditorAware<String> auditorProvider,
             final ApplicationEventPublisher eventPublisher, final ApplicationContext applicationContext,
             final AfterTransactionCommitExecutor afterCommit, final VirtualPropertyReplacer virtualPropertyReplacer,
-            final PlatformTransactionManager txManager) {
+            final PlatformTransactionManager txManager,
+            final TenantConfigurationManagement tenantConfigurationManagement,
+            final SystemSecurityContext systemSecurityContext) {
         return new JpaDeploymentManagement(entityManager, actionRepository, distributionSetRepository, targetRepository,
                 actionStatusRepository, targetManagement, auditorProvider, eventPublisher, applicationContext,
-                afterCommit, virtualPropertyReplacer, txManager);
+                afterCommit, virtualPropertyReplacer, txManager, tenantConfigurationManagement, systemSecurityContext);
     }
 
     /**
@@ -537,7 +566,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public EntityFactory entityFactory() {
+    EntityFactory entityFactory() {
         return new JpaEntityFactory();
     }
 

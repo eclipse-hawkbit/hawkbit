@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -72,11 +71,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                 .andExpect(applySelfLinkMatcherOnPagedResult(unassigned, TARGETTAGS_ROOT + unassigned.getId()))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(2)))
-                .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(2)))
-                .andExpect(jsonPath("$.content.[?(@.id==" + assigned.getId() + ")]._links.assignedTargets.href",
-                        contains(TARGETTAGS_ROOT + assigned.getId() + "/assigned?offset=0&limit=50{&sort,q}")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + unassigned.getId() + ")]._links.assignedTargets.href",
-                        contains(TARGETTAGS_ROOT + unassigned.getId() + "/assigned?offset=0&limit=50{&sort,q}")));
+                .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(2)));
 
     }
 
@@ -113,11 +108,11 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
 
-        final Tag createdOne = tagManagement.findAllTargetTags("name==thetest1", PAGE).getContent().get(0);
+        final Tag createdOne = targetTagManagement.findByRsql(PAGE, "name==thetest1").getContent().get(0);
         assertThat(createdOne.getName()).isEqualTo(tagOne.getName());
         assertThat(createdOne.getDescription()).isEqualTo(tagOne.getDescription());
         assertThat(createdOne.getColour()).isEqualTo(tagOne.getColour());
-        final Tag createdTwo = tagManagement.findAllTargetTags("name==thetest2", PAGE).getContent().get(0);
+        final Tag createdTwo = targetTagManagement.findByRsql(PAGE, "name==thetest2").getContent().get(0);
         assertThat(createdTwo.getName()).isEqualTo(tagTwo.getName());
         assertThat(createdTwo.getDescription()).isEqualTo(tagTwo.getDescription());
         assertThat(createdTwo.getColour()).isEqualTo(tagTwo.getColour());
@@ -143,7 +138,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
 
-        final Tag updated = tagManagement.findAllTargetTags("name==updatedName", PAGE).getContent().get(0);
+        final Tag updated = targetTagManagement.findByRsql(PAGE, "name==updatedName").getContent().get(0);
         assertThat(updated.getName()).isEqualTo(update.getName());
         assertThat(updated.getDescription()).isEqualTo(update.getDescription());
         assertThat(updated.getColour()).isEqualTo(update.getColour());
@@ -162,7 +157,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         mvc.perform(delete(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + original.getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        assertThat(tagManagement.findTargetTagById(original.getId())).isNotPresent();
+        assertThat(targetTagManagement.get(original.getId())).isNotPresent();
     }
 
     @Test
@@ -237,7 +232,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
 
         ResultActions result = toggle(tag, targets);
 
-        List<Target> updated = targetManagement.findTargetsByTag(PAGE, tag.getId()).getContent();
+        List<Target> updated = targetManagement.findByTag(PAGE, tag.getId()).getContent();
 
         assertThat(updated.stream().map(Target::getControllerId).collect(Collectors.toList()))
                 .containsAll(targets.stream().map(Target::getControllerId).collect(Collectors.toList()));
@@ -247,12 +242,12 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
 
         result = toggle(tag, targets);
 
-        updated = targetManagement.findTargetsAll(PAGE).getContent();
+        updated = targetManagement.findAll(PAGE).getContent();
 
         result.andExpect(applyTargetEntityMatcherOnArrayResult(updated.get(0), "unassignedTargets"))
                 .andExpect(applyTargetEntityMatcherOnArrayResult(updated.get(1), "unassignedTargets"));
 
-        assertThat(targetManagement.findTargetsByTag(PAGE, tag.getId())).isEmpty();
+        assertThat(targetManagement.findByTag(PAGE, tag.getId())).isEmpty();
     }
 
     private ResultActions toggle(final TargetTag tag, final List<Target> targets) throws Exception {
@@ -283,7 +278,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
 
-        final List<Target> updated = targetManagement.findTargetsByTag(PAGE, tag.getId()).getContent();
+        final List<Target> updated = targetManagement.findByTag(PAGE, tag.getId()).getContent();
 
         assertThat(updated.stream().map(Target::getControllerId).collect(Collectors.toList()))
                 .containsAll(targets.stream().map(Target::getControllerId).collect(Collectors.toList()));
@@ -309,7 +304,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         mvc.perform(delete(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned/"
                 + unassigned.getControllerId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        final List<Target> updated = targetManagement.findTargetsByTag(PAGE, tag.getId()).getContent();
+        final List<Target> updated = targetManagement.findByTag(PAGE, tag.getId()).getContent();
 
         assertThat(updated.stream().map(Target::getControllerId).collect(Collectors.toList()))
                 .containsOnly(assigned.getControllerId());

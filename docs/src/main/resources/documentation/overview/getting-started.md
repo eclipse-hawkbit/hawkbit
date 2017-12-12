@@ -20,8 +20,7 @@ $ cd hawkbit
 $ mvn clean install
 {% endhighlight %}
 
-#### Start hawkBit update server
-[Example Application](https://github.com/eclipse/hawkbit/tree/master/examples/hawkbit-example-app)
+#### Start hawkBit [update server](https://github.com/eclipse/hawkbit/tree/master/hawkbit-runtime/hawkbit-update-server)
 
 {% highlight bash %}
 $ java -jar ./hawkbit-runtime/hawkbit-update-server/target/hawkbit-update-server-#version#-SNAPSHOT.jar
@@ -29,19 +28,19 @@ $ java -jar ./hawkbit-runtime/hawkbit-update-server/target/hawkbit-update-server
 
 #### Build hawkBit examples
 {% highlight bash %}
-$ git clone https://github.com/eclipse/hawkbit.git
-$ cd hawkbit/examples
+$ git clone https://github.com/eclipse/hawkbit-examples.git
+$ cd hawkbit-examples
 $ mvn clean install
 {% endhighlight %}
 
 #### Start hawkBit device simulator
-[Device Simulator](https://github.com/eclipse/hawkbit/tree/master/examples/hawkbit-device-simulator)
+[Device Simulator](https://github.com/eclipse/hawkbit-examples/tree/master/hawkbit-device-simulator)
 {% highlight bash %}
-$ java -jar ./examples/hawkbit-device-simulator/target/hawkbit-device-simulator-#version#.jar
+$ java -jar ./hawkbit-device-simulator/target/hawkbit-device-simulator-#version#.jar
 {% endhighlight %}
 
 #### Generate Getting Started data
-[Example Management API Client](https://github.com/eclipse/hawkbit/tree/master/examples/hawkbit-example-mgmt-simulator)
+[Example Management API Client](https://github.com/eclipse/hawkbit-examples/tree/master/hawkbit-example-mgmt-simulator)
 {% highlight bash %}
-$ java -jar ./examples/hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulator-#version#.jar
+$ java -jar ./hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulator-#version#.jar
 {% endhighlight %}

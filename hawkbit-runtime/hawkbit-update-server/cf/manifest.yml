@@ -10,7 +10,8 @@
 ---
 applications:
 - name: hawkbit
-  memory: 1024M
+  memory: 2048M
+  disk_quota: 2048M
   instances: 1
   buildpack: https://github.com/cloudfoundry/java-buildpack
   path: @project.build.finalName@.jar
@@ -20,3 +21,5 @@ applications:
     SPRING_PROFILES_ACTIVE: cloudsandbox,amqp
     CF_STAGING_TIMEOUT: 15
     CF_STARTUP_TIMEOUT: 15
+    JBP_CONFIG_JAVA_MAIN: '{ arguments: "-XX:+UseG1GC -XX:+UseStringDeduplication -XX:+UseCompressedOops -XX:+ExitOnOutOfMemoryError" }'
+  timeout: 180

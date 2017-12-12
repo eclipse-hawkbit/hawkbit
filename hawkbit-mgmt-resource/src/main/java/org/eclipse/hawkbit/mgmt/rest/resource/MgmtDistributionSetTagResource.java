@@ -20,9 +20,9 @@ import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTagRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,7 +51,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     private static final Logger LOG = LoggerFactory.getLogger(MgmtDistributionSetTagResource.class);
 
     @Autowired
-    private TagManagement tagManagement;
+    private DistributionSetTagManagement distributionSetTagManagement;
 
     @Autowired
     private DistributionSetManagement distributionSetManagement;
@@ -70,24 +71,32 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
         final Sort sorting = PagingUtility.sanitizeTagSortParam(sortParam);
 
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
-        final Page<DistributionSetTag> findTargetsAll;
+        final Slice<DistributionSetTag> distributionSetTags;
+        final long count;
         if (rsqlParam == null) {
-            findTargetsAll = tagManagement.findAllDistributionSetTags(pageable);
+            distributionSetTags = distributionSetTagManagement.findAll(pageable);
+            count = distributionSetTagManagement.count();
 
         } else {
-            findTargetsAll = tagManagement.findAllDistributionSetTags(rsqlParam, pageable);
+            final Page<DistributionSetTag> page = distributionSetTagManagement.findByRsql(pageable, rsqlParam);
+            distributionSetTags = page;
+            count = page.getTotalElements();
 
         }
 
-        final List<MgmtTag> rest = MgmtTagMapper.toResponseDistributionSetTag(findTargetsAll.getContent());
-        return ResponseEntity.ok(new PagedList<>(rest, findTargetsAll.getTotalElements()));
+        final List<MgmtTag> rest = MgmtTagMapper.toResponseDistributionSetTag(distributionSetTags.getContent());
+        return ResponseEntity.ok(new PagedList<>(rest, count));
     }
 
     @Override
     public ResponseEntity<MgmtTag> getDistributionSetTag(
             @PathVariable("distributionsetTagId") final Long distributionsetTagId) {
-        final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);
-        return ResponseEntity.ok(MgmtTagMapper.toResponse(tag));
+        final DistributionSetTag distributionSetTag = findDistributionTagById(distributionsetTagId);
+
+        final MgmtTag response = MgmtTagMapper.toResponse(distributionSetTag);
+        MgmtTagMapper.addLinks(distributionSetTag, response);
+
+        return ResponseEntity.ok(response);
     }
 
     @Override
@@ -95,8 +104,8 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
             @RequestBody final List<MgmtTagRequestBodyPut> tags) {
         LOG.debug("creating {} ds tags", tags.size());
 
-        final List<DistributionSetTag> createdTags = this.tagManagement
-                .createDistributionSetTags(MgmtTagMapper.mapTagFromRequest(entityFactory, tags));
+        final List<DistributionSetTag> createdTags = distributionSetTagManagement
+                .create(MgmtTagMapper.mapTagFromRequest(entityFactory, tags));
 
         return new ResponseEntity<>(MgmtTagMapper.toResponseDistributionSetTag(createdTags), HttpStatus.CREATED);
     }
@@ -106,9 +115,14 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
             @PathVariable("distributionsetTagId") final Long distributionsetTagId,
             @RequestBody final MgmtTagRequestBodyPut restDSTagRest) {
 
-        return ResponseEntity.ok(MgmtTagMapper.toResponse(tagManagement
-                .updateDistributionSetTag(entityFactory.tag().update(distributionsetTagId).name(restDSTagRest.getName())
-                        .description(restDSTagRest.getDescription()).colour(restDSTagRest.getColour()))));
+        final DistributionSetTag distributionSetTag = distributionSetTagManagement
+                .update(entityFactory.tag().update(distributionsetTagId).name(restDSTagRest.getName())
+                        .description(restDSTagRest.getDescription()).colour(restDSTagRest.getColour()));
+
+        final MgmtTag response = MgmtTagMapper.toResponse(distributionSetTag);
+        MgmtTagMapper.addLinks(distributionSetTag, response);
+
+        return ResponseEntity.ok(response);
     }
 
     @Override
@@ -117,7 +131,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
         LOG.debug("Delete {} distribution set tag", distributionsetTagId);
         final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);
 
-        this.tagManagement.deleteDistributionSetTag(tag.getName());
+        distributionSetTagManagement.delete(tag.getName());
 
         return ResponseEntity.ok().build();
     }
@@ -126,7 +140,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     public ResponseEntity<List<MgmtDistributionSet>> getAssignedDistributionSets(
             @PathVariable("distributionsetTagId") final Long distributionsetTagId) {
         return ResponseEntity.ok(MgmtDistributionSetMapper.toResponseDistributionSets(distributionSetManagement
-                .findDistributionSetsByTag(new PageRequest(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT),
+                .findByTag(new PageRequest(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT),
                         distributionsetTagId)
                 .getContent()));
     }
@@ -145,11 +159,10 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
         Page<DistributionSet> findDistrAll;
         if (rsqlParam == null) {
-            findDistrAll = distributionSetManagement.findDistributionSetsByTag(pageable, distributionsetTagId);
+            findDistrAll = distributionSetManagement.findByTag(pageable, distributionsetTagId);
 
         } else {
-            findDistrAll = distributionSetManagement.findDistributionSetsByTag(pageable, rsqlParam,
-                    distributionsetTagId);
+            findDistrAll = distributionSetManagement.findByRsqlAndTag(pageable, rsqlParam, distributionsetTagId);
         }
 
         final List<MgmtDistributionSet> rest = MgmtDistributionSetMapper
@@ -202,7 +215,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     }
 
     private DistributionSetTag findDistributionTagById(final Long distributionsetTagId) {
-        return tagManagement.findDistributionSetTagById(distributionsetTagId)
+        return distributionSetTagManagement.get(distributionsetTagId)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, distributionsetTagId));
     }
 

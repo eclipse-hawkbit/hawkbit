@@ -45,7 +45,7 @@ public class RSQLSoftwareModuleMetadataFieldsTest extends AbstractJpaIntegration
             metadata.add(entityFactory.generateMetadata("" + i, "" + i));
         }
 
-        softwareModuleManagement.createSoftwareModuleMetadata(softwareModule.getId(), metadata);
+        softwareModuleManagement.createMetaData(softwareModule.getId(), metadata);
 
     }
 
@@ -70,7 +70,7 @@ public class RSQLSoftwareModuleMetadataFieldsTest extends AbstractJpaIntegration
     private void assertRSQLQuery(final String rsqlParam, final long expectedEntities) {
 
         final Page<SoftwareModuleMetadata> findEnitity = softwareModuleManagement
-                .findSoftwareModuleMetadataBySoftwareModuleId(softwareModuleId, rsqlParam, new PageRequest(0, 100));
+                .findMetaDataByRsql(new PageRequest(0, 100), softwareModuleId, rsqlParam);
         final long countAllEntities = findEnitity.getTotalElements();
         assertThat(findEnitity).isNotNull();
         assertThat(countAllEntities).isEqualTo(expectedEntities);

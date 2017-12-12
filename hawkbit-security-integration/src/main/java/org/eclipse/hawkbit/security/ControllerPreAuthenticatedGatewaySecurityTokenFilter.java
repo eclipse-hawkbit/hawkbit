@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.security;
 
-import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;

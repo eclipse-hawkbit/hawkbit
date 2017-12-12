@@ -44,14 +44,14 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
 
         final Map<String, String> attributes = new HashMap<>();
 
-        target = targetManagement.createTarget(entityFactory.target().create().controllerId("targetId123")
+        target = targetManagement.create(entityFactory.target().create().controllerId("targetId123")
                 .name("targetName123").description("targetDesc123"));
         attributes.put("revision", "1.1");
         target = controllerManagement.updateControllerAttributes(target.getControllerId(), attributes);
         target = controllerManagement.findOrRegisterTargetIfItDoesNotexist(target.getControllerId(), LOCALHOST);
 
         target2 = targetManagement
-                .createTarget(entityFactory.target().create().controllerId("targetId1234").description("targetId1234"));
+                .create(entityFactory.target().create().controllerId("targetId1234").description("targetId1234"));
         attributes.put("revision", "1.2");
         Thread.sleep(1);
         target2 = controllerManagement.updateControllerAttributes(target2.getControllerId(), attributes);
@@ -60,10 +60,10 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         testdataFactory.createTarget("targetId1235");
         testdataFactory.createTarget("targetId1236");
 
-        final TargetTag targetTag = tagManagement.createTargetTag(entityFactory.tag().create().name("Tag1"));
-        tagManagement.createTargetTag(entityFactory.tag().create().name("Tag2"));
-        tagManagement.createTargetTag(entityFactory.tag().create().name("Tag3"));
-        tagManagement.createTargetTag(entityFactory.tag().create().name("Tag4"));
+        final TargetTag targetTag = targetTagManagement.create(entityFactory.tag().create().name("Tag1"));
+        targetTagManagement.create(entityFactory.tag().create().name("Tag2"));
+        targetTagManagement.create(entityFactory.tag().create().name("Tag3"));
+        targetTagManagement.create(entityFactory.tag().create().name("Tag4"));
 
         targetManagement.assignTag(Arrays.asList(target.getControllerId(), target2.getControllerId()),
                 targetTag.getId());
@@ -182,7 +182,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long expcetedTargets) {
-        final Page<Target> findTargetPage = targetManagement.findTargetsAll(rsqlParam, PAGE);
+        final Page<Target> findTargetPage = targetManagement.findByRsql(PAGE, rsqlParam);
         final long countTargetsAll = findTargetPage.getTotalElements();
         assertThat(findTargetPage).isNotNull();
         assertThat(countTargetsAll).isEqualTo(expcetedTargets);

@@ -187,19 +187,19 @@ public interface DeploymentManagement {
      *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Long countActionsByTarget(@NotNull String rsqlParam, @NotEmpty String controllerId);
+    long countActionsByTarget(@NotNull String rsqlParam, @NotEmpty String controllerId);
 
     /**
      * @return the total amount of stored action status
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Long countActionStatusAll();
+    long countActionStatusAll();
 
     /**
      * @return the total amount of stored actions
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Long countActionsAll();
+    long countActionsAll();
 
     /**
      * counts all actions associated to a specific target.
@@ -212,7 +212,7 @@ public interface DeploymentManagement {
      *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Long countActionsByTarget(@NotEmpty String controllerId);
+    long countActionsByTarget(@NotEmpty String controllerId);
 
     /**
      * Get the {@link Action} entity for given actionId.
@@ -407,7 +407,8 @@ public interface DeploymentManagement {
      * @return the amount of started actions
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long startScheduledActionsByRolloutGroupParent(@NotNull Long rolloutId, Long rolloutGroupParentId);
+    long startScheduledActionsByRolloutGroupParent(@NotNull Long rolloutId, @NotNull Long distributionSetId,
+            Long rolloutGroupParentId);
 
     /**
      * All {@link ActionStatus} entries in the repository.

@@ -140,12 +140,12 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
             final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
 
             final SoftwareModuleType softwareModuleTypeByName = softwareModuleTypeManagement
-                    .findSoftwareModuleTypeByName(type)
+                    .getByName(type)
                     .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, type));
             final SoftwareModuleCreate softwareModule = entityFactory.softwareModule().create()
                     .type(softwareModuleTypeByName).name(name).version(version).description(description).vendor(vendor);
 
-            final SoftwareModule newSoftwareModule = softwareModuleManagement.createSoftwareModule(softwareModule);
+            final SoftwareModule newSoftwareModule = softwareModuleManagement.create(softwareModule);
             eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.ADD_ENTITY, newSoftwareModule));
             uiNotifcation.displaySuccess(i18n.getMessage("message.save.success",
                     new Object[] { newSoftwareModule.getName() + ":" + newSoftwareModule.getVersion() }));
@@ -157,10 +157,10 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
             final String version = versionTextField.getValue();
             final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
 
-            final Optional<Long> moduleType = softwareModuleTypeManagement.findSoftwareModuleTypeByName(type)
+            final Optional<Long> moduleType = softwareModuleTypeManagement.getByName(type)
                     .map(SoftwareModuleType::getId);
             if (moduleType.isPresent() && softwareModuleManagement
-                    .findSoftwareModuleByNameAndVersion(name, version, moduleType.get()).isPresent()) {
+                    .getByNameAndVersionAndType(name, version, moduleType.get()).isPresent()) {
                 uiNotifcation.displayValidationError(
                         i18n.getMessage("message.duplicate.softwaremodule", new Object[] { name, version }));
                 return true;
@@ -173,7 +173,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
          */
         private void updateSwModule() {
             final SoftwareModule newSWModule = softwareModuleManagement
-                    .updateSoftwareModule(entityFactory.softwareModule().update(baseSwModuleId)
+                    .update(entityFactory.softwareModule().update(baseSwModuleId)
                             .description(descTextArea.getValue()).vendor(vendorTextField.getValue()));
             if (newSWModule != null) {
                 uiNotifcation.displaySuccess(i18n.getMessage("message.save.success",
@@ -289,7 +289,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
             return;
         }
         editSwModule = Boolean.TRUE;
-        softwareModuleManagement.findSoftwareModuleById(baseSwModuleId).ifPresent(swModule -> {
+        softwareModuleManagement.get(baseSwModuleId).ifPresent(swModule -> {
             nameTextField.setValue(swModule.getName());
             versionTextField.setValue(swModule.getVersion());
             vendorTextField.setValue(HawkbitCommonUtil.trimAndNullIfEmpty(swModule.getVendor()));

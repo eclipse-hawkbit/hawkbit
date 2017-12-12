@@ -47,7 +47,7 @@ public class DSTypeFilterButtonClick extends AbstractFilterSingleButtonClick imp
 
     @Override
     protected void filterClicked(final Button clickedButton) {
-        distributionSetTypeManagement.findDistributionSetTypeByName(clickedButton.getData().toString())
+        distributionSetTypeManagement.getByName(clickedButton.getData().toString())
                 .ifPresent(manageDistUIState.getManageDistFilters()::setClickedDistSetType);
         eventBus.publish(this, new RefreshDistributionTableByFilterEvent());
     }

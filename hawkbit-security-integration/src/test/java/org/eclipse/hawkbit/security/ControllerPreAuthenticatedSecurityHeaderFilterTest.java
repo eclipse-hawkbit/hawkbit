@@ -15,10 +15,9 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 
-import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken;
-import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
+import org.eclipse.hawkbit.security.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.Before;
 import org.junit.Test;

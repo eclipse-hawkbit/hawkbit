@@ -97,8 +97,8 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
         }
         selectedSWModuleId = swModule.getId();
         final List<SoftwareModuleMetadata> swMetadataList = softwareModuleManagement
-                .findSoftwareModuleMetadataBySoftwareModuleId(selectedSWModuleId,
-                        new PageRequest(0, MAX_METADATA_QUERY))
+                .findMetaDataBySoftwareModuleId(new PageRequest(0, MAX_METADATA_QUERY),
+                        selectedSWModuleId)
                 .getContent();
         if (!CollectionUtils.isEmpty(swMetadataList)) {
             swMetadataList.forEach(this::setSWMetadataProperties);
@@ -178,7 +178,7 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
     }
 
     private void showMetadataDetails(final Long selectedSWModuleId, final String metadataKey) {
-        softwareModuleManagement.findSoftwareModuleById(selectedSWModuleId).ifPresent(swmodule -> UI.getCurrent()
+        softwareModuleManagement.get(selectedSWModuleId).ifPresent(swmodule -> UI.getCurrent()
                 .addWindow(swMetadataPopupLayout.getWindow(swmodule, entityFactory.generateMetadata(metadataKey, ""))));
     }
 

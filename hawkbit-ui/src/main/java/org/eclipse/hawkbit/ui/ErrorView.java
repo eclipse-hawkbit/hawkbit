@@ -34,7 +34,7 @@ import com.vaadin.ui.VerticalLayout;
  */
 @SpringComponent
 @UIScope
-class ErrorView extends VerticalLayout implements View {
+public class ErrorView extends VerticalLayout implements View {
 
     private static final long serialVersionUID = 1L;
 
@@ -62,8 +62,8 @@ class ErrorView extends VerticalLayout implements View {
         }
         if (dashboardMenu.isAccessDenied(event.getViewName())) {
             final Notification nt = new Notification("Access denied",
-                    i18n.getMessage("message.accessdenied.view", new Object[] { event.getViewName() }), Type.ERROR_MESSAGE,
-                    false);
+                    i18n.getMessage("message.accessdenied.view", new Object[] { event.getViewName() }),
+                    Type.ERROR_MESSAGE, false);
             nt.setStyleName(SPUILabelDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE);
             nt.setPosition(Position.BOTTOM_RIGHT);
             nt.show(UI.getCurrent().getPage());

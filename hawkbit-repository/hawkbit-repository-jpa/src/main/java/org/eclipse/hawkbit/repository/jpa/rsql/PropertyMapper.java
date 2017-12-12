@@ -36,9 +36,7 @@ public final class PropertyMapper {
      *            property name
      */
     public static void addNewMapping(final Class<?> type, final String property, final String mapping) {
-        if (allowedColmns.get(type) == null) {
-            allowedColmns.put(type, new HashMap<String, String>());
-        }
+        allowedColmns.computeIfAbsent(type, k -> new HashMap<>());
         allowedColmns.get(type).put(property, mapping);
     }
 

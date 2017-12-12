@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.ui.HawkbitUI;
+import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
@@ -46,7 +46,7 @@ import com.vaadin.ui.VerticalLayout;
  * Rollout management view.
  */
 @UIScope
-@SpringView(name = RolloutView.VIEW_NAME, ui = HawkbitUI.class)
+@SpringView(name = RolloutView.VIEW_NAME, ui = AbstractHawkbitUI.class)
 public class RolloutView extends VerticalLayout implements View {
 
     private static final long serialVersionUID = -6199789714170913988L;
@@ -172,7 +172,7 @@ public class RolloutView extends VerticalLayout implements View {
             return true;
         }
 
-        final Optional<Rollout> rollout = rolloutManagement.findRolloutById(rolloutIdInState.get());
+        final Optional<Rollout> rollout = rolloutManagement.get(rolloutIdInState.get());
         return !rollout.isPresent() || rollout.get().isDeleted();
     }
 

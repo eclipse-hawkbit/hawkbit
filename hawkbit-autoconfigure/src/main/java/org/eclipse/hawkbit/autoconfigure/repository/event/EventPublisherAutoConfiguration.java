@@ -11,12 +11,14 @@ package org.eclipse.hawkbit.autoconfigure.repository.event;
 import java.util.concurrent.Executor;
 
 import org.eclipse.hawkbit.event.BusProtoStuffMessageConverter;
+import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.event.remote.RemoteTenantAwareEvent;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.bus.ConditionalOnBusEnabled;
 import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.cloud.bus.jackson.RemoteApplicationEventScan;
@@ -58,7 +60,7 @@ public class EventPublisherAutoConfiguration {
     @Bean(name = AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME)
     public ApplicationEventMulticaster applicationEventMulticaster() {
         final SimpleApplicationEventMulticaster simpleApplicationEventMulticaster = new TenantAwareApplicationEventPublisher(
-                tenantAware);
+                tenantAware, applicationEventFilter());
         simpleApplicationEventMulticaster.setTaskExecutor(executor);
         return simpleApplicationEventMulticaster;
     }
@@ -74,9 +76,21 @@ public class EventPublisherAutoConfiguration {
         return EventPublisherHolder.getInstance();
     }
 
+    /**
+     * @return default {@link ApplicationEventFilter} that does not filter any
+     *         events
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public ApplicationEventFilter applicationEventFilter() {
+        return e -> false;
+    }
+
     private static class TenantAwareApplicationEventPublisher extends SimpleApplicationEventMulticaster {
 
         private final TenantAware tenantAware;
+
+        private final ApplicationEventFilter applicationEventFilter;
 
         @Autowired(required = false)
         private ServiceMatcher serviceMatcher;
@@ -87,8 +101,10 @@ public class EventPublisherAutoConfiguration {
          * @param tenantAware
          *            the tenant ware
          */
-        protected TenantAwareApplicationEventPublisher(final TenantAware tenantAware) {
+        protected TenantAwareApplicationEventPublisher(final TenantAware tenantAware,
+                final ApplicationEventFilter applicationEventFilter) {
             this.tenantAware = tenantAware;
+            this.applicationEventFilter = applicationEventFilter;
         }
 
         /**
@@ -97,6 +113,10 @@ public class EventPublisherAutoConfiguration {
          */
         @Override
         public void multicastEvent(final ApplicationEvent event, final ResolvableType eventType) {
+            if (applicationEventFilter.filter(event)) {
+                return;
+            }
+
             if (serviceMatcher == null || !(event instanceof RemoteTenantAwareEvent)) {
                 super.multicastEvent(event, eventType);
                 return;

@@ -92,9 +92,9 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
         final PageRequest pageRequest = new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE,
                 SPUIDefinitions.PAGE_SIZE, sort);
         if (StringUtils.isEmpty(searchText)) {
-            rolloutBeans = getRolloutManagement().findAllRolloutsWithDetailedStatus(pageRequest, false);
+            rolloutBeans = getRolloutManagement().findAllWithDetailedStatus(pageRequest, false);
         } else {
-            rolloutBeans = getRolloutManagement().findRolloutWithDetailedStatusByFilters(pageRequest, searchText,
+            rolloutBeans = getRolloutManagement().findByFiltersWithDetailedStatus(pageRequest, searchText,
                     false);
         }
         return getProxyRolloutList(rolloutBeans);
@@ -137,11 +137,11 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
 
     @Override
     public int size() {
-        int size = getRolloutManagement().countRolloutsAll().intValue();
+        long size = getRolloutManagement().count();
         if (!StringUtils.isEmpty(searchText)) {
-            size = getRolloutManagement().countRolloutsAllByFilters(searchText).intValue();
+            size = getRolloutManagement().countByFilters(searchText);
         }
-        return size;
+        return (int) size;
     }
 
     private RolloutManagement getRolloutManagement() {

@@ -15,7 +15,7 @@ package org.eclipse.hawkbit.dmf.amqp.api;
 public enum MessageType {
 
     /**
-     * The event type.
+     * The event type related to interaction with a thing.
      */
     EVENT,
 
@@ -28,5 +28,15 @@ public enum MessageType {
      * The thing deleted type.
      */
     THING_DELETED,
+
+    /**
+     * DMF receiver health check type.
+     */
+    PING,
+
+    /**
+     * DMF receiver health check reponse type.
+     */
+    PING_RESPONSE;
 
 }
