@@ -185,6 +185,9 @@ public final class MgmtRestConstants {
      */
     public static final String SOFTWAREMODULETYPE_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/softwaremoduletypes";
 
+    /**
+     * The distributon set base resource.
+     */
     public static final String DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING
             + "/distributionsettypes";
 
