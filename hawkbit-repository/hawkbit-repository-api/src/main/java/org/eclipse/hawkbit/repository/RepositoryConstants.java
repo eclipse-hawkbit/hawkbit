@@ -28,7 +28,7 @@ public final class RepositoryConstants {
      * Number of {@link DistributionSetType}s that are generated as part of
      * default tenant setup.
      */
-    public static final int DEFAULT_DS_TYPES_IN_TENANT = 2;
+    public static final int DEFAULT_DS_TYPES_IN_TENANT = 3;
 
     /**
      * Maximum number of messages that can be retrieved by a controller for an
