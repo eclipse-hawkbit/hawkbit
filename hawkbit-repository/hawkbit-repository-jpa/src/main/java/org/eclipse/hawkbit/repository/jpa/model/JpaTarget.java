@@ -91,7 +91,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     private static final List<String> TARGET_UPDATE_EVENT_IGNORE_FIELDS = Arrays.asList("lastTargetQuery", "address",
             "optLockRevision", "lastModifiedAt", "lastModifiedBy");
 
-    @Column(name = "controller_id", length = Target.CONTROLLER_ID_MAX_SIZE, updatable = false)
+    @Column(name = "controller_id", length = Target.CONTROLLER_ID_MAX_SIZE, updatable = false, nullable = false)
     @Size(min = 1, max = Target.CONTROLLER_ID_MAX_SIZE)
     @NotNull
     @Pattern(regexp = "[.\\S]*", message = "has whitespaces which are not allowed")

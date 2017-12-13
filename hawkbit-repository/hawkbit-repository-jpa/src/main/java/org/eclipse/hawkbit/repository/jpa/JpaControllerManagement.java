@@ -285,7 +285,7 @@ public class JpaControllerManagement implements ControllerManagement {
     private Void updateLastTargetQueries(final List<TargetPoll> polls) {
         LOG.debug("Persist {} targetqueries.", polls.size());
         polls.forEach(poll -> {
-            targetRepository.setLastTargetQuery(poll.getTime(), poll.getControllerId());
+            targetRepository.setLastTargetQuery(poll.getTime(), poll.getControllerId(), poll.getTenant());
             afterCommit.afterCommit(() -> eventPublisher.publishEvent(
                     new TargetPollEvent(poll.getControllerId(), poll.getTenant(), applicationContext.getId())));
         });

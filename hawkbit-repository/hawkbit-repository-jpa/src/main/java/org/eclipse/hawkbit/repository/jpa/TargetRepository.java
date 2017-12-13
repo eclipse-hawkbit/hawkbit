@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import javax.persistence.EntityManager;
 
@@ -37,10 +38,21 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>, JpaSpecificationExecutor<JpaTarget> {
 
+    /**
+     * Set {@link Target#getLastTargetQuery()} on given {@link Target} as native
+     * query to avoid {@link Target#getOptLockRevision()} update.
+     * 
+     * @param time
+     *            in {@link TimeUnit#MILLISECONDS}
+     * @param controllerId
+     *            of the {@link Target}
+     * @param tenant
+     *            the {@link Target} belongs to
+     */
     @Modifying
     @Transactional
-    @Query("UPDATE JpaTarget t SET t.lastTargetQuery = :time WHERE t.controllerId = :controllerId")
-    void setLastTargetQuery(@Param("time") long time, @Param("controllerId") String controllerId);
+    @Query(value = "UPDATE sp_target t SET t.last_target_query = ? WHERE t.controller_id = ? AND t.tenant = ?", nativeQuery = true)
+    void setLastTargetQuery(long time, String controllerId, String tenant);
 
     /**
      * Sets {@link JpaTarget#getAssignedDistributionSet()}.
@@ -218,9 +230,6 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("SELECT t FROM JpaTarget t WHERE t.id IN ?1")
     List<JpaTarget> findAll(Iterable<Long> ids);
-
-    @Query("SELECT t FROM JpaTarget t WHERE t.id IN ?1")
-    List<JpaTarget> findAllWithoutLock(Iterable<Long> ids);
 
     /**
      * 
