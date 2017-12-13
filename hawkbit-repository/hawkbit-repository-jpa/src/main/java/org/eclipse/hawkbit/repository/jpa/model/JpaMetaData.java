@@ -26,7 +26,7 @@ public class JpaMetaData implements MetaData {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @Column(name = "meta_key", nullable = false, length = MetaData.KEY_MAX_SIZE)
+    @Column(name = "meta_key", nullable = false, length = MetaData.KEY_MAX_SIZE, updatable = false)
     @Size(min = 1, max = MetaData.KEY_MAX_SIZE)
     @NotNull
     private String key;

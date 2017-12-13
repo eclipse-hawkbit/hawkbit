@@ -207,7 +207,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final Map<SoftwareModule, List<SoftwareModuleMetadata>> modules = Maps
                 .newHashMapWithExpectedSize(action.getDistributionSet().getModules().size());
         action.getDistributionSet().getModules().forEach(module -> modules.put(module,
-                controllerManagement.findTargetVisbileMetaDataBySoftwareModuleId(module.getId())));
+                controllerManagement.findTargetVisibleMetaDataBySoftwareModuleId(module.getId())));
 
         amqpMessageDispatcherService.sendUpdateMessageToTarget(action.getTenant(), action.getTarget(), action.getId(),
                 modules);

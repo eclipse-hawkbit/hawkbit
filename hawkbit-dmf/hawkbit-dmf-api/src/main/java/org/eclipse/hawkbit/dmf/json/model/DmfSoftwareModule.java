@@ -34,7 +34,6 @@ public class DmfSoftwareModule {
     @JsonProperty
     private List<DmfArtifact> artifacts;
     @JsonProperty
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<DmfMetadata> metadata;
 
     public String getModuleType() {

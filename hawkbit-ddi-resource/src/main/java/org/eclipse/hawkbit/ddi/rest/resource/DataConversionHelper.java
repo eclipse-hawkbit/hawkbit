@@ -53,7 +53,7 @@ public final class DataConversionHelper {
                 .map(module -> new DdiChunk(mapChunkLegacyKeys(module.getType().getKey()), module.getVersion(),
                         module.getName(),
                         createArtifacts(target, module, artifactUrlHandler, systemManagement, request),
-                        mapMetadata(controllerManagement.findTargetVisbileMetaDataBySoftwareModuleId(module.getId()))))
+                        mapMetadata(controllerManagement.findTargetVisibleMetaDataBySoftwareModuleId(module.getId()))))
                 .collect(Collectors.toList());
 
     }

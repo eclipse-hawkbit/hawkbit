@@ -529,7 +529,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public List<SoftwareModuleMetadata> findTargetVisbileMetaDataBySoftwareModuleId(final Long moduleId) {
+    public List<SoftwareModuleMetadata> findTargetVisibleMetaDataBySoftwareModuleId(final Long moduleId) {
         return Collections
                 .unmodifiableList(softwareModuleMetadataRepository
                         .findBySoftwareModuleIdAndTargetVisible(

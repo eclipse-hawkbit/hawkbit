@@ -75,8 +75,17 @@ public interface ControllerManagement {
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     Optional<SoftwareModule> getSoftwareModule(@NotNull Long moduleId);
 
+    /**
+     * Retrieves {@link SoftwareModuleMetadata} where
+     * {@link SoftwareModuleMetadata#isTargetVisible()}.
+     * 
+     * @param moduleId
+     *            of the {@link SoftwareModule}
+     * @return list of {@link SoftwareModuleMetadata} with maximum size of
+     *         {@link RepositoryConstants#MAX_META_DATA_COUNT}
+     */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    List<SoftwareModuleMetadata> findTargetVisbileMetaDataBySoftwareModuleId(@NotNull Long moduleId);
+    List<SoftwareModuleMetadata> findTargetVisibleMetaDataBySoftwareModuleId(@NotNull Long moduleId);
 
     /**
      * Simple addition of a new {@link ActionStatus} entry to the {@link Action}

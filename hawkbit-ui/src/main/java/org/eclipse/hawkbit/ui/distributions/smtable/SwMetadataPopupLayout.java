@@ -116,7 +116,7 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
 
     // Exception for squid:S1172 - parameter defined by Vaadin
     @SuppressWarnings("squid:S1172")
-    public void onCheckBoxChange(final ValueChangeEvent event) {
+    private void onCheckBoxChange(final ValueChangeEvent event) {
         if (hasCreatePermission() || hasUpdatePermission()) {
             if (!getValueTextArea().getValue().isEmpty() && !getKeyTextField().getValue().isEmpty()) {
                 getMetadataWindow().setSaveButtonEnabled(true);

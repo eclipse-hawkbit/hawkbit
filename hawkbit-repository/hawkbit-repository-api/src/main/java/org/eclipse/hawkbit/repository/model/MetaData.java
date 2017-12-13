@@ -18,7 +18,7 @@ public interface MetaData extends Serializable {
     /**
      * Maximum length of metadata key.
      */
-    int KEY_MAX_SIZE = 256;
+    int KEY_MAX_SIZE = 128;
 
     /**
      * Maximum length of metadata value.
