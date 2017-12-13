@@ -42,7 +42,7 @@ public interface SoftwareModuleMetadataCreate {
      *            for {@link SoftwareModuleMetadata#isTargetVisible()}
      * @return updated builder instance
      */
-    SoftwareModuleMetadataCreate targetVisible(boolean visible);
+    SoftwareModuleMetadataCreate targetVisible(Boolean visible);
 
     /**
      * @return peek on current state of {@link SoftwareModuleMetadata} in the

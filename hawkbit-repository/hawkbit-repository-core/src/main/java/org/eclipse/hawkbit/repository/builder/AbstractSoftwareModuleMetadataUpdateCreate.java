@@ -33,7 +33,7 @@ public abstract class AbstractSoftwareModuleMetadataUpdateCreate<T> extends Abst
         return Optional.ofNullable(targetVisible);
     }
 
-    public T targetVisible(final boolean targetVisible) {
+    public T targetVisible(final Boolean targetVisible) {
         this.targetVisible = targetVisible;
         return (T) this;
     }

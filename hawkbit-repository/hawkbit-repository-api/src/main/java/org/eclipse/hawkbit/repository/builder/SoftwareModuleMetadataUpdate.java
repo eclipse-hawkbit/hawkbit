@@ -32,6 +32,6 @@ public interface SoftwareModuleMetadataUpdate {
      *            for {@link SoftwareModuleMetadata#isTargetVisible()}
      * @return updated builder instance
      */
-    SoftwareModuleMetadataUpdate targetVisible(boolean visible);
+    SoftwareModuleMetadataUpdate targetVisible(Boolean visible);
 
 }
