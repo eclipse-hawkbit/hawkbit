@@ -24,7 +24,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * Abstract metadata tab for entities.
  *
  */
-public abstract class AbstractMetadataDetailslayout extends Table {
+public abstract class AbstractMetadataDetailsLayout extends Table {
 
     protected static final String METADATA_KEY = "Key";
 
@@ -32,7 +32,7 @@ public abstract class AbstractMetadataDetailslayout extends Table {
 
     private final VaadinMessageSource i18n;
 
-    protected AbstractMetadataDetailslayout(final VaadinMessageSource i18n) {
+    protected AbstractMetadataDetailsLayout(final VaadinMessageSource i18n) {
         this.i18n = i18n;
         createMetadataTable();
 

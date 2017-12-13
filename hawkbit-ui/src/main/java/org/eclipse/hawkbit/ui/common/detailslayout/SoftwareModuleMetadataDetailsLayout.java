@@ -24,7 +24,7 @@ import com.vaadin.ui.UI;
  * SoftwareModule Metadata details layout.
  *
  */
-public class SoftwareModuleMetadataDetailslayout extends AbstractMetadataDetailslayout {
+public class SoftwareModuleMetadataDetailsLayout extends AbstractMetadataDetailsLayout {
 
     private static final long serialVersionUID = 1L;
 
@@ -44,7 +44,7 @@ public class SoftwareModuleMetadataDetailslayout extends AbstractMetadataDetails
      * @param swMetadataPopupLayout
      *            the software module metadata popup layout
      */
-    public SoftwareModuleMetadataDetailslayout(final VaadinMessageSource i18n,
+    public SoftwareModuleMetadataDetailsLayout(final VaadinMessageSource i18n,
             final SoftwareModuleManagement softwareManagement, final SwMetadataPopupLayout swMetadataPopupLayout) {
         super(i18n);
         this.softwareModuleManagement = softwareManagement;

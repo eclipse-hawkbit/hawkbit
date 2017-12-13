@@ -23,7 +23,7 @@ import com.vaadin.ui.UI;
  * DistributionSet Metadata details layout.
  *
  */
-public class DistributionSetMetadataDetailsLayout extends AbstractMetadataDetailslayout {
+public class DistributionSetMetadataDetailsLayout extends AbstractMetadataDetailsLayout {
 
     private static final long serialVersionUID = 1L;
 

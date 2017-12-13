@@ -38,7 +38,7 @@ public abstract class AbstractSoftwareModuleDetails
 
     private static final long serialVersionUID = 1L;
 
-    private final SoftwareModuleMetadataDetailslayout swmMetadataTable;
+    private final SoftwareModuleMetadataDetailsLayout swmMetadataTable;
 
     private final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow;
 
@@ -55,7 +55,7 @@ public abstract class AbstractSoftwareModuleDetails
         this.softwareModuleManagement = softwareManagement;
         this.swMetadataPopupLayout = swMetadataPopupLayout;
 
-        swmMetadataTable = new SoftwareModuleMetadataDetailslayout(getI18n(), softwareManagement,
+        swmMetadataTable = new SoftwareModuleMetadataDetailsLayout(getI18n(), softwareManagement,
                 swMetadataPopupLayout);
 
         addDetailsTab();
