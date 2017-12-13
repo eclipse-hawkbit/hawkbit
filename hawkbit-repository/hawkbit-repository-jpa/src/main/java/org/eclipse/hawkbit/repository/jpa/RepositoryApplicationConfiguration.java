@@ -547,8 +547,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    ControllerManagement controllerManagement(final ScheduledExecutorService executorService) {
-        return new JpaControllerManagement(executorService);
+    ControllerManagement controllerManagement(final ScheduledExecutorService executorService,
+            final RepositoryProperties repositoryProperties) {
+        return new JpaControllerManagement(executorService, repositoryProperties);
     }
 
     @Bean

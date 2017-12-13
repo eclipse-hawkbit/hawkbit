@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystemProperties;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
@@ -177,9 +176,6 @@ public abstract class AbstractIntegrationTest {
     protected SystemSecurityContext systemSecurityContext;
 
     @Autowired
-    private ArtifactFilesystemProperties artifactFilesystemProperties;
-
-    @Autowired
     protected ArtifactRepository binaryArtifactRepository;
 
     @Autowired
@@ -271,18 +267,18 @@ public abstract class AbstractIntegrationTest {
 
         osType = securityRule
                 .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_OS));
-        osType = securityRule.runAsPrivileged(() -> softwareModuleTypeManagement.update(
-                entityFactory.softwareModuleType().update(osType.getId()).description(description)));
+        osType = securityRule.runAsPrivileged(() -> softwareModuleTypeManagement
+                .update(entityFactory.softwareModuleType().update(osType.getId()).description(description)));
 
         appType = securityRule.runAsPrivileged(
                 () -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_APP, Integer.MAX_VALUE));
-        appType = securityRule.runAsPrivileged(() -> softwareModuleTypeManagement.update(
-                entityFactory.softwareModuleType().update(appType.getId()).description(description)));
+        appType = securityRule.runAsPrivileged(() -> softwareModuleTypeManagement
+                .update(entityFactory.softwareModuleType().update(appType.getId()).description(description)));
 
         runtimeType = securityRule
                 .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_RT));
-        runtimeType = securityRule.runAsPrivileged(() -> softwareModuleTypeManagement.update(
-                entityFactory.softwareModuleType().update(runtimeType.getId()).description(description)));
+        runtimeType = securityRule.runAsPrivileged(() -> softwareModuleTypeManagement
+                .update(entityFactory.softwareModuleType().update(runtimeType.getId()).description(description)));
 
         standardDsType = securityRule.runAsPrivileged(() -> testdataFactory.findOrCreateDefaultTestDsType());
     }

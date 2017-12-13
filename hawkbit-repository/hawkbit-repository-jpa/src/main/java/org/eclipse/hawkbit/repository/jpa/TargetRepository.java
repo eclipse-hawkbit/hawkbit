@@ -39,8 +39,8 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
 
     @Modifying
     @Transactional
-    @Query("UPDATE JpaTarget t SET t.lastTargetQuery = :time WHERE t.id = :id")
-    void setLastTargetQuery(@Param("time") long time, @Param("id") long id);
+    @Query("UPDATE JpaTarget t SET t.lastTargetQuery = :time WHERE t.controllerId = :controllerId")
+    void setLastTargetQuery(@Param("time") long time, @Param("controllerId") String controllerId);
 
     /**
      * Sets {@link JpaTarget#getAssignedDistributionSet()}.

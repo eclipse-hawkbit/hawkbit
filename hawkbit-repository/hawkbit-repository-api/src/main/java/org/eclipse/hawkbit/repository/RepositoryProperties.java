@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.util.concurrent.TimeUnit;
+
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -33,6 +35,45 @@ public class RepositoryProperties {
      * Activated by default but may be worth to disable if not needed.
      */
     private boolean publishTargetPollEvent = true;
+
+    /**
+     * Maximum number of poll operations queued before flush.
+     */
+    private int pollPersistenceQueueSize = 10_000;
+
+    /**
+     * Maximum time before queue is flushed in {@link TimeUnit#MILLISECONDS}.
+     */
+    private long pollPersistenceFlushTime = 10_000;
+
+    /**
+     * Set to true to persist polls immediately.
+     */
+    private boolean eagerPollPersistence;
+
+    public boolean isEagerPollPersistence() {
+        return eagerPollPersistence;
+    }
+
+    public void setEagerPollPersistence(final boolean eagerPollPersistence) {
+        this.eagerPollPersistence = eagerPollPersistence;
+    }
+
+    public long getPollPersistenceFlushTime() {
+        return pollPersistenceFlushTime;
+    }
+
+    public void setPollPersistenceFlushTime(final long pollPersistenceFlushTime) {
+        this.pollPersistenceFlushTime = pollPersistenceFlushTime;
+    }
+
+    public int getPollPersistenceQueueSize() {
+        return pollPersistenceQueueSize;
+    }
+
+    public void setPollPersistenceQueueSize(final int pollPersistenceQueueSize) {
+        this.pollPersistenceQueueSize = pollPersistenceQueueSize;
+    }
 
     public boolean isRejectActionStatusForClosedAction() {
         return rejectActionStatusForClosedAction;

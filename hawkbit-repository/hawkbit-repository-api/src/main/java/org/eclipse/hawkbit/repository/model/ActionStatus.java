@@ -25,7 +25,7 @@ public interface ActionStatus extends TenantAwareBaseEntity {
      * @return time in {@link TimeUnit#MILLISECONDS} when the status was
      *         reported.
      */
-    Long getOccurredAt();
+    long getOccurredAt();
 
     /**
      * @return {@link Action} this {@link ActionStatus} belongs to.

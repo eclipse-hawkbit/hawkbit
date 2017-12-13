@@ -9,10 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.net.URI;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -92,9 +89,7 @@ import com.google.common.collect.Lists;
 public class JpaControllerManagement implements ControllerManagement {
     private static final Logger LOG = LoggerFactory.getLogger(ControllerManagement.class);
 
-    private static final int BLOCK_SIZE = 10_000;
-    private final BlockingDeque<TargetPoll> queue = new LinkedBlockingDeque<>(BLOCK_SIZE);
-    private volatile long lastFlush;
+    private final BlockingDeque<TargetPoll> queue;
 
     @Autowired
     private EntityManager entityManager;
@@ -113,9 +108,6 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Autowired
     private QuotaManagement quotaManagement;
-
-    @Autowired
-    private RepositoryProperties repositoryProperties;
 
     @Autowired
     private TenantConfigurationManagement tenantConfigurationManagement;
@@ -141,8 +133,22 @@ public class JpaControllerManagement implements ControllerManagement {
     @Autowired
     private TenantAware tenantAware;
 
-    JpaControllerManagement(final ScheduledExecutorService executorService) {
-        executorService.scheduleWithFixedDelay(this::flushUpdateQueue, 10, 10, TimeUnit.SECONDS);
+    private final RepositoryProperties repositoryProperties;
+
+    JpaControllerManagement(final ScheduledExecutorService executorService,
+            final RepositoryProperties repositoryProperties) {
+
+        if (!repositoryProperties.isEagerPollPersistence()) {
+            executorService.scheduleWithFixedDelay(this::flushUpdateQueue,
+                    repositoryProperties.getPollPersistenceFlushTime(),
+                    repositoryProperties.getPollPersistenceFlushTime(), TimeUnit.MILLISECONDS);
+
+            queue = new LinkedBlockingDeque<>(repositoryProperties.getPollPersistenceQueueSize());
+        } else {
+            queue = null;
+        }
+
+        this.repositoryProperties = repositoryProperties;
     }
 
     private <T> T runInNewTransaction(final String transactionName, final TransactionCallback<T> action) {
@@ -246,27 +252,43 @@ public class JpaControllerManagement implements ControllerManagement {
         return updateTargetStatus(target, address);
     }
 
+    /**
+     * Flush the update queue by means to persisting
+     * {@link Target#getLastTargetQuery()}.
+     */
     private void flushUpdateQueue() {
-        final long oneMinuteAgo = Date.from(Instant.now().minus(1, ChronoUnit.MINUTES)).getTime();
+        LOG.debug("Run flushUpdateQueue.");
 
         final int size = queue.size();
-        if (size <= 0 || (size <= 1000 && lastFlush > oneMinuteAgo)) {
+        if (size <= 0) {
             return;
         }
+
+        LOG.debug("{} events in flushUpdateQueue.", size);
 
         final List<TargetPoll> events = Lists.newArrayListWithExpectedSize(queue.size());
         queue.drainTo(events);
 
-        events.stream().collect(Collectors.groupingBy(TargetPoll::getTenant)).forEach((tenant, polls) -> {
-            final TransactionCallback<Void> createTransaction = status -> updateLastTargetQueries(polls);
-            tenantAware.runAsTenant(tenant, () -> runInNewTransaction("flushUpdateQueue", createTransaction));
-        });
+        try {
+            events.stream().collect(Collectors.groupingBy(TargetPoll::getTenant)).forEach((tenant, polls) -> {
+                final TransactionCallback<Void> createTransaction = status -> updateLastTargetQueries(polls);
+                tenantAware.runAsTenant(tenant, () -> runInNewTransaction("flushUpdateQueue", createTransaction));
+            });
+        } catch (final RuntimeException ex) {
+            LOG.error("Failed to persist UpdateQueue content.", ex);
+            return;
+        }
 
-        lastFlush = System.currentTimeMillis();
+        LOG.debug("{} events persisted.", size);
     }
 
     private Void updateLastTargetQueries(final List<TargetPoll> polls) {
-        polls.forEach(poll -> targetRepository.setLastTargetQuery(poll.getTime(), poll.getId()));
+        LOG.debug("Persist {} targetqueries.", polls.size());
+        polls.forEach(poll -> {
+            targetRepository.setLastTargetQuery(poll.getTime(), poll.getControllerId());
+            afterCommit.afterCommit(() -> eventPublisher.publishEvent(
+                    new TargetPollEvent(poll.getControllerId(), poll.getTenant(), applicationContext.getId())));
+        });
         return null;
     }
 
@@ -276,14 +298,14 @@ public class JpaControllerManagement implements ControllerManagement {
      * 
      */
     private Target updateTargetStatus(final JpaTarget toUpdate, final URI address) {
-        boolean storeImmediatly = toUpdate.getAddress() == null ? true : !toUpdate.getAddress().equals(address);
+        boolean storeEager = isStoreEager(toUpdate, address);
 
         if (TargetUpdateStatus.UNKNOWN.equals(toUpdate.getUpdateStatus())) {
             toUpdate.setUpdateStatus(TargetUpdateStatus.REGISTERED);
-            storeImmediatly = true;
+            storeEager = true;
         }
 
-        if (storeImmediatly || !queue.offer(new TargetPoll(toUpdate))) {
+        if (storeEager || !queue.offer(new TargetPoll(toUpdate))) {
             toUpdate.setAddress(address.toString());
             toUpdate.setLastTargetQuery(System.currentTimeMillis());
 
@@ -294,6 +316,16 @@ public class JpaControllerManagement implements ControllerManagement {
         }
 
         return toUpdate;
+    }
+
+    private boolean isStoreEager(final JpaTarget toUpdate, final URI address) {
+        if (repositoryProperties.isEagerPollPersistence()) {
+            return true;
+        } else if (toUpdate.getAddress() == null) {
+            return true;
+        } else {
+            return !toUpdate.getAddress().equals(address);
+        }
     }
 
     @Override
@@ -599,20 +631,20 @@ public class JpaControllerManagement implements ControllerManagement {
 
     private static class TargetPoll {
         private final String tenant;
-        private final Long id;
+        private final String controllerId;
         private final long time = System.currentTimeMillis();
 
         TargetPoll(final Target target) {
             this.tenant = target.getTenant();
-            this.id = target.getId();
+            this.controllerId = target.getControllerId();
         }
 
         public String getTenant() {
             return tenant;
         }
 
-        public Long getId() {
-            return id;
+        public String getControllerId() {
+            return controllerId;
         }
 
         public long getTime() {

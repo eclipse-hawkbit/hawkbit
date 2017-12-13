@@ -26,6 +26,11 @@ public class TargetPollEvent extends RemoteTenantAwareEvent {
         // for serialization libs like jackson
     }
 
+    public TargetPollEvent(final String controllerId, final String tenant, final String applicationId) {
+        super(controllerId, tenant, applicationId);
+        this.controllerId = controllerId;
+    }
+
     public TargetPollEvent(final Target target, final String applicationId) {
         super(target.getControllerId(), target.getTenant(), applicationId);
         this.controllerId = target.getControllerId();
