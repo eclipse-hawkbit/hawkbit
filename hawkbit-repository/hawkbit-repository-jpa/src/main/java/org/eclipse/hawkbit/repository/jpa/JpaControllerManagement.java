@@ -267,7 +267,7 @@ public class JpaControllerManagement implements ControllerManagement {
         LOG.debug("{} events in flushUpdateQueue.", size);
 
         final List<TargetPoll> events = Lists.newArrayListWithExpectedSize(queue.size());
-        queue.drainTo(events);
+        final int drained = queue.drainTo(events);
 
         try {
             events.stream().collect(Collectors.groupingBy(TargetPoll::getTenant)).forEach((tenant, polls) -> {
@@ -279,7 +279,7 @@ public class JpaControllerManagement implements ControllerManagement {
             return;
         }
 
-        LOG.debug("{} events persisted.", size);
+        LOG.debug("{} events persisted.", drained);
     }
 
     private Void updateLastTargetQueries(final List<TargetPoll> polls) {

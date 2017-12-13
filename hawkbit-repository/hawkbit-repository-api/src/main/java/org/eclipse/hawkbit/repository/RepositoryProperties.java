@@ -44,7 +44,7 @@ public class RepositoryProperties {
     /**
      * Maximum time before queue is flushed in {@link TimeUnit#MILLISECONDS}.
      */
-    private long pollPersistenceFlushTime = 10_000;
+    private long pollPersistenceFlushTime = TimeUnit.SECONDS.toMillis(10);
 
     /**
      * Set to true to persist polls immediately.
