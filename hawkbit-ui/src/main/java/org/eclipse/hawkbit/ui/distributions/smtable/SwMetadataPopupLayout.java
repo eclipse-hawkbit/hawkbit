@@ -107,7 +107,7 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
 
     private CheckBox createTargetVisibleField() {
         final CheckBox checkBox = new CheckBox();
-        checkBox.setId(UIComponentIdProvider.METADATA_VALUE_ID);
+        checkBox.setId(UIComponentIdProvider.METADATA_TARGET_VISIBLE_ID);
         checkBox.setCaption(i18n.getMessage("metadata.targetvisible"));
         checkBox.addValueChangeListener(this::onCheckBoxChange);
 
