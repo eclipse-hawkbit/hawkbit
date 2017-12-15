@@ -19,6 +19,11 @@ public interface SoftwareModuleMetadata extends MetaData {
      */
     SoftwareModule getSoftwareModule();
 
+    @Override
+    default Long getEntityId() {
+        return getSoftwareModule().getId();
+    }
+
     /**
      * @return <code>true</code> if element is visible for targets as part of
      *         {@link Action}.

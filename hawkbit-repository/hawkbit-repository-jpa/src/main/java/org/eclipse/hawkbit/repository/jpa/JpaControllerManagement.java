@@ -9,10 +9,12 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -529,11 +531,13 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public List<SoftwareModuleMetadata> findTargetVisibleMetaDataBySoftwareModuleId(final Long moduleId) {
-        return Collections
-                .unmodifiableList(softwareModuleMetadataRepository
-                        .findBySoftwareModuleIdAndTargetVisible(
-                                new PageRequest(0, RepositoryConstants.MAX_META_DATA_COUNT), moduleId, true)
-                        .getContent());
+    public Map<Long, List<SoftwareModuleMetadata>> findTargetVisibleMetaDataBySoftwareModuleId(
+            final Collection<Long> moduleId) {
+
+        return softwareModuleMetadataRepository
+                .findBySoftwareModuleIdInAndTargetVisible(new PageRequest(0, RepositoryConstants.MAX_META_DATA_COUNT),
+                        moduleId, true)
+                .getContent().stream().collect(Collectors.groupingBy(o -> (Long) o[0],
+                        Collectors.mapping(o -> (SoftwareModuleMetadata) o[1], Collectors.toList())));
     }
 }

@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ddi.rest.resource;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.api.ApiType;
@@ -27,6 +28,7 @@ import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Artifact;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.data.ResponseList;
@@ -49,11 +51,15 @@ public final class DataConversionHelper {
             final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement,
             final HttpRequest request, final ControllerManagement controllerManagement) {
 
+        final Map<Long, List<SoftwareModuleMetadata>> metadata = controllerManagement
+                .findTargetVisibleMetaDataBySoftwareModuleId(uAction.getDistributionSet().getModules().stream()
+                        .map(SoftwareModule::getId).collect(Collectors.toList()));
+
         return uAction.getDistributionSet().getModules().stream()
                 .map(module -> new DdiChunk(mapChunkLegacyKeys(module.getType().getKey()), module.getVersion(),
                         module.getName(),
                         createArtifacts(target, module, artifactUrlHandler, systemManagement, request),
-                        mapMetadata(controllerManagement.findTargetVisibleMetaDataBySoftwareModuleId(module.getId()))))
+                        mapMetadata(metadata.get(module.getId()))))
                 .collect(Collectors.toList());
 
     }

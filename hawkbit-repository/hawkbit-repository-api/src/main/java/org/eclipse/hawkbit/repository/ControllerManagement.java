@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -85,7 +86,8 @@ public interface ControllerManagement {
      *         {@link RepositoryConstants#MAX_META_DATA_COUNT}
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    List<SoftwareModuleMetadata> findTargetVisibleMetaDataBySoftwareModuleId(@NotNull Long moduleId);
+    Map<Long, List<SoftwareModuleMetadata>> findTargetVisibleMetaDataBySoftwareModuleId(
+            @NotNull Collection<Long> moduleId);
 
     /**
      * Simple addition of a new {@link ActionStatus} entry to the {@link Action}

@@ -26,6 +26,11 @@ public interface MetaData extends Serializable {
     int VALUE_MAX_SIZE = 4000;
 
     /**
+     * @return {@link BaseEntity#getId()} the metadata is related to
+     */
+    Long getEntityId();
+
+    /**
      * @return the key
      */
     String getKey();

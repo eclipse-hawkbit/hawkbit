@@ -649,7 +649,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertThat(softwareModuleMetadata.get(0)).isNotNull();
         assertThat(softwareModuleMetadata.get(0).getValue()).isEqualTo(knownValue1);
         assertThat(((JpaSoftwareModuleMetadata) softwareModuleMetadata.get(0)).getId().getKey()).isEqualTo(knownKey1);
-        assertThat(softwareModuleMetadata.get(0).getSoftwareModule().getId()).isEqualTo(ah.getId());
+        assertThat(softwareModuleMetadata.get(0).getEntityId()).isEqualTo(ah.getId());
     }
 
     @Test
@@ -721,7 +721,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertThat(updated.getValue()).isEqualTo(knownUpdateValue);
         assertThat(updated.isTargetVisible()).isTrue();
         assertThat(((JpaSoftwareModuleMetadata) updated).getId().getKey()).isEqualTo(knownKey);
-        assertThat(updated.getSoftwareModule().getId()).isEqualTo(ah.getId());
+        assertThat(updated.getEntityId()).isEqualTo(ah.getId());
     }
 
     @Test
@@ -732,10 +732,10 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         SoftwareModule ah = testdataFactory.createSoftwareModuleApp();
 
-        ah = softwareModuleManagement
-                .createMetaData(
-                        entityFactory.softwareModuleMetadata().create(ah.getId()).key(knownKey1).value(knownValue1))
-                .getSoftwareModule();
+        softwareModuleManagement.createMetaData(
+                entityFactory.softwareModuleMetadata().create(ah.getId()).key(knownKey1).value(knownValue1));
+
+        ah = softwareModuleManagement.get(ah.getId()).get();
 
         assertThat(softwareModuleManagement.findMetaDataBySoftwareModuleId(new PageRequest(0, 10), ah.getId())
                 .getContent()).as("Contains the created metadata element")
@@ -752,12 +752,10 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         final String knownKey1 = "myKnownKey1";
         final String knownValue1 = "myKnownValue1";
 
-        SoftwareModule ah = testdataFactory.createSoftwareModuleApp();
+        final SoftwareModule ah = testdataFactory.createSoftwareModuleApp();
 
-        ah = softwareModuleManagement
-                .createMetaData(
-                        entityFactory.softwareModuleMetadata().create(ah.getId()).key(knownKey1).value(knownValue1))
-                .getSoftwareModule();
+        softwareModuleManagement.createMetaData(
+                entityFactory.softwareModuleMetadata().create(ah.getId()).key(knownKey1).value(knownValue1));
 
         assertThat(softwareModuleManagement.getMetaDataBySoftwareModuleId(ah.getId(), "doesnotexist")).isNotPresent();
     }
@@ -766,18 +764,18 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     @Description("Queries and loads the metadata related to a given software module.")
     public void findAllSoftwareModuleMetadataBySwId() {
 
-        SoftwareModule sw1 = testdataFactory.createSoftwareModuleApp();
+        final SoftwareModule sw1 = testdataFactory.createSoftwareModuleApp();
 
-        SoftwareModule sw2 = testdataFactory.createSoftwareModuleOs();
+        final SoftwareModule sw2 = testdataFactory.createSoftwareModuleOs();
 
         for (int index = 0; index < 10; index++) {
-            sw1 = softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(sw1.getId())
-                    .key("key" + index).value("value" + index).targetVisible(true)).getSoftwareModule();
+            softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(sw1.getId())
+                    .key("key" + index).value("value" + index).targetVisible(true));
         }
 
         for (int index = 0; index < 20; index++) {
-            sw2 = softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(sw2.getId())
-                    .key("key" + index).value("value" + index).targetVisible(false)).getSoftwareModule();
+            softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(sw2.getId())
+                    .key("key" + index).value("value" + index).targetVisible(false));
         }
 
         Page<SoftwareModuleMetadata> metadataOfSw1 = softwareModuleManagement

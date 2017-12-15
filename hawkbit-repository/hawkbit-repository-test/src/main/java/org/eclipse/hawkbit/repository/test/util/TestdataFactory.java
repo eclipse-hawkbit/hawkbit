@@ -308,11 +308,11 @@ public class TestdataFactory {
         set.getModules().forEach(this::addTestModuleMetadata);
     }
 
-    private SoftwareModule addTestModuleMetadata(final SoftwareModule module) {
+    private void addTestModuleMetadata(final SoftwareModule module) {
         softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(module.getId())
                 .key(VISIBLE_SM_MD_KEY).value(VISIBLE_SM_MD_VALUE).targetVisible(true));
-        return softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(module.getId())
-                .key(INVISIBLE_SM_MD_KEY).value(INVISIBLE_SM_MD_VALUE).targetVisible(false)).getSoftwareModule();
+        softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(module.getId())
+                .key(INVISIBLE_SM_MD_KEY).value(INVISIBLE_SM_MD_VALUE).targetVisible(false));
 
     }
 

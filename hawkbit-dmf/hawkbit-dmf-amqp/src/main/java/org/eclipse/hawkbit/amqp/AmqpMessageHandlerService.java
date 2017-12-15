@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
@@ -206,8 +207,12 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
         final Map<SoftwareModule, List<SoftwareModuleMetadata>> modules = Maps
                 .newHashMapWithExpectedSize(action.getDistributionSet().getModules().size());
-        action.getDistributionSet().getModules().forEach(module -> modules.put(module,
-                controllerManagement.findTargetVisibleMetaDataBySoftwareModuleId(module.getId())));
+
+        final Map<Long, List<SoftwareModuleMetadata>> metadata = controllerManagement
+                .findTargetVisibleMetaDataBySoftwareModuleId(action.getDistributionSet().getModules().stream()
+                        .map(SoftwareModule::getId).collect(Collectors.toList()));
+
+        action.getDistributionSet().getModules().forEach(module -> modules.put(module, metadata.get(module.getId())));
 
         amqpMessageDispatcherService.sendUpdateMessageToTarget(action.getTenant(), action.getTarget(), action.getId(),
                 modules);
