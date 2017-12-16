@@ -11,6 +11,9 @@ package org.eclipse.hawkbit.ddi.json.model;
 import java.util.Collections;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
@@ -22,6 +25,8 @@ public class DdiDeployment {
 
     private HandlingType update;
 
+    @JsonProperty("chunks")
+    @NotNull
     private List<DdiChunk> chunks;
 
     /**
@@ -59,7 +64,7 @@ public class DdiDeployment {
         if (chunks == null) {
             return Collections.emptyList();
         }
-        
+
         return Collections.unmodifiableList(chunks);
     }
 

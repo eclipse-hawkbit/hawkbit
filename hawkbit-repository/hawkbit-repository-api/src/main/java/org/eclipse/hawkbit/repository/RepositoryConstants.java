@@ -8,8 +8,10 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 
 /**
  * Repository constants.
@@ -35,6 +37,13 @@ public final class RepositoryConstants {
      * {@link Action}.
      */
     public static final int MAX_ACTION_HISTORY_MSG_COUNT = 100;
+
+    /**
+     * Maximum number of metadata entries provided to controllers.
+     * 
+     * @see SoftwareModuleMetadata#isTargetVisible()
+     */
+    public static final int MAX_META_DATA_COUNT = 50;
 
     private RepositoryConstants() {
         // Utility class.

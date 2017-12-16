@@ -19,4 +19,9 @@ public interface DistributionSetMetadata extends MetaData {
      */
     DistributionSet getDistributionSet();
 
+    @Override
+    default Long getEntityId() {
+        return getDistributionSet().getId();
+    }
+
 }

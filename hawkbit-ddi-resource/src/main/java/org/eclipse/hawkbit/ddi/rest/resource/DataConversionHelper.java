@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ddi.rest.resource;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.api.ApiType;
@@ -20,17 +21,22 @@ import org.eclipse.hawkbit.ddi.json.model.DdiArtifactHash;
 import org.eclipse.hawkbit.ddi.json.model.DdiChunk;
 import org.eclipse.hawkbit.ddi.json.model.DdiConfig;
 import org.eclipse.hawkbit.ddi.json.model.DdiControllerBase;
+import org.eclipse.hawkbit.ddi.json.model.DdiMetadata;
 import org.eclipse.hawkbit.ddi.json.model.DdiPolling;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
+import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Artifact;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.data.ResponseList;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpRequest;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Utility class for the DDI API.
@@ -43,13 +49,24 @@ public final class DataConversionHelper {
 
     static List<DdiChunk> createChunks(final Target target, final Action uAction,
             final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement,
-            final HttpRequest request) {
+            final HttpRequest request, final ControllerManagement controllerManagement) {
+
+        final Map<Long, List<SoftwareModuleMetadata>> metadata = controllerManagement
+                .findTargetVisibleMetaDataBySoftwareModuleId(uAction.getDistributionSet().getModules().stream()
+                        .map(SoftwareModule::getId).collect(Collectors.toList()));
+
         return uAction.getDistributionSet().getModules().stream()
                 .map(module -> new DdiChunk(mapChunkLegacyKeys(module.getType().getKey()), module.getVersion(),
                         module.getName(),
-                        createArtifacts(target, module, artifactUrlHandler, systemManagement, request)))
+                        createArtifacts(target, module, artifactUrlHandler, systemManagement, request),
+                        mapMetadata(metadata.get(module.getId()))))
                 .collect(Collectors.toList());
 
+    }
+
+    private static List<DdiMetadata> mapMetadata(final List<SoftwareModuleMetadata> metadata) {
+        return CollectionUtils.isEmpty(metadata) ? null
+                : metadata.stream().map(md -> new DdiMetadata(md.getKey(), md.getValue())).collect(Collectors.toList());
     }
 
     private static String mapChunkLegacyKeys(final String key) {

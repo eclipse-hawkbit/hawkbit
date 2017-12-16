@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.distributions.smtable;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -33,8 +32,8 @@ public class SwModuleDetails extends AbstractSoftwareModuleDetails {
             final SpPermissionChecker permissionChecker,
             final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow,
             final ManageDistUIState manageDistUIState, final SoftwareModuleManagement softwareManagement,
-            final SwMetadataPopupLayout swMetadataPopupLayout, final EntityFactory entityFactory) {
-        super(i18n, eventBus, permissionChecker, null, softwareManagement, swMetadataPopupLayout, entityFactory,
+            final SwMetadataPopupLayout swMetadataPopupLayout) {
+        super(i18n, eventBus, permissionChecker, null, softwareManagement, swMetadataPopupLayout,
                 softwareModuleAddUpdateWindow);
         this.manageDistUIState = manageDistUIState;
         restoreState();

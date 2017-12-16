@@ -150,12 +150,12 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected boolean hasDeletePermission() {
-        return permChecker.hasDeleteDistributionPermission() || permChecker.hasDeleteTargetPermission();
+        return permChecker.hasDeleteRepositoryPermission() || permChecker.hasDeleteTargetPermission();
     }
 
     @Override
     protected boolean hasUpdatePermission() {
-        return permChecker.hasUpdateTargetPermission() && permChecker.hasReadDistributionPermission();
+        return permChecker.hasUpdateTargetPermission() && permChecker.hasReadRepositoryPermission();
     }
 
     @Override
@@ -386,7 +386,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
     }
 
     private Boolean canDSBeDeleted() {
-        if (!permChecker.hasDeleteDistributionPermission()) {
+        if (!permChecker.hasDeleteRepositoryPermission()) {
             notification.displayValidationError(i18n.getMessage("message.permission.insufficient"));
             return false;
         }

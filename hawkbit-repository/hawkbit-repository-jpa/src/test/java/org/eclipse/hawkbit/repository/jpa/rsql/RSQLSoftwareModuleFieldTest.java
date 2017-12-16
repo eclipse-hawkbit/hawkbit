@@ -11,9 +11,9 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
-import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.junit.Before;
@@ -31,21 +31,23 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
 
     @Before
     public void setupBeforeTest() {
-        final SoftwareModule ah = softwareModuleManagement.create(entityFactory.softwareModule().create()
-                .type(appType).name("agent-hub").version("1.0.1").description("agent-hub"));
-        softwareModuleManagement.create(entityFactory.softwareModule().create().type(runtimeType)
-                .name("oracle-jre").version("1.7.2").description("aa"));
+        final SoftwareModule ah = softwareModuleManagement.create(entityFactory.softwareModule().create().type(appType)
+                .name("agent-hub").version("1.0.1").description("agent-hub"));
+        softwareModuleManagement.create(entityFactory.softwareModule().create().type(runtimeType).name("oracle-jre")
+                .version("1.7.2").description("aa"));
         softwareModuleManagement.create(
                 entityFactory.softwareModule().create().type(osType).name("poky").version("3.0.2").description("aa"));
 
-        final JpaSoftwareModule ah2 = (JpaSoftwareModule) softwareModuleManagement.create(entityFactory
-                .softwareModule().create().type(appType).name("agent-hub2").version("1.0.1").description("agent-hub2"));
+        final JpaSoftwareModule ah2 = (JpaSoftwareModule) softwareModuleManagement.create(entityFactory.softwareModule()
+                .create().type(appType).name("agent-hub2").version("1.0.1").description("agent-hub2"));
 
-        final MetaData softwareModuleMetadata = entityFactory.generateMetadata("metaKey", "metaValue");
-        softwareModuleManagement.createMetaData(ah.getId(), softwareModuleMetadata);
+        final SoftwareModuleMetadataCreate softwareModuleMetadata = entityFactory.softwareModuleMetadata()
+                .create(ah.getId()).key("metaKey").value("metaValue");
+        softwareModuleManagement.createMetaData(softwareModuleMetadata);
 
-        final MetaData softwareModuleMetadata2 = entityFactory.generateMetadata("metaKey", "value");
-        softwareModuleManagement.createMetaData(ah2.getId(), softwareModuleMetadata2);
+        final SoftwareModuleMetadataCreate softwareModuleMetadata2 = entityFactory.softwareModuleMetadata()
+                .create(ah2.getId()).key("metaKey").value("value");
+        softwareModuleManagement.createMetaData(softwareModuleMetadata2);
     }
 
     @Test
@@ -105,8 +107,7 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long excpectedEntity) {
-        final Page<SoftwareModule> find = softwareModuleManagement.findByRsql(new PageRequest(0, 100),
-                rsqlParam);
+        final Page<SoftwareModule> find = softwareModuleManagement.findByRsql(new PageRequest(0, 100), rsqlParam);
         final long countAll = find.getTotalElements();
         assertThat(find).isNotNull();
         assertThat(countAll).isEqualTo(excpectedEntity);

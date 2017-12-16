@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.mgmt.rest.api;
 import java.util.List;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPost;
@@ -256,7 +257,8 @@ public interface MgmtDistributionSetRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetId}/metadata", produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<PagedList<MgmtMetadata>> getMetadata(@PathVariable("distributionSetId") Long distributionSetId,
+    ResponseEntity<PagedList<MgmtMetadata>> getMetadata(
+            @PathVariable("distributionSetId") Long distributionSetId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) String sortParam,
@@ -292,7 +294,7 @@ public interface MgmtDistributionSetRestApi {
     @RequestMapping(method = RequestMethod.PUT, value = "/{distributionSetId}/metadata/{metadataKey}", produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("distributionSetId") Long distributionSetId,
-            @PathVariable("metadataKey") String metadataKey, MgmtMetadata metadata);
+            @PathVariable("metadataKey") String metadataKey, MgmtMetadataBodyPut metadata);
 
     /**
      * Deletes a single meta data entry from the distribution set.

@@ -13,21 +13,32 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Deployment chunks.
  */
 public class DdiChunk {
 
+    @JsonProperty("part")
     @NotNull
     private String part;
 
+    @JsonProperty("version")
     @NotNull
     private String version;
 
+    @JsonProperty("name")
     @NotNull
     private String name;
 
+    @JsonProperty("artifacts")
     private List<DdiArtifact> artifacts;
+
+    @JsonProperty("metadata")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<DdiMetadata> metadata;
 
     public DdiChunk() {
         // needed for json create
@@ -44,13 +55,16 @@ public class DdiChunk {
      *            of the artifact
      * @param artifacts
      *            download information
+     * @param metadata
+     *            optional as additional information for the target/device
      */
-    public DdiChunk(final String part, final String version, final String name, final List<DdiArtifact> artifacts) {
-        super();
+    public DdiChunk(final String part, final String version, final String name, final List<DdiArtifact> artifacts,
+            final List<DdiMetadata> metadata) {
         this.part = part;
         this.version = version;
         this.name = name;
         this.artifacts = artifacts;
+        this.metadata = metadata;
     }
 
     public String getPart() {
@@ -71,6 +85,10 @@ public class DdiChunk {
         }
 
         return Collections.unmodifiableList(artifacts);
+    }
+
+    public List<DdiMetadata> getMetadata() {
+        return metadata;
     }
 
 }

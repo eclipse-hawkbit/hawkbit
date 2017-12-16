@@ -61,7 +61,7 @@ public abstract class AbstractDistributionSetTableHeader extends AbstractTableHe
 
     @Override
     protected boolean hasCreatePermission() {
-        return permChecker.hasCreateDistributionPermission();
+        return permChecker.hasCreateRepositoryPermission();
     }
 
     @Override

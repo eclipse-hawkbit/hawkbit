@@ -55,7 +55,7 @@ public class DistributionTagHeader extends AbstractFilterHeader implements Refre
 
     @Override
     protected boolean hasCreateUpdatePermission() {
-        return permChecker.hasCreateDistributionPermission() || permChecker.hasUpdateDistributionPermission();
+        return permChecker.hasCreateRepositoryPermission() || permChecker.hasUpdateRepositoryPermission();
     }
 
     @Override

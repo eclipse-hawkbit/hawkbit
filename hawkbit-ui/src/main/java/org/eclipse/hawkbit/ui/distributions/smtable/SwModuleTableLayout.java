@@ -41,8 +41,9 @@ public class SwModuleTableLayout extends AbstractTableLayout<SwModuleTable> {
         final SwMetadataPopupLayout swMetadataPopupLayout = new SwMetadataPopupLayout(i18n, uiNotification, eventBus,
                 softwareModuleManagement, entityFactory, permChecker);
 
-        this.swModuleTable = new SwModuleTable(eventBus, i18n, uiNotification, manageDistUIState, softwareModuleManagement,
-                distributionsViewClientCriterion, artifactManagement, swMetadataPopupLayout, artifactUploadState);
+        this.swModuleTable = new SwModuleTable(eventBus, i18n, uiNotification, manageDistUIState,
+                softwareModuleManagement, distributionsViewClientCriterion, artifactManagement, swMetadataPopupLayout,
+                artifactUploadState);
 
         final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow = new SoftwareModuleAddUpdateWindow(i18n,
                 uiNotification, eventBus, softwareModuleManagement, softwareModuleTypeManagement, entityFactory,
@@ -50,7 +51,7 @@ public class SwModuleTableLayout extends AbstractTableLayout<SwModuleTable> {
         super.init(
                 new SwModuleTableHeader(i18n, permChecker, eventBus, manageDistUIState, softwareModuleAddUpdateWindow),
                 swModuleTable, new SwModuleDetails(i18n, eventBus, permChecker, softwareModuleAddUpdateWindow,
-                        manageDistUIState, softwareModuleManagement, swMetadataPopupLayout, entityFactory));
+                        manageDistUIState, softwareModuleManagement, swMetadataPopupLayout));
     }
 
     public SwModuleTable getSwModuleTable() {
