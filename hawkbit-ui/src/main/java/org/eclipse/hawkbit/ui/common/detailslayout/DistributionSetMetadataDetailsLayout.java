@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.ui.distributions.dstable.DsMetadataPopupLayout;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.PageRequest;
 
@@ -76,6 +77,11 @@ public class DistributionSetMetadataDetailsLayout extends AbstractMetadataDetail
     protected void showMetadataDetails(final String metadataKey) {
         distributionSetManagement.get(selectedDistSetId)
                 .ifPresent(distSet -> UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(distSet, metadataKey)));
+    }
+
+    @Override
+    protected String getDetailLinkId(final String name) {
+        return new StringBuilder(UIComponentIdProvider.DS_METADATA_DETAIL_LINK).append('.').append(name).toString();
     }
 
 }

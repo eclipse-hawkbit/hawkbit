@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.common.detailslayout;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.data.Item;
@@ -89,9 +88,7 @@ public abstract class AbstractMetadataDetailsLayout extends Table {
         return viewIcon;
     }
 
-    private static String getDetailLinkId(final String name) {
-        return new StringBuilder(UIComponentIdProvider.DS_METADATA_DETAIL_LINK).append('.').append(name).toString();
-    }
+    protected abstract String getDetailLinkId(final String name);
 
     protected abstract void showMetadataDetails(final String metadataKey);
 

@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.util.CollectionUtils;
@@ -74,6 +75,11 @@ public class SoftwareModuleMetadataDetailsLayout extends AbstractMetadataDetails
     protected void showMetadataDetails(final String metadataKey) {
         softwareModuleManagement.get(selectedSWModuleId).ifPresent(
                 swmodule -> UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, metadataKey)));
+    }
+
+    @Override
+    protected String getDetailLinkId(final String name) {
+        return new StringBuilder(UIComponentIdProvider.SW_METADATA_DETAIL_LINK).append('.').append(name).toString();
     }
 
 }
