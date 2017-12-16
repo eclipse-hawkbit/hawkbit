@@ -275,6 +275,10 @@ public class JpaControllerManagement implements ControllerManagement {
         final Set<TargetPoll> events = Sets.newHashSetWithExpectedSize(queue.size());
         final int drained = queue.drainTo(events);
 
+        if (drained <= 0) {
+            return;
+        }
+
         try {
             events.stream().collect(Collectors.groupingBy(TargetPoll::getTenant)).forEach((tenant, polls) -> {
                 final TransactionCallback<Void> createTransaction = status -> updateLastTargetQueries(tenant, polls);
@@ -289,10 +293,6 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     private Void updateLastTargetQueries(final String tenant, final List<TargetPoll> polls) {
-        if (polls.isEmpty()) {
-            return null;
-        }
-
         LOG.debug("Persist {} targetqueries.", polls.size());
 
         final List<List<String>> pollChunks = Lists.partition(
