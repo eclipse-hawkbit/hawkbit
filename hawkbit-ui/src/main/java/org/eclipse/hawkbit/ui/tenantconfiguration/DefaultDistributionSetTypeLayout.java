@@ -52,7 +52,7 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView {
         combobox = SPUIComponentProvider.getComboBox(null, "330", null, null, false, "", "label.combobox.tag");
         changeIcon = new Label();
 
-        if (!permChecker.hasReadDistributionPermission()) {
+        if (!permChecker.hasReadRepositoryPermission()) {
             return;
         }
 

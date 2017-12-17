@@ -27,6 +27,10 @@ We offer a sandbox installation that is free for everyone to try out hawkBit. Ho
 
 https://hawkbit.eu-gb.mybluemix.net/UI/
 
+In addition the following vendors offer free trial accounts for their hawkBit compatible products:
+
+- [Bosch IoT Rollouts](https://www.bosch-iot-suite.com/rollouts/)
+
 # Device Integration
 
 hawkBit does not provide off the shelf clients for devices as part of the project. The long term goal is to provide an [Eclipse hono](https://github.com/eclipse/hono) integration which will provide connectivity through various IoT protocols and as a result allows a wide range of clients to connect to hawkBit. However, the hawkBit [Direct Device Integration (API) API](http://www.eclipse.org/hawkbit/documentation/interfaces/ddi-api.html) is HTTP/JSon based which should allow any update client to integrate quite easily.
@@ -83,7 +87,7 @@ $ java -jar ./hawkbit-device-simulator/target/hawkbit-device-simulator-#version#
 ## Generate getting started data with the [Management API example](https://github.com/eclipse/hawkbit-examples/tree/master/hawkbit-example-mgmt-simulator) (optional)
 
 ```
-$ java -jar ./hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulator-#version#.jar
+$ java -jar ./hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulator-#version#-exec.jar
 ```
 
 # Releases and Roadmap

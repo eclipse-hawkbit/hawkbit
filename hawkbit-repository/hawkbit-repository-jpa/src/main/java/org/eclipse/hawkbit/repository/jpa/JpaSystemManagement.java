@@ -34,6 +34,8 @@ import org.eclipse.hawkbit.repository.report.model.SystemUsageReportWithTenants;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.interceptor.KeyGenerator;
@@ -59,6 +61,8 @@ import org.springframework.validation.annotation.Validated;
 @Transactional(readOnly = true)
 @Validated
 public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, SystemManagement {
+    private static final Logger LOGGER = LoggerFactory.getLogger(JpaSystemManagement.class);
+
     private static final int MAX_TENANTS_QUERY = 500;
 
     @Autowired
@@ -302,6 +306,11 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
                         org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_OS_ONLY_NAME,
                         "Default type with Firmware/OS only.").addMandatoryModuleType(os));
 
+        distributionSetTypeRepository
+                .save(new JpaDistributionSetType(org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_APP_ONLY_KEY,
+                        org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_APP_ONLY_NAME,
+                        "Default type with app(s) only.").addMandatoryModuleType(app));
+
         return distributionSetTypeRepository
                 .save(new JpaDistributionSetType(org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_OS_WITH_APPS_KEY,
                         org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_OS_WITH_APPS_NAME,
@@ -323,7 +332,12 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         do {
             tenants = findTenants(query);
             tenants.forEach(tenant -> tenantAware.runAsTenant(tenant, () -> {
-                consumer.accept(tenant);
+                try {
+                    consumer.accept(tenant);
+                } catch (final RuntimeException ex) {
+                    LOGGER.error("Exception on forEachTenant execution for tenant {}. Continue with next tenant.",
+                            tenant, ex);
+                }
                 return null;
             }));
         } while (tenants.hasNext() && (query = tenants.nextPageable()) != null);

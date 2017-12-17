@@ -10,10 +10,11 @@ package org.eclipse.hawkbit.mgmt.rest.api;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
+import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleMetadata;
+import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleMetadataBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequestBodyPut;
 import org.springframework.hateoas.MediaTypes;
@@ -214,7 +215,8 @@ public interface MgmtSoftwareModuleRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{softwareModuleId}/metadata", produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<PagedList<MgmtMetadata>> getMetadata(@PathVariable("softwareModuleId") final Long softwareModuleId,
+    ResponseEntity<PagedList<MgmtSoftwareModuleMetadata>> getMetadata(
+            @PathVariable("softwareModuleId") final Long softwareModuleId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
@@ -232,7 +234,8 @@ public interface MgmtSoftwareModuleRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{softwareModuleId}/metadata/{metadataKey}", produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtMetadata> getMetadataValue(@PathVariable("softwareModuleId") final Long softwareModuleId,
+    ResponseEntity<MgmtSoftwareModuleMetadata> getMetadataValue(
+            @PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("metadataKey") final String metadataKey);
 
     /**
@@ -242,13 +245,16 @@ public interface MgmtSoftwareModuleRestApi {
      *            the ID of the software module to update the meta data entry
      * @param metadataKey
      *            the key of the meta data to update the value
+     * @param metadata
+     *            body to update
      * @return status OK if the update request is successful and the updated
      *         meta data result
      */
     @RequestMapping(method = RequestMethod.PUT, value = "/{softwareModuleId}/metadata/{metadataKey}", produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("softwareModuleId") final Long softwareModuleId,
-            @PathVariable("metadataKey") final String metadataKey, final MgmtMetadata metadata);
+    ResponseEntity<MgmtSoftwareModuleMetadata> updateMetadata(
+            @PathVariable("softwareModuleId") final Long softwareModuleId,
+            @PathVariable("metadataKey") final String metadataKey, final MgmtSoftwareModuleMetadataBodyPut metadata);
 
     /**
      * Deletes a single meta data entry from the software module.
@@ -276,7 +282,8 @@ public interface MgmtSoftwareModuleRestApi {
     @RequestMapping(method = RequestMethod.POST, value = "/{softwareModuleId}/metadata", consumes = {
             MediaType.APPLICATION_JSON_VALUE,
             MediaTypes.HAL_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtMetadata>> createMetadata(@PathVariable("softwareModuleId") final Long softwareModuleId,
-            final List<MgmtMetadata> metadataRest);
+    ResponseEntity<List<MgmtSoftwareModuleMetadata>> createMetadata(
+            @PathVariable("softwareModuleId") final Long softwareModuleId,
+            final List<MgmtSoftwareModuleMetadata> metadataRest);
 
 }

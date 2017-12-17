@@ -141,7 +141,6 @@ public class RolloutGroupListGrid extends AbstractGrid<LazyQueryContainer> {
     @Override
     protected void addContainerProperties() {
         final LazyQueryContainer rolloutGroupGridContainer = (LazyQueryContainer) getContainerDataSource();
-        rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", false, false);
 
         rolloutGroupGridContainer.addContainerProperty(ROLLOUT_RENDERER_DATA, RolloutRendererData.class, null, false,
                 false);
@@ -221,20 +220,14 @@ public class RolloutGroupListGrid extends AbstractGrid<LazyQueryContainer> {
 
     @Override
     protected void setColumnProperties() {
-        final List<Object> columnList = new ArrayList<>();
-        columnList.add(ROLLOUT_RENDERER_DATA);
-        columnList.add(SPUILabelDefinitions.VAR_STATUS);
-        columnList.add(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS);
-        columnList.add(SPUILabelDefinitions.VAR_TOTAL_TARGETS);
-        columnList.add(SPUILabelDefinitions.ROLLOUT_GROUP_INSTALLED_PERCENTAGE);
-        columnList.add(SPUILabelDefinitions.ROLLOUT_GROUP_ERROR_THRESHOLD);
-        columnList.add(SPUILabelDefinitions.ROLLOUT_GROUP_THRESHOLD);
-        columnList.add(SPUILabelDefinitions.VAR_CREATED_DATE);
-        columnList.add(SPUILabelDefinitions.VAR_CREATED_USER);
-        columnList.add(SPUILabelDefinitions.VAR_MODIFIED_DATE);
-        columnList.add(SPUILabelDefinitions.VAR_MODIFIED_BY);
-        columnList.add(SPUILabelDefinitions.VAR_DESC);
-        setColumnOrder(columnList.toArray());
+        final Object[] columnsToShowInOrder = new Object[] { ROLLOUT_RENDERER_DATA, SPUILabelDefinitions.VAR_STATUS,
+                SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS, SPUILabelDefinitions.VAR_TOTAL_TARGETS,
+                SPUILabelDefinitions.ROLLOUT_GROUP_INSTALLED_PERCENTAGE,
+                SPUILabelDefinitions.ROLLOUT_GROUP_ERROR_THRESHOLD, SPUILabelDefinitions.ROLLOUT_GROUP_THRESHOLD,
+                SPUILabelDefinitions.VAR_CREATED_DATE, SPUILabelDefinitions.VAR_CREATED_USER,
+                SPUILabelDefinitions.VAR_MODIFIED_DATE, SPUILabelDefinitions.VAR_MODIFIED_BY,
+                SPUILabelDefinitions.VAR_DESC };
+        setColumns(columnsToShowInOrder);
         alignColumns();
     }
 
@@ -253,7 +246,6 @@ public class RolloutGroupListGrid extends AbstractGrid<LazyQueryContainer> {
     @Override
     protected void setHiddenColumns() {
         final List<Object> columnsToBeHidden = new ArrayList<>();
-        columnsToBeHidden.add(SPUILabelDefinitions.VAR_NAME);
         columnsToBeHidden.add(SPUILabelDefinitions.VAR_CREATED_DATE);
         columnsToBeHidden.add(SPUILabelDefinitions.VAR_CREATED_USER);
         columnsToBeHidden.add(SPUILabelDefinitions.VAR_MODIFIED_DATE);

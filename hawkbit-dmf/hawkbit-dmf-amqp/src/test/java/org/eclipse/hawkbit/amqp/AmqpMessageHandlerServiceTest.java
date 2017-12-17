@@ -22,7 +22,6 @@ import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
@@ -421,7 +420,7 @@ public class AmqpMessageHandlerServiceTest {
         final ArgumentCaptor<Long> actionIdCaptor = ArgumentCaptor.forClass(Long.class);
 
         verify(amqpMessageDispatcherServiceMock, times(1)).sendUpdateMessageToTarget(tenantCaptor.capture(),
-                targetCaptor.capture(), actionIdCaptor.capture(), any(Collection.class));
+                targetCaptor.capture(), actionIdCaptor.capture(), any(Map.class));
         final String tenant = tenantCaptor.getValue();
         final String controllerId = targetCaptor.getValue().getControllerId();
         final Long actionId = actionIdCaptor.getValue();

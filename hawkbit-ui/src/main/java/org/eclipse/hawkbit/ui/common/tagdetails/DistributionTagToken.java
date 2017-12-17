@@ -101,7 +101,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
 
     @Override
     protected Boolean isToggleTagAssignmentAllowed() {
-        return checker.hasUpdateDistributionPermission();
+        return checker.hasUpdateRepositoryPermission();
     }
 
     @Override

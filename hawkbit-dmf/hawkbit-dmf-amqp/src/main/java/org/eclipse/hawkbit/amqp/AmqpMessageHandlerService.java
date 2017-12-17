@@ -12,8 +12,10 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
@@ -28,6 +30,8 @@ import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
@@ -44,6 +48,8 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.util.StringUtils;
+
+import com.google.common.collect.Maps;
 
 /**
  *
@@ -199,8 +205,17 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             return;
         }
 
+        final Map<SoftwareModule, List<SoftwareModuleMetadata>> modules = Maps
+                .newHashMapWithExpectedSize(action.getDistributionSet().getModules().size());
+
+        final Map<Long, List<SoftwareModuleMetadata>> metadata = controllerManagement
+                .findTargetVisibleMetaDataBySoftwareModuleId(action.getDistributionSet().getModules().stream()
+                        .map(SoftwareModule::getId).collect(Collectors.toList()));
+
+        action.getDistributionSet().getModules().forEach(module -> modules.put(module, metadata.get(module.getId())));
+
         amqpMessageDispatcherService.sendUpdateMessageToTarget(action.getTenant(), action.getTarget(), action.getId(),
-                action.getDistributionSet().getModules());
+                modules);
     }
 
     /**

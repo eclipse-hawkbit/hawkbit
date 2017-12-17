@@ -232,7 +232,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
 
     private void buildLayout() {
         // Build only if user has both permissions
-        if (permChecker.hasTargetReadPermission() || permChecker.hasReadDistributionPermission()) {
+        if (permChecker.hasTargetReadPermission() || permChecker.hasReadRepositoryPermission()) {
             setSizeFull();
             createMainLayout();
             addComponents(mainLayout);
@@ -250,9 +250,9 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
 
     private void layoutWidgets() {
         mainLayout.removeAllComponents();
-        if (permChecker.hasReadDistributionPermission() && permChecker.hasTargetReadPermission()) {
+        if (permChecker.hasReadRepositoryPermission() && permChecker.hasTargetReadPermission()) {
             displayAllWidgets();
-        } else if (permChecker.hasReadDistributionPermission()) {
+        } else if (permChecker.hasReadRepositoryPermission()) {
             displayDistributionWidgetsOnly();
         } else if (permChecker.hasTargetReadPermission()) {
             displayTargetWidgetsOnly();
@@ -292,7 +292,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
 
     private Boolean showFooterLayout() {
         if (permChecker.hasTargetReadPermission()
-                || (permChecker.hasDeleteDistributionPermission() || permChecker.hasDeleteTargetPermission())
+                || (permChecker.hasDeleteRepositoryPermission() || permChecker.hasDeleteTargetPermission())
                 || hasDeploymentPermission()) {
             return true;
         }
@@ -300,7 +300,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
     }
 
     private boolean hasDeploymentPermission() {
-        return permChecker.hasReadDistributionPermission() && permChecker.hasUpdateTargetPermission();
+        return permChecker.hasReadRepositoryPermission() && permChecker.hasUpdateTargetPermission();
     }
 
     private void displayTargetWidgetsOnly() {
@@ -318,7 +318,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
     }
 
     private void maximizeTargetTable() {
-        if (permChecker.hasReadDistributionPermission()) {
+        if (permChecker.hasReadRepositoryPermission()) {
             mainLayout.removeComponent(distributionTableLayout);
             mainLayout.removeComponent(distributionTagLayout);
         }

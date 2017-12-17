@@ -109,7 +109,7 @@ public class DistributionTagDropEvent implements DropHandler {
     }
 
     private boolean checkForDSUpdatePermission() {
-        if (!permChecker.hasUpdateDistributionPermission()) {
+        if (!permChecker.hasUpdateRepositoryPermission()) {
 
             notification.displayValidationError(i18n.getMessage("message.permission.insufficient"));
             return false;

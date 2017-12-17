@@ -9,9 +9,10 @@
 package org.eclipse.hawkbit.amqp;
 
 import java.net.URI;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.api.ApiType;
@@ -25,8 +26,11 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DmfArtifact;
 import org.eclipse.hawkbit.dmf.json.model.DmfArtifactHash;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
+import org.eclipse.hawkbit.dmf.json.model.DmfMetadata;
 import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.RepositoryConstants;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
@@ -34,6 +38,7 @@ import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.util.IpUtil;
@@ -46,6 +51,9 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.PageRequest;
+
+import com.google.common.collect.Maps;
 
 /**
  * {@link AmqpMessageDispatcherService} create all outgoing AMQP messages and
@@ -66,6 +74,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private final TargetManagement targetManagement;
     private final ServiceMatcher serviceMatcher;
     private final DistributionSetManagement distributionSetManagement;
+    private final SoftwareModuleManagement softwareModuleManagement;
 
     /**
      * Constructor.
@@ -92,7 +101,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
             final TargetManagement targetManagement, final ServiceMatcher serviceMatcher,
-            final DistributionSetManagement distributionSetManagement) {
+            final DistributionSetManagement distributionSetManagement,
+            final SoftwareModuleManagement softwareModuleManagement) {
         super(rabbitTemplate);
         this.artifactUrlHandler = artifactUrlHandler;
         this.amqpSenderService = amqpSenderService;
@@ -101,6 +111,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         this.targetManagement = targetManagement;
         this.serviceMatcher = serviceMatcher;
         this.distributionSetManagement = distributionSetManagement;
+        this.softwareModuleManagement = softwareModuleManagement;
     }
 
     /**
@@ -118,11 +129,22 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
         LOG.debug("targetAssignDistributionSet retrieved. I will forward it to DMF broker.");
 
-        distributionSetManagement.get(assignedEvent.getDistributionSetId()).ifPresent(set ->
+        distributionSetManagement.get(assignedEvent.getDistributionSetId()).ifPresent(set -> {
 
-        targetManagement.getByControllerID(assignedEvent.getActions().keySet())
-                .forEach(target -> sendUpdateMessageToTarget(assignedEvent.getTenant(), target,
-                        assignedEvent.getActions().get(target.getControllerId()), set.getModules())));
+            final Map<SoftwareModule, List<SoftwareModuleMetadata>> modules = Maps
+                    .newHashMapWithExpectedSize(set.getModules().size());
+            set.getModules()
+                    .forEach(
+                            module -> modules.put(module,
+                                    softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(
+                                            new PageRequest(0, RepositoryConstants.MAX_META_DATA_COUNT), module.getId())
+                                            .getContent()));
+
+            targetManagement.getByControllerID(assignedEvent.getActions().keySet())
+                    .forEach(target -> sendUpdateMessageToTarget(assignedEvent.getTenant(), target,
+                            assignedEvent.getActions().get(target.getControllerId()), modules));
+
+        });
     }
 
     /**
@@ -159,7 +181,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     protected void sendUpdateMessageToTarget(final String tenant, final Target target, final Long actionId,
-            final Collection<SoftwareModule> modules) {
+            final Map<SoftwareModule, List<SoftwareModuleMetadata>> modules) {
 
         final URI targetAdress = target.getAddress();
         if (!IpUtil.isAmqpUri(targetAdress)) {
@@ -172,10 +194,11 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         final String targetSecurityToken = systemSecurityContext.runAsSystem(target::getSecurityToken);
         downloadAndUpdateRequest.setTargetSecurityToken(targetSecurityToken);
 
-        for (final SoftwareModule softwareModule : modules) {
-            final DmfSoftwareModule amqpSoftwareModule = convertToAmqpSoftwareModule(target, softwareModule);
+        modules.entrySet().forEach(entry -> {
+
+            final DmfSoftwareModule amqpSoftwareModule = convertToAmqpSoftwareModule(target, entry);
             downloadAndUpdateRequest.addSoftwareModule(amqpSoftwareModule);
-        }
+        });
 
         final Message message = getMessageConverter().toMessage(downloadAndUpdateRequest,
                 createConnectorMessagePropertiesEvent(tenant, target.getControllerId(),
@@ -248,15 +271,20 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         return messageProperties;
     }
 
-    private DmfSoftwareModule convertToAmqpSoftwareModule(final Target target, final SoftwareModule softwareModule) {
+    private DmfSoftwareModule convertToAmqpSoftwareModule(final Target target,
+            final Entry<SoftwareModule, List<SoftwareModuleMetadata>> entry) {
         final DmfSoftwareModule amqpSoftwareModule = new DmfSoftwareModule();
-        amqpSoftwareModule.setModuleId(softwareModule.getId());
-        amqpSoftwareModule.setModuleType(softwareModule.getType().getKey());
-        amqpSoftwareModule.setModuleVersion(softwareModule.getVersion());
+        amqpSoftwareModule.setModuleId(entry.getKey().getId());
+        amqpSoftwareModule.setModuleType(entry.getKey().getType().getKey());
+        amqpSoftwareModule.setModuleVersion(entry.getKey().getVersion());
+        amqpSoftwareModule.setArtifacts(convertArtifacts(target, entry.getKey().getArtifacts()));
+        amqpSoftwareModule.setMetadata(convertMetadata(entry.getValue()));
 
-        final List<DmfArtifact> artifacts = convertArtifacts(target, softwareModule.getArtifacts());
-        amqpSoftwareModule.setArtifacts(artifacts);
         return amqpSoftwareModule;
+    }
+
+    private List<DmfMetadata> convertMetadata(final List<SoftwareModuleMetadata> metadata) {
+        return metadata.stream().map(md -> new DmfMetadata(md.getKey(), md.getValue())).collect(Collectors.toList());
     }
 
     private List<DmfArtifact> convertArtifacts(final Target target, final List<Artifact> localArtifacts) {

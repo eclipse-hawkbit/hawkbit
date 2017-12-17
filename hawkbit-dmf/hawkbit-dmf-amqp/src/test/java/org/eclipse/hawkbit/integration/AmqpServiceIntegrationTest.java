@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
+import org.eclipse.hawkbit.dmf.json.model.DmfMetadata;
 import org.eclipse.hawkbit.integration.listener.DeadletterListener;
 import org.eclipse.hawkbit.integration.listener.ReplyToListener;
 import org.eclipse.hawkbit.matcher.SoftwareModuleJsonMatcher;
@@ -35,6 +36,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.Assert;
 import org.junit.Before;
@@ -107,6 +109,8 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
 
     protected DistributionSetAssignmentResult registerTargetAndAssignDistributionSet(final String controllerId) {
         distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        testdataFactory.addSoftwareModuleMetadata(distributionSet);
+
         return registerTargetAndAssignDistributionSet(distributionSet.getId(), TargetUpdateStatus.REGISTERED,
                 distributionSet.getModules(), controllerId);
     }
@@ -164,6 +168,10 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
 
         Assert.assertThat(dsModules,
                 SoftwareModuleJsonMatcher.containsExactly(downloadAndUpdateRequest.getSoftwareModules()));
+
+        downloadAndUpdateRequest.getSoftwareModules()
+                .forEach(dmfModule -> assertThat(dmfModule.getMetadata()).containsExactly(
+                        new DmfMetadata(TestdataFactory.VISIBLE_SM_MD_KEY, TestdataFactory.VISIBLE_SM_MD_VALUE)));
 
         final Target updatedTarget = waitUntilIsPresent(() -> targetManagement.getByControllerID(controllerId));
 

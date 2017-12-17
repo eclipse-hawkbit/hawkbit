@@ -28,15 +28,20 @@ import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleMetadataFields;
+import org.eclipse.hawkbit.repository.builder.GenericSoftwareModuleMetadataUpdate;
 import org.eclipse.hawkbit.repository.builder.GenericSoftwareModuleUpdate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataUpdate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleCreate;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
@@ -51,7 +56,6 @@ import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.AssignedSoftwareModule;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -61,6 +65,7 @@ import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -443,15 +448,17 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public SoftwareModuleMetadata createMetaData(final Long moduleId, final MetaData md) {
+    public SoftwareModuleMetadata createMetaData(final SoftwareModuleMetadataCreate c) {
+        final JpaSoftwareModuleMetadataCreate create = (JpaSoftwareModuleMetadataCreate) c;
 
-        checkAndThrowAlreadyIfSoftwareModuleMetadataExists(moduleId, md);
+        checkAndThrowAlreadyIfSoftwareModuleMetadataExists(create.getSoftwareModuleId(), create);
+        touch(create.getSoftwareModuleId());
 
-        return softwareModuleMetadataRepository
-                .save(new JpaSoftwareModuleMetadata(md.getKey(), touch(moduleId), md.getValue()));
+        return softwareModuleMetadataRepository.save(create.build());
     }
 
-    private void checkAndThrowAlreadyIfSoftwareModuleMetadataExists(final Long moduleId, final MetaData md) {
+    private void checkAndThrowAlreadyIfSoftwareModuleMetadataExists(final Long moduleId,
+            final JpaSoftwareModuleMetadataCreate md) {
         if (softwareModuleMetadataRepository.exists(new SwMetadataCompositeKey(moduleId, md.getKey()))) {
             throwMetadataKeyAlreadyExists(md.getKey());
         }
@@ -461,28 +468,26 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public List<SoftwareModuleMetadata> createMetaData(final Long moduleId, final Collection<MetaData> md) {
-        md.forEach(meta -> checkAndThrowAlreadyIfSoftwareModuleMetadataExists(moduleId, meta));
+    public List<SoftwareModuleMetadata> createMetaData(final Collection<SoftwareModuleMetadataCreate> create) {
 
-        final JpaSoftwareModule module = touch(moduleId);
-
-        return Collections.unmodifiableList(md.stream()
-                .map(meta -> softwareModuleMetadataRepository
-                        .save(new JpaSoftwareModuleMetadata(meta.getKey(), module, meta.getValue())))
-                .collect(Collectors.toList()));
+        return create.stream().map(this::createMetaData).collect(Collectors.toList());
     }
 
     @Override
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public SoftwareModuleMetadata updateMetaData(final Long moduleId, final MetaData md) {
+    public SoftwareModuleMetadata updateMetaData(final SoftwareModuleMetadataUpdate u) {
+        final GenericSoftwareModuleMetadataUpdate update = (GenericSoftwareModuleMetadataUpdate) u;
 
         // check if exists otherwise throw entity not found exception
-        final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) getMetaDataBySoftwareModuleId(moduleId,
-                md.getKey()).orElseThrow(
-                        () -> new EntityNotFoundException(SoftwareModuleMetadata.class, moduleId, md.getKey()));
-        metadata.setValue(md.getValue());
+        final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) getMetaDataBySoftwareModuleId(
+                update.getSoftwareModuleId(), update.getKey())
+                        .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleMetadata.class,
+                                update.getSoftwareModuleId(), update.getKey()));
+
+        update.getValue().ifPresent(metadata::setValue);
+        update.isTargetVisible().ifPresent(metadata::setTargetVisible);
 
         touch(metadata.getSoftwareModule());
         return softwareModuleMetadataRepository.save(metadata);
@@ -591,6 +596,15 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     @Override
     public boolean exists(final Long id) {
         return softwareModuleRepository.exists(id);
+    }
+
+    @Override
+    public Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleIdAndTargetVisible(final Pageable pageable,
+            final Long moduleId) {
+        throwExceptionIfSoftwareModuleDoesNotExist(moduleId);
+
+        return convertMdPage(softwareModuleMetadataRepository.findBySoftwareModuleIdAndTargetVisible(
+                new PageRequest(0, RepositoryConstants.MAX_META_DATA_COUNT), moduleId, true), pageable);
     }
 
 }

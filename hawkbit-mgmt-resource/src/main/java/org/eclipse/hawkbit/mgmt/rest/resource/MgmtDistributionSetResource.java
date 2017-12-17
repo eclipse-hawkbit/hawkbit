@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPost;
@@ -298,8 +299,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("distributionSetId") final Long distributionSetId,
-            @PathVariable("metadataKey") final String metadataKey, @RequestBody final MgmtMetadata metadata) {
+    public ResponseEntity<MgmtMetadata> updateMetadata(
+            @PathVariable("distributionSetId") final Long distributionSetId,
+            @PathVariable("metadataKey") final String metadataKey, @RequestBody final MgmtMetadataBodyPut metadata) {
         // check if distribution set exists otherwise throw exception
         // immediately
         final DistributionSetMetadata updated = distributionSetManagement.updateMetaData(distributionSetId,

@@ -40,6 +40,7 @@ import org.eclipse.hawkbit.repository.builder.DistributionSetBuilder;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleBuilder;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
@@ -52,6 +53,7 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetTypeBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleBuilder;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleMetadataBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
 import org.eclipse.hawkbit.repository.jpa.event.JpaEventEntityManager;
@@ -166,6 +168,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     DistributionSetBuilder distributionSetBuilder(final DistributionSetTypeManagement distributionSetTypeManagement,
             final SoftwareModuleManagement softwareManagement) {
         return new JpaDistributionSetBuilder(distributionSetTypeManagement, softwareManagement);
+    }
+
+    @Bean
+    SoftwareModuleMetadataBuilder softwareModuleMetadataBuilder(
+            final SoftwareModuleManagement softwareModuleManagement) {
+        return new JpaSoftwareModuleMetadataBuilder(softwareModuleManagement);
     }
 
     /**

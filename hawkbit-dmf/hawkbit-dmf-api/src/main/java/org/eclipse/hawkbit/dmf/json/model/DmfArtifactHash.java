@@ -32,7 +32,6 @@ public class DmfArtifactHash {
      */
     @JsonCreator
     public DmfArtifactHash(@JsonProperty("sha1") final String sha1, @JsonProperty("md5") final String md5) {
-        super();
         this.sha1 = sha1;
         this.md5 = md5;
     }

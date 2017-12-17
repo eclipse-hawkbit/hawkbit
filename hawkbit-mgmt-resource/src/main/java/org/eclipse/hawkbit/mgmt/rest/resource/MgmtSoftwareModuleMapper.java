@@ -16,18 +16,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifactHash;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
+import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.model.Artifact;
-import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.rest.data.ResponseList;
@@ -48,14 +48,16 @@ public final class MgmtSoftwareModuleMapper {
                 .version(smsRest.getVersion()).description(smsRest.getDescription()).vendor(smsRest.getVendor());
     }
 
-    static List<MetaData> fromRequestSwMetadata(final EntityFactory entityFactory,
-            final Collection<MgmtMetadata> metadata) {
+    static List<SoftwareModuleMetadataCreate> fromRequestSwMetadata(final EntityFactory entityFactory,
+            final Long softwareModuleId, final Collection<MgmtSoftwareModuleMetadata> metadata) {
         if (metadata == null) {
             return Collections.emptyList();
         }
 
         return metadata.stream()
-                .map(metadataRest -> entityFactory.generateMetadata(metadataRest.getKey(), metadataRest.getValue()))
+                .map(metadataRest -> entityFactory.softwareModuleMetadata().create(softwareModuleId)
+                        .key(metadataRest.getKey()).value(metadataRest.getValue())
+                        .targetVisible(metadataRest.isTargetVisible()))
                 .collect(Collectors.toList());
     }
 
@@ -77,7 +79,8 @@ public final class MgmtSoftwareModuleMapper {
                 softwareModules.stream().map(MgmtSoftwareModuleMapper::toResponse).collect(Collectors.toList()));
     }
 
-    static List<MgmtMetadata> toResponseSwMetadata(final Collection<SoftwareModuleMetadata> metadata) {
+    static List<MgmtSoftwareModuleMetadata> toResponseSwMetadata(
+            final Collection<SoftwareModuleMetadata> metadata) {
         if (metadata == null) {
             return Collections.emptyList();
         }
@@ -85,10 +88,11 @@ public final class MgmtSoftwareModuleMapper {
         return metadata.stream().map(MgmtSoftwareModuleMapper::toResponseSwMetadata).collect(Collectors.toList());
     }
 
-    static MgmtMetadata toResponseSwMetadata(final SoftwareModuleMetadata metadata) {
-        final MgmtMetadata metadataRest = new MgmtMetadata();
+    static MgmtSoftwareModuleMetadata toResponseSwMetadata(final SoftwareModuleMetadata metadata) {
+        final MgmtSoftwareModuleMetadata metadataRest = new MgmtSoftwareModuleMetadata();
         metadataRest.setKey(metadata.getKey());
         metadataRest.setValue(metadata.getValue());
+        metadataRest.setTargetVisible(metadata.isTargetVisible());
         return metadataRest;
     }
 

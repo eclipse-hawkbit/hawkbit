@@ -271,7 +271,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
             final List<DdiChunk> chunks = DataConversionHelper.createChunks(target, action, artifactUrlHandler,
                     systemManagement,
-                    new ServletServerHttpRequest(requestResponseContextHolder.getHttpServletRequest()));
+                    new ServletServerHttpRequest(requestResponseContextHolder.getHttpServletRequest()),
+                    controllerManagement);
 
             final HandlingType handlingType = action.isForce() ? HandlingType.FORCED : HandlingType.ATTEMPT;
 

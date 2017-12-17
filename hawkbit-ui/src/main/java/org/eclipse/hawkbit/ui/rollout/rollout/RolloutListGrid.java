@@ -10,13 +10,13 @@ package org.eclipse.hawkbit.ui.rollout.rollout;
 
 import static org.eclipse.hawkbit.ui.rollout.DistributionBarHelper.getTooltip;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -34,7 +34,8 @@ import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
 import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
-import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
+import org.eclipse.hawkbit.ui.customrenderers.renderers.AbstractGridButtonConverter;
+import org.eclipse.hawkbit.ui.customrenderers.renderers.GridButtonRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.RolloutRenderer;
 import org.eclipse.hawkbit.ui.push.RolloutChangeEventContainer;
@@ -58,8 +59,9 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.data.Container;
 import com.vaadin.data.Item;
+import com.vaadin.data.util.GeneratedPropertyContainer;
+import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.data.util.converter.Converter;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.UI;
@@ -73,19 +75,16 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String UPDATE_OPTION = "Update";
-
-    private static final String COPY_OPTION = "Copy";
-
-    private static final String PAUSE_OPTION = "Pause";
-
-    private static final String RUN_OPTION = "Run";
-
-    private static final String DELETE_OPTION = "Delete";
-
     private static final String ROLLOUT_RENDERER_DATA = "rolloutRendererData";
 
+    private static final String VIRT_PROP_RUN = "run";
+    private static final String VIRT_PROP_PAUSE = "pause";
+    private static final String VIRT_PROP_UPDATE = "update";
+    private static final String VIRT_PROP_COPY = "copy";
+    private static final String VIRT_PROP_DELETE = "delete";
+
     private final transient RolloutManagement rolloutManagement;
+
     private final transient RolloutGroupManagement rolloutGroupManagement;
 
     private final AddUpdateRolloutWindowLayout addUpdateRolloutWindow;
@@ -94,7 +93,24 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
     private final RolloutUIState rolloutUIState;
 
+    private static final List<RolloutStatus> DELETE_COPY_BUTTON_ENABLED = Arrays.asList(RolloutStatus.CREATING,
+            RolloutStatus.ERROR_CREATING, RolloutStatus.ERROR_STARTING, RolloutStatus.PAUSED, RolloutStatus.READY,
+            RolloutStatus.RUNNING, RolloutStatus.STARTING, RolloutStatus.STOPPED, RolloutStatus.FINISHED);
+
+    private static final List<RolloutStatus> UPDATE_BUTTON_ENABLED = Arrays.asList(RolloutStatus.CREATING,
+            RolloutStatus.ERROR_CREATING, RolloutStatus.ERROR_STARTING, RolloutStatus.PAUSED, RolloutStatus.READY,
+            RolloutStatus.RUNNING, RolloutStatus.STARTING, RolloutStatus.STOPPED);
+
+    private static final List<RolloutStatus> PAUSE_BUTTON_ENABLED = Arrays.asList(RolloutStatus.RUNNING);
+
+    private static final List<RolloutStatus> RUN_BUTTON_ENABLED = Arrays.asList(RolloutStatus.READY,
+            RolloutStatus.PAUSED);
+
     private static final Map<RolloutStatus, StatusFontIcon> statusIconMap = new EnumMap<>(RolloutStatus.class);
+
+    private static final List<Object> HIDDEN_COLUMNS = Arrays.asList(SPUILabelDefinitions.VAR_CREATED_DATE,
+            SPUILabelDefinitions.VAR_CREATED_USER, SPUILabelDefinitions.VAR_MODIFIED_DATE,
+            SPUILabelDefinitions.VAR_MODIFIED_BY, SPUILabelDefinitions.VAR_DESC);
 
     static {
         statusIconMap.put(RolloutStatus.FINISHED,
@@ -115,11 +131,6 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         statusIconMap.put(RolloutStatus.DELETING, new StatusFontIcon(null, SPUIStyleDefinitions.STATUS_SPINNER_RED));
     }
 
-    private static final List<Object> HIDDEN_COLUMNS = Arrays.asList(SPUILabelDefinitions.VAR_NAME,
-            SPUILabelDefinitions.VAR_CREATED_DATE, SPUILabelDefinitions.VAR_CREATED_USER,
-            SPUILabelDefinitions.VAR_MODIFIED_DATE, SPUILabelDefinitions.VAR_MODIFIED_BY,
-            SPUILabelDefinitions.VAR_DESC);
-
     RolloutListGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final RolloutManagement rolloutManagement, final UINotification uiNotification,
             final RolloutUIState rolloutUIState, final SpPermissionChecker permissionChecker,
@@ -135,7 +146,9 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         this.uiNotification = uiNotification;
         this.rolloutUIState = rolloutUIState;
 
+        setGeneratedPropertySupport(new RolloutGeneratedPropertySupport());
         init();
+        hideColumnsDueToInsufficientPermissions();
     }
 
     /**
@@ -188,13 +201,13 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         if (!rollout.isPresent()) {
             return;
         }
-
-        final LazyQueryContainer rolloutContainer = (LazyQueryContainer) getContainerDataSource();
+        final GeneratedPropertyContainer rolloutContainer = (GeneratedPropertyContainer) getContainerDataSource();
         final Item item = rolloutContainer.getItem(rolloutChangeEvent.getRolloutId());
         if (item == null) {
             refreshContainer();
             return;
         }
+
         updateItem(rollout.get(), item);
     }
 
@@ -228,8 +241,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
     @Override
     protected void addContainerProperties() {
-        final LazyQueryContainer rolloutGridContainer = (LazyQueryContainer) getContainerDataSource();
-        rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", false, false);
+        final LazyQueryContainer rolloutGridContainer = getGeneratedPropertySupport().getRawContainer();
+
         rolloutGridContainer.addContainerProperty(ROLLOUT_RENDERER_DATA, RolloutRendererData.class, null, false, false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, null, false, false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_STATUS, RolloutStatus.class, null, false,
@@ -252,19 +265,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS,
                 TotalTargetCountStatus.class, null, false, false);
 
-        rolloutGridContainer.addContainerProperty(RUN_OPTION, String.class, FontAwesome.PLAY.getHtml(), false, false);
-        rolloutGridContainer.addContainerProperty(PAUSE_OPTION, String.class, FontAwesome.PAUSE.getHtml(), false,
-                false);
-
-        if (permissionChecker.hasRolloutUpdatePermission()) {
-            rolloutGridContainer.addContainerProperty(UPDATE_OPTION, String.class, FontAwesome.EDIT.getHtml(), false,
-                    false);
-        }
-        if (permissionChecker.hasRolloutCreatePermission()) {
-            rolloutGridContainer.addContainerProperty(COPY_OPTION, String.class, FontAwesome.COPY.getHtml(), false,
-                    false);
-        }
-        rolloutGridContainer.addContainerProperty(DELETE_OPTION, String.class, FontAwesome.TRASH_O.getHtml(), false,
+        rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_STATUS, RolloutStatus.class, null, true,
                 false);
     }
 
@@ -286,24 +287,20 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setMinimumWidth(40);
         getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setMaximumWidth(60);
 
-        getColumn(RUN_OPTION).setMinimumWidth(25);
-        getColumn(RUN_OPTION).setMaximumWidth(25);
+        getColumn(VIRT_PROP_RUN).setMinimumWidth(25);
+        getColumn(VIRT_PROP_RUN).setMaximumWidth(25);
 
-        getColumn(PAUSE_OPTION).setMinimumWidth(25);
-        getColumn(PAUSE_OPTION).setMaximumWidth(25);
+        getColumn(VIRT_PROP_PAUSE).setMinimumWidth(25);
+        getColumn(VIRT_PROP_PAUSE).setMaximumWidth(25);
 
-        if (permissionChecker.hasRolloutUpdatePermission()) {
-            getColumn(UPDATE_OPTION).setMinimumWidth(25);
-            getColumn(UPDATE_OPTION).setMaximumWidth(25);
-        }
+        getColumn(VIRT_PROP_UPDATE).setMinimumWidth(25);
+        getColumn(VIRT_PROP_UPDATE).setMaximumWidth(25);
 
-        if (permissionChecker.hasRolloutCreatePermission()) {
-            getColumn(COPY_OPTION).setMinimumWidth(25);
-            getColumn(COPY_OPTION).setMaximumWidth(25);
-        }
+        getColumn(VIRT_PROP_COPY).setMinimumWidth(25);
+        getColumn(VIRT_PROP_COPY).setMaximumWidth(25);
 
-        getColumn(DELETE_OPTION).setMinimumWidth(25);
-        getColumn(DELETE_OPTION).setMaximumWidth(40);
+        getColumn(VIRT_PROP_DELETE).setMinimumWidth(25);
+        getColumn(VIRT_PROP_DELETE).setMaximumWidth(40);
 
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setMinimumWidth(280);
     }
@@ -324,33 +321,19 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
                 .setHeaderCaption(i18n.getMessage("header.detail.status"));
         getColumn(SPUILabelDefinitions.VAR_STATUS).setHeaderCaption(i18n.getMessage("header.status"));
 
-        getColumn(RUN_OPTION).setHeaderCaption(i18n.getMessage("header.action.run"));
-        getColumn(PAUSE_OPTION).setHeaderCaption(i18n.getMessage("header.action.pause"));
-
-        if (permissionChecker.hasRolloutUpdatePermission()) {
-            getColumn(UPDATE_OPTION).setHeaderCaption(i18n.getMessage("header.action.update"));
-        }
-
-        if (permissionChecker.hasRolloutCreatePermission()) {
-            getColumn(COPY_OPTION).setHeaderCaption(i18n.getMessage("header.action.copy"));
-        }
-
-        getColumn(DELETE_OPTION).setHeaderCaption(i18n.getMessage("header.action.delete"));
+        getColumn(VIRT_PROP_RUN).setHeaderCaption(i18n.getMessage("header.action.run"));
+        getColumn(VIRT_PROP_PAUSE).setHeaderCaption(i18n.getMessage("header.action.pause"));
+        getColumn(VIRT_PROP_UPDATE).setHeaderCaption(i18n.getMessage("header.action.update"));
+        getColumn(VIRT_PROP_COPY).setHeaderCaption(i18n.getMessage("header.action.copy"));
+        getColumn(VIRT_PROP_DELETE).setHeaderCaption(i18n.getMessage("header.action.delete"));
 
         joinColumns().setText(i18n.getMessage("header.action"));
     }
 
     private HeaderCell joinColumns() {
-        if (permissionChecker.hasRolloutUpdatePermission() && permissionChecker.hasRolloutCreatePermission()) {
-            return getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION, UPDATE_OPTION, COPY_OPTION, DELETE_OPTION);
-        }
-        if (permissionChecker.hasRolloutUpdatePermission()) {
-            return getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION, UPDATE_OPTION, DELETE_OPTION);
-        }
-        if (permissionChecker.hasRolloutCreatePermission()) {
-            return getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION, COPY_OPTION, DELETE_OPTION);
-        }
-        return getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION);
+
+        return getDefaultHeaderRow().join(VIRT_PROP_RUN, VIRT_PROP_PAUSE, VIRT_PROP_UPDATE, VIRT_PROP_COPY,
+                VIRT_PROP_DELETE);
     }
 
     @Override
@@ -360,32 +343,16 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
     @Override
     protected void setColumnProperties() {
-        final List<Object> columnList = new ArrayList<>();
-        columnList.add(ROLLOUT_RENDERER_DATA);
-        columnList.add(SPUILabelDefinitions.VAR_DIST_NAME_VERSION);
-        columnList.add(SPUILabelDefinitions.VAR_STATUS);
-        columnList.add(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS);
-        columnList.add(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS);
-        columnList.add(SPUILabelDefinitions.VAR_TOTAL_TARGETS);
 
-        columnList.add(RUN_OPTION);
-        columnList.add(PAUSE_OPTION);
+        final List<String> columnsToShowInOrder = Arrays.asList(ROLLOUT_RENDERER_DATA,
+                SPUILabelDefinitions.VAR_DIST_NAME_VERSION, SPUILabelDefinitions.VAR_STATUS,
+                SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS, SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS,
+                SPUILabelDefinitions.VAR_TOTAL_TARGETS, VIRT_PROP_RUN, VIRT_PROP_PAUSE, VIRT_PROP_UPDATE,
+                VIRT_PROP_COPY, VIRT_PROP_DELETE, SPUILabelDefinitions.VAR_CREATED_DATE,
+                SPUILabelDefinitions.VAR_CREATED_USER, SPUILabelDefinitions.VAR_MODIFIED_DATE,
+                SPUILabelDefinitions.VAR_MODIFIED_BY, SPUILabelDefinitions.VAR_DESC);
 
-        if (permissionChecker.hasRolloutUpdatePermission()) {
-            columnList.add(UPDATE_OPTION);
-        }
-        if (permissionChecker.hasRolloutCreatePermission()) {
-            columnList.add(COPY_OPTION);
-        }
-        columnList.add(DELETE_OPTION);
-
-        columnList.add(SPUILabelDefinitions.VAR_CREATED_DATE);
-        columnList.add(SPUILabelDefinitions.VAR_CREATED_USER);
-        columnList.add(SPUILabelDefinitions.VAR_MODIFIED_DATE);
-        columnList.add(SPUILabelDefinitions.VAR_MODIFIED_BY);
-        columnList.add(SPUILabelDefinitions.VAR_DESC);
-        setColumnOrder(columnList.toArray());
-        alignColumns();
+        setColumns(columnsToShowInOrder.toArray());
     }
 
     @Override
@@ -393,6 +360,12 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         for (final Object propertyId : HIDDEN_COLUMNS) {
             getColumn(propertyId).setHidden(true);
         }
+
+        getColumn(VIRT_PROP_RUN).setHidable(false);
+        getColumn(VIRT_PROP_PAUSE).setHidable(false);
+        getColumn(VIRT_PROP_DELETE).setHidable(false);
+        getColumn(VIRT_PROP_UPDATE).setHidable(false);
+        getColumn(VIRT_PROP_COPY).setHidable(false);
     }
 
     @Override
@@ -413,28 +386,92 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         customObjectRenderer.addClickListener(this::onClickOfRolloutName);
         getColumn(ROLLOUT_RENDERER_DATA).setRenderer(customObjectRenderer);
 
-        getColumn(RUN_OPTION)
-                .setRenderer(new HtmlButtonRenderer(clickEvent -> startOrResumeRollout((Long) clickEvent.getItemId())));
-
-        getColumn(PAUSE_OPTION)
-                .setRenderer(new HtmlButtonRenderer(clickEvent -> pauseRollout((Long) clickEvent.getItemId())));
-
-        if (permissionChecker.hasRolloutUpdatePermission()) {
-            getColumn(UPDATE_OPTION)
-                    .setRenderer(new HtmlButtonRenderer(clickEvent -> updateRollout((Long) clickEvent.getItemId())));
-        }
-        if (permissionChecker.hasRolloutCreatePermission()) {
-            getColumn(COPY_OPTION)
-                    .setRenderer(new HtmlButtonRenderer(clickEvent -> copyRollout((Long) clickEvent.getItemId())));
-        }
-
-        getColumn(DELETE_OPTION)
-                .setRenderer(new HtmlButtonRenderer(clickEvent -> deleteRollout((Long) clickEvent.getItemId())));
-
+        getColumn(VIRT_PROP_RUN).setRenderer(
+                new GridButtonRenderer(clickEvent -> startOrResumeRollout((Long) clickEvent.getItemId())),
+                new RolloutGridButtonConverter(this::createRunButtonMetadata));
+        getColumn(VIRT_PROP_PAUSE).setRenderer(
+                new GridButtonRenderer(clickEvent -> pauseRollout((Long) clickEvent.getItemId())),
+                new RolloutGridButtonConverter(this::createPauseButtonMetadata));
+        getColumn(VIRT_PROP_UPDATE).setRenderer(
+                new GridButtonRenderer(clickEvent -> updateRollout((Long) clickEvent.getItemId())),
+                new RolloutGridButtonConverter(this::createUpdateButtonMetadata));
+        getColumn(VIRT_PROP_COPY).setRenderer(
+                new GridButtonRenderer(clickEvent -> copyRollout((Long) clickEvent.getItemId())),
+                new RolloutGridButtonConverter(this::createCopyButtonMetadata));
+        getColumn(VIRT_PROP_DELETE).setRenderer(
+                new GridButtonRenderer(clickEvent -> deleteRollout((Long) clickEvent.getItemId())),
+                new RolloutGridButtonConverter(this::createDeleteButtonMetadata));
     }
 
-    private void alignColumns() {
-        setCellStyleGenerator(new RollouStatusCellStyleGenerator(getContainerDataSource()));
+    /**
+     * Generator class responsible to retrieve a Rollout from the grid data in
+     * order to generate a virtual property.
+     */
+    class GenericPropertyValueGenerator extends PropertyValueGenerator<RolloutStatus> {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public RolloutStatus getValue(final Item item, final Object itemId, final Object propertyId) {
+            return (RolloutStatus) item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).getValue();
+        }
+
+        @Override
+        public Class<RolloutStatus> getType() {
+            return RolloutStatus.class;
+        }
+    }
+
+    /**
+     * Adds support for virtual properties (aka generated properties)
+     */
+    class RolloutGeneratedPropertySupport extends AbstractGeneratedPropertySupport {
+
+        @Override
+        public GeneratedPropertyContainer getDecoratedContainer() {
+            return (GeneratedPropertyContainer) getContainerDataSource();
+        }
+
+        @Override
+        public LazyQueryContainer getRawContainer() {
+            return (LazyQueryContainer) (getDecoratedContainer()).getWrappedContainer();
+        }
+
+        @Override
+        protected GeneratedPropertyContainer addGeneratedContainerProperties() {
+            final GeneratedPropertyContainer decoratedContainer = getDecoratedContainer();
+
+            decoratedContainer.addGeneratedProperty(VIRT_PROP_RUN, new GenericPropertyValueGenerator());
+            decoratedContainer.addGeneratedProperty(VIRT_PROP_PAUSE, new GenericPropertyValueGenerator());
+            decoratedContainer.addGeneratedProperty(VIRT_PROP_UPDATE, new GenericPropertyValueGenerator());
+            decoratedContainer.addGeneratedProperty(VIRT_PROP_COPY, new GenericPropertyValueGenerator());
+            decoratedContainer.addGeneratedProperty(VIRT_PROP_DELETE, new GenericPropertyValueGenerator());
+
+            return decoratedContainer;
+        }
+    }
+
+    /**
+     * Concrete grid-button converter that handles Rollouts Status.
+     */
+    class RolloutGridButtonConverter extends AbstractGridButtonConverter<RolloutStatus> {
+
+        private static final long serialVersionUID = 1L;
+
+        /**
+         * Constructor that sets the appropriate adapter.
+         *
+         * @param adapter
+         *            adapts <code>RolloutStatus</code> to
+         *            <code>StatusFontIcon</code>
+         */
+        public RolloutGridButtonConverter(final GridButtonAdapter<RolloutStatus> adapter) {
+            addAdapter(adapter);
+        }
+
+        @Override
+        public Class<RolloutStatus> getModelType() {
+            return RolloutStatus.class;
+        }
     }
 
     private void onClickOfRolloutName(final RendererClickEvent event) {
@@ -554,79 +591,39 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         return description;
     }
 
-    private static class RollouStatusCellStyleGenerator implements CellStyleGenerator {
+    private static boolean hasToBeDisabled(final RolloutStatus currentRolloutStatus,
+            final List<RolloutStatus> expectedRolloutStatus) {
+        return !expectedRolloutStatus.contains(currentRolloutStatus);
+    }
 
-        private static final List<RolloutStatus> DELETE_COPY_BUTTON_ENABLED = Arrays.asList(RolloutStatus.CREATING,
-                RolloutStatus.ERROR_CREATING, RolloutStatus.ERROR_STARTING, RolloutStatus.PAUSED, RolloutStatus.READY,
-                RolloutStatus.RUNNING, RolloutStatus.STARTING, RolloutStatus.STOPPED, RolloutStatus.FINISHED);
+    private StatusFontIcon createRunButtonMetadata(final RolloutStatus rolloutStatus) {
+        final boolean isDisabled = hasToBeDisabled(rolloutStatus, RUN_BUTTON_ENABLED);
+        return new StatusFontIcon(FontAwesome.PLAY, null, i18n.getMessage("tooltip.rollout.run"),
+                UIComponentIdProvider.ROLLOUT_RUN_BUTTON_ID, isDisabled);
+    }
 
-        private static final List<RolloutStatus> UPDATE_BUTTON_ENABLED = Arrays.asList(RolloutStatus.CREATING,
-                RolloutStatus.ERROR_CREATING, RolloutStatus.ERROR_STARTING, RolloutStatus.PAUSED, RolloutStatus.READY,
-                RolloutStatus.RUNNING, RolloutStatus.STARTING, RolloutStatus.STOPPED);
+    private StatusFontIcon createPauseButtonMetadata(final RolloutStatus rolloutStatus) {
+        final boolean isDisabled = hasToBeDisabled(rolloutStatus, PAUSE_BUTTON_ENABLED);
+        return new StatusFontIcon(FontAwesome.PAUSE, null, i18n.getMessage("tooltip.rollout.pause"),
+                UIComponentIdProvider.ROLLOUT_PAUSE_BUTTON_ID, isDisabled);
+    }
 
-        private static final List<RolloutStatus> PAUSE_BUTTON_ENABLED = Arrays.asList(RolloutStatus.RUNNING);
+    private StatusFontIcon createCopyButtonMetadata(final RolloutStatus rolloutStatus) {
+        final boolean isDisabled = hasToBeDisabled(rolloutStatus, DELETE_COPY_BUTTON_ENABLED);
+        return new StatusFontIcon(FontAwesome.COPY, null, i18n.getMessage("tooltip.rollout.copy"),
+                UIComponentIdProvider.ROLLOUT_COPY_BUTTON_ID, isDisabled);
+    }
 
-        private static final List<RolloutStatus> RUN_BUTTON_ENABLED = Arrays.asList(RolloutStatus.READY,
-                RolloutStatus.PAUSED);
+    private StatusFontIcon createUpdateButtonMetadata(final RolloutStatus rolloutStatus) {
+        final boolean isDisabled = hasToBeDisabled(rolloutStatus, UPDATE_BUTTON_ENABLED);
+        return new StatusFontIcon(FontAwesome.EDIT, null, i18n.getMessage("tooltip.rollout.update"),
+                UIComponentIdProvider.ROLLOUT_UPDATE_BUTTON_ID, isDisabled);
+    }
 
-        private static final long serialVersionUID = 1L;
-
-        private final Container.Indexed containerDataSource;
-
-        /**
-         * Constructor
-         *
-         * @param containerDataSource
-         *            the container
-         */
-        public RollouStatusCellStyleGenerator(final Container.Indexed containerDataSource) {
-            this.containerDataSource = containerDataSource;
-        }
-
-        @Override
-        public String getStyle(final CellReference cellReference) {
-            if (SPUILabelDefinitions.VAR_STATUS.equals(cellReference.getPropertyId())) {
-                return "centeralign";
-            }
-            return convertRolloutStatusToString(cellReference);
-        }
-
-        private String convertRolloutStatusToString(final CellReference cellReference) {
-            final String propertyId = (String) cellReference.getPropertyId();
-
-            if (RUN_OPTION.equals(propertyId)) {
-                return getStatus(cellReference, RUN_BUTTON_ENABLED);
-            }
-
-            if (PAUSE_OPTION.equals(propertyId)) {
-                return getStatus(cellReference, PAUSE_BUTTON_ENABLED);
-            }
-
-            if (UPDATE_OPTION.equals(propertyId)) {
-                return getStatus(cellReference, UPDATE_BUTTON_ENABLED);
-            }
-
-            if (DELETE_OPTION.equals(propertyId) || COPY_OPTION.equals(propertyId)) {
-                return getStatus(cellReference, DELETE_COPY_BUTTON_ENABLED);
-            }
-
-            return null;
-        }
-
-        private String getStatus(final CellReference cellReference, final List<RolloutStatus> expectedRolloutStatus) {
-            final RolloutStatus currentRolloutStatus = getRolloutStatus(cellReference.getItemId());
-
-            if (expectedRolloutStatus.contains(currentRolloutStatus)) {
-                return null;
-            }
-
-            return org.eclipse.hawkbit.ui.customrenderers.client.renderers.HtmlButtonRenderer.DISABLE_VALUE;
-        }
-
-        private RolloutStatus getRolloutStatus(final Object itemId) {
-            final Item row = containerDataSource.getItem(itemId);
-            return (RolloutStatus) row.getItemProperty(SPUILabelDefinitions.VAR_STATUS).getValue();
-        }
+    private StatusFontIcon createDeleteButtonMetadata(final RolloutStatus rolloutStatus) {
+        final boolean isDisabled = hasToBeDisabled(rolloutStatus, DELETE_COPY_BUTTON_ENABLED);
+        return new StatusFontIcon(FontAwesome.TRASH_O, null, i18n.getMessage("tooltip.rollout.delete"),
+                UIComponentIdProvider.ROLLOUT_DELETE_BUTTON_ID, isDisabled);
     }
 
     /**
@@ -636,7 +633,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
      */
     class RolloutStatusConverter implements Converter<String, RolloutStatus> {
 
-        private static final long serialVersionUID = -1217685750825632678L;
+        private static final long serialVersionUID = 1L;
 
         @Override
         public RolloutStatus convertToModel(final String value, final Class<? extends RolloutStatus> targetType,
@@ -735,6 +732,20 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         public Class<String> getPresentationType() {
             return String.class;
         }
+    }
+
+    private final void hideColumnsDueToInsufficientPermissions() {
+
+        final List<Object> modifiableColumnsList = getColumns().stream().map(Column::getPropertyId)
+                .collect(Collectors.toList());
+
+        if (!permissionChecker.hasRolloutUpdatePermission()) {
+            modifiableColumnsList.remove(VIRT_PROP_UPDATE);
+        }
+        if (!permissionChecker.hasRolloutCreatePermission()) {
+            modifiableColumnsList.remove(VIRT_PROP_COPY);
+        }
+        setColumns(modifiableColumnsList.toArray());
     }
 
 }
