@@ -385,7 +385,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     @Override
     protected boolean hasDropPermission() {
-        return permissionChecker.hasUpdateDistributionPermission();
+        return permissionChecker.hasUpdateRepositoryPermission();
     }
 
     private void addTableStyleGenerator() {

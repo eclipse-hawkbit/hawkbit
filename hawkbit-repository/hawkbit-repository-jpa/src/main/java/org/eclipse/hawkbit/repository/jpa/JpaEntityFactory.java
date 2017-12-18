@@ -15,6 +15,7 @@ import org.eclipse.hawkbit.repository.builder.DistributionSetTypeBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupBuilder;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleBuilder;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataBuilder;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeBuilder;
 import org.eclipse.hawkbit.repository.builder.TagBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetBuilder;
@@ -24,7 +25,7 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleTypeBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTagBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetBuilder;
-import org.eclipse.hawkbit.repository.jpa.model.JpaMetaData;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -51,9 +52,12 @@ public class JpaEntityFactory implements EntityFactory {
     @Autowired
     private TargetFilterQueryBuilder targetFilterQueryBuilder;
 
+    @Autowired
+    private SoftwareModuleMetadataBuilder softwareModuleMetadataBuilder;
+
     @Override
     public MetaData generateMetadata(final String key, final String value) {
-        return new JpaMetaData(key, value);
+        return new JpaDistributionSetMetadata(key, value);
     }
 
     @Override
@@ -104,6 +108,11 @@ public class JpaEntityFactory implements EntityFactory {
     @Override
     public RolloutGroupBuilder rolloutGroup() {
         return new JpaRolloutGroupBuilder();
+    }
+
+    @Override
+    public SoftwareModuleMetadataBuilder softwareModuleMetadata() {
+        return softwareModuleMetadataBuilder;
     }
 
 }

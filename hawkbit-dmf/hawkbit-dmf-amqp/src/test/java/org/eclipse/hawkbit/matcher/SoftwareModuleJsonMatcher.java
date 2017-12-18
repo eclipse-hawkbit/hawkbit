@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -44,21 +45,19 @@ public final class SoftwareModuleJsonMatcher {
      *            the json sofware modules.
      */
     @Factory
-    public static SoftwareModulesMatcher containsExactly(
-            final List<org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule> expectedModules) {
+    public static SoftwareModulesMatcher containsExactly(final List<DmfSoftwareModule> expectedModules) {
         return new SoftwareModulesMatcher(expectedModules);
     }
 
     private static class SoftwareModulesMatcher extends BaseMatcher<Set<SoftwareModule>> {
 
-        private final List<org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule> expectedModules;
+        private final List<DmfSoftwareModule> expectedModules;
 
-        public SoftwareModulesMatcher(List<org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule> expectedModules) {
+        public SoftwareModulesMatcher(final List<DmfSoftwareModule> expectedModules) {
             this.expectedModules = expectedModules;
         }
 
-        static boolean containsExactly(Object actual,
-                List<org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule> expected) {
+        static boolean containsExactly(final Object actual, final List<DmfSoftwareModule> expected) {
             if (actual == null) {
                 return expected == null;
             }
@@ -73,7 +72,7 @@ public final class SoftwareModuleJsonMatcher {
             for (final SoftwareModule repoSoftwareModule : modules) {
                 boolean containsElement = false;
 
-                for (final org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule jsonSoftwareModule : expected) {
+                for (final DmfSoftwareModule jsonSoftwareModule : expected) {
                     if (!jsonSoftwareModule.getModuleId().equals(repoSoftwareModule.getId())) {
                         continue;
                     }
@@ -100,12 +99,12 @@ public final class SoftwareModuleJsonMatcher {
         }
 
         @Override
-        public boolean matches(Object actualValue) {
+        public boolean matches(final Object actualValue) {
             return containsExactly(actualValue, expectedModules);
         }
 
         @Override
-        public void describeTo(Description description) {
+        public void describeTo(final Description description) {
             description.appendValue(expectedModules);
         }
     }

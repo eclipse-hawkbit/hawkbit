@@ -949,6 +949,11 @@ public final class UIComponentIdProvider {
     public static final String METADATA_VALUE_ID = "metadata.value.id";
 
     /**
+     * Metadata target visible checkbox id.
+     */
+    public static final String METADATA_TARGET_VISIBLE_ID = "metadata.targetvisible.id";
+
+    /**
      * Metadata add icon id.
      */
     public static final String METADTA_ADD_ICON_ID = "metadata.add.icon.id";

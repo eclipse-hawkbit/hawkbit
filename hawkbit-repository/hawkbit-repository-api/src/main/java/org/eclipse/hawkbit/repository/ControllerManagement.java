@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +26,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
@@ -72,7 +74,20 @@ public interface ControllerManagement {
      * @return {@link SoftwareModule} identified by ID
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Optional<SoftwareModule> getSoftwareModule(@NotNull final Long moduleId);
+    Optional<SoftwareModule> getSoftwareModule(@NotNull Long moduleId);
+
+    /**
+     * Retrieves {@link SoftwareModuleMetadata} where
+     * {@link SoftwareModuleMetadata#isTargetVisible()}.
+     * 
+     * @param moduleId
+     *            of the {@link SoftwareModule}
+     * @return list of {@link SoftwareModuleMetadata} with maximum size of
+     *         {@link RepositoryConstants#MAX_META_DATA_COUNT}
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    Map<Long, List<SoftwareModuleMetadata>> findTargetVisibleMetaDataBySoftwareModuleId(
+            @NotNull Collection<Long> moduleId);
 
     /**
      * Simple addition of a new {@link ActionStatus} entry to the {@link Action}

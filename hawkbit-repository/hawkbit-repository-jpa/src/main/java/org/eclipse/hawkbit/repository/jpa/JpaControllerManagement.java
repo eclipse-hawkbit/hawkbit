@@ -9,10 +9,12 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -45,6 +47,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -114,6 +117,9 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
+
+    @Autowired
+    private SoftwareModuleMetadataRepository softwareModuleMetadataRepository;
 
     @Override
     public String getPollingTime() {
@@ -522,5 +528,16 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     public Optional<SoftwareModule> getSoftwareModule(final Long id) {
         return Optional.ofNullable(softwareModuleRepository.findOne(id));
+    }
+
+    @Override
+    public Map<Long, List<SoftwareModuleMetadata>> findTargetVisibleMetaDataBySoftwareModuleId(
+            final Collection<Long> moduleId) {
+
+        return softwareModuleMetadataRepository
+                .findBySoftwareModuleIdInAndTargetVisible(new PageRequest(0, RepositoryConstants.MAX_META_DATA_COUNT),
+                        moduleId, true)
+                .getContent().stream().collect(Collectors.groupingBy(o -> (Long) o[0],
+                        Collectors.mapping(o -> (SoftwareModuleMetadata) o[1], Collectors.toList())));
     }
 }

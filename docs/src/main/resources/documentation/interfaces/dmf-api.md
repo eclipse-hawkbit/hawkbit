@@ -237,7 +237,13 @@ Payload Template
             "sha1":"String"
             },
         "size":long
-        }]
+        }],
+    "metadata":[
+        {
+            "key":"String",
+            "value":"String"
+        }
+    ]
     }]
 }
 ```
@@ -249,7 +255,6 @@ Payload Template
 | type=EVENT  <br /> tenant=tenant123 <br /> thingId=abc  <br /> topic=DOWNLOAD\_AND\_INSTALL   | content_type=application/json  
 
 ```json
-{
 "actionId":137,
 "targetSecurityToken":"bH7XXAprK1ChnLfKSdtlsp7NOlPnZAYY",
 "softwareModules":[
@@ -269,7 +274,13 @@ Payload Template
             "sha1":"sha1hash"
             },
         "size":512
-        }]
+        }],
+    "metadata":[
+        {
+            "key":"installationType",
+            "value":"5784K#"
+        }
+    ]
     }]
 }
 ```

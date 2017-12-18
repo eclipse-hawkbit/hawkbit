@@ -6,61 +6,39 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.jpa.model;
+package org.eclipse.hawkbit.dmf.json.model;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
-import javax.validation.constraints.Size;
-
-import org.eclipse.hawkbit.repository.model.MetaData;
-import org.hibernate.validator.constraints.NotEmpty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Meta data for entities.
+ * Additional metadata to be provided for the target/device.
  *
  */
-@MappedSuperclass
-public class JpaMetaData implements MetaData {
-    private static final long serialVersionUID = 1L;
+@JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class DmfMetadata {
+    @JsonProperty
+    private final String key;
 
-    @Id
-    @Column(name = "meta_key", nullable = false, length = 128)
-    @Size(min = 1, max = 128)
-    @NotEmpty
-    private String key;
+    @JsonProperty
+    private final String value;
 
-    @Column(name = "meta_value", length = 4000)
-    @Size(max = 4000)
-    @Basic
-    private String value;
-
-    public JpaMetaData(final String key, final String value) {
+    @JsonCreator
+    public DmfMetadata(@JsonProperty("key") final String key, @JsonProperty("value") final String value) {
         this.key = key;
         this.value = value;
     }
 
-    public JpaMetaData() {
-        // Default constructor needed for JPA entities
-    }
-
-    @Override
     public String getKey() {
         return key;
     }
 
-    public void setKey(final String key) {
-        this.key = key;
-    }
-
-    @Override
     public String getValue() {
         return value;
-    }
-
-    public void setValue(final String value) {
-        this.value = value;
     }
 
     @Override
@@ -80,10 +58,10 @@ public class JpaMetaData implements MetaData {
         if (obj == null) {
             return false;
         }
-        if (!(this.getClass().isInstance(obj))) {
+        if (getClass() != obj.getClass()) {
             return false;
         }
-        final JpaMetaData other = (JpaMetaData) obj;
+        final DmfMetadata other = (DmfMetadata) obj;
         if (key == null) {
             if (other.key != null) {
                 return false;

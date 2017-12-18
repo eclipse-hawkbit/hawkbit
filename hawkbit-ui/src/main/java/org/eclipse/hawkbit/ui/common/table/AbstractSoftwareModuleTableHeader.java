@@ -86,7 +86,7 @@ public abstract class AbstractSoftwareModuleTableHeader extends AbstractTableHea
 
     @Override
     protected boolean hasCreatePermission() {
-        return permChecker.hasCreateDistributionPermission();
+        return permChecker.hasCreateRepositoryPermission();
     }
 
     @Override

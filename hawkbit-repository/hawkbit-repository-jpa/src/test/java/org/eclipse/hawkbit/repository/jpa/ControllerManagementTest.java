@@ -17,6 +17,7 @@ import java.io.ByteArrayInputStream;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolationException;
 
@@ -40,6 +41,7 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
@@ -430,6 +432,23 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotexist("", LOCALHOST))
                 .as("register target with empty controllerId should fail");
+    }
+
+    @Test
+    @Description("Verify that targetVisible metadata is returned from repository")
+    @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6) })
+    public void findTargetVisibleMetaDataBySoftwareModuleId() {
+        final DistributionSet set = testdataFactory.createDistributionSet();
+        testdataFactory.addSoftwareModuleMetadata(set);
+
+        final Map<Long, List<SoftwareModuleMetadata>> result = controllerManagement
+                .findTargetVisibleMetaDataBySoftwareModuleId(
+                        set.getModules().stream().map(SoftwareModule::getId).collect(Collectors.toList()));
+
+        assertThat(result).hasSize(3);
+        result.entrySet().forEach(entry -> assertThat(entry.getValue()).hasSize(1));
     }
 
     @Test

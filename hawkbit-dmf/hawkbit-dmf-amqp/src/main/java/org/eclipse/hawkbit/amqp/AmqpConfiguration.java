@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
@@ -311,9 +312,11 @@ public class AmqpConfiguration {
     AmqpMessageDispatcherService amqpMessageDispatcherService(final RabbitTemplate rabbitTemplate,
             final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
-            final TargetManagement targetManagement, final DistributionSetManagement distributionSetManagement) {
+            final TargetManagement targetManagement, final DistributionSetManagement distributionSetManagement,
+            final SoftwareModuleManagement softwareModuleManagement) {
         return new AmqpMessageDispatcherService(rabbitTemplate, amqpSenderService, artifactUrlHandler,
-                systemSecurityContext, systemManagement, targetManagement, serviceMatcher, distributionSetManagement);
+                systemSecurityContext, systemManagement, targetManagement, serviceMatcher, distributionSetManagement,
+                softwareModuleManagement);
     }
 
     private static Map<String, Object> getTTLMaxArgsAuthenticationQueue() {

@@ -747,19 +747,17 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Description("Queries and loads the metadata related to a given software module.")
     public void findAllDistributionSetMetadataByDsId() {
         // create a DS
-        DistributionSet ds1 = testdataFactory.createDistributionSet("testDs1");
-        DistributionSet ds2 = testdataFactory.createDistributionSet("testDs2");
+        final DistributionSet ds1 = testdataFactory.createDistributionSet("testDs1");
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("testDs2");
 
         for (int index = 0; index < 10; index++) {
-
-            ds1 = createDistributionSetMetadata(ds1.getId(),
-                    new JpaDistributionSetMetadata("key" + index, ds1, "value" + index)).getDistributionSet();
+            createDistributionSetMetadata(ds1.getId(),
+                    new JpaDistributionSetMetadata("key" + index, ds1, "value" + index));
         }
 
         for (int index = 0; index < 20; index++) {
-
-            ds2 = createDistributionSetMetadata(ds2.getId(),
-                    new JpaDistributionSetMetadata("key" + index, ds2, "value" + index)).getDistributionSet();
+            createDistributionSetMetadata(ds2.getId(),
+                    new JpaDistributionSetMetadata("key" + index, ds2, "value" + index));
         }
 
         final Page<DistributionSetMetadata> metadataOfDs1 = distributionSetManagement

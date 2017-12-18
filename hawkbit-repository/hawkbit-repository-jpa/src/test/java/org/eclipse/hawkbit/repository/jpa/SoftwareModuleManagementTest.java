@@ -9,17 +9,18 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.RandomUtils;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -84,10 +85,14 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
                         .create(entityFactory.softwareModule().create().name("xxx").type(NOT_EXIST_ID)),
                 "SoftwareModuleType");
 
-        verifyThrownExceptionBy(() -> softwareModuleManagement.createMetaData(NOT_EXIST_IDL,
-                entityFactory.generateMetadata("xxx", "xxx")), "SoftwareModule");
-        verifyThrownExceptionBy(() -> softwareModuleManagement.createMetaData(NOT_EXIST_IDL,
-                Arrays.asList(entityFactory.generateMetadata("xxx", "xxx"))), "SoftwareModule");
+        verifyThrownExceptionBy(
+                () -> softwareModuleManagement.createMetaData(
+                        entityFactory.softwareModuleMetadata().create(NOT_EXIST_IDL).key("xxx").value("xxx")),
+                "SoftwareModule");
+        verifyThrownExceptionBy(
+                () -> softwareModuleManagement.createMetaData(Arrays
+                        .asList(entityFactory.softwareModuleMetadata().create(NOT_EXIST_IDL).key("xxx").value("xxx"))),
+                "SoftwareModule");
 
         verifyThrownExceptionBy(() -> softwareModuleManagement.delete(NOT_EXIST_IDL), "SoftwareModule");
         verifyThrownExceptionBy(() -> softwareModuleManagement.delete(Arrays.asList(NOT_EXIST_IDL)), "SoftwareModule");
@@ -95,10 +100,14 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> softwareModuleManagement.deleteMetaData(module.getId(), NOT_EXIST_ID),
                 "SoftwareModuleMetadata");
 
-        verifyThrownExceptionBy(() -> softwareModuleManagement.updateMetaData(NOT_EXIST_IDL,
-                entityFactory.generateMetadata("xxx", "xxx")), "SoftwareModule");
-        verifyThrownExceptionBy(() -> softwareModuleManagement.updateMetaData(module.getId(),
-                entityFactory.generateMetadata(NOT_EXIST_ID, "xxx")), "SoftwareModuleMetadata");
+        verifyThrownExceptionBy(
+                () -> softwareModuleManagement.updateMetaData(
+                        entityFactory.softwareModuleMetadata().update(NOT_EXIST_IDL, "xxx").value("xxx")),
+                "SoftwareModule");
+        verifyThrownExceptionBy(
+                () -> softwareModuleManagement.updateMetaData(
+                        entityFactory.softwareModuleMetadata().update(module.getId(), NOT_EXIST_ID).value("xxx")),
+                "SoftwareModuleMetadata");
 
         verifyThrownExceptionBy(() -> softwareModuleManagement.findByAssignedTo(PAGE, NOT_EXIST_IDL),
                 "DistributionSet");
@@ -624,12 +633,14 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(ah.getOptLockRevision()).isEqualTo(1);
 
-        final SoftwareModuleMetadata swMetadata1 = new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue1);
+        final SoftwareModuleMetadataCreate swMetadata1 = entityFactory.softwareModuleMetadata().create(ah.getId())
+                .key(knownKey1).value(knownValue1);
 
-        final SoftwareModuleMetadata swMetadata2 = new JpaSoftwareModuleMetadata(knownKey2, ah, knownValue2);
+        final SoftwareModuleMetadataCreate swMetadata2 = entityFactory.softwareModuleMetadata().create(ah.getId())
+                .key(knownKey2).value(knownValue2);
 
-        final List<SoftwareModuleMetadata> softwareModuleMetadata = softwareModuleManagement.createMetaData(ah.getId(),
-                Arrays.asList(swMetadata1, swMetadata2));
+        final List<SoftwareModuleMetadata> softwareModuleMetadata = softwareModuleManagement
+                .createMetaData(Arrays.asList(swMetadata1, swMetadata2));
 
         final SoftwareModule changedLockRevisionModule = softwareModuleManagement.get(ah.getId()).get();
         assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(2);
@@ -638,7 +649,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertThat(softwareModuleMetadata.get(0)).isNotNull();
         assertThat(softwareModuleMetadata.get(0).getValue()).isEqualTo(knownValue1);
         assertThat(((JpaSoftwareModuleMetadata) softwareModuleMetadata.get(0)).getId().getKey()).isEqualTo(knownKey1);
-        assertThat(softwareModuleMetadata.get(0).getSoftwareModule().getId()).isEqualTo(ah.getId());
+        assertThat(softwareModuleMetadata.get(0).getEntityId()).isEqualTo(ah.getId());
     }
 
     @Test
@@ -651,14 +662,23 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         final SoftwareModule ah = testdataFactory.createSoftwareModuleApp();
 
-        softwareModuleManagement.createMetaData(ah.getId(), entityFactory.generateMetadata(knownKey1, knownValue1));
+        softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(ah.getId()).key(knownKey1)
+                .value(knownValue1).targetVisible(true));
 
-        try {
-            softwareModuleManagement.createMetaData(ah.getId(), entityFactory.generateMetadata(knownKey1, knownValue2));
-            fail("should not have worked as module metadata already exists");
-        } catch (final EntityAlreadyExistsException e) {
+        assertThatExceptionOfType(EntityAlreadyExistsException.class)
+                .isThrownBy(() -> softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata()
+                        .create(ah.getId()).key(knownKey1).value(knownValue1).targetVisible(true)))
+                .withMessageContaining("Metadata").withMessageContaining(knownKey1);
 
-        }
+        final String knownKey2 = "myKnownKey2";
+
+        softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(ah.getId()).key(knownKey2)
+                .value(knownValue1).targetVisible(false));
+
+        assertThatExceptionOfType(EntityAlreadyExistsException.class)
+                .isThrownBy(() -> softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata()
+                        .create(ah.getId()).key(knownKey2).value(knownValue1).targetVisible(true)))
+                .withMessageContaining("Metadata").withMessageContaining(knownKey2);
     }
 
     @Test
@@ -675,9 +695,11 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertThat(ah.getOptLockRevision()).isEqualTo(1);
 
         // create an software module meta data entry
-        final List<SoftwareModuleMetadata> softwareModuleMetadata = softwareModuleManagement.createMetaData(ah.getId(),
-                Collections.singleton(entityFactory.generateMetadata(knownKey, knownValue)));
-        assertThat(softwareModuleMetadata).hasSize(1);
+        final SoftwareModuleMetadata softwareModuleMetadata = softwareModuleManagement.createMetaData(
+                entityFactory.softwareModuleMetadata().create(ah.getId()).key(knownKey).value(knownValue));
+        assertThat(softwareModuleMetadata.isTargetVisible()).isFalse();
+        assertThat(softwareModuleMetadata.getValue()).isEqualTo(knownValue);
+
         // base software module should have now the opt lock revision one
         // because we are modifying the
         // base software module
@@ -686,8 +708,8 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         // update the software module metadata
         Thread.sleep(100);
-        final SoftwareModuleMetadata updated = softwareModuleManagement.updateMetaData(ah.getId(),
-                entityFactory.generateMetadata(knownKey, knownUpdateValue));
+        final SoftwareModuleMetadata updated = softwareModuleManagement.updateMetaData(entityFactory
+                .softwareModuleMetadata().update(ah.getId(), knownKey).value(knownUpdateValue).targetVisible(true));
         // we are updating the sw meta data so also modiying the base software
         // module so opt lock
         // revision must be two
@@ -697,8 +719,9 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         // verify updated meta data contains the updated value
         assertThat(updated).isNotNull();
         assertThat(updated.getValue()).isEqualTo(knownUpdateValue);
+        assertThat(updated.isTargetVisible()).isTrue();
         assertThat(((JpaSoftwareModuleMetadata) updated).getId().getKey()).isEqualTo(knownKey);
-        assertThat(updated.getSoftwareModule().getId()).isEqualTo(ah.getId());
+        assertThat(updated.getEntityId()).isEqualTo(ah.getId());
     }
 
     @Test
@@ -709,8 +732,10 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         SoftwareModule ah = testdataFactory.createSoftwareModuleApp();
 
-        ah = softwareModuleManagement.createMetaData(ah.getId(), entityFactory.generateMetadata(knownKey1, knownValue1))
-                .getSoftwareModule();
+        softwareModuleManagement.createMetaData(
+                entityFactory.softwareModuleMetadata().create(ah.getId()).key(knownKey1).value(knownValue1));
+
+        ah = softwareModuleManagement.get(ah.getId()).get();
 
         assertThat(softwareModuleManagement.findMetaDataBySoftwareModuleId(new PageRequest(0, 10), ah.getId())
                 .getContent()).as("Contains the created metadata element")
@@ -727,10 +752,10 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         final String knownKey1 = "myKnownKey1";
         final String knownValue1 = "myKnownValue1";
 
-        SoftwareModule ah = testdataFactory.createSoftwareModuleApp();
+        final SoftwareModule ah = testdataFactory.createSoftwareModuleApp();
 
-        ah = softwareModuleManagement.createMetaData(ah.getId(), entityFactory.generateMetadata(knownKey1, knownValue1))
-                .getSoftwareModule();
+        softwareModuleManagement.createMetaData(
+                entityFactory.softwareModuleMetadata().create(ah.getId()).key(knownKey1).value(knownValue1));
 
         assertThat(softwareModuleManagement.getMetaDataBySoftwareModuleId(ah.getId(), "doesnotexist")).isNotPresent();
     }
@@ -739,26 +764,24 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     @Description("Queries and loads the metadata related to a given software module.")
     public void findAllSoftwareModuleMetadataBySwId() {
 
-        SoftwareModule sw1 = testdataFactory.createSoftwareModuleApp();
+        final SoftwareModule sw1 = testdataFactory.createSoftwareModuleApp();
 
-        SoftwareModule sw2 = testdataFactory.createSoftwareModuleOs();
+        final SoftwareModule sw2 = testdataFactory.createSoftwareModuleOs();
 
         for (int index = 0; index < 10; index++) {
-            sw1 = softwareModuleManagement
-                    .createMetaData(sw1.getId(), entityFactory.generateMetadata("key" + index, "value" + index))
-                    .getSoftwareModule();
+            softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(sw1.getId())
+                    .key("key" + index).value("value" + index).targetVisible(true));
         }
 
         for (int index = 0; index < 20; index++) {
-            sw2 = softwareModuleManagement
-                    .createMetaData(sw2.getId(), new JpaSoftwareModuleMetadata("key" + index, sw2, "value" + index))
-                    .getSoftwareModule();
+            softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(sw2.getId())
+                    .key("key" + index).value("value" + index).targetVisible(false));
         }
 
-        final Page<SoftwareModuleMetadata> metadataOfSw1 = softwareModuleManagement
+        Page<SoftwareModuleMetadata> metadataOfSw1 = softwareModuleManagement
                 .findMetaDataBySoftwareModuleId(new PageRequest(0, 100), sw1.getId());
 
-        final Page<SoftwareModuleMetadata> metadataOfSw2 = softwareModuleManagement
+        Page<SoftwareModuleMetadata> metadataOfSw2 = softwareModuleManagement
                 .findMetaDataBySoftwareModuleId(new PageRequest(0, 100), sw2.getId());
 
         assertThat(metadataOfSw1.getNumberOfElements()).isEqualTo(10);
@@ -766,5 +789,17 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(metadataOfSw2.getNumberOfElements()).isEqualTo(20);
         assertThat(metadataOfSw2.getTotalElements()).isEqualTo(20);
+
+        metadataOfSw1 = softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(new PageRequest(0, 100),
+                sw1.getId());
+
+        metadataOfSw2 = softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(new PageRequest(0, 100),
+                sw2.getId());
+
+        assertThat(metadataOfSw1.getNumberOfElements()).isEqualTo(10);
+        assertThat(metadataOfSw1.getTotalElements()).isEqualTo(10);
+
+        assertThat(metadataOfSw2.getNumberOfElements()).isEqualTo(0);
+        assertThat(metadataOfSw2.getTotalElements()).isEqualTo(0);
     }
 }

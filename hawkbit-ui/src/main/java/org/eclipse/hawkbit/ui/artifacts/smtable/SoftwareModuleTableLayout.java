@@ -49,7 +49,7 @@ public class SoftwareModuleTableLayout extends AbstractTableLayout<SoftwareModul
                         softwareModuleAddUpdateWindow),
                 softwareModuleTable,
                 new SoftwareModuleDetails(i18n, eventBus, permChecker, softwareModuleAddUpdateWindow,
-                        artifactUploadState, softwareModuleManagement, swMetadataPopupLayout, entityFactory));
+                        artifactUploadState, softwareModuleManagement, swMetadataPopupLayout));
     }
 
     public SoftwareModuleTable getSoftwareModuleTable() {

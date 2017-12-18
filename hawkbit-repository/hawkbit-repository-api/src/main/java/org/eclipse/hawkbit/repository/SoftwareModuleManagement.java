@@ -16,6 +16,8 @@ import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataUpdate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -23,7 +25,6 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.AssignedSoftwareModule;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -60,10 +61,8 @@ public interface SoftwareModuleManagement
     /**
      * creates a list of software module meta data entries.
      * 
-     * @param moduleId
-     *            the metadata belongs to
      * @param metadata
-     *            the meta data entries to create or update
+     *            the meta data entries to create
      * @return the updated or created software module meta data entries
      * @throws EntityAlreadyExistsException
      *             in case one of the meta data entry already exists for the
@@ -72,15 +71,13 @@ public interface SoftwareModuleManagement
      *             if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    List<SoftwareModuleMetadata> createMetaData(@NotNull Long moduleId, @NotNull Collection<MetaData> metadata);
+    List<SoftwareModuleMetadata> createMetaData(@NotNull Collection<SoftwareModuleMetadataCreate> metadata);
 
     /**
      * creates or updates a single software module meta data entry.
      * 
-     * @param moduleId
-     *            the metadata belongs to
      * @param metadata
-     *            the meta data entry to create or update
+     *            the meta data entry to create
      * @return the updated or created software module meta data entry
      * @throws EntityAlreadyExistsException
      *             in case the meta data entry already exists for the specific
@@ -89,7 +86,7 @@ public interface SoftwareModuleManagement
      *             if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    SoftwareModuleMetadata createMetaData(@NotNull Long moduleId, @NotNull MetaData metadata);
+    SoftwareModuleMetadata createMetaData(@NotNull SoftwareModuleMetadataCreate metadata);
 
     /**
      * deletes a software module meta data entry.
@@ -189,6 +186,25 @@ public interface SoftwareModuleManagement
     Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleId(@NotNull Pageable pageable, @NotNull Long moduleId);
 
     /**
+     * finds all meta data by the given software module id where
+     * {@link SoftwareModuleMetadata#isTargetVisible()}.
+     * 
+     * @param pageable
+     *            the page request to page the result
+     * @param moduleId
+     *            the software module id to retrieve the meta data from
+     *
+     * @return a paged result of all meta data entries for a given software
+     *         module id
+     * 
+     * @throws EntityNotFoundException
+     *             if software module with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleIdAndTargetVisible(@NotNull Pageable pageable,
+            @NotNull Long moduleId);
+
+    /**
      * finds all meta data by the given software module id.
      * 
      * @param pageable
@@ -259,9 +275,7 @@ public interface SoftwareModuleManagement
     /**
      * updates a distribution set meta data value if corresponding entry exists.
      * 
-     * @param moduleId
-     *            the metadata belongs to
-     * @param metadata
+     * @param update
      *            the meta data entry to be updated
      * 
      * @return the updated meta data entry
@@ -271,5 +285,5 @@ public interface SoftwareModuleManagement
      *             updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    SoftwareModuleMetadata updateMetaData(@NotNull Long moduleId, @NotNull MetaData metadata);
+    SoftwareModuleMetadata updateMetaData(@NotNull SoftwareModuleMetadataUpdate update);
 }

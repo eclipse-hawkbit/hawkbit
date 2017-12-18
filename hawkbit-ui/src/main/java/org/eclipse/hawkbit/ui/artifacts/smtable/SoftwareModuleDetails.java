@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -31,8 +30,8 @@ public class SoftwareModuleDetails extends AbstractSoftwareModuleDetails {
             final SpPermissionChecker permissionChecker,
             final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow,
             final ArtifactUploadState artifactUploadState, final SoftwareModuleManagement softwareManagement,
-            final SwMetadataPopupLayout swMetadataPopupLayout, final EntityFactory entityFactory) {
-        super(i18n, eventBus, permissionChecker, null, softwareManagement, swMetadataPopupLayout, entityFactory,
+            final SwMetadataPopupLayout swMetadataPopupLayout) {
+        super(i18n, eventBus, permissionChecker, null, softwareManagement, swMetadataPopupLayout,
                 softwareModuleAddUpdateWindow);
         this.artifactUploadState = artifactUploadState;
         restoreState();

@@ -244,11 +244,11 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
      */
     @Override
     public void onApplicationEvent(final ApplicationEvent applicationEvent) {
-        if (!(applicationEvent instanceof org.eclipse.hawkbit.repository.event.TenantAwareEvent)) {
+        if (!(applicationEvent instanceof TenantAwareEvent)) {
             return;
         }
 
-        final org.eclipse.hawkbit.repository.event.TenantAwareEvent event = (TenantAwareEvent) applicationEvent;
+        final TenantAwareEvent event = (TenantAwareEvent) applicationEvent;
 
         collectRolloutEvent(event);
         // to dispatch too many events which are not interested on the UI
@@ -259,14 +259,14 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
         offerEvent(event);
     }
 
-    private void offerEventIfNotContains(final org.eclipse.hawkbit.repository.event.TenantAwareEvent event) {
+    private void offerEventIfNotContains(final TenantAwareEvent event) {
         if (queue.contains(event)) {
             return;
         }
         offerEvent(event);
     }
 
-    private void offerEvent(final org.eclipse.hawkbit.repository.event.TenantAwareEvent event) {
+    private void offerEvent(final TenantAwareEvent event) {
         if (!queue.offer(event)) {
             LOG.trace("Deque limit is reached, cannot add more events!!! Dropped event is {}", event);
         }
