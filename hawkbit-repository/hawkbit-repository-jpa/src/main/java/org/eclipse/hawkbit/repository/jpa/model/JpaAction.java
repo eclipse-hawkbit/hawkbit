@@ -14,8 +14,6 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
@@ -40,6 +38,9 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
+import org.eclipse.persistence.annotations.ConversionValue;
+import org.eclipse.persistence.annotations.Convert;
+import org.eclipse.persistence.annotations.ObjectTypeConverter;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
@@ -71,8 +72,12 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @Column(name = "active")
     private boolean active;
 
-    @Column(name = "action_type", nullable = false, length = 16)
-    @Enumerated(EnumType.STRING)
+    @Column(name = "action_type", nullable = false)
+    @ObjectTypeConverter(name = "actionType", objectType = Action.ActionType.class, dataType = Integer.class, conversionValues = {
+            @ConversionValue(objectValue = "FORCED", dataValue = "0"),
+            @ConversionValue(objectValue = "SOFT", dataValue = "1"),
+            @ConversionValue(objectValue = "TIMEFORCED", dataValue = "2") })
+    @Convert("actionType")
     @NotNull
     private ActionType actionType;
 
@@ -80,6 +85,18 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     private long forcedTime;
 
     @Column(name = "status", nullable = false)
+    @ObjectTypeConverter(name = "status", objectType = Action.Status.class, dataType = Integer.class, conversionValues = {
+            @ConversionValue(objectValue = "FINISHED", dataValue = "0"),
+            @ConversionValue(objectValue = "ERROR", dataValue = "1"),
+            @ConversionValue(objectValue = "WARNING", dataValue = "2"),
+            @ConversionValue(objectValue = "RUNNING", dataValue = "3"),
+            @ConversionValue(objectValue = "CANCELED", dataValue = "4"),
+            @ConversionValue(objectValue = "CANCELING", dataValue = "5"),
+            @ConversionValue(objectValue = "RETRIEVED", dataValue = "6"),
+            @ConversionValue(objectValue = "DOWNLOAD", dataValue = "7"),
+            @ConversionValue(objectValue = "SCHEDULED", dataValue = "8"),
+            @ConversionValue(objectValue = "CANCEL_REJECTED", dataValue = "9") })
+    @Convert("status")
     @NotNull
     private Status status;
 

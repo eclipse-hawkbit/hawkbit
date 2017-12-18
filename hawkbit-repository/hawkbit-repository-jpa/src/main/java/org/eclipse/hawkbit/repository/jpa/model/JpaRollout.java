@@ -15,8 +15,6 @@ import java.util.stream.Collectors;
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.JoinColumn;
@@ -30,10 +28,12 @@ import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
@@ -44,7 +44,6 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.eclipse.persistence.queries.UpdateObjectQuery;
 import org.eclipse.persistence.sessions.changesets.DirectToFieldChangeRecord;
 import org.eclipse.persistence.sessions.changesets.ObjectChangeSet;
-import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * JPA implementation of a {@link Rollout}.
@@ -56,18 +55,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
-@ObjectTypeConverter(name = "rolloutstatus", objectType = Rollout.RolloutStatus.class, dataType = Integer.class, conversionValues = {
-        @ConversionValue(objectValue = "CREATING", dataValue = "0"),
-        @ConversionValue(objectValue = "READY", dataValue = "1"),
-        @ConversionValue(objectValue = "PAUSED", dataValue = "2"),
-        @ConversionValue(objectValue = "STARTING", dataValue = "3"),
-        @ConversionValue(objectValue = "STOPPED", dataValue = "4"),
-        @ConversionValue(objectValue = "RUNNING", dataValue = "5"),
-        @ConversionValue(objectValue = "FINISHED", dataValue = "6"),
-        @ConversionValue(objectValue = "ERROR_CREATING", dataValue = "7"),
-        @ConversionValue(objectValue = "ERROR_STARTING", dataValue = "8"),
-        @ConversionValue(objectValue = "DELETING", dataValue = "9"),
-        @ConversionValue(objectValue = "DELETED", dataValue = "10") })
 public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, EventAwareEntity {
 
     private static final long serialVersionUID = 1L;
@@ -78,9 +65,9 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     @OneToMany(targetEntity = JpaRolloutGroup.class, fetch = FetchType.LAZY, mappedBy = "rollout")
     private List<JpaRolloutGroup> rolloutGroups;
 
-    @Column(name = "target_filter", length = 1024, nullable = false)
-    @Size(max = 1024)
-    @NotEmpty
+    @Column(name = "target_filter", length = TargetFilterQuery.QUERY_MAX_SIZE, nullable = false)
+    @Size(min = 1, max = TargetFilterQuery.QUERY_MAX_SIZE)
+    @NotNull
     private String targetFilterQuery;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -89,6 +76,18 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     private JpaDistributionSet distributionSet;
 
     @Column(name = "status", nullable = false)
+    @ObjectTypeConverter(name = "rolloutstatus", objectType = Rollout.RolloutStatus.class, dataType = Integer.class, conversionValues = {
+            @ConversionValue(objectValue = "CREATING", dataValue = "0"),
+            @ConversionValue(objectValue = "READY", dataValue = "1"),
+            @ConversionValue(objectValue = "PAUSED", dataValue = "2"),
+            @ConversionValue(objectValue = "STARTING", dataValue = "3"),
+            @ConversionValue(objectValue = "STOPPED", dataValue = "4"),
+            @ConversionValue(objectValue = "RUNNING", dataValue = "5"),
+            @ConversionValue(objectValue = "FINISHED", dataValue = "6"),
+            @ConversionValue(objectValue = "ERROR_CREATING", dataValue = "7"),
+            @ConversionValue(objectValue = "ERROR_STARTING", dataValue = "8"),
+            @ConversionValue(objectValue = "DELETING", dataValue = "9"),
+            @ConversionValue(objectValue = "DELETED", dataValue = "10") })
     @Convert("rolloutstatus")
     @NotNull
     private RolloutStatus status = RolloutStatus.CREATING;
@@ -96,8 +95,12 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     @Column(name = "last_check")
     private long lastCheck;
 
-    @Column(name = "action_type", nullable = false, length = 16)
-    @Enumerated(EnumType.STRING)
+    @Column(name = "action_type", nullable = false)
+    @ObjectTypeConverter(name = "actionType", objectType = Action.ActionType.class, dataType = Integer.class, conversionValues = {
+            @ConversionValue(objectValue = "FORCED", dataValue = "0"),
+            @ConversionValue(objectValue = "SOFT", dataValue = "1"),
+            @ConversionValue(objectValue = "TIMEFORCED", dataValue = "2") })
+    @Convert("actionType")
     @NotNull
     private ActionType actionType = ActionType.FORCED;
 

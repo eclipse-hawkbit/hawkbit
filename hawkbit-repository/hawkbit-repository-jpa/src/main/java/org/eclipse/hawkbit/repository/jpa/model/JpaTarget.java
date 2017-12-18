@@ -28,8 +28,6 @@ import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
@@ -63,6 +61,9 @@ import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagement
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
+import org.eclipse.persistence.annotations.ConversionValue;
+import org.eclipse.persistence.annotations.Convert;
+import org.eclipse.persistence.annotations.ObjectTypeConverter;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,10 +88,10 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
 
     private static final Logger LOG = LoggerFactory.getLogger(JpaTarget.class);
 
-    private static final List<String> TARGET_UPDATE_EVENT_IGNORE_FIELDS = Arrays.asList("lastTargetQuery",
-            "lastTargetQuery", "address", "optLockRevision", "lastModifiedAt", "lastModifiedBy");
+    private static final List<String> TARGET_UPDATE_EVENT_IGNORE_FIELDS = Arrays.asList("lastTargetQuery", "address",
+            "optLockRevision", "lastModifiedAt", "lastModifiedBy");
 
-    @Column(name = "controller_id", length = Target.CONTROLLER_ID_MAX_SIZE)
+    @Column(name = "controller_id", length = Target.CONTROLLER_ID_MAX_SIZE, updatable = false, nullable = false)
     @Size(min = 1, max = Target.CONTROLLER_ID_MAX_SIZE)
     @NotNull
     @Pattern(regexp = "[.\\S]*", message = "has whitespaces which are not allowed")
@@ -130,8 +131,14 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     @Column(name = "install_date")
     private Long installationDate;
 
-    @Column(name = "update_status", nullable = false, length = 16)
-    @Enumerated(EnumType.STRING)
+    @Column(name = "update_status", nullable = false)
+    @ObjectTypeConverter(name = "updateStatus", objectType = TargetUpdateStatus.class, dataType = Integer.class, conversionValues = {
+            @ConversionValue(objectValue = "UNKNOWN", dataValue = "0"),
+            @ConversionValue(objectValue = "IN_SYNC", dataValue = "1"),
+            @ConversionValue(objectValue = "PENDING", dataValue = "2"),
+            @ConversionValue(objectValue = "ERROR", dataValue = "3"),
+            @ConversionValue(objectValue = "REGISTERED", dataValue = "4") })
+    @Convert("updateStatus")
     @NotNull
     private TargetUpdateStatus updateStatus = TargetUpdateStatus.UNKNOWN;
 
