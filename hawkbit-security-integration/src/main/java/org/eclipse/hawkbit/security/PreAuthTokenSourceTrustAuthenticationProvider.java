@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -20,7 +19,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
 /**
@@ -91,19 +89,17 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
         final Object credentials = token.getCredentials();
         final Object principal = token.getPrincipal();
         final Object tokenDetails = token.getDetails();
+        final Collection<GrantedAuthority> authorities = token.getAuthorities();
 
         if (principal == null) {
             throw new BadCredentialsException("The provided principal and credentials are not match");
         }
 
-        boolean successAuthentication = calculateAuthenticationSuccess(principal, credentials, tokenDetails);
+        final boolean successAuthentication = calculateAuthenticationSuccess(principal, credentials, tokenDetails);
 
         if (successAuthentication) {
-            final Collection<GrantedAuthority> controllerAuthorities = new ArrayList<>();
-            controllerAuthorities.add(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE));
-            controllerAuthorities.add(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_DOWNLOAD_ROLE));
             final PreAuthenticatedAuthenticationToken successToken = new PreAuthenticatedAuthenticationToken(principal,
-                    credentials, controllerAuthorities);
+                    credentials, authorities);
             successToken.setDetails(tokenDetails);
             return successToken;
         }
@@ -132,7 +128,8 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
      * @return <code>true</code> if authentication succeeded, otherwise
      *         <code>false</code>
      */
-    private boolean calculateAuthenticationSuccess(Object principal, Object credentials, Object tokenDetails) {
+    private boolean calculateAuthenticationSuccess(final Object principal, final Object credentials,
+            final Object tokenDetails) {
         boolean successAuthentication = false;
         if (credentials instanceof Collection) {
             final Collection<?> multiValueCredentials = (Collection<?>) credentials;

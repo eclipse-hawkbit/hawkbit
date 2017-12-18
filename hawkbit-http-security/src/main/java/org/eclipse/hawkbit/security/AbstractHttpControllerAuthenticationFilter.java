@@ -65,7 +65,7 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
 
     private final AntPathMatcher pathExtractor;
 
-    private PreAuthentificationFilter abstractControllerAuthenticationFilter;
+    private PreAuthenticationFilter abstractControllerAuthenticationFilter;
 
     /**
      * Constructor for sub-classes.
@@ -108,7 +108,7 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
         }
     }
 
-    protected abstract PreAuthentificationFilter createControllerAuthenticationFilter();
+    protected abstract PreAuthenticationFilter createControllerAuthenticationFilter();
 
     @Override
     protected void successfulAuthentication(final HttpServletRequest request, final HttpServletResponse response,

@@ -56,6 +56,6 @@ public class ControllerPreAuthenticatedAnonymousDownloadTest {
     public void successfulAuthenticationAdditionalAuthoritiesForDownload() {
         assertThat(underTest.getSuccessfulAuthenticationAuthorities())
                 .as("Additional authorities should be containing the download anonymous role")
-                .contains(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_DOWNLOAD_ROLE));
+                .contains(new SimpleGrantedAuthority(SpringEvalExpressions.IS_CONTROLLER));
     }
 }
