@@ -31,6 +31,9 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
+import org.eclipse.persistence.annotations.ConversionValue;
+import org.eclipse.persistence.annotations.Convert;
+import org.eclipse.persistence.annotations.ObjectTypeConverter;
 
 import com.google.common.base.Splitter;
 
@@ -50,8 +53,8 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
 
     private static final long serialVersionUID = 1L;
 
-    @Column(name = "target_occurred_at")
-    private Long occurredAt;
+    @Column(name = "target_occurred_at", nullable = false, updatable = false)
+    private long occurredAt;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "action", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_act_stat_action"))
@@ -59,6 +62,18 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
     private JpaAction action;
 
     @Column(name = "status", nullable = false, updatable = false)
+    @ObjectTypeConverter(name = "status", objectType = Action.Status.class, dataType = Integer.class, conversionValues = {
+            @ConversionValue(objectValue = "FINISHED", dataValue = "0"),
+            @ConversionValue(objectValue = "ERROR", dataValue = "1"),
+            @ConversionValue(objectValue = "WARNING", dataValue = "2"),
+            @ConversionValue(objectValue = "RUNNING", dataValue = "3"),
+            @ConversionValue(objectValue = "CANCELED", dataValue = "4"),
+            @ConversionValue(objectValue = "CANCELING", dataValue = "5"),
+            @ConversionValue(objectValue = "RETRIEVED", dataValue = "6"),
+            @ConversionValue(objectValue = "DOWNLOAD", dataValue = "7"),
+            @ConversionValue(objectValue = "SCHEDULED", dataValue = "8"),
+            @ConversionValue(objectValue = "CANCEL_REJECTED", dataValue = "9") })
+    @Convert("status")
     @NotNull
     private Status status;
 
@@ -66,7 +81,7 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
     @ElementCollection(fetch = FetchType.LAZY, targetClass = String.class)
     @CollectionTable(name = "sp_action_status_messages", joinColumns = @JoinColumn(name = "action_status_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_stat_msg_act_stat")), indexes = {
             @Index(name = "sp_idx_action_status_msgs_01", columnList = "action_status_id") })
-    @Column(name = "detail_message", length = 512)
+    @Column(name = "detail_message", length = MESSAGE_ENTRY_LENGTH, nullable = false, updatable = false)
     private List<String> messages;
 
     /**
@@ -97,7 +112,7 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
      * @param message
      *            the message which should be added to this action status
      */
-    public JpaActionStatus(final JpaAction action, final Status status, final Long occurredAt, final String message) {
+    public JpaActionStatus(final JpaAction action, final Status status, final long occurredAt, final String message) {
         this.action = action;
         this.status = status;
         this.occurredAt = occurredAt;
@@ -125,11 +140,11 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
     }
 
     @Override
-    public Long getOccurredAt() {
+    public long getOccurredAt() {
         return occurredAt;
     }
 
-    public void setOccurredAt(final Long occurredAt) {
+    public void setOccurredAt(final long occurredAt) {
         this.occurredAt = occurredAt;
     }
 

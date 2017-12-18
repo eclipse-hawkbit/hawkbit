@@ -14,9 +14,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -51,6 +57,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,9 +73,19 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.validation.annotation.Validated;
+
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * JPA based {@link ControllerManagement} implementation.
@@ -78,6 +95,8 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class JpaControllerManagement implements ControllerManagement {
     private static final Logger LOG = LoggerFactory.getLogger(ControllerManagement.class);
+
+    private final BlockingDeque<TargetPoll> queue;
 
     @Autowired
     private EntityManager entityManager;
@@ -96,9 +115,6 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Autowired
     private QuotaManagement quotaManagement;
-
-    @Autowired
-    private RepositoryProperties repositoryProperties;
 
     @Autowired
     private TenantConfigurationManagement tenantConfigurationManagement;
@@ -120,6 +136,38 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Autowired
     private SoftwareModuleMetadataRepository softwareModuleMetadataRepository;
+
+    @Autowired
+    private PlatformTransactionManager txManager;
+
+    @Autowired
+    private TenantAware tenantAware;
+
+    private final RepositoryProperties repositoryProperties;
+
+    JpaControllerManagement(final ScheduledExecutorService executorService,
+            final RepositoryProperties repositoryProperties) {
+
+        if (!repositoryProperties.isEagerPollPersistence()) {
+            executorService.scheduleWithFixedDelay(this::flushUpdateQueue,
+                    repositoryProperties.getPollPersistenceFlushTime(),
+                    repositoryProperties.getPollPersistenceFlushTime(), TimeUnit.MILLISECONDS);
+
+            queue = new LinkedBlockingDeque<>(repositoryProperties.getPollPersistenceQueueSize());
+        } else {
+            queue = null;
+        }
+
+        this.repositoryProperties = repositoryProperties;
+    }
+
+    private <T> T runInNewTransaction(final String transactionName, final TransactionCallback<T> action) {
+        final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+        def.setName(transactionName);
+        def.setReadOnly(false);
+        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        return new TransactionTemplate(txManager, def).execute(action);
+    }
 
     @Override
     public String getPollingTime() {
@@ -214,19 +262,121 @@ public class JpaControllerManagement implements ControllerManagement {
         return updateTargetStatus(target, address);
     }
 
+    /**
+     * Flush the update queue by means to persisting
+     * {@link Target#getLastTargetQuery()}.
+     */
+    private void flushUpdateQueue() {
+        LOG.debug("Run flushUpdateQueue.");
+
+        final int size = queue.size();
+        if (size <= 0) {
+            return;
+        }
+
+        LOG.debug("{} events in flushUpdateQueue.", size);
+
+        final Set<TargetPoll> events = Sets.newHashSetWithExpectedSize(queue.size());
+        final int drained = queue.drainTo(events);
+
+        if (drained <= 0) {
+            return;
+        }
+
+        try {
+            events.stream().collect(Collectors.groupingBy(TargetPoll::getTenant)).forEach((tenant, polls) -> {
+                final TransactionCallback<Void> createTransaction = status -> updateLastTargetQueries(tenant, polls);
+                tenantAware.runAsTenant(tenant, () -> runInNewTransaction("flushUpdateQueue", createTransaction));
+            });
+        } catch (final RuntimeException ex) {
+            LOG.error("Failed to persist UpdateQueue content.", ex);
+            return;
+        }
+
+        LOG.debug("{} events persisted.", drained);
+    }
+
+    private Void updateLastTargetQueries(final String tenant, final List<TargetPoll> polls) {
+        LOG.debug("Persist {} targetqueries.", polls.size());
+
+        final List<List<String>> pollChunks = Lists.partition(
+                polls.stream().map(TargetPoll::getControllerId).collect(Collectors.toList()),
+                Constants.MAX_ENTRIES_IN_STATEMENT);
+
+        pollChunks.forEach(chunk -> {
+            setLastTargetQuery(tenant, System.currentTimeMillis(), chunk);
+            chunk.forEach(controllerId -> afterCommit.afterCommit(() -> eventPublisher
+                    .publishEvent(new TargetPollEvent(controllerId, tenant, applicationContext.getId()))));
+        });
+
+        return null;
+    }
+
+    /**
+     * Sets {@link Target#getLastTargetQuery()} by native SQL in order to avoid
+     * raising opt lock revision as this update is not mission critical and in
+     * fact only written by {@link ControllerManagement}, i.e. the target
+     * itself.
+     */
+    private void setLastTargetQuery(final String tenant, final long currentTimeMillis, final List<String> chunk) {
+        final Map<String, String> paramMapping = Maps.newHashMapWithExpectedSize(chunk.size());
+
+        for (int i = 0; i < chunk.size(); i++) {
+            paramMapping.put("cid" + i, chunk.get(i));
+        }
+
+        final Query updateQuery = entityManager.createNativeQuery(
+                "UPDATE sp_target t SET t.last_target_query = #last_target_query WHERE t.controller_id IN ("
+                        + formatQueryInStatementParams(paramMapping.keySet()) + ") AND t.tenant = #tenant");
+
+        paramMapping.entrySet().forEach(entry -> updateQuery.setParameter(entry.getKey(), entry.getValue()));
+        updateQuery.setParameter("last_target_query", currentTimeMillis);
+        updateQuery.setParameter("tenant", tenant);
+
+        final int updated = updateQuery.executeUpdate();
+        if (updated < chunk.size()) {
+            LOG.error("Targets polls could not be applied completely ({} instead of {}).", updated, chunk.size());
+        }
+    }
+
+    private static String formatQueryInStatementParams(final Collection<String> paramNames) {
+        return "#" + Joiner.on(",#").join(paramNames);
+    }
+
+    /**
+     * Stores target directly to DB in case either {@link Target#getAddress()}
+     * or {@link Target#getUpdateStatus()} changes or the buffer queue is full.
+     * 
+     */
     private Target updateTargetStatus(final JpaTarget toUpdate, final URI address) {
+        boolean storeEager = isStoreEager(toUpdate, address);
 
         if (TargetUpdateStatus.UNKNOWN.equals(toUpdate.getUpdateStatus())) {
             toUpdate.setUpdateStatus(TargetUpdateStatus.REGISTERED);
+            storeEager = true;
         }
 
-        toUpdate.setAddress(address.toString());
-        toUpdate.setLastTargetQuery(System.currentTimeMillis());
+        if (storeEager || !queue.offer(new TargetPoll(toUpdate))) {
+            toUpdate.setAddress(address.toString());
+            toUpdate.setLastTargetQuery(System.currentTimeMillis());
 
-        afterCommit.afterCommit(
-                () -> eventPublisher.publishEvent(new TargetPollEvent(toUpdate, applicationContext.getId())));
+            afterCommit.afterCommit(
+                    () -> eventPublisher.publishEvent(new TargetPollEvent(toUpdate, applicationContext.getId())));
 
-        return targetRepository.save(toUpdate);
+            return targetRepository.save(toUpdate);
+        }
+
+        return toUpdate;
+    }
+
+    private boolean isStoreEager(final JpaTarget toUpdate, final URI address) {
+        if (repositoryProperties.isEagerPollPersistence()) {
+            return true;
+        } else if (toUpdate.getAddress() == null) {
+            return true;
+        } else {
+            return !toUpdate.getAddress().equals(address);
+        }
     }
 
     @Override
@@ -539,5 +689,63 @@ public class JpaControllerManagement implements ControllerManagement {
                         moduleId, true)
                 .getContent().stream().collect(Collectors.groupingBy(o -> (Long) o[0],
                         Collectors.mapping(o -> (SoftwareModuleMetadata) o[1], Collectors.toList())));
+    }
+
+    private static class TargetPoll {
+
+        private final String tenant;
+        private final String controllerId;
+
+        TargetPoll(final Target target) {
+            this.tenant = target.getTenant();
+            this.controllerId = target.getControllerId();
+        }
+
+        public String getTenant() {
+            return tenant;
+        }
+
+        public String getControllerId() {
+            return controllerId;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((controllerId == null) ? 0 : controllerId.hashCode());
+            result = prime * result + ((tenant == null) ? 0 : tenant.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final TargetPoll other = (TargetPoll) obj;
+            if (controllerId == null) {
+                if (other.controllerId != null) {
+                    return false;
+                }
+            } else if (!controllerId.equals(other.controllerId)) {
+                return false;
+            }
+            if (tenant == null) {
+                if (other.tenant != null) {
+                    return false;
+                }
+            } else if (!tenant.equals(other.tenant)) {
+                return false;
+            }
+            return true;
+        }
+
     }
 }
