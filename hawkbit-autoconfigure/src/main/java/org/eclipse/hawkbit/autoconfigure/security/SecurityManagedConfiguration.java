@@ -22,6 +22,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import org.eclipse.hawkbit.cache.DownloadIdCache;
+import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.ddi.rest.resource.DdiApiConfiguration;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -141,29 +142,32 @@ public class SecurityManagedConfiguration {
     @ConditionalOnClass(DdiApiConfiguration.class)
     static class ControllerSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
-        private static final String[] DDI_ANT_MATCHERS = { "/{tenant}/controller/v1/{controllerId}",
-                "/{tenant}/controller/v1/{controllerId}/deploymentBase**",
-                "/{tenant}/controller/v1/{controllerId}/cancelAction**",
-                "/{tenant}/controller/v1/{controllerId}/configData",
-                "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts" };
+        private static final String[] DDI_ANT_MATCHERS = { DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}",
+                DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/deploymentBase/**",
+                DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/cancelAction/**",
+                DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/configData",
+                DdiRestConstants.BASE_V1_REQUEST_MAPPING
+                        + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts" };
+
+        private final ControllerManagement controllerManagement;
+        private final TenantConfigurationManagement tenantConfigurationManagement;
+        private final TenantAware tenantAware;
+        private final DdiSecurityProperties ddiSecurityConfiguration;
+        private final SecurityProperties springSecurityProperties;
+        private final SystemSecurityContext systemSecurityContext;
 
         @Autowired
-        private ControllerManagement controllerManagement;
-
-        @Autowired
-        private TenantConfigurationManagement tenantConfigurationManagement;
-
-        @Autowired
-        private TenantAware tenantAware;
-
-        @Autowired
-        private DdiSecurityProperties ddiSecurityConfiguration;
-
-        @Autowired
-        private SecurityProperties springSecurityProperties;
-
-        @Autowired
-        private SystemSecurityContext systemSecurityContext;
+        ControllerSecurityConfigurationAdapter(final ControllerManagement controllerManagement,
+                final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
+                final DdiSecurityProperties ddiSecurityConfiguration, final SecurityProperties springSecurityProperties,
+                final SystemSecurityContext systemSecurityContext) {
+            this.controllerManagement = controllerManagement;
+            this.tenantConfigurationManagement = tenantConfigurationManagement;
+            this.tenantAware = tenantAware;
+            this.ddiSecurityConfiguration = ddiSecurityConfiguration;
+            this.springSecurityProperties = springSecurityProperties;
+            this.systemSecurityContext = systemSecurityContext;
+        }
 
         /**
          * Filter to protect the hawkBit server DDI interface against to many
@@ -258,25 +262,28 @@ public class SecurityManagedConfiguration {
     @ConditionalOnClass(DdiApiConfiguration.class)
     static class ControllerDownloadSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
-        private static final String DDI_DL_ANT_MATCHER = "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/*";
+        private static final String DDI_DL_ANT_MATCHER = DdiRestConstants.BASE_V1_REQUEST_MAPPING
+                + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/*";
+
+        private final ControllerManagement controllerManagement;
+        private final TenantConfigurationManagement tenantConfigurationManagement;
+        private final TenantAware tenantAware;
+        private final DdiSecurityProperties ddiSecurityConfiguration;
+        private final SecurityProperties springSecurityProperties;
+        private final SystemSecurityContext systemSecurityContext;
 
         @Autowired
-        private TenantConfigurationManagement tenantConfigurationManagement;
-
-        @Autowired
-        private TenantAware tenantAware;
-
-        @Autowired
-        private ControllerManagement controllerManagement;
-
-        @Autowired
-        private DdiSecurityProperties ddiSecurityConfiguration;
-
-        @Autowired
-        private SecurityProperties springSecurityProperties;
-
-        @Autowired
-        private SystemSecurityContext systemSecurityContext;
+        ControllerDownloadSecurityConfigurationAdapter(final ControllerManagement controllerManagement,
+                final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
+                final DdiSecurityProperties ddiSecurityConfiguration, final SecurityProperties springSecurityProperties,
+                final SystemSecurityContext systemSecurityContext) {
+            this.controllerManagement = controllerManagement;
+            this.tenantConfigurationManagement = tenantConfigurationManagement;
+            this.tenantAware = tenantAware;
+            this.ddiSecurityConfiguration = ddiSecurityConfiguration;
+            this.springSecurityProperties = springSecurityProperties;
+            this.systemSecurityContext = systemSecurityContext;
+        }
 
         /**
          * Filter to protect the hawkBit server DDI download interface against
