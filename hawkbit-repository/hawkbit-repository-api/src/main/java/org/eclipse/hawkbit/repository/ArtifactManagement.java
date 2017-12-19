@@ -204,7 +204,7 @@ public interface ArtifactManagement {
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DOWNLOAD_ARTIFACT + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.HAS_CONTROLLER_DOWNLOAD)
+            + SpringEvalExpressions.IS_CONTROLLER)
     Optional<AbstractDbArtifact> loadArtifactBinary(@NotEmpty String sha1Hash);
 
 }

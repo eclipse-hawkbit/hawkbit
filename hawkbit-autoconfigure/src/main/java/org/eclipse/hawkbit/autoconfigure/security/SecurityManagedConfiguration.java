@@ -22,6 +22,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import org.eclipse.hawkbit.cache.DownloadIdCache;
+import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.ddi.rest.resource.DdiApiConfiguration;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -134,32 +135,39 @@ public class SecurityManagedConfiguration {
     }
 
     /**
-     * {@link WebSecurityConfigurer} for the internal SP controller API.
+     * {@link WebSecurityConfigurer} for the hawkBit server DDI interface.
      */
     @Configuration
     @Order(300)
     @ConditionalOnClass(DdiApiConfiguration.class)
     static class ControllerSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
-        private static final String DDI_ANT_MATCHER = "/{tenant}/controller/**";
+        private static final String[] DDI_ANT_MATCHERS = { DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}",
+                DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/deploymentBase/**",
+                DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/cancelAction/**",
+                DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/configData",
+                DdiRestConstants.BASE_V1_REQUEST_MAPPING
+                        + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts" };
+
+        private final ControllerManagement controllerManagement;
+        private final TenantConfigurationManagement tenantConfigurationManagement;
+        private final TenantAware tenantAware;
+        private final DdiSecurityProperties ddiSecurityConfiguration;
+        private final SecurityProperties springSecurityProperties;
+        private final SystemSecurityContext systemSecurityContext;
 
         @Autowired
-        private ControllerManagement controllerManagement;
-
-        @Autowired
-        private TenantConfigurationManagement tenantConfigurationManagement;
-
-        @Autowired
-        private TenantAware tenantAware;
-
-        @Autowired
-        private DdiSecurityProperties ddiSecurityConfiguration;
-
-        @Autowired
-        private SecurityProperties springSecurityProperties;
-
-        @Autowired
-        private SystemSecurityContext systemSecurityContext;
+        ControllerSecurityConfigurationAdapter(final ControllerManagement controllerManagement,
+                final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
+                final DdiSecurityProperties ddiSecurityConfiguration, final SecurityProperties springSecurityProperties,
+                final SystemSecurityContext systemSecurityContext) {
+            this.controllerManagement = controllerManagement;
+            this.tenantConfigurationManagement = tenantConfigurationManagement;
+            this.tenantAware = tenantAware;
+            this.ddiSecurityConfiguration = ddiSecurityConfiguration;
+            this.springSecurityProperties = springSecurityProperties;
+            this.systemSecurityContext = systemSecurityContext;
+        }
 
         /**
          * Filter to protect the hawkBit server DDI interface against to many
@@ -175,10 +183,126 @@ public class SecurityManagedConfiguration {
         @ConditionalOnProperty(prefix = "hawkbit.server.security.dos.filter", name = "enabled", matchIfMissing = true)
         public FilterRegistrationBean dosDDiFilter(final HawkbitSecurityProperties securityProperties) {
 
-            final FilterRegistrationBean filterRegBean = dosFilter(Arrays.asList(DDI_ANT_MATCHER),
+            final FilterRegistrationBean filterRegBean = dosFilter(Arrays.asList(DDI_ANT_MATCHERS),
                     securityProperties.getDos().getFilter(), securityProperties.getClients());
             filterRegBean.setOrder(DOS_FILTER_ORDER);
             filterRegBean.setName("dosDDiFilter");
+
+            return filterRegBean;
+        }
+
+        @Override
+        protected void configure(final HttpSecurity http) throws Exception {
+
+            final ControllerTenantAwareAuthenticationDetailsSource authenticationDetailsSource = new ControllerTenantAwareAuthenticationDetailsSource();
+
+            final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter = new HttpControllerPreAuthenticatedSecurityHeaderFilter(
+                    ddiSecurityConfiguration.getRp().getCnHeader(),
+                    ddiSecurityConfiguration.getRp().getSslIssuerHashHeader(), tenantConfigurationManagement,
+                    tenantAware, systemSecurityContext);
+            securityHeaderFilter.setAuthenticationManager(authenticationManager());
+            securityHeaderFilter.setCheckForPrincipalChanges(true);
+            securityHeaderFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
+
+            final HttpControllerPreAuthenticateSecurityTokenFilter securityTokenFilter = new HttpControllerPreAuthenticateSecurityTokenFilter(
+                    tenantConfigurationManagement, tenantAware, controllerManagement, systemSecurityContext);
+            securityTokenFilter.setAuthenticationManager(authenticationManager());
+            securityTokenFilter.setCheckForPrincipalChanges(true);
+            securityTokenFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
+
+            final HttpControllerPreAuthenticatedGatewaySecurityTokenFilter gatewaySecurityTokenFilter = new HttpControllerPreAuthenticatedGatewaySecurityTokenFilter(
+                    tenantConfigurationManagement, tenantAware, systemSecurityContext);
+            gatewaySecurityTokenFilter.setAuthenticationManager(authenticationManager());
+            gatewaySecurityTokenFilter.setCheckForPrincipalChanges(true);
+            gatewaySecurityTokenFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
+
+            HttpSecurity httpSec = http.csrf().disable();
+
+            if (springSecurityProperties.isRequireSsl()) {
+                httpSec = httpSec.requiresChannel().anyRequest().requiresSecure().and();
+            }
+
+            if (ddiSecurityConfiguration.getAuthentication().getAnonymous().isEnabled()) {
+
+                LOG.info(
+                        "******************\n** Anonymous controller security enabled, should only be used for developing purposes **\n******************");
+
+                final AnonymousAuthenticationFilter anoymousFilter = new AnonymousAuthenticationFilter(
+                        "controllerAnonymousFilter", "anonymous",
+                        Arrays.asList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS)));
+                anoymousFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
+                httpSec.requestMatchers().antMatchers(DDI_ANT_MATCHERS).and().securityContext().disable().anonymous()
+                        .authenticationFilter(anoymousFilter);
+            } else {
+
+                httpSec.addFilter(securityHeaderFilter).addFilter(securityTokenFilter)
+                        .addFilter(gatewaySecurityTokenFilter).requestMatchers().antMatchers(DDI_ANT_MATCHERS).and()
+                        .anonymous().disable().authorizeRequests().anyRequest().authenticated().and()
+                        .exceptionHandling()
+                        .authenticationEntryPoint((request, response, authException) -> response
+                                .setStatus(HttpStatus.UNAUTHORIZED.value()))
+                        .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+            }
+        }
+
+        @Override
+        protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
+
+            auth.authenticationProvider(new PreAuthTokenSourceTrustAuthenticationProvider(
+                    ddiSecurityConfiguration.getRp().getTrustedIPs()));
+        }
+    }
+
+    /**
+     * {@link WebSecurityConfigurer} for the hawkBit server DDI download
+     * interface.
+     */
+    @Configuration
+    @Order(301)
+    @ConditionalOnClass(DdiApiConfiguration.class)
+    static class ControllerDownloadSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
+
+        private static final String DDI_DL_ANT_MATCHER = DdiRestConstants.BASE_V1_REQUEST_MAPPING
+                + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/*";
+
+        private final ControllerManagement controllerManagement;
+        private final TenantConfigurationManagement tenantConfigurationManagement;
+        private final TenantAware tenantAware;
+        private final DdiSecurityProperties ddiSecurityConfiguration;
+        private final SecurityProperties springSecurityProperties;
+        private final SystemSecurityContext systemSecurityContext;
+
+        @Autowired
+        ControllerDownloadSecurityConfigurationAdapter(final ControllerManagement controllerManagement,
+                final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
+                final DdiSecurityProperties ddiSecurityConfiguration, final SecurityProperties springSecurityProperties,
+                final SystemSecurityContext systemSecurityContext) {
+            this.controllerManagement = controllerManagement;
+            this.tenantConfigurationManagement = tenantConfigurationManagement;
+            this.tenantAware = tenantAware;
+            this.ddiSecurityConfiguration = ddiSecurityConfiguration;
+            this.springSecurityProperties = springSecurityProperties;
+            this.systemSecurityContext = systemSecurityContext;
+        }
+
+        /**
+         * Filter to protect the hawkBit server DDI download interface against
+         * to many requests.
+         * 
+         * @param securityProperties
+         *            for filter configuration
+         *
+         * @return the spring filter registration bean for registering a denial
+         *         of service protection filter in the filter chain
+         */
+        @Bean
+        @ConditionalOnProperty(prefix = "hawkbit.server.security.dos.filter", name = "enabled", matchIfMissing = true)
+        public FilterRegistrationBean dosDDiDlFilter(final HawkbitSecurityProperties securityProperties) {
+
+            final FilterRegistrationBean filterRegBean = dosFilter(Arrays.asList(DDI_DL_ANT_MATCHER),
+                    securityProperties.getDos().getFilter(), securityProperties.getClients());
+            filterRegBean.setOrder(DOS_FILTER_ORDER);
+            filterRegBean.setName("dosDDiDlFilter");
 
             return filterRegBean;
         }
@@ -227,17 +351,16 @@ public class SecurityManagedConfiguration {
 
                 final AnonymousAuthenticationFilter anoymousFilter = new AnonymousAuthenticationFilter(
                         "controllerAnonymousFilter", "anonymous",
-                        Arrays.asList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS),
-                                new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_DOWNLOAD_ROLE)));
+                        Arrays.asList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS)));
                 anoymousFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
-                httpSec.requestMatchers().antMatchers(DDI_ANT_MATCHER).and().securityContext().disable().anonymous()
+                httpSec.requestMatchers().antMatchers(DDI_DL_ANT_MATCHER).and().securityContext().disable().anonymous()
                         .authenticationFilter(anoymousFilter);
             } else {
 
                 httpSec.addFilter(securityHeaderFilter).addFilter(securityTokenFilter)
                         .addFilter(gatewaySecurityTokenFilter).addFilter(controllerAnonymousDownloadFilter)
-                        .antMatcher(DDI_ANT_MATCHER).anonymous().disable().authorizeRequests().anyRequest()
-                        .authenticated().and().exceptionHandling()
+                        .requestMatchers().antMatchers(DDI_DL_ANT_MATCHER).and().anonymous().disable()
+                        .authorizeRequests().anyRequest().authenticated().and().exceptionHandling()
                         .authenticationEntryPoint((request, response, authException) -> response
                                 .setStatus(HttpStatus.UNAUTHORIZED.value()))
                         .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);

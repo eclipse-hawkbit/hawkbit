@@ -8,15 +8,10 @@
  */
 package org.eclipse.hawkbit.security;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 /**
  * An pre-authenticated processing filter which add the
@@ -58,10 +53,5 @@ public class ControllerPreAuthenticatedAnonymousDownload extends AbstractControl
     @Override
     protected String getTenantConfigurationKey() {
         return TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED;
-    }
-
-    @Override
-    public Collection<GrantedAuthority> getSuccessfulAuthenticationAuthorities() {
-        return Arrays.asList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_DOWNLOAD_ROLE));
     }
 }
