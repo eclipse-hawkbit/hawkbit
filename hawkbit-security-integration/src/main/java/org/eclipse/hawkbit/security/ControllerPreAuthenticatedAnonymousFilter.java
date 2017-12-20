@@ -14,7 +14,7 @@ package org.eclipse.hawkbit.security;
  * 
  * @see DdiSecurityProperties
  */
-public class ControllerPreAuthenticatedAnonymousFilter implements PreAuthentificationFilter {
+public class ControllerPreAuthenticatedAnonymousFilter implements PreAuthenticationFilter {
 
     private final DdiSecurityProperties ddiSecurityConfiguration;
 

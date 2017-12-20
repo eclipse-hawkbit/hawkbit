@@ -52,6 +52,7 @@ import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.Maps;
 
@@ -278,7 +279,10 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         amqpSoftwareModule.setModuleType(entry.getKey().getType().getKey());
         amqpSoftwareModule.setModuleVersion(entry.getKey().getVersion());
         amqpSoftwareModule.setArtifacts(convertArtifacts(target, entry.getKey().getArtifacts()));
-        amqpSoftwareModule.setMetadata(convertMetadata(entry.getValue()));
+
+        if (!CollectionUtils.isEmpty(entry.getValue())) {
+            amqpSoftwareModule.setMetadata(convertMetadata(entry.getValue()));
+        }
 
         return amqpSoftwareModule;
     }
