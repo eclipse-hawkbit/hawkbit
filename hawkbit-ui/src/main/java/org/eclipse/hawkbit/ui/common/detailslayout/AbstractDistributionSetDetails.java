@@ -171,7 +171,7 @@ public abstract class AbstractDistributionSetDetails
         detailsTabLayout.removeAllComponents();
 
         final Label typeLabel = SPUIComponentProvider
-                .createNameValueLabel(getI18n().getMessage("label.dist.details.type"), type);
+                .createNameValueLabel(getI18n().getMessage("label.dist.details.type"), type == null ? "" : type);
         typeLabel.setId(UIComponentIdProvider.DETAILS_TYPE_LABEL_ID);
         detailsTabLayout.addComponent(typeLabel);
 
@@ -182,7 +182,7 @@ public abstract class AbstractDistributionSetDetails
 
     private String getMigrationRequiredValue(final Boolean isMigrationRequired) {
         if (isMigrationRequired == null) {
-            return null;
+            return "";
         }
         return isMigrationRequired.equals(Boolean.TRUE) ? getI18n().getMessage("label.yes")
                 : getI18n().getMessage("label.no");

@@ -12,8 +12,8 @@ import java.net.URI;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -141,9 +141,9 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
                     getSelectedBaseEntity().getSecurityToken(),
                     SPDateTimeUtil.getFormattedDate(getSelectedBaseEntity().getLastTargetQuery()));
 
-            populateDistributionDtls(installedDistLayout, deploymentManagement
-                    .getAssignedDistributionSet(getSelectedBaseEntity().getControllerId()).orElse(null));
             populateDistributionDtls(assignedDistLayout, deploymentManagement
+                    .getAssignedDistributionSet(getSelectedBaseEntity().getControllerId()).orElse(null));
+            populateDistributionDtls(installedDistLayout, deploymentManagement
                     .getInstalledDistributionSet(getSelectedBaseEntity().getControllerId()).orElse(null));
         } else {
             updateDetailsLayout(null, null, null, null);
