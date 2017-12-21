@@ -209,7 +209,7 @@ public final class DashboardMenu extends CustomComponent {
             settingsItem.setDescription(UserDetailsFormatter.getCurrentTenant() + " "
                     + UserDetailsFormatter.getCurrentUser().getUsername());
         } else {
-            settingsItem.setText("Menue");
+            settingsItem.setText("...");
         }
 
         settingsItem.setStyleName("user-menuitem");
