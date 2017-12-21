@@ -117,7 +117,7 @@ public final class DashboardMenu extends CustomComponent {
         final VerticalLayout dashboardMenuLayout = new VerticalLayout();
         dashboardMenuLayout.setSizeFull();
         final VerticalLayout menuContent = getMenuLayout();
-        menuContent.addComponent(buildUserMenu());
+        menuContent.addComponent(buildUserMenu(uiProperties));
         menuContent.addComponent(buildToggleButton());
 
         final VerticalLayout menus = buildMenuItems();
@@ -186,18 +186,22 @@ public final class DashboardMenu extends CustomComponent {
         return links;
     }
 
-    private static Resource getImage() {
+    private static Resource getImage(final boolean gravatar) {
+        if (!gravatar) {
+            return new ThemeResource("images/profile-pic-57px.jpg");
+        }
+
         return UserDetailsFormatter.getCurrentUserEmail().map(email -> (Resource) new GravatarResource(email))
                 .orElse(new ThemeResource("images/profile-pic-57px.jpg"));
 
     }
 
-    private static Component buildUserMenu() {
+    private static Component buildUserMenu(final UiProperties uiProperties) {
         final MenuBar settings = new MenuBar();
         settings.addStyleName("user-menu");
         settings.setHtmlContentAllowed(true);
 
-        final MenuItem settingsItem = settings.addItem("", getImage(), null);
+        final MenuItem settingsItem = settings.addItem("", getImage(uiProperties.isGravatar()), null);
 
         final String formattedTenant = UserDetailsFormatter.formatCurrentTenant();
         if (!StringUtils.isEmpty(formattedTenant)) {

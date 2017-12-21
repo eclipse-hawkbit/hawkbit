@@ -21,6 +21,16 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class UiProperties implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    private boolean gravatar;
+
+    public boolean isGravatar() {
+        return gravatar;
+    }
+
+    public void setGravatar(final boolean gravatar) {
+        this.gravatar = gravatar;
+    }
+
     /**
      * Demo account login information.
      *
