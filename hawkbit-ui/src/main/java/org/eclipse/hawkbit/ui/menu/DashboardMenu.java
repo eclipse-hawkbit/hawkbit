@@ -13,6 +13,9 @@
  */
 package org.eclipse.hawkbit.ui.menu;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +29,8 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.menu.DashboardEvent.PostViewChangeEvent;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
@@ -56,8 +61,12 @@ import com.vaadin.ui.themes.ValoTheme;
 @UIScope
 @SpringComponent
 public final class DashboardMenu extends CustomComponent {
+    private static final Logger LOG = LoggerFactory.getLogger(DashboardMenu.class);
 
     private static final String ID = "dashboard-menu";
+
+    private static final String LOGOUT_BASE = "/UI/logout";
+    private static final String LOGIN_BASE = "/UI/login";
 
     private final VaadinMessageSource i18n;
 
@@ -191,18 +200,33 @@ public final class DashboardMenu extends CustomComponent {
         final MenuItem settingsItem = settings.addItem("", getImage(), null);
 
         final String formattedTenant = UserDetailsFormatter.formatCurrentTenant();
-        final String formattedUsername = UserDetailsFormatter.formatCurrentUsername();
-        String tenantAndUsernameHtml = "";
         if (!StringUtils.isEmpty(formattedTenant)) {
-            tenantAndUsernameHtml += formattedTenant + "<br>";
+            settingsItem.setText(formattedTenant);
+            settingsItem.setDescription(UserDetailsFormatter.getCurrentTenant() + " "
+                    + UserDetailsFormatter.getCurrentUser().getUsername());
+        } else {
+            settingsItem.setText("Menue");
         }
-        tenantAndUsernameHtml += formattedUsername;
-        settingsItem.setText(tenantAndUsernameHtml);
-        settingsItem.setDescription(formattedUsername);
+
         settingsItem.setStyleName("user-menuitem");
 
-        settingsItem.addItem("Sign Out", selectedItem -> Page.getCurrent().setLocation("/UI/logout"));
+        final String logoutUrl = generateLogoutUrl();
+
+        settingsItem.addItem("Sign Out", selectedItem -> Page.getCurrent().setLocation(logoutUrl));
         return settings;
+    }
+
+    private static String generateLogoutUrl() {
+        String logoutUrl;
+        try {
+            logoutUrl = LOGOUT_BASE + "?login="
+                    + URLEncoder.encode(LOGIN_BASE + "?tenant=" + UserDetailsFormatter.getCurrentTenant(),
+                            StandardCharsets.UTF_8.toString());
+        } catch (final UnsupportedEncodingException e) {
+            LOG.error("Could not encode logout URL", e);
+            return LOGOUT_BASE;
+        }
+        return logoutUrl;
     }
 
     private Component buildToggleButton() {

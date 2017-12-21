@@ -156,6 +156,22 @@ public final class UserDetailsFormatter {
     }
 
     /**
+     * Format the current tenant. The information is loaded by the current
+     * session information.
+     * 
+     * @return the formatted user name (max 8 characters) can be <null>
+     */
+    public static String getCurrentTenant() {
+        final UserDetails userDetails = getCurrentUser();
+        if (!(userDetails instanceof UserPrincipal)) {
+            return null;
+        }
+
+        final UserPrincipal userPrincipal = (UserPrincipal) userDetails;
+        return userPrincipal.getTenant().trim();
+    }
+
+    /**
      * @return logged in users Email address
      */
     public static Optional<String> getCurrentUserEmail() {
