@@ -326,8 +326,8 @@ public class CommonDialogWindow extends Window {
     private boolean isMandatoryFieldNotEmptyAndValid(final Component currentChangedComponent, final Object newValue) {
 
         boolean valid = true;
-        final List<AbstractField<?>> requiredComponents = allComponents.stream().filter(field -> field.isRequired())
-                .filter(field -> field.isEnabled()).collect(Collectors.toList());
+        final List<AbstractField<?>> requiredComponents = allComponents.stream().filter(AbstractField::isRequired)
+                .filter(AbstractField::isEnabled).collect(Collectors.toList());
 
         requiredComponents.addAll(allComponents.stream().filter(this::hasNullValidator).collect(Collectors.toList()));
 
@@ -396,12 +396,18 @@ public class CommonDialogWindow extends Window {
 
             if (c instanceof TabSheet) {
                 final TabSheet tabSheet = (TabSheet) c;
-                for (final Iterator<Component> i = tabSheet.iterator(); i.hasNext();) {
-                    final Component component = i.next();
-                    if (component instanceof AbstractLayout) {
-                        components.addAll(getAllComponents((AbstractLayout) component));
-                    }
-                }
+                components.addAll(getAllComponentsFromTabSheet(tabSheet));
+            }
+        }
+        return components;
+    }
+
+    private static List<AbstractField<?>> getAllComponentsFromTabSheet(final TabSheet tabSheet) {
+        final List<AbstractField<?>> components = new ArrayList<>();
+        for (final Iterator<Component> i = tabSheet.iterator(); i.hasNext();) {
+            final Component component = i.next();
+            if (component instanceof AbstractLayout) {
+                components.addAll(getAllComponents((AbstractLayout) component));
             }
         }
         return components;

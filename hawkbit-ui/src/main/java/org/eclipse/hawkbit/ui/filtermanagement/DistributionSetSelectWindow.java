@@ -44,7 +44,7 @@ import com.vaadin.ui.Window;
  * query.
  */
 public class DistributionSetSelectWindow
-implements CommonDialogWindow.SaveDialogCloseListener, Property.ValueChangeListener {
+        implements CommonDialogWindow.SaveDialogCloseListener, Property.ValueChangeListener {
 
     private static final long serialVersionUID = 4752345414134989396L;
 
@@ -58,10 +58,8 @@ implements CommonDialogWindow.SaveDialogCloseListener, Property.ValueChangeListe
 
     private final transient TargetFilterQueryManagement targetFilterQueryManagement;
 
-    private CommonDialogWindow window;
     private CheckBox checkBox;
     private Long tfqId;
-    private VerticalLayout verticalLayout;
 
     DistributionSetSelectWindow(final VaadinMessageSource i18n, final UIEventBus eventBus, final TargetManagement targetManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final ManageDistUIState manageDistUIState) {
@@ -72,7 +70,7 @@ implements CommonDialogWindow.SaveDialogCloseListener, Property.ValueChangeListe
         this.targetFilterQueryManagement = targetFilterQueryManagement;
     }
 
-    private void initView() {
+    private VerticalLayout initView() {
         final Label label = new Label(i18n.getMessage("label.auto.assign.description"));
 
         checkBox = new CheckBox(i18n.getMessage("label.auto.assign.enable"));
@@ -82,10 +80,12 @@ implements CommonDialogWindow.SaveDialogCloseListener, Property.ValueChangeListe
 
         setTableEnabled(false);
 
-        verticalLayout = new VerticalLayout();
+        final VerticalLayout verticalLayout = new VerticalLayout();
         verticalLayout.addComponent(label);
         verticalLayout.addComponent(checkBox);
         verticalLayout.addComponent(dsTable);
+
+        return verticalLayout;
     }
 
     private void setValue(final Long distSet) {
@@ -106,7 +106,7 @@ implements CommonDialogWindow.SaveDialogCloseListener, Property.ValueChangeListe
         final TargetFilterQuery tfq = targetFilterQueryManagement.get(tfqId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, tfqId));
 
-        initView();
+        final VerticalLayout verticalLayout = initView();
 
         final DistributionSet distributionSet = tfq.getAutoAssignDistributionSet();
         if (distributionSet != null) {
@@ -116,7 +116,7 @@ implements CommonDialogWindow.SaveDialogCloseListener, Property.ValueChangeListe
         }
 
         // build window after values are set to view elements
-        window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
+        final CommonDialogWindow window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
                 .caption(i18n.getMessage("caption.select.auto.assign.dist")).content(verticalLayout)
                 .layout(verticalLayout).i18n(i18n).saveDialogCloseListener(this).buildCommonDialogWindow();
         window.setId(UIComponentIdProvider.DIST_SET_SELECT_WINDOW_ID);
@@ -158,13 +158,15 @@ implements CommonDialogWindow.SaveDialogCloseListener, Property.ValueChangeListe
     }
 
     private boolean isFormularValid() {
-        boolean isValid = false;
-        if (checkBox.getValue() && dsTable.getValue() != null) {
-            isValid = true;
-        } else if (!checkBox.getValue()) {
-            isValid = true;
-        }
-        return isValid;
+        return isAutoAssignmentDisabled() || isAutoAssignmentEnabledAndDistributionSetSelected();
+    }
+
+    private boolean isAutoAssignmentEnabledAndDistributionSetSelected() {
+        return checkBox.getValue() && dsTable.getValue() != null;
+    }
+
+    private boolean isAutoAssignmentDisabled() {
+        return !checkBox.getValue();
     }
 
     /**
@@ -259,7 +261,7 @@ implements CommonDialogWindow.SaveDialogCloseListener, Property.ValueChangeListe
                 mainTextLabel = new Label(i18n.getMessage("message.confirm.assign.consequences.none"));
             } else {
                 mainTextLabel = new Label(
-                        i18n.getMessage("message.confirm.assign.consequences.text", new Object[] { targetsCount }));
+                        i18n.getMessage("message.confirm.assign.consequences.text", targetsCount));
             }
 
             layout.addComponent(mainTextLabel);
