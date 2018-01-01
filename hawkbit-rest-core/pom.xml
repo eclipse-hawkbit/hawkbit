@@ -26,7 +26,6 @@
          <artifactId>hawkbit-core</artifactId>
          <version>${project.version}</version>
       </dependency>
-
       <dependency>
          <groupId>com.google.guava</groupId>
          <artifactId>guava</artifactId>
@@ -35,7 +34,10 @@
          <groupId>org.apache.commons</groupId>
          <artifactId>commons-lang3</artifactId>
       </dependency>
-
+      <dependency>
+         <groupId>javax.annotation</groupId>
+         <artifactId>javax.annotation-api</artifactId>
+      </dependency>
       <dependency>
          <groupId>org.springframework</groupId>
          <artifactId>spring-web</artifactId>
