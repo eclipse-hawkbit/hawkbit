@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.validation.ValidationException;
+
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
@@ -201,6 +203,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
      * Save or update the rollout.
      */
     private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
+
+        boolean saveActionWasSuccessful = true;
+
         @Override
         public void saveOrUpdate() {
             if (editRolloutEnabled) {
@@ -219,8 +224,20 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         }
 
         private void createRollout() {
-            final Rollout rolloutToCreate = saveRollout();
-            uiNotification.displaySuccess(i18n.getMessage("message.save.success", rolloutToCreate.getName()));
+            try {
+                final Rollout rolloutToCreate = saveRollout();
+                uiNotification.displaySuccess(i18n.getMessage("message.save.success", rolloutToCreate.getName()));
+                saveActionWasSuccessful = true;
+            } catch (final ValidationException e) {
+                LOGGER.info(e.getMessage(), e);
+                uiNotification.displayValidationError(e.getMessage());
+                saveActionWasSuccessful = false;
+            }
+        }
+
+        @Override
+        public boolean canWindowClose() {
+            return saveActionWasSuccessful;
         }
 
         private boolean duplicateCheck() {
@@ -267,8 +284,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         private boolean duplicateCheckForEdit() {
             final String rolloutNameVal = getRolloutName();
-            if (!rollout.getName().equals(rolloutNameVal)
-                    && rolloutManagement.getByName(rolloutNameVal).isPresent()) {
+            if (!rollout.getName().equals(rolloutNameVal) && rolloutManagement.getByName(rolloutNameVal).isPresent()) {
                 uiNotification
                         .displayValidationError(i18n.getMessage("message.rollout.duplicate.check", rolloutNameVal));
                 return false;
@@ -344,6 +360,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             return (AutoStartOptionGroupLayout.AutoStartOption) autoStartOptionGroupLayout.getAutoStartOptionGroup()
                     .getValue();
         }
+
     }
 
     CommonDialogWindow getWindow(final Long rolloutId, final boolean copy) {
@@ -734,8 +751,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private void populateTargetFilterQuery(final Rollout rollout) {
-        final Page<TargetFilterQuery> filterQueries = targetFilterQueryManagement
-                .findByQuery(new PageRequest(0, 1), rollout.getTargetFilterQuery());
+        final Page<TargetFilterQuery> filterQueries = targetFilterQueryManagement.findByQuery(new PageRequest(0, 1),
+                rollout.getTargetFilterQuery());
         if (filterQueries.getTotalElements() > 0) {
             final TargetFilterQuery filterQuery = filterQueries.getContent().get(0);
             targetFilterQueryCombo.setValue(filterQuery.getName());
@@ -936,10 +953,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             window.updateAllComponents(this);
             window.setOrginaleValues();
 
-            updateGroupsChart(
-                    rolloutGroupManagement.findByRollout(new PageRequest(0, quotaManagement.getMaxRolloutGroupsPerRollout()),
-                            rollout.getId()).getContent(),
-                    rollout.getTotalTargets());
+            updateGroupsChart(rolloutGroupManagement
+                    .findByRollout(new PageRequest(0, quotaManagement.getMaxRolloutGroupsPerRollout()), rollout.getId())
+                    .getContent(), rollout.getTotalTargets());
         }
 
         totalTargetsCount = targetManagement.countByRsql(rollout.getTargetFilterQuery());
