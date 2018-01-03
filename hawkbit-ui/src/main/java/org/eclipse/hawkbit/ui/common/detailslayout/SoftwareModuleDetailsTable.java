@@ -163,8 +163,13 @@ public class SoftwareModuleDetailsTable extends Table {
             if (!CollectionUtils.isEmpty(swModuleOptionalTypes)) {
                 swModuleOptionalTypes.forEach(swModule -> setSwModuleProperties(swModule, false, distributionSet));
             }
+            setAmountOfTableRows(getContainerDataSource().size());
         }
 
+    }
+
+    private void setAmountOfTableRows(final int amountOfRows) {
+        setPageLength(amountOfRows);
     }
 
     private void setSwModuleProperties(final SoftwareModuleType swModType, final Boolean isMandatory,
@@ -179,7 +184,6 @@ public class SoftwareModuleDetailsTable extends Table {
         saveTblitem.getItemProperty(SOFT_TYPE_MANDATORY).setValue(mandatoryLabel);
         saveTblitem.getItemProperty(SOFT_TYPE_NAME).setValue(typeName);
         saveTblitem.getItemProperty(SOFT_MODULE).setValue(verticalLayout);
-
     }
 
     private void unassignSW(final ClickEvent event, final DistributionSet distributionSet,
