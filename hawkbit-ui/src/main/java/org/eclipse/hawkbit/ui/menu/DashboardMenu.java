@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
@@ -196,7 +197,7 @@ public final class DashboardMenu extends CustomComponent {
 
     }
 
-    private static Component buildUserMenu(final UiProperties uiProperties) {
+    private Component buildUserMenu(final UiProperties uiProperties) {
         final MenuBar settings = new MenuBar();
         settings.addStyleName("user-menu");
         settings.setHtmlContentAllowed(true);
@@ -206,8 +207,8 @@ public final class DashboardMenu extends CustomComponent {
         final String formattedTenant = UserDetailsFormatter.formatCurrentTenant();
         if (!StringUtils.isEmpty(formattedTenant)) {
             settingsItem.setText(formattedTenant);
-            settingsItem.setDescription(UserDetailsFormatter.getCurrentTenant() + " "
-                    + UserDetailsFormatter.getCurrentUser().getUsername());
+            settingsItem.setDescription(i18n.getMessage("menu.user.description",
+                    UserDetailsFormatter.getCurrentTenant(), UserDetailsFormatter.getCurrentUser().getUsername()));
         } else {
             settingsItem.setText("...");
         }
@@ -221,16 +222,17 @@ public final class DashboardMenu extends CustomComponent {
     }
 
     private static String generateLogoutUrl() {
-        String logoutUrl;
         try {
-            logoutUrl = LOGOUT_BASE + "?login="
-                    + URLEncoder.encode(LOGIN_BASE + "?tenant=" + UserDetailsFormatter.getCurrentTenant(),
-                            StandardCharsets.UTF_8.toString());
+            return UriComponentsBuilder.fromPath(LOGOUT_BASE)
+                    .queryParam("login",
+                            URLEncoder.encode(UriComponentsBuilder.fromPath(LOGIN_BASE)
+                                    .queryParam("tenant", UserDetailsFormatter.getCurrentTenant()).build().toString(),
+                                    StandardCharsets.UTF_8.toString()))
+                    .build().toString();
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Could not encode logout URL", e);
             return LOGOUT_BASE;
         }
-        return logoutUrl;
     }
 
     private Component buildToggleButton() {
