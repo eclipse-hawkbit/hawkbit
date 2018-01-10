@@ -155,7 +155,7 @@ public final class SpPermission {
      * 
      * @return all permission
      */
-    public static Collection<String> getAllAuthorities() {
+    public static List<String> getAllAuthorities() {
         return getAllAuthorities(Collections.emptyList());
     }
 
@@ -166,7 +166,7 @@ public final class SpPermission {
      *            roles which will excluded
      * @return all permissions
      */
-    public static Collection<String> getAllAuthorities(final String... exclusionRoles) {
+    public static List<String> getAllAuthorities(final String... exclusionRoles) {
         return getAllAuthorities(Arrays.asList(exclusionRoles));
     }
 
@@ -177,7 +177,7 @@ public final class SpPermission {
      *            roles which will excluded
      * @return all permissions
      */
-    public static Collection<String> getAllAuthorities(final Collection<String> exclusionRoles) {
+    public static List<String> getAllAuthorities(final Collection<String> exclusionRoles) {
         final List<String> allPermissions = new ArrayList<>();
         final Field[] declaredFields = SpPermission.class.getDeclaredFields();
         for (final Field field : declaredFields) {
