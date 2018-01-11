@@ -13,8 +13,6 @@
  */
 package org.eclipse.hawkbit.ui.menu;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -222,17 +220,12 @@ public final class DashboardMenu extends CustomComponent {
     }
 
     private static String generateLogoutUrl() {
-        try {
-            return UriComponentsBuilder.fromPath(LOGOUT_BASE)
-                    .queryParam("login",
-                            URLEncoder.encode(UriComponentsBuilder.fromPath(LOGIN_BASE)
-                                    .queryParam("tenant", UserDetailsFormatter.getCurrentTenant()).build().toString(),
-                                    StandardCharsets.UTF_8.toString()))
-                    .build().toString();
-        } catch (final UnsupportedEncodingException e) {
-            LOG.error("Could not encode logout URL", e);
-            return LOGOUT_BASE;
-        }
+        return UriComponentsBuilder.fromPath(LOGOUT_BASE)
+                .queryParam("login",
+                        UriComponentsBuilder.fromPath(LOGIN_BASE)
+                                .queryParam("tenant", UserDetailsFormatter.getCurrentTenant()).build().toUriString(),
+                        StandardCharsets.UTF_8.toString())
+                .toUriString();
     }
 
     private Component buildToggleButton() {

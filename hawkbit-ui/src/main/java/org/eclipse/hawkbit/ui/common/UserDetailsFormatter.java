@@ -161,14 +161,14 @@ public final class UserDetailsFormatter {
      * 
      * @return the formatted user name (max 8 characters) can be <null>
      */
-    public static String getCurrentTenant() {
+    public static Optional<String> getCurrentTenant() {
         final UserDetails userDetails = getCurrentUser();
         if (!(userDetails instanceof UserPrincipal)) {
-            return null;
+            return Optional.empty();
         }
 
         final UserPrincipal userPrincipal = (UserPrincipal) userDetails;
-        return userPrincipal.getTenant().trim();
+        return Optional.of(userPrincipal.getTenant().trim());
     }
 
     /**
