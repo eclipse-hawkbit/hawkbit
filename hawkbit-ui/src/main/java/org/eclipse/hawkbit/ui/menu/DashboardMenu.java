@@ -13,7 +13,6 @@
  */
 package org.eclipse.hawkbit.ui.menu;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -220,12 +219,12 @@ public final class DashboardMenu extends CustomComponent {
     }
 
     private static String generateLogoutUrl() {
-        return UriComponentsBuilder.fromPath(LOGOUT_BASE)
-                .queryParam("login",
-                        UriComponentsBuilder.fromPath(LOGIN_BASE)
-                                .queryParam("tenant", UserDetailsFormatter.getCurrentTenant()).build().toUriString(),
-                        StandardCharsets.UTF_8.toString())
-                .toUriString();
+        final UriComponentsBuilder logout = UriComponentsBuilder.fromPath(LOGOUT_BASE);
+
+        UserDetailsFormatter.getCurrentTenant().ifPresent(tenant -> logout.queryParam("login",
+                UriComponentsBuilder.fromPath(LOGIN_BASE).queryParam("tenant", tenant).build().toUriString()));
+
+        return logout.toUriString();
     }
 
     private Component buildToggleButton() {
