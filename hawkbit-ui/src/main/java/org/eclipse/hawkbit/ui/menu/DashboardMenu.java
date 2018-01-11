@@ -26,8 +26,6 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.menu.DashboardEvent.PostViewChangeEvent;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -59,7 +57,6 @@ import com.vaadin.ui.themes.ValoTheme;
 @UIScope
 @SpringComponent
 public final class DashboardMenu extends CustomComponent {
-    private static final Logger LOG = LoggerFactory.getLogger(DashboardMenu.class);
 
     private static final String ID = "dashboard-menu";
 
