@@ -58,7 +58,6 @@ public class DistributionSetSelectWindow
 
     private final transient TargetFilterQueryManagement targetFilterQueryManagement;
 
-    private CommonDialogWindow window;
     private CheckBox checkBox;
     private Long tfqId;
 
@@ -71,7 +70,7 @@ public class DistributionSetSelectWindow
         this.targetFilterQueryManagement = targetFilterQueryManagement;
     }
 
-    private void initLocal() {
+    private VerticalLayout initView() {
         final Label label = new Label(i18n.getMessage("label.auto.assign.description"));
 
         checkBox = new CheckBox(i18n.getMessage("label.auto.assign.enable"));
@@ -79,27 +78,26 @@ public class DistributionSetSelectWindow
         checkBox.setImmediate(true);
         checkBox.addValueChangeListener(this);
 
+        setTableEnabled(false);
+
         final VerticalLayout verticalLayout = new VerticalLayout();
         verticalLayout.addComponent(label);
         verticalLayout.addComponent(checkBox);
         verticalLayout.addComponent(dsTable);
 
-        window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
-                .caption(i18n.getMessage("caption.select.auto.assign.dist")).content(verticalLayout).layout(verticalLayout)
-                .i18n(i18n).saveDialogCloseListener(this).buildCommonDialogWindow();
-        window.setId(UIComponentIdProvider.DIST_SET_SELECT_WINDOW_ID);
+        return verticalLayout;
     }
 
-    public void setValue(final Long distSet) {
-        dsTable.setVisible(distSet != null);
+    private void setValue(final Long distSet) {
         checkBox.setValue(distSet != null);
         dsTable.setValue(distSet);
         dsTable.setCurrentPageFirstItemId(distSet);
+        dsTable.setNullSelectionAllowed(false);
     }
 
     /**
      * Shows a distribution set select window for the given target filter query
-     * 
+     *
      * @param tfqId
      *            target filter query id
      */
@@ -108,7 +106,7 @@ public class DistributionSetSelectWindow
         final TargetFilterQuery tfq = targetFilterQueryManagement.get(tfqId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, tfqId));
 
-        initLocal();
+        final VerticalLayout verticalLayout = initView();
 
         final DistributionSet distributionSet = tfq.getAutoAssignDistributionSet();
         if (distributionSet != null) {
@@ -117,6 +115,12 @@ public class DistributionSetSelectWindow
             setValue(null);
         }
 
+        // build window after values are set to view elements
+        final CommonDialogWindow window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
+                .caption(i18n.getMessage("caption.select.auto.assign.dist")).content(verticalLayout)
+                .layout(verticalLayout).i18n(i18n).saveDialogCloseListener(this).buildCommonDialogWindow();
+        window.setId(UIComponentIdProvider.DIST_SET_SELECT_WINDOW_ID);
+
         window.setWidth(40.0F, Sizeable.Unit.PERCENTAGE);
         UI.getCurrent().addWindow(window);
         window.setVisible(true);
@@ -124,27 +128,45 @@ public class DistributionSetSelectWindow
 
     /**
      * Is triggered when the checkbox value changes
-     * 
+     *
      * @param event
      *            change event
      */
     @Override
     public void valueChange(final Property.ValueChangeEvent event) {
-        dsTable.setVisible(checkBox.getValue());
-        if (window != null) {
-            window.center();
-
+        if (checkBox.getValue()) {
+            setTableEnabled(true);
+        } else {
+            dsTable.select(null);
+            setTableEnabled(false);
         }
+    }
+
+    private void setTableEnabled(final boolean enabled) {
+        dsTable.setEnabled(enabled);
+        dsTable.setRequired(enabled);
     }
 
     /**
      * Is triggered when the save button is clicked
-     * 
+     *
      * @return whether the click should be allowed
      */
     @Override
     public boolean canWindowSaveOrUpdate() {
-        return !checkBox.getValue() || dsTable.getValue() != null;
+        return isFormularValid();
+    }
+
+    private boolean isFormularValid() {
+        return isAutoAssignmentDisabled() || isAutoAssignmentEnabledAndDistributionSetSelected();
+    }
+
+    private boolean isAutoAssignmentEnabledAndDistributionSetSelected() {
+        return checkBox.getValue() && dsTable.getValue() != null;
+    }
+
+    private boolean isAutoAssignmentDisabled() {
+        return !checkBox.getValue();
     }
 
     /**
@@ -239,7 +261,7 @@ public class DistributionSetSelectWindow
                 mainTextLabel = new Label(i18n.getMessage("message.confirm.assign.consequences.none"));
             } else {
                 mainTextLabel = new Label(
-                        i18n.getMessage("message.confirm.assign.consequences.text", new Object[] { targetsCount }));
+                        i18n.getMessage("message.confirm.assign.consequences.text", targetsCount));
             }
 
             layout.addComponent(mainTextLabel);
