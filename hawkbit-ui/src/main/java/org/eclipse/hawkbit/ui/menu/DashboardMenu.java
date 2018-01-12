@@ -201,8 +201,8 @@ public final class DashboardMenu extends CustomComponent {
         final String formattedTenant = UserDetailsFormatter.formatCurrentTenant();
         if (!StringUtils.isEmpty(formattedTenant)) {
             settingsItem.setText(formattedTenant);
-            settingsItem.setDescription(i18n.getMessage("menu.user.description",
-                    UserDetailsFormatter.getCurrentTenant(), UserDetailsFormatter.getCurrentUser().getUsername()));
+            UserDetailsFormatter.getCurrentTenant().ifPresent(tenant -> settingsItem.setDescription(i18n
+                    .getMessage("menu.user.description", tenant, UserDetailsFormatter.getCurrentUser().getUsername())));
         } else {
             settingsItem.setText("...");
         }
