@@ -121,8 +121,9 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
     }
 
     private boolean isController() {
-        return SecurityContextHolder.getContext().getAuthentication()
-                .getDetails() instanceof TenantAwareAuthenticationDetails
+        return SecurityContextHolder.getContext().getAuthentication() != null
+                && SecurityContextHolder.getContext().getAuthentication()
+                        .getDetails() instanceof TenantAwareAuthenticationDetails
                 && ((TenantAwareAuthenticationDetails) SecurityContextHolder.getContext().getAuthentication()
                         .getDetails()).isController();
     }
