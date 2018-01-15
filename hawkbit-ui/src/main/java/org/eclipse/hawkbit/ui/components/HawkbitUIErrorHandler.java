@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import javax.validation.ValidationException;
 
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -107,17 +108,23 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
 
     private String extractMessageFrom(final Throwable ex) {
 
-        if (!(ex instanceof ConstraintViolation)) {
-            return ex.getClass().getSimpleName();
+        if (ex instanceof ValidationException) {
+            return ((ValidationException) ex).getMessage();
         }
 
-        final Set<ConstraintViolation<?>> violations = ((ConstraintViolationException) ex).getConstraintViolations();
+        if (ex instanceof ConstraintViolationException) {
 
-        if (violations == null) {
-            return ex.getClass().getSimpleName();
+            final Set<ConstraintViolation<?>> violations = ((ConstraintViolationException) ex)
+                    .getConstraintViolations();
+
+            if (violations == null) {
+                return ex.getClass().getSimpleName();
+            }
+
+            return violations.stream().map(violation -> violation.getPropertyPath() + " " + violation.getMessage())
+                    .collect(Collectors.joining(System.lineSeparator()));
         }
 
-        return violations.stream().map(violation -> violation.getPropertyPath() + " " + violation.getMessage())
-                .collect(Collectors.joining(System.lineSeparator()));
+        return ex.getClass().getSimpleName();
     }
 }

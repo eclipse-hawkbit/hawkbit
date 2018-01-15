@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.validation.ValidationException;
-
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
@@ -224,15 +222,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         }
 
         private void createRollout() {
-            try {
-                final Rollout rolloutToCreate = saveRollout();
-                uiNotification.displaySuccess(i18n.getMessage("message.save.success", rolloutToCreate.getName()));
-                saveActionWasSuccessful = true;
-            } catch (final ValidationException e) {
-                LOGGER.info(e.getMessage(), e);
-                uiNotification.displayValidationError(e.getMessage());
-                saveActionWasSuccessful = false;
-            }
+            final Rollout rolloutToCreate = saveRollout();
+            uiNotification.displaySuccess(i18n.getMessage("message.save.success", rolloutToCreate.getName()));
+            saveActionWasSuccessful = true;
         }
 
         @Override
