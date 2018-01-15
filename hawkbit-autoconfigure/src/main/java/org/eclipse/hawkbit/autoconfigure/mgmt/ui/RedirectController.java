@@ -6,15 +6,15 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.app;
+package org.eclipse.hawkbit.autoconfigure.mgmt.ui;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Redirects for convenience of the example apps users. hawkBit's management UI
- * is by default not listening on / but on /UI.
+ * Redirects for convenience. hawkBit's management UI is by default not
+ * listening on / but on /UI.
  *
  */
 @Controller
