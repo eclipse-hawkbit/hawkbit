@@ -77,6 +77,7 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Validator;
 import com.vaadin.data.util.converter.StringToIntegerConverter;
 import com.vaadin.data.validator.IntegerRangeValidator;
+import com.vaadin.data.validator.LongRangeValidator;
 import com.vaadin.data.validator.NullValidator;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.ComboBox;
@@ -98,6 +99,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     private static final Logger LOGGER = LoggerFactory.getLogger(AddUpdateRolloutWindowLayout.class);
 
     private static final String MESSAGE_ROLLOUT_FIELD_VALUE_RANGE = "message.rollout.field.value.range";
+
+    private static final String MESSAGE_ROLLOUT_FILTER_TARGET_EXISTS = "message.rollout.filter.target.exists";
 
     private static final String MESSAGE_ENTER_NUMBER = "message.enter.number";
 
@@ -202,8 +205,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
      */
     private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
 
-        boolean saveActionWasSuccessful = true;
-
         @Override
         public void saveOrUpdate() {
             if (editRolloutEnabled) {
@@ -224,12 +225,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         private void createRollout() {
             final Rollout rolloutToCreate = saveRollout();
             uiNotification.displaySuccess(i18n.getMessage("message.save.success", rolloutToCreate.getName()));
-            saveActionWasSuccessful = true;
-        }
-
-        @Override
-        public boolean canWindowClose() {
-            return saveActionWasSuccessful;
         }
 
         private boolean duplicateCheck() {
@@ -452,6 +447,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         addComponent(getMandatoryLabel("prompt.target.filter"), 0, 2);
         addComponent(targetFilterQueryCombo, 1, 2);
         targetFilterQueryCombo.addValidator(nullValidator);
+        targetFilterQueryCombo.addValidator(new TargetExistsValidator());
         targetFilterQuery.removeValidator(nullValidator);
 
         addComponent(getLabel("textfield.description"), 0, 3);
@@ -875,6 +871,18 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private int getGroupSize() {
         return (int) Math.ceil((double) totalTargetsCount / Double.parseDouble(noOfGroups.getValue()));
+    }
+
+    class TargetExistsValidator implements Validator {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public void validate(final Object value) {
+            if (value != null) {
+                new LongRangeValidator(i18n.getMessage(MESSAGE_ROLLOUT_FILTER_TARGET_EXISTS), 1L, null)
+                        .validate(totalTargetsCount);
+            }
+        }
     }
 
     class ThresholdFieldValidator implements Validator {
