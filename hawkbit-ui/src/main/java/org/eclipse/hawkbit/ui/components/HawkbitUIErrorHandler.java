@@ -8,12 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.components;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
@@ -106,19 +100,6 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
     }
 
     private static String extractMessageFrom(final Throwable ex) {
-
-        if (ex instanceof ConstraintViolationException) {
-
-            final Set<ConstraintViolation<?>> violations = ((ConstraintViolationException) ex)
-                    .getConstraintViolations();
-
-            if (violations == null) {
-                return ex.getClass().getSimpleName();
-            }
-
-            return violations.stream().map(violation -> violation.getPropertyPath() + " " + violation.getMessage())
-                    .collect(Collectors.joining(System.lineSeparator()));
-        }
 
         if (!StringUtils.isEmpty(ex.getMessage())) {
             return ex.getMessage();
