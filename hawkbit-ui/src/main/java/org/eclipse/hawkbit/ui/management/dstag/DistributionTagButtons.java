@@ -61,7 +61,9 @@ public class DistributionTagButtons extends AbstractFilterButtons implements Ref
         this.managementUIState = managementUIState;
         this.entityFactory = entityFactory;
 
-        addNewTag(entityFactory.tag().create().name(NO_TAG).build());
+        if (permChecker.hasReadRepositoryPermission()) {
+            addNewTag(entityFactory.tag().create().name(NO_TAG).build());
+        }
     }
 
     @Override

@@ -59,8 +59,7 @@ public class DistributionsViewMenuItem extends AbstractDashboardMenuItemNotifica
 
     @Override
     public List<String> getPermissions() {
-        return Arrays.asList(SpPermission.CREATE_REPOSITORY, SpPermission.READ_REPOSITORY,
-                SpPermission.UPDATE_REPOSITORY);
+        return Arrays.asList(SpPermission.READ_REPOSITORY);
     }
 
 }

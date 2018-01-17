@@ -59,7 +59,7 @@ public class FilterManagementViewMenuItem extends AbstractDashboardMenuItemNotif
 
     @Override
     public List<String> getPermissions() {
-        return Arrays.asList(SpPermission.CREATE_TARGET, SpPermission.READ_TARGET);
+        return Arrays.asList(SpPermission.READ_TARGET);
     }
 
 }

@@ -124,6 +124,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         addNewContainerDS();
         setColumnProperties();
         setDataAvailable(getContainerDataSource().size() != 0);
+
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
