@@ -431,8 +431,9 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
         final Transferable transferable = dragEvent.getTransferable();
         final Component compsource = transferable.getSourceComponent();
 
-        if (!hasDropPermission()) {
-            notification.displayValidationError(i18n.getMessage("message.permission.insufficient"));
+        final List<String> missingPermissions = hasMissingPermissionsForDrop();
+        if (!missingPermissions.isEmpty()) {
+            notification.displayValidationError(i18n.getMessage("message.permission.insufficient", missingPermissions));
             return false;
         }
 
@@ -487,7 +488,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
         publishSelectedEntityEvent(entity);
     }
 
-    protected abstract boolean hasDropPermission();
+    protected abstract List<String> hasMissingPermissionsForDrop();
 
     protected abstract boolean validateDragAndDropWrapper(final DragAndDropWrapper wrapperSource);
 

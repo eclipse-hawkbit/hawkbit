@@ -9,7 +9,9 @@
 package org.eclipse.hawkbit.ui.management.dstable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +20,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -448,8 +451,9 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     @Override
-    protected boolean hasDropPermission() {
-        return permissionChecker.hasUpdateTargetPermission();
+    protected List<String> hasMissingPermissionsForDrop() {
+        return permissionChecker.hasUpdateTargetPermission() ? Collections.emptyList()
+                : Arrays.asList(SpPermission.UPDATE_TARGET);
     }
 
     @Override

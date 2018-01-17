@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
@@ -379,7 +380,8 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private Boolean canTargetBeDeleted() {
         if (!permChecker.hasDeleteTargetPermission()) {
-            notification.displayValidationError(i18n.getMessage("message.permission.insufficient"));
+            notification.displayValidationError(
+                    i18n.getMessage("message.permission.insufficient", SpPermission.DELETE_TARGET));
             return false;
         }
         return true;
@@ -387,7 +389,8 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private Boolean canDSBeDeleted() {
         if (!permChecker.hasDeleteRepositoryPermission()) {
-            notification.displayValidationError(i18n.getMessage("message.permission.insufficient"));
+            notification.displayValidationError(
+                    i18n.getMessage("message.permission.insufficient", SpPermission.DELETE_REPOSITORY));
             return false;
         }
         return true;

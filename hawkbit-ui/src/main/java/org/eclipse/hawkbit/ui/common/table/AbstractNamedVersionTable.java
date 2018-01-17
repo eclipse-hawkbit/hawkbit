@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.common.table;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
@@ -66,8 +67,8 @@ public abstract class AbstractNamedVersionTable<E extends NamedVersionedEntity> 
     }
 
     @Override
-    protected boolean hasDropPermission() {
-        return true;
+    protected List<String> hasMissingPermissionsForDrop() {
+        return Collections.emptyList();
     }
 
     @Override
