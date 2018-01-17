@@ -31,7 +31,7 @@ import org.vaadin.spring.security.annotation.EnableVaadinSecurity;
 import com.vaadin.spring.annotation.UIScope;
 
 /**
- * The hawkbit-ui autoconfiguration.
+ * The Management UI auto configuration.
  */
 @Configuration
 @EnableVaadinSecurity
@@ -42,6 +42,7 @@ import com.vaadin.spring.annotation.UIScope;
 public class MgmtUiAutoConfiguration {
 
     @Bean
+    @ConditionalOnMissingBean
     RedirectController uiRedirectController() {
         return new RedirectController();
     }
