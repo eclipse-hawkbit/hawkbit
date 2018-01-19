@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.management.targettag;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
@@ -163,7 +164,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
 
         final AbstractTable<?> source = (AbstractTable<?>) tabletransferable.getSourceComponent();
 
-        if (!validateIfSourceisTargetTable(source) && !checkForTargetUpdatePermission()) {
+        if (!validateIfSourceisTargetTable(source) && !hasTargetUpdatePermission()) {
             return false;
         }
 
@@ -182,10 +183,10 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
      *
      * @return boolean
      */
-    private boolean checkForTargetUpdatePermission() {
+    private boolean hasTargetUpdatePermission() {
         if (!permChecker.hasUpdateTargetPermission()) {
-
-            notification.displayValidationError(i18n.getMessage("message.permission.insufficient"));
+            notification.displayValidationError(
+                    i18n.getMessage("message.permission.insufficient", SpPermission.UPDATE_TARGET));
             return false;
         }
 
@@ -200,6 +201,10 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
         final Set<Long> targetList = targetTable.getDeletedEntityByTransferable(transferable);
         final String targTagName = HawkbitCommonUtil.removePrefix(targetDetails.getTarget().getId(),
                 SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
+
+        if (!hasTargetUpdatePermission()) {
+            return;
+        }
 
         final TargetTagAssignmentResult result = targetTable.toggleTagAssignment(targetList, targTagName);
 

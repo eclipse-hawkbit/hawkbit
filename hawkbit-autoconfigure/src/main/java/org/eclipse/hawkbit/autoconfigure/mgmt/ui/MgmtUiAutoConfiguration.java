@@ -31,7 +31,7 @@ import org.vaadin.spring.security.annotation.EnableVaadinSecurity;
 import com.vaadin.spring.annotation.UIScope;
 
 /**
- * The hawkbit-ui autoconfiguration.
+ * The Management UI auto configuration.
  */
 @Configuration
 @EnableVaadinSecurity
@@ -41,13 +41,19 @@ import com.vaadin.spring.annotation.UIScope;
 @Import(MgmtUiConfiguration.class)
 public class MgmtUiAutoConfiguration {
 
+    @Bean
+    @ConditionalOnMissingBean
+    RedirectController uiRedirectController() {
+        return new RedirectController();
+    }
+
     /**
      * A message source bean to add distributed message sources.
      * 
      * @return the message bean.
      */
     @Bean(name = "messageSource")
-    public DistributedResourceBundleMessageSource messageSource() {
+    DistributedResourceBundleMessageSource messageSource() {
         return new DistributedResourceBundleMessageSource();
     }
 
@@ -58,7 +64,7 @@ public class MgmtUiAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public UIEventProvider eventProvider() {
+    UIEventProvider eventProvider() {
         return new HawkbitEventProvider();
     }
 
@@ -81,7 +87,7 @@ public class MgmtUiAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @UIScope
-    public EventPushStrategy eventPushStrategy(final ConfigurableApplicationContext applicationContext,
+    EventPushStrategy eventPushStrategy(final ConfigurableApplicationContext applicationContext,
             final ScheduledExecutorService executorService, final UIEventBus eventBus,
             final UIEventProvider eventProvider, final UiProperties uiProperties) {
         final DelayedEventBusPushStrategy delayedEventBusPushStrategy = new DelayedEventBusPushStrategy(executorService,

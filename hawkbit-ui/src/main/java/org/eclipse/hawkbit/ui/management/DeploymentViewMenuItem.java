@@ -57,8 +57,7 @@ public class DeploymentViewMenuItem extends AbstractDashboardMenuItemNotificatio
 
     @Override
     public List<String> getPermissions() {
-        return Arrays.asList(SpPermission.CREATE_REPOSITORY, SpPermission.READ_REPOSITORY, SpPermission.CREATE_TARGET,
-                SpPermission.READ_TARGET, SpPermission.UPDATE_TARGET, SpPermission.UPDATE_REPOSITORY);
+        return Arrays.asList(SpPermission.READ_REPOSITORY, SpPermission.READ_TARGET);
     }
 
 }
