@@ -206,7 +206,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         rawCont.addContainerProperty(ProxyAction.PXY_ACTION_LAST_MODIFIED_AT, Long.class, null, true, true);
         rawCont.addContainerProperty(ProxyAction.PXY_ACTION_STATUS, Action.Status.class, null, true, false);
 
-        rawCont.addContainerProperty(ProxyAction.PXY_ACTION_ID, Long.class, null, true, true);
+        rawCont.addContainerProperty(ProxyAction.PXY_ACTION_ID, String.class, null, true, true);
         rawCont.addContainerProperty(ProxyAction.PXY_ACTION_ROLLOUT_NAME, String.class, null, true, true);
     }
 
