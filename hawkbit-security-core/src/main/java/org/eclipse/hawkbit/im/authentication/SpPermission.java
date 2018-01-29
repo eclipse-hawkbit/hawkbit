@@ -142,9 +142,29 @@ public final class SpPermission {
     public static final String TENANT_CONFIGURATION = "TENANT_CONFIGURATION";
 
     /**
-     * Permission to administrate a rollout management.
+     * Permission to read a rollout.
      */
-    public static final String ROLLOUT_MANAGEMENT = "ROLLOUT_MANAGEMENT";
+    public static final String READ_ROLLOUT = "READ_ROLLOUT";
+
+    /**
+     * Permission to create a rollout.
+     */
+    public static final String CREATE_ROLLOUT = "CREATE_ROLLOUT";
+
+    /**
+     * Permission to update a rollout.
+     */
+    public static final String UPDATE_ROLLOUT = "UPDATE_ROLLOUT";
+
+    /**
+     * Permission to delete a rollout.
+     */
+    public static final String DELETE_ROLLOUT = "DELETE_ROLLOUT";
+
+    /**
+     * Permission to star/stop/resume a rollout.
+     */
+    public static final String HANDLE_ROLLOUT = "HANDLE_ROLLOUT";
 
     private SpPermission() {
         // Constants only
@@ -389,29 +409,52 @@ public final class SpPermission {
 
         /**
          * Spring security eval hasAuthority expression to check if spring
-         * context contains {@link SpPermission#ROLLOUT_MANAGEMENT} or
+         * context contains {@link SpPermission#READ_ROLLOUT} or
          * {@link #IS_SYSTEM_CODE}.
          */
-        public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_READ = HAS_AUTH_PREFIX + ROLLOUT_MANAGEMENT
-                + HAS_AUTH_SUFFIX + HAS_AUTH_OR + IS_SYSTEM_CODE;
+        public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_READ = HAS_AUTH_PREFIX + READ_ROLLOUT + HAS_AUTH_SUFFIX
+                + HAS_AUTH_OR + IS_SYSTEM_CODE;
 
         /**
          * Spring security eval hasAuthority expression to check if spring
-         * context contains {@link SpPermission#ROLLOUT_MANAGEMENT} and
+         * context contains {@link SpPermission#READ_ROLLOUT} and
          * {@link SpPermission#READ_TARGET} or {@link #IS_SYSTEM_CODE}.
          */
         public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ = BRACKET_OPEN + HAS_AUTH_PREFIX
-                + ROLLOUT_MANAGEMENT + HAS_AUTH_SUFFIX + HAS_AUTH_AND + HAS_AUTH_PREFIX + READ_TARGET + HAS_AUTH_SUFFIX
+                + READ_ROLLOUT + HAS_AUTH_SUFFIX + HAS_AUTH_AND + HAS_AUTH_PREFIX + READ_TARGET + HAS_AUTH_SUFFIX
                 + BRACKET_CLOSE + HAS_AUTH_OR + IS_SYSTEM_CODE;
 
         /**
          * Spring security eval hasAuthority expression to check if spring
-         * context contains {@link SpPermission#ROLLOUT_MANAGEMENT} and
-         * {@link SpPermission#UPDATE_TARGET} or {@link #IS_SYSTEM_CODE}.
+         * context contains {@link SpPermission#CREATE_ROLLOUT} or
+         * {@link #IS_SYSTEM_CODE}.
          */
-        public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE = BRACKET_OPEN + HAS_AUTH_PREFIX
-                + ROLLOUT_MANAGEMENT + HAS_AUTH_SUFFIX + HAS_AUTH_AND + HAS_AUTH_PREFIX + UPDATE_TARGET
-                + HAS_AUTH_SUFFIX + BRACKET_CLOSE + HAS_AUTH_OR + IS_SYSTEM_CODE;
+        public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_CREATE = HAS_AUTH_PREFIX + CREATE_ROLLOUT
+                + HAS_AUTH_SUFFIX + HAS_AUTH_OR + IS_SYSTEM_CODE;
+
+        /**
+         * Spring security eval hasAuthority expression to check if spring
+         * context contains {@link SpPermission#HANDLE_ROLLOUT} or
+         * {@link #IS_SYSTEM_CODE}.
+         */
+        public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_HANDLE = HAS_AUTH_PREFIX + HANDLE_ROLLOUT
+                + HAS_AUTH_SUFFIX + HAS_AUTH_OR + IS_SYSTEM_CODE;
+
+        /**
+         * Spring security eval hasAuthority expression to check if spring
+         * context contains {@link SpPermission#UPDATE_ROLLOUT} or
+         * {@link #IS_SYSTEM_CODE}.
+         */
+        public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE = HAS_AUTH_PREFIX + UPDATE_ROLLOUT
+                + HAS_AUTH_SUFFIX + HAS_AUTH_OR + IS_SYSTEM_CODE;
+
+        /**
+         * Spring security eval hasAuthority expression to check if spring
+         * context contains {@link SpPermission#DELETE_ROLLOUT} or
+         * {@link #IS_SYSTEM_CODE}.
+         */
+        public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_DELETE = HAS_AUTH_PREFIX + DELETE_ROLLOUT
+                + HAS_AUTH_SUFFIX + HAS_AUTH_OR + IS_SYSTEM_CODE;
 
         /**
          * Spring security eval hasAuthority expression to check if spring
