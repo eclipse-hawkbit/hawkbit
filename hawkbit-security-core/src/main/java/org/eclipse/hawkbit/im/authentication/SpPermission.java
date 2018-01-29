@@ -162,7 +162,7 @@ public final class SpPermission {
     public static final String DELETE_ROLLOUT = "DELETE_ROLLOUT";
 
     /**
-     * Permission to star/stop/resume a rollout.
+     * Permission to start/stop/resume a rollout.
      */
     public static final String HANDLE_ROLLOUT = "HANDLE_ROLLOUT";
 
