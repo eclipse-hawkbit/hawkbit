@@ -34,9 +34,9 @@ public class MgmtDownloadResourceTest extends AbstractManagementApiIntegrationTe
     @Autowired
     private DownloadIdCache downloadIdCache;
 
-    private final String downloadIdSha1 = "downloadIdSha1";
+    private static final String DOWNLOAD_ID_SHA1 = "downloadIdSha1";
 
-    private final String downloadIdNotAvailable = "downloadIdNotAvailable";
+    private static final String DOWNLOAD_ID_NOT_AVAILABLE = "downloadIdNotAvailable";
 
     @Before
     public void setupCache() {
@@ -45,7 +45,7 @@ public class MgmtDownloadResourceTest extends AbstractManagementApiIntegrationTe
         final SoftwareModule softwareModule = distributionSet.getModules().stream().findAny().get();
         final Artifact artifact = testdataFactory.createArtifacts(softwareModule.getId()).stream().findAny().get();
 
-        downloadIdCache.put(downloadIdSha1, new DownloadArtifactCache(DownloadType.BY_SHA1, artifact.getSha1Hash()));
+        downloadIdCache.put(DOWNLOAD_ID_SHA1, new DownloadArtifactCache(DownloadType.BY_SHA1, artifact.getSha1Hash()));
     }
 
     @Test
@@ -54,7 +54,7 @@ public class MgmtDownloadResourceTest extends AbstractManagementApiIntegrationTe
         mvc.perform(get(
                 MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE
                         + MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING,
-                tenantAware.getCurrentTenant(), downloadIdNotAvailable)).andDo(MockMvcResultPrinter.print())
+                tenantAware.getCurrentTenant(), DOWNLOAD_ID_NOT_AVAILABLE)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
     }
@@ -65,14 +65,14 @@ public class MgmtDownloadResourceTest extends AbstractManagementApiIntegrationTe
         mvc.perform(get(
                 MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE
                         + MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING,
-                tenantAware.getCurrentTenant(), downloadIdSha1)).andDo(MockMvcResultPrinter.print())
+                tenantAware.getCurrentTenant(), DOWNLOAD_ID_SHA1)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         // because cache is empty
         mvc.perform(get(
                 MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE
                         + MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING,
-                tenantAware.getCurrentTenant(), downloadIdSha1)).andDo(MockMvcResultPrinter.print())
+                tenantAware.getCurrentTenant(), DOWNLOAD_ID_SHA1)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
     }
