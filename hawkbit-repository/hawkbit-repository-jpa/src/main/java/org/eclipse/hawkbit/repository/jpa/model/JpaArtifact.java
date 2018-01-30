@@ -41,13 +41,13 @@ public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Art
     private static final long serialVersionUID = 1L;
 
     @Column(name = "sha1_hash", length = 40, nullable = false, updatable = false)
-    @Size(max = 40)
-    @NotEmpty
+    @Size(min = 1, max = 40)
+    @NotNull
     private String sha1Hash;
 
     @Column(name = "provided_file_name", length = 256)
-    @Size(max = 256)
-    @NotEmpty
+    @Size(min = 1, max = 256)
+    @NotNull
     private String filename;
 
     @ManyToOne(optional = false, cascade = { CascadeType.PERSIST }, fetch = FetchType.LAZY)

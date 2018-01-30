@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionHistory;
+import org.eclipse.hawkbit.ddi.json.model.DdiArtifact;
 import org.eclipse.hawkbit.ddi.json.model.DdiCancel;
 import org.eclipse.hawkbit.ddi.json.model.DdiCancelActionToStop;
 import org.eclipse.hawkbit.ddi.json.model.DdiChunk;
@@ -115,8 +116,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
     private EntityFactory entityFactory;
 
     @Override
-    public ResponseEntity<List<org.eclipse.hawkbit.ddi.json.model.DdiArtifact>> getSoftwareModulesArtifacts(
-            @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId,
+    public ResponseEntity<List<DdiArtifact>> getSoftwareModulesArtifacts(@PathVariable("tenant") final String tenant,
+            @PathVariable("controllerId") final String controllerId,
             @PathVariable("softwareModuleId") final Long softwareModuleId) {
         LOG.debug("getSoftwareModulesArtifacts({})", controllerId);
 
@@ -269,7 +270,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
             final List<DdiChunk> chunks = DataConversionHelper.createChunks(target, action, artifactUrlHandler,
                     systemManagement,
-                    new ServletServerHttpRequest(requestResponseContextHolder.getHttpServletRequest()));
+                    new ServletServerHttpRequest(requestResponseContextHolder.getHttpServletRequest()),
+                    controllerManagement);
 
             final HandlingType handlingType = action.isForce() ? HandlingType.FORCED : HandlingType.ATTEMPT;
 

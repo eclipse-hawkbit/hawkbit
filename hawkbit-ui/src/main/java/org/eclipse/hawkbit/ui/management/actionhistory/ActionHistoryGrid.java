@@ -59,8 +59,8 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     private static final Logger LOG = LoggerFactory.getLogger(ActionHistoryGrid.class);
     private static final String BUTTON_CANCEL = "button.cancel";
     private static final String BUTTON_OK = "button.ok";
-    private static final double FIXED_PIX_MIN = 29F;
-    private static final double FIXED_PIX_MAX = 32F;
+    private static final double FIXED_PIX_MIN = 25;
+    private static final double FIXED_PIX_MAX = 32;
 
     private static final String STATUS_ICON_GREEN = "statusIconGreen";
     private static final String STATUS_ICON_RED = "statusIconRed";
@@ -72,7 +72,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
 
     private static final String VIRT_PROP_FORCED = "forced";
     private static final String VIRT_PROP_TIMEFORCED = "timeForced";
-    private static final String VIRT_PROP_ACTION_CANCEL = "cancel-aciton";
+    private static final String VIRT_PROP_ACTION_CANCEL = "cancel-action";
     private static final String VIRT_PROP_ACTION_FORCE = "force-action";
     private static final String VIRT_PROP_ACTION_FORCE_QUIT = "force-quit-action";
 
@@ -206,9 +206,8 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         rawCont.addContainerProperty(ProxyAction.PXY_ACTION_LAST_MODIFIED_AT, Long.class, null, true, true);
         rawCont.addContainerProperty(ProxyAction.PXY_ACTION_STATUS, Action.Status.class, null, true, false);
 
-        rawCont.addContainerProperty(ProxyAction.PXY_ACTION_ID, Long.class, null, true, true);
+        rawCont.addContainerProperty(ProxyAction.PXY_ACTION_ID, String.class, null, true, true);
         rawCont.addContainerProperty(ProxyAction.PXY_ACTION_ROLLOUT_NAME, String.class, null, true, true);
-
     }
 
     @Override
@@ -392,7 +391,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
      * Pinning.
      */
     private void updateDistributionTableStyle() {
-        managementUIState.getDistributionTableFilters().getPinnedTarget().ifPresent((pinnedTarget) -> {
+        managementUIState.getDistributionTableFilters().getPinnedTarget().ifPresent(pinnedTarget -> {
             if (pinnedTarget.getTargetId().equals(selectedTarget.getId())) {
                 eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
             }
@@ -634,20 +633,6 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     /**
-     * Concrete html-label converter that handles Booleans. The converter needs
-     * an appropriate adapter that must be set via
-     * {@link AbstractHtmlLabelConverter#addAdapter()} to do the work.
-     */
-    class HtmlBooleanLabelConverter extends AbstractHtmlLabelConverter<Boolean> {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public Class<Boolean> getModelType() {
-            return Boolean.class;
-        }
-    }
-
-    /**
      * Concrete html-label converter that handles Actions.
      */
     class HtmlVirtPropLabelConverter extends AbstractHtmlLabelConverter<Action> {
@@ -706,30 +691,6 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         @Override
         public Class<Action> getType() {
             return Action.class;
-        }
-    }
-
-    /**
-     * Generator class responsible to generate a button property value for the
-     * grid.
-     */
-    class ButtonPropertyValueGenerator extends PropertyValueGenerator<String> {
-        private static final long serialVersionUID = 1L;
-
-        private final String buttonLabel;
-
-        public ButtonPropertyValueGenerator(final String buttonLabel) {
-            this.buttonLabel = buttonLabel;
-        }
-
-        @Override
-        public String getValue(final Item item, final Object itemId, final Object propertyId) {
-            return buttonLabel;
-        }
-
-        @Override
-        public Class<String> getType() {
-            return String.class;
         }
     }
 

@@ -36,7 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional(readOnly = true)
 public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>, JpaSpecificationExecutor<JpaTarget> {
-
     /**
      * Sets {@link JpaTarget#getAssignedDistributionSet()}.
      *

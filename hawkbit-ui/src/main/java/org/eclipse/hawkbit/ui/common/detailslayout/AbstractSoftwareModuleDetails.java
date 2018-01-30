@@ -8,15 +8,12 @@
  */
 package org.eclipse.hawkbit.ui.common.detailslayout;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
-import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -41,7 +38,7 @@ public abstract class AbstractSoftwareModuleDetails
 
     private static final long serialVersionUID = 1L;
 
-    private final SoftwareModuleMetadatadetailslayout swmMetadataTable;
+    private final SoftwareModuleMetadataDetailsLayout swmMetadataTable;
 
     private final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow;
 
@@ -52,38 +49,16 @@ public abstract class AbstractSoftwareModuleDetails
     protected AbstractSoftwareModuleDetails(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState,
             final SoftwareModuleManagement softwareManagement, final SwMetadataPopupLayout swMetadataPopupLayout,
-            final EntityFactory entityFactory, final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow) {
+            final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow) {
         super(i18n, eventBus, permissionChecker, managementUIState);
         this.softwareModuleAddUpdateWindow = softwareModuleAddUpdateWindow;
         this.softwareModuleManagement = softwareManagement;
         this.swMetadataPopupLayout = swMetadataPopupLayout;
 
-        swmMetadataTable = new SoftwareModuleMetadatadetailslayout();
-        swmMetadataTable.init(getI18n(), getPermissionChecker(), softwareManagement, swMetadataPopupLayout,
-                entityFactory);
+        swmMetadataTable = new SoftwareModuleMetadataDetailsLayout(getI18n(), softwareManagement,
+                swMetadataPopupLayout);
 
         addDetailsTab();
-    }
-
-    /**
-     * MetadataEvent.
-     *
-     * @param event
-     *            as instance of {@link MetadataEvent}
-     */
-    @EventBusListenerMethod(scope = EventScope.UI)
-    void onEvent(final MetadataEvent event) {
-        UI.getCurrent().access(() -> {
-            final MetaData softwareModuleMetadata = event.getMetaData();
-            if (softwareModuleMetadata == null || !isSoftwareModuleSelected(event.getModule())) {
-                return;
-            }
-            if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.CREATE_SOFTWARE_MODULE_METADATA) {
-                swmMetadataTable.createMetadata(event.getMetaData().getKey());
-            } else if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.DELETE_SOFTWARE_MODULE_METADATA) {
-                swmMetadataTable.deleteMetadata(event.getMetaData().getKey());
-            }
-        });
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -124,7 +99,7 @@ public abstract class AbstractSoftwareModuleDetails
 
     @Override
     protected boolean hasEditPermission() {
-        return getPermissionChecker().hasUpdateDistributionPermission();
+        return getPermissionChecker().hasUpdateRepositoryPermission();
     }
 
     @Override

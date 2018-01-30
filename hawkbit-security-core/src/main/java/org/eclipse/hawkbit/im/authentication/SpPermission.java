@@ -155,7 +155,7 @@ public final class SpPermission {
      * 
      * @return all permission
      */
-    public static Collection<String> getAllAuthorities() {
+    public static List<String> getAllAuthorities() {
         return getAllAuthorities(Collections.emptyList());
     }
 
@@ -166,7 +166,7 @@ public final class SpPermission {
      *            roles which will excluded
      * @return all permissions
      */
-    public static Collection<String> getAllAuthorities(final String... exclusionRoles) {
+    public static List<String> getAllAuthorities(final String... exclusionRoles) {
         return getAllAuthorities(Arrays.asList(exclusionRoles));
     }
 
@@ -177,7 +177,7 @@ public final class SpPermission {
      *            roles which will excluded
      * @return all permissions
      */
-    public static Collection<String> getAllAuthorities(final Collection<String> exclusionRoles) {
+    public static List<String> getAllAuthorities(final Collection<String> exclusionRoles) {
         final List<String> allPermissions = new ArrayList<>();
         final Field[] declaredFields = SpPermission.class.getDeclaredFields();
         for (final Field field : declaredFields) {
@@ -245,12 +245,6 @@ public final class SpPermission {
          * controller is authenticated but only as anonymous.
          */
         public static final String CONTROLLER_ROLE_ANONYMOUS = "ROLE_CONTROLLER_ANONYMOUS";
-
-        /**
-         * The role which contains in the spring security context in case an
-         * controller is authenticated to download artifacts.
-         */
-        public static final String CONTROLLER_DOWNLOAD_ROLE = "ROLE_CONTROLLER_DOWNLOAD";
 
         /**
          * The role which contains the spring security context in case the
@@ -383,14 +377,6 @@ public final class SpPermission {
          */
         public static final String IS_CONTROLLER = "hasAnyRole('" + CONTROLLER_ROLE_ANONYMOUS + "', '" + CONTROLLER_ROLE
                 + "')";
-
-        /**
-         * Spring security eval hasAuthority expression to check if the spring
-         * context contains the role to allow controllers to download specific
-         * role {@link SpringEvalExpressions#CONTROLLER_DOWNLOAD_ROLE}
-         */
-        public static final String HAS_CONTROLLER_DOWNLOAD = HAS_AUTH_PREFIX + CONTROLLER_DOWNLOAD_ROLE
-                + HAS_AUTH_SUFFIX;
 
         /**
          * Spring security eval hasAuthority expression to check if spring

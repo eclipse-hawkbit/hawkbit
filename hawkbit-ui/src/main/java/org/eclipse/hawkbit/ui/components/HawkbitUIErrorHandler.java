@@ -8,16 +8,11 @@
  */
 package org.eclipse.hawkbit.ui.components;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import com.google.common.base.Optional;
 import com.vaadin.server.ClientConnector.ConnectorErrorEvent;
@@ -99,25 +94,17 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
         LOG.error("Error in UI: ", ex);
 
         final String errorMessage = extractMessageFrom(ex);
-
         final VaadinMessageSource i18n = SpringContextHelper.getBean(VaadinMessageSource.class);
-        return new HawkbitErrorNotificationMessage(STYLE, i18n.getMessage("caption.error"),
-                i18n.getMessage("message.error.temp", errorMessage), false);
+
+        return new HawkbitErrorNotificationMessage(STYLE, i18n.getMessage("caption.error"), errorMessage, true);
     }
 
-    private String extractMessageFrom(final Throwable ex) {
+    private static String extractMessageFrom(final Throwable ex) {
 
-        if (!(ex instanceof ConstraintViolation)) {
-            return ex.getClass().getSimpleName();
+        if (!StringUtils.isEmpty(ex.getMessage())) {
+            return ex.getMessage();
         }
 
-        final Set<ConstraintViolation<?>> violations = ((ConstraintViolationException) ex).getConstraintViolations();
-
-        if (violations == null) {
-            return ex.getClass().getSimpleName();
-        }
-
-        return violations.stream().map(violation -> violation.getPropertyPath() + " " + violation.getMessage())
-                .collect(Collectors.joining(System.lineSeparator()));
+        return ex.getClass().getSimpleName();
     }
 }

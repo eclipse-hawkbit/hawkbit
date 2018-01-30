@@ -13,8 +13,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.components.ProxyDistribution;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -67,19 +69,23 @@ public class TargetFilterTable extends Table {
 
     private final DistributionSetSelectWindow dsSelectWindow;
 
+    private final SpPermissionChecker permChecker;
+
     private Container container;
 
     private static final int PROPERTY_DEPT = 3;
 
-    public TargetFilterTable(final VaadinMessageSource i18n, final UINotification notification, final UIEventBus eventBus,
-            final FilterManagementUIState filterManagementUIState,
+    public TargetFilterTable(final VaadinMessageSource i18n, final UINotification notification,
+            final UIEventBus eventBus, final FilterManagementUIState filterManagementUIState,
             final TargetFilterQueryManagement targetFilterQueryManagement, final ManageDistUIState manageDistUIState,
-            final TargetManagement targetManagement) {
+            final TargetManagement targetManagement, final SpPermissionChecker permChecker) {
         this.i18n = i18n;
         this.notification = notification;
         this.eventBus = eventBus;
         this.filterManagementUIState = filterManagementUIState;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
+        this.permChecker = permChecker;
+
         this.dsSelectWindow = new DistributionSetSelectWindow(i18n, eventBus, targetManagement,
                 targetFilterQueryManagement, manageDistUIState);
 
@@ -141,10 +147,14 @@ public class TargetFilterTable extends Table {
     private List<TableColumn> getVisbleColumns() {
         final List<TableColumn> columnList = new ArrayList<>(7);
         columnList.add(new TableColumn(SPUILabelDefinitions.NAME, i18n.getMessage("header.name"), 0.2F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_USER, i18n.getMessage("header.createdBy"), 0.1F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.getMessage("header.createdDate"), 0.2F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_MODIFIED_BY, i18n.getMessage("header.modifiedBy"), 0.1F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_MODIFIED_DATE, i18n.getMessage("header.modifiedDate"), 0.2F));
+        columnList
+                .add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_USER, i18n.getMessage("header.createdBy"), 0.1F));
+        columnList.add(
+                new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.getMessage("header.createdDate"), 0.2F));
+        columnList
+                .add(new TableColumn(SPUILabelDefinitions.VAR_MODIFIED_BY, i18n.getMessage("header.modifiedBy"), 0.1F));
+        columnList.add(
+                new TableColumn(SPUILabelDefinitions.VAR_MODIFIED_DATE, i18n.getMessage("header.modifiedDate"), 0.2F));
         columnList.add(new TableColumn(SPUILabelDefinitions.AUTO_ASSIGN_DISTRIBUTION_SET,
                 i18n.getMessage("header.auto.assignment.ds"), 0.1F));
         columnList.add(new TableColumn(SPUIDefinitions.CUSTOM_FILTER_DELETE, i18n.getMessage("header.delete"), 0.1F));
@@ -175,12 +185,12 @@ public class TargetFilterTable extends Table {
 
     private void onDelete(final ClickEvent event) {
         /* Display the confirmation */
-        final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.getMessage("caption.filter.delete.confirmbox"),
-                i18n.getMessage("message.delete.filter.confirm"), i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
+        final ConfirmationDialog confirmDialog = new ConfirmationDialog(
+                i18n.getMessage("caption.filter.delete.confirmbox"), i18n.getMessage("message.delete.filter.confirm"),
+                i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
                     if (ok) {
                         final Long rowId = (Long) ((Button) event.getComponent()).getData();
-                        final String deletedFilterName = targetFilterQueryManagement.get(rowId)
-                                .get().getName();
+                        final String deletedFilterName = targetFilterQueryManagement.get(rowId).get().getName();
                         targetFilterQueryManagement.delete(rowId);
 
                         /*
@@ -229,10 +239,12 @@ public class TargetFilterTable extends Table {
         Button updateIcon;
         if (distSet == null) {
             updateIcon = SPUIComponentProvider.getButton(buttonId, i18n.getMessage("button.no.auto.assignment"),
-                    i18n.getMessage("button.auto.assignment.desc"), null, false, null, SPUIButtonStyleSmallNoBorder.class);
+                    i18n.getMessage("button.auto.assignment.desc"), null, false, null,
+                    SPUIButtonStyleSmallNoBorder.class);
         } else {
             updateIcon = SPUIComponentProvider.getButton(buttonId, distSet.getNameVersion(),
-                    i18n.getMessage("button.auto.assignment.desc"), null, false, null, SPUIButtonStyleSmallNoBorder.class);
+                    i18n.getMessage("button.auto.assignment.desc"), null, false, null,
+                    SPUIButtonStyleSmallNoBorder.class);
         }
 
         updateIcon.addClickListener(this::onClickOfDistributionSetButton);
@@ -246,7 +258,12 @@ public class TargetFilterTable extends Table {
         final Item item = (Item) ((Button) event.getComponent()).getData();
         final Long tfqId = (Long) item.getItemProperty(SPUILabelDefinitions.VAR_ID).getValue();
 
-        dsSelectWindow.showForTargetFilter(tfqId);
+        if (permChecker.hasReadRepositoryPermission()) {
+            dsSelectWindow.showForTargetFilter(tfqId);
+        } else {
+            notification.displayValidationError(
+                    i18n.getMessage("message.permission.insufficient", SpPermission.READ_REPOSITORY));
+        }
 
     }
 

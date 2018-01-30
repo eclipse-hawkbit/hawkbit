@@ -8,9 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rolloutgrouptargets;
 
-import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -164,15 +162,11 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid<LazyQueryContainer
 
     @Override
     protected void setColumnProperties() {
-        final List<Object> columnList = new ArrayList<>();
-        columnList.add(SPUILabelDefinitions.VAR_NAME);
-        columnList.add(SPUILabelDefinitions.VAR_CREATED_DATE);
-        columnList.add(SPUILabelDefinitions.VAR_CREATED_BY);
-        columnList.add(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE);
-        columnList.add(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY);
-        columnList.add(SPUILabelDefinitions.VAR_STATUS);
-        columnList.add(SPUILabelDefinitions.VAR_DESC);
-        setColumnOrder(columnList.toArray());
+        final Object[] columnsToShowInOrder = new Object[] { SPUILabelDefinitions.VAR_NAME,
+                SPUILabelDefinitions.VAR_CREATED_DATE, SPUILabelDefinitions.VAR_CREATED_BY,
+                SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, SPUILabelDefinitions.VAR_LAST_MODIFIED_BY,
+                SPUILabelDefinitions.VAR_STATUS, SPUILabelDefinitions.VAR_DESC };
+        setColumns(columnsToShowInOrder);
         alignColumns();
     }
 

@@ -145,7 +145,7 @@ public class SoftwareModuleDetailsTable extends Table {
     public void populateModule(final DistributionSet distributionSet) {
         removeAllItems();
         if (distributionSet != null) {
-            if (isUnassignSoftModAllowed && permissionChecker.hasUpdateDistributionPermission()) {
+            if (isUnassignSoftModAllowed && permissionChecker.hasUpdateRepositoryPermission()) {
                 try {
                     isTargetAssigned = false;
                 } catch (final EntityReadOnlyException exception) {
@@ -163,8 +163,13 @@ public class SoftwareModuleDetailsTable extends Table {
             if (!CollectionUtils.isEmpty(swModuleOptionalTypes)) {
                 swModuleOptionalTypes.forEach(swModule -> setSwModuleProperties(swModule, false, distributionSet));
             }
+            setAmountOfTableRows(getContainerDataSource().size());
         }
 
+    }
+
+    private void setAmountOfTableRows(final int amountOfRows) {
+        setPageLength(amountOfRows);
     }
 
     private void setSwModuleProperties(final SoftwareModuleType swModType, final Boolean isMandatory,
@@ -179,7 +184,6 @@ public class SoftwareModuleDetailsTable extends Table {
         saveTblitem.getItemProperty(SOFT_TYPE_MANDATORY).setValue(mandatoryLabel);
         saveTblitem.getItemProperty(SOFT_TYPE_NAME).setValue(typeName);
         saveTblitem.getItemProperty(SOFT_MODULE).setValue(verticalLayout);
-
     }
 
     private void unassignSW(final ClickEvent event, final DistributionSet distributionSet,
@@ -229,7 +233,7 @@ public class SoftwareModuleDetailsTable extends Table {
                 softwareModule.setId(sw.getName() + "-label");
                 horizontalLayout.addComponent(softwareModule);
                 horizontalLayout.setExpandRatio(softwareModule, 1F);
-                if (isUnassignSoftModAllowed && permissionChecker.hasUpdateDistributionPermission() && !isTargetAssigned
+                if (isUnassignSoftModAllowed && permissionChecker.hasUpdateRepositoryPermission() && !isTargetAssigned
                         && (isSoftModAvaiableForSoftType(alreadyAssignedSwModules, swModType))) {
                     horizontalLayout.addComponent(reassignSoftModule);
                 }

@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.util.StringUtils;
 import org.eclipse.hawkbit.HawkbitServerProperties;
 import org.eclipse.hawkbit.im.authentication.PermissionService;
 import org.eclipse.hawkbit.ui.UiProperties;
@@ -28,6 +27,8 @@ import org.eclipse.hawkbit.ui.menu.DashboardEvent.PostViewChangeEvent;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
@@ -58,6 +59,9 @@ import com.vaadin.ui.themes.ValoTheme;
 public final class DashboardMenu extends CustomComponent {
 
     private static final String ID = "dashboard-menu";
+
+    private static final String LOGOUT_BASE = "/UI/logout";
+    private static final String LOGIN_BASE = "/UI/login";
 
     private final VaadinMessageSource i18n;
 
@@ -108,7 +112,7 @@ public final class DashboardMenu extends CustomComponent {
         final VerticalLayout dashboardMenuLayout = new VerticalLayout();
         dashboardMenuLayout.setSizeFull();
         final VerticalLayout menuContent = getMenuLayout();
-        menuContent.addComponent(buildUserMenu());
+        menuContent.addComponent(buildUserMenu(uiProperties));
         menuContent.addComponent(buildToggleButton());
 
         final VerticalLayout menus = buildMenuItems();
@@ -145,7 +149,6 @@ public final class DashboardMenu extends CustomComponent {
             final Link docuLink = SPUIComponentProvider.getLink(UIComponentIdProvider.LINK_DOCUMENTATION,
                     i18n.getMessage("link.documentation.name"), uiProperties.getLinks().getDocumentation().getRoot(),
                     FontAwesome.QUESTION_CIRCLE, "_blank", linkStyle);
-            docuLink.setDescription(i18n.getMessage("link.documentation.name"));
             docuLink.setSizeFull();
             links.addComponent(docuLink);
             links.setComponentAlignment(docuLink, Alignment.BOTTOM_CENTER);
@@ -155,7 +158,6 @@ public final class DashboardMenu extends CustomComponent {
             final Link userManagementLink = SPUIComponentProvider.getLink(UIComponentIdProvider.LINK_USERMANAGEMENT,
                     i18n.getMessage("link.usermanagement.name"), uiProperties.getLinks().getUserManagement(),
                     FontAwesome.USERS, "_blank", linkStyle);
-            userManagementLink.setDescription(i18n.getMessage("link.usermanagement.name"));
             links.addComponent(userManagementLink);
             userManagementLink.setSizeFull();
             links.setComponentAlignment(userManagementLink, Alignment.BOTTOM_CENTER);
@@ -165,7 +167,6 @@ public final class DashboardMenu extends CustomComponent {
             final Link supportLink = SPUIComponentProvider.getLink(UIComponentIdProvider.LINK_SUPPORT,
                     i18n.getMessage("link.support.name"), uiProperties.getLinks().getSupport(), FontAwesome.ENVELOPE_O,
                     "", linkStyle);
-            supportLink.setDescription(i18n.getMessage("link.support.name"));
             supportLink.setSizeFull();
             links.addComponent(supportLink);
             links.setComponentAlignment(supportLink, Alignment.BOTTOM_CENTER);
@@ -180,32 +181,47 @@ public final class DashboardMenu extends CustomComponent {
         return links;
     }
 
-    private static Resource getImage() {
+    private static Resource getImage(final boolean gravatar) {
+        if (!gravatar) {
+            return new ThemeResource("images/profile-pic-57px.jpg");
+        }
+
         return UserDetailsFormatter.getCurrentUserEmail().map(email -> (Resource) new GravatarResource(email))
                 .orElse(new ThemeResource("images/profile-pic-57px.jpg"));
 
     }
 
-    private static Component buildUserMenu() {
+    private Component buildUserMenu(final UiProperties uiProperties) {
         final MenuBar settings = new MenuBar();
         settings.addStyleName("user-menu");
         settings.setHtmlContentAllowed(true);
 
-        final MenuItem settingsItem = settings.addItem("", getImage(), null);
+        final MenuItem settingsItem = settings.addItem("", getImage(uiProperties.isGravatar()), null);
 
         final String formattedTenant = UserDetailsFormatter.formatCurrentTenant();
-        final String formattedUsername = UserDetailsFormatter.formatCurrentUsername();
-        String tenantAndUsernameHtml = "";
         if (!StringUtils.isEmpty(formattedTenant)) {
-            tenantAndUsernameHtml += formattedTenant + "<br>";
+            settingsItem.setText(formattedTenant);
+            UserDetailsFormatter.getCurrentTenant().ifPresent(tenant -> settingsItem.setDescription(i18n
+                    .getMessage("menu.user.description", tenant, UserDetailsFormatter.getCurrentUser().getUsername())));
+        } else {
+            settingsItem.setText("...");
         }
-        tenantAndUsernameHtml += formattedUsername;
-        settingsItem.setText(tenantAndUsernameHtml);
-        settingsItem.setDescription(formattedUsername);
+
         settingsItem.setStyleName("user-menuitem");
 
-        settingsItem.addItem("Sign Out", selectedItem -> Page.getCurrent().setLocation("/UI/logout"));
+        final String logoutUrl = generateLogoutUrl();
+
+        settingsItem.addItem("Sign Out", selectedItem -> Page.getCurrent().setLocation(logoutUrl));
         return settings;
+    }
+
+    private static String generateLogoutUrl() {
+        final UriComponentsBuilder logout = UriComponentsBuilder.fromPath(LOGOUT_BASE);
+
+        UserDetailsFormatter.getCurrentTenant().ifPresent(tenant -> logout.queryParam("login",
+                UriComponentsBuilder.fromPath(LOGIN_BASE).queryParam("tenant", tenant).build().toUriString()));
+
+        return logout.toUriString();
     }
 
     private Component buildToggleButton() {

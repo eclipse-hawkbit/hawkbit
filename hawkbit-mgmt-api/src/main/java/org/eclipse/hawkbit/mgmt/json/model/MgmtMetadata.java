@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * The representation of an meta data in the REST API.
+ * The representation of an meta data in the REST API for POST/Create.
  *
  */
 @JsonInclude(Include.NON_NULL)
@@ -26,32 +26,18 @@ public class MgmtMetadata {
     @JsonProperty
     private String value;
 
-    /**
-     * @return the key
-     */
     public String getKey() {
         return key;
     }
 
-    /**
-     * @param key
-     *            the key to set
-     */
     public void setKey(final String key) {
         this.key = key;
     }
 
-    /**
-     * @return the value
-     */
     public String getValue() {
         return value;
     }
 
-    /**
-     * @param value
-     *            the value to set
-     */
     public void setValue(final String value) {
         this.value = value;
     }

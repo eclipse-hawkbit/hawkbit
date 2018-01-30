@@ -38,7 +38,7 @@ public interface RolloutGroupRepository
      *            the rollout the rolloutgroups belong to
      * @return the rollout groups belonging to a rollout ordered by ID ASC.
      */
-    List<JpaRolloutGroup> findByRolloutOrderByIdAsc(final JpaRollout rollout);
+    List<JpaRolloutGroup> findByRolloutOrderByIdAsc(JpaRollout rollout);
 
     /**
      * Retrieves all {@link RolloutGroup} referring a specific rollout in a
@@ -50,7 +50,7 @@ public interface RolloutGroupRepository
      *            the status of the rollout groups
      * @return the rollout groups belonging to a rollout in a specific status
      */
-    List<JpaRolloutGroup> findByRolloutAndStatus(final Rollout rollout, final RolloutGroupStatus status);
+    List<JpaRolloutGroup> findByRolloutAndStatus(Rollout rollout, RolloutGroupStatus status);
 
     /**
      * Counts all {@link RolloutGroup} referring a specific rollout in specific

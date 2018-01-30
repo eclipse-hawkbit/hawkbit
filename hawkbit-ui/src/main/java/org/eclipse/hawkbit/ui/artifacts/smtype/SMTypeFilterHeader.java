@@ -43,14 +43,14 @@ public class SMTypeFilterHeader extends AbstractFilterHeader {
         this.createUpdateSWTypeLayout = new CreateUpdateSoftwareTypeLayout(i18n, entityFactory, eventBus, permChecker,
                 uiNotification, softwareModuletypeManagement);
 
-        if (permChecker.hasCreateDistributionPermission() || permChecker.hasUpdateDistributionPermission()) {
+        if (permChecker.hasCreateRepositoryPermission() || permChecker.hasUpdateRepositoryPermission()) {
             createUpdateSWTypeLayout.init();
         }
     }
 
     @Override
     protected boolean hasCreateUpdatePermission() {
-        return permChecker.hasCreateDistributionPermission() || permChecker.hasUpdateDistributionPermission();
+        return permChecker.hasCreateRepositoryPermission() || permChecker.hasUpdateRepositoryPermission();
     }
 
     @Override

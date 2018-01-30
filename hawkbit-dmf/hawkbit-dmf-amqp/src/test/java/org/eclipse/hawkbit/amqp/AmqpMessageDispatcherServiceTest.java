@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
+import org.eclipse.hawkbit.dmf.json.model.DmfMetadata;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
@@ -46,6 +47,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
+import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -108,28 +110,14 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         when(systemManagement.getTenantMetadata()).thenReturn(tenantMetaData);
 
         amqpMessageDispatcherService = new AmqpMessageDispatcherService(rabbitTemplate, senderService,
-                artifactUrlHandlerMock, systemSecurityContext, systemManagement, targetManagement, serviceMatcher);
+                artifactUrlHandlerMock, systemSecurityContext, systemManagement, targetManagement, serviceMatcher,
+                distributionSetManagement, softwareModuleManagement);
 
-    }
-
-    @Test
-    @Description("Verifies that download and install event with no software modul works")
-    public void testSendDownloadRequesWithEmptySoftwareModules() {
-
-        final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
-                "DEFAULT", 1L, 1L, CONTROLLER_ID, serviceMatcher.getServiceId());
-        amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
-
-        final Message sendMessage = getCaptureAdressEvent(targetAssignDistributionSetEvent);
-        final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage, 1L);
-        assertThat(downloadAndUpdateRequest.getTargetSecurityToken()).isEqualTo(TEST_TOKEN);
-        assertTrue("No softwaremmodule should be contained in the request",
-                downloadAndUpdateRequest.getSoftwareModules().isEmpty());
     }
 
     private Message getCaptureAdressEvent(final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
-        final Target target = targetManagement.getByControllerID(targetAssignDistributionSetEvent.getControllerId())
-                .get();
+        final Target target = targetManagement
+                .getByControllerID(targetAssignDistributionSetEvent.getActions().keySet().iterator().next()).get();
         final Message sendMessage = createArgumentCapture(target.getAddress());
         return sendMessage;
     }
@@ -143,6 +131,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     public void testSendDownloadRequesWithSoftwareModulesAndNoArtifacts() {
         final DistributionSet createDistributionSet = testdataFactory
                 .createDistributionSet(UUID.randomUUID().toString());
+        testdataFactory.addSoftwareModuleMetadata(createDistributionSet);
+
         final Action action = createAction(createDistributionSet);
 
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
@@ -156,6 +146,10 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         for (final org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule softwareModule : downloadAndUpdateRequest
                 .getSoftwareModules()) {
             assertTrue("Artifact list for softwaremodule should be empty", softwareModule.getArtifacts().isEmpty());
+
+            assertThat(softwareModule.getMetadata()).containsExactly(
+                    new DmfMetadata(TestdataFactory.VISIBLE_SM_MD_KEY, TestdataFactory.VISIBLE_SM_MD_VALUE));
+
             for (final SoftwareModule softwareModule2 : action.getDistributionSet().getModules()) {
                 assertNotNull("Sofware module ID should be set", softwareModule.getModuleId());
                 if (!softwareModule.getModuleId().equals(softwareModule2.getId())) {

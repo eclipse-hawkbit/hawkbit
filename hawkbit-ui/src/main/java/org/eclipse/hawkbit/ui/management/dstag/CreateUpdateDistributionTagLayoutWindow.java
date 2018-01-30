@@ -191,15 +191,15 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     @Override
     protected void createRequiredComponents() {
         super.createRequiredComponents();
-        createOptionGroup(permChecker.hasCreateDistributionPermission(), permChecker.hasUpdateDistributionPermission());
+        createOptionGroup(permChecker.hasCreateRepositoryPermission(), permChecker.hasUpdateRepositoryPermission());
     }
 
     @Override
     protected void reset() {
 
         super.reset();
-        setOptionGroupDefaultValue(permChecker.hasCreateDistributionPermission(),
-                permChecker.hasUpdateDistributionPermission());
+        setOptionGroupDefaultValue(permChecker.hasCreateRepositoryPermission(),
+                permChecker.hasUpdateRepositoryPermission());
     }
 
     @Override

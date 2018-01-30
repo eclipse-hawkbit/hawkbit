@@ -34,7 +34,7 @@ public class HttpControllerPreAuthenticatedGatewaySecurityTokenFilter
      *            the tenant aware service to get configuration for the specific
      *            tenant
      * @param systemSecurityContext
-     *            * @param systemSecurityContext the system security context
+     *            the system security context
      */
     public HttpControllerPreAuthenticatedGatewaySecurityTokenFilter(
             final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
@@ -43,7 +43,7 @@ public class HttpControllerPreAuthenticatedGatewaySecurityTokenFilter
     }
 
     @Override
-    protected PreAuthentificationFilter createControllerAuthenticationFilter() {
+    protected PreAuthenticationFilter createControllerAuthenticationFilter() {
         return new ControllerPreAuthenticatedGatewaySecurityTokenFilter(tenantConfigurationManagement, tenantAware,
                 systemSecurityContext);
     }

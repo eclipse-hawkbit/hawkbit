@@ -24,7 +24,12 @@ public enum SoftwareModuleMetadataFields implements FieldNameProvider {
     /**
      * The key field.
      */
-    KEY("key");
+    KEY("key"),
+
+    /**
+     * The target visible field.
+     */
+    TARGETVISIBLE("targetVisible");
 
     private final String fieldName;
 

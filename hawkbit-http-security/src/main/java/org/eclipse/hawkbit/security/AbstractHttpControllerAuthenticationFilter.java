@@ -21,9 +21,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken;
-import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.security.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +65,7 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
 
     private final AntPathMatcher pathExtractor;
 
-    private PreAuthentificationFilter abstractControllerAuthenticationFilter;
+    private PreAuthenticationFilter abstractControllerAuthenticationFilter;
 
     /**
      * Constructor for sub-classes.
@@ -109,7 +108,7 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
         }
     }
 
-    protected abstract PreAuthentificationFilter createControllerAuthenticationFilter();
+    protected abstract PreAuthenticationFilter createControllerAuthenticationFilter();
 
     @Override
     protected void successfulAuthentication(final HttpServletRequest request, final HttpServletResponse response,

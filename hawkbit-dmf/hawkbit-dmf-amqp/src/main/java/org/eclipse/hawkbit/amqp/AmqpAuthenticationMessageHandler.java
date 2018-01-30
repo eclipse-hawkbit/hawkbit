@@ -13,20 +13,18 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.eclipse.hawkbit.api.HostnameResolver;
-import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.eclipse.hawkbit.cache.DownloadArtifactCache;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.cache.DownloadType;
 import org.eclipse.hawkbit.dmf.json.model.DmfArtifact;
 import org.eclipse.hawkbit.dmf.json.model.DmfArtifactHash;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadResponse;
-import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken;
-import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
+import org.eclipse.hawkbit.security.DmfTenantSecurityToken;
+import org.eclipse.hawkbit.security.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -188,55 +186,54 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
         return Optional.empty();
     }
 
-    private static DmfArtifact convertDbArtifact(final AbstractDbArtifact dbArtifact) {
+    private static DmfArtifact convertDbArtifact(final Artifact dbArtifact) {
         final DmfArtifact artifact = new DmfArtifact();
         artifact.setSize(dbArtifact.getSize());
-        artifact.setLastModified(dbArtifact.getLastModified());
-        final DbArtifactHash dbArtifactHash = dbArtifact.getHashes();
-        artifact.setHashes(new DmfArtifactHash(dbArtifactHash.getSha1(), dbArtifactHash.getMd5()));
+        artifact.setLastModified(dbArtifact.getCreatedAt());
+        artifact.setHashes(new DmfArtifactHash(dbArtifact.getSha1Hash(), dbArtifact.getMd5Hash()));
         return artifact;
     }
 
     private Message handleAuthenticationMessage(final Message message) {
-        final DmfDownloadResponse authentificationResponse = new DmfDownloadResponse();
+        final DmfDownloadResponse authenticationResponse = new DmfDownloadResponse();
         final DmfTenantSecurityToken secruityToken = convertMessage(message, DmfTenantSecurityToken.class);
         final FileResource fileResource = secruityToken.getFileResource();
         try {
             SecurityContextHolder.getContext().setAuthentication(authenticationManager.doAuthenticate(secruityToken));
 
-            final String sha1Hash = findArtifactByFileResource(fileResource).map(Artifact::getSha1Hash)
+            final Artifact artifact = findArtifactByFileResource(fileResource)
                     .orElseThrow(EntityNotFoundException::new);
 
-            checkIfArtifactIsAssignedToTarget(secruityToken, sha1Hash);
+            checkIfArtifactIsAssignedToTarget(secruityToken, artifact.getSha1Hash());
 
-            final DmfArtifact artifact = convertDbArtifact(artifactManagement.loadArtifactBinary(sha1Hash)
-                    .orElseThrow(() -> new EntityNotFoundException(Artifact.class, sha1Hash)));
+            final DmfArtifact dmfArtifact = convertDbArtifact(artifact);
 
-            authentificationResponse.setArtifact(artifact);
+            authenticationResponse.setArtifact(dmfArtifact);
             final String downloadId = UUID.randomUUID().toString();
             // SHA1 key is set, download by SHA1
-            final DownloadArtifactCache downloadCache = new DownloadArtifactCache(DownloadType.BY_SHA1, sha1Hash);
+            final DownloadArtifactCache downloadCache = new DownloadArtifactCache(DownloadType.BY_SHA1,
+                    artifact.getSha1Hash());
             cache.put(downloadId, downloadCache);
-            authentificationResponse.setDownloadUrl(UriComponentsBuilder
+            authenticationResponse.setDownloadUrl(UriComponentsBuilder
                     .fromUri(hostnameResolver.resolveHostname().toURI()).path("/api/v1/downloadserver/downloadId/")
                     .path(tenantAware.getCurrentTenant()).path("/").path(downloadId).build().toUriString());
-            authentificationResponse.setResponseCode(HttpStatus.OK.value());
+            authenticationResponse.setResponseCode(HttpStatus.OK.value());
         } catch (final BadCredentialsException | AuthenticationServiceException | CredentialsExpiredException e) {
             LOG.error("Login failed", e);
-            authentificationResponse.setResponseCode(HttpStatus.FORBIDDEN.value());
-            authentificationResponse.setMessage("Login failed");
+            authenticationResponse.setResponseCode(HttpStatus.FORBIDDEN.value());
+            authenticationResponse.setMessage("Login failed");
         } catch (final URISyntaxException e) {
             LOG.error("URI build exception", e);
-            authentificationResponse.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            authentificationResponse.setMessage("Building download URI failed");
+            authenticationResponse.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            authenticationResponse.setMessage("Building download URI failed");
         } catch (final EntityNotFoundException e) {
             final String errorMessage = "Artifact for resource " + fileResource + "not found ";
             LOG.warn(errorMessage, e);
-            authentificationResponse.setResponseCode(HttpStatus.NOT_FOUND.value());
-            authentificationResponse.setMessage(errorMessage);
+            authenticationResponse.setResponseCode(HttpStatus.NOT_FOUND.value());
+            authenticationResponse.setMessage(errorMessage);
         }
 
-        return getMessageConverter().toMessage(authentificationResponse, message.getMessageProperties());
+        return getMessageConverter().toMessage(authenticationResponse, message.getMessageProperties());
     }
 
 }

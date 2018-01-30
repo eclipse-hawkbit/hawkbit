@@ -39,7 +39,7 @@ public class HttpControllerPreAuthenticateAnonymousDownloadFilter extends Abstra
     }
 
     @Override
-    protected PreAuthentificationFilter createControllerAuthenticationFilter() {
+    protected PreAuthenticationFilter createControllerAuthenticationFilter() {
         return new ControllerPreAuthenticatedAnonymousDownload(tenantConfigurationManagement, tenantAware,
                 systemSecurityContext);
     }

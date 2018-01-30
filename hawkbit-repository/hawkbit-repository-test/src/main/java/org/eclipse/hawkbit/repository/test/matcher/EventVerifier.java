@@ -132,8 +132,7 @@ public class EventVerifier extends AbstractTestExecutionListener {
             }
 
             if (event instanceof TargetAssignDistributionSetEvent) {
-                assertThat(((TargetAssignDistributionSetEvent) event).getActionId()).isNotNull();
-                assertThat(((TargetAssignDistributionSetEvent) event).getControllerId()).isNotEmpty();
+                assertThat(((TargetAssignDistributionSetEvent) event).getActions()).isNotEmpty();
                 assertThat(((TargetAssignDistributionSetEvent) event).getDistributionSetId()).isNotNull();
             }
 

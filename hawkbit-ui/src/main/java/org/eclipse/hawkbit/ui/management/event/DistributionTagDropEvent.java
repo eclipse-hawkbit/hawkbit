@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.management.event;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -109,9 +110,10 @@ public class DistributionTagDropEvent implements DropHandler {
     }
 
     private boolean checkForDSUpdatePermission() {
-        if (!permChecker.hasUpdateDistributionPermission()) {
+        if (!permChecker.hasUpdateRepositoryPermission()) {
 
-            notification.displayValidationError(i18n.getMessage("message.permission.insufficient"));
+            notification.displayValidationError(
+                    i18n.getMessage("message.permission.insufficient", SpPermission.UPDATE_REPOSITORY));
             return false;
         }
 

@@ -92,7 +92,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected boolean hasDeletePermission() {
-        return permChecker.hasDeleteDistributionPermission();
+        return permChecker.hasDeleteRepositoryPermission();
     }
 
     @Override

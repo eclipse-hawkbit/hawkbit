@@ -18,8 +18,6 @@ import org.eclipse.hawkbit.amqp.AmqpProperties;
 import org.eclipse.hawkbit.amqp.DmfApiConfiguration;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadResponse;
-import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken;
-import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.rabbitmq.test.AbstractAmqpIntegrationTest;
 import org.eclipse.hawkbit.rabbitmq.test.AmqpTestConfiguration;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
@@ -28,6 +26,8 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
+import org.eclipse.hawkbit.security.DmfTenantSecurityToken;
+import org.eclipse.hawkbit.security.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.Before;
 import org.junit.Test;
@@ -92,7 +92,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     @Test
     @Description("Target in the message is null.This message is invalid and should not requeued. Additional the receive message is null")
     public void securityTokenFileResourceIsNull() {
-        enableAnonymousAuthentification();
+        enableAnonymousAuthentication();
         final DmfTenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET, null);
         final Message returnMessage = sendAndReceiveAuthenticationMessage(securityToken);
         verifyResult(returnMessage, HttpStatus.NOT_FOUND, null);
@@ -114,7 +114,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     @Test
     @Description("Verify that the receive message contains a 404 code,if the artifact could not found")
     public void fileResourceGetSha1InSecurityTokenIsNull() {
-        enableAnonymousAuthentification();
+        enableAnonymousAuthentication();
         final DmfTenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
                 FileResource.createFileResourceBySha1(null));
 
@@ -143,7 +143,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     @Test
     @Description("Verify that the receive message contains a 404 code, if there is no artifact for the given sha1")
     public void artifactForFileResourceSHA1NotFound() {
-        enableAnonymousAuthentification();
+        enableAnonymousAuthentication();
         final DmfTenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
                 FileResource.createFileResourceBySha1(TARGET_SECRUITY_TOKEN));
 
@@ -156,7 +156,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     @Test
     @Description("Verify that the receive message contains a 404 code, if there is no existing target for the given controller id")
     public void artifactForFileResourceSHA1FoundTargetNotExists() {
-        enableAnonymousAuthentification();
+        enableAnonymousAuthentication();
         final DistributionSet distributionSet = createDistributionSet();
         final List<Artifact> artifacts = createArtifacts(distributionSet);
         final String sha1Hash = artifacts.get(0).getSha1Hash();
@@ -226,7 +226,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     @Test
     @Description("Verify that the receive message contains a 200 code and a artifact without a controller id (anonymous enabled)")
     public void anonymousAuthentification() {
-        enableAnonymousAuthentification();
+        enableAnonymousAuthentication();
         final DistributionSet distributionSet = createDistributionSet();
         final List<Artifact> artifacts = createArtifacts(distributionSet);
         final Artifact artifact = artifacts.get(0);
@@ -260,7 +260,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     @Test
     @Description("Verify that the receive message contains a 404, if there is no artifact to the given filename")
     public void artifactForFileResourceFileNameNotFound() {
-        enableAnonymousAuthentification();
+        enableAnonymousAuthentication();
         final DmfTenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
                 FileResource.createFileResourceByFilename("Test.txt"));
 
@@ -289,7 +289,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     @Test
     @Description("Verify that the receive message contains a 404, if there is no exisiting target")
     public void artifactForFileResourceArtifactIdFoundTargetNotExists() {
-        enableAnonymousAuthentification();
+        enableAnonymousAuthentication();
         final DistributionSet distributionSet = createDistributionSet();
         final List<Artifact> artifacts = createArtifacts(distributionSet);
         final FileResource fileResource = FileResource.createFileResourceByArtifactId(artifacts.get(0).getId());
@@ -323,7 +323,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     @Test
     @Description("Verify that the receive message contains a 404, if there is no artifact to the given softwareModuleFilename")
     public void artifactForFileResourceSoftwareModuleFilenameNotFound() {
-        enableAnonymousAuthentification();
+        enableAnonymousAuthentication();
         final DmfTenantSecurityToken securityToken = createTenantSecurityToken(TENANT_EXIST, TARGET,
                 FileResource.softwareModuleFilename(1L, "Test.txt"));
 
@@ -336,7 +336,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     @Test
     @Description("Verify that the receive message contains a 404, if there is no existing target for the file resource")
     public void artifactForFileResourceSoftwareModuleFilenameFoundTargetNotExists() {
-        enableAnonymousAuthentification();
+        enableAnonymousAuthentication();
         final DistributionSet distributionSet = createDistributionSet();
         final List<Artifact> artifacts = createArtifacts(distributionSet);
 
@@ -386,7 +386,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
 
     }
 
-    private void enableAnonymousAuthentification() {
+    private void enableAnonymousAuthentication() {
         tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED,
                 true);
         tenantConfigurationManagement.addOrUpdateConfiguration(

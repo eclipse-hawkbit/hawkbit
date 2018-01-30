@@ -237,7 +237,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Description("Test verifies that an assignment with automatic cancelation works correctly even if the update is split into multiple partitions on the database.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = Constants.MAX_ENTRIES_IN_STATEMENT + 10),
             @Expect(type = TargetUpdatedEvent.class, count = 2 * (Constants.MAX_ENTRIES_IN_STATEMENT + 10)),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = Constants.MAX_ENTRIES_IN_STATEMENT + 10),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 2 * (Constants.MAX_ENTRIES_IN_STATEMENT + 10)),
             @Expect(type = CancelTargetAssignmentEvent.class, count = Constants.MAX_ENTRIES_IN_STATEMENT + 10),
             @Expect(type = ActionUpdatedEvent.class, count = Constants.MAX_ENTRIES_IN_STATEMENT + 10),
@@ -437,7 +437,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetUpdatedEvent.class, count = 20), @Expect(type = ActionCreatedEvent.class, count = 20),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 10) })
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1) })
     public void assignedDistributionSet() {
         final List<String> controllerIds = testdataFactory.createTargets(10).stream().map(Target::getControllerId)
                 .collect(Collectors.toList());
@@ -468,7 +468,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = ActionUpdatedEvent.class, count = 10),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 20) })
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 2) })
     public void assigneDistributionSetAndAutoCloseActiveActions() {
         tenantConfigurationManagement
                 .addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, true);
@@ -517,7 +517,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Simple deployment or distribution set to target assignment test.")
     public void assignDistributionSet2Targets() throws InterruptedException {
-        eventHandlerStub.setExpectedNumberOfEvents(20);
+        eventHandlerStub.setExpectedNumberOfEvents(1);
 
         final String myCtrlIDPref = "myCtrlID";
         final Iterable<Target> savedNakedTargets = testdataFactory.createTargets(10, myCtrlIDPref, "first description");
@@ -595,7 +595,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet nowComplete = distributionSetManagement.assignSoftwareModules(incomplete.getId(),
                 Sets.newHashSet(os.getId()));
 
-        eventHandlerStub.setExpectedNumberOfEvents(10);
+        eventHandlerStub.setExpectedNumberOfEvents(1);
 
         assertThat(assignDistributionSet(nowComplete, targets).getAssigned()).as("assign ds doesn't work")
                 .isEqualTo(10);
@@ -606,6 +606,14 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Multiple deployments or distribution set to target assignment test. Expected behaviour is that a new deployment "
             + "overides unfinished old one which are canceled as part of the operation.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 5 + 4),
+            @Expect(type = TargetUpdatedEvent.class, count = 3 * 4),
+            @Expect(type = ActionCreatedEvent.class, count = 3 * 4),
+            @Expect(type = ActionUpdatedEvent.class, count = 4 * 2),
+            @Expect(type = CancelTargetAssignmentEvent.class, count = 4 * 2),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 3),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 9),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1) })
     public void mutipleDeployments() throws InterruptedException {
         final String undeployedTargetPrefix = "undep-T";
         final int noOfUndeployedTargets = 5;
@@ -615,8 +623,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         final int noOfDistributionSets = 3;
 
-        // Each of the four targets get one assignment (4 * 1 = 4)
-        final int expectedNumberOfEventsForAssignment = 4;
+        // One assigment per DS
+        final int expectedNumberOfEventsForAssignment = 1;
         eventHandlerStub.setExpectedNumberOfEvents(expectedNumberOfEventsForAssignment);
 
         // Each of the four targets get two more assignment the which are
@@ -641,10 +649,10 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // only records retrieved from the DB can be evaluated to be sure that
         // all fields are
         // populated;
-        final Iterable<JpaTarget> allFoundTargets = targetRepository.findAll();
+        final List<JpaTarget> allFoundTargets = targetRepository.findAll();
 
-        final Iterable<JpaTarget> deployedTargetsFromDB = targetRepository.findAll(deployedTargetIDs);
-        final Iterable<JpaTarget> undeployedTargetsFromDB = targetRepository.findAll(undeployedTargetIDs);
+        final List<JpaTarget> deployedTargetsFromDB = targetRepository.findAll(deployedTargetIDs);
+        final List<JpaTarget> undeployedTargetsFromDB = targetRepository.findAll(undeployedTargetIDs);
 
         // test that number of Targets
         assertThat(allFoundTargets.spliterator().getExactSizeIfKnown()).as("number of target is wrong")
@@ -1029,33 +1037,23 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             deployedTargets = assignDistributionSet(ds, deployedTargets).getAssignedEntity();
         }
 
-        final DeploymentResult deploymentResult = new DeploymentResult(deployedTargets, nakedTargets, dsList,
-                deployedTargetPrefix, undeployedTargetPrefix, distributionSetPrefix);
-        return deploymentResult;
+        return new DeploymentResult(deployedTargets, nakedTargets, dsList, deployedTargetPrefix, undeployedTargetPrefix,
+                distributionSetPrefix);
 
     }
 
     private void assertTargetAssignDistributionSetEvents(final List<Target> targets, final DistributionSet ds,
             final List<TargetAssignDistributionSetEvent> events) {
-        assertThat(events).isNotEmpty();
-        for (final Target myt : targets) {
-            boolean found = false;
-            for (final TargetAssignDistributionSetEvent event : events) {
-                if (event.getControllerId().equals(myt.getControllerId())) {
-                    found = true;
-                    final List<Action> activeActionsByTarget = deploymentManagement
-                            .findActiveActionsByTarget(PAGE, myt.getControllerId()).getContent();
-                    assertThat(activeActionsByTarget).as("size of active actions for target is wrong").isNotEmpty();
-                    assertThat(event.getActionId()).as("Action id in database and event do not match")
-                            .isEqualTo(activeActionsByTarget.get(0).getId());
+        assertThat(events).hasSize(1);
+        final TargetAssignDistributionSetEvent event = events.get(0);
+        assertThat(event).isNotNull();
+        assertThat(event.getDistributionSetId()).isEqualTo(ds.getId());
 
-                    assertThat(distributionSetManagement.get(event.getDistributionSetId()).get().getModules())
-                            .as("softwaremodule size is not correct")
-                            .containsOnly(ds.getModules().toArray(new SoftwareModule[ds.getModules().size()]));
-                }
-            }
-            assertThat(found).as("No event found for controller " + myt.getControllerId()).isTrue();
-        }
+        assertThat(event.getActions()).isEqualTo(targets.stream()
+                .map(target -> deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId())
+                        .getContent())
+                .flatMap(List::stream)
+                .collect(Collectors.toMap(action -> action.getTarget().getControllerId(), Action::getId)));
     }
 
     private class DeploymentResult {

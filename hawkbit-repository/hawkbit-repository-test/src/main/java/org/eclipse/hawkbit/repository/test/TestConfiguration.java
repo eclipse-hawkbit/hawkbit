@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.test;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.hawkbit.ControllerPollProperties;
 import org.eclipse.hawkbit.HawkbitServerProperties;
@@ -60,8 +61,11 @@ import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
+import org.springframework.security.concurrent.DelegatingSecurityContextScheduledExecutorService;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.util.AntPathMatcher;
+
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 /**
  * Spring context configuration required for Dev.Environment.
@@ -184,6 +188,12 @@ public class TestConfiguration implements AsyncConfigurer {
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return new SimpleAsyncUncaughtExceptionHandler();
+    }
+
+    @Bean
+    public ScheduledExecutorService scheduledExecutorService() {
+        return new DelegatingSecurityContextScheduledExecutorService(Executors.newScheduledThreadPool(1,
+                new ThreadFactoryBuilder().setNameFormat("central-scheduled-executor-pool-%d").build()));
     }
 
     /**

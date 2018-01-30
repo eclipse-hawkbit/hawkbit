@@ -12,7 +12,6 @@ import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.tagdetails.DistributionTagToken;
@@ -45,7 +44,7 @@ public abstract class AbstractDistributionSetDetails
 
     private final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout;
 
-    private final DistributionSetMetadatadetailsLayout dsMetadataTable;
+    private final DistributionSetMetadataDetailsLayout dsMetadataTable;
 
     private final UINotification uiNotification;
 
@@ -63,8 +62,8 @@ public abstract class AbstractDistributionSetDetails
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState,
             final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout,
             final DistributionSetManagement distributionSetManagement,
-            final DsMetadataPopupLayout dsMetadataPopupLayout, final EntityFactory entityFactory,
-            final UINotification uiNotification, final DistributionSetTagManagement distributionSetTagManagement,
+            final DsMetadataPopupLayout dsMetadataPopupLayout, final UINotification uiNotification,
+            final DistributionSetTagManagement distributionSetTagManagement,
             final SoftwareModuleDetailsTable softwareModuleDetailsTable) {
         super(i18n, eventBus, permissionChecker, managementUIState);
         this.distributionAddUpdateWindowLayout = distributionAddUpdateWindowLayout;
@@ -75,8 +74,8 @@ public abstract class AbstractDistributionSetDetails
                 managementUIState, distributionSetTagManagement, distributionSetManagement);
         this.softwareModuleDetailsTable = softwareModuleDetailsTable;
 
-        dsMetadataTable = new DistributionSetMetadatadetailsLayout(i18n, permissionChecker, distributionSetManagement,
-                dsMetadataPopupLayout, entityFactory, uiNotification);
+        dsMetadataTable = new DistributionSetMetadataDetailsLayout(i18n, distributionSetManagement,
+                dsMetadataPopupLayout);
         createSoftwareModuleTab();
         addDetailsTab();
     }
@@ -106,7 +105,7 @@ public abstract class AbstractDistributionSetDetails
 
     @Override
     protected boolean hasEditPermission() {
-        return getPermissionChecker().hasUpdateDistributionPermission();
+        return getPermissionChecker().hasUpdateRepositoryPermission();
     }
 
     @Override
@@ -131,8 +130,7 @@ public abstract class AbstractDistributionSetDetails
 
     @Override
     protected void showMetadata(final ClickEvent event) {
-        final Optional<DistributionSet> ds = distributionSetManagement
-                .get(getSelectedBaseEntityId());
+        final Optional<DistributionSet> ds = distributionSetManagement.get(getSelectedBaseEntityId());
         if (!ds.isPresent()) {
             uiNotification.displayWarning(getI18n().getMessage("distributionset.not.exists"));
             return;
@@ -173,7 +171,7 @@ public abstract class AbstractDistributionSetDetails
         detailsTabLayout.removeAllComponents();
 
         final Label typeLabel = SPUIComponentProvider
-                .createNameValueLabel(getI18n().getMessage("label.dist.details.type"), type);
+                .createNameValueLabel(getI18n().getMessage("label.dist.details.type"), type == null ? "" : type);
         typeLabel.setId(UIComponentIdProvider.DETAILS_TYPE_LABEL_ID);
         detailsTabLayout.addComponent(typeLabel);
 
@@ -184,7 +182,7 @@ public abstract class AbstractDistributionSetDetails
 
     private String getMigrationRequiredValue(final Boolean isMigrationRequired) {
         if (isMigrationRequired == null) {
-            return null;
+            return "";
         }
         return isMigrationRequired.equals(Boolean.TRUE) ? getI18n().getMessage("label.yes")
                 : getI18n().getMessage("label.no");

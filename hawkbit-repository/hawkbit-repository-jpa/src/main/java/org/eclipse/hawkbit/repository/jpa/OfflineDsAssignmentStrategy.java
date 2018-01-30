@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.springframework.context.ApplicationContext;
@@ -48,8 +49,8 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    void sendAssignmentEvents(final List<JpaTarget> targets, final Set<Long> targetIdsCancellList,
-            final Map<String, JpaAction> targetIdsToActions) {
+    void sendAssignmentEvents(final DistributionSet set, final List<JpaTarget> targets,
+            final Set<Long> targetIdsCancellList, final Map<String, JpaAction> targetIdsToActions) {
 
         targets.forEach(target -> {
             target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);

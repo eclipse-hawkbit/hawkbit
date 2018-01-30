@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
@@ -150,12 +151,12 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected boolean hasDeletePermission() {
-        return permChecker.hasDeleteDistributionPermission() || permChecker.hasDeleteTargetPermission();
+        return permChecker.hasDeleteRepositoryPermission() || permChecker.hasDeleteTargetPermission();
     }
 
     @Override
     protected boolean hasUpdatePermission() {
-        return permChecker.hasUpdateTargetPermission() && permChecker.hasReadDistributionPermission();
+        return permChecker.hasUpdateTargetPermission() && permChecker.hasReadRepositoryPermission();
     }
 
     @Override
@@ -379,15 +380,17 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private Boolean canTargetBeDeleted() {
         if (!permChecker.hasDeleteTargetPermission()) {
-            notification.displayValidationError(i18n.getMessage("message.permission.insufficient"));
+            notification.displayValidationError(
+                    i18n.getMessage("message.permission.insufficient", SpPermission.DELETE_TARGET));
             return false;
         }
         return true;
     }
 
     private Boolean canDSBeDeleted() {
-        if (!permChecker.hasDeleteDistributionPermission()) {
-            notification.displayValidationError(i18n.getMessage("message.permission.insufficient"));
+        if (!permChecker.hasDeleteRepositoryPermission()) {
+            notification.displayValidationError(
+                    i18n.getMessage("message.permission.insufficient", SpPermission.DELETE_REPOSITORY));
             return false;
         }
         return true;

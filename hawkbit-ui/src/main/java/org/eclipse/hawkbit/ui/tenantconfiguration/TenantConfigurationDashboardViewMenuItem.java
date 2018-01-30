@@ -13,6 +13,8 @@ import java.util.List;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.ui.management.AbstractDashboardMenuItemNotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 
 import com.vaadin.server.FontAwesome;
@@ -28,7 +30,12 @@ import com.vaadin.spring.annotation.UIScope;
 @Order(700)
 public class TenantConfigurationDashboardViewMenuItem extends AbstractDashboardMenuItemNotification {
 
-    private static final long serialVersionUID = 348659206461499664L;
+    private static final long serialVersionUID = 1L;
+
+    @Autowired
+    TenantConfigurationDashboardViewMenuItem(final VaadinMessageSource i18n) {
+        super(i18n);
+    }
 
     @Override
     public String getViewName() {
@@ -42,12 +49,12 @@ public class TenantConfigurationDashboardViewMenuItem extends AbstractDashboardM
 
     @Override
     public String getDashboardCaption() {
-        return "System Config";
+        return getI18n().getMessage("dashboard.tenantconfig.caption");
     }
 
     @Override
     public String getDashboardCaptionLong() {
-        return "System Configuration";
+        return getI18n().getMessage("dashboard.tenantconfig.caption-long");
     }
 
     @Override

@@ -13,28 +13,35 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
-import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.AbstractMetadataPopupLayout;
-import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
-import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent.MetadataUIEvent;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.PageRequest;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
+import com.vaadin.data.Item;
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.VerticalLayout;
+
 /**
  * Pop up layout to display software module metadata.
  */
-public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareModule, MetaData> {
+public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareModule, SoftwareModuleMetadata> {
 
-    private static final long serialVersionUID = -1252090014161012563L;
+    private static final long serialVersionUID = 1L;
+
+    protected static final String TARGET_VISIBLE = "targetVisible";
 
     private final transient SoftwareModuleManagement softwareModuleManagement;
 
     private final transient EntityFactory entityFactory;
+    private CheckBox targetVisibleField;
 
     public SwMetadataPopupLayout(final VaadinMessageSource i18n, final UINotification uiNotification,
             final UIEventBus eventBus, final SoftwareModuleManagement softwareManagement,
@@ -49,52 +56,135 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
         return softwareModuleManagement.getMetaDataBySoftwareModuleId(entity.getId(), value).isPresent();
     }
 
-    /**
-     * Create metadata for SWModule.
-     */
     @Override
     protected SoftwareModuleMetadata createMetadata(final SoftwareModule entity, final String key, final String value) {
-        final SoftwareModuleMetadata swMetadata = softwareModuleManagement.createMetaData(entity.getId(),
-                entityFactory.generateMetadata(key, value));
+        final SoftwareModuleMetadata swMetadata = softwareModuleManagement
+                .createMetaData(entityFactory.softwareModuleMetadata().create(entity.getId()).key(key).value(value)
+                        .targetVisible(targetVisibleField.getValue()));
         setSelectedEntity(swMetadata.getSoftwareModule());
-        eventBus.publish(this, new MetadataEvent(MetadataUIEvent.CREATE_SOFTWARE_MODULE_METADATA, swMetadata, entity));
         return swMetadata;
     }
 
-    /**
-     * Update metadata for SWModule.
-     */
     @Override
     protected SoftwareModuleMetadata updateMetadata(final SoftwareModule entity, final String key, final String value) {
-        final SoftwareModuleMetadata swMetadata = softwareModuleManagement.updateMetaData(entity.getId(),
-                entityFactory.generateMetadata(key, value));
+        final SoftwareModuleMetadata swMetadata = softwareModuleManagement
+                .updateMetaData(entityFactory.softwareModuleMetadata().update(entity.getId(), key).value(value)
+                        .targetVisible(targetVisibleField.getValue()));
         setSelectedEntity(swMetadata.getSoftwareModule());
         return swMetadata;
     }
 
     @Override
-    protected List<MetaData> getMetadataList() {
+    protected List<SoftwareModuleMetadata> getMetadataList() {
         return Collections.unmodifiableList(softwareModuleManagement
-                .findMetaDataBySoftwareModuleId(new PageRequest(0, MAX_METADATA_QUERY), getSelectedEntity().getId()).getContent());
+                .findMetaDataBySoftwareModuleId(new PageRequest(0, MAX_METADATA_QUERY), getSelectedEntity().getId())
+                .getContent());
     }
 
-    /**
-     * delete metadata for SWModule.
-     */
     @Override
-    protected void deleteMetadata(final SoftwareModule entity, final String key, final String value) {
+    protected Grid createMetadataGrid() {
+        final Grid metadataGrid = super.createMetadataGrid();
+        metadataGrid.getContainerDataSource().addContainerProperty(TARGET_VISIBLE, Boolean.class, Boolean.FALSE);
+        metadataGrid.getColumn(TARGET_VISIBLE).setHeaderCaption(i18n.getMessage("metadata.targetvisible"));
+        metadataGrid.getColumn(TARGET_VISIBLE).setHidden(true);
+        return metadataGrid;
+    }
+
+    @Override
+    protected void deleteMetadata(final SoftwareModule entity, final String key) {
         softwareModuleManagement.deleteMetaData(entity.getId(), key);
-        eventBus.publish(this, new MetadataEvent(MetadataUIEvent.DELETE_SOFTWARE_MODULE_METADATA,
-                entityFactory.generateMetadata(key, value), entity));
     }
 
     @Override
     protected boolean hasCreatePermission() {
-        return permChecker.hasCreateDistributionPermission();
+        return permChecker.hasCreateRepositoryPermission();
     }
 
     @Override
     protected boolean hasUpdatePermission() {
-        return permChecker.hasUpdateDistributionPermission();
+        return permChecker.hasUpdateRepositoryPermission();
+    }
+
+    private CheckBox createTargetVisibleField() {
+        final CheckBox checkBox = new CheckBox();
+        checkBox.setId(UIComponentIdProvider.METADATA_TARGET_VISIBLE_ID);
+        checkBox.setCaption(i18n.getMessage("metadata.targetvisible"));
+        checkBox.addValueChangeListener(this::onCheckBoxChange);
+
+        return checkBox;
+    }
+
+    // Exception for squid:S1172 - parameter defined by Vaadin
+    @SuppressWarnings("squid:S1172")
+    private void onCheckBoxChange(final ValueChangeEvent event) {
+        if (hasCreatePermission() || hasUpdatePermission()) {
+            if (!getValueTextArea().getValue().isEmpty() && !getKeyTextField().getValue().isEmpty()) {
+                getMetadataWindow().setSaveButtonEnabled(true);
+            } else {
+                getMetadataWindow().setSaveButtonEnabled(false);
+            }
+        }
+
+    }
+
+    @Override
+    protected void createComponents() {
+        super.createComponents();
+        targetVisibleField = createTargetVisibleField();
+    }
+
+    @Override
+    protected VerticalLayout createMetadataFieldsLayout() {
+
+        final VerticalLayout metadataFieldsLayout = super.createMetadataFieldsLayout();
+        metadataFieldsLayout.addComponent(targetVisibleField);
+        return metadataFieldsLayout;
+    }
+
+    @Override
+    protected Item popualateKeyValue(final Object metadataCompositeKey) {
+        final Item item = super.popualateKeyValue(metadataCompositeKey);
+
+        if (item != null) {
+            targetVisibleField.setValue((Boolean) item.getItemProperty(TARGET_VISIBLE).getValue());
+            if (hasUpdatePermission()) {
+                targetVisibleField.setEnabled(true);
+            }
+        }
+
+        return item;
+    }
+
+    @Override
+    protected Item updateItemInGrid(final String key) {
+        final Item item = super.updateItemInGrid(key);
+        item.getItemProperty(TARGET_VISIBLE).setValue(targetVisibleField.getValue());
+
+        return item;
+    }
+
+    @Override
+    protected Item addItemToGrid(final SoftwareModuleMetadata metaData) {
+        final Item item = super.addItemToGrid(metaData);
+        item.getItemProperty(TARGET_VISIBLE).setValue(metaData.isTargetVisible());
+        return item;
+    }
+
+    @Override
+    protected void enableEditing() {
+        super.enableEditing();
+        targetVisibleField.setEnabled(true);
+    }
+
+    @Override
+    protected void clearFields() {
+        super.clearFields();
+        targetVisibleField.clear();
+    }
+
+    @Override
+    protected void disableEditing() {
+        super.disableEditing();
+        targetVisibleField.setEnabled(false);
     }
 }

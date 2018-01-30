@@ -77,6 +77,7 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Validator;
 import com.vaadin.data.util.converter.StringToIntegerConverter;
 import com.vaadin.data.validator.IntegerRangeValidator;
+import com.vaadin.data.validator.LongRangeValidator;
 import com.vaadin.data.validator.NullValidator;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.ComboBox;
@@ -98,6 +99,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     private static final Logger LOGGER = LoggerFactory.getLogger(AddUpdateRolloutWindowLayout.class);
 
     private static final String MESSAGE_ROLLOUT_FIELD_VALUE_RANGE = "message.rollout.field.value.range";
+
+    private static final String MESSAGE_ROLLOUT_FILTER_TARGET_EXISTS = "message.rollout.filter.target.exists";
 
     private static final String MESSAGE_ENTER_NUMBER = "message.enter.number";
 
@@ -201,6 +204,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
      * Save or update the rollout.
      */
     private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
+
         @Override
         public void saveOrUpdate() {
             if (editRolloutEnabled) {
@@ -267,8 +271,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         private boolean duplicateCheckForEdit() {
             final String rolloutNameVal = getRolloutName();
-            if (!rollout.getName().equals(rolloutNameVal)
-                    && rolloutManagement.getByName(rolloutNameVal).isPresent()) {
+            if (!rollout.getName().equals(rolloutNameVal) && rolloutManagement.getByName(rolloutNameVal).isPresent()) {
                 uiNotification
                         .displayValidationError(i18n.getMessage("message.rollout.duplicate.check", rolloutNameVal));
                 return false;
@@ -344,6 +347,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             return (AutoStartOptionGroupLayout.AutoStartOption) autoStartOptionGroupLayout.getAutoStartOptionGroup()
                     .getValue();
         }
+
     }
 
     CommonDialogWindow getWindow(final Long rolloutId, final boolean copy) {
@@ -443,6 +447,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         addComponent(getMandatoryLabel("prompt.target.filter"), 0, 2);
         addComponent(targetFilterQueryCombo, 1, 2);
         targetFilterQueryCombo.addValidator(nullValidator);
+        targetFilterQueryCombo.addValidator(new TargetExistsValidator());
         targetFilterQuery.removeValidator(nullValidator);
 
         addComponent(getLabel("textfield.description"), 0, 3);
@@ -734,8 +739,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private void populateTargetFilterQuery(final Rollout rollout) {
-        final Page<TargetFilterQuery> filterQueries = targetFilterQueryManagement
-                .findByQuery(new PageRequest(0, 1), rollout.getTargetFilterQuery());
+        final Page<TargetFilterQuery> filterQueries = targetFilterQueryManagement.findByQuery(new PageRequest(0, 1),
+                rollout.getTargetFilterQuery());
         if (filterQueries.getTotalElements() > 0) {
             final TargetFilterQuery filterQuery = filterQueries.getContent().get(0);
             targetFilterQueryCombo.setValue(filterQuery.getName());
@@ -868,6 +873,18 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         return (int) Math.ceil((double) totalTargetsCount / Double.parseDouble(noOfGroups.getValue()));
     }
 
+    class TargetExistsValidator implements Validator {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public void validate(final Object value) {
+            if (value != null) {
+                new LongRangeValidator(i18n.getMessage(MESSAGE_ROLLOUT_FILTER_TARGET_EXISTS), 1L, null)
+                        .validate(totalTargetsCount);
+            }
+        }
+    }
+
     class ThresholdFieldValidator implements Validator {
         private static final long serialVersionUID = 9049939751976326550L;
 
@@ -936,10 +953,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             window.updateAllComponents(this);
             window.setOrginaleValues();
 
-            updateGroupsChart(
-                    rolloutGroupManagement.findByRollout(new PageRequest(0, quotaManagement.getMaxRolloutGroupsPerRollout()),
-                            rollout.getId()).getContent(),
-                    rollout.getTotalTargets());
+            updateGroupsChart(rolloutGroupManagement
+                    .findByRollout(new PageRequest(0, quotaManagement.getMaxRolloutGroupsPerRollout()), rollout.getId())
+                    .getContent(), rollout.getTotalTargets());
         }
 
         totalTargetsCount = targetManagement.countByRsql(rollout.getTargetFilterQuery());

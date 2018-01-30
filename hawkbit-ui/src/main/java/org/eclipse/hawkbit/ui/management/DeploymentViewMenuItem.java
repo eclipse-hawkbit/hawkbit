@@ -12,6 +12,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 
 import com.vaadin.server.FontAwesome;
@@ -20,15 +22,18 @@ import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 
 /**
- * Menu item for deplyoment.
- *
+ * Menu item for deployment.
  */
 @SpringComponent
 @UIScope
 @Order(100)
 public class DeploymentViewMenuItem extends AbstractDashboardMenuItemNotification {
+    private static final long serialVersionUID = 1L;
 
-    private static final long serialVersionUID = 6112540239655168995L;
+    @Autowired
+    DeploymentViewMenuItem(final VaadinMessageSource i18n) {
+        super(i18n);
+    }
 
     @Override
     public String getViewName() {
@@ -42,18 +47,17 @@ public class DeploymentViewMenuItem extends AbstractDashboardMenuItemNotificatio
 
     @Override
     public String getDashboardCaption() {
-        return "Deployment";
+        return getI18n().getMessage("dashboard.deployment.caption");
     }
 
     @Override
     public String getDashboardCaptionLong() {
-        return "Deployment Management";
+        return getI18n().getMessage("dashboard.deployment.caption-long");
     }
 
     @Override
     public List<String> getPermissions() {
-        return Arrays.asList(SpPermission.CREATE_REPOSITORY, SpPermission.READ_REPOSITORY, SpPermission.CREATE_TARGET,
-                SpPermission.READ_TARGET, SpPermission.UPDATE_TARGET, SpPermission.UPDATE_REPOSITORY);
+        return Arrays.asList(SpPermission.READ_REPOSITORY, SpPermission.READ_TARGET);
     }
 
 }

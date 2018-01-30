@@ -136,38 +136,56 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
         this.i18n = i18n;
         this.uiNotification = uiNotification;
         this.managementUIState = managementUIState;
-        this.actionHistoryLayout = new ActionHistoryLayout(i18n, deploymentManagement, eventBus, uiNotification,
-                managementUIState);
-        this.actionStatusLayout = new ActionStatusLayout(i18n, eventBus, managementUIState);
-        this.actionStatusMsgLayout = new ActionStatusMsgLayout(i18n, eventBus, managementUIState);
-        final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout = new CreateUpdateTargetTagLayoutWindow(
-                i18n, targetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
-        this.targetTagFilterLayout = new TargetTagFilterLayout(i18n, createUpdateTargetTagLayout, managementUIState,
-                managementViewClientCriterion, permChecker, eventBus, uiNotification, entityFactory,
-                targetFilterQueryManagement);
-        final TargetTable targetTable = new TargetTable(eventBus, i18n, uiNotification, targetManagement,
-                managementUIState, permChecker, managementViewClientCriterion, distributionSetManagement,
-                targetTagManagement);
-
-        this.targetTableLayout = new TargetTableLayout(eventbus, targetTable, targetManagement, entityFactory, i18n,
-                eventBus, uiNotification, managementUIState, managementViewClientCriterion, deploymentManagement,
-                uiproperties, permChecker, uiNotification, targetTagManagement, distributionSetManagement, uiExecutor);
-
-        this.distributionTagLayout = new DistributionTagLayout(eventbus, managementUIState, i18n, permChecker, eventBus,
-                distributionSetTagManagement, entityFactory, uiNotification, distFilterParameters,
-                distributionSetManagement, managementViewClientCriterion);
-        this.distributionTableLayout = new DistributionTableLayout(i18n, eventBus, permChecker, managementUIState,
-                distributionSetManagement, distributionSetTypeManagement, managementViewClientCriterion, entityFactory,
-                uiNotification, distributionSetTagManagement, targetTagManagement, systemManagement, targetManagement,
-                deploymentManagement);
-        this.deleteAndActionsLayout = new DeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
-                targetTagManagement, distributionSetTagManagement, managementViewClientCriterion, managementUIState,
-                targetManagement, targetTable, deploymentManagement, distributionSetManagement);
 
         this.deploymentViewMenuItem = deploymentViewMenuItem;
 
-        actionHistoryLayout.registerDetails(((ActionStatusGrid) actionStatusLayout.getGrid()).getDetailsSupport());
-        actionStatusLayout.registerDetails(((ActionStatusMsgGrid) actionStatusMsgLayout.getGrid()).getDetailsSupport());
+        if (permChecker.hasTargetReadPermission()) {
+            this.actionHistoryLayout = new ActionHistoryLayout(i18n, deploymentManagement, eventBus, uiNotification,
+                    managementUIState);
+            this.actionStatusLayout = new ActionStatusLayout(i18n, eventBus, managementUIState);
+            this.actionStatusMsgLayout = new ActionStatusMsgLayout(i18n, eventBus, managementUIState);
+            final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout = new CreateUpdateTargetTagLayoutWindow(
+                    i18n, targetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
+            this.targetTagFilterLayout = new TargetTagFilterLayout(i18n, createUpdateTargetTagLayout, managementUIState,
+                    managementViewClientCriterion, permChecker, eventBus, uiNotification, entityFactory,
+                    targetFilterQueryManagement);
+            final TargetTable targetTable = new TargetTable(eventBus, i18n, uiNotification, targetManagement,
+                    managementUIState, permChecker, managementViewClientCriterion, distributionSetManagement,
+                    targetTagManagement);
+
+            this.targetTableLayout = new TargetTableLayout(eventbus, targetTable, targetManagement, entityFactory, i18n,
+                    eventBus, uiNotification, managementUIState, managementViewClientCriterion, deploymentManagement,
+                    uiproperties, permChecker, uiNotification, targetTagManagement, distributionSetManagement,
+                    uiExecutor);
+            this.deleteAndActionsLayout = new DeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
+                    targetTagManagement, distributionSetTagManagement, managementViewClientCriterion, managementUIState,
+                    targetManagement, targetTable, deploymentManagement, distributionSetManagement);
+
+            actionHistoryLayout.registerDetails(((ActionStatusGrid) actionStatusLayout.getGrid()).getDetailsSupport());
+            actionStatusLayout
+                    .registerDetails(((ActionStatusMsgGrid) actionStatusMsgLayout.getGrid()).getDetailsSupport());
+        } else {
+            this.actionHistoryLayout = null;
+            this.actionStatusLayout = null;
+            this.actionStatusMsgLayout = null;
+            this.targetTagFilterLayout = null;
+            this.targetTableLayout = null;
+            this.deleteAndActionsLayout = null;
+        }
+
+        if (permChecker.hasReadRepositoryPermission()) {
+            this.distributionTagLayout = new DistributionTagLayout(eventbus, managementUIState, i18n, permChecker,
+                    eventBus, distributionSetTagManagement, entityFactory, uiNotification, distFilterParameters,
+                    distributionSetManagement, managementViewClientCriterion);
+            this.distributionTableLayout = new DistributionTableLayout(i18n, eventBus, permChecker, managementUIState,
+                    distributionSetManagement, distributionSetTypeManagement, managementViewClientCriterion,
+                    entityFactory, uiNotification, distributionSetTagManagement, targetTagManagement, systemManagement,
+                    targetManagement, deploymentManagement);
+        } else {
+            this.distributionTagLayout = null;
+            this.distributionTableLayout = null;
+        }
+
     }
 
     @PostConstruct
@@ -182,7 +200,9 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
 
     @Override
     public void enter(final ViewChangeEvent event) {
-        distributionTableLayout.getDistributionTable().selectEntity(managementUIState.getLastSelectedDsIdName());
+        if (permChecker.hasReadRepositoryPermission()) {
+            distributionTableLayout.getDistributionTable().selectEntity(managementUIState.getLastSelectedDsIdName());
+        }
     }
 
     @Override
@@ -232,7 +252,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
 
     private void buildLayout() {
         // Build only if user has both permissions
-        if (permChecker.hasTargetReadPermission() || permChecker.hasReadDistributionPermission()) {
+        if (permChecker.hasTargetReadPermission() || permChecker.hasReadRepositoryPermission()) {
             setSizeFull();
             createMainLayout();
             addComponents(mainLayout);
@@ -250,9 +270,9 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
 
     private void layoutWidgets() {
         mainLayout.removeAllComponents();
-        if (permChecker.hasReadDistributionPermission() && permChecker.hasTargetReadPermission()) {
+        if (permChecker.hasReadRepositoryPermission() && permChecker.hasTargetReadPermission()) {
             displayAllWidgets();
-        } else if (permChecker.hasReadDistributionPermission()) {
+        } else if (permChecker.hasReadRepositoryPermission()) {
             displayDistributionWidgetsOnly();
         } else if (permChecker.hasTargetReadPermission()) {
             displayTargetWidgetsOnly();
@@ -292,7 +312,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
 
     private Boolean showFooterLayout() {
         if (permChecker.hasTargetReadPermission()
-                || (permChecker.hasDeleteDistributionPermission() || permChecker.hasDeleteTargetPermission())
+                || (permChecker.hasDeleteRepositoryPermission() || permChecker.hasDeleteTargetPermission())
                 || hasDeploymentPermission()) {
             return true;
         }
@@ -300,7 +320,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
     }
 
     private boolean hasDeploymentPermission() {
-        return permChecker.hasReadDistributionPermission() && permChecker.hasUpdateTargetPermission();
+        return permChecker.hasReadRepositoryPermission() && permChecker.hasUpdateTargetPermission();
     }
 
     private void displayTargetWidgetsOnly() {
@@ -318,7 +338,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
     }
 
     private void maximizeTargetTable() {
-        if (permChecker.hasReadDistributionPermission()) {
+        if (permChecker.hasReadRepositoryPermission()) {
             mainLayout.removeComponent(distributionTableLayout);
             mainLayout.removeComponent(distributionTagLayout);
         }
@@ -382,17 +402,22 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
 
     private void showOrHideFilterButtons(final int browserWidth) {
         if (browserWidth < SPUIDefinitions.REQ_MIN_BROWSER_WIDTH) {
-            targetTagFilterLayout.setVisible(false);
-            targetTableLayout.setShowFilterButtonVisible(true);
-            distributionTagLayout.setVisible(false);
-            distributionTableLayout.setShowFilterButtonVisible(true);
+            if (permChecker.hasTargetReadPermission()) {
+                targetTagFilterLayout.setVisible(false);
+                targetTableLayout.setShowFilterButtonVisible(true);
+            }
+
+            if (permChecker.hasReadRepositoryPermission()) {
+                distributionTagLayout.setVisible(false);
+                distributionTableLayout.setShowFilterButtonVisible(true);
+            }
         } else {
-            if (!managementUIState.isTargetTagFilterClosed()) {
+            if (permChecker.hasTargetReadPermission() && !managementUIState.isTargetTagFilterClosed()) {
                 targetTagFilterLayout.setVisible(true);
                 targetTableLayout.setShowFilterButtonVisible(false);
 
             }
-            if (!managementUIState.isDistTagFilterClosed()) {
+            if (permChecker.hasReadRepositoryPermission() && !managementUIState.isDistTagFilterClosed()) {
                 distributionTagLayout.setVisible(true);
                 distributionTableLayout.setShowFilterButtonVisible(false);
             }

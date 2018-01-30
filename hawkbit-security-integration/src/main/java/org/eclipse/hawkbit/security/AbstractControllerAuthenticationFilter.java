@@ -8,20 +8,22 @@
  */
 package org.eclipse.hawkbit.security;
 
-import org.eclipse.hawkbit.dmf.json.model.DmfTenantSecurityToken;
+import java.util.Arrays;
+import java.util.Collection;
+
+import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 /**
  * An abstraction for all controller based security. Check if the tenant
  * configuration is enabled.
- *
- *
- *
  */
-public abstract class AbstractControllerAuthenticationFilter implements PreAuthentificationFilter {
+public abstract class AbstractControllerAuthenticationFilter implements PreAuthenticationFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractControllerAuthenticationFilter.class);
 
@@ -54,5 +56,10 @@ public abstract class AbstractControllerAuthenticationFilter implements PreAuthe
                     .getConfigurationValue(getTenantConfigurationKey(), Boolean.class).getValue());
         }
 
+    }
+
+    @Override
+    public Collection<GrantedAuthority> getSuccessfulAuthenticationAuthorities() {
+        return Arrays.asList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE));
     }
 }
