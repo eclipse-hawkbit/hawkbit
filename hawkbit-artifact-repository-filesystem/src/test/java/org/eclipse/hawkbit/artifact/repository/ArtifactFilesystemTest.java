@@ -32,7 +32,7 @@ public class ArtifactFilesystemTest {
     public void getInputStreamOfNonExistingFileThrowsException() {
         final File file = new File("fileWhichTotalDoesNotExists");
         final ArtifactFilesystem underTest = new ArtifactFilesystem(file, "fileWhichTotalDoesNotExists",
-                new DbArtifactHash("1", "2"), 0L, null, file.lastModified());
+                new DbArtifactHash("1", "2"), 0L, null);
         try {
             underTest.getFileInputStream();
             Assertions.fail("Expected a FileNotFoundException because file does not exists");
@@ -48,8 +48,7 @@ public class ArtifactFilesystemTest {
         createTempFile.deleteOnExit();
 
         final ArtifactFilesystem underTest = new ArtifactFilesystem(createTempFile,
-                ArtifactFilesystemTest.class.getSimpleName(), new DbArtifactHash("1", "2"), 0L, null,
-                createTempFile.lastModified());
+                ArtifactFilesystemTest.class.getSimpleName(), new DbArtifactHash("1", "2"), 0L, null);
         final byte[] buffer = new byte[1024];
         IOUtils.read(underTest.getFileInputStream(), buffer);
     }

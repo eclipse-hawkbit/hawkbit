@@ -23,8 +23,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.rest.util.FileStreamingUtil;
 import org.eclipse.hawkbit.rest.util.HttpUtil;
 import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpHeaders;
@@ -77,7 +75,7 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
         }
 
         return FileStreamingUtil.writeFileResponse(file, artifact.getFilename(),
-                artifact.getLastModifiedAt() != null ? artifact.getLastModifiedAt() : artifact.getCreatedAt(),
+                artifact.getLastModifiedAt() > 0 ? artifact.getLastModifiedAt() : artifact.getCreatedAt(),
                 requestResponseContextHolder.getHttpServletResponse(), request, null);
     }
 

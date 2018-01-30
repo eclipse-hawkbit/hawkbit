@@ -173,8 +173,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         final List<AbstractDbArtifact> receivedList = new ArrayList<>();
         for (final Artifact artifact : testdataFactory.createArtifacts(module.getId())) {
             receivedList.add(new ArtifactFilesystem(new File("./test"), artifact.getSha1Hash(),
-                    new DbArtifactHash(artifact.getSha1Hash(), null), artifact.getSize(), null,
-                    artifact.getLastModifiedAt()));
+                    new DbArtifactHash(artifact.getSha1Hash(), null), artifact.getSize(), null));
         }
         module = softwareModuleManagement.get(module.getId()).get();
         dsA = distributionSetManagement.get(dsA.getId()).get();
