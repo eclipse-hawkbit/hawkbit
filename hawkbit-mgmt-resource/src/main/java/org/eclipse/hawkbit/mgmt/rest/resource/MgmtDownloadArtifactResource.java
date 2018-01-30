@@ -74,8 +74,7 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
             return new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
         }
 
-        return FileStreamingUtil.writeFileResponse(file, artifact.getFilename(),
-                artifact.getLastModifiedAt() > 0 ? artifact.getLastModifiedAt() : artifact.getCreatedAt(),
+        return FileStreamingUtil.writeFileResponse(file, artifact.getFilename(), artifact.getCreatedAt(),
                 requestResponseContextHolder.getHttpServletResponse(), request, null);
     }
 
