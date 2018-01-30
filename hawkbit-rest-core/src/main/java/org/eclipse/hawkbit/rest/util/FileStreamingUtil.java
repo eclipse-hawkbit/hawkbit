@@ -131,7 +131,9 @@ public final class FileStreamingUtil {
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + filename);
         response.setHeader(HttpHeaders.ETAG, etag);
         response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
-        response.setDateHeader(HttpHeaders.LAST_MODIFIED, lastModified);
+        if (lastModified > 0) {
+            response.setDateHeader(HttpHeaders.LAST_MODIFIED, lastModified);
+        }
 
         response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
         response.setBufferSize(BUFFER_SIZE);
@@ -141,7 +143,7 @@ public final class FileStreamingUtil {
 
         // Validate and process Range and If-Range headers.
         final String range = request.getHeader("Range");
-        if (range != null) {
+        if (lastModified > 0 && range != null) {
             LOG.debug("range header for filename ({}) is: {}", filename, range);
 
             // Range header matches"bytes=n-n,n-n,n-n..."
