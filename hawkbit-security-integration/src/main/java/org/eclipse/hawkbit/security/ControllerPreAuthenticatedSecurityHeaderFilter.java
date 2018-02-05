@@ -128,7 +128,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
         int iHeader = 1;
         String foundHash;
         while ((foundHash = secruityToken.getHeader(String.format(sslIssuerHashBasicHeader, iHeader))) != null) {
-            if (knownHashes.contains(foundHash)) {
+            if (knownHashes.contains(foundHash.toLowerCase())) {
                 if (LOGGER.isTraceEnabled()) {
                     LOGGER.trace("Found matching ssl issuer hash at position {}", iHeader);
                 }
@@ -156,6 +156,6 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
     }
 
     private static List<String> splitMultiHashBySemicolon(final String knownIssuerHashes) {
-        return Arrays.asList(knownIssuerHashes.split(";"));
+        return Arrays.stream(knownIssuerHashes.split(";|,")).map(String::toLowerCase).collect(Collectors.toList());
     }
 }
