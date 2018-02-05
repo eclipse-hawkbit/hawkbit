@@ -195,7 +195,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> distributionSetManagement.create(
                         entityFactory.distributionSet().create().name("a").version("a").description(INVALID_TEXT_HTML)))
-                .as("entity with XSS attempt should not be created");
+                .as("entity with invalid description should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> distributionSetManagement.update(entityFactory.distributionSet().update(set.getId())
