@@ -14,6 +14,7 @@ import javax.validation.ConstraintViolationException;
 
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.slf4j.Logger;
@@ -78,7 +79,7 @@ public class DelayedRequeueExceptionStrategy extends ConditionalRejectingErrorHa
     }
 
     private boolean invalidContent(final Throwable cause) {
-        return cause instanceof ConstraintViolationException || cause instanceof MessageConversionException
-                || cause instanceof MessageHandlingException;
+        return cause instanceof ConstraintViolationException || cause instanceof InvalidTargetAddressException
+                || cause instanceof MessageConversionException || cause instanceof MessageHandlingException;
     }
 }

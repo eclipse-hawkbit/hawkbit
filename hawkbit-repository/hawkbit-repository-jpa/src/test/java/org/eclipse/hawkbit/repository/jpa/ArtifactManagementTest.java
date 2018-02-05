@@ -101,12 +101,11 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
-        final Artifact result = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(),
-                "/test/123/file1", false);
-        artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "/test/123/file11", false);
-        artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "/test/123/file12", false);
-        final Artifact result2 = artifactManagement.create(new ByteArrayInputStream(random), sm2.getId(),
-                "/test/123/file2", false);
+        final Artifact result = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1", false);
+        artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file11", false);
+        artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file12", false);
+        final Artifact result2 = artifactManagement.create(new ByteArrayInputStream(random), sm2.getId(), "file2",
+                false);
 
         assertThat(result).isInstanceOf(Artifact.class);
         assertThat(result.getSoftwareModule().getId()).isEqualTo(sm.getId());

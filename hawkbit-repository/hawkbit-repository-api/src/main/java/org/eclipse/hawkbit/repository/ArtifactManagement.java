@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository;
 import java.io.InputStream;
 import java.util.Optional;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
@@ -23,7 +24,6 @@ import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import javax.validation.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Identifiable;
@@ -99,7 +99,6 @@ public interface ArtifactManagement {
      *             if check against provided SHA1 checksum failed
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    // FIXME filename??
     Artifact create(@NotNull InputStream stream, long moduleId, @NotEmpty String filename, String providedMd5Sum,
             String providedSha1Sum, boolean overrideExisting, String contentType);
 

@@ -85,12 +85,10 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Artifact create(final InputStream stream, final long moduleId, final String file,
+    public Artifact create(final InputStream stream, final long moduleId, final String filename,
             final String providedMd5Sum, final String providedSha1Sum, final boolean overrideExisting,
             final String contentType) {
         AbstractDbArtifact result = null;
-
-        final String filename = sanitizeFilename(file);
 
         final SoftwareModule softwareModule = getModuleAndThrowExceptionIfThatFails(moduleId);
 
@@ -113,14 +111,6 @@ public class JpaArtifactManagement implements ArtifactManagement {
         }
 
         return storeArtifactMetadata(softwareModule, filename, result, existing);
-    }
-
-    private String sanitizeFilename(final String file) {
-        if (file.contains("/")) {
-            return file.substring(file.lastIndexOf('/') + 1);
-        }
-
-        return file;
     }
 
     @Override
