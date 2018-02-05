@@ -38,6 +38,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -209,9 +210,19 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
                 .as("target with too long description should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement
+                        .create(entityFactory.target().create().controllerId("a").description(INVALID_TEXT_HTML)))
+                .as("target with invalid description should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> targetManagement.update(entityFactory.target().update(target.getControllerId())
                         .description(RandomStringUtils.randomAlphanumeric(513))))
                 .as("target with too long description should not be updated");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement
+                        .update(entityFactory.target().update(target.getControllerId()).description(INVALID_TEXT_HTML)))
+                .as("target with invalid description should not be updated");
 
     }
 
@@ -224,9 +235,19 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
                 .as("target with too long name should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement
+                        .create(entityFactory.target().create().controllerId("a").name(INVALID_TEXT_HTML)))
+                .as("target with invalidname should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> targetManagement.update(entityFactory.target().update(target.getControllerId())
                         .name(RandomStringUtils.randomAlphanumeric(65))))
                 .as("target with too long name should not be updated");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement
+                        .update(entityFactory.target().update(target.getControllerId()).name(INVALID_TEXT_HTML)))
+                .as("target with invalid name should not be updated");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(
@@ -244,9 +265,19 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
                 .as("target with too long token should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement
+                        .create(entityFactory.target().create().controllerId("a").securityToken(INVALID_TEXT_HTML)))
+                .as("target with invalid token should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> targetManagement.update(entityFactory.target().update(target.getControllerId())
                         .securityToken(RandomStringUtils.randomAlphanumeric(129))))
                 .as("target with too long token should not be updated");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetManagement.update(
+                        entityFactory.target().update(target.getControllerId()).securityToken(INVALID_TEXT_HTML)))
+                .as("target with invalid token should not be updated");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> targetManagement
@@ -262,10 +293,20 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
                         .address(RandomStringUtils.randomAlphanumeric(513))))
                 .as("target with too long address should not be created");
 
+        assertThatExceptionOfType(InvalidTargetAddressException.class)
+                .isThrownBy(() -> targetManagement
+                        .create(entityFactory.target().create().controllerId("a").address(INVALID_TEXT_HTML)))
+                .as("target with invalid should not be created");
+
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> targetManagement.update(entityFactory.target().update(target.getControllerId())
                         .address(RandomStringUtils.randomAlphanumeric(513))))
                 .as("target with too long address should not be updated");
+
+        assertThatExceptionOfType(InvalidTargetAddressException.class)
+                .isThrownBy(() -> targetManagement
+                        .update(entityFactory.target().update(target.getControllerId()).address(INVALID_TEXT_HTML)))
+                .as("target with invalid address should not be updated");
     }
 
     @Step
@@ -284,15 +325,12 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
                 .as("target with too long controller id should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(
+                        () -> targetManagement.create(entityFactory.target().create().controllerId(INVALID_TEXT_HTML)))
+                .as("target with invalid controller id should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> targetManagement.create(entityFactory.target().create().controllerId(" ")))
-                .as(WHITESPACE_ERROR);
-
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> targetManagement.create(entityFactory.target().create().controllerId(" a")))
-                .as(WHITESPACE_ERROR);
-
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> targetManagement.create(entityFactory.target().create().controllerId("a ")))
                 .as(WHITESPACE_ERROR);
 
         assertThatExceptionOfType(ConstraintViolationException.class)
@@ -330,8 +368,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final List<Target> assignedTargets = targetManagement.assignTag(assignTarget, targetTag.getId());
         assertThat(assignedTargets.size()).as("Assigned targets are wrong").isEqualTo(4);
         assignedTargets.forEach(target -> assertThat(
-                targetTagManagement.findByTarget(PAGE, target.getControllerId()).getNumberOfElements())
-                        .isEqualTo(1));
+                targetTagManagement.findByTarget(PAGE, target.getControllerId()).getNumberOfElements()).isEqualTo(1));
 
         TargetTag findTargetTag = targetTagManagement.getByName("Tag1").get();
         assertThat(assignedTargets.size()).as("Assigned targets are wrong")
@@ -339,8 +376,8 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         final Target unAssignTarget = targetManagement.unAssignTag("targetId123", findTargetTag.getId());
         assertThat(unAssignTarget.getControllerId()).as("Controller id is wrong").isEqualTo("targetId123");
-        assertThat(targetTagManagement.findByTarget(PAGE, unAssignTarget.getControllerId()))
-                .as("Tag size is wrong").isEmpty();
+        assertThat(targetTagManagement.findByTarget(PAGE, unAssignTarget.getControllerId())).as("Tag size is wrong")
+                .isEmpty();
         findTargetTag = targetTagManagement.getByName("Tag1").get();
         assertThat(targetManagement.findByTag(PAGE, targetTag.getId())).as("Assigned targets are wrong").hasSize(3);
         assertThat(targetManagement.findByRsqlAndTag(PAGE, "controllerId==targetId123", targetTag.getId()))
@@ -631,16 +668,16 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         t2Tags.forEach(tag -> targetManagement.assignTag(Arrays.asList(t2.getControllerId()), tag.getId()));
 
         final Target t11 = targetManagement.getByControllerID(t1.getControllerId()).get();
-        assertThat(targetTagManagement.findByTarget(PAGE, t11.getControllerId()).getContent())
-                .as("Tag size is wrong").hasSize(noT1Tags).containsAll(t1Tags);
-        assertThat(targetTagManagement.findByTarget(PAGE, t11.getControllerId()).getContent())
-                .as("Tag size is wrong").hasSize(noT1Tags).doesNotContain(Iterables.toArray(t2Tags, TargetTag.class));
+        assertThat(targetTagManagement.findByTarget(PAGE, t11.getControllerId()).getContent()).as("Tag size is wrong")
+                .hasSize(noT1Tags).containsAll(t1Tags);
+        assertThat(targetTagManagement.findByTarget(PAGE, t11.getControllerId()).getContent()).as("Tag size is wrong")
+                .hasSize(noT1Tags).doesNotContain(Iterables.toArray(t2Tags, TargetTag.class));
 
         final Target t21 = targetManagement.getByControllerID(t2.getControllerId()).get();
-        assertThat(targetTagManagement.findByTarget(PAGE, t21.getControllerId()).getContent())
-                .as("Tag size is wrong").hasSize(noT2Tags).containsAll(t2Tags);
-        assertThat(targetTagManagement.findByTarget(PAGE, t21.getControllerId()).getContent())
-                .as("Tag size is wrong").hasSize(noT2Tags).doesNotContain(Iterables.toArray(t1Tags, TargetTag.class));
+        assertThat(targetTagManagement.findByTarget(PAGE, t21.getControllerId()).getContent()).as("Tag size is wrong")
+                .hasSize(noT2Tags).containsAll(t2Tags);
+        assertThat(targetTagManagement.findByTarget(PAGE, t21.getControllerId()).getContent()).as("Tag size is wrong")
+                .hasSize(noT2Tags).doesNotContain(Iterables.toArray(t1Tags, TargetTag.class));
     }
 
     @Test

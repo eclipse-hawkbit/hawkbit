@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.amqp;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -277,7 +277,7 @@ public class AmqpMessageHandlerServiceTest {
     @Test
     @Description("Tests the update of an action of a target without a exist action id")
     public void updateActionStatusWithoutActionId() {
-        when(controllerManagementMock.findActionWithDetails(any())).thenReturn(Optional.empty());
+        when(controllerManagementMock.findActionWithDetails(anyLong())).thenReturn(Optional.empty());
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
         final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(1L, DmfActionStatus.DOWNLOAD);
@@ -297,7 +297,7 @@ public class AmqpMessageHandlerServiceTest {
     public void updateActionStatusWithoutExistActionId() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
-        when(controllerManagementMock.findActionWithDetails(any())).thenReturn(Optional.empty());
+        when(controllerManagementMock.findActionWithDetails(anyLong())).thenReturn(Optional.empty());
 
         final DmfActionUpdateStatus actionUpdateStatus = createActionUpdateStatus(DmfActionStatus.DOWNLOAD);
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(actionUpdateStatus,
@@ -342,7 +342,7 @@ public class AmqpMessageHandlerServiceTest {
 
         final Artifact localArtifactMock = mock(Artifact.class);
         when(artifactManagementMock.findFirstBySHA1(anyString())).thenReturn(Optional.of(localArtifactMock));
-        when(controllerManagementMock.getActionForDownloadByTargetAndSoftwareModule(anyObject(), anyObject()))
+        when(controllerManagementMock.getActionForDownloadByTargetAndSoftwareModule(anyString(), anyLong()))
                 .thenThrow(EntityNotFoundException.class);
 
         // test
@@ -396,7 +396,7 @@ public class AmqpMessageHandlerServiceTest {
 
         // Mock
         final Action action = createActionWithTarget(22L, Status.FINISHED);
-        when(controllerManagementMock.findActionWithDetails(any())).thenReturn(Optional.of(action));
+        when(controllerManagementMock.findActionWithDetails(anyLong())).thenReturn(Optional.of(action));
         when(controllerManagementMock.addUpdateActionStatus(any())).thenReturn(action);
         final ActionStatusBuilder builder = mock(ActionStatusBuilder.class);
         final ActionStatusCreate create = mock(ActionStatusCreate.class);

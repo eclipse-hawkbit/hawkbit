@@ -10,7 +10,9 @@ package org.eclipse.hawkbit.repository.builder;
 
 import java.util.Optional;
 
+import org.eclipse.hawkbit.repository.ValidString;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.springframework.util.StringUtils;
 
 /**
  * Create and update builder DTO.
@@ -20,7 +22,10 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
  */
 public abstract class AbstractRolloutUpdateCreate<T> extends AbstractNamedEntityBuilder<T> {
     protected Long set;
+
+    @ValidString
     protected String targetFilterQuery;
+
     protected ActionType actionType;
     protected Long forcedTime;
     protected Long startAt;
@@ -31,7 +36,7 @@ public abstract class AbstractRolloutUpdateCreate<T> extends AbstractNamedEntity
     }
 
     public T targetFilterQuery(final String targetFilterQuery) {
-        this.targetFilterQuery = targetFilterQuery;
+        this.targetFilterQuery = StringUtils.trimWhitespace(targetFilterQuery);
         return (T) this;
     }
 

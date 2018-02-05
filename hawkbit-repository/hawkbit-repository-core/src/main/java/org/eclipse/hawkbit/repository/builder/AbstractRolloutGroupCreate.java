@@ -8,7 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
+import org.eclipse.hawkbit.repository.ValidString;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
+import org.springframework.util.StringUtils;
 
 /**
  * Create builder DTO.
@@ -17,12 +19,13 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
  *            update or create builder interface
  */
 public abstract class AbstractRolloutGroupCreate<T> extends AbstractNamedEntityBuilder<T> {
+    @ValidString
     protected String targetFilterQuery;
     protected Float targetPercentage;
     protected RolloutGroupConditions conditions;
 
     public T targetFilterQuery(final String targetFilterQuery) {
-        this.targetFilterQuery = targetFilterQuery;
+        this.targetFilterQuery = StringUtils.trimWhitespace(targetFilterQuery);
         return (T) this;
     }
 

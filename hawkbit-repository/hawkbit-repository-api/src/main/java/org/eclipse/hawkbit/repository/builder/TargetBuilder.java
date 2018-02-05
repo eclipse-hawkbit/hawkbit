@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository.builder;
 
 import org.eclipse.hawkbit.repository.model.Target;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 /**
  * Builder for {@link Target}.

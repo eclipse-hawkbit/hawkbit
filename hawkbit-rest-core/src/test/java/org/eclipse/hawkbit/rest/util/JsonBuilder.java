@@ -207,7 +207,8 @@ public abstract class JsonBuilder {
      * @throws JSONException
      */
     public static String deploymentActionFeedback(final String id, final String execution) throws JSONException {
-        return deploymentActionFeedback(id, execution, "none", Arrays.asList(RandomStringUtils.randomAscii(1000)));
+        return deploymentActionFeedback(id, execution, "none",
+                Arrays.asList(RandomStringUtils.randomAlphanumeric(1000)));
 
     }
 
@@ -516,7 +517,7 @@ public abstract class JsonBuilder {
     }
 
     public static String cancelActionFeedback(final String id, final String execution) throws JSONException {
-        return cancelActionFeedback(id, execution, RandomStringUtils.randomAscii(1000));
+        return cancelActionFeedback(id, execution, RandomStringUtils.randomAlphanumeric(1000));
 
     }
 

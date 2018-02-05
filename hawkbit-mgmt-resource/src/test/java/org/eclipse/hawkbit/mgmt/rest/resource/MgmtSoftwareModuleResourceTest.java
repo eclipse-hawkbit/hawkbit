@@ -123,7 +123,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
         final String md5sum = HashGeneratorUtils.generateMD5(random);
         final String sha1sum = HashGeneratorUtils.generateSHA1(random);
-        final MockMultipartFile file = new MockMultipartFile("file", "origFilename", null, random);
+        final MockMultipartFile file = new MockMultipartFile("file", "/test/123/origFilename", null, random);
 
         // upload
         final MvcResult mvcResult = mvc
@@ -220,7 +220,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         // create test file
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
-        final MockMultipartFile file = new MockMultipartFile("file", "origFilename", null, random);
+        final MockMultipartFile file = new MockMultipartFile("file", "/test/123/origFilename", null, random);
 
         // upload
         mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
@@ -431,7 +431,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(status().isBadRequest());
 
         final SoftwareModule toLongName = entityFactory.softwareModule().create().type(osType)
-                .name(RandomStringUtils.randomAscii(80)).build();
+                .name(RandomStringUtils.randomAlphanumeric(80)).build();
         mvc.perform(post("/rest/v1/softwaremodules").content(JsonBuilder.softwareModules(Arrays.asList(toLongName)))
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());

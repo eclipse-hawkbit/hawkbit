@@ -85,10 +85,12 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Artifact create(final InputStream stream, final Long moduleId, final String filename,
+    public Artifact create(final InputStream stream, final long moduleId, final String file,
             final String providedMd5Sum, final String providedSha1Sum, final boolean overrideExisting,
             final String contentType) {
         AbstractDbArtifact result = null;
+
+        final String filename = sanitizeFilename(file);
 
         final SoftwareModule softwareModule = getModuleAndThrowExceptionIfThatFails(moduleId);
 
@@ -113,11 +115,19 @@ public class JpaArtifactManagement implements ArtifactManagement {
         return storeArtifactMetadata(softwareModule, filename, result, existing);
     }
 
+    private String sanitizeFilename(final String file) {
+        if (file.contains("/")) {
+            return file.substring(file.lastIndexOf('/') + 1);
+        }
+
+        return file;
+    }
+
     @Override
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public boolean clearArtifactBinary(final String sha1Hash, final Long moduleId) {
+    public boolean clearArtifactBinary(final String sha1Hash, final long moduleId) {
 
         if (localArtifactRepository.existsWithSha1HashAndSoftwareModuleIdIsNot(sha1Hash, moduleId)) {
             // there are still other artifacts that need the binary
@@ -137,7 +147,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void delete(final Long id) {
+    public void delete(final long id) {
         final JpaArtifact existing = (JpaArtifact) get(id)
                 .orElseThrow(() -> new EntityNotFoundException(Artifact.class, id));
 
@@ -149,12 +159,12 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     @Override
-    public Optional<Artifact> get(final Long id) {
+    public Optional<Artifact> get(final long id) {
         return Optional.ofNullable(localArtifactRepository.findOne(id));
     }
 
     @Override
-    public Optional<Artifact> getByFilenameAndSoftwareModule(final String filename, final Long softwareModuleId) {
+    public Optional<Artifact> getByFilenameAndSoftwareModule(final String filename, final long softwareModuleId) {
         throwExceptionIfSoftwareModuleDoesNotExist(softwareModuleId);
 
         return localArtifactRepository.findFirstByFilenameAndSoftwareModuleId(filename, softwareModuleId);
@@ -171,7 +181,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     @Override
-    public Page<Artifact> findBySoftwareModule(final Pageable pageReq, final Long swId) {
+    public Page<Artifact> findBySoftwareModule(final Pageable pageReq, final long swId) {
         throwExceptionIfSoftwareModuleDoesNotExist(swId);
 
         return localArtifactRepository.findBySoftwareModuleId(pageReq, swId);
@@ -206,7 +216,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Artifact create(final InputStream inputStream, final Long moduleId, final String filename,
+    public Artifact create(final InputStream inputStream, final long moduleId, final String filename,
             final boolean overrideExisting) {
         return create(inputStream, moduleId, filename, null, null, overrideExisting, null);
     }
