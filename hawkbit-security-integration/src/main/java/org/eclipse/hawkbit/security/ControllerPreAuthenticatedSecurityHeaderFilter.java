@@ -132,7 +132,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
                 if (LOGGER.isTraceEnabled()) {
                     LOGGER.trace("Found matching ssl issuer hash at position {}", iHeader);
                 }
-                return foundHash;
+                return foundHash.toLowerCase();
             }
             iHeader++;
         }
