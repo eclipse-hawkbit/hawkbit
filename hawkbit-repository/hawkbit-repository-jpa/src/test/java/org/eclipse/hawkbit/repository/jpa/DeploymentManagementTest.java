@@ -458,7 +458,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .as("TargetUpdateStatus IN_SYNC")
                 .allMatch(target -> TargetUpdateStatus.IN_SYNC.equals(target.getUpdateStatus()))
                 .as("InstallationDate equal to LastModifiedAt")
-                .allMatch(target -> target.getLastModifiedAt().equals(target.getInstallationDate()));
+                .allMatch(target -> target.getLastModifiedAt() == target.getInstallationDate());
     }
 
     @Test

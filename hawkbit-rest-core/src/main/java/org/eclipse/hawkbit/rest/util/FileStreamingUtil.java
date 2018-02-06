@@ -119,7 +119,7 @@ public final class FileStreamingUtil {
      *             if streaming fails
      */
     public static ResponseEntity<InputStream> writeFileResponse(final AbstractDbArtifact artifact,
-            final String filename, final Long lastModified, final HttpServletResponse response,
+            final String filename, final long lastModified, final HttpServletResponse response,
             final HttpServletRequest request, final FileStreamingProgressListener progressListener) {
 
         ResponseEntity<InputStream> result;
@@ -131,7 +131,7 @@ public final class FileStreamingUtil {
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + filename);
         response.setHeader(HttpHeaders.ETAG, etag);
         response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
-        if (lastModified != null) {
+        if (lastModified > 0) {
             response.setDateHeader(HttpHeaders.LAST_MODIFIED, lastModified);
         }
 
@@ -143,7 +143,7 @@ public final class FileStreamingUtil {
 
         // Validate and process Range and If-Range headers.
         final String range = request.getHeader("Range");
-        if (lastModified != null && range != null) {
+        if (lastModified > 0 && range != null) {
             LOG.debug("range header for filename ({}) is: {}", filename, range);
 
             // Range header matches"bytes=n-n,n-n,n-n..."
