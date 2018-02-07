@@ -20,7 +20,6 @@ import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -140,9 +139,9 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     }
 
     private void addNewTarget() {
-        final String newControllerId = HawkbitCommonUtil.trimAndNullIfEmpty(controllerIDTextField.getValue());
-        final String newName = HawkbitCommonUtil.trimAndNullIfEmpty(nameTextField.getValue());
-        final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
+        final String newControllerId = controllerIDTextField.getValue();
+        final String newName = nameTextField.getValue();
+        final String newDesc = descTextArea.getValue();
 
         final Target newTarget = targetManagement.create(
                 entityFactory.target().create().controllerId(newControllerId).name(newName).description(newDesc));
@@ -153,11 +152,9 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     }
 
     public Window createNewWindow() {
-        window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
+        return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
                 .caption(i18n.getMessage(UIComponentIdProvider.TARGET_ADD_CAPTION)).content(this).layout(formLayout)
                 .i18n(i18n).saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
-
-        return window;
     }
 
     /**

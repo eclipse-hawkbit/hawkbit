@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorderWithIcon;
 import org.eclipse.hawkbit.ui.filtermanagement.TargetFilterBeanQuery;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -238,8 +237,9 @@ public class DefineGroupsLayout extends GridLayout {
 
         removeAllRows();
 
-        final List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(new PageRequest(0, quotaManagement.getMaxRolloutGroupsPerRollout()),
-                rollout.getId()).getContent();
+        final List<RolloutGroup> groups = rolloutGroupManagement
+                .findByRollout(new PageRequest(0, quotaManagement.getMaxRolloutGroupsPerRollout()), rollout.getId())
+                .getContent();
         for (final RolloutGroup group : groups) {
             final GroupRow groupRow = addGroupRow();
             groupRow.populateByGroup(group);
@@ -540,8 +540,7 @@ public class DefineGroupsLayout extends GridLayout {
         }
 
         private String getTargetFilterQuery() {
-            if (null != targetFilterQueryCombo.getValue()
-                    && HawkbitCommonUtil.trimAndNullIfEmpty((String) targetFilterQueryCombo.getValue()) != null) {
+            if (targetFilterQueryCombo.getValue() != null) {
                 final Item filterItem = targetFilterQueryCombo.getContainerDataSource()
                         .getItem(targetFilterQueryCombo.getValue());
                 return (String) filterItem.getItemProperty("query").getValue();

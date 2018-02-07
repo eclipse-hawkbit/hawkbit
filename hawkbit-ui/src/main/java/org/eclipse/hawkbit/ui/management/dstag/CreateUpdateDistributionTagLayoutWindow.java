@@ -25,7 +25,6 @@ import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -123,8 +122,8 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     @Override
     protected void createNewTag() {
         super.createNewTag();
-        final String tagNameValueTrimmed = HawkbitCommonUtil.trimAndNullIfEmpty(tagNameValue);
-        final String tagDescriptionTrimmed = HawkbitCommonUtil.trimAndNullIfEmpty(tagDescValue);
+        final String tagNameValueTrimmed = tagNameValue;
+        final String tagDescriptionTrimmed = tagDescValue;
         if (!StringUtils.isEmpty(tagNameValueTrimmed)) {
 
             String colour = ColorPickerConstants.START_COLOR.getCSS();
@@ -132,8 +131,8 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
                 colour = getColorPicked();
             }
 
-            final DistributionSetTag newDistTag = distributionSetTagManagement.create(entityFactory
-                    .tag().create().name(tagNameValueTrimmed).description(tagDescriptionTrimmed).colour(colour));
+            final DistributionSetTag newDistTag = distributionSetTagManagement.create(entityFactory.tag().create()
+                    .name(tagNameValueTrimmed).description(tagDescriptionTrimmed).colour(colour));
             eventBus.publish(this, new DistributionSetTagTableEvent(BaseEntityEventType.ADD_ENTITY, newDistTag));
             displaySuccess(newDistTag.getName());
             resetDistTagValues();
@@ -175,8 +174,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     @Override
     public void setTagDetails(final String distTagSelected) {
         tagName.setValue(distTagSelected);
-        final Optional<DistributionSetTag> selectedDistTag = distributionSetTagManagement
-                .getByName(distTagSelected);
+        final Optional<DistributionSetTag> selectedDistTag = distributionSetTagManagement.getByName(distTagSelected);
         if (selectedDistTag.isPresent()) {
             tagDesc.setValue(selectedDistTag.get().getDescription());
             if (null == selectedDistTag.get().getColour()) {

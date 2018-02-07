@@ -756,8 +756,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private String getTargetFilterQuery() {
-        if (null != targetFilterQueryCombo.getValue()
-                && HawkbitCommonUtil.trimAndNullIfEmpty((String) targetFilterQueryCombo.getValue()) != null) {
+        if (targetFilterQueryCombo.getValue() != null) {
             final Item filterItem = targetFilterQueryCombo.getContainerDataSource()
                     .getItem(targetFilterQueryCombo.getValue());
             return (String) filterItem.getItemProperty("query").getValue();
@@ -863,9 +862,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         }
 
         private boolean isNoOfGroupsOrTargetFilterEmpty() {
-            return HawkbitCommonUtil.trimAndNullIfEmpty(noOfGroups.getValue()) == null
-                    || (HawkbitCommonUtil.trimAndNullIfEmpty((String) targetFilterQueryCombo.getValue()) == null
-                            && targetFilterQuery.getValue() == null);
+            return noOfGroups.getValue() == null
+                    || ((String) targetFilterQueryCombo.getValue() == null && targetFilterQuery.getValue() == null);
         }
     }
 

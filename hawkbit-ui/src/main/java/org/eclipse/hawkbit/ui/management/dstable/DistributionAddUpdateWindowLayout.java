@@ -29,7 +29,6 @@ import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.distributions.dstable.DistributionSetTable;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -142,10 +141,9 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             final Long distSetTypeId = (Long) distsetTypeNameComboBox.getValue();
 
             distributionSetTypeManagement.get(distSetTypeId).ifPresent(type -> {
-                final DistributionSet currentDS = distributionSetManagement.update(
-                        entityFactory.distributionSet().update(editDistId).name(distNameTextField.getValue())
-                                .description(descTextArea.getValue()).version(distVersionTextField.getValue())
-                                .requiredMigrationStep(isMigStepReq).type(type));
+                final DistributionSet currentDS = distributionSetManagement.update(entityFactory.distributionSet()
+                        .update(editDistId).name(distNameTextField.getValue()).description(descTextArea.getValue())
+                        .version(distVersionTextField.getValue()).requiredMigrationStep(isMigStepReq).type(type));
                 notificationMessage.displaySuccess(i18n.getMessage("message.new.dist.save.success",
                         new Object[] { currentDS.getName(), currentDS.getVersion() }));
                 // update table row+details layout
@@ -159,18 +157,17 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         private void addNewDistribution() {
             editDistribution = Boolean.FALSE;
 
-            final String name = HawkbitCommonUtil.trimAndNullIfEmpty(distNameTextField.getValue());
-            final String version = HawkbitCommonUtil.trimAndNullIfEmpty(distVersionTextField.getValue());
+            final String name = distNameTextField.getValue();
+            final String version = distVersionTextField.getValue();
             final Long distSetTypeId = (Long) distsetTypeNameComboBox.getValue();
-            final String desc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
+            final String desc = descTextArea.getValue();
             final boolean isMigStepReq = reqMigStepCheckbox.getValue();
 
-            final DistributionSetType distributionSetType = distributionSetTypeManagement
-                    .get(distSetTypeId)
+            final DistributionSetType distributionSetType = distributionSetTypeManagement.get(distSetTypeId)
                     .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, distSetTypeId));
             final DistributionSet newDist = distributionSetManagement
-                    .create(entityFactory.distributionSet().create().name(name).version(version)
-                            .description(desc).type(distributionSetType).requiredMigrationStep(isMigStepReq));
+                    .create(entityFactory.distributionSet().create().name(name).version(version).description(desc)
+                            .type(distributionSetType).requiredMigrationStep(isMigStepReq));
 
             eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.ADD_ENTITY, newDist));
             notificationMessage.displaySuccess(i18n.getMessage("message.new.dist.save.success",
@@ -182,8 +179,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             final String name = distNameTextField.getValue();
             final String version = distVersionTextField.getValue();
 
-            final Optional<DistributionSet> existingDs = distributionSetManagement
-                    .getByNameAndVersion(name, version);
+            final Optional<DistributionSet> existingDs = distributionSetManagement.getByNameAndVersion(name, version);
             /*
              * Distribution should not exists with the same name & version.
              * Display error message, when the "existingDs" is not null and it
@@ -296,8 +292,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             return;
         }
 
-        final Optional<DistributionSet> distSet = distributionSetManagement
-                .getWithDetails(editDistId);
+        final Optional<DistributionSet> distSet = distributionSetManagement.getWithDetails(editDistId);
         if (!distSet.isPresent()) {
             return;
         }

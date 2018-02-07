@@ -541,8 +541,8 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
      */
     protected void createNewTag() {
         colorPicked = ColorPickerHelper.getColorPickedString(colorPickerLayout.getSelPreview());
-        tagNameValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagName.getValue());
-        tagDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
+        tagNameValue = tagName.getValue();
+        tagDescValue = tagDesc.getValue();
     }
 
     protected void displaySuccess(final String tagName) {

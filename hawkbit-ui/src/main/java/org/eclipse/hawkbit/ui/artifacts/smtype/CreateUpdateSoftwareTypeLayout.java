@@ -250,9 +250,9 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
     private void createNewSWModuleType() {
         int assignNumber = 0;
         final String colorPicked = ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview());
-        final String typeNameValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagName.getValue());
-        final String typeKeyValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeKey.getValue());
-        final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
+        final String typeNameValue = tagName.getValue();
+        final String typeKeyValue = typeKey.getValue();
+        final String typeDescValue = tagDesc.getValue();
         final String assignValue = (String) assignOptiongroup.getValue();
         if (assignValue != null && assignValue.equalsIgnoreCase(singleAssignStr)) {
             assignNumber = 1;
@@ -261,8 +261,8 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
         }
 
         if (typeNameValue != null && typeKeyValue != null) {
-            final SoftwareModuleType newSWType = softwareModuleTypeManagement.create(
-                    entityFactory.softwareModuleType().create().key(typeKeyValue).name(typeNameValue)
+            final SoftwareModuleType newSWType = softwareModuleTypeManagement
+                    .create(entityFactory.softwareModuleType().create().key(typeKeyValue).name(typeNameValue)
                             .description(typeDescValue).colour(colorPicked).maxAssignments(assignNumber));
             uiNotification
                     .displaySuccess(i18n.getMessage("message.save.success", new Object[] { newSWType.getName() }));
@@ -274,8 +274,8 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
     }
 
     private void updateSWModuleType(final SoftwareModuleType existingType) {
-        softwareModuleTypeManagement.update(
-                entityFactory.softwareModuleType().update(existingType.getId()).description(tagDesc.getValue())
+        softwareModuleTypeManagement
+                .update(entityFactory.softwareModuleType().update(existingType.getId()).description(tagDesc.getValue())
                         .colour(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview())));
         uiNotification
                 .displaySuccess(i18n.getMessage("message.update.success", new Object[] { existingType.getName() }));

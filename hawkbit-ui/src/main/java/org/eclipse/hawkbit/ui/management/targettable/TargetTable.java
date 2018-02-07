@@ -276,7 +276,7 @@ public class TargetTable extends AbstractTable<Target> {
         addGeneratedColumn(SPUIDefinitions.TARGET_STATUS_PIN_TOGGLE_ICON,
                 (source, itemId, columnId) -> getTagetPinButton(itemId));
         addGeneratedColumn(SPUIDefinitions.TARGET_STATUS_POLL_TIME,
-                (source, itemId, columnId) -> getTagetPollTime(itemId));
+                (source, itemId, columnId) -> getTargetPollTime(itemId));
     }
 
     @Override
@@ -363,17 +363,17 @@ public class TargetTable extends AbstractTable<Target> {
         return queryConfig;
     }
 
-    private Label getTagetPollTime(final Object itemId) {
+    private Label getTargetPollTime(final Object itemId) {
         final Label statusLabel = new Label();
         statusLabel.addStyleName(ValoTheme.LABEL_SMALL);
         statusLabel.setHeightUndefined();
         statusLabel.setContentMode(ContentMode.HTML);
         final String pollStatusToolTip = (String) getContainerDataSource().getItem(itemId)
                 .getItemProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP).getValue();
-        if (HawkbitCommonUtil.trimAndNullIfEmpty(pollStatusToolTip) != null) {
-            statusLabel.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
-        } else {
+        if (pollStatusToolTip == null) {
             statusLabel.setValue(FontAwesome.CLOCK_O.getHtml());
+        } else {
+            statusLabel.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
         }
         statusLabel.setDescription(pollStatusToolTip);
         return statusLabel;
