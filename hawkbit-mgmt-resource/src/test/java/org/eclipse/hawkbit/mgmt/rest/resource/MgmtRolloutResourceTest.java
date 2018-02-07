@@ -78,7 +78,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing that creating rollout with insufficient permission returns forbidden")
-    @WithUser(allSpPermissions = true, removeFromAllPermission = "ROLLOUT_MANAGEMENT")
+    @WithUser(allSpPermissions = true, removeFromAllPermission = "CREATE_ROLLOUT")
     public void createRolloutWithInsufficientPermissionReturnsForbidden() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         mvc.perform(post("/rest/v1/rollouts")
