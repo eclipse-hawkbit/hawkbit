@@ -101,7 +101,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private HorizontalLayout captionLayout;
 
-    private BlurListener nameTextFieldBlusListner;
+    private BlurListener nameTextFieldBlurListener;
 
     private LayoutClickListener nameLayoutClickListner;
 
@@ -210,7 +210,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private void createListeners() {
-        nameTextFieldBlusListner = event -> {
+        nameTextFieldBlurListener = event -> {
             if (!StringUtils.isEmpty(nameTextField.getValue())) {
                 captionLayout.removeComponent(nameTextField);
                 captionLayout.addComponent(nameLabel);
@@ -283,12 +283,12 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     private void setUpCaptionLayout(final boolean isCreateView) {
         captionLayout.removeAllComponents();
         if (isCreateView) {
-            nameTextField.removeBlurListener(nameTextFieldBlusListner);
+            nameTextField.removeBlurListener(nameTextFieldBlurListener);
             captionLayout.removeLayoutClickListener(nameLayoutClickListner);
             captionLayout.addComponent(nameTextField);
         } else {
             captionLayout.addComponent(nameLabel);
-            nameTextField.addBlurListener(nameTextFieldBlusListner);
+            nameTextField.addBlurListener(nameTextFieldBlurListener);
             captionLayout.addLayoutClickListener(nameLayoutClickListner);
         }
     }

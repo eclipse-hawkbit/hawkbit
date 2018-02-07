@@ -122,17 +122,15 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     @Override
     protected void createNewTag() {
         super.createNewTag();
-        final String tagNameValueTrimmed = tagNameValue;
-        final String tagDescriptionTrimmed = tagDescValue;
-        if (!StringUtils.isEmpty(tagNameValueTrimmed)) {
+        if (!StringUtils.isEmpty(tagNameValue)) {
 
             String colour = ColorPickerConstants.START_COLOR.getCSS();
             if (!StringUtils.isEmpty(getColorPicked())) {
                 colour = getColorPicked();
             }
 
-            final DistributionSetTag newDistTag = distributionSetTagManagement.create(entityFactory.tag().create()
-                    .name(tagNameValueTrimmed).description(tagDescriptionTrimmed).colour(colour));
+            final DistributionSetTag newDistTag = distributionSetTagManagement
+                    .create(entityFactory.tag().create().name(tagNameValue).description(tagDescValue).colour(colour));
             eventBus.publish(this, new DistributionSetTagTableEvent(BaseEntityEventType.ADD_ENTITY, newDistTag));
             displaySuccess(newDistTag.getName());
             resetDistTagValues();
