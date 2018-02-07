@@ -138,7 +138,8 @@ public class SpPermissionChecker implements Serializable {
      * @return <code>true</code> if rollout create permission
      */
     public boolean hasRolloutCreatePermission() {
-        return hasReadRepositoryPermission() && permissionService.hasPermission(SpPermission.CREATE_ROLLOUT);
+        return hasTargetReadPermission() && hasReadRepositoryPermission()
+                && permissionService.hasPermission(SpPermission.CREATE_ROLLOUT);
     }
 
     /**
