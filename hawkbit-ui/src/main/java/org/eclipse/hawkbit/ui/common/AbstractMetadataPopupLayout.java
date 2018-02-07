@@ -502,6 +502,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     private void setUpDetails(final Long swId, final String metaDatakey) {
         resetDetails();
+        metadataWindow.clearOriginalValues();
         if (swId != null) {
             metaDataGrid.getContainerDataSource().removeAllItems();
             populateGrid();
