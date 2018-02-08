@@ -10,6 +10,9 @@ package org.eclipse.hawkbit.repository.builder;
 
 import java.util.Optional;
 
+import org.eclipse.hawkbit.repository.ValidString;
+import org.springframework.util.StringUtils;
+
 /**
  * Create and update builder DTO.
  *
@@ -17,8 +20,12 @@ import java.util.Optional;
  *            update or create builder interface
  */
 public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractBaseEntityBuilder {
+    @ValidString
     protected String name;
+
+    @ValidString
     protected String query;
+
     protected Long set;
 
     public T set(final long set) {
@@ -31,7 +38,7 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
     }
 
     public T name(final String name) {
-        this.name = name;
+        this.name = StringUtils.trimWhitespace(name);
         return (T) this;
     }
 
@@ -40,7 +47,7 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
     }
 
     public T query(final String query) {
-        this.query = query;
+        this.query = StringUtils.trimWhitespace(query);
         return (T) this;
     }
 

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.validation.ConstraintViolationException;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -22,7 +23,7 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -52,7 +53,7 @@ public interface RepositoryManagement<T, C, U> {
      *             {@link BaseEntity} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    List<T> create(@NotNull Collection<C> creates);
+    List<T> create(@NotNull @Valid Collection<C> creates);
 
     /**
      * Creates new {@link SoftwareModuleType}.
@@ -66,7 +67,7 @@ public interface RepositoryManagement<T, C, U> {
      *             {@link BaseEntity} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    T create(@NotNull C create);
+    T create(@NotNull @Valid C create);
 
     /**
      * Updates existing {@link BaseEntity}.
@@ -87,7 +88,7 @@ public interface RepositoryManagement<T, C, U> {
      *             {@link BaseEntity} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    T update(@NotNull U update);
+    T update(@NotNull @Valid U update);
 
     /**
      * @return number of {@link BaseEntity}s in the repository.
@@ -105,7 +106,7 @@ public interface RepositoryManagement<T, C, U> {
      *             BaseEntity with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
-    void delete(@NotNull Long id);
+    void delete(long id);
 
     /**
      * Delete {@link BaseEntity}s by their IDs. That is either a soft delete of
@@ -139,7 +140,7 @@ public interface RepositoryManagement<T, C, U> {
      * @return <code>true</code> if entity with given ID exists
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    boolean exists(@NotNull Long id);
+    boolean exists(long id);
 
     /**
      * Retrieve {@link BaseEntity}
@@ -150,7 +151,7 @@ public interface RepositoryManagement<T, C, U> {
      *         {@link BaseEntity#getId()}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Optional<T> get(@NotNull Long id);
+    Optional<T> get(long id);
 
     /**
      * Retrieves {@link Page} of all {@link BaseEntity} of given type.

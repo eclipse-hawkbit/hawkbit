@@ -10,9 +10,13 @@ package org.eclipse.hawkbit.repository.builder;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.repository.ValidString;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.springframework.util.StringUtils;
 
 /**
  * Create and update builder DTO.
@@ -23,7 +27,9 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 public abstract class AbstractActionStatusCreate<T> {
     protected Status status;
     protected Long occurredAt;
-    protected Collection<String> messages;
+
+    protected List<@ValidString String> messages;
+
     protected Long actionId;
 
     public Long getActionId() {
@@ -36,7 +42,7 @@ public abstract class AbstractActionStatusCreate<T> {
         return (T) this;
     }
 
-    public T occurredAt(final Long occurredAt) {
+    public T occurredAt(final long occurredAt) {
         this.occurredAt = occurredAt;
 
         return (T) this;
@@ -44,9 +50,9 @@ public abstract class AbstractActionStatusCreate<T> {
 
     public T messages(final Collection<String> messages) {
         if (this.messages == null) {
-            this.messages = messages;
+            this.messages = messages.stream().map(StringUtils::trimWhitespace).collect(Collectors.toList());
         } else {
-            this.messages.addAll(messages);
+            this.messages.addAll(messages.stream().map(StringUtils::trimWhitespace).collect(Collectors.toList()));
         }
 
         return (T) this;
@@ -56,7 +62,7 @@ public abstract class AbstractActionStatusCreate<T> {
         if (this.messages == null) {
             this.messages = new ArrayList<>();
         }
-        this.messages.add(message);
+        this.messages.add(StringUtils.trimWhitespace(message));
 
         return (T) this;
     }

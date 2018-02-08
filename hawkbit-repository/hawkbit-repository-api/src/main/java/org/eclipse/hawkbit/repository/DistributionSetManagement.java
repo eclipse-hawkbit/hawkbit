@@ -33,7 +33,7 @@ import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -66,7 +66,7 @@ public interface DistributionSetManagement
      *             {@link DistributionSet#getType()}.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSet assignSoftwareModules(@NotNull Long setId, @NotEmpty Collection<Long> moduleIds);
+    DistributionSet assignSoftwareModules(long setId, @NotEmpty Collection<Long> moduleIds);
 
     /**
      * Assign a {@link DistributionSetTag} assignment to given
@@ -83,7 +83,7 @@ public interface DistributionSetManagement
      *             distribution sets.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    List<DistributionSet> assignTag(@NotEmpty Collection<Long> setIds, @NotNull Long tagId);
+    List<DistributionSet> assignTag(@NotEmpty Collection<Long> setIds, long tagId);
 
     /**
      * creates a list of distribution set meta data entries.
@@ -102,7 +102,7 @@ public interface DistributionSetManagement
      *             specific key
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    List<DistributionSetMetadata> createMetaData(@NotNull Long setId, @NotEmpty Collection<MetaData> metadata);
+    List<DistributionSetMetadata> createMetaData(long setId, @NotEmpty Collection<MetaData> metadata);
 
     /**
      * deletes a distribution set meta data entry.
@@ -116,7 +116,7 @@ public interface DistributionSetManagement
      *             if given set does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    void deleteMetaData(@NotNull Long setId, @NotEmpty String key);
+    void deleteMetaData(long setId, @NotEmpty String key);
 
     /**
      * retrieves the distribution set for a given action.
@@ -129,7 +129,7 @@ public interface DistributionSetManagement
      *             if action with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Optional<DistributionSet> getByAction(@NotNull Long actionId);
+    Optional<DistributionSet> getByAction(long actionId);
 
     /**
      * Find {@link DistributionSet} based on given ID including (lazy loaded)
@@ -143,7 +143,7 @@ public interface DistributionSetManagement
      * @return {@link DistributionSet}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Optional<DistributionSet> getWithDetails(@NotNull Long setId);
+    Optional<DistributionSet> getWithDetails(long setId);
 
     /**
      * Find distribution set by name and version.
@@ -172,7 +172,7 @@ public interface DistributionSetManagement
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<DistributionSetMetadata> findMetaDataByDistributionSetId(@NotNull Pageable pageable, @NotNull Long setId);
+    Page<DistributionSetMetadata> findMetaDataByDistributionSetId(@NotNull Pageable pageable, long setId);
 
     /**
      * finds all meta data by the given distribution set id.
@@ -198,7 +198,7 @@ public interface DistributionSetManagement
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<DistributionSetMetadata> findMetaDataByDistributionSetIdAndRsql(@NotNull Pageable pageable,
-            @NotNull Long setId, @NotNull String rsqlParam);
+            long setId, @NotNull String rsqlParam);
 
     /**
      * finds all {@link DistributionSet}s.
@@ -273,7 +273,7 @@ public interface DistributionSetManagement
      *             of distribution set tag with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<DistributionSet> findByTag(@NotNull Pageable pageable, @NotNull Long tagId);
+    Page<DistributionSet> findByTag(@NotNull Pageable pageable, long tagId);
 
     /**
      * retrieves {@link DistributionSet}s by filtering on the given parameters.
@@ -290,7 +290,7 @@ public interface DistributionSetManagement
      *             of distribution set tag with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<DistributionSet> findByRsqlAndTag(@NotNull Pageable pageable, @NotNull String rsqlParam, @NotNull Long tagId);
+    Page<DistributionSet> findByRsqlAndTag(@NotNull Pageable pageable, @NotNull String rsqlParam, long tagId);
 
     /**
      * finds a single distribution set meta data by its id.
@@ -305,7 +305,7 @@ public interface DistributionSetManagement
      *             is set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Optional<DistributionSetMetadata> getMetaDataByDistributionSetId(@NotNull Long setId, @NotEmpty String key);
+    Optional<DistributionSetMetadata> getMetaDataByDistributionSetId(long setId, @NotEmpty String key);
 
     /**
      * Checks if a {@link DistributionSet} is currently in use by a target in
@@ -317,7 +317,7 @@ public interface DistributionSetManagement
      * @return <code>true</code> if in use
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    boolean isInUse(@NotNull Long setId);
+    boolean isInUse(long setId);
 
     /**
      * Toggles {@link DistributionSetTag} assignment to given
@@ -356,7 +356,7 @@ public interface DistributionSetManagement
      *             the DS is already in use.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSet unassignSoftwareModule(@NotNull Long setId, @NotNull Long moduleId);
+    DistributionSet unassignSoftwareModule(long setId, long moduleId);
 
     /**
      * Unassign a {@link DistributionSetTag} assignment to given
@@ -372,7 +372,7 @@ public interface DistributionSetManagement
      *             if set or tag with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSet unAssignTag(@NotNull Long setId, @NotNull Long tagId);
+    DistributionSet unAssignTag(long setId, long tagId);
 
     /**
      * updates a distribution set meta data value if corresponding entry exists.
@@ -388,7 +388,7 @@ public interface DistributionSetManagement
      *             updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSetMetadata updateMetaData(@NotNull Long setId, @NotNull MetaData metadata);
+    DistributionSetMetadata updateMetaData(long setId, @NotNull MetaData metadata);
 
     /**
      * Count all {@link DistributionSet}s in the repository that are not marked
@@ -403,6 +403,6 @@ public interface DistributionSetManagement
      *             if type with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    long countByTypeId(@NotNull Long typeId);
+    long countByTypeId(long typeId);
 
 }

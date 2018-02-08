@@ -713,8 +713,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     @Test
     @Description("Verfies that a  properties of new targets are validated as in allowed size range.")
     public void createTargetWithInvalidPropertyBadRequest() throws Exception {
-        final Target test1 = entityFactory.target().create().controllerId("id1").name(RandomStringUtils.randomAscii(80))
-                .build();
+        final Target test1 = entityFactory.target().create().controllerId("id1")
+                .name(RandomStringUtils.randomAlphanumeric(80)).build();
 
         final MvcResult mvcResult = mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING)
                 .content(JsonBuilder.targets(Arrays.asList(test1), true)).contentType(MediaType.APPLICATION_JSON))

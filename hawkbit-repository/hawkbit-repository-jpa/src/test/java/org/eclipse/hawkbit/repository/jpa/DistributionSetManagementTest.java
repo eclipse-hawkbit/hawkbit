@@ -66,6 +66,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("DistributionSet Management")
 public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
+
     @Test
     @Description("Verifies that management get access react as specfied on calls for non existing entities by means "
             + "of Optional not present.")
@@ -77,7 +78,6 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(distributionSetManagement.getWithDetails(NOT_EXIST_IDL)).isNotPresent();
         assertThat(distributionSetManagement.getByNameAndVersion(NOT_EXIST_ID, NOT_EXIST_ID)).isNotPresent();
         assertThat(distributionSetManagement.getMetaDataByDistributionSetId(set.getId(), NOT_EXIST_ID)).isNotPresent();
-
     }
 
     @Test
@@ -193,9 +193,19 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .as("entity with too long description should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> distributionSetManagement.create(
+                        entityFactory.distributionSet().create().name("a").version("a").description(INVALID_TEXT_HTML)))
+                .as("entity with invalid description should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> distributionSetManagement.update(entityFactory.distributionSet().update(set.getId())
                         .description(RandomStringUtils.randomAlphanumeric(513))))
                 .as("entity with too long description should not be updated");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> distributionSetManagement
+                        .update(entityFactory.distributionSet().update(set.getId()).description(INVALID_TEXT_HTML)))
+                .as("entity with invalid characters should not be updated");
 
     }
 
@@ -209,12 +219,22 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(
                 () -> distributionSetManagement.create(entityFactory.distributionSet().create().version("a").name("")))
-                .as("entity with too long name should not be created");
+                .as("entity with too short name should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> distributionSetManagement
+                        .create(entityFactory.distributionSet().create().version("a").name(INVALID_TEXT_HTML)))
+                .as("entity with invalid characters in name should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> distributionSetManagement.update(entityFactory.distributionSet().update(set.getId())
                         .name(RandomStringUtils.randomAlphanumeric(65))))
                 .as("entity with too long name should not be updated");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> distributionSetManagement
+                        .update(entityFactory.distributionSet().update(set.getId()).name(INVALID_TEXT_HTML)))
+                .as("entity with invalid characters should not be updated");
 
         assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(
                 () -> distributionSetManagement.update(entityFactory.distributionSet().update(set.getId()).name("")))

@@ -40,6 +40,7 @@ import com.google.common.collect.Lists;
 @TestPropertySource(locations = "classpath:/jpa-test.properties")
 public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest {
 
+    protected static final String INVALID_TEXT_HTML = "</noscript><br><script>";
     protected static final String NOT_EXIST_ID = "1234";
     protected static final long NOT_EXIST_IDL = Long.parseLong(NOT_EXIST_ID);
 

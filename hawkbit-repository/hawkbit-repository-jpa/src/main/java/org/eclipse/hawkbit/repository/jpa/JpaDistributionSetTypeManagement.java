@@ -101,7 +101,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetType assignMandatorySoftwareModuleTypes(final Long dsTypeId,
+    public DistributionSetType assignMandatorySoftwareModuleTypes(final long dsTypeId,
             final Collection<Long> softwareModulesTypeIds) {
         final Collection<JpaSoftwareModuleType> modules = softwareModuleTypeRepository.findAll(softwareModulesTypeIds);
 
@@ -122,7 +122,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetType assignOptionalSoftwareModuleTypes(final Long dsTypeId,
+    public DistributionSetType assignOptionalSoftwareModuleTypes(final long dsTypeId,
             final Collection<Long> softwareModulesTypeIds) {
 
         final Collection<JpaSoftwareModuleType> modules = softwareModuleTypeRepository.findAll(softwareModulesTypeIds);
@@ -143,7 +143,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetType unassignSoftwareModuleType(final Long dsTypeId, final Long softwareModuleTypeId) {
+    public DistributionSetType unassignSoftwareModuleType(final long dsTypeId, final long softwareModuleTypeId) {
         final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(dsTypeId);
 
         checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(dsTypeId);
@@ -197,7 +197,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void delete(final Long typeId) {
+    public void delete(final long typeId) {
 
         final JpaDistributionSetType toDelete = distributionSetTypeRepository.findById(typeId)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, typeId));
@@ -275,12 +275,12 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     }
 
     @Override
-    public Optional<DistributionSetType> get(final Long id) {
+    public Optional<DistributionSetType> get(final long id) {
         return Optional.ofNullable(distributionSetTypeRepository.findOne(id));
     }
 
     @Override
-    public boolean exists(final Long id) {
+    public boolean exists(final long id) {
         return distributionSetTypeRepository.exists(id);
     }
 

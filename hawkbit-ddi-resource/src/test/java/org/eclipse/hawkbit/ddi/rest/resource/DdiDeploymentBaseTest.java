@@ -552,13 +552,13 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
             mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action.getId() + "/feedback",
                     tenantAware.getCurrentTenant()).content(feedback).contentType(MediaType.APPLICATION_JSON)
                             .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
+                    .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         }
 
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action.getId() + "/feedback",
                 tenantAware.getCurrentTenant()).content(feedback).contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden());
     }
 
     @Test
@@ -582,7 +582,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action.getId() + "/feedback",
                 tenantAware.getCurrentTenant()).content(feedback).contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden());
 
     }
 

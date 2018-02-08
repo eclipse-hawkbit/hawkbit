@@ -59,7 +59,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
 
     @Before
     public void testSetup() {
-        enableTargetTokenAuthentification();
+        enableTargetTokenAuthentication();
     }
 
     @Test
@@ -393,7 +393,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
                 TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, false);
     }
 
-    private void enableTargetTokenAuthentification() {
+    private void enableTargetTokenAuthentication() {
         tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED,
                 false);
         tenantConfigurationManagement.addOrUpdateConfiguration(
