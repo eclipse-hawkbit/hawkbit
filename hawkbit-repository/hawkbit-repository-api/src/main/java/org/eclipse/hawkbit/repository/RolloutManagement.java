@@ -72,7 +72,7 @@ public interface RolloutManagement {
      * otherwise.
      * 
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
+    @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
     void handleRollouts();
 
     /**
@@ -124,7 +124,7 @@ public interface RolloutManagement {
      * @throws ConstraintViolationException
      *             if rollout or group parameters are invalid.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_CREATE)
     Rollout create(@NotNull RolloutCreate create, int amountGroup, @NotNull RolloutGroupConditions conditions);
 
     /**
@@ -158,7 +158,7 @@ public interface RolloutManagement {
      * @throws ConstraintViolationException
      *             if rollout or group parameters are invalid
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_CREATE)
     Rollout create(@NotNull @Valid RolloutCreate rollout, @NotNull @Valid List<RolloutGroupCreate> groups,
             RolloutGroupConditions conditions);
 
@@ -313,7 +313,7 @@ public interface RolloutManagement {
      *             Only running rollouts can be paused.
      * 
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_HANDLE)
     void pauseRollout(long rolloutId);
 
     /**
@@ -330,7 +330,7 @@ public interface RolloutManagement {
      *             if given rollout is not in {@link RolloutStatus#PAUSED}. Only
      *             paused rollouts can be resumed.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_HANDLE)
     void resumeRollout(long rolloutId);
 
     /**
@@ -351,7 +351,7 @@ public interface RolloutManagement {
      *             if given rollout is not in {@link RolloutStatus#READY}. Only
      *             ready rollouts can be started.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_HANDLE)
     Rollout start(long rolloutId);
 
     /**
@@ -369,7 +369,7 @@ public interface RolloutManagement {
      *             reference
      * 
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
     Rollout update(@NotNull @Valid RolloutUpdate update);
 
     /**
@@ -380,7 +380,7 @@ public interface RolloutManagement {
      * @param rolloutId
      *            the ID of the rollout to be deleted
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_DELETE)
     void delete(long rolloutId);
 
 }

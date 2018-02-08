@@ -380,6 +380,8 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
         final DmfDownloadResponse convertedMessage = verifyResult(returnMessage, HttpStatus.OK, null);
         assertThat(convertedMessage.getDownloadUrl()).isNotNull();
         assertThat(convertedMessage.getArtifact()).isNotNull();
+        assertThat(convertedMessage.getArtifact().getLastModified())
+                .isEqualTo(artifactManagement.findFirstBySHA1(artifact.getSha1Hash()).get().getCreatedAt());
         assertThat(convertedMessage.getArtifact().getHashes().getSha1()).isEqualTo(artifact.getSha1Hash());
 
     }

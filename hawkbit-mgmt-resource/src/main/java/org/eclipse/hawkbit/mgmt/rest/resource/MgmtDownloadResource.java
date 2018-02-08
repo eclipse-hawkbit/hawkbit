@@ -72,7 +72,7 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
                 return ResponseEntity.notFound().build();
             }
 
-            return FileStreamingUtil.writeFileResponse(artifact, downloadId, null,
+            return FileStreamingUtil.writeFileResponse(artifact, downloadId, 0L,
                     requestResponseContextHolder.getHttpServletResponse(),
                     requestResponseContextHolder.getHttpServletRequest(), null);
 

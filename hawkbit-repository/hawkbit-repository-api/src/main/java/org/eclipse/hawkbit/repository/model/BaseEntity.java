@@ -27,7 +27,7 @@ public interface BaseEntity extends Serializable, Identifiable<Long> {
      * @return time in {@link TimeUnit#MILLISECONDS} when the {@link BaseEntity}
      *         was created.
      */
-    Long getCreatedAt();
+    long getCreatedAt();
 
     /**
      * @return user that created the {@link BaseEntity}.
@@ -38,7 +38,7 @@ public interface BaseEntity extends Serializable, Identifiable<Long> {
      * @return time in {@link TimeUnit#MILLISECONDS} when the {@link BaseEntity}
      *         was last time changed.
      */
-    Long getLastModifiedAt();
+    long getLastModifiedAt();
 
     /**
      * @return user that updated the {@link BaseEntity} last.

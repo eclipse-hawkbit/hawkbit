@@ -189,6 +189,7 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
     private static DmfArtifact convertDbArtifact(final Artifact dbArtifact) {
         final DmfArtifact artifact = new DmfArtifact();
         artifact.setSize(dbArtifact.getSize());
+        artifact.setLastModified(dbArtifact.getCreatedAt());
         artifact.setHashes(new DmfArtifactHash(dbArtifact.getSha1Hash(), dbArtifact.getMd5Hash()));
         return artifact;
     }

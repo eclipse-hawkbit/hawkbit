@@ -59,6 +59,6 @@ public class RolloutViewMenuItem extends AbstractDashboardMenuItemNotification {
 
     @Override
     public List<String> getPermissions() {
-        return Arrays.asList(SpPermission.ROLLOUT_MANAGEMENT);
+        return Arrays.asList(SpPermission.READ_ROLLOUT);
     }
 }

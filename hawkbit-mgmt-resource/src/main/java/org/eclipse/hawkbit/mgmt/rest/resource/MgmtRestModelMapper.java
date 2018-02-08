@@ -30,10 +30,10 @@ final class MgmtRestModelMapper {
     static void mapBaseToBase(final MgmtBaseEntity response, final TenantAwareBaseEntity base) {
         response.setCreatedBy(base.getCreatedBy());
         response.setLastModifiedBy(base.getLastModifiedBy());
-        if (base.getCreatedAt() != null) {
+        if (base.getCreatedAt() > 0) {
             response.setCreatedAt(base.getCreatedAt());
         }
-        if (base.getLastModifiedAt() != null) {
+        if (base.getLastModifiedAt() > 0) {
             response.setLastModifiedAt(base.getLastModifiedAt());
         }
     }

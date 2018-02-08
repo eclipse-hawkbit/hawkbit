@@ -129,7 +129,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath("content.[0].id", equalTo(status.getId().intValue())))
                 .andExpect(jsonPath("content.[0].type", equalTo("finished")))
                 .andExpect(jsonPath("content.[0].messages", hasSize(1)))
-                .andExpect(jsonPath("content.[0].reportedAt", equalTo(status.getCreatedAt().longValue())))
+                .andExpect(jsonPath("content.[0].reportedAt", equalTo(status.getCreatedAt())))
                 .andExpect(jsonPath("content.[1].type", equalTo("canceling")));
     }
 

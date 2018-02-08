@@ -44,8 +44,8 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     private String createdBy;
     private String lastModifiedBy;
-    private Long createdAt;
-    private Long lastModifiedAt;
+    private long createdAt;
+    private long lastModifiedAt;
 
     @Version
     @Column(name = "optlock_revision")
@@ -61,7 +61,7 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
     @Override
     @Access(AccessType.PROPERTY)
     @Column(name = "created_at", insertable = true, updatable = false)
-    public Long getCreatedAt() {
+    public long getCreatedAt() {
         return createdAt;
     }
 
@@ -75,7 +75,7 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
     @Override
     @Access(AccessType.PROPERTY)
     @Column(name = "last_modified_at", insertable = true, updatable = true)
-    public Long getLastModifiedAt() {
+    public long getLastModifiedAt() {
         return lastModifiedAt;
     }
 
@@ -97,12 +97,12 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
     }
 
     @CreatedDate
-    public void setCreatedAt(final Long createdAt) {
+    public void setCreatedAt(final long createdAt) {
         this.createdAt = createdAt;
     }
 
     @LastModifiedDate
-    public void setLastModifiedAt(final Long lastModifiedAt) {
+    public void setLastModifiedAt(final long lastModifiedAt) {
 
         if (isController()) {
             return;
