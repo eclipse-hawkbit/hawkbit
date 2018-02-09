@@ -335,6 +335,9 @@ public class CommonDialogWindow extends Window {
             Object value = getCurrentVaue(currentChangedComponent, newValue, field);
 
             if (String.class.equals(field.getType())) {
+                if (StringUtils.isEmpty(((String) value).trim())) {
+                    value = null;
+                }
                 value = Strings.emptyToNull((String) value);
             }
 
