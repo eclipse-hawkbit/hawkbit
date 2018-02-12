@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
+import org.eclipse.hawkbit.ui.common.EmptyStringValidator;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
@@ -243,6 +244,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
     private TextField createTextField(final String in18Key, final String id) {
         final TextField buildTextField = new TextFieldBuilder().caption(i18n.getMessage(in18Key)).required(true)
+                .validator(new EmptyStringValidator(i18n.getMessage("textfield.min.length")))
                 .prompt(i18n.getMessage(in18Key)).immediate(true).id(id).buildTextComponent();
         buildTextField.setNullRepresentation("");
         return buildTextField;

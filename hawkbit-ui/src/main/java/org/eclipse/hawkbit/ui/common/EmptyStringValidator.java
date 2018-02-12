@@ -11,8 +11,9 @@ package org.eclipse.hawkbit.ui.common;
 import com.vaadin.data.validator.RegexpValidator;
 
 /**
- * Assures that the entered text contains not only whitespaces. At least one
- * character has to be entered.
+ * Assures that the entered text does not contain only whitespaces. At least one
+ * character has to be entered. Leading and trailing whitespaces are allowed as
+ * they will be trimmed by the repository.
  */
 public class EmptyStringValidator extends RegexpValidator {
 
@@ -24,7 +25,7 @@ public class EmptyStringValidator extends RegexpValidator {
      * Validator for validating if at least one character has entered
      * 
      * @param errorMessage
-     *            the message to dispay if validation fails
+     *            the message to display if validation fails
      */
     public EmptyStringValidator(final String errorMessage) {
         super(regex, true, errorMessage);

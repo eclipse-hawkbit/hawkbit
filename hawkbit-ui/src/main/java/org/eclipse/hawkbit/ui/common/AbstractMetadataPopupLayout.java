@@ -239,7 +239,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         final TextField keyField = new TextFieldBuilder().caption(i18n.getMessage("textfield.key")).required(true)
                 .prompt(i18n.getMessage("textfield.key")).immediate(true)
                 .id(UIComponentIdProvider.METADATA_KEY_FIELD_ID).maxLengthAllowed(MetaData.KEY_MAX_SIZE)
-                .buildTextComponent();
+                .validator(new EmptyStringValidator(i18n.getMessage("textfield.min.length"))).buildTextComponent();
         keyField.addTextChangeListener(this::onKeyChange);
         keyField.setTextChangeEventMode(TextChangeEventMode.EAGER);
         keyField.setWidth("100%");
@@ -248,6 +248,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     private TextArea createValueTextField() {
         valueTextArea = new TextAreaBuilder().caption(i18n.getMessage("textfield.value")).required(true)
+                .validator(new EmptyStringValidator(i18n.getMessage("textfield.min.length")))
                 .prompt(i18n.getMessage("textfield.value")).immediate(true).id(UIComponentIdProvider.METADATA_VALUE_ID)
                 .maxLengthAllowed(MetaData.VALUE_MAX_SIZE).buildTextComponent();
         valueTextArea.setNullRepresentation("");

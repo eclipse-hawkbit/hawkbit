@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
+import org.eclipse.hawkbit.ui.common.EmptyStringValidator;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -137,7 +138,8 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
     private TextField createTextField(final String in18Key, final String styleName, final String id) {
         return new TextFieldBuilder().caption(i18n.getMessage(in18Key))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + styleName).required(true).prompt(i18n.getMessage(in18Key))
-                .immediate(true).id(id).buildTextComponent();
+                .validator(new EmptyStringValidator(i18n.getMessage("textfield.min.length"))).immediate(true).id(id)
+                .buildTextComponent();
     }
 
     @Override

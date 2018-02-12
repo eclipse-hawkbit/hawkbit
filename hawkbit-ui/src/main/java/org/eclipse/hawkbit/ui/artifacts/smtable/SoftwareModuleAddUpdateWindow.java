@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
+import org.eclipse.hawkbit.ui.common.EmptyStringValidator;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
@@ -233,7 +234,8 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
     private TextField createTextField(final String in18Key, final String id) {
         return new TextFieldBuilder().caption(i18n.getMessage(in18Key)).required(true).prompt(i18n.getMessage(in18Key))
-                .immediate(true).id(id).buildTextComponent();
+                .immediate(true).id(id).validator(new EmptyStringValidator(i18n.getMessage("textfield.min.length")))
+                .buildTextComponent();
     }
 
     private void populateTypeNameCombo() {
