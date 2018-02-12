@@ -131,12 +131,12 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     private AfterTransactionCommitExecutor afterCommit;
 
     @Override
-    public Optional<DistributionSet> getWithDetails(final Long distid) {
+    public Optional<DistributionSet> getWithDetails(final long distid) {
         return Optional.ofNullable(distributionSetRepository.findOne(DistributionSetSpecification.byId(distid)));
     }
 
     @Override
-    public long countByTypeId(final Long typeId) {
+    public long countByTypeId(final long typeId) {
         if (!distributionSetTypeManagement.exists(typeId)) {
             throw new EntityNotFoundException(DistributionSetType.class, typeId);
         }
@@ -304,7 +304,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSet assignSoftwareModules(final Long setId, final Collection<Long> moduleIds) {
+    public DistributionSet assignSoftwareModules(final long setId, final Collection<Long> moduleIds) {
 
         final Collection<JpaSoftwareModule> modules = softwareModuleRepository.findByIdIn(moduleIds);
 
@@ -325,7 +325,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSet unassignSoftwareModule(final Long setId, final Long moduleId) {
+    public DistributionSet unassignSoftwareModule(final long setId, final long moduleId) {
         final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(setId);
         final JpaSoftwareModule module = findSoftwareModuleAndThrowExceptionIfNotFound(moduleId);
 
@@ -446,7 +446,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public List<DistributionSetMetadata> createMetaData(final Long dsId, final Collection<MetaData> md) {
+    public List<DistributionSetMetadata> createMetaData(final long dsId, final Collection<MetaData> md) {
 
         md.forEach(meta -> checkAndThrowAlreadyIfDistributionSetMetadataExists(
                 new DsMetadataCompositeKey(dsId, meta.getKey())));
@@ -463,7 +463,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetMetadata updateMetaData(final Long dsId, final MetaData md) {
+    public DistributionSetMetadata updateMetaData(final long dsId, final MetaData md) {
 
         // check if exists otherwise throw entity not found exception
         final JpaDistributionSetMetadata toUpdate = (JpaDistributionSetMetadata) getMetaDataByDistributionSetId(dsId,
@@ -480,7 +480,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void deleteMetaData(final Long distributionSetId, final String key) {
+    public void deleteMetaData(final long distributionSetId, final String key) {
         final JpaDistributionSetMetadata metadata = (JpaDistributionSetMetadata) getMetaDataByDistributionSetId(
                 distributionSetId, key).orElseThrow(
                         () -> new EntityNotFoundException(DistributionSetMetadata.class, distributionSetId, key));
@@ -521,7 +521,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public Page<DistributionSetMetadata> findMetaDataByDistributionSetId(final Pageable pageable,
-            final Long distributionSetId) {
+            final long distributionSetId) {
         throwExceptionIfDistributionSetDoesNotExist(distributionSetId);
 
         return convertMdPage(distributionSetMetadataRepository
@@ -533,7 +533,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public Page<DistributionSetMetadata> findMetaDataByDistributionSetIdAndRsql(final Pageable pageable,
-            final Long distributionSetId, final String rsqlParam) {
+            final long distributionSetId, final String rsqlParam) {
 
         throwExceptionIfDistributionSetDoesNotExist(distributionSetId);
 
@@ -555,14 +555,14 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    public Optional<DistributionSetMetadata> getMetaDataByDistributionSetId(final Long setId, final String key) {
+    public Optional<DistributionSetMetadata> getMetaDataByDistributionSetId(final long setId, final String key) {
         throwExceptionIfDistributionSetDoesNotExist(setId);
 
         return Optional.ofNullable(distributionSetMetadataRepository.findOne(new DsMetadataCompositeKey(setId, key)));
     }
 
     @Override
-    public Optional<DistributionSet> getByAction(final Long actionId) {
+    public Optional<DistributionSet> getByAction(final long actionId) {
         if (!actionRepository.exists(actionId)) {
             throw new EntityNotFoundException(Action.class, actionId);
         }
@@ -571,7 +571,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    public boolean isInUse(final Long setId) {
+    public boolean isInUse(final long setId) {
         throwExceptionIfDistributionSetDoesNotExist(setId);
 
         return actionRepository.countByDistributionSetId(setId) > 0;
@@ -665,7 +665,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public List<DistributionSet> assignTag(final Collection<Long> dsIds, final Long dsTagId) {
+    public List<DistributionSet> assignTag(final Collection<Long> dsIds, final long dsTagId) {
         final List<JpaDistributionSet> allDs = findDistributionSetListWithDetails(dsIds);
 
         if (allDs.size() < dsIds.size()) {
@@ -690,7 +690,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSet unAssignTag(final Long dsId, final Long dsTagId) {
+    public DistributionSet unAssignTag(final long dsId, final long dsTagId) {
         final JpaDistributionSet set = (JpaDistributionSet) getWithDetails(dsId)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, dsId));
 
@@ -710,7 +710,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void delete(final Long setId) {
+    public void delete(final long setId) {
         throwExceptionIfDistributionSetDoesNotExist(setId);
 
         delete(Arrays.asList(setId));
@@ -728,7 +728,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    public Page<DistributionSet> findByTag(final Pageable pageable, final Long tagId) {
+    public Page<DistributionSet> findByTag(final Pageable pageable, final long tagId) {
         throwEntityNotFoundExceptionIfDsTagDoesNotExist(tagId);
 
         return convertDsPage(distributionSetRepository.findByTag(pageable, tagId), pageable);
@@ -742,7 +742,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    public Page<DistributionSet> findByRsqlAndTag(final Pageable pageable, final String rsqlParam, final Long tagId) {
+    public Page<DistributionSet> findByRsqlAndTag(final Pageable pageable, final String rsqlParam, final long tagId) {
         throwEntityNotFoundExceptionIfDsTagDoesNotExist(tagId);
 
         final Specification<JpaDistributionSet> spec = RSQLUtility.parse(rsqlParam, DistributionSetFields.class,
@@ -769,12 +769,12 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    public Optional<DistributionSet> get(final Long id) {
+    public Optional<DistributionSet> get(final long id) {
         return Optional.ofNullable(distributionSetRepository.findOne(id));
     }
 
     @Override
-    public boolean exists(final Long id) {
+    public boolean exists(final long id) {
         return distributionSetRepository.exists(id);
     }
 

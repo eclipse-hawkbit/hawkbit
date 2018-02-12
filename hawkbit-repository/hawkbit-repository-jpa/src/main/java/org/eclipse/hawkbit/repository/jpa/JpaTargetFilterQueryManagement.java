@@ -84,7 +84,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void delete(final Long targetFilterQueryId) {
+    public void delete(final long targetFilterQueryId) {
         if (!targetFilterQueryRepository.exists(targetFilterQueryId)) {
             throw new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId);
         }
@@ -136,7 +136,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-    public Page<TargetFilterQuery> findByAutoAssignDSAndRsql(final Pageable pageable, final Long setId,
+    public Page<TargetFilterQuery> findByAutoAssignDSAndRsql(final Pageable pageable, final long setId,
             final String rsqlFilter) {
         final List<Specification<JpaTargetFilterQuery>> specList = Lists.newArrayListWithExpectedSize(2);
 
@@ -173,7 +173,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-    public Optional<TargetFilterQuery> get(final Long targetFilterQueryId) {
+    public Optional<TargetFilterQuery> get(final long targetFilterQueryId) {
         return Optional.ofNullable(targetFilterQueryRepository.findOne(targetFilterQueryId));
     }
 
@@ -192,7 +192,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     @Transactional
-    public TargetFilterQuery updateAutoAssignDS(final Long queryId, final Long dsId) {
+    public TargetFilterQuery updateAutoAssignDS(final long queryId, final Long dsId) {
         final JpaTargetFilterQuery targetFilterQuery = findTargetFilterQueryOrThrowExceptionIfNotFound(queryId);
 
         targetFilterQuery.setAutoAssignDistributionSet(

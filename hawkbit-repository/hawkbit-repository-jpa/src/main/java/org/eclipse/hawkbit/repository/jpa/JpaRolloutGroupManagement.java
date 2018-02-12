@@ -21,7 +21,6 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ListJoin;
 import javax.persistence.criteria.Root;
-import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.RolloutGroupFields;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
@@ -85,12 +84,12 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     private RolloutStatusCache rolloutStatusCache;
 
     @Override
-    public Optional<RolloutGroup> get(final Long rolloutGroupId) {
+    public Optional<RolloutGroup> get(final long rolloutGroupId) {
         return Optional.ofNullable(rolloutGroupRepository.findOne(rolloutGroupId));
     }
 
     @Override
-    public Page<RolloutGroup> findByRollout(final Pageable pageable, final Long rolloutId) {
+    public Page<RolloutGroup> findByRollout(final Pageable pageable, final long rolloutId) {
         throwEntityNotFoundExceptionIfRolloutDoesNotExist(rolloutId);
 
         return convertPage(rolloutGroupRepository.findByRolloutId(rolloutId, pageable), pageable);
@@ -105,7 +104,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     }
 
     @Override
-    public Page<RolloutGroup> findByRolloutAndRsql(final Pageable pageable, final Long rolloutId,
+    public Page<RolloutGroup> findByRolloutAndRsql(final Pageable pageable, final long rolloutId,
             final String rsqlParam) {
         throwEntityNotFoundExceptionIfRolloutDoesNotExist(rolloutId);
 
@@ -130,7 +129,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     }
 
     @Override
-    public Page<RolloutGroup> findByRolloutWithDetailedStatus(final Pageable pageable, final Long rolloutId) {
+    public Page<RolloutGroup> findByRolloutWithDetailedStatus(final Pageable pageable, final long rolloutId) {
         throwEntityNotFoundExceptionIfRolloutDoesNotExist(rolloutId);
 
         final Page<JpaRolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutId(rolloutId, pageable);
@@ -155,7 +154,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     }
 
     @Override
-    public Optional<RolloutGroup> getWithDetailedStatus(final Long rolloutGroupId) {
+    public Optional<RolloutGroup> getWithDetailedStatus(final long rolloutGroupId) {
         final Optional<RolloutGroup> rolloutGroup = get(rolloutGroupId);
 
         if (!rolloutGroup.isPresent()) {
@@ -201,7 +200,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     }
 
     @Override
-    public Page<Target> findTargetsOfRolloutGroupByRsql(final Pageable pageable, final Long rolloutGroupId,
+    public Page<Target> findTargetsOfRolloutGroupByRsql(final Pageable pageable, final long rolloutGroupId,
             final String rsqlParam) {
 
         throwExceptionIfRolloutGroupDoesNotExist(rolloutGroupId);
@@ -219,7 +218,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     }
 
     @Override
-    public Page<Target> findTargetsOfRolloutGroup(final Pageable page, final Long rolloutGroupId) {
+    public Page<Target> findTargetsOfRolloutGroup(final Pageable page, final long rolloutGroupId) {
         final JpaRolloutGroup rolloutGroup = rolloutGroupRepository.findById(rolloutGroupId)
                 .orElseThrow(() -> new EntityNotFoundException(RolloutGroup.class, rolloutGroupId));
 
@@ -238,7 +237,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
     @Override
     public Page<TargetWithActionStatus> findAllTargetsOfRolloutGroupWithActionStatus(final Pageable pageRequest,
-            final Long rolloutGroupId) {
+            final long rolloutGroupId) {
         throwExceptionIfRolloutGroupDoesNotExist(rolloutGroupId);
 
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -269,7 +268,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     }
 
     @Override
-    public long countTargetsOfRolloutsGroup(@NotNull final Long rolloutGroupId) {
+    public long countTargetsOfRolloutsGroup(final long rolloutGroupId) {
         throwExceptionIfRolloutGroupDoesNotExist(rolloutGroupId);
 
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -287,7 +286,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     }
 
     @Override
-    public long countByRollout(final Long rolloutId) {
+    public long countByRollout(final long rolloutId) {
         throwEntityNotFoundExceptionIfRolloutDoesNotExist(rolloutId);
 
         return rolloutGroupRepository.countByRolloutId(rolloutId);

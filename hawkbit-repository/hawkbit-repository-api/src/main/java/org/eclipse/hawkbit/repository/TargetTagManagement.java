@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.validation.ConstraintViolationException;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -24,7 +26,6 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -58,7 +59,7 @@ public interface TargetTagManagement {
      *             {@link TagCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
-    TargetTag create(@NotNull TagCreate create);
+    TargetTag create(@NotNull @Valid TagCreate create);
 
     /**
      * created multiple {@link TargetTag}s.
@@ -74,7 +75,7 @@ public interface TargetTagManagement {
      *             {@link TagCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
-    List<TargetTag> create(@NotNull Collection<TagCreate> creates);
+    List<TargetTag> create(@NotNull @Valid Collection<TagCreate> creates);
 
     /**
      * Deletes {@link TargetTag} with given name.
@@ -117,6 +118,7 @@ public interface TargetTagManagement {
 
     /**
      * Retrieves all target tags based on the given specification.
+     * 
      * @param pageable
      *            pagination parameter
      * @param rsqlParam
@@ -151,7 +153,7 @@ public interface TargetTagManagement {
      * @return the found {@link TargetTag}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Optional<TargetTag> get(@NotNull Long id);
+    Optional<TargetTag> get(long id);
 
     /**
      * updates the {@link TargetTag}.
@@ -168,6 +170,6 @@ public interface TargetTagManagement {
      *             {@link TagUpdate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    TargetTag update(@NotNull TagUpdate update);
+    TargetTag update(@NotNull @Valid TagUpdate update);
 
 }

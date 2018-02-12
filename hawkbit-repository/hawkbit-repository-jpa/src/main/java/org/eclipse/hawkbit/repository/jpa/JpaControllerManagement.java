@@ -177,7 +177,7 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Override
     public Optional<Action> getActionForDownloadByTargetAndSoftwareModule(final String controllerId,
-            final Long moduleId) {
+            final long moduleId) {
         throwExceptionIfTargetDoesNotExist(controllerId);
         throwExceptionIfSoftwareModuleDoesNotExist(moduleId);
 
@@ -215,7 +215,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public boolean hasTargetArtifactAssigned(final Long targetId, final String sha1Hash) {
+    public boolean hasTargetArtifactAssigned(final long targetId, final String sha1Hash) {
         throwExceptionIfTargetDoesNotExist(targetId);
         return actionRepository.count(ActionSpecifications.hasTargetAssignedArtifact(targetId, sha1Hash)) > 0;
     }
@@ -233,7 +233,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public Optional<Action> findActionWithDetails(final Long actionId) {
+    public Optional<Action> findActionWithDetails(final long actionId) {
         return actionRepository.getById(actionId);
     }
 
@@ -556,7 +556,7 @@ public class JpaControllerManagement implements ControllerManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Action registerRetrieved(final Long actionId, final String message) {
+    public Action registerRetrieved(final long actionId, final String message) {
         return handleRegisterRetrieved(actionId, message);
     }
 
@@ -640,12 +640,12 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public Optional<Target> get(final Long targetId) {
+    public Optional<Target> get(final long targetId) {
         return Optional.ofNullable(targetRepository.findOne(targetId));
     }
 
     @Override
-    public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final Long actionId) {
+    public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final long actionId) {
         if (!actionRepository.exists(actionId)) {
             throw new EntityNotFoundException(Action.class, actionId);
         }
@@ -654,7 +654,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public List<String> getActionHistoryMessages(final Long actionId, final int messageCount) {
+    public List<String> getActionHistoryMessages(final long actionId, final int messageCount) {
         // Just return empty list in case messageCount is zero.
         if (messageCount == 0) {
             return Collections.emptyList();
@@ -676,7 +676,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public Optional<SoftwareModule> getSoftwareModule(final Long id) {
+    public Optional<SoftwareModule> getSoftwareModule(final long id) {
         return Optional.ofNullable(softwareModuleRepository.findOne(id));
     }
 

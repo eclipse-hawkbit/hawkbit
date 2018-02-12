@@ -10,6 +10,9 @@ package org.eclipse.hawkbit.repository.builder;
 
 import java.util.Optional;
 
+import org.eclipse.hawkbit.repository.ValidString;
+import org.springframework.util.StringUtils;
+
 /**
  * Create and update builder DTO.
  *
@@ -17,10 +20,11 @@ import java.util.Optional;
  *            update or create builder interface
  */
 public class AbstractTagUpdateCreate<T> extends AbstractNamedEntityBuilder<T> {
+    @ValidString
     protected String colour;
 
     public T colour(final String colour) {
-        this.colour = colour;
+        this.colour = StringUtils.trimWhitespace(colour);
         return (T) this;
     }
 

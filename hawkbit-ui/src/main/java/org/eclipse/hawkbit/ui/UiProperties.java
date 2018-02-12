@@ -23,6 +23,14 @@ public class UiProperties implements Serializable {
 
     private boolean gravatar;
 
+    private final Links links = new Links();
+
+    private final Login login = new Login();
+
+    private final Demo demo = new Demo();
+
+    private final Event event = new Event();
+
     public boolean isGravatar() {
         return gravatar;
     }
@@ -315,14 +323,6 @@ public class UiProperties implements Serializable {
             return push;
         }
     }
-
-    private final Links links = new Links();
-
-    private final Login login = new Login();
-
-    private final Demo demo = new Demo();
-
-    private final Event event = new Event();
 
     public Demo getDemo() {
         return demo;

@@ -11,8 +11,10 @@ package org.eclipse.hawkbit.repository.builder;
 import java.net.URI;
 import java.util.Optional;
 
+import org.eclipse.hawkbit.repository.ValidString;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.springframework.util.StringUtils;
 
 /**
  * Create and update builder DTO.
@@ -21,14 +23,19 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
  *            update or create builder interface
  */
 public class AbstractTargetUpdateCreate<T> extends AbstractNamedEntityBuilder<T> {
+    @ValidString
     protected String controllerId;
+
     protected String address;
+
+    @ValidString
     protected String securityToken;
+
     protected Long lastTargetQuery;
     protected TargetUpdateStatus status;
 
     protected AbstractTargetUpdateCreate(final String controllerId) {
-        this.controllerId = controllerId;
+        this.controllerId = StringUtils.trimWhitespace(controllerId);
     }
 
     public T status(final TargetUpdateStatus status) {
@@ -40,7 +47,7 @@ public class AbstractTargetUpdateCreate<T> extends AbstractNamedEntityBuilder<T>
         // check if this is a real URI
         if (address != null) {
             try {
-                URI.create(address);
+                URI.create(StringUtils.trimWhitespace(address));
             } catch (final IllegalArgumentException e) {
                 throw new InvalidTargetAddressException(
                         "The given address " + address + " violates the RFC-2396 specification", e);
@@ -51,7 +58,7 @@ public class AbstractTargetUpdateCreate<T> extends AbstractNamedEntityBuilder<T>
     }
 
     public T securityToken(final String securityToken) {
-        this.securityToken = securityToken;
+        this.securityToken = StringUtils.trimWhitespace(securityToken);
         return (T) this;
     }
 
@@ -61,7 +68,7 @@ public class AbstractTargetUpdateCreate<T> extends AbstractNamedEntityBuilder<T>
     }
 
     public TargetCreate controllerId(final String controllerId) {
-        this.controllerId = controllerId;
+        this.controllerId = StringUtils.trimWhitespace(controllerId);
         return (TargetCreate) this;
     }
 

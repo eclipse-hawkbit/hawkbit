@@ -15,6 +15,7 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -144,6 +145,33 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(actionStatusRepository.count()).isEqualTo(6);
         assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(6);
+    }
+
+    @Test
+    @Description("Controller confirmation failes with invalid messages.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void controllerConfirmationFailsWithInvalidMessages() {
+        final Long actionId = createTargetAndAssignDs();
+
+        simulateIntermediateStatusOnUpdate(actionId);
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> controllerManagement.addUpdateActionStatus(entityFactory.actionStatus()
+                        .create(actionId).status(Action.Status.FINISHED).message(INVALID_TEXT_HTML)))
+                .as("set invalid description text should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> controllerManagement.addUpdateActionStatus(
+                        entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED)
+                                .messages(Arrays.asList("this is valid.", INVALID_TEXT_HTML))))
+                .as("set invalid description text should not be created");
+
+        assertThat(actionStatusRepository.count()).isEqualTo(5);
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(5);
     }
 
     @Test

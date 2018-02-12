@@ -431,7 +431,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(status().isBadRequest());
 
         final SoftwareModule toLongName = entityFactory.softwareModule().create().type(osType)
-                .name(RandomStringUtils.randomAscii(80)).build();
+                .name(RandomStringUtils.randomAlphanumeric(80)).build();
         mvc.perform(post("/rest/v1/softwaremodules").content(JsonBuilder.softwareModules(Arrays.asList(toLongName)))
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());

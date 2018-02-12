@@ -136,7 +136,7 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     }
 
     @Override
-    public Page<DistributionSetTag> findByDistributionSet(final Pageable pageable, final Long setId) {
+    public Page<DistributionSetTag> findByDistributionSet(final Pageable pageable, final long setId) {
         if (!distributionSetRepository.exists(setId)) {
             throw new EntityNotFoundException(DistributionSet.class, setId);
         }
@@ -176,7 +176,7 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     }
 
     @Override
-    public Optional<DistributionSetTag> get(final Long id) {
+    public Optional<DistributionSetTag> get(final long id) {
         return Optional.ofNullable(distributionSetTagRepository.findOne(id));
     }
 
@@ -184,12 +184,12 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void delete(final Long id) {
+    public void delete(final long id) {
         distributionSetTagRepository.delete(id);
     }
 
     @Override
-    public boolean exists(final Long id) {
+    public boolean exists(final long id) {
         return distributionSetTagRepository.exists(id);
     }
 

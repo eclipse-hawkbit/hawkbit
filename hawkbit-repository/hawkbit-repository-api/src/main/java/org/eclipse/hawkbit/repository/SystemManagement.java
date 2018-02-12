@@ -117,7 +117,7 @@ public interface SystemManagement {
      * @return updated {@link TenantMetaData} entity
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
-    TenantMetaData updateTenantMetadata(@NotNull Long defaultDsType);
+    TenantMetaData updateTenantMetadata(long defaultDsType);
 
     /**
      * Returns {@link TenantMetaData} of given tenant ID.
@@ -127,6 +127,6 @@ public interface SystemManagement {
      * @return {@link TenantMetaData} of given tenant
      */
     @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
-    TenantMetaData getTenantMetadata(@NotNull Long tenantId);
+    TenantMetaData getTenantMetadata(long tenantId);
 
 }
