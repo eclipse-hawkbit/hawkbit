@@ -40,7 +40,7 @@ public class DelayedRequeueExceptionStrategy extends ConditionalRejectingErrorHa
      * @param delay
      *            in {@link TimeUnit#MILLISECONDS} before requeue.
      */
-    DelayedRequeueExceptionStrategy(final long delay) {
+    protected DelayedRequeueExceptionStrategy(final long delay) {
         this.delay = delay;
     }
 
