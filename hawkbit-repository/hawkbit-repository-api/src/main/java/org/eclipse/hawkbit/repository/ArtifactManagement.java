@@ -62,7 +62,7 @@ public interface ArtifactManagement {
      * @throws EntityNotFoundException
      *             if given software module does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     Artifact create(@NotNull InputStream inputStream, long moduleId, final String filename,
             final boolean overrideExisting);
 

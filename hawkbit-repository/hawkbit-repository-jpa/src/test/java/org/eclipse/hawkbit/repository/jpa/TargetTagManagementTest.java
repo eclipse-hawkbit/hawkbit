@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
@@ -17,6 +18,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.validation.ConstraintViolationException;
+
+import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
@@ -33,6 +37,7 @@ import org.junit.Test;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Step;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
@@ -67,6 +72,89 @@ public class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Verify that a tag with with invalid properties cannot be created or updated")
+    public void createAndUpdateTagWithInvalidFields() {
+        final TargetTag tag = targetTagManagement
+                .create(entityFactory.tag().create().name("tag1").description("tagdesc1"));
+
+        createAndUpdateTagWithInvalidDescription(tag);
+        createAndUpdateTagWithInvalidColour(tag);
+        createAndUpdateTagWithInvalidName(tag);
+    }
+
+    @Step
+    private void createAndUpdateTagWithInvalidDescription(final Tag tag) {
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetTagManagement.create(
+                        entityFactory.tag().create().name("a").description(RandomStringUtils.randomAlphanumeric(513))))
+                .as("tag with too long description should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(
+                () -> targetTagManagement.create(entityFactory.tag().create().name("a").description(INVALID_TEXT_HTML)))
+                .as("tag with invalid description should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetTagManagement.update(
+                        entityFactory.tag().update(tag.getId()).description(RandomStringUtils.randomAlphanumeric(513))))
+                .as("tag with too long description should not be updated");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetTagManagement
+                        .update(entityFactory.tag().update(tag.getId()).description(INVALID_TEXT_HTML)))
+                .as("tag with invalid description should not be updated");
+    }
+
+    @Step
+    private void createAndUpdateTagWithInvalidColour(final Tag tag) {
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetTagManagement.create(
+                        entityFactory.tag().create().name("a").colour(RandomStringUtils.randomAlphanumeric(17))))
+                .as("tag with too long colour should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(
+                () -> targetTagManagement.create(entityFactory.tag().create().name("a").colour(INVALID_TEXT_HTML)))
+                .as("tag with invalid colour should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetTagManagement.update(
+                        entityFactory.tag().update(tag.getId()).colour(RandomStringUtils.randomAlphanumeric(17))))
+                .as("tag with too long colour should not be updated");
+
+        assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(
+                () -> targetTagManagement.update(entityFactory.tag().update(tag.getId()).colour(INVALID_TEXT_HTML)))
+                .as("tag with invalid colour should not be updated");
+    }
+
+    @Step
+    private void createAndUpdateTagWithInvalidName(final Tag tag) {
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetTagManagement
+                        .create(entityFactory.tag().create().name(RandomStringUtils.randomAlphanumeric(65))))
+                .as("tag with too long name should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetTagManagement.create(entityFactory.tag().create().name(INVALID_TEXT_HTML)))
+                .as("tag with invalidname should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetTagManagement
+                        .update(entityFactory.tag().update(tag.getId()).name(RandomStringUtils.randomAlphanumeric(65))))
+                .as("tag with too long name should not be updated");
+
+        assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(
+                () -> targetTagManagement.update(entityFactory.tag().update(tag.getId()).name(INVALID_TEXT_HTML)))
+                .as("tag with invalid name should not be updated");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetTagManagement.update(entityFactory.tag().update(tag.getId()).name("")))
+                .as("tag with too short name should not be updated");
+
+    }
+
+    @Test
     @Description("Verifies the toogle mechanism by means on assigning tag if at least on target in the list does not have"
             + "the tag yet. Unassign if all of them have the tag already.")
     public void assignAndUnassignTargetTags() {
@@ -80,8 +168,8 @@ public class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         TargetTagAssignmentResult result = toggleTagAssignment(groupA, tag);
         assertThat(result.getAlreadyAssigned()).isEqualTo(0);
         assertThat(result.getAssigned()).isEqualTo(20);
-        assertThat(result.getAssignedEntity()).containsAll(targetManagement.getByControllerID(
-                groupA.stream().map(target -> target.getControllerId()).collect(Collectors.toList())));
+        assertThat(result.getAssignedEntity()).containsAll(targetManagement
+                .getByControllerID(groupA.stream().map(Target::getControllerId).collect(Collectors.toList())));
         assertThat(result.getUnassigned()).isEqualTo(0);
         assertThat(result.getUnassignedEntity()).isEmpty();
         assertThat(result.getTargetTag()).isEqualTo(tag);
@@ -90,8 +178,8 @@ public class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         result = toggleTagAssignment(concat(groupA, groupB), tag);
         assertThat(result.getAlreadyAssigned()).isEqualTo(20);
         assertThat(result.getAssigned()).isEqualTo(20);
-        assertThat(result.getAssignedEntity()).containsAll(targetManagement.getByControllerID(
-                groupB.stream().map(target -> target.getControllerId()).collect(Collectors.toList())));
+        assertThat(result.getAssignedEntity()).containsAll(targetManagement
+                .getByControllerID(groupB.stream().map(Target::getControllerId).collect(Collectors.toList())));
         assertThat(result.getUnassigned()).isEqualTo(0);
         assertThat(result.getUnassignedEntity()).isEmpty();
         assertThat(result.getTargetTag()).isEqualTo(tag);
@@ -132,10 +220,8 @@ public class TargetTagManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(targetTagRepository.findByNameEquals("kai1").get().getDescription()).as("wrong tag ed")
                 .isEqualTo("kai2");
-        assertThat(targetTagManagement.getByName("kai1").get().getColour()).as("wrong tag found")
-                .isEqualTo("colour");
-        assertThat(targetTagManagement.get(tag.getId()).get().getColour()).as("wrong tag found")
-                .isEqualTo("colour");
+        assertThat(targetTagManagement.getByName("kai1").get().getColour()).as("wrong tag found").isEqualTo("colour");
+        assertThat(targetTagManagement.get(tag.getId()).get().getColour()).as("wrong tag found").isEqualTo("colour");
     }
 
     @Test
