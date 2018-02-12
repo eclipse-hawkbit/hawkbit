@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.common.builder;
 
 import org.springframework.util.StringUtils;
 
+import com.vaadin.data.Validator;
 import com.vaadin.ui.AbstractTextField;
 
 /**
@@ -30,6 +31,7 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
     private boolean readOnly;
     private boolean enabled = true;
     private int maxLengthAllowed;
+    private Validator validator;
 
     /**
      * @param caption
@@ -132,6 +134,17 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
     }
 
     /**
+     * 
+     * @param validator
+     *            the validator to set for this field
+     * @return the builder
+     */
+    public AbstractTextFieldBuilder<E> validator(final Validator validator) {
+        this.validator = validator;
+        return this;
+    }
+
+    /**
      * Build a textfield
      * 
      * @return textfield
@@ -165,6 +178,10 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
 
         if (!StringUtils.isEmpty(id)) {
             textComponent.setId(id);
+        }
+
+        if (validator != null) {
+            textComponent.addValidator(validator);
         }
 
         return textComponent;
