@@ -152,7 +152,7 @@
       <jsoup.version>1.8.3</jsoup.version>
       <validation-api.version>2.0.1.Final</validation-api.version>
       <allure.version>1.5.4</allure.version>
-      <eclipselink.version>2.6.4</eclipselink.version>
+      <eclipselink.version>2.7.1</eclipselink.version>
       <org.powermock.version>1.6.5</org.powermock.version>
       <gwtmockito.version>1.1.6</gwtmockito.version>
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
