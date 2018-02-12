@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository;
 import java.util.Collection;
 import java.util.Optional;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotEmpty;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
@@ -21,7 +21,6 @@ import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import javax.validation.constraints.NotEmpty;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**

@@ -13,11 +13,11 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
-import javax.validation.constraints.NotEmpty;
 
 /**
  * A JPA entity which stores the tenant specific configuration.
