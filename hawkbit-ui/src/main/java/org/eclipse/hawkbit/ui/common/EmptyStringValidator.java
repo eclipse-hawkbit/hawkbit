@@ -19,7 +19,7 @@ public class EmptyStringValidator extends RegexpValidator {
 
     private static final long serialVersionUID = 1L;
 
-    static String regex = "[\\s]*(\\w[\\s,-.;:/]*)+[\\s]*";
+    static String regex = "[\\s]*(\\w[\\s,-.;:/()]*)+[\\s]*";
 
     /**
      * Validator for validating if at least one character has entered

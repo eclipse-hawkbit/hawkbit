@@ -333,10 +333,6 @@ public class CommonDialogWindow extends Window {
         for (final AbstractField field : requiredComponents) {
             Object value = getCurrentVaue(currentChangedComponent, newValue, field);
 
-            // if (String.class.equals(field.getType())) {
-            // value = Strings.emptyToNull((String) value);
-            // }
-
             if (Set.class.equals(field.getType())) {
                 value = emptyToNull((Collection<?>) value);
             }
