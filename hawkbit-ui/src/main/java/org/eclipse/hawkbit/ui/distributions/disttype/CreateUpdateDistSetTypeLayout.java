@@ -40,6 +40,7 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -138,8 +139,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
     private TextField createTextField(final String in18Key, final String styleName, final String id) {
         return new TextFieldBuilder().caption(i18n.getMessage(in18Key))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + styleName).required(true).prompt(i18n.getMessage(in18Key))
-                .validator(new EmptyStringValidator(i18n.getMessage("textfield.min.length"))).immediate(true).id(id)
-                .buildTextComponent();
+                .validator(new EmptyStringValidator(i18n)).immediate(true).id(id).buildTextComponent();
     }
 
     @Override
@@ -237,7 +237,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
             public String generateDescription(final Component source, final Object itemId, final Object propertyId) {
                 final Item item = selectedTable.getItem(itemId);
                 final String description = (String) (item.getItemProperty(DIST_TYPE_DESCRIPTION).getValue());
-                if (DIST_TYPE_NAME.equals(propertyId) && description != null) {
+                if (DIST_TYPE_NAME.equals(propertyId) && !StringUtils.isEmpty(description)) {
                     return i18n.getMessage("label.description") + description;
                 } else if (DIST_TYPE_MANDATORY.equals(propertyId)) {
                     return i18n.getMessage("tooltip.check.for.mandatory");
@@ -341,7 +341,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
             public String generateDescription(final Component source, final Object itemId, final Object propertyId) {
                 final Item item = sourceTable.getItem(itemId);
                 final String description = (String) item.getItemProperty(DIST_TYPE_DESCRIPTION).getValue();
-                if (DIST_TYPE_NAME.equals(propertyId) && description != null) {
+                if (DIST_TYPE_NAME.equals(propertyId) && !StringUtils.isEmpty(description)) {
                     return i18n.getMessage("label.description") + description;
                 }
                 return null;

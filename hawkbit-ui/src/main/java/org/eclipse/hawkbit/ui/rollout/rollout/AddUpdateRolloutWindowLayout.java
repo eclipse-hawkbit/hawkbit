@@ -52,7 +52,6 @@ import org.eclipse.hawkbit.ui.management.footer.ActionTypeOptionGroupLayout;
 import org.eclipse.hawkbit.ui.management.footer.ActionTypeOptionGroupLayout.ActionTypeOption;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.groupschart.GroupsPieChart;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -207,6 +206,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         @Override
         public void saveOrUpdate() {
+
             if (editRolloutEnabled) {
                 editRollout();
                 return;
@@ -228,6 +228,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         }
 
         private boolean duplicateCheck() {
+            if (!StringUtils.hasText(rolloutName.getValue())) {
+                uiNotification.displayValidationError(i18n.getMessage("message.rollout.name.empty"));
+                return false;
+            }
             if (rolloutManagement.getByName(getRolloutName()).isPresent()) {
                 uiNotification
                         .displayValidationError(i18n.getMessage("message.rollout.duplicate.check", getRolloutName()));
@@ -270,6 +274,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         }
 
         private boolean duplicateCheckForEdit() {
+            if (!StringUtils.hasText(rolloutName.getValue())) {
+                uiNotification.displayValidationError(i18n.getMessage("message.rollout.name.empty"));
+                return false;
+            }
             final String rolloutNameVal = getRolloutName();
             if (!rollout.getName().equals(rolloutNameVal) && rolloutManagement.getByName(rolloutNameVal).isPresent()) {
                 uiNotification
@@ -280,7 +288,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         }
 
         private String getRolloutName() {
-            return HawkbitCommonUtil.trimAndNullIfEmpty(rolloutName.getValue());
+            return StringUtils.trimWhitespace(rolloutName.getValue());
         }
 
         private Rollout saveRollout() {
@@ -756,12 +764,12 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private String getTargetFilterQuery() {
-        if (targetFilterQueryCombo.getValue() != null) {
-            final Item filterItem = targetFilterQueryCombo.getContainerDataSource()
-                    .getItem(targetFilterQueryCombo.getValue());
-            return (String) filterItem.getItemProperty("query").getValue();
+        if (StringUtils.isEmpty(targetFilterQueryCombo.getValue())) {
+            return null;
         }
-        return null;
+        final Item filterItem = targetFilterQueryCombo.getContainerDataSource()
+                .getItem(targetFilterQueryCombo.getValue());
+        return (String) filterItem.getItemProperty("query").getValue();
     }
 
     private void setDefaultSaveStartGroupOption() {
@@ -862,8 +870,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         }
 
         private boolean isNoOfGroupsOrTargetFilterEmpty() {
-            return noOfGroups.getValue() == null
-                    || ((String) targetFilterQueryCombo.getValue() == null && targetFilterQuery.getValue() == null);
+            return !StringUtils.hasText(noOfGroups.getValue())
+                    || (!StringUtils.hasText((String) targetFilterQueryCombo.getValue())
+                            && !StringUtils.hasText(targetFilterQuery.getValue()));
         }
     }
 

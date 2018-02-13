@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUITagButtonStyle;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -156,7 +157,7 @@ public abstract class AbstractFilterButtons extends Table {
             button.setCaption(prepareFilterButtonCaption(button.getCaption(), color));
         }
 
-        if (description != null) {
+        if (!StringUtils.isEmpty(description)) {
             button.setDescription(description);
         } else {
             button.setDescription(name);

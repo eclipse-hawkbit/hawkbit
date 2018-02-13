@@ -370,10 +370,10 @@ public class TargetTable extends AbstractTable<Target> {
         statusLabel.setContentMode(ContentMode.HTML);
         final String pollStatusToolTip = (String) getContainerDataSource().getItem(itemId)
                 .getItemProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP).getValue();
-        if (pollStatusToolTip == null) {
-            statusLabel.setValue(FontAwesome.CLOCK_O.getHtml());
-        } else {
+        if (StringUtils.hasText(pollStatusToolTip)) {
             statusLabel.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
+        } else {
+            statusLabel.setValue(FontAwesome.CLOCK_O.getHtml());
         }
         statusLabel.setDescription(pollStatusToolTip);
         return statusLabel;

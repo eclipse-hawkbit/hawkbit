@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
-import org.eclipse.hawkbit.ui.common.EmptyStringValidator;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
@@ -113,8 +112,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     private TextField createTextField(final String in18Key, final String id) {
         return new TextFieldBuilder().caption(i18n.getMessage(in18Key)).required(true).prompt(i18n.getMessage(in18Key))
-                .validator(new EmptyStringValidator(i18n.getMessage("textfield.min.length"))).immediate(true).id(id)
-                .buildTextComponent();
+                .immediate(true).id(id).buildTextComponent();
     }
 
     private void buildLayout() {

@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.PageRequest;
@@ -122,21 +121,16 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     @Override
     protected void createNewTag() {
         super.createNewTag();
-        if (!StringUtils.isEmpty(tagNameValue)) {
-
-            String colour = ColorPickerConstants.START_COLOR.getCSS();
-            if (!StringUtils.isEmpty(getColorPicked())) {
-                colour = getColorPicked();
-            }
-
-            final DistributionSetTag newDistTag = distributionSetTagManagement
-                    .create(entityFactory.tag().create().name(tagNameValue).description(tagDescValue).colour(colour));
-            eventBus.publish(this, new DistributionSetTagTableEvent(BaseEntityEventType.ADD_ENTITY, newDistTag));
-            displaySuccess(newDistTag.getName());
-            resetDistTagValues();
-        } else {
-            displayValidationError(i18n.getMessage(SPUILabelDefinitions.MISSING_TAG_NAME));
+        String colour = ColorPickerConstants.START_COLOR.getCSS();
+        if (!StringUtils.isEmpty(getColorPicked())) {
+            colour = getColorPicked();
         }
+
+        final DistributionSetTag newDistTag = distributionSetTagManagement
+                .create(entityFactory.tag().create().name(tagNameValue).description(tagDescValue).colour(colour));
+        eventBus.publish(this, new DistributionSetTagTableEvent(BaseEntityEventType.ADD_ENTITY, newDistTag));
+        displaySuccess(newDistTag.getName());
+        resetDistTagValues();
     }
 
     /**

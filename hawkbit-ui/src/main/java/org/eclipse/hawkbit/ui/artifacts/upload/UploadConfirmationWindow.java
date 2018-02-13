@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.data.Item;
@@ -147,7 +148,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
         for (final String itemId : itemIds) {
             final Item item = tableContainer.getItem(itemId);
             final String providedFileName = (String) item.getItemProperty(FILE_NAME).getValue();
-            if (HawkbitCommonUtil.trimAndNullIfEmpty(providedFileName) == null) {
+            if (!StringUtils.hasText(providedFileName)) {
                 validationSuccess = false;
                 break;
             }
@@ -189,9 +190,11 @@ public class UploadConfirmationWindow implements Button.ClickListener {
      */
     private void setWarningIcon(final Label warningIconLabel, final String fileName, final Object itemId) {
         final Item item = uploadDetailsTable.getItem(itemId);
-        if (HawkbitCommonUtil.trimAndNullIfEmpty(fileName) != null) {
+        if (StringUtils.hasText(fileName)) {
+            final String fileNameTrimmed = StringUtils.trimWhitespace(fileName);
             final Long baseSwId = (Long) item.getItemProperty(BASE_SOFTWARE_ID).getValue();
-            final Optional<Artifact> artifact = artifactManagement.getByFilenameAndSoftwareModule(fileName, baseSwId);
+            final Optional<Artifact> artifact = artifactManagement.getByFilenameAndSoftwareModule(fileNameTrimmed,
+                    baseSwId);
             if (artifact.isPresent()) {
                 warningIconLabel.setVisible(true);
                 if (isErrorIcon(warningIconLabel)) {
@@ -199,7 +202,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
                     redErrorLabelCount--;
                 }
                 warningIconLabel.setDescription(i18n.getMessage(ALREADY_EXISTS_MSG));
-                if (checkForDuplicate(fileName, itemId, baseSwId)) {
+                if (checkForDuplicate(fileNameTrimmed, itemId, baseSwId)) {
                     warningIconLabel.setDescription(i18n.getMessage("message.duplicate.filename"));
                     warningIconLabel.addStyleName(SPUIStyleDefinitions.ERROR_LABEL);
                     redErrorLabelCount++;
@@ -620,8 +623,13 @@ public class UploadConfirmationWindow implements Button.ClickListener {
 
         final File newFile = new File(filePath);
         final Item item = tableContainer.getItem(itemId);
-        final String sha1Checksum = ((TextField) item.getItemProperty(SHA1_CHECKSUM).getValue()).getValue();
-        final String md5Checksum = ((TextField) item.getItemProperty(MD5_CHECKSUM).getValue()).getValue();
+        // We have to make sure that null is assigned to sha1Checksum and
+        // md5Checksum if no alphanumeric value is provided. Empty String will
+        // fail
+        final String sha1Checksum = org.apache.commons.lang3.StringUtils
+                .trimToNull(((TextField) item.getItemProperty(SHA1_CHECKSUM).getValue()).getValue());
+        final String md5Checksum = org.apache.commons.lang3.StringUtils
+                .trimToNull(((TextField) item.getItemProperty(MD5_CHECKSUM).getValue()).getValue());
         final String providedFileName = (String) item.getItemProperty(FILE_NAME).getValue();
         final CustomFile customFile = (CustomFile) item.getItemProperty(CUSTOM_FILE).getValue();
         final String[] itemDet = itemId.split("/");

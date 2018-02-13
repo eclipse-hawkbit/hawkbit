@@ -130,8 +130,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
     private TextField createTextField(final String in18Key, final String styleName, final String id) {
         return new TextFieldBuilder().caption(i18n.getMessage(in18Key))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + styleName).required(true).prompt(i18n.getMessage(in18Key))
-                .validator(new EmptyStringValidator(i18n.getMessage("textfield.min.length"))).immediate(true).id(id)
-                .buildTextComponent();
+                .validator(new EmptyStringValidator(i18n)).immediate(true).id(id).buildTextComponent();
     }
 
     @Override

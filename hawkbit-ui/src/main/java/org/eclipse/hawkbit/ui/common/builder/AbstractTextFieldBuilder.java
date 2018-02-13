@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.common.builder;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.springframework.util.StringUtils;
 
 import com.vaadin.data.Validator;
@@ -31,7 +34,7 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
     private boolean readOnly;
     private boolean enabled = true;
     private int maxLengthAllowed;
-    private Validator validator;
+    private final List<Validator> validators = new LinkedList<>();
 
     /**
      * @param caption
@@ -140,7 +143,7 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
      * @return the builder
      */
     public AbstractTextFieldBuilder<E> validator(final Validator validator) {
-        this.validator = validator;
+        validators.add(validator);
         return this;
     }
 
@@ -180,8 +183,8 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
             textComponent.setId(id);
         }
 
-        if (validator != null) {
-            textComponent.addValidator(validator);
+        if (!validators.isEmpty()) {
+            validators.forEach(textComponent::addValidator);
         }
 
         return textComponent;

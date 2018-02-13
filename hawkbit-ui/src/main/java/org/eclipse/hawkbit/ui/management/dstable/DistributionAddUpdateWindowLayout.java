@@ -244,8 +244,8 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
     private TextField createTextField(final String in18Key, final String id) {
         final TextField buildTextField = new TextFieldBuilder().caption(i18n.getMessage(in18Key)).required(true)
-                .validator(new EmptyStringValidator(i18n.getMessage("textfield.min.length")))
-                .prompt(i18n.getMessage(in18Key)).immediate(true).id(id).buildTextComponent();
+                .validator(new EmptyStringValidator(i18n)).prompt(i18n.getMessage(in18Key)).immediate(true).id(id)
+                .buildTextComponent();
         buildTextField.setNullRepresentation("");
         return buildTextField;
     }

@@ -212,8 +212,10 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
     private void createRequiredComponents() {
 
         nameTextField = createTextField("textfield.name", UIComponentIdProvider.SOFT_MODULE_NAME);
+        nameTextField.addValidator(new EmptyStringValidator(i18n));
 
         versionTextField = createTextField("textfield.version", UIComponentIdProvider.SOFT_MODULE_VERSION);
+        versionTextField.addValidator(new EmptyStringValidator(i18n));
 
         vendorTextField = createTextField("textfield.vendor", UIComponentIdProvider.SOFT_MODULE_VENDOR);
         vendorTextField.setRequired(false);
@@ -234,8 +236,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
     private TextField createTextField(final String in18Key, final String id) {
         return new TextFieldBuilder().caption(i18n.getMessage(in18Key)).required(true).prompt(i18n.getMessage(in18Key))
-                .immediate(true).id(id).validator(new EmptyStringValidator(i18n.getMessage("textfield.min.length")))
-                .buildTextComponent();
+                .immediate(true).id(id).buildTextComponent();
     }
 
     private void populateTypeNameCombo() {
