@@ -15,6 +15,7 @@ import java.util.Optional;
 
 import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -32,7 +33,6 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import javax.validation.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -508,8 +508,8 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<Target> findByFilterOrderByLinkedDistributionSet(@NotNull Pageable pageable,
-            long orderByDistributionId, @NotNull FilterParams filterParams);
+    Slice<Target> findByFilterOrderByLinkedDistributionSet(@NotNull Pageable pageable, long orderByDistributionId,
+            @NotNull FilterParams filterParams);
 
     /**
      * Find targets by tag name.

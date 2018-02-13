@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.tenancy.configuration.validator;
 
-import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
+import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
  * Exception which is thrown, when the validation of the configuration value has

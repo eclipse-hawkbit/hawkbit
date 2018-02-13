@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository;
 import java.util.Collection;
 import java.util.Optional;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -31,7 +32,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
-import javax.validation.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -114,8 +114,8 @@ public interface DeploymentManagement {
      *             do not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    DistributionSetAssignmentResult assignDistributionSet(long dsID,
-            @NotEmpty Collection<TargetWithActionType> targets, String actionMessage);
+    DistributionSetAssignmentResult assignDistributionSet(long dsID, @NotEmpty Collection<TargetWithActionType> targets,
+            String actionMessage);
 
     /**
      * Method registers an "offline" assignment, i.e. adds a completed action
@@ -407,8 +407,7 @@ public interface DeploymentManagement {
      * @return the amount of started actions
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long startScheduledActionsByRolloutGroupParent(long rolloutId, long distributionSetId,
-            Long rolloutGroupParentId);
+    long startScheduledActionsByRolloutGroupParent(long rolloutId, long distributionSetId, Long rolloutGroupParentId);
 
     /**
      * All {@link ActionStatus} entries in the repository.

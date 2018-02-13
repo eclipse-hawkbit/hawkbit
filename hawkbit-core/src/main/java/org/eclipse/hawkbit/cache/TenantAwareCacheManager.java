@@ -90,11 +90,11 @@ public class TenantAwareCacheManager implements TenancyCacheManager {
         getCacheNames(tenant).forEach(cachename -> delegate.getCache(buildKey(tenant, cachename)).clear());
     }
 
-    private boolean isTenantInvalid(final String tenant) {
+    private static boolean isTenantInvalid(final String tenant) {
         return tenant == null || tenant.contains(TENANT_CACHE_DELIMITER);
     }
 
-    private String buildKey(final String tenant, final String cacheName) {
+    private static String buildKey(final String tenant, final String cacheName) {
         return tenant + TENANT_CACHE_DELIMITER + cacheName;
     }
 
