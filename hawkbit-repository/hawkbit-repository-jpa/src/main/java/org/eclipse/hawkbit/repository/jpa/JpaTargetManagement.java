@@ -24,7 +24,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.TargetFields;
@@ -137,7 +136,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Slice<Target> findByTargetFilterQuery(final Pageable pageable, final Long targetFilterQueryId) {
+    public Slice<Target> findByTargetFilterQuery(final Pageable pageable, final long targetFilterQueryId) {
         final TargetFilterQuery targetFilterQuery = targetFilterQueryRepository.findById(targetFilterQueryId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));
 
@@ -205,14 +204,14 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Page<Target> findByAssignedDistributionSet(final Pageable pageReq, final Long distributionSetID) {
+    public Page<Target> findByAssignedDistributionSet(final Pageable pageReq, final long distributionSetID) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetID);
 
         return targetRepository.findByAssignedDistributionSetId(pageReq, distributionSetID);
     }
 
     @Override
-    public Page<Target> findByAssignedDistributionSetAndRsql(final Pageable pageReq, final Long distributionSetID,
+    public Page<Target> findByAssignedDistributionSetAndRsql(final Pageable pageReq, final long distributionSetID,
             final String rsqlParam) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetID);
 
@@ -242,13 +241,13 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Page<Target> findByInstalledDistributionSet(final Pageable pageReq, final Long distributionSetID) {
+    public Page<Target> findByInstalledDistributionSet(final Pageable pageReq, final long distributionSetID) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetID);
         return targetRepository.findByInstalledDistributionSetId(pageReq, distributionSetID);
     }
 
     @Override
-    public Page<Target> findByInstalledDistributionSetAndRsql(final Pageable pageable, final Long distributionSetId,
+    public Page<Target> findByInstalledDistributionSetAndRsql(final Pageable pageable, final long distributionSetId,
             final String rsqlParam) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetId);
 
@@ -372,7 +371,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public List<Target> assignTag(final Collection<String> controllerIds, final Long tagId) {
+    public List<Target> assignTag(final Collection<String> controllerIds, final long tagId) {
 
         final List<JpaTarget> allTargets = targetRepository
                 .findAll(TargetSpecifications.byControllerIdWithTagsInJoin(controllerIds));
@@ -399,7 +398,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Target unAssignTag(final String controllerID, final Long targetTagId) {
+    public Target unAssignTag(final String controllerID, final long targetTagId) {
         final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerID)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerID));
 
@@ -417,7 +416,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Slice<Target> findByFilterOrderByLinkedDistributionSet(final Pageable pageable,
-            final Long orderByDistributionId, final FilterParams filterParams) {
+            final long orderByDistributionId, final FilterParams filterParams) {
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<JpaTarget> query = cb.createQuery(JpaTarget.class);
         final Root<JpaTarget> targetRoot = query.from(JpaTarget.class);
@@ -470,21 +469,21 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public long countByAssignedDistributionSet(final Long distId) {
+    public long countByAssignedDistributionSet(final long distId) {
         throwEntityNotFoundIfDsDoesNotExist(distId);
 
         return targetRepository.countByAssignedDistributionSetId(distId);
     }
 
     @Override
-    public long countByInstalledDistributionSet(final Long distId) {
+    public long countByInstalledDistributionSet(final long distId) {
         throwEntityNotFoundIfDsDoesNotExist(distId);
 
         return targetRepository.countByInstalledDistributionSetId(distId);
     }
 
     @Override
-    public Page<Target> findByTargetFilterQueryAndNonDS(final Pageable pageRequest, final Long distributionSetId,
+    public Page<Target> findByTargetFilterQueryAndNonDS(final Pageable pageRequest, final long distributionSetId,
             final String targetFilterQuery) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetId);
 
@@ -512,8 +511,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Page<Target> findByInRolloutGroupWithoutAction(@NotNull final Pageable pageRequest,
-            @NotNull final Long group) {
+    public Page<Target> findByInRolloutGroupWithoutAction(final Pageable pageRequest, final long group) {
         if (!rolloutGroupRepository.exists(group)) {
             throw new EntityNotFoundException(RolloutGroup.class, group);
         }
@@ -534,7 +532,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public long countByRsqlAndNonDS(final Long distributionSetId, final String targetFilterQuery) {
+    public long countByRsqlAndNonDS(final long distributionSetId, final String targetFilterQuery) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetId);
 
         final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery, TargetFields.class,
@@ -564,7 +562,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Page<Target> findByTag(final Pageable pageable, final Long tagId) {
+    public Page<Target> findByTag(final Pageable pageable, final long tagId) {
         throwEntityNotFoundExceptionIfTagDoesNotExist(tagId);
 
         return convertPage(targetRepository.findByTag(pageable, tagId), pageable);
@@ -577,7 +575,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Page<Target> findByRsqlAndTag(final Pageable pageable, final String rsqlParam, final Long tagId) {
+    public Page<Target> findByRsqlAndTag(final Pageable pageable, final String rsqlParam, final long tagId) {
 
         throwEntityNotFoundExceptionIfTagDoesNotExist(tagId);
 
@@ -589,7 +587,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public long countByTargetFilterQuery(final Long targetFilterQueryId) {
+    public long countByTargetFilterQuery(final long targetFilterQueryId) {
         final TargetFilterQuery targetFilterQuery = targetFilterQueryRepository.findById(targetFilterQueryId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));
 
@@ -609,7 +607,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Optional<Target> get(final Long id) {
+    public Optional<Target> get(final long id) {
         return Optional.ofNullable(targetRepository.findOne(id));
     }
 

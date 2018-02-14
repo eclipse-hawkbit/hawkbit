@@ -62,23 +62,23 @@ public class DelayedRequeueExceptionStrategy extends ConditionalRejectingErrorHa
         return false;
     }
 
-    private boolean invalidMessage(final Throwable cause) {
+    private static boolean invalidMessage(final Throwable cause) {
         return doesNotExist(cause) || quotaHit(cause) || invalidContent(cause) || invalidState(cause);
     }
 
-    private boolean invalidState(final Throwable cause) {
+    private static boolean invalidState(final Throwable cause) {
         return cause instanceof CancelActionNotAllowedException;
     }
 
-    private boolean quotaHit(final Throwable cause) {
+    private static boolean quotaHit(final Throwable cause) {
         return cause instanceof QuotaExceededException;
     }
 
-    private boolean doesNotExist(final Throwable cause) {
+    private static boolean doesNotExist(final Throwable cause) {
         return cause instanceof TenantNotExistException || cause instanceof EntityNotFoundException;
     }
 
-    private boolean invalidContent(final Throwable cause) {
+    private static boolean invalidContent(final Throwable cause) {
         return cause instanceof ConstraintViolationException || cause instanceof InvalidTargetAddressException
                 || cause instanceof MessageConversionException || cause instanceof MessageHandlingException;
     }

@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 
-import org.springframework.util.StringUtils;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
@@ -17,6 +16,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
 import org.eclipse.hawkbit.ui.tenantconfiguration.generic.AbstractBooleanTenantConfigurationItem;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.util.StringUtils;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;

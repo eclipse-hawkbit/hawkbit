@@ -281,7 +281,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public TenantMetaData updateTenantMetadata(final Long defaultDsType) {
+    public TenantMetaData updateTenantMetadata(final long defaultDsType) {
         final JpaTenantMetaData data = (JpaTenantMetaData) getTenantMetadata();
 
         data.setDefaultDsType(distributionSetTypeRepository.findOne(defaultDsType));
@@ -319,7 +319,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    public TenantMetaData getTenantMetadata(final Long tenantId) {
+    public TenantMetaData getTenantMetadata(final long tenantId) {
         return tenantMetaDataRepository.findOne(tenantId);
     }
 

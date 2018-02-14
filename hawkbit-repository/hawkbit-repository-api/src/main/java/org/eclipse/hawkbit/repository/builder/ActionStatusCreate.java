@@ -35,7 +35,7 @@ public interface ActionStatusCreate {
      *            for {@link ActionStatus#getOccurredAt()}
      * @return updated {@link ActionStatusCreate} object
      */
-    ActionStatusCreate occurredAt(Long occurredAt);
+    ActionStatusCreate occurredAt(long occurredAt);
 
     /**
      * @param messages

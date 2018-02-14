@@ -10,11 +10,12 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Optional;
 
+import javax.validation.constraints.NotEmpty;
+
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeUpdate;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**

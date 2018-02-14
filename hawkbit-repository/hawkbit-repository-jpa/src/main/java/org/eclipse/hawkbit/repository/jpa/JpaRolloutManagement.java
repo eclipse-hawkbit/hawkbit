@@ -186,7 +186,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    public Optional<Rollout> get(final Long rolloutId) {
+    public Optional<Rollout> get(final long rolloutId) {
         return Optional.ofNullable(rolloutRepository.findOne(rolloutId));
     }
 
@@ -439,7 +439,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Rollout start(final Long rolloutId) {
+    public Rollout start(final long rolloutId) {
         LOGGER.debug("startRollout called for rollout {}", rolloutId);
 
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
@@ -571,7 +571,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void pauseRollout(final Long rolloutId) {
+    public void pauseRollout(final long rolloutId) {
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
         if (!RolloutStatus.RUNNING.equals(rollout.getStatus())) {
             throw new RolloutIllegalStateException("Rollout can only be paused in state running but current state is "
@@ -590,7 +590,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void resumeRollout(final Long rolloutId) {
+    public void resumeRollout(final long rolloutId) {
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
         if (!(RolloutStatus.PAUSED.equals(rollout.getStatus()))) {
             throw new RolloutIllegalStateException("Rollout can only be resumed in state paused but current state is "
@@ -818,7 +818,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void delete(final Long rolloutId) {
+    public void delete(final long rolloutId) {
         final JpaRollout jpaRollout = rolloutRepository.findOne(rolloutId);
 
         if (jpaRollout == null) {
@@ -982,7 +982,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    public Optional<Rollout> getWithDetailedStatus(final Long rolloutId) {
+    public Optional<Rollout> getWithDetailedStatus(final long rolloutId) {
         final Optional<Rollout> rollout = get(rolloutId);
 
         if (!rollout.isPresent()) {
@@ -1041,7 +1041,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    public boolean exists(final Long rolloutId) {
+    public boolean exists(final long rolloutId) {
         return rolloutRepository.exists(rolloutId);
     }
 }

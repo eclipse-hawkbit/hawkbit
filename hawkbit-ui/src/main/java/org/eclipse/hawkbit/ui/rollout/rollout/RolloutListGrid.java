@@ -195,8 +195,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         if (!rolloutUIState.isShowRollOuts() || rolloutChangeEvent.getRolloutId() == null) {
             return;
         }
-        final Optional<Rollout> rollout = rolloutManagement
-                .getWithDetailedStatus(rolloutChangeEvent.getRolloutId());
+        final Optional<Rollout> rollout = rolloutManagement.getWithDetailedStatus(rolloutChangeEvent.getRolloutId());
 
         if (!rollout.isPresent()) {
             return;
@@ -745,6 +744,14 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         if (!permissionChecker.hasRolloutCreatePermission()) {
             modifiableColumnsList.remove(VIRT_PROP_COPY);
         }
+        if (!permissionChecker.hasRolloutDeletePermission()) {
+            modifiableColumnsList.remove(VIRT_PROP_DELETE);
+        }
+        if (!permissionChecker.hasRolloutHandlePermission()) {
+            modifiableColumnsList.remove(VIRT_PROP_PAUSE);
+            modifiableColumnsList.remove(VIRT_PROP_RUN);
+        }
+
         setColumns(modifiableColumnsList.toArray());
     }
 

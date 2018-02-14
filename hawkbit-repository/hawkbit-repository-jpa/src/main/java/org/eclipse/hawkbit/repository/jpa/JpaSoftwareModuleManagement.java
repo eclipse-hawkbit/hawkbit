@@ -149,7 +149,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     @Override
-    public Slice<SoftwareModule> findByType(final Pageable pageable, final Long typeId) {
+    public Slice<SoftwareModule> findByType(final Pageable pageable, final long typeId) {
         throwExceptionIfSoftwareModuleTypeDoesNotExist(typeId);
 
         final List<Specification<JpaSoftwareModule>> specList = Lists.newArrayListWithExpectedSize(2);
@@ -181,13 +181,13 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     @Override
-    public Optional<SoftwareModule> get(final Long id) {
+    public Optional<SoftwareModule> get(final long id) {
         return Optional.ofNullable(softwareModuleRepository.findOne(id));
     }
 
     @Override
     public Optional<SoftwareModule> getByNameAndVersionAndType(final String name, final String version,
-            final Long typeId) {
+            final long typeId) {
 
         throwExceptionIfSoftwareModuleTypeDoesNotExist(typeId);
 
@@ -325,7 +325,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     @Override
     public Slice<AssignedSoftwareModule> findAllOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(
-            final Pageable pageable, final Long orderByDistributionId, final String searchText, final Long typeId) {
+            final Pageable pageable, final long orderByDistributionId, final String searchText, final Long typeId) {
 
         final List<AssignedSoftwareModule> resultList = new ArrayList<>();
         final int pageSize = pageable.getPageSize();
@@ -436,7 +436,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     @Override
-    public Page<SoftwareModule> findByAssignedTo(final Pageable pageable, final Long setId) {
+    public Page<SoftwareModule> findByAssignedTo(final Pageable pageable, final long setId) {
         if (!distributionSetRepository.exists(setId)) {
             throw new EntityNotFoundException(DistributionSet.class, setId);
         }
@@ -526,7 +526,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void deleteMetaData(final Long moduleId, final String key) {
+    public void deleteMetaData(final long moduleId, final String key) {
         final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) getMetaDataBySoftwareModuleId(moduleId,
                 key).orElseThrow(() -> new EntityNotFoundException(SoftwareModuleMetadata.class, moduleId, key));
 
@@ -541,7 +541,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     @Override
-    public Page<SoftwareModuleMetadata> findMetaDataByRsql(final Pageable pageable, final Long softwareModuleId,
+    public Page<SoftwareModuleMetadata> findMetaDataByRsql(final Pageable pageable, final long softwareModuleId,
             final String rsqlParam) {
 
         throwExceptionIfSoftwareModuleDoesNotExist(softwareModuleId);
@@ -565,7 +565,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     @Override
-    public Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleId(final Pageable pageable, final Long swId) {
+    public Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleId(final Pageable pageable, final long swId) {
         throwExceptionIfSoftwareModuleDoesNotExist(swId);
 
         return convertMdPage(softwareModuleMetadataRepository.findAll(
@@ -575,7 +575,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     @Override
-    public Optional<SoftwareModuleMetadata> getMetaDataBySoftwareModuleId(final Long moduleId, final String key) {
+    public Optional<SoftwareModuleMetadata> getMetaDataBySoftwareModuleId(final long moduleId, final String key) {
         throwExceptionIfSoftwareModuleDoesNotExist(moduleId);
 
         return Optional.ofNullable(softwareModuleMetadataRepository.findOne(new SwMetadataCompositeKey(moduleId, key)));
@@ -589,18 +589,18 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void delete(final Long moduleId) {
+    public void delete(final long moduleId) {
         delete(Arrays.asList(moduleId));
     }
 
     @Override
-    public boolean exists(final Long id) {
+    public boolean exists(final long id) {
         return softwareModuleRepository.exists(id);
     }
 
     @Override
     public Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleIdAndTargetVisible(final Pageable pageable,
-            final Long moduleId) {
+            final long moduleId) {
         throwExceptionIfSoftwareModuleDoesNotExist(moduleId);
 
         return convertMdPage(softwareModuleMetadataRepository.findBySoftwareModuleIdAndTargetVisible(

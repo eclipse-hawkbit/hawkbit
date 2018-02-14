@@ -728,7 +728,8 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
-        final DistributionSet toLongName = testdataFactory.generateDistributionSet(RandomStringUtils.randomAscii(80));
+        final DistributionSet toLongName = testdataFactory
+                .generateDistributionSet(RandomStringUtils.randomAlphanumeric(80));
         mvc.perform(post("/rest/v1/distributionsets").content(JsonBuilder.distributionSets(Arrays.asList(toLongName)))
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());

@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository;
 import java.io.InputStream;
 import java.util.Optional;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
@@ -23,7 +24,6 @@ import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Identifiable;
@@ -62,8 +62,8 @@ public interface ArtifactManagement {
      * @throws EntityNotFoundException
      *             if given software module does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    Artifact create(@NotNull InputStream inputStream, @NotNull Long moduleId, final String filename,
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
+    Artifact create(@NotNull InputStream inputStream, long moduleId, final String filename,
             final boolean overrideExisting);
 
     /**
@@ -99,8 +99,8 @@ public interface ArtifactManagement {
      *             if check against provided SHA1 checksum failed
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    Artifact create(@NotNull InputStream stream, @NotNull Long moduleId, @NotEmpty String filename,
-            String providedMd5Sum, String providedSha1Sum, boolean overrideExisting, String contentType);
+    Artifact create(@NotNull InputStream stream, long moduleId, @NotEmpty String filename, String providedMd5Sum,
+            String providedSha1Sum, boolean overrideExisting, String contentType);
 
     /**
      * Garbage collects artifact binaries if only referenced by given
@@ -116,7 +116,7 @@ public interface ArtifactManagement {
      * @return <code>true</code> if an binary was actually garbage collected
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
-    boolean clearArtifactBinary(@NotEmpty String artifactSha1Hash, @NotNull Long moduleId);
+    boolean clearArtifactBinary(@NotEmpty String artifactSha1Hash, long moduleId);
 
     /**
      * Deletes {@link Artifact} based on given id.
@@ -129,7 +129,7 @@ public interface ArtifactManagement {
      *             if artifact with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
-    void delete(@NotNull Long id);
+    void delete(long id);
 
     /**
      * Searches for {@link Artifact} with given {@link Identifiable}.
@@ -140,7 +140,7 @@ public interface ArtifactManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    Optional<Artifact> get(@NotNull Long id);
+    Optional<Artifact> get(long id);
 
     /**
      * Find by artifact by software module id and filename.
@@ -156,7 +156,7 @@ public interface ArtifactManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    Optional<Artifact> getByFilenameAndSoftwareModule(@NotNull String filename, @NotNull Long softwareModuleId);
+    Optional<Artifact> getByFilenameAndSoftwareModule(@NotNull String filename, long softwareModuleId);
 
     /**
      * Find all local artifact by sha1 and return the first artifact.
@@ -193,7 +193,7 @@ public interface ArtifactManagement {
      *             if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<Artifact> findBySoftwareModule(@NotNull Pageable pageReq, @NotNull Long swId);
+    Page<Artifact> findBySoftwareModule(@NotNull Pageable pageReq, long swId);
 
     /**
      * Loads {@link AbstractDbArtifact} from store for given {@link Artifact}.

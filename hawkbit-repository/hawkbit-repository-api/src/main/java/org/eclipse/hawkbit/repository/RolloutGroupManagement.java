@@ -45,7 +45,7 @@ public interface RolloutGroupManagement {
      *             of rollout with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<RolloutGroup> findByRolloutWithDetailedStatus(@NotNull Pageable pageable, @NotNull Long rolloutId);
+    Page<RolloutGroup> findByRolloutWithDetailedStatus(@NotNull Pageable pageable, long rolloutId);
 
     /**
      * 
@@ -65,7 +65,7 @@ public interface RolloutGroupManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
     Page<TargetWithActionStatus> findAllTargetsOfRolloutGroupWithActionStatus(@NotNull Pageable pageable,
-            @NotNull Long rolloutGroupId);
+            long rolloutGroupId);
 
     /**
      * Retrieves a single {@link RolloutGroup} by its ID.
@@ -77,7 +77,7 @@ public interface RolloutGroupManagement {
      * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Optional<RolloutGroup> get(@NotNull Long rolloutGroupId);
+    Optional<RolloutGroup> get(long rolloutGroupId);
 
     /**
      * Retrieves a page of {@link RolloutGroup}s filtered by a given
@@ -100,7 +100,7 @@ public interface RolloutGroupManagement {
      *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<RolloutGroup> findByRolloutAndRsql(@NotNull Pageable pageable, @NotNull Long rolloutId,
+    Page<RolloutGroup> findByRolloutAndRsql(@NotNull Pageable pageable, long rolloutId,
             @NotNull String rsqlParam);
 
     /**
@@ -115,7 +115,7 @@ public interface RolloutGroupManagement {
      * @return a page of found {@link RolloutGroup}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<RolloutGroup> findByRollout(@NotNull Pageable pageable, @NotNull Long rolloutId);
+    Page<RolloutGroup> findByRollout(@NotNull Pageable pageable, long rolloutId);
 
     /**
      * Retrieves a page of {@link RolloutGroup}s filtered by a given
@@ -128,7 +128,7 @@ public interface RolloutGroupManagement {
      * @return a page of found {@link RolloutGroup}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    long countByRollout(@NotNull Long rolloutId);
+    long countByRollout(long rolloutId);
 
     /**
      * Get targets of specified rollout group.
@@ -144,7 +144,7 @@ public interface RolloutGroupManagement {
      *             if group with ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
-    Page<Target> findTargetsOfRolloutGroup(@NotNull Pageable pageable, @NotNull Long rolloutGroupId);
+    Page<Target> findTargetsOfRolloutGroup(@NotNull Pageable pageable, long rolloutGroupId);
 
     /**
      * Get targets of specified rollout group.
@@ -165,7 +165,7 @@ public interface RolloutGroupManagement {
      *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
-    Page<Target> findTargetsOfRolloutGroupByRsql(@NotNull Pageable pageable, @NotNull Long rolloutGroupId,
+    Page<Target> findTargetsOfRolloutGroupByRsql(@NotNull Pageable pageable, long rolloutGroupId,
             @NotNull String rsqlParam);
 
     /**
@@ -177,7 +177,7 @@ public interface RolloutGroupManagement {
      * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Optional<RolloutGroup> getWithDetailedStatus(@NotNull Long rolloutGroupId);
+    Optional<RolloutGroup> getWithDetailedStatus(long rolloutGroupId);
 
     /**
      * Count targets of rollout group.
@@ -190,5 +190,5 @@ public interface RolloutGroupManagement {
      *             if rollout group with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    long countTargetsOfRolloutsGroup(@NotNull Long rolloutGroupId);
+    long countTargetsOfRolloutsGroup(long rolloutGroupId);
 }

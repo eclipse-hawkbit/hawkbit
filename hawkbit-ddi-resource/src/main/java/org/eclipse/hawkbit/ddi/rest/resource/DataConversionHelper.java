@@ -80,8 +80,7 @@ public final class DataConversionHelper {
         return key;
     }
 
-    static List<DdiArtifact> createArtifacts(final Target target,
-            final org.eclipse.hawkbit.repository.model.SoftwareModule module,
+    static List<DdiArtifact> createArtifacts(final Target target, final SoftwareModule module,
             final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement,
             final HttpRequest request) {
 

@@ -15,6 +15,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
@@ -54,7 +55,6 @@ import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.util.IpUtil;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -179,8 +179,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
                 final Long statusId = action.getId();
 
-                result = FileStreamingUtil.writeFileResponse(file, artifact.getFilename(),
-                        artifact.getLastModifiedAt() != null ? artifact.getLastModifiedAt() : artifact.getCreatedAt(),
+                result = FileStreamingUtil.writeFileResponse(file, artifact.getFilename(), artifact.getCreatedAt(),
                         requestResponseContextHolder.getHttpServletResponse(),
                         requestResponseContextHolder.getHttpServletRequest(),
                         (length, shippedSinceLastEvent, total) -> eventPublisher

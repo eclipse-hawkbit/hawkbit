@@ -31,7 +31,7 @@ public final class PermissionTest {
     @Test
     @Description("Verify the get permission function")
     public void testGetPermissions() {
-        final int allPermission = 15;
+        final int allPermission = 19;
         final int permissionWithoutSystem = allPermission - 3;
         final Collection<String> allAuthorities = SpPermission.getAllAuthorities();
         final List<GrantedAuthority> allAuthoritiesList = PermissionUtils.createAllAuthorityList();

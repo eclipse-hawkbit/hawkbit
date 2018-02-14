@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository;
 import java.util.Collection;
 import java.util.Optional;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotEmpty;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
@@ -21,7 +21,6 @@ import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -66,7 +65,7 @@ public interface DistributionSetTypeManagement
      *             by a {@link DistributionSet}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSetType assignOptionalSoftwareModuleTypes(@NotNull Long dsTypeId,
+    DistributionSetType assignOptionalSoftwareModuleTypes(long dsTypeId,
             @NotEmpty Collection<Long> softwareModuleTypeIds);
 
     /**
@@ -87,7 +86,7 @@ public interface DistributionSetTypeManagement
      *             by a {@link DistributionSet}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSetType assignMandatorySoftwareModuleTypes(@NotNull Long dsTypeId,
+    DistributionSetType assignMandatorySoftwareModuleTypes(long dsTypeId,
             @NotEmpty Collection<Long> softwareModuleTypes);
 
     /**
@@ -109,6 +108,6 @@ public interface DistributionSetTypeManagement
      *             by a {@link DistributionSet}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSetType unassignSoftwareModuleType(@NotNull Long dsTypeId, @NotNull Long softwareModuleId);
+    DistributionSetType unassignSoftwareModuleType(long dsTypeId, long softwareModuleId);
 
 }

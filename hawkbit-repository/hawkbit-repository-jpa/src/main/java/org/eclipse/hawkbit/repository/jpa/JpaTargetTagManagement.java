@@ -133,7 +133,7 @@ public class JpaTargetTagManagement implements TargetTagManagement {
     }
 
     @Override
-    public Optional<TargetTag> get(final Long id) {
+    public Optional<TargetTag> get(final long id) {
         return Optional.ofNullable(targetTagRepository.findOne(id));
     }
 

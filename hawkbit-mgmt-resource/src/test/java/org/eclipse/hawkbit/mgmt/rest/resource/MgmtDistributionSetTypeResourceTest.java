@@ -539,7 +539,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 .andExpect(status().isBadRequest());
 
         final DistributionSetType toLongName = entityFactory.distributionSetType().create().key("test123")
-                .name(RandomStringUtils.randomAscii(80)).build();
+                .name(RandomStringUtils.randomAlphanumeric(80)).build();
         mvc.perform(post("/rest/v1/distributionsettypes")
                 .content(JsonBuilder.distributionSetTypes(Arrays.asList(toLongName)))
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())

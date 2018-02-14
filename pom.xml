@@ -129,6 +129,8 @@
       <!-- Avoid extra CQs through transitive dependencies -->
       <jboss-logging.version>3.2.1.Final</jboss-logging.version>
       <tomcat.version>8.0.28</tomcat.version>
+      
+      <hibernate-validator.version>6.0.7.Final</hibernate-validator.version>
       <!-- Spring boot version overrides - END -->
 
       <!-- Vaadin versions - START -->
@@ -147,9 +149,10 @@
       <maven.scm.plugin.version>1.9.4</maven.scm.plugin.version>
 
       <!-- Misc libraries versions - START -->
-      <validation-api.version>1.1.0.Final</validation-api.version>
+      <jsoup.version>1.8.3</jsoup.version>
+      <validation-api.version>2.0.1.Final</validation-api.version>
       <allure.version>1.5.4</allure.version>
-      <eclipselink.version>2.6.4</eclipselink.version>
+      <eclipselink.version>2.7.1</eclipselink.version>
       <org.powermock.version>1.6.5</org.powermock.version>
       <gwtmockito.version>1.1.6</gwtmockito.version>
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
@@ -296,9 +299,11 @@
                <artifactId>license-maven-plugin</artifactId>
                <version>2.11</version>
                <configuration>
-                  <header>licenses/LICENSE_HEADER_TEMPLATE_BOSCH.txt</header>
+                  <header>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_18.txt</header>
                   <validHeaders>
                       <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS.txt</validHeader>
+                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS_18.txt</validHeader>
+                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH.txt</validHeader>
                   </validHeaders>
                   <excludes>
                      <exclude>**/README</exclude>
@@ -563,6 +568,11 @@
          </dependency>
 
          <!-- Misc -->
+         <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>${jsoup.version}</version>
+         </dependency>
          <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>

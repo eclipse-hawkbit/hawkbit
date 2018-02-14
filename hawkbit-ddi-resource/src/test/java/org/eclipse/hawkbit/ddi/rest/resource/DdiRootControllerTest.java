@@ -299,7 +299,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         assertThat(target.getCreatedBy()).isEqualTo("CONTROLLER_PLUG_AND_PLAY");
         assertThat(target.getCreatedAt()).isGreaterThanOrEqualTo(create);
         assertThat(target.getLastModifiedBy()).isNull();
-        assertThat(target.getLastModifiedAt()).isNull();
+        assertThat(target.getLastModifiedAt()).isZero();
 
     }
 
