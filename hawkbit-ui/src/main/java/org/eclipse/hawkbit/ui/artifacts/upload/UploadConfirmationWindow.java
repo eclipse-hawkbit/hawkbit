@@ -626,10 +626,10 @@ public class UploadConfirmationWindow implements Button.ClickListener {
         // We have to make sure that null is assigned to sha1Checksum and
         // md5Checksum if no alphanumeric value is provided. Empty String will
         // fail
-        final String sha1Checksum = org.apache.commons.lang3.StringUtils
-                .trimToNull(((TextField) item.getItemProperty(SHA1_CHECKSUM).getValue()).getValue());
-        final String md5Checksum = org.apache.commons.lang3.StringUtils
-                .trimToNull(((TextField) item.getItemProperty(MD5_CHECKSUM).getValue()).getValue());
+        final String sha1Checksum = HawkbitCommonUtil
+                .trimAndNullIfEmpty(((TextField) item.getItemProperty(SHA1_CHECKSUM).getValue()).getValue());
+        final String md5Checksum = HawkbitCommonUtil
+                .trimAndNullIfEmpty(((TextField) item.getItemProperty(MD5_CHECKSUM).getValue()).getValue());
         final String providedFileName = (String) item.getItemProperty(FILE_NAME).getValue();
         final CustomFile customFile = (CustomFile) item.getItemProperty(CUSTOM_FILE).getValue();
         final String[] itemDet = itemId.split("/");

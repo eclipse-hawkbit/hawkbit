@@ -77,6 +77,21 @@ public final class HawkbitCommonUtil {
     }
 
     /**
+     * Trims the text and converts into null in case of an empty string.
+     *
+     * @param text
+     *            text to be trimmed
+     * @return null if the text is null or if the text is blank, text.trim() if
+     *         the text is not empty.
+     */
+    public static String trimAndNullIfEmpty(final String text) {
+        if (text != null && !text.trim().isEmpty()) {
+            return text.trim();
+        }
+        return null;
+    }
+
+    /**
      * Concatenate the given text all the string arguments with the given
      * delimiter.
      *
@@ -188,7 +203,7 @@ public final class HawkbitCommonUtil {
      * @return String formatted text
      */
     public static String getFormattedName(final String orgText) {
-        return org.apache.commons.lang3.StringUtils.trimToNull(orgText) == null ? SPUIDefinitions.SPACE : orgText;
+        return trimAndNullIfEmpty(orgText) == null ? SPUIDefinitions.SPACE : orgText;
     }
 
     private static float findRequiredSwModuleExtraWidth(final float newBrowserWidth) {

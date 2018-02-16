@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.common;
 
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
-import com.vaadin.data.Validator;
 import com.vaadin.data.validator.StringLengthValidator;
 
 /**
@@ -18,25 +17,39 @@ import com.vaadin.data.validator.StringLengthValidator;
  * character has to be entered. Leading and trailing whitespaces are allowed as
  * they will be trimmed by the repository.
  */
-public class EmptyStringValidator implements Validator {
+public class EmptyStringValidator extends StringLengthValidator {
 
     private static final long serialVersionUID = 1L;
 
-    private final VaadinMessageSource i18n;
+    private static final String MESSAGE_KEY = "validator.textfield.min.length";
+
+    private static final int TEXT_FIELD_DEFAULT_MAX_LENGTH = 64;
 
     /**
-     * Constructor
+     * Constructor for EmptyStringValidator
      * 
-     * @param vaadinMessageSource
+     * @param i18n
      *            {@link VaadinMessageSource}
      */
-    public EmptyStringValidator(final VaadinMessageSource vaadinMessageSource) {
-        this.i18n = vaadinMessageSource;
+    public EmptyStringValidator(final VaadinMessageSource i18n) {
+        super(i18n.getMessage(MESSAGE_KEY), 1, TEXT_FIELD_DEFAULT_MAX_LENGTH, false);
+    }
+
+    /**
+     * Constructor for EmptyStringValidator
+     * 
+     * @param i18n
+     *            {@link VaadinMessageSource}
+     * @param maxLength
+     *            max length of the textfield
+     */
+    public EmptyStringValidator(final VaadinMessageSource i18n, final int maxLength) {
+        super(i18n.getMessage(MESSAGE_KEY), 1, maxLength, false);
     }
 
     @Override
-    public void validate(final Object value) {
-        new StringLengthValidator(i18n.getMessage("validator.textfield.min.length"), 1, Integer.MAX_VALUE, false)
-                .validate(((String) value).trim());
+    public boolean isValid(final Object value) {
+        return super.isValid(value != null ? value.toString().trim() : null);
     }
+
 }
