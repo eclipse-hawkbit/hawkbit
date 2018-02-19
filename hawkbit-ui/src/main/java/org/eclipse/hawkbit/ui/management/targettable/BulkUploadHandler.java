@@ -40,7 +40,6 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.state.TargetBulkUpload;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
@@ -108,8 +107,8 @@ public class BulkUploadHandler extends CustomComponent
     BulkUploadHandler(final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout,
             final TargetManagement targetManagement, final TargetTagManagement tagManagement,
             final EntityFactory entityFactory, final DistributionSetManagement distributionSetManagement,
-            final ManagementUIState managementUIState, final DeploymentManagement deploymentManagement, final VaadinMessageSource i18n,
-            final UI uiInstance, final Executor uiExecutor) {
+            final ManagementUIState managementUIState, final DeploymentManagement deploymentManagement,
+            final VaadinMessageSource i18n, final UI uiInstance, final Executor uiExecutor) {
         this.uiInstance = uiInstance;
         this.comboBox = targetBulkUpdateWindowLayout.getDsNamecomboBox();
         this.descTextArea = targetBulkUpdateWindowLayout.getDescTextArea();
@@ -364,8 +363,8 @@ public class BulkUploadHandler extends CustomComponent
         // Exception squid:S1166 - Targets that exist already are simply ignored
         @SuppressWarnings("squid:S1166")
         private void addNewTarget(final String controllerId, final String name) {
-            final String newControllerId = HawkbitCommonUtil.trimAndNullIfEmpty(controllerId);
-            final String description = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
+            final String newControllerId = controllerId;
+            final String description = descTextArea.getValue();
 
             try {
                 targetManagement.create(entityFactory.target().create().controllerId(newControllerId).name(name)

@@ -16,7 +16,6 @@ import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -123,9 +122,8 @@ public abstract class AbstractSoftwareModuleDetails
 
         detailsTabLayout.removeAllComponents();
 
-        final Label vendorLabel = SPUIComponentProvider.createNameValueLabel(
-                getI18n().getMessage("label.dist.details.vendor"),
-                HawkbitCommonUtil.trimAndNullIfEmpty(vendor) == null ? "" : vendor);
+        final Label vendorLabel = SPUIComponentProvider
+                .createNameValueLabel(getI18n().getMessage("label.dist.details.vendor"), vendor == null ? "" : vendor);
         vendorLabel.setId(UIComponentIdProvider.DETAILS_VENDOR_LABEL_ID);
         detailsTabLayout.addComponent(vendorLabel);
 
@@ -136,9 +134,8 @@ public abstract class AbstractSoftwareModuleDetails
             detailsTabLayout.addComponent(typeLabel);
         }
 
-        final Label assignLabel = SPUIComponentProvider.createNameValueLabel(
-                getI18n().getMessage("label.assigned.type"),
-                HawkbitCommonUtil.trimAndNullIfEmpty(maxAssign) == null ? "" : maxAssign);
+        final Label assignLabel = SPUIComponentProvider
+                .createNameValueLabel(getI18n().getMessage("label.assigned.type"), maxAssign == null ? "" : maxAssign);
         assignLabel.setId(UIComponentIdProvider.SWM_DTLS_MAX_ASSIGN);
         detailsTabLayout.addComponent(assignLabel);
     }

@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.data.Item;
@@ -102,7 +103,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
 
     private final UploadLayout uploadLayout;
 
-    private IndexedContainer tabelContainer;
+    private IndexedContainer tableContainer;
 
     private final List<UploadStatus> uploadResultList = new ArrayList<>();
 
@@ -145,9 +146,9 @@ public class UploadConfirmationWindow implements Button.ClickListener {
     private Boolean preUploadValidation(final List<String> itemIds) {
         Boolean validationSuccess = true;
         for (final String itemId : itemIds) {
-            final Item item = tabelContainer.getItem(itemId);
+            final Item item = tableContainer.getItem(itemId);
             final String providedFileName = (String) item.getItemProperty(FILE_NAME).getValue();
-            if (HawkbitCommonUtil.trimAndNullIfEmpty(providedFileName) == null) {
+            if (!StringUtils.hasText(providedFileName)) {
                 validationSuccess = false;
                 break;
             }
@@ -189,9 +190,11 @@ public class UploadConfirmationWindow implements Button.ClickListener {
      */
     private void setWarningIcon(final Label warningIconLabel, final String fileName, final Object itemId) {
         final Item item = uploadDetailsTable.getItem(itemId);
-        if (HawkbitCommonUtil.trimAndNullIfEmpty(fileName) != null) {
+        if (StringUtils.hasText(fileName)) {
+            final String fileNameTrimmed = StringUtils.trimWhitespace(fileName);
             final Long baseSwId = (Long) item.getItemProperty(BASE_SOFTWARE_ID).getValue();
-            final Optional<Artifact> artifact = artifactManagement.getByFilenameAndSoftwareModule(fileName, baseSwId);
+            final Optional<Artifact> artifact = artifactManagement.getByFilenameAndSoftwareModule(fileNameTrimmed,
+                    baseSwId);
             if (artifact.isPresent()) {
                 warningIconLabel.setVisible(true);
                 if (isErrorIcon(warningIconLabel)) {
@@ -199,7 +202,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
                     redErrorLabelCount--;
                 }
                 warningIconLabel.setDescription(i18n.getMessage(ALREADY_EXISTS_MSG));
-                if (checkForDuplicate(fileName, itemId, baseSwId)) {
+                if (checkForDuplicate(fileNameTrimmed, itemId, baseSwId)) {
                     warningIconLabel.setDescription(i18n.getMessage("message.duplicate.filename"));
                     warningIconLabel.addStyleName(SPUIStyleDefinitions.ERROR_LABEL);
                     redErrorLabelCount++;
@@ -216,8 +219,8 @@ public class UploadConfirmationWindow implements Button.ClickListener {
     }
 
     private Boolean checkForDuplicate(final String fileName, final Object itemId, final Long currentBaseSwId) {
-        for (final Object newItemId : tabelContainer.getItemIds()) {
-            final Item newItem = tabelContainer.getItem(newItemId);
+        for (final Object newItemId : tableContainer.getItemIds()) {
+            final Item newItem = tableContainer.getItem(newItemId);
             final Long newBaseSwId = (Long) newItem.getItemProperty(BASE_SOFTWARE_ID).getValue();
             final String newFileName = (String) newItem.getItemProperty(FILE_NAME).getValue();
             if (!newItemId.equals(itemId) && newBaseSwId.equals(currentBaseSwId) && newFileName.equals(fileName)) {
@@ -232,7 +235,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             final String swNameVersion = HawkbitCommonUtil.getFormattedNameVersion(
                     customFile.getBaseSoftwareModuleName(), customFile.getBaseSoftwareModuleVersion());
             final String itemId = swNameVersion + "/" + customFile.getFileName();
-            final Item newItem = tabelContainer.addItem(itemId);
+            final Item newItem = tableContainer.addItem(itemId);
             final SoftwareModule bSoftwareModule = artifactUploadState.getBaseSwModuleList().get(swNameVersion);
             newItem.getItemProperty(BASE_SOFTWARE_ID).setValue(bSoftwareModule.getId());
 
@@ -328,8 +331,8 @@ public class UploadConfirmationWindow implements Button.ClickListener {
      *            file name before modification
      */
     private void modifyIconOfSameSwId(final Object itemId, final Long oldSwId, final String oldFileName) {
-        for (final Object rowId : tabelContainer.getItemIds()) {
-            final Item newItem = tabelContainer.getItem(rowId);
+        for (final Object rowId : tableContainer.getItemIds()) {
+            final Item newItem = tableContainer.getItem(rowId);
             final Long newBaseSwId = (Long) newItem.getItemProperty(BASE_SOFTWARE_ID).getValue();
             final String newFileName = (String) newItem.getItemProperty(FILE_NAME).getValue();
             if (!rowId.equals(itemId) && newBaseSwId.equals(oldSwId) && newFileName.equals(oldFileName)) {
@@ -380,9 +383,9 @@ public class UploadConfirmationWindow implements Button.ClickListener {
     }
 
     private void newFileNameIsDuplicate(final Object itemId, final Long currentSwId, final String currentChangedText) {
-        for (final Object rowId : tabelContainer.getItemIds()) {
-            final Item currentItem = tabelContainer.getItem(itemId);
-            final Item newItem = tabelContainer.getItem(rowId);
+        for (final Object rowId : tableContainer.getItemIds()) {
+            final Item currentItem = tableContainer.getItem(itemId);
+            final Item newItem = tableContainer.getItem(rowId);
             final Long newBaseSwId = (Long) newItem.getItemProperty(BASE_SOFTWARE_ID).getValue();
             final String fileName = (String) newItem.getItemProperty(FILE_NAME).getValue();
             if (!rowId.equals(itemId) && newBaseSwId.equals(currentSwId) && fileName.equals(currentChangedText)) {
@@ -406,8 +409,8 @@ public class UploadConfirmationWindow implements Button.ClickListener {
         Label errorLabel = null;
         int errorLabelCount = 0;
         int duplicateCount = 0;
-        for (final Object rowId : tabelContainer.getItemIds()) {
-            final Item newItem = tabelContainer.getItem(rowId);
+        for (final Object rowId : tableContainer.getItemIds()) {
+            final Item newItem = tableContainer.getItem(rowId);
             final Long newBaseSwId = (Long) newItem.getItemProperty(BASE_SOFTWARE_ID).getValue();
             final String newFileName = (String) newItem.getItemProperty(FILE_NAME).getValue();
             if (!rowId.equals(itemId) && newBaseSwId.equals(currentSwId) && newFileName.equals(oldFileName)) {
@@ -461,19 +464,19 @@ public class UploadConfirmationWindow implements Button.ClickListener {
     }
 
     private void setTableContainer() {
-        tabelContainer = new IndexedContainer();
-        tabelContainer.addContainerProperty(FILE_NAME_LAYOUT, HorizontalLayout.class, null);
-        tabelContainer.addContainerProperty(SW_MODULE_NAME, Label.class, null);
-        tabelContainer.addContainerProperty(SHA1_CHECKSUM, TextField.class, null);
-        tabelContainer.addContainerProperty(MD5_CHECKSUM, TextField.class, null);
-        tabelContainer.addContainerProperty(SIZE, Long.class, null);
-        tabelContainer.addContainerProperty(ACTION, Button.class, "");
-        tabelContainer.addContainerProperty(FILE_NAME, String.class, null);
-        tabelContainer.addContainerProperty(BASE_SOFTWARE_ID, Long.class, null);
-        tabelContainer.addContainerProperty(WARNING_ICON, Label.class, null);
-        tabelContainer.addContainerProperty(CUSTOM_FILE, CustomFile.class, null);
+        tableContainer = new IndexedContainer();
+        tableContainer.addContainerProperty(FILE_NAME_LAYOUT, HorizontalLayout.class, null);
+        tableContainer.addContainerProperty(SW_MODULE_NAME, Label.class, null);
+        tableContainer.addContainerProperty(SHA1_CHECKSUM, TextField.class, null);
+        tableContainer.addContainerProperty(MD5_CHECKSUM, TextField.class, null);
+        tableContainer.addContainerProperty(SIZE, Long.class, null);
+        tableContainer.addContainerProperty(ACTION, Button.class, "");
+        tableContainer.addContainerProperty(FILE_NAME, String.class, null);
+        tableContainer.addContainerProperty(BASE_SOFTWARE_ID, Long.class, null);
+        tableContainer.addContainerProperty(WARNING_ICON, Label.class, null);
+        tableContainer.addContainerProperty(CUSTOM_FILE, CustomFile.class, null);
 
-        uploadDetailsTable.setContainerDataSource(tabelContainer);
+        uploadDetailsTable.setContainerDataSource(tableContainer);
         uploadDetailsTable.setPageLength(10);
         uploadDetailsTable.setColumnHeader(FILE_NAME_LAYOUT, i18n.getMessage("upload.file.name"));
         uploadDetailsTable.setColumnHeader(SW_MODULE_NAME, i18n.getMessage("upload.swModuleTable.header"));
@@ -619,9 +622,14 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             final SoftwareModule baseSw) {
 
         final File newFile = new File(filePath);
-        final Item item = tabelContainer.getItem(itemId);
-        final String sha1Checksum = ((TextField) item.getItemProperty(SHA1_CHECKSUM).getValue()).getValue();
-        final String md5Checksum = ((TextField) item.getItemProperty(MD5_CHECKSUM).getValue()).getValue();
+        final Item item = tableContainer.getItem(itemId);
+        // We have to make sure that null is assigned to sha1Checksum and
+        // md5Checksum if no alphanumeric value is provided. Empty String will
+        // fail
+        final String sha1Checksum = HawkbitCommonUtil
+                .trimAndNullIfEmpty(((TextField) item.getItemProperty(SHA1_CHECKSUM).getValue()).getValue());
+        final String md5Checksum = HawkbitCommonUtil
+                .trimAndNullIfEmpty(((TextField) item.getItemProperty(MD5_CHECKSUM).getValue()).getValue());
         final String providedFileName = (String) item.getItemProperty(FILE_NAME).getValue();
         final CustomFile customFile = (CustomFile) item.getItemProperty(CUSTOM_FILE).getValue();
         final String[] itemDet = itemId.split("/");
@@ -629,9 +637,8 @@ public class UploadConfirmationWindow implements Button.ClickListener {
 
         try (FileInputStream fis = new FileInputStream(newFile)) {
 
-            artifactManagement.create(fis, baseSw.getId(), providedFileName,
-                    HawkbitCommonUtil.trimAndNullIfEmpty(md5Checksum),
-                    HawkbitCommonUtil.trimAndNullIfEmpty(sha1Checksum), true, customFile.getMimeType());
+            artifactManagement.create(fis, baseSw.getId(), providedFileName, md5Checksum, sha1Checksum, true,
+                    customFile.getMimeType());
             saveUploadStatus(providedFileName, swModuleNameVersion, SPUILabelDefinitions.SUCCESS, "");
 
         } catch (final ArtifactUploadFailedException | InvalidSHA1HashException | InvalidMD5HashException

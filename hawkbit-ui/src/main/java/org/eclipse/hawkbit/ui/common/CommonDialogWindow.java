@@ -31,7 +31,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroupItemComponent;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.vaadin.data.Container.ItemSetChangeEvent;
 import com.vaadin.data.Container.ItemSetChangeListener;
@@ -333,10 +332,6 @@ public class CommonDialogWindow extends Window {
 
         for (final AbstractField field : requiredComponents) {
             Object value = getCurrentVaue(currentChangedComponent, newValue, field);
-
-            if (String.class.equals(field.getType())) {
-                value = Strings.emptyToNull((String) value);
-            }
 
             if (Set.class.equals(field.getType())) {
                 value = emptyToNull((Collection<?>) value);

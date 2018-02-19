@@ -20,8 +20,6 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public class TextFieldBuilder extends AbstractTextFieldBuilder<TextField> {
 
-    private static final int TEXT_FIELD_DEFAULT_MAX_LENGTH = 64;
-
     /**
      * Constructor.
      */
@@ -36,7 +34,6 @@ public class TextFieldBuilder extends AbstractTextFieldBuilder<TextField> {
      *            the id
      */
     public TextFieldBuilder(final String id) {
-        maxLengthAllowed(TEXT_FIELD_DEFAULT_MAX_LENGTH);
         styleName(ValoTheme.TEXTAREA_TINY);
         id(id);
     }

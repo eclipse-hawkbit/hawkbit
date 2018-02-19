@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorderWithIcon;
 import org.eclipse.hawkbit.ui.filtermanagement.TargetFilterBeanQuery;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -170,6 +169,7 @@ public class DefineGroupsLayout extends GridLayout {
         button.setVisible(true);
         button.addClickListener(event -> addGroupRowAndValidate());
         return button;
+
     }
 
     private GroupRow addGroupRow() {
@@ -238,8 +238,9 @@ public class DefineGroupsLayout extends GridLayout {
 
         removeAllRows();
 
-        final List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(new PageRequest(0, quotaManagement.getMaxRolloutGroupsPerRollout()),
-                rollout.getId()).getContent();
+        final List<RolloutGroup> groups = rolloutGroupManagement
+                .findByRollout(new PageRequest(0, quotaManagement.getMaxRolloutGroupsPerRollout()), rollout.getId())
+                .getContent();
         for (final RolloutGroup group : groups) {
             final GroupRow groupRow = addGroupRow();
             groupRow.populateByGroup(group);
@@ -299,6 +300,7 @@ public class DefineGroupsLayout extends GridLayout {
         }
 
         runningValidationsCounter.incrementAndGet();
+
     }
 
     /**
@@ -388,32 +390,31 @@ public class DefineGroupsLayout extends GridLayout {
             groupName = createTextField("textfield.name", UIComponentIdProvider.ROLLOUT_GROUP_LIST_GRID_ID);
             groupName.setValue(i18n.getMessage("textfield.rollout.group.default.name", groupsCount));
             groupName.setStyleName("rollout-group-name");
-            groupName.addValueChangeListener(event -> valueChanged());
+            groupName.addValueChangeListener(
 
-            targetFilterQueryCombo = createTargetFilterQueryCombo();
+                    event -> valueChanged());
+
+            targetFilterQueryCombo =
+
+                    createTargetFilterQueryCombo();
+
             populateTargetFilterQuery();
             targetFilterQueryCombo.addValueChangeListener(event -> valueChanged());
-
             targetFilterQuery = createTargetFilterQuery();
-
             targetPercentage = createPercentageWithDecimalsField("textfield.target.percentage",
                     UIComponentIdProvider.ROLLOUT_GROUP_TARGET_PERC_ID);
             targetPercentage.setValue("100");
             targetPercentage.addValueChangeListener(event -> valueChanged());
-
             triggerThreshold = createPercentageField("prompt.tigger.threshold",
                     UIComponentIdProvider.ROLLOUT_TRIGGER_THRESOLD_ID);
             triggerThreshold.setValue(defaultTriggerThreshold);
             triggerThreshold.addValueChangeListener(event -> valueChanged());
-
             errorThreshold = createPercentageField("prompt.error.threshold",
                     UIComponentIdProvider.ROLLOUT_ERROR_THRESOLD_ID);
             errorThreshold.setValue(defaultErrorThreshold);
             errorThreshold.addValueChangeListener(event -> valueChanged());
-
             optionsLayout = new HorizontalLayout();
             optionsLayout.addComponent(createRemoveButton());
-
             initialized = true;
         }
 
@@ -540,13 +541,12 @@ public class DefineGroupsLayout extends GridLayout {
         }
 
         private String getTargetFilterQuery() {
-            if (null != targetFilterQueryCombo.getValue()
-                    && HawkbitCommonUtil.trimAndNullIfEmpty((String) targetFilterQueryCombo.getValue()) != null) {
-                final Item filterItem = targetFilterQueryCombo.getContainerDataSource()
-                        .getItem(targetFilterQueryCombo.getValue());
-                return (String) filterItem.getItemProperty("query").getValue();
+            if (!StringUtils.hasText((String) targetFilterQueryCombo.getValue())) {
+                return null;
             }
-            return null;
+            final Item filterItem = targetFilterQueryCombo.getContainerDataSource()
+                    .getItem(targetFilterQueryCombo.getValue());
+            return (String) filterItem.getItemProperty("query").getValue();
         }
 
         /**

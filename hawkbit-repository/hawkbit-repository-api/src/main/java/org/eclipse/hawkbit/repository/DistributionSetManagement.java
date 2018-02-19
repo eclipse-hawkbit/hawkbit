@@ -197,8 +197,8 @@ public interface DistributionSetManagement
      *             of distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<DistributionSetMetadata> findMetaDataByDistributionSetIdAndRsql(@NotNull Pageable pageable,
-            long setId, @NotNull String rsqlParam);
+    Page<DistributionSetMetadata> findMetaDataByDistributionSetIdAndRsql(@NotNull Pageable pageable, long setId,
+            @NotNull String rsqlParam);
 
     /**
      * finds all {@link DistributionSet}s.

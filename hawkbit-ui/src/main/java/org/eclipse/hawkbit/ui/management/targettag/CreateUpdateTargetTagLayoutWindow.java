@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
 import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.PageRequest;
@@ -134,16 +133,14 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
     @Override
     protected void createNewTag() {
         super.createNewTag();
-        final String tagNameTrimmed = HawkbitCommonUtil.trimAndNullIfEmpty(tagNameValue);
-        final String tagDescriptionTrimmed = HawkbitCommonUtil.trimAndNullIfEmpty(tagDescValue);
-        if (!StringUtils.isEmpty(tagNameTrimmed)) {
+        if (!StringUtils.isEmpty(tagNameValue)) {
             String colour = ColorPickerConstants.START_COLOR.getCSS();
             if (!StringUtils.isEmpty(getColorPicked())) {
                 colour = getColorPicked();
             }
 
-            final TargetTag newTargetTag = targetTagManagement.create(entityFactory.tag().create()
-                    .name(tagNameTrimmed).description(tagDescriptionTrimmed).colour(colour));
+            final TargetTag newTargetTag = targetTagManagement
+                    .create(entityFactory.tag().create().name(tagNameValue).description(tagDescValue).colour(colour));
             eventBus.publish(this, new TargetTagTableEvent(BaseEntityEventType.ADD_ENTITY, newTargetTag));
             displaySuccess(newTargetTag.getName());
         } else {
