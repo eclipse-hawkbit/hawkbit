@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ddi.rest.resource;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION;
@@ -31,7 +30,9 @@ import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTypeCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleTypeCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -50,6 +51,8 @@ import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -73,13 +76,15 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @WithUser(tenantId = "tenantDoesNotExists", allSpPermissions = true, authorities = { CONTROLLER_ROLE,
             SYSTEM_ROLE }, autoCreateTenant = false)
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetPollEvent.class, count = 1) })
+            @Expect(type = TargetPollEvent.class, count = 1),
+            @Expect(type = DistributionSetTypeCreatedEvent.class, count = 3),
+            @Expect(type = SoftwareModuleTypeCreatedEvent.class, count = 2) })
     public void targetCannotBeRegisteredIfTenantDoesNotExistsButWhenExists() throws Exception {
 
         mvc.perform(get("/default-tenant/", tenantAware.getCurrentTenant())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
-        // create tenant
+        // create tenant -- creates softwaremoduletypes and distributionsettypes
         systemManagement.getTenantMetadata("tenantDoesNotExists");
 
         mvc.perform(get("/{}/controller/v1/aControllerId", tenantAware.getCurrentTenant()))
