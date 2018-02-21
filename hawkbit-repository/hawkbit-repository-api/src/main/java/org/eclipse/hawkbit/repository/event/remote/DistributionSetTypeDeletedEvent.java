@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2018 Bosch Software Innovations GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,20 +9,20 @@
 package org.eclipse.hawkbit.repository.event.remote;
 
 import org.eclipse.hawkbit.repository.event.entitiy.EntityDeletedEvent;
-import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 
 /**
- * Defines the remote event of delete a {@link TargetTag}.
  *
+ * Defines the remote event of deleting a {@link DistributionSetType}.
  */
-public class TargetTagDeletedEvent extends RemoteIdEvent implements EntityDeletedEvent {
+public class DistributionSetTypeDeletedEvent extends RemoteIdEvent implements EntityDeletedEvent {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * Default constructor.
      */
-    public TargetTagDeletedEvent() {
+    public DistributionSetTypeDeletedEvent() {
         // for serialization libs like jackson
     }
 
@@ -38,8 +38,9 @@ public class TargetTagDeletedEvent extends RemoteIdEvent implements EntityDelete
      * @param applicationId
      *            the origin application id
      */
-    public TargetTagDeletedEvent(final String tenant, final Long entityId, final String entityClass,
+    public DistributionSetTypeDeletedEvent(final String tenant, final Long entityId, final String entityClass,
             final String applicationId) {
         super(entityId, tenant, entityClass, applicationId);
     }
+
 }

@@ -8,13 +8,14 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import org.eclipse.hawkbit.repository.event.entitiy.EntityDeletedEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 
 /**
  *
  * Defines the remote event of deleting a {@link Rollout}.
  */
-public class RolloutDeletedEvent extends RemoteIdEvent {
+public class RolloutDeletedEvent extends RemoteIdEvent implements EntityDeletedEvent {
 
     private static final long serialVersionUID = 1L;
 

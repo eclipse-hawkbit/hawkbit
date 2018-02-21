@@ -17,7 +17,12 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleTypeDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleTypeCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleTypeUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
+import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
  * Type of a software modules.
@@ -32,7 +37,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
-public class JpaSoftwareModuleType extends AbstractJpaNamedEntity implements SoftwareModuleType {
+public class JpaSoftwareModuleType extends AbstractJpaNamedEntity implements SoftwareModuleType, EventAwareEntity {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "type_key", nullable = false, length = SoftwareModuleType.KEY_MAX_SIZE)
@@ -137,5 +142,23 @@ public class JpaSoftwareModuleType extends AbstractJpaNamedEntity implements Sof
 
     public void setKey(final String key) {
         this.key = key;
+    }
+
+    @Override
+    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
+                new SoftwareModuleTypeCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+    }
+
+    @Override
+    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
+                new SoftwareModuleTypeUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+    }
+
+    @Override
+    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new SoftwareModuleTypeDeletedEvent(
+                getTenant(), getId(), getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
     }
 }

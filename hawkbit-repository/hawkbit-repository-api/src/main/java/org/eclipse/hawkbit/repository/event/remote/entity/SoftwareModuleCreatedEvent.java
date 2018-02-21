@@ -8,13 +8,14 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import org.eclipse.hawkbit.repository.event.entitiy.EntityCreatedEvent;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
 /**
  * Defines the remote event of creating a new {@link SoftwareModule}.
  *
  */
-public class SoftwareModuleCreatedEvent extends RemoteEntityEvent<SoftwareModule> {
+public class SoftwareModuleCreatedEvent extends RemoteEntityEvent<SoftwareModule> implements EntityCreatedEvent {
     private static final long serialVersionUID = 1L;
 
     /**

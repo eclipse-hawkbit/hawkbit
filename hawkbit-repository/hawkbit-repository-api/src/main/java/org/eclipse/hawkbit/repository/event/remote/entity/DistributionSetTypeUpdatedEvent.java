@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2018 Bosch Software Innovations GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,20 +9,22 @@
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import org.eclipse.hawkbit.repository.event.entitiy.EntityUpdatedEvent;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 
 /**
- * Defines the remote event for updating a {@link SoftwareModule}.
+ * Defines the remote event for updating a {@link SoftwareModuleType}.
  *
  */
-public class SoftwareModuleUpdatedEvent extends RemoteEntityEvent<SoftwareModule> implements EntityUpdatedEvent {
+public class DistributionSetTypeUpdatedEvent extends RemoteEntityEvent<DistributionSetType>
+        implements EntityUpdatedEvent {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * Default constructor.
      */
-    public SoftwareModuleUpdatedEvent() {
+    public DistributionSetTypeUpdatedEvent() {
         // for serialization libs like jackson
     }
 
@@ -30,11 +32,11 @@ public class SoftwareModuleUpdatedEvent extends RemoteEntityEvent<SoftwareModule
      * Constructor.
      * 
      * @param baseEntity
-     *            the software module
+     *            DistributionSetType
      * @param applicationId
      *            the origin application id
      */
-    public SoftwareModuleUpdatedEvent(final SoftwareModule baseEntity, final String applicationId) {
+    public DistributionSetTypeUpdatedEvent(final DistributionSetType baseEntity, final String applicationId) {
         super(baseEntity, applicationId);
     }
 

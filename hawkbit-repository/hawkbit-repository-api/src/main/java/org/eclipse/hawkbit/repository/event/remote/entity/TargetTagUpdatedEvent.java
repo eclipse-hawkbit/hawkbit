@@ -8,13 +8,14 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import org.eclipse.hawkbit.repository.event.entitiy.EntityUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 
 /**
  * Defines the remote event for updating a {@link TargetTag}.
  *
  */
-public class TargetTagUpdatedEvent extends RemoteEntityEvent<TargetTag> {
+public class TargetTagUpdatedEvent extends RemoteEntityEvent<TargetTag> implements EntityUpdatedEvent {
 
     private static final long serialVersionUID = 1L;
 

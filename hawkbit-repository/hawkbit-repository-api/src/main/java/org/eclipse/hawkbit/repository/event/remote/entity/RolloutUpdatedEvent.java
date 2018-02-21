@@ -8,12 +8,13 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import org.eclipse.hawkbit.repository.event.entitiy.EntityUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 
 /**
  * Defines the remote event of updated a {@link Rollout}.
  */
-public class RolloutUpdatedEvent extends RemoteEntityEvent<Rollout> {
+public class RolloutUpdatedEvent extends RemoteEntityEvent<Rollout> implements EntityUpdatedEvent {
     private static final long serialVersionUID = 1L;
 
     /**
