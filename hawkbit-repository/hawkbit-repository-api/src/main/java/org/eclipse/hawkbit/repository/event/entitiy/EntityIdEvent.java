@@ -8,10 +8,12 @@
  */
 package org.eclipse.hawkbit.repository.event.entitiy;
 
+import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
+
 /**
  * Interface to indicate an entity event which contains at least an entity id.
  */
-public interface EntityIdEvent {
+public interface EntityIdEvent extends TenantAwareEvent {
 
     /**
      * @return the class of the entity of this event.
