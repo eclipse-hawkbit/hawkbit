@@ -8,9 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,6 +30,7 @@ import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEv
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RolloutCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
@@ -70,6 +68,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -137,7 +138,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = RolloutGroupUpdatedEvent.class, count = 10),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = RolloutUpdatedEvent.class, count = 1),
+            @Expect(type = RolloutUpdatedEvent.class, count = 1), @Expect(type = RolloutCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 10) })
     public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         testdataFactory.createRollout("xxx");
@@ -1419,7 +1420,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = RolloutGroupCreatedEvent.class, count = 5),
             @Expect(type = RolloutGroupDeletedEvent.class, count = 5),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = RolloutGroupUpdatedEvent.class, count = 5) })
+            @Expect(type = RolloutGroupUpdatedEvent.class, count = 5),
+            @Expect(type = RolloutCreatedEvent.class, count = 1) })
     public void deleteRolloutWhichHasNeverStartedIsHardDeleted() {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
@@ -1450,7 +1452,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = RolloutGroupCreatedEvent.class, count = 5),
             @Expect(type = RolloutGroupDeletedEvent.class, count = 5),
             @Expect(type = ActionCreatedEvent.class, count = 10), @Expect(type = ActionUpdatedEvent.class, count = 2),
-            @Expect(type = RolloutDeletedEvent.class, count = 1) })
+            @Expect(type = RolloutDeletedEvent.class, count = 1),
+            @Expect(type = RolloutCreatedEvent.class, count = 1) })
     public void deleteRolloutWhichHasBeenStartedBeforeIsSoftDeleted() {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
