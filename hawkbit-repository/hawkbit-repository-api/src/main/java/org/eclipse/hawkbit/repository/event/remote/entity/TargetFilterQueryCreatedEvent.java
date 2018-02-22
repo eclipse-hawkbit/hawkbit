@@ -9,11 +9,10 @@
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import org.eclipse.hawkbit.repository.event.entitiy.EntityCreatedEvent;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 
 /**
- * Defines the remote event of creating a new {@link Target}.
+ * Defines the remote event of creating a new {@link TargetFilterQuery}.
  *
  */
 public class TargetFilterQueryCreatedEvent extends RemoteEntityEvent<TargetFilterQuery> implements EntityCreatedEvent {
