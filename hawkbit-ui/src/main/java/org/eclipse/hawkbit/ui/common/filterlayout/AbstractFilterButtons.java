@@ -15,10 +15,10 @@ import java.util.List;
 
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUITagButtonStyle;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -95,14 +95,12 @@ public abstract class AbstractFilterButtons extends Table {
         final Item item = getItem(itemId);
         final Long id = (Long) item.getItemProperty(SPUILabelDefinitions.VAR_ID).getValue();
         final String name = (String) item.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
-        final String desc = HawkbitCommonUtil
-                .trimAndNullIfEmpty((String) item.getItemProperty(SPUILabelDefinitions.VAR_DESC).getValue()) != null
-                        ? item.getItemProperty(SPUILabelDefinitions.VAR_DESC).getValue().toString() : null;
-        final String color = HawkbitCommonUtil
-                .trimAndNullIfEmpty((String) item.getItemProperty(SPUILabelDefinitions.VAR_COLOR).getValue()) != null
-                        ? item.getItemProperty(SPUILabelDefinitions.VAR_COLOR).getValue().toString() : DEFAULT_GREEN;
+        final String desc = (String) item.getItemProperty(SPUILabelDefinitions.VAR_DESC).getValue() != null
+                ? item.getItemProperty(SPUILabelDefinitions.VAR_DESC).getValue().toString() : null;
+        final String color = (String) item.getItemProperty(SPUILabelDefinitions.VAR_COLOR).getValue() != null
+                ? item.getItemProperty(SPUILabelDefinitions.VAR_COLOR).getValue().toString() : DEFAULT_GREEN;
         final Button typeButton = createFilterButton(id, name, desc, color, itemId);
-        typeButton.addClickListener(event -> filterButtonClickBehaviour.processFilterButtonClick(event));
+        typeButton.addClickListener(filterButtonClickBehaviour::processFilterButtonClick);
 
         if ((NO_TAG_BUTTON_ID.equals(typeButton.getData()) && isNoTagStateSelected())
                 || (id != null && isClickedByDefault(name))) {
@@ -159,7 +157,7 @@ public abstract class AbstractFilterButtons extends Table {
             button.setCaption(prepareFilterButtonCaption(button.getCaption(), color));
         }
 
-        if (HawkbitCommonUtil.trimAndNullIfEmpty(description) != null) {
+        if (!StringUtils.isEmpty(description)) {
             button.setDescription(description);
         } else {
             button.setDescription(name);

@@ -114,8 +114,8 @@ public interface DeploymentManagement {
      *             do not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    DistributionSetAssignmentResult assignDistributionSet(long dsID,
-            @NotEmpty Collection<TargetWithActionType> targets, String actionMessage);
+    DistributionSetAssignmentResult assignDistributionSet(long dsID, @NotEmpty Collection<TargetWithActionType> targets,
+            String actionMessage);
 
     /**
      * Method registers an "offline" assignment, i.e. adds a completed action
@@ -407,8 +407,7 @@ public interface DeploymentManagement {
      * @return the amount of started actions
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long startScheduledActionsByRolloutGroupParent(long rolloutId, long distributionSetId,
-            Long rolloutGroupParentId);
+    long startScheduledActionsByRolloutGroupParent(long rolloutId, long distributionSetId, Long rolloutGroupParentId);
 
     /**
      * All {@link ActionStatus} entries in the repository.

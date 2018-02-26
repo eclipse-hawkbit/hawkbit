@@ -70,6 +70,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -196,6 +197,9 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     protected ServiceMatcher serviceMatcher;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
     @Rule
     public final WithSpringAuthorityRule securityRule = new WithSpringAuthorityRule();
 
@@ -263,6 +267,7 @@ public abstract class AbstractIntegrationTest {
 
     @Before
     public void before() throws Exception {
+
         final String description = "Updated description.";
 
         osType = securityRule
@@ -281,6 +286,15 @@ public abstract class AbstractIntegrationTest {
                 .update(entityFactory.softwareModuleType().update(runtimeType.getId()).description(description)));
 
         standardDsType = securityRule.runAsPrivileged(() -> testdataFactory.findOrCreateDefaultTestDsType());
+
+        // publish the reset counter market event to reset the counters after
+        // setup. The setup is transparent by the test and its @ExpectedEvent
+        // counting so we reset the counter here after the setup. Note that this
+        // approach is only working when using a single-thread executor in the
+        // ApplicationEventMultiCaster which the TestConfiguration is doing so
+        // the order of the events keep the same.
+        EventVerifier.publishResetMarkerEvent(eventPublisher);
+
     }
 
     private static String artifactDirectory = "./artifactrepo/" + RandomStringUtils.randomAlphanumeric(20);

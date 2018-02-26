@@ -77,19 +77,18 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     * Trim the text and convert into null in case of empty string.
+     * Trims the text and converts into null in case of an empty string.
      *
      * @param text
-     *            as text to be trimed
+     *            text to be trimmed
      * @return null if the text is null or if the text is blank, text.trim() if
      *         the text is not empty.
      */
     public static String trimAndNullIfEmpty(final String text) {
-        String resultStr = null;
         if (text != null && !text.trim().isEmpty()) {
-            resultStr = text.trim();
+            return text.trim();
         }
-        return resultStr;
+        return null;
     }
 
     /**

@@ -508,8 +508,8 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<Target> findByFilterOrderByLinkedDistributionSet(@NotNull Pageable pageable,
-            long orderByDistributionId, @NotNull FilterParams filterParams);
+    Slice<Target> findByFilterOrderByLinkedDistributionSet(@NotNull Pageable pageable, long orderByDistributionId,
+            @NotNull FilterParams filterParams);
 
     /**
      * Find targets by tag name.

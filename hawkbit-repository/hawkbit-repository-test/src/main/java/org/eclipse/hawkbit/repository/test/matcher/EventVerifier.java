@@ -27,6 +27,7 @@ import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.bus.event.RemoteApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ApplicationEventMulticaster;
@@ -46,6 +47,25 @@ public class EventVerifier extends AbstractTestExecutionListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventVerifier.class);
 
     private EventCaptor eventCaptor;
+
+    /**
+     * Publishes a reset counter marker event on the context to reset the
+     * current counted events. This allows test to prepare a setup such in
+     * {@code @Before} annotations which are actually counted to the executed
+     * test-method and maybe fire events which are not covered / recognized by
+     * the test-method itself and reset the counter again.
+     * 
+     * Note that this approach is only working when using a single-thread
+     * executor in the ApplicationEventMultiCaster, so the order of the events
+     * keep the same.
+     * 
+     * @param publisher
+     *            the {@link ApplicationEventPublisher} to publish the marker
+     *            event to
+     */
+    public static void publishResetMarkerEvent(final ApplicationEventPublisher publisher) {
+        publisher.publishEvent(new ResetCounterMarkerEvent());
+    }
 
     @Override
     public void beforeTestMethod(final TestContext testContext) throws Exception {
@@ -123,6 +143,12 @@ public class EventVerifier extends AbstractTestExecutionListener {
         public void onApplicationEvent(final RemoteApplicationEvent event) {
             LOGGER.debug("Received event {}", event.getClass().getSimpleName());
 
+            if (ResetCounterMarkerEvent.class.isAssignableFrom(event.getClass())) {
+                LOGGER.debug("Retrieving reset counter marker event - resetting counters");
+                capturedEvents.clear();
+                return;
+            }
+
             if (event instanceof RemoteTenantAwareEvent) {
                 assertThat(((RemoteTenantAwareEvent) event).getTenant()).isNotEmpty();
             }
@@ -148,6 +174,14 @@ public class EventVerifier extends AbstractTestExecutionListener {
                     Stream.of(allEvents).map(Expect::type).collect(Collectors.toSet()));
         }
 
+    }
+
+    private static final class ResetCounterMarkerEvent extends RemoteApplicationEvent {
+        private static final long serialVersionUID = 1L;
+
+        private ResetCounterMarkerEvent() {
+            super(new Object(), "resetcounter");
+        }
     }
 
 }

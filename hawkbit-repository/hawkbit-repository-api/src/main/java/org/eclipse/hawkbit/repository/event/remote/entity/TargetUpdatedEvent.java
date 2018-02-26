@@ -8,13 +8,14 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import org.eclipse.hawkbit.repository.event.entitiy.EntityUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Target;
 
 /**
  * Defines the remote event for updating a {@link Target}.
  *
  */
-public class TargetUpdatedEvent extends RemoteEntityEvent<Target> {
+public class TargetUpdatedEvent extends RemoteEntityEvent<Target> implements EntityUpdatedEvent {
 
     private static final long serialVersionUID = 1L;
 

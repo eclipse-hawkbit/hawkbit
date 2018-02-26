@@ -8,13 +8,14 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import org.eclipse.hawkbit.repository.event.entitiy.EntityUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
 /**
  * Defines the remote event for updating a {@link SoftwareModule}.
  *
  */
-public class SoftwareModuleUpdatedEvent extends RemoteEntityEvent<SoftwareModule> {
+public class SoftwareModuleUpdatedEvent extends RemoteEntityEvent<SoftwareModule> implements EntityUpdatedEvent {
 
     private static final long serialVersionUID = 1L;
 

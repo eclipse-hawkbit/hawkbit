@@ -162,8 +162,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     protected void updateDescriptionLayout(final String description) {
         descriptionLayout.removeAllComponents();
-        final Label descLabel = SPUIComponentProvider.createNameValueLabel("",
-                HawkbitCommonUtil.trimAndNullIfEmpty(description) == null ? "" : description);
+        final Label descLabel = SPUIComponentProvider.createNameValueLabel("", description == null ? "" : description);
         /**
          * By default text will be truncated based on layout width. So removing
          * it as we need full description.
@@ -181,8 +180,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
             attributesLayout.removeAllComponents();
             for (final Map.Entry<String, String> entry : attributes.entrySet()) {
                 final Label conAttributeLabel = SPUIComponentProvider.createNameValueLabel(
-                        entry.getKey().concat("  :  "),
-                        HawkbitCommonUtil.trimAndNullIfEmpty(entry.getValue()) == null ? "" : entry.getValue());
+                        entry.getKey().concat("  :  "), entry.getValue() == null ? "" : entry.getValue());
                 conAttributeLabel.setDescription(entry.getKey().concat("  :  ") + entry.getValue());
                 conAttributeLabel.addStyleName("label-style");
                 attributesLayout.addComponent(conAttributeLabel);
