@@ -9,6 +9,7 @@
 
 package org.eclipse.hawkbit.repository.test.matcher;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 import java.lang.reflect.Method;
@@ -39,8 +40,6 @@ import com.google.common.collect.Sets;
 import com.jayway.awaitility.Awaitility;
 import com.jayway.awaitility.core.ConditionTimeoutException;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 /**
  * Test rule to setup and verify the event count for a method.
  */
@@ -55,6 +54,10 @@ public class EventVerifier extends AbstractTestExecutionListener {
      * {@code @Before} annotations which are actually counted to the executed
      * test-method and maybe fire events which are not covered / recognized by
      * the test-method itself and reset the counter again.
+     * 
+     * Note that this approach is only working when using a single-thread
+     * executor in the ApplicationEventMultiCaster, so the order of the events
+     * keep the same.
      * 
      * @param publisher
      *            the {@link ApplicationEventPublisher} to publish the marker
