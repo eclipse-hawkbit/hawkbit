@@ -23,23 +23,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DmfDownloadAndUpdateRequest {
-    @JsonProperty
-    private Long actionId;
+public class DmfDownloadAndUpdateRequest extends DmfActionRequest {
 
     @JsonProperty
     private String targetSecurityToken;
 
     @JsonProperty
     private List<DmfSoftwareModule> softwareModules;
-
-    public Long getActionId() {
-        return actionId;
-    }
-
-    public void setActionId(final Long correlator) {
-        this.actionId = correlator;
-    }
 
     public String getTargetSecurityToken() {
         return targetSecurityToken;

@@ -155,12 +155,24 @@ Possible actionStatus
 |-----------------------------|----------------------------------|-------------------------------------|----------------
 | content_type                 | The content type of the payload  | String                              | true
 
-**Example Header**
+Payload Template
+
+```json
+{
+"actionId": long
+}
+
+**Example Header and payload**
 
 | Headers                               | MessageProperties               |                                                              
 |---------------------------------------|---------------------------------|
 | type=EVENT <br /> tenant=tenant123 <br /> thingId=abc  <br /> topic=CANCEL\_DOWNLOAD   | content_type=application/json  
 
+```json
+{
+"actionId":137
+}
+```
 
 After this message has been sent, an action status event with either actionStatus=CANCELED or actionStatus=CANCEL_REJECTED has to be returned.
 
