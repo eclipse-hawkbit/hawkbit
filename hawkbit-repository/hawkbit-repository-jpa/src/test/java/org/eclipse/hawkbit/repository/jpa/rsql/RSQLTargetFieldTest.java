@@ -57,16 +57,22 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         target2 = controllerManagement.updateControllerAttributes(target2.getControllerId(), attributes);
         target2 = controllerManagement.findOrRegisterTargetIfItDoesNotexist(target2.getControllerId(), LOCALHOST);
 
-        testdataFactory.createTarget("targetId1235");
-        testdataFactory.createTarget("targetId1236");
+        final Target target3 = testdataFactory.createTarget("targetId1235");
+        final Target target4 = testdataFactory.createTarget("targetId1236");
+        testdataFactory.createTarget("targetId1237");
 
         final TargetTag targetTag = targetTagManagement.create(entityFactory.tag().create().name("Tag1"));
-        targetTagManagement.create(entityFactory.tag().create().name("Tag2"));
-        targetTagManagement.create(entityFactory.tag().create().name("Tag3"));
+        final TargetTag targetTag2 = targetTagManagement.create(entityFactory.tag().create().name("Tag2"));
+        final TargetTag targetTag3 = targetTagManagement.create(entityFactory.tag().create().name("Tag3"));
         targetTagManagement.create(entityFactory.tag().create().name("Tag4"));
 
         targetManagement.assignTag(Arrays.asList(target.getControllerId(), target2.getControllerId()),
                 targetTag.getId());
+
+        targetManagement.assignTag(Arrays.asList(target3.getControllerId(), target4.getControllerId()),
+                targetTag2.getId());
+        targetManagement.assignTag(Arrays.asList(target3.getControllerId(), target4.getControllerId()),
+                targetTag3.getId());
 
         assignDistributionSet(ds.getId(), target.getControllerId());
     }
@@ -78,7 +84,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.ID.name() + "==target*", 4);
         assertRSQLQuery(TargetFields.ID.name() + "==noExist*", 0);
         assertRSQLQuery(TargetFields.ID.name() + "=in=(targetId123,notexist)", 1);
-        assertRSQLQuery(TargetFields.ID.name() + "=out=(targetId123,notexist)", 3);
+        assertRSQLQuery(TargetFields.ID.name() + "=out=(targetId123,notexist)", 4);
     }
 
     @Test
@@ -88,7 +94,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.NAME.name() + "==target*", 4);
         assertRSQLQuery(TargetFields.NAME.name() + "==noExist*", 0);
         assertRSQLQuery(TargetFields.NAME.name() + "=in=(targetName123,notexist)", 1);
-        assertRSQLQuery(TargetFields.NAME.name() + "=out=(targetName123,notexist)", 3);
+        assertRSQLQuery(TargetFields.NAME.name() + "=out=(targetName123,notexist)", 4);
     }
 
     @Test
@@ -108,14 +114,14 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.CONTROLLERID.name() + "==target*", 4);
         assertRSQLQuery(TargetFields.CONTROLLERID.name() + "==noExist*", 0);
         assertRSQLQuery(TargetFields.CONTROLLERID.name() + "=in=(targetId123,notexist)", 1);
-        assertRSQLQuery(TargetFields.CONTROLLERID.name() + "=out=(targetId123,notexist)", 3);
+        assertRSQLQuery(TargetFields.CONTROLLERID.name() + "=out=(targetId123,notexist)", 4);
     }
 
     @Test
     @Description("Test filter target by status")
     public void testFilterByParameterUpdateStatus() {
         assertRSQLQuery(TargetFields.UPDATESTATUS.name() + "==pending", 1);
-        assertRSQLQuery(TargetFields.UPDATESTATUS.name() + "!=pending", 3);
+        assertRSQLQuery(TargetFields.UPDATESTATUS.name() + "!=pending", 4);
         try {
             assertRSQLQuery(TargetFields.UPDATESTATUS.name() + "==noExist*", 0);
             fail("RSQLParameterUnsupportedFieldException was expected since update status unknown");
@@ -123,13 +129,14 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
             // test ok - exception was excepted
         }
         assertRSQLQuery(TargetFields.UPDATESTATUS.name() + "=in=(pending,error)", 1);
-        assertRSQLQuery(TargetFields.UPDATESTATUS.name() + "=out=(pending,error)", 3);
+        assertRSQLQuery(TargetFields.UPDATESTATUS.name() + "=out=(pending,error)", 4);
     }
 
     @Test
     @Description("Test filter target by attribute")
     public void testFilterByAttribute() {
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".revision==1.1", 1);
+        assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".revision!=1.1", 1);
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".revision==1*", 2);
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".revision==noExist*", 0);
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".revision=in=(1.1,notexist)", 1);
@@ -162,10 +169,22 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     @Description("Test filter target by tag")
     public void testFilterByTag() {
         assertRSQLQuery(TargetFields.TAG.name() + "==Tag1", 2);
-        assertRSQLQuery(TargetFields.TAG.name() + "==T*", 2);
+
+        // FIXME: should be 3 (2 tagged with something else, 1 untagged)
+        assertRSQLQuery(TargetFields.TAG.name() + "!=Tag1", 3);
+
+        assertRSQLQuery(TargetFields.TAG.name() + "==T*", 4);
         assertRSQLQuery(TargetFields.TAG.name() + "==noExist*", 0);
+        assertRSQLQuery(TargetFields.TAG.name() + "!=notexist", 4);
         assertRSQLQuery(TargetFields.TAG.name() + "=in=(Tag1,notexist)", 2);
-        assertRSQLQuery(TargetFields.TAG.name() + "=out=(Tag1,notexist)", 0);
+
+        // FIXME: should be 1 (untagged) , Note: works with out -> see below
+        assertRSQLQuery(TargetFields.TAG.name() + "=in=(null)", 1);
+
+        // FIXME: should be 3 (2 tagged with something else, 1 untagged)
+        assertRSQLQuery(TargetFields.TAG.name() + "=out=(Tag1,notexist)", 3);
+
+        assertRSQLQuery(TargetFields.TAG.name() + "=out=(null)", 4);
     }
 
     @Test

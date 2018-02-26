@@ -41,14 +41,14 @@ public class RSQLRolloutGroupFields extends AbstractJpaIntegrationTest {
         rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
         rollout = rolloutManagement.get(rollout.getId()).get();
 
-        this.rolloutGroupId = rolloutGroupManagement.findByRollout(PAGE, rollout.getId()).getContent()
-                .get(0).getId();
+        this.rolloutGroupId = rolloutGroupManagement.findByRollout(PAGE, rollout.getId()).getContent().get(0).getId();
     }
 
     @Test
     @Description("Test filter rollout group by  id")
     public void testFilterByParameterId() {
         assertRSQLQuery(RolloutGroupFields.ID.name() + "==" + rolloutGroupId, 1);
+        assertRSQLQuery(RolloutGroupFields.ID.name() + "!=" + rolloutGroupId, 3);
         assertRSQLQuery(RolloutGroupFields.ID.name() + "==noExist*", 0);
         assertRSQLQuery(RolloutGroupFields.ID.name() + "=in=(" + rolloutGroupId + ")", 1);
         assertRSQLQuery(RolloutGroupFields.ID.name() + "=out=(" + rolloutGroupId + ")", 3);
@@ -58,6 +58,7 @@ public class RSQLRolloutGroupFields extends AbstractJpaIntegrationTest {
     @Description("Test filter rollout group by name")
     public void testFilterByParameterName() {
         assertRSQLQuery(RolloutGroupFields.NAME.name() + "==group-1", 1);
+        assertRSQLQuery(RolloutGroupFields.NAME.name() + "!=group-1", 3);
         assertRSQLQuery(RolloutGroupFields.NAME.name() + "==*", 4);
         assertRSQLQuery(RolloutGroupFields.NAME.name() + "==noExist*", 0);
         assertRSQLQuery(RolloutGroupFields.NAME.name() + "=in=(group-1,group-2)", 2);
@@ -68,6 +69,7 @@ public class RSQLRolloutGroupFields extends AbstractJpaIntegrationTest {
     @Description("Test filter rollout group by description")
     public void testFilterByParameterDescription() {
         assertRSQLQuery(RolloutGroupFields.DESCRIPTION.name() + "==group-1", 1);
+        assertRSQLQuery(RolloutGroupFields.DESCRIPTION.name() + "!=group-1", 3);
         assertRSQLQuery(RolloutGroupFields.DESCRIPTION.name() + "==group*", 4);
         assertRSQLQuery(RolloutGroupFields.DESCRIPTION.name() + "==noExist*", 0);
         assertRSQLQuery(RolloutGroupFields.DESCRIPTION.name() + "=in=(group-1,notexist)", 1);
@@ -85,8 +87,7 @@ public class RSQLRolloutGroupFields extends AbstractJpaIntegrationTest {
     private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId,
             final String targetFilterQuery) {
         return rolloutManagement.create(
-                entityFactory.rollout().create()
-                        .set(distributionSetManagement.get(distributionSetId).get()).name(name)
+                entityFactory.rollout().create().set(distributionSetManagement.get(distributionSetId).get()).name(name)
                         .targetFilterQuery(targetFilterQuery),
                 amountGroups, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());

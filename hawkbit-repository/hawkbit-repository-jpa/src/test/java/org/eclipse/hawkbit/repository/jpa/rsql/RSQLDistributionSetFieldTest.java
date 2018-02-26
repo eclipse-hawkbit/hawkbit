@@ -63,6 +63,7 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
     @Description("Test filter distribution set by name")
     public void testFilterByParameterName() {
         assertRSQLQuery(DistributionSetFields.NAME.name() + "==DS", 1);
+        assertRSQLQuery(DistributionSetFields.NAME.name() + "!=DS", 3);
         assertRSQLQuery(DistributionSetFields.NAME.name() + "==*DS", 4);
         assertRSQLQuery(DistributionSetFields.NAME.name() + "==noExist*", 0);
         assertRSQLQuery(DistributionSetFields.NAME.name() + "=in=(DS,notexist)", 1);
@@ -73,6 +74,7 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
     @Description("Test filter distribution set by description")
     public void testFilterByParameterDescription() {
         assertRSQLQuery(DistributionSetFields.DESCRIPTION.name() + "==DS", 1);
+        assertRSQLQuery(DistributionSetFields.DESCRIPTION.name() + "!=DS", 3);
         assertRSQLQuery(DistributionSetFields.DESCRIPTION.name() + "==DS*", 2);
         assertRSQLQuery(DistributionSetFields.DESCRIPTION.name() + "==DS%", 1);
         assertRSQLQuery(DistributionSetFields.DESCRIPTION.name() + "==noExist*", 0);
@@ -108,10 +110,12 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
     @Description("Test filter distribution set by tag")
     public void testFilterByTag() {
         assertRSQLQuery(DistributionSetFields.TAG.name() + "==Tag1", 2);
+        // does not include untagged sets
+        assertRSQLQuery(DistributionSetFields.TAG.name() + "!=Tag1", 0);
         assertRSQLQuery(DistributionSetFields.TAG.name() + "==T*", 2);
         assertRSQLQuery(DistributionSetFields.TAG.name() + "==noExist*", 0);
         assertRSQLQuery(DistributionSetFields.TAG.name() + "=in=(Tag1,notexist)", 2);
-        assertRSQLQuery(DistributionSetFields.TAG.name() + "=out=(Tag1,notexist)", 0);
+        assertRSQLQuery(DistributionSetFields.TAG.name() + "=out=(null)", 2);
     }
 
     @Test
