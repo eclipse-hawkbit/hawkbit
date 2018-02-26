@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2018 Bosch Software Innovations GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,34 +9,32 @@
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import org.eclipse.hawkbit.repository.event.entitiy.EntityCreatedEvent;
-import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 
 /**
- * Defines the {@link RemoteEntityEvent} for creation of a new
- * {@link DistributionSetTag}.
+ * Defines the remote event of creating a new {@link TargetFilterQuery}.
  *
  */
-public class DistributionSetTagCreatedEvent extends RemoteEntityEvent<DistributionSetTag>
-        implements EntityCreatedEvent {
-
+public class TargetFilterQueryCreatedEvent extends RemoteEntityEvent<TargetFilterQuery> implements EntityCreatedEvent {
     private static final long serialVersionUID = 1L;
 
     /**
      * Default constructor.
      */
-    public DistributionSetTagCreatedEvent() {
+    public TargetFilterQueryCreatedEvent() {
         // for serialization libs like jackson
     }
 
     /**
      * Constructor.
      * 
-     * @param tag
-     *            the tag which is deleted
+     * @param baseEntity
+     *            the TargetFilterQuery
      * @param applicationId
      *            the origin application id
      */
-    public DistributionSetTagCreatedEvent(final DistributionSetTag tag, final String applicationId) {
-        super(tag, applicationId);
+    public TargetFilterQueryCreatedEvent(final TargetFilterQuery baseEntity, final String applicationId) {
+        super(baseEntity, applicationId);
     }
+
 }

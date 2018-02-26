@@ -9,26 +9,25 @@
 package org.eclipse.hawkbit.repository.event.remote;
 
 import org.eclipse.hawkbit.repository.event.entitiy.EntityDeletedEvent;
-import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 
 /**
- * Defines the remote event of delete a {@link TargetTag}.
  *
+ * Defines the remote event of deleting a {@link TargetFilterQuery}.
  */
-public class TargetTagDeletedEvent extends RemoteIdEvent implements EntityDeletedEvent {
+public class TargetFilterQueryDeletedEvent extends RemoteIdEvent implements EntityDeletedEvent {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     /**
      * Default constructor.
      */
-    public TargetTagDeletedEvent() {
+    public TargetFilterQueryDeletedEvent() {
         // for serialization libs like jackson
     }
 
     /**
-     * Constructor for json serialization.
-     * 
+     *
      * @param tenant
      *            the tenant
      * @param entityId
@@ -38,7 +37,7 @@ public class TargetTagDeletedEvent extends RemoteIdEvent implements EntityDelete
      * @param applicationId
      *            the origin application id
      */
-    public TargetTagDeletedEvent(final String tenant, final Long entityId, final String entityClass,
+    public TargetFilterQueryDeletedEvent(final String tenant, final Long entityId, final String entityClass,
             final String applicationId) {
         super(entityId, tenant, entityClass, applicationId);
     }

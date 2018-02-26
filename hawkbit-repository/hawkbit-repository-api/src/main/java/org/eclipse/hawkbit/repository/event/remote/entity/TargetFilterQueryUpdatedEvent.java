@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2018 Bosch Software Innovations GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,31 +9,33 @@
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import org.eclipse.hawkbit.repository.event.entitiy.EntityUpdatedEvent;
-import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 
 /**
- * Defines the remote event of updated a {@link Rollout}.
+ * Defines the remote event for updating a {@link TargetFilterQuery}.
+ *
  */
-public class RolloutUpdatedEvent extends RemoteEntityEvent<Rollout> implements EntityUpdatedEvent {
+public class TargetFilterQueryUpdatedEvent extends RemoteEntityEvent<TargetFilterQuery> implements EntityUpdatedEvent {
+
     private static final long serialVersionUID = 1L;
 
     /**
      * Default constructor.
      */
-    public RolloutUpdatedEvent() {
+    public TargetFilterQueryUpdatedEvent() {
         // for serialization libs like jackson
     }
 
     /**
-     * Constructor
+     * Constructor.
      * 
-     * @param rollout
-     *            the updated rollout
+     * @param baseEntity
+     *            TargetFilterQuery entity
      * @param applicationId
      *            the origin application id
      */
-    public RolloutUpdatedEvent(final Rollout rollout, final String applicationId) {
-        super(rollout, applicationId);
+    public TargetFilterQueryUpdatedEvent(final TargetFilterQuery baseEntity, final String applicationId) {
+        super(baseEntity, applicationId);
     }
 
 }

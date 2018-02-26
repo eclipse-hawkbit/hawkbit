@@ -8,12 +8,13 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import org.eclipse.hawkbit.repository.event.entitiy.EntityUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Action;
 
 /**
  * Defines the remote event of updated a {@link Action}.
  */
-public class ActionUpdatedEvent extends AbstractActionEvent {
+public class ActionUpdatedEvent extends AbstractActionEvent implements EntityUpdatedEvent {
     private static final long serialVersionUID = 2L;
 
     /**
