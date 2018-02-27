@@ -169,21 +169,13 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     @Description("Test filter target by tag")
     public void testFilterByTag() {
         assertRSQLQuery(TargetFields.TAG.name() + "==Tag1", 2);
-
-        // FIXME: should be 3 (2 tagged with something else, 1 untagged)
-        assertRSQLQuery(TargetFields.TAG.name() + "!=Tag1", 3);
-
+        assertRSQLQuery(TargetFields.TAG.name() + "!=Tag1", 2);
         assertRSQLQuery(TargetFields.TAG.name() + "==T*", 4);
         assertRSQLQuery(TargetFields.TAG.name() + "==noExist*", 0);
         assertRSQLQuery(TargetFields.TAG.name() + "!=notexist", 4);
         assertRSQLQuery(TargetFields.TAG.name() + "=in=(Tag1,notexist)", 2);
-
-        // FIXME: should be 1 (untagged) , Note: works with out -> see below
-        assertRSQLQuery(TargetFields.TAG.name() + "=in=(null)", 1);
-
-        // FIXME: should be 3 (2 tagged with something else, 1 untagged)
-        assertRSQLQuery(TargetFields.TAG.name() + "=out=(Tag1,notexist)", 3);
-
+        assertRSQLQuery(TargetFields.TAG.name() + "=in=(null)", 0);
+        assertRSQLQuery(TargetFields.TAG.name() + "=out=(Tag1,notexist)", 2);
         assertRSQLQuery(TargetFields.TAG.name() + "=out=(null)", 4);
     }
 
