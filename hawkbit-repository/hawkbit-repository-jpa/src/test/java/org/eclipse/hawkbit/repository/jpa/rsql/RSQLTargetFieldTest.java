@@ -81,7 +81,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     @Description("Test filter target by (controller) id")
     public void testFilterByParameterId() {
         assertRSQLQuery(TargetFields.ID.name() + "==targetId123", 1);
-        assertRSQLQuery(TargetFields.ID.name() + "==target*", 4);
+        assertRSQLQuery(TargetFields.ID.name() + "==target*", 5);
         assertRSQLQuery(TargetFields.ID.name() + "==noExist*", 0);
         assertRSQLQuery(TargetFields.ID.name() + "=in=(targetId123,notexist)", 1);
         assertRSQLQuery(TargetFields.ID.name() + "=out=(targetId123,notexist)", 4);
@@ -91,7 +91,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     @Description("Test filter target by name")
     public void testFilterByParameterName() {
         assertRSQLQuery(TargetFields.NAME.name() + "==targetName123", 1);
-        assertRSQLQuery(TargetFields.NAME.name() + "==target*", 4);
+        assertRSQLQuery(TargetFields.NAME.name() + "==target*", 5);
         assertRSQLQuery(TargetFields.NAME.name() + "==noExist*", 0);
         assertRSQLQuery(TargetFields.NAME.name() + "=in=(targetName123,notexist)", 1);
         assertRSQLQuery(TargetFields.NAME.name() + "=out=(targetName123,notexist)", 4);
@@ -111,7 +111,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     @Description("Test filter target by controller id")
     public void testFilterByParameterControllerId() {
         assertRSQLQuery(TargetFields.CONTROLLERID.name() + "==targetId123", 1);
-        assertRSQLQuery(TargetFields.CONTROLLERID.name() + "==target*", 4);
+        assertRSQLQuery(TargetFields.CONTROLLERID.name() + "==target*", 5);
         assertRSQLQuery(TargetFields.CONTROLLERID.name() + "==noExist*", 0);
         assertRSQLQuery(TargetFields.CONTROLLERID.name() + "=in=(targetId123,notexist)", 1);
         assertRSQLQuery(TargetFields.CONTROLLERID.name() + "=out=(targetId123,notexist)", 4);
