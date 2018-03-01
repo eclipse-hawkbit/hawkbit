@@ -66,6 +66,7 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
     @Description("Test filter action by id")
     public void testFilterByParameterId() {
         assertRSQLQuery(ActionFields.ID.name() + "==" + action.getId(), 1);
+        assertRSQLQuery(ActionFields.ID.name() + "!=" + action.getId(), 10);
         assertRSQLQuery(ActionFields.ID.name() + "==noExist*", 0);
         assertRSQLQuery(ActionFields.ID.name() + "=in=(" + action.getId() + ",1000000)", 1);
         assertRSQLQuery(ActionFields.ID.name() + "=out=(" + action.getId() + ",1000000)", 10);
@@ -75,6 +76,7 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
     @Description("Test action by status")
     public void testFilterByParameterStatus() {
         assertRSQLQuery(ActionFields.STATUS.name() + "==pending", 5);
+        assertRSQLQuery(ActionFields.STATUS.name() + "!=pending", 6);
         assertRSQLQuery(ActionFields.STATUS.name() + "=in=(pending)", 5);
         assertRSQLQuery(ActionFields.STATUS.name() + "=out=(pending)", 6);
 

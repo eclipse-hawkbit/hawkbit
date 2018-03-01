@@ -173,6 +173,7 @@ public final class RSQLUtility {
         @Override
         public Predicate toPredicate(final Root<T> root, final CriteriaQuery<?> query, final CriteriaBuilder cb) {
             final Node rootNode = parseRsql(rsql);
+            query.distinct(true);
 
             final JpqQueryRSQLVisitor<A, T> jpqQueryRSQLVisitor = new JpqQueryRSQLVisitor<>(root, cb, enumType,
                     virtualPropertyReplacer, database);

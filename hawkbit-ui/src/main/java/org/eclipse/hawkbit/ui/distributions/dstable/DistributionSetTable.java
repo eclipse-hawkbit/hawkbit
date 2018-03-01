@@ -222,7 +222,9 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
 
         final Object distItemId = dropData.getItemIdOver();
-        handleDropEvent(source, softwareModulesIdList, distItemId);
+        if (distItemId != null) {
+            handleDropEvent(source, softwareModulesIdList, distItemId);
+        }
     }
 
     @Override

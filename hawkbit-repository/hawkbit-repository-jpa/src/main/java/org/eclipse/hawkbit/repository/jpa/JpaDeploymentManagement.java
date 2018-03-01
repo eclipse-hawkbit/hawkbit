@@ -451,8 +451,18 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     private JpaAction startScheduledActionIfNoCancelationHasToBeHandledFirst(final JpaAction action) {
         // check if we need to override running update actions
-        final List<Long> overrideObsoleteUpdateActions = onlineDsAssignmentStrategy
-                .overrideObsoleteUpdateActions(Collections.singletonList(action.getTarget().getId()));
+        final List<Long> overrideObsoleteUpdateActions;
+
+        if (systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
+                .getConfigurationValue(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, Boolean.class)
+                .getValue())) {
+            overrideObsoleteUpdateActions = Collections.emptyList();
+            onlineDsAssignmentStrategy
+                    .closeObsoleteUpdateActions(Collections.singletonList(action.getTarget().getId()));
+        } else {
+            overrideObsoleteUpdateActions = onlineDsAssignmentStrategy
+                    .overrideObsoleteUpdateActions(Collections.singletonList(action.getTarget().getId()));
+        }
 
         action.setActive(true);
         action.setStatus(Status.RUNNING);
