@@ -113,6 +113,7 @@ Payload Template
 "message":["String"]
 }
 ```
+
 Possible actionStatus
 
 | Header          | Description                        |                                                
@@ -161,6 +162,7 @@ Payload Template
 {
 "actionId": long
 }
+```
 
 **Example Header and payload**
 
