@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.api.URLPlaceholder.SoftwareData;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
+import org.eclipse.hawkbit.dmf.json.model.DmfActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfArtifact;
 import org.eclipse.hawkbit.dmf.json.model.DmfArtifactHash;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
@@ -241,7 +242,11 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         if (!IpUtil.isAmqpUri(address)) {
             return;
         }
-        final Message message = getMessageConverter().toMessage(actionId,
+
+        final DmfActionRequest actionRequest = new DmfActionRequest();
+        actionRequest.setActionId(actionId);
+
+        final Message message = getMessageConverter().toMessage(actionRequest,
                 createConnectorMessagePropertiesEvent(tenant, controllerId, EventTopic.CANCEL_DOWNLOAD));
 
         amqpSenderService.sendMessage(message, address);
