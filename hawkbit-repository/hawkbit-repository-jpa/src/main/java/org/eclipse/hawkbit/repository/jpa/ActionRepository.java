@@ -154,7 +154,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      *            the {@link DistributionSet} on which will be filtered
      * @return the found {@link Action}s
      */
-    @Query("Select a from JpaAction a where a.target = :target and a.distributionSet = :ds order by a.id")
+    @Query("Select a from JpaAction a where a.target = :target and a.distributionSet = :ds")
     Page<JpaAction> findByTargetAndDistributionSet(final Pageable pageable, @Param("target") final JpaTarget target,
             @Param("ds") JpaDistributionSet ds);
 
@@ -182,7 +182,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return a list of actions ordered by action ID
      */
     @EntityGraph(value = "Action.ds", type = EntityGraphType.LOAD)
-    @Query("Select a from JpaAction a where a.target.controllerId = :target and a.active= :active order by a.id")
+    @Query("Select a from JpaAction a where a.target.controllerId = :target and a.active = :active")
     Page<Action> findByActiveAndTarget(Pageable pageable, @Param("target") String target,
             @Param("active") boolean active);
 

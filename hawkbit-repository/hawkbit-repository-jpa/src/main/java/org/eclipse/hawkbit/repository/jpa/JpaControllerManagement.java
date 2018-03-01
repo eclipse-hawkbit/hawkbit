@@ -326,8 +326,8 @@ public class JpaControllerManagement implements ControllerManagement {
         }
 
         final Query updateQuery = entityManager.createNativeQuery(
-                "UPDATE sp_target t SET t.last_target_query = #last_target_query WHERE t.controller_id IN ("
-                        + formatQueryInStatementParams(paramMapping.keySet()) + ") AND t.tenant = #tenant");
+                "UPDATE sp_target SET last_target_query = #last_target_query WHERE controller_id IN ("
+                        + formatQueryInStatementParams(paramMapping.keySet()) + ") AND tenant = #tenant");
 
         paramMapping.entrySet().forEach(entry -> updateQuery.setParameter(entry.getKey(), entry.getValue()));
         updateQuery.setParameter("last_target_query", currentTimeMillis);
@@ -663,7 +663,8 @@ public class JpaControllerManagement implements ControllerManagement {
         // For negative and large value of messageCount, limit the number of
         // messages.
         final int limit = messageCount < 0 || messageCount >= RepositoryConstants.MAX_ACTION_HISTORY_MSG_COUNT
-                ? RepositoryConstants.MAX_ACTION_HISTORY_MSG_COUNT : messageCount;
+                ? RepositoryConstants.MAX_ACTION_HISTORY_MSG_COUNT
+                : messageCount;
 
         final PageRequest pageable = new PageRequest(0, limit, new Sort(Direction.DESC, "occurredAt"));
         final Page<String> messages = actionStatusRepository.findMessagesByActionIdAndMessageNotLike(pageable, actionId,

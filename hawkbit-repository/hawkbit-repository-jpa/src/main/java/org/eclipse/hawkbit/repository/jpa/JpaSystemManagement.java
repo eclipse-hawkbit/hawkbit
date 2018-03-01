@@ -128,9 +128,8 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     @Override
     public SystemUsageReport getSystemUsageStatistics() {
 
-        BigDecimal sumOfArtifacts = (BigDecimal) entityManager
-                .createNativeQuery(
-                        "select SUM(file_size) from sp_artifact a INNER JOIN sp_base_software_module sm ON a.software_module = sm.id WHERE sm.deleted = 0")
+        BigDecimal sumOfArtifacts = (BigDecimal) entityManager.createNativeQuery(
+                "select SUM(file_size) from sp_artifact a INNER JOIN sp_base_software_module sm ON a.software_module = sm.id WHERE sm.deleted = 0")
                 .getSingleResult();
 
         if (sumOfArtifacts == null) {
@@ -139,16 +138,15 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
         // we use native queries to punch through the tenant boundaries. This
         // has to be used with care!
-        final Long targets = (Long) entityManager.createNativeQuery("SELECT COUNT(id) FROM sp_target")
-                .getSingleResult();
+        final long targets = ((Number) entityManager.createNativeQuery("SELECT COUNT(id) FROM sp_target")
+                .getSingleResult()).longValue();
 
-        final Long artifacts = (Long) entityManager
-                .createNativeQuery(
-                        "SELECT COUNT(a.id) FROM sp_artifact a INNER JOIN sp_base_software_module sm ON a.software_module = sm.id WHERE sm.deleted = 0")
-                .getSingleResult();
+        final long artifacts = ((Number) entityManager.createNativeQuery(
+                "SELECT COUNT(a.id) FROM sp_artifact a INNER JOIN sp_base_software_module sm ON a.software_module = sm.id WHERE sm.deleted = 0")
+                .getSingleResult()).longValue();
 
-        final Long actions = (Long) entityManager.createNativeQuery("SELECT COUNT(id) FROM sp_action")
-                .getSingleResult();
+        final long actions = ((Number) entityManager.createNativeQuery("SELECT COUNT(id) FROM sp_action")
+                .getSingleResult()).longValue();
 
         return new SystemUsageReportWithTenants(targets, artifacts, actions,
                 sumOfArtifacts.setScale(0, BigDecimal.ROUND_HALF_UP).longValue(), tenantMetaDataRepository.count());

@@ -35,6 +35,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,13 +57,17 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
 
     private final NoCountPagingRepository criteriaNoCountDao;
 
+    private final Database database;
+
     JpaDistributionSetTagManagement(final DistributionSetTagRepository distributionSetTagRepository,
             final DistributionSetRepository distributionSetRepository,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final NoCountPagingRepository criteriaNoCountDao) {
+            final VirtualPropertyReplacer virtualPropertyReplacer, final NoCountPagingRepository criteriaNoCountDao,
+            final Database database) {
         this.distributionSetTagRepository = distributionSetTagRepository;
         this.distributionSetRepository = distributionSetRepository;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.criteriaNoCountDao = criteriaNoCountDao;
+        this.database = database;
     }
 
     @Override
@@ -130,7 +135,7 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     @Override
     public Page<DistributionSetTag> findByRsql(final Pageable pageable, final String rsqlParam) {
         final Specification<JpaDistributionSetTag> spec = RSQLUtility.parse(rsqlParam, TagFields.class,
-                virtualPropertyReplacer);
+                virtualPropertyReplacer, database);
 
         return convertDsPage(distributionSetTagRepository.findAll(spec, pageable), pageable);
     }

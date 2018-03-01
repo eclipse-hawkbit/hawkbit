@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.util.CollectionUtils;
 
 import cz.jirutka.rsql.parser.RSQLParser;
@@ -113,16 +114,21 @@ public final class RSQLUtility {
      * @param virtualPropertyReplacer
      *            holds the logic how the known macros have to be resolved; may
      *            be <code>null</code>
+     * @param database
+     *            in use
+     * 
      * @return an specification which can be used with JPA
      * @throws RSQLParameterUnsupportedFieldException
      *             if a field in the RSQL string is used but not provided by the
      *             given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException
      *             if the RSQL syntax is wrong
+     * 
      */
     public static <A extends Enum<A> & FieldNameProvider, T> Specification<T> parse(final String rsql,
-            final Class<A> fieldNameProvider, final VirtualPropertyReplacer virtualPropertyReplacer) {
-        return new RSQLSpecification<>(rsql.toLowerCase(), fieldNameProvider, virtualPropertyReplacer);
+            final Class<A> fieldNameProvider, final VirtualPropertyReplacer virtualPropertyReplacer,
+            final Database database) {
+        return new RSQLSpecification<>(rsql.toLowerCase(), fieldNameProvider, virtualPropertyReplacer, database);
     }
 
     /**
@@ -154,12 +160,14 @@ public final class RSQLUtility {
         private final String rsql;
         private final Class<A> enumType;
         private final VirtualPropertyReplacer virtualPropertyReplacer;
+        private final Database database;
 
         private RSQLSpecification(final String rsql, final Class<A> enumType,
-                final VirtualPropertyReplacer virtualPropertyReplacer) {
+                final VirtualPropertyReplacer virtualPropertyReplacer, final Database database) {
             this.rsql = rsql;
             this.enumType = enumType;
             this.virtualPropertyReplacer = virtualPropertyReplacer;
+            this.database = database;
         }
 
         @Override
@@ -167,7 +175,7 @@ public final class RSQLUtility {
             final Node rootNode = parseRsql(rsql);
 
             final JpqQueryRSQLVisitor<A, T> jpqQueryRSQLVisitor = new JpqQueryRSQLVisitor<>(root, cb, enumType,
-                    virtualPropertyReplacer);
+                    virtualPropertyReplacer, database);
             final List<Predicate> accept = rootNode.<List<Predicate>, String> accept(jpqQueryRSQLVisitor);
 
             if (!CollectionUtils.isEmpty(accept)) {
@@ -204,13 +212,16 @@ public final class RSQLUtility {
 
         private final SimpleTypeConverter simpleTypeConverter;
 
+        final Database database;
+
         private JpqQueryRSQLVisitor(final Root<T> root, final CriteriaBuilder cb, final Class<A> enumType,
-                final VirtualPropertyReplacer virtualPropertyReplacer) {
+                final VirtualPropertyReplacer virtualPropertyReplacer, final Database database) {
             this.root = root;
             this.cb = cb;
             this.enumType = enumType;
             this.virtualPropertyReplacer = virtualPropertyReplacer;
             simpleTypeConverter = new SimpleTypeConverter();
+            this.database = database;
         }
 
         private void beginLevel(final boolean isOr) {
@@ -400,7 +411,7 @@ public final class RSQLUtility {
                 transformedValue.add(convertValueIfNecessary(node, fieldName, value, fieldPath));
             }
 
-            return mapToPredicate(node, fieldPath, node.getArguments(), transformedValue, fieldName);
+            return mapToPredicate(node, fieldPath, node.getArguments(), transformedValue, fieldName, database);
         }
 
         // Exception squid:S2095 - see
@@ -512,7 +523,8 @@ public final class RSQLUtility {
         }
 
         private List<Predicate> mapToPredicate(final ComparisonNode node, final Path<Object> fieldPath,
-                final List<String> values, final List<Object> transformedValues, final A enumField) {
+                final List<String> values, final List<Object> transformedValues, final A enumField,
+                final Database database) {
             // only 'equal' and 'notEqual' can handle transformed value like
             // enums. The JPA API cannot handle object types for greaterThan etc
             // methods.
@@ -532,19 +544,19 @@ public final class RSQLUtility {
             }
 
             addOperatorPredicate(node, getMapValueFieldPath(enumField, fieldPath), transformedValues, transformedValue,
-                    value, singleList);
+                    value, singleList, database);
             return Collections.unmodifiableList(singleList);
         }
 
         private void addOperatorPredicate(final ComparisonNode node, final Path<Object> fieldPath,
                 final List<Object> transformedValues, final Object transformedValue, final String value,
-                final List<Predicate> singleList) {
+                final List<Predicate> singleList, final Database database) {
             switch (node.getOperator().getSymbol()) {
             case "==":
-                singleList.add(getEqualToPredicate(transformedValue, fieldPath));
+                singleList.add(getEqualToPredicate(transformedValue, fieldPath, database));
                 break;
             case "!=":
-                singleList.add(getNotEqualToPredicate(transformedValue, fieldPath));
+                singleList.add(getNotEqualToPredicate(transformedValue, fieldPath, database));
                 break;
             case "=gt=":
                 singleList.add(cb.greaterThan(pathOfString(fieldPath), value));
@@ -623,24 +635,37 @@ public final class RSQLUtility {
             return cb.equal(cb.upper(fieldPath.get(enumField.getKeyFieldName())), keyValue.toUpperCase());
         }
 
-        private Predicate getEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath) {
+        private Predicate getEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath,
+                final Database database) {
             if (transformedValue instanceof String) {
-                final String preFormattedValue = escapeValueToSQL((String) transformedValue);
+                final String preFormattedValue = escapeValueToSQL((String) transformedValue, database);
                 return cb.like(cb.upper(pathOfString(fieldPath)), preFormattedValue.toUpperCase());
             }
             return cb.equal(fieldPath, transformedValue);
         }
 
-        private Predicate getNotEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath) {
+        private Predicate getNotEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath,
+                final Database database) {
             if (transformedValue instanceof String) {
-                final String preFormattedValue = escapeValueToSQL((String) transformedValue);
+                final String preFormattedValue = escapeValueToSQL((String) transformedValue, database);
                 return cb.notLike(cb.upper(pathOfString(fieldPath)), preFormattedValue.toUpperCase());
             }
             return cb.notEqual(fieldPath, transformedValue);
         }
 
-        private static String escapeValueToSQL(final String transformedValue) {
-            return transformedValue.replace("%", "\\%").replace(LIKE_WILDCARD, '%');
+        private static String escapeValueToSQL(final String transformedValue, final Database database) {
+            final String escaped;
+
+            switch (database) {
+            case SQL_SERVER:
+                escaped = transformedValue.replace("%", "[%]").replace("_", "[_]");
+                break;
+            default:
+                escaped = transformedValue.replace("%", "\\%").replace("_", "\\_");
+                break;
+            }
+
+            return escaped.replace(LIKE_WILDCARD, '%');
         }
 
         @SuppressWarnings("unchecked")

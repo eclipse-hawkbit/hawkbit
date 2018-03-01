@@ -24,6 +24,7 @@ import javax.persistence.Table;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.persistence.annotations.CascadeOnDelete;
 
 /**
  * Relation element between a {@link DistributionSetType} and its
@@ -41,11 +42,13 @@ public class DistributionSetTypeElement implements Serializable {
     @Column(name = "mandatory")
     private boolean mandatory;
 
+    @CascadeOnDelete
     @MapsId("dsType")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "distribution_set_type", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_type_element_element"))
     private JpaDistributionSetType dsType;
 
+    @CascadeOnDelete
     @MapsId("smType")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "software_module_type", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_type_element_smtype"))

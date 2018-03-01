@@ -31,13 +31,13 @@ import org.eclipse.hawkbit.repository.jpa.specifications.TargetFilterQuerySpecif
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
+import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,14 +60,15 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     private final VirtualPropertyReplacer virtualPropertyReplacer;
 
     private final DistributionSetManagement distributionSetManagement;
+    private final Database database;
 
-    @Autowired
     JpaTargetFilterQueryManagement(final TargetFilterQueryRepository targetFilterQueryRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer,
-            final DistributionSetManagement distributionSetManagement) {
+            final DistributionSetManagement distributionSetManagement, final Database database) {
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.distributionSetManagement = distributionSetManagement;
+        this.database = database;
     }
 
     @Override
@@ -121,7 +122,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         List<Specification<JpaTargetFilterQuery>> specList = Collections.emptyList();
         if (!StringUtils.isEmpty(rsqlFilter)) {
             specList = Collections.singletonList(
-                    RSQLUtility.parse(rsqlFilter, TargetFilterQueryFields.class, virtualPropertyReplacer));
+                    RSQLUtility.parse(rsqlFilter, TargetFilterQueryFields.class, virtualPropertyReplacer, database));
         }
         return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList), pageable);
     }
@@ -145,7 +146,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         specList.add(TargetFilterQuerySpecification.byAutoAssignDS(distributionSet));
 
         if (!StringUtils.isEmpty(rsqlFilter)) {
-            specList.add(RSQLUtility.parse(rsqlFilter, TargetFilterQueryFields.class, virtualPropertyReplacer));
+            specList.add(
+                    RSQLUtility.parse(rsqlFilter, TargetFilterQueryFields.class, virtualPropertyReplacer, database));
         }
         return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList), pageable);
     }
@@ -213,7 +215,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     public boolean verifyTargetFilterQuerySyntax(final String query) {
-        RSQLUtility.parse(query, TargetFields.class, virtualPropertyReplacer);
+        RSQLUtility.parse(query, TargetFields.class, virtualPropertyReplacer, database);
         return true;
     }
 
