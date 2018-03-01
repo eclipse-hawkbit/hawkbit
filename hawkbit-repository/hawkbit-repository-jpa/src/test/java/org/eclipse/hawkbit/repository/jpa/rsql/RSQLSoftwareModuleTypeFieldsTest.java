@@ -36,12 +36,14 @@ public class RSQLSoftwareModuleTypeFieldsTest extends AbstractJpaIntegrationTest
     @Description("Test filter software module test type by name")
     public void testFilterByParameterName() {
         assertRSQLQuery(SoftwareModuleTypeFields.NAME.name() + "==" + Constants.SMT_DEFAULT_OS_NAME, 1);
+        assertRSQLQuery(SoftwareModuleTypeFields.NAME.name() + "!=" + Constants.SMT_DEFAULT_OS_NAME, 2);
     }
 
     @Test
     @Description("Test filter software module test type by description")
     public void testFilterByParameterDescription() {
         assertRSQLQuery(SoftwareModuleTypeFields.DESCRIPTION.name() + "==Updated*", 3);
+        assertRSQLQuery(SoftwareModuleTypeFields.DESCRIPTION.name() + "!=Updated*", 0);
         assertRSQLQuery(SoftwareModuleTypeFields.DESCRIPTION.name() + "==noExist*", 0);
     }
 
@@ -49,6 +51,7 @@ public class RSQLSoftwareModuleTypeFieldsTest extends AbstractJpaIntegrationTest
     @Description("Test filter software module test type by key")
     public void testFilterByParameterKey() {
         assertRSQLQuery(SoftwareModuleTypeFields.KEY.name() + "==os", 1);
+        assertRSQLQuery(SoftwareModuleTypeFields.KEY.name() + "!=os", 2);
         assertRSQLQuery(SoftwareModuleTypeFields.KEY.name() + "=in=(os)", 1);
         assertRSQLQuery(SoftwareModuleTypeFields.KEY.name() + "=out=(os)", 2);
     }
@@ -57,6 +60,7 @@ public class RSQLSoftwareModuleTypeFieldsTest extends AbstractJpaIntegrationTest
     @Description("Test filter software module test type by max")
     public void testFilterByMaxAssignment() {
         assertRSQLQuery(SoftwareModuleTypeFields.MAXASSIGNMENTS.name() + "==1", 2);
+        assertRSQLQuery(SoftwareModuleTypeFields.MAXASSIGNMENTS.name() + "!=1", 1);
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long excpectedEntity) {
