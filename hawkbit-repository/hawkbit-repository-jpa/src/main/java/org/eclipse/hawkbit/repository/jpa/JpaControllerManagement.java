@@ -505,7 +505,7 @@ public class JpaControllerManagement implements ControllerManagement {
             final Long statusCount = actionStatusRepository.countByAction(action);
 
             if (statusCount >= quotaManagement.getMaxStatusEntriesPerAction()) {
-                throw new QuotaExceededException(ActionStatus.class, statusCount,
+                throw new QuotaExceededException(ActionStatus.class, statusCount + 1,
                         quotaManagement.getMaxStatusEntriesPerAction());
             }
         }

@@ -457,8 +457,6 @@ public class JpaTargetManagement implements TargetManagement {
         // multiselect
         if (specificationsForMultiSelect.length > 0) {
             query.where(specificationsForMultiSelect);
-            // multiselect statement order by the select case and id
-            query.distinct(true);
         }
         // add the order to the multi select first based on the selectCase
         query.orderBy(cb.asc(selectCase), cb.desc(targetRoot.get(JpaTarget_.id)));
@@ -467,8 +465,7 @@ public class JpaTargetManagement implements TargetManagement {
         // be mapped directly to a Target entity because the selectCase is not a
         // attribute of the
         // Target entity, the the Object array contains the Target on the first
-        // index (case of the
-        // multiselect order) of the array and
+        // index of the array and
         // the 2nd contains the selectCase int value.
         final int pageSize = pageable.getPageSize();
         final List<JpaTarget> resultList = entityManager.createQuery(query).setFirstResult(pageable.getOffset())
