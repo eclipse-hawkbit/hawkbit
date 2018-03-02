@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -128,12 +127,13 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     @Override
     public SystemUsageReport getSystemUsageStatistics() {
 
-        BigDecimal sumOfArtifacts = (BigDecimal) entityManager.createNativeQuery(
+        final Number count = (Number) entityManager.createNativeQuery(
                 "select SUM(file_size) from sp_artifact a INNER JOIN sp_base_software_module sm ON a.software_module = sm.id WHERE sm.deleted = 0")
                 .getSingleResult();
 
-        if (sumOfArtifacts == null) {
-            sumOfArtifacts = new BigDecimal(0);
+        long sumOfArtifacts = 0;
+        if (count != null) {
+            sumOfArtifacts = count.longValue();
         }
 
         // we use native queries to punch through the tenant boundaries. This
@@ -148,8 +148,8 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         final long actions = ((Number) entityManager.createNativeQuery("SELECT COUNT(id) FROM sp_action")
                 .getSingleResult()).longValue();
 
-        return new SystemUsageReportWithTenants(targets, artifacts, actions,
-                sumOfArtifacts.setScale(0, BigDecimal.ROUND_HALF_UP).longValue(), tenantMetaDataRepository.count());
+        return new SystemUsageReportWithTenants(targets, artifacts, actions, sumOfArtifacts,
+                tenantMetaDataRepository.count());
     }
 
     @Override

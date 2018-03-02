@@ -222,7 +222,7 @@ public class RSQLUtilityTest {
         // verification
         verify(criteriaBuilderMock, times(1)).and(any(Predicate.class));
         verify(criteriaBuilderMock, times(1)).like(eq(pathOfString(baseSoftwareModuleRootMock)),
-                eq("a\\%".toUpperCase()));
+                eq("a\\%".toUpperCase()), eq('\\'));
     }
 
     @Test
@@ -244,7 +244,7 @@ public class RSQLUtilityTest {
         // verification
         verify(criteriaBuilderMock, times(1)).and(any(Predicate.class));
         verify(criteriaBuilderMock, times(1)).like(eq(pathOfString(baseSoftwareModuleRootMock)),
-                eq("a[%]".toUpperCase()));
+                eq("a[%]".toUpperCase()), eq('\\'));
     }
 
     @Test

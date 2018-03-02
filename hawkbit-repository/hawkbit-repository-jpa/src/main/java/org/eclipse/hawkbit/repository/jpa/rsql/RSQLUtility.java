@@ -201,6 +201,8 @@ public final class RSQLUtility {
      */
     private static final class JpqQueryRSQLVisitor<A extends Enum<A> & FieldNameProvider, T>
             implements RSQLVisitor<List<Predicate>, String> {
+        private static final char ESCAPE_CHAR = '\\';
+
         public static final Character LIKE_WILDCARD = '*';
 
         private final Root<T> root;
@@ -639,8 +641,8 @@ public final class RSQLUtility {
         private Predicate getEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath,
                 final Database database) {
             if (transformedValue instanceof String) {
-                final String preFormattedValue = escapeValueToSQL((String) transformedValue, database);
-                return cb.like(cb.upper(pathOfString(fieldPath)), preFormattedValue.toUpperCase());
+                final String preFormattedValue = escapeValueToSQL((String) transformedValue, database, ESCAPE_CHAR);
+                return cb.like(cb.upper(pathOfString(fieldPath)), preFormattedValue.toUpperCase(), ESCAPE_CHAR);
             }
             return cb.equal(fieldPath, transformedValue);
         }
@@ -648,13 +650,14 @@ public final class RSQLUtility {
         private Predicate getNotEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath,
                 final Database database) {
             if (transformedValue instanceof String) {
-                final String preFormattedValue = escapeValueToSQL((String) transformedValue, database);
-                return cb.notLike(cb.upper(pathOfString(fieldPath)), preFormattedValue.toUpperCase());
+                final String preFormattedValue = escapeValueToSQL((String) transformedValue, database, ESCAPE_CHAR);
+                return cb.notLike(cb.upper(pathOfString(fieldPath)), preFormattedValue.toUpperCase(), ESCAPE_CHAR);
             }
             return cb.notEqual(fieldPath, transformedValue);
         }
 
-        private static String escapeValueToSQL(final String transformedValue, final Database database) {
+        private static String escapeValueToSQL(final String transformedValue, final Database database,
+                final char escapeChar) {
             final String escaped;
 
             switch (database) {
@@ -662,7 +665,7 @@ public final class RSQLUtility {
                 escaped = transformedValue.replace("%", "[%]").replace("_", "[_]");
                 break;
             default:
-                escaped = transformedValue.replace("%", "\\%").replace("_", "\\_");
+                escaped = transformedValue.replace("%", escapeChar + "%").replace("_", escapeChar + "_");
                 break;
             }
 
