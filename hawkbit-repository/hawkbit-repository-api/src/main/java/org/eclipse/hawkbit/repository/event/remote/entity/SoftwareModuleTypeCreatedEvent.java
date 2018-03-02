@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import org.eclipse.hawkbit.repository.event.entitiy.EntityCreatedEvent;
+import org.eclipse.hawkbit.repository.event.entity.EntityCreatedEvent;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 
 /**

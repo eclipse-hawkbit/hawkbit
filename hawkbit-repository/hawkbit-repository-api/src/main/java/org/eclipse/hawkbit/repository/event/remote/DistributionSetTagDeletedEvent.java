@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
-import org.eclipse.hawkbit.repository.event.entitiy.EntityDeletedEvent;
+import org.eclipse.hawkbit.repository.event.entity.EntityDeletedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 
 /**
