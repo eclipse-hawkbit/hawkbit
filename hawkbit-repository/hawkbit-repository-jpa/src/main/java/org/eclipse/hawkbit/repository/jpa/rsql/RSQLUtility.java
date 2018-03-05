@@ -628,7 +628,7 @@ public final class RSQLUtility {
         private Predicate getEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath) {
             if (transformedValue instanceof String) {
                 if (StringUtils.isEmpty(transformedValue)) {
-                    return cb.isNull(pathOfString(fieldPath));
+                    return cb.or(cb.isNull(pathOfString(fieldPath)), cb.equal(pathOfString(fieldPath), ""));
                 }
 
                 final String preFormattedValue = escapeValueToSQL((String) transformedValue);
@@ -645,7 +645,7 @@ public final class RSQLUtility {
         private Predicate getNotEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath) {
             if (transformedValue instanceof String) {
                 if (StringUtils.isEmpty(transformedValue)) {
-                    return cb.isNotNull(pathOfString(fieldPath));
+                    return cb.and(cb.isNotNull(pathOfString(fieldPath)), cb.notEqual(pathOfString(fieldPath), ""));
                 }
 
                 final String preFormattedValue = escapeValueToSQL((String) transformedValue);
