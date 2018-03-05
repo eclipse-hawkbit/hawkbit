@@ -100,6 +100,8 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test filter target by description")
     public void testFilterByParameterDescription() {
+        assertRSQLQuery(TargetFields.DESCRIPTION.name() + "==''", 3);
+        assertRSQLQuery(TargetFields.DESCRIPTION.name() + "!=''", 2);
         assertRSQLQuery(TargetFields.DESCRIPTION.name() + "==targetDesc123", 1);
         assertRSQLQuery(TargetFields.DESCRIPTION.name() + "==target*", 2);
         assertRSQLQuery(TargetFields.DESCRIPTION.name() + "==noExist*", 0);
