@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
@@ -44,20 +45,25 @@ public class RSQLDistributionSetMetadataFieldsTest extends AbstractJpaIntegratio
         }
 
         distributionSetManagement.createMetaData(distributionSetId, metadata);
+
+        distributionSetManagement.createMetaData(distributionSetId,
+                Arrays.asList(entityFactory.generateMetadata("emptyValueTest", null)));
     }
 
     @Test
     @Description("Test filter distribution set metadata by key")
     public void testFilterByParameterKey() {
         assertRSQLQuery(DistributionSetMetadataFields.KEY.name() + "==1", 1);
-        assertRSQLQuery(DistributionSetMetadataFields.KEY.name() + "!=1", 4);
+        assertRSQLQuery(DistributionSetMetadataFields.KEY.name() + "!=1", 5);
         assertRSQLQuery(DistributionSetMetadataFields.KEY.name() + "=in=(1,2)", 2);
-        assertRSQLQuery(DistributionSetMetadataFields.KEY.name() + "=out=(1,2)", 3);
+        assertRSQLQuery(DistributionSetMetadataFields.KEY.name() + "=out=(1,2)", 4);
     }
 
     @Test
     @Description("Test filter distribution set metadata by value")
     public void testFilterByParameterValue() {
+        assertRSQLQuery(DistributionSetMetadataFields.VALUE.name() + "==''", 1);
+        assertRSQLQuery(DistributionSetMetadataFields.VALUE.name() + "!=''", 5);
         assertRSQLQuery(DistributionSetMetadataFields.VALUE.name() + "==1", 1);
         assertRSQLQuery(DistributionSetMetadataFields.VALUE.name() + "!=1", 4);
         assertRSQLQuery(DistributionSetMetadataFields.VALUE.name() + "=in=(1,2)", 2);

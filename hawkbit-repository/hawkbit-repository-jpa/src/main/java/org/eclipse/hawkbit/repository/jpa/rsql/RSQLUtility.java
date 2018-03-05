@@ -44,6 +44,7 @@ import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.RSQLParserException;
@@ -626,17 +627,35 @@ public final class RSQLUtility {
 
         private Predicate getEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath) {
             if (transformedValue instanceof String) {
+                if (StringUtils.isEmpty(transformedValue)) {
+                    return cb.isNull(pathOfString(fieldPath));
+                }
+
                 final String preFormattedValue = escapeValueToSQL((String) transformedValue);
                 return cb.like(cb.upper(pathOfString(fieldPath)), preFormattedValue.toUpperCase());
             }
+
+            if (transformedValue == null) {
+                return cb.isNull(pathOfString(fieldPath));
+            }
+
             return cb.equal(fieldPath, transformedValue);
         }
 
         private Predicate getNotEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath) {
             if (transformedValue instanceof String) {
+                if (StringUtils.isEmpty(transformedValue)) {
+                    return cb.isNotNull(pathOfString(fieldPath));
+                }
+
                 final String preFormattedValue = escapeValueToSQL((String) transformedValue);
                 return cb.notLike(cb.upper(pathOfString(fieldPath)), preFormattedValue.toUpperCase());
             }
+
+            if (transformedValue == null) {
+                return cb.isNotNull(pathOfString(fieldPath));
+            }
+
             return cb.notEqual(fieldPath, transformedValue);
         }
 

@@ -51,28 +51,33 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
         distributionSetTagManagement.create(entityFactory.tag().create().name("Tag4"));
 
         distributionSetManagement.assignTag(Arrays.asList(ds.getId(), ds2.getId()), targetTag.getId());
+
+        distributionSetManagement
+                .create(entityFactory.distributionSet().create().name("test123").version("noDescription"));
     }
 
     @Test
     @Description("Test filter distribution set by id")
     public void testFilterByParameterId() {
-        assertRSQLQuery(DistributionSetFields.ID.name() + "==*", 4);
+        assertRSQLQuery(DistributionSetFields.ID.name() + "==*", 5);
     }
 
     @Test
     @Description("Test filter distribution set by name")
     public void testFilterByParameterName() {
         assertRSQLQuery(DistributionSetFields.NAME.name() + "==DS", 1);
-        assertRSQLQuery(DistributionSetFields.NAME.name() + "!=DS", 3);
+        assertRSQLQuery(DistributionSetFields.NAME.name() + "!=DS", 4);
         assertRSQLQuery(DistributionSetFields.NAME.name() + "==*DS", 4);
         assertRSQLQuery(DistributionSetFields.NAME.name() + "==noExist*", 0);
         assertRSQLQuery(DistributionSetFields.NAME.name() + "=in=(DS,notexist)", 1);
-        assertRSQLQuery(DistributionSetFields.NAME.name() + "=out=(DS,notexist)", 3);
+        assertRSQLQuery(DistributionSetFields.NAME.name() + "=out=(DS,notexist)", 4);
     }
 
     @Test
     @Description("Test filter distribution set by description")
     public void testFilterByParameterDescription() {
+        assertRSQLQuery(DistributionSetFields.DESCRIPTION.name() + "==''", 1);
+        assertRSQLQuery(DistributionSetFields.DESCRIPTION.name() + "!=''", 4);
         assertRSQLQuery(DistributionSetFields.DESCRIPTION.name() + "==DS", 1);
         assertRSQLQuery(DistributionSetFields.DESCRIPTION.name() + "!=DS", 3);
         assertRSQLQuery(DistributionSetFields.DESCRIPTION.name() + "==DS*", 2);
@@ -86,11 +91,11 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
     @Description("Test filter distribution set by version")
     public void testFilterByParameterVersion() {
         assertRSQLQuery(DistributionSetFields.VERSION.name() + "==" + TestdataFactory.DEFAULT_VERSION, 1);
-        assertRSQLQuery(DistributionSetFields.VERSION.name() + "!=" + TestdataFactory.DEFAULT_VERSION, 3);
+        assertRSQLQuery(DistributionSetFields.VERSION.name() + "!=" + TestdataFactory.DEFAULT_VERSION, 4);
         assertRSQLQuery(
                 DistributionSetFields.VERSION.name() + "=in=(" + TestdataFactory.DEFAULT_VERSION + ",1.0.0,1.0.1)", 3);
         assertRSQLQuery(DistributionSetFields.VERSION.name() + "=out=(" + TestdataFactory.DEFAULT_VERSION + ",error)",
-                3);
+                4);
     }
 
     @Test
@@ -103,7 +108,7 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
         } catch (final RSQLParameterSyntaxException e) {
         }
         assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "=in=(true)", 4);
-        assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "=out=(true)", 0);
+        assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "=out=(true)", 1);
     }
 
     @Test
@@ -124,7 +129,7 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(DistributionSetFields.TYPE.name() + "==" + TestdataFactory.DS_TYPE_DEFAULT, 4);
         assertRSQLQuery(DistributionSetFields.TYPE.name() + "==noExist*", 0);
         assertRSQLQuery(DistributionSetFields.TYPE.name() + "=in=(" + TestdataFactory.DS_TYPE_DEFAULT + ",ecl)", 4);
-        assertRSQLQuery(DistributionSetFields.TYPE.name() + "=out=(" + TestdataFactory.DS_TYPE_DEFAULT + ")", 0);
+        assertRSQLQuery(DistributionSetFields.TYPE.name() + "=out=(" + TestdataFactory.DS_TYPE_DEFAULT + ")", 1);
     }
 
     @Test

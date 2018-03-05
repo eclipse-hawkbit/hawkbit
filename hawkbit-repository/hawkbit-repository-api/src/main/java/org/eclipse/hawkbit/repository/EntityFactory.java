@@ -53,7 +53,7 @@ public interface EntityFactory {
      * @return {@link MetaData} object
      */
     MetaData generateMetadata(@Size(min = 1, max = MetaData.KEY_MAX_SIZE) @NotNull String key,
-            @Size(min = 1, max = MetaData.VALUE_MAX_SIZE) @NotNull String value);
+            @Size(max = MetaData.VALUE_MAX_SIZE) String value);
 
     /**
      * @return {@link SoftwareModuleMetadataBuilder} object
