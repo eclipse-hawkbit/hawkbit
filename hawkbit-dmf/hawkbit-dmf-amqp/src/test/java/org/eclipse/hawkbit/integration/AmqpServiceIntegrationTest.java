@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
+import org.eclipse.hawkbit.dmf.json.model.DmfActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMetadata;
@@ -128,8 +129,9 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
     protected void assertCancelActionMessage(final Long actionId, final String controllerId) {
         final Message replyMessage = assertReplyMessageHeader(EventTopic.CANCEL_DOWNLOAD, controllerId);
 
-        final Long actionUpdateStatus = (Long) getDmfClient().getMessageConverter().fromMessage(replyMessage);
-        assertThat(actionUpdateStatus).isEqualTo(actionId);
+        final DmfActionRequest actionUpdateStatus = (DmfActionRequest) getDmfClient().getMessageConverter()
+                .fromMessage(replyMessage);
+        assertThat(actionUpdateStatus.getActionId()).isEqualTo(actionId);
     }
 
     protected void assertDeleteMessage(final String target) {

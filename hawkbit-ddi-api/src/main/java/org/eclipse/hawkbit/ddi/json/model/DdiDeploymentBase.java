@@ -76,7 +76,7 @@ public class DdiDeploymentBase extends ResourceSupport {
     @Override
     public String toString() {
         return "DeploymentBase [id=" + deplyomentId + ", deployment=" + deployment + " actionHistory="
-                + actionHistory.toString() + "]";
+                + actionHistory + "]";
     }
 
 }

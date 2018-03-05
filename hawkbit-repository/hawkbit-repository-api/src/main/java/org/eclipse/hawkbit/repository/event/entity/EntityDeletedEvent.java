@@ -6,11 +6,11 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.event.entitiy;
+package org.eclipse.hawkbit.repository.event.entity;
 
 /**
- * Marker interface to indicate event has updated an entity.
+ * Marker interface to indicate event has deleted an entity.
  */
-public interface EntityUpdatedEvent extends EntityIdEvent {
+public interface EntityDeletedEvent extends EntityIdEvent {
 
 }

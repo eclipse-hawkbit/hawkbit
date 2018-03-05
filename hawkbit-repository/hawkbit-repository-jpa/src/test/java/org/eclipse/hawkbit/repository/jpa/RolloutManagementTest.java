@@ -63,6 +63,7 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
@@ -117,6 +118,49 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final Action rolloutCreatedAction = actionsByKnownTarget.stream()
                 .filter(action -> !action.getId().equals(manuallyAssignedActionId)).findAny().get();
         assertThat(rolloutCreatedAction.getStatus()).isEqualTo(Status.FINISHED);
+
+    }
+
+    @Test
+    @Description("Verifies that a running action is auto canceled by a rollout which assigns another distribution-set.")
+    public void rolloutAssignesNewDistributionSetAndAutoCloseActiveActions() {
+        tenantConfigurationManagement
+                .addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, true);
+
+        try {
+            // manually assign distribution set to target
+            final String knownControllerId = "controller12345";
+            final DistributionSet firstDistributionSet = testdataFactory.createDistributionSet();
+            final DistributionSet secondDistributionSet = testdataFactory.createDistributionSet("second");
+            testdataFactory.createTarget(knownControllerId);
+            final DistributionSetAssignmentResult assignmentResult = deploymentManagement.assignDistributionSet(
+                    firstDistributionSet.getId(), ActionType.FORCED, 0, Collections.singleton(knownControllerId));
+            final Long manuallyAssignedActionId = assignmentResult.getActions().get(0);
+
+            // create rollout with the same distribution set already assigned
+            // start rollout
+            final Rollout rollout = testdataFactory.createRolloutByVariables("rolloutNotCancelRunningAction",
+                    "description", 1, "name==*", secondDistributionSet, "50", "5");
+            rolloutManagement.start(rollout.getId());
+            rolloutManagement.handleRollouts();
+
+            // verify that manually created action is canceled and action
+            // created from rollout is running
+            final List<Action> actionsByKnownTarget = deploymentManagement.findActionsByTarget(knownControllerId, PAGE)
+                    .getContent();
+            // should be 2 actions, one manually and one from the rollout
+            assertThat(actionsByKnownTarget).hasSize(2);
+            // verify that manually assigned action is still running
+            assertThat(deploymentManagement.findAction(manuallyAssignedActionId).get().getStatus())
+                    .isEqualTo(Status.CANCELED);
+            // verify that rollout management created action is running
+            final Action rolloutCreatedAction = actionsByKnownTarget.stream()
+                    .filter(action -> !action.getId().equals(manuallyAssignedActionId)).findAny().get();
+            assertThat(rolloutCreatedAction.getStatus()).isEqualTo(Status.RUNNING);
+        } finally {
+            tenantConfigurationManagement
+                    .addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, false);
+        }
 
     }
 

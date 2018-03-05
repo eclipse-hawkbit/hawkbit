@@ -60,6 +60,7 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
     @Description("Test filter software module by name")
     public void testFilterByParameterName() {
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==agent-hub", 1);
+        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "!=agent-hub", 3);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==agent-hub*", 2);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "!=agent-hub*", 2);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==noExist*", 0);
@@ -71,6 +72,7 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
     @Description("Test filter software module by description")
     public void testFilterByParameterDescription() {
         assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "==agent-hub", 1);
+        assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "!=agent-hub", 3);
         assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "==noExist*", 0);
         assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "=in=(agent-hub,notexist)", 1);
         assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "=out=(agent-hub,notexist)", 3);
@@ -89,6 +91,7 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
     @Description("Test filter software module by type")
     public void testFilterByType() {
         assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "==" + TestdataFactory.SM_TYPE_APP, 2);
+        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "!=" + TestdataFactory.SM_TYPE_APP, 2);
         assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "==noExist*", 0);
         assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "=in=(" + TestdataFactory.SM_TYPE_APP + ")", 2);
         assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "=out=(" + TestdataFactory.SM_TYPE_APP + ")", 2);
@@ -98,6 +101,8 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
     @Description("Test filter software module by metadata")
     public void testFilterByMetadata() {
         assertRSQLQuery(SoftwareModuleFields.METADATA.name() + ".metaKey==metaValue", 1);
+        assertRSQLQuery(SoftwareModuleFields.METADATA.name() + ".metaKey!=metaValue", 1);
+        assertRSQLQuery(SoftwareModuleFields.METADATA.name() + ".metaKey!=notexist", 2);
         assertRSQLQuery(SoftwareModuleFields.METADATA.name() + ".metaKey==*v*", 2);
         assertRSQLQuery(SoftwareModuleFields.METADATA.name() + ".metaKey==noExist*", 0);
         assertRSQLQuery(SoftwareModuleFields.METADATA.name() + ".metaKey=in=(metaValue,value)", 2);
