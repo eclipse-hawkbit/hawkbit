@@ -35,7 +35,7 @@ public interface SoftwareModuleMetadataCreate {
      *            for {@link MetaData#getValue()}
      * @return updated builder instance
      */
-    SoftwareModuleMetadataCreate value(@Size(min = 1, max = MetaData.VALUE_MAX_SIZE) @NotNull String value);
+    SoftwareModuleMetadataCreate value(@Size(max = MetaData.VALUE_MAX_SIZE) String value);
 
     /**
      * @param visible

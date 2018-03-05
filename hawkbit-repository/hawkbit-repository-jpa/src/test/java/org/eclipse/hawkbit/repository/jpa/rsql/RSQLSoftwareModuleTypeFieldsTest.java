@@ -42,6 +42,8 @@ public class RSQLSoftwareModuleTypeFieldsTest extends AbstractJpaIntegrationTest
     @Test
     @Description("Test filter software module test type by description")
     public void testFilterByParameterDescription() {
+        assertRSQLQuery(SoftwareModuleTypeFields.DESCRIPTION.name() + "==''", 0);
+        assertRSQLQuery(SoftwareModuleTypeFields.DESCRIPTION.name() + "!=''", 3);
         assertRSQLQuery(SoftwareModuleTypeFields.DESCRIPTION.name() + "==Updated*", 3);
         assertRSQLQuery(SoftwareModuleTypeFields.DESCRIPTION.name() + "!=Updated*", 0);
         assertRSQLQuery(SoftwareModuleTypeFields.DESCRIPTION.name() + "==noExist*", 0);

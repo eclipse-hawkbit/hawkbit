@@ -42,6 +42,8 @@ public class RSQLTagFieldsTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test filter target tag by name")
     public void testFilterTargetTagByParameterName() {
+        assertRSQLQueryTarget(TagFields.NAME.name() + "==''", 0);
+        assertRSQLQueryTarget(TagFields.NAME.name() + "!=''", 5);
         assertRSQLQueryTarget(TagFields.NAME.name() + "==1", 1);
         assertRSQLQueryTarget(TagFields.NAME.name() + "!=1", 4);
         assertRSQLQueryTarget(TagFields.NAME.name() + "==*", 5);
@@ -53,6 +55,8 @@ public class RSQLTagFieldsTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test filter target tag by description")
     public void testFilterTargetTagByParameterDescription() {
+        assertRSQLQueryTarget(TagFields.DESCRIPTION.name() + "==''", 0);
+        assertRSQLQueryTarget(TagFields.DESCRIPTION.name() + "!=''", 5);
         assertRSQLQueryTarget(TagFields.DESCRIPTION.name() + "==1", 1);
         assertRSQLQueryTarget(TagFields.DESCRIPTION.name() + "!=1", 4);
         assertRSQLQueryTarget(TagFields.DESCRIPTION.name() + "==*", 5);
@@ -64,6 +68,8 @@ public class RSQLTagFieldsTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test filter target tag by colour")
     public void testFilterTargetTagByParameterColour() {
+        assertRSQLQueryTarget(TagFields.COLOUR.name() + "==''", 0);
+        assertRSQLQueryTarget(TagFields.COLOUR.name() + "!=''", 5);
         assertRSQLQueryTarget(TagFields.COLOUR.name() + "==red", 3);
         assertRSQLQueryTarget(TagFields.COLOUR.name() + "!=red", 2);
         assertRSQLQueryTarget(TagFields.COLOUR.name() + "==r*", 3);
@@ -75,6 +81,8 @@ public class RSQLTagFieldsTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test filter distribution set tag by name")
     public void testFilterDistributionSetTagByParameterName() {
+        assertRSQLQueryDistributionSet(TagFields.NAME.name() + "==''", 0);
+        assertRSQLQueryDistributionSet(TagFields.NAME.name() + "!=''", 5);
         assertRSQLQueryDistributionSet(TagFields.NAME.name() + "==1", 1);
         assertRSQLQueryDistributionSet(TagFields.NAME.name() + "!=1", 4);
         assertRSQLQueryDistributionSet(TagFields.NAME.name() + "==*", 5);
@@ -86,6 +94,8 @@ public class RSQLTagFieldsTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test filter distribution set by description")
     public void testFilterDistributionSetTagByParameterDescription() {
+        assertRSQLQueryDistributionSet(TagFields.DESCRIPTION.name() + "==''", 0);
+        assertRSQLQueryDistributionSet(TagFields.DESCRIPTION.name() + "!=''", 5);
         assertRSQLQueryDistributionSet(TagFields.DESCRIPTION.name() + "==1", 1);
         assertRSQLQueryDistributionSet(TagFields.DESCRIPTION.name() + "!=1", 4);
         assertRSQLQueryDistributionSet(TagFields.DESCRIPTION.name() + "==*", 5);
@@ -97,6 +107,8 @@ public class RSQLTagFieldsTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test filter distribution set by colour")
     public void testFilterDistributionSetTagByParameterColour() {
+        assertRSQLQueryDistributionSet(TagFields.COLOUR.name() + "==''", 0);
+        assertRSQLQueryDistributionSet(TagFields.COLOUR.name() + "!=''", 5);
         assertRSQLQueryDistributionSet(TagFields.COLOUR.name() + "==red", 3);
         assertRSQLQueryDistributionSet(TagFields.COLOUR.name() + "!=red", 2);
         assertRSQLQueryDistributionSet(TagFields.COLOUR.name() + "==r*", 3);
