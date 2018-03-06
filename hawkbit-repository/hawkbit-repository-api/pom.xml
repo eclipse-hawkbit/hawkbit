@@ -50,7 +50,6 @@
       <dependency>
          <groupId>com.cronutils</groupId>
          <artifactId>cron-utils</artifactId>
-         <version>5.0.5</version>
       </dependency>
 
       <!-- TEST -->

@@ -313,10 +313,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
      * @return the end time of window as {@link Optional<ZonedDateTime>}.
      */
     private Optional<ZonedDateTime> getMaintenanceWindowEndTime() {
-        if (getMaintenanceWindowStartTime().isPresent()) {
-            return Optional.of(getMaintenanceWindowStartTime().get().plus(getMaintenanceWindowDuration()));
-        }
-        return Optional.empty();
+        return getMaintenanceWindowStartTime().map(start -> start.plus(getMaintenanceWindowDuration()));
     }
 
     /**
@@ -368,9 +365,11 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
             return false;
         } else {
             final ZonedDateTime now = ZonedDateTime.now(ZoneOffset.of(maintenanceWindowTimeZone));
-            if (this.getMaintenanceWindowStartTime().isPresent() && this.getMaintenanceWindowEndTime().isPresent()) {
-                return now.isAfter(this.getMaintenanceWindowStartTime().get())
-                        && now.isBefore(this.getMaintenanceWindowEndTime().get());
+            final Optional<ZonedDateTime> start = getMaintenanceWindowStartTime();
+            final Optional<ZonedDateTime> end = getMaintenanceWindowEndTime();
+
+            if (start.isPresent() && end.isPresent()) {
+                return now.isAfter(start.get()) && now.isBefore(end.get());
             } else {
                 return false;
             }

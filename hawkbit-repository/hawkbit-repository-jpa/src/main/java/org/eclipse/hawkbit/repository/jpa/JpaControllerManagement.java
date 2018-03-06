@@ -212,13 +212,12 @@ public class JpaControllerManagement implements ControllerManagement {
 
         final JpaAction action = getActionAndThrowExceptionIfNotFound(actionId);
 
-        if (!action.hasMaintenanceSchedule() || action.isMaintenanceScheduleLapsed()
-                || !action.getMaintenanceWindowStartTime().isPresent()) {
+        if (!action.hasMaintenanceSchedule() || action.isMaintenanceScheduleLapsed()) {
             return getPollingTime();
         }
 
         return (new EventTimer(getPollingTime(), getMinPollingTime(), ChronoUnit.SECONDS))
-                .timeToNextEvent(getMaintenanceWindowPollCount(), action.getMaintenanceWindowStartTime().get());
+                .timeToNextEvent(getMaintenanceWindowPollCount(), action.getMaintenanceWindowStartTime().orElse(null));
     }
 
     /**

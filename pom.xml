@@ -149,6 +149,7 @@
       <maven.scm.plugin.version>1.9.4</maven.scm.plugin.version>
 
       <!-- Misc libraries versions - START -->
+      <cron-utils.version>5.0.5</cron-utils.version>
       <jsoup.version>1.8.3</jsoup.version>
       <validation-api.version>2.0.1.Final</validation-api.version>
       <allure.version>1.5.4</allure.version>
@@ -568,6 +569,11 @@
          </dependency>
 
          <!-- Misc -->
+         <dependency>
+            <groupId>com.cronutils</groupId>
+            <artifactId>cron-utils</artifactId>
+            <version>${cron-utils.version}</version>
+         </dependency>
          <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
