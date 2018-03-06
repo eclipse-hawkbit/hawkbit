@@ -236,7 +236,7 @@ public interface ControllerManagement {
      *         {@link TenantConfigurationKey#MAINTENANCE_WINDOW_POLL_COUNT}.
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    public int getMaintenanceWindowPollCount();
+    int getMaintenanceWindowPollCount();
 
     /**
      * Returns polling time based on the maintenance window for an action.
@@ -248,14 +248,14 @@ public interface ControllerManagement {
      * of maintenance window, it resets to default
      * {@link TenantConfigurationKey#POLLING_TIME_INTERVAL}.
      *
-     * @param action
+     * @param actionId
      *            id the {@link Action} for which polling time is calculated
      *            based on it having maintenance window or not
      *
      * @return current {@link TenantConfigurationKey#POLLING_TIME_INTERVAL}.
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    String getPollingTimeForAction(final Action action);
+    String getPollingTimeForAction(long actionId);
 
     /**
      * Checks if a given target has currently or has even been assigned to the

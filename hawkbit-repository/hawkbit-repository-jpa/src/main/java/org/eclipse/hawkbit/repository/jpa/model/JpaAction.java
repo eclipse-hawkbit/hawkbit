@@ -101,7 +101,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
             @ConversionValue(objectValue = "DOWNLOAD", dataValue = "7"),
             @ConversionValue(objectValue = "SCHEDULED", dataValue = "8"),
             @ConversionValue(objectValue = "CANCEL_REJECTED", dataValue = "9"),
-            @ConversionValue(objectValue = "DOWNLOADED", dataValue = "10")})
+            @ConversionValue(objectValue = "DOWNLOADED", dataValue = "10") })
     @Convert("status")
     @NotNull
     private Status status;
@@ -243,7 +243,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
      * @param maintenanceSchedule
      *            is a cron expression to be used for scheduling.
      */
-    public void setMaintenanceSchedule(String maintenanceSchedule) {
+    public void setMaintenanceSchedule(final String maintenanceSchedule) {
         this.maintenanceSchedule = maintenanceSchedule;
     }
 
@@ -254,7 +254,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
      *            is the duration of an available maintenance schedule in
      *            HH:mm:ss format.
      */
-    public void setMaintenanceWindowDuration(String maintenanceWindowDuration) {
+    public void setMaintenanceWindowDuration(final String maintenanceWindowDuration) {
         this.maintenanceWindowDuration = maintenanceWindowDuration;
     }
 
@@ -267,7 +267,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
      *            start time of a maintenance window calculated based on the
      *            cron expression is relative to this time zone.
      */
-    public void setMaintenanceWindowTimeZone(String maintenanceWindowTimeZone) {
+    public void setMaintenanceWindowTimeZone(final String maintenanceWindowTimeZone) {
         this.maintenanceWindowTimeZone = maintenanceWindowTimeZone;
     }
 
@@ -277,10 +277,9 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
      *
      * @return the {@link MaintenanceScheduleHelper} object.
      */
-    MaintenanceScheduleHelper getScheduler() {
+    private MaintenanceScheduleHelper getScheduler() {
         if (this.scheduleHelper == null) {
-            this.scheduleHelper = new MaintenanceScheduleHelper(maintenanceSchedule, maintenanceWindowDuration,
-                    maintenanceWindowTimeZone);
+            this.scheduleHelper = new MaintenanceScheduleHelper(maintenanceSchedule);
         }
         return this.scheduleHelper;
     }
@@ -290,7 +289,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
      *
      * @return the {@link Duration} of each maintenance window.
      */
-    Duration getMaintenanceWindowDuration() {
+    private Duration getMaintenanceWindowDuration() {
         return Duration.parse(MaintenanceScheduleHelper.convertToISODuration(this.maintenanceWindowDuration));
     }
 
@@ -302,7 +301,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
      * @return the start time as {@link Optional<ZonedDateTime>}.
      */
     public Optional<ZonedDateTime> getMaintenanceWindowStartTime() {
-        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.of(maintenanceWindowTimeZone));
+        final ZonedDateTime now = ZonedDateTime.now(ZoneOffset.of(maintenanceWindowTimeZone));
         return getScheduler().nextExecution(now.minus(getMaintenanceWindowDuration()));
     }
 
@@ -313,7 +312,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
      *
      * @return the end time of window as {@link Optional<ZonedDateTime>}.
      */
-    public Optional<ZonedDateTime> getMaintenanceWindowEndTime() {
+    private Optional<ZonedDateTime> getMaintenanceWindowEndTime() {
         if (getMaintenanceWindowStartTime().isPresent()) {
             return Optional.of(getMaintenanceWindowStartTime().get().plus(getMaintenanceWindowDuration()));
         }
@@ -343,7 +342,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
      */
     @Override
     public boolean isMaintenanceScheduleLapsed() {
-        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.of(maintenanceWindowTimeZone));
+        final ZonedDateTime now = ZonedDateTime.now(ZoneOffset.of(maintenanceWindowTimeZone));
         return !getScheduler().nextExecution(now.minus(getMaintenanceWindowDuration())).isPresent();
     }
 
@@ -368,7 +367,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
             // available.
             return false;
         } else {
-            ZonedDateTime now = ZonedDateTime.now(ZoneOffset.of(maintenanceWindowTimeZone));
+            final ZonedDateTime now = ZonedDateTime.now(ZoneOffset.of(maintenanceWindowTimeZone));
             if (this.getMaintenanceWindowStartTime().isPresent() && this.getMaintenanceWindowEndTime().isPresent()) {
                 return now.isAfter(this.getMaintenanceWindowStartTime().get())
                         && now.isBefore(this.getMaintenanceWindowEndTime().get());

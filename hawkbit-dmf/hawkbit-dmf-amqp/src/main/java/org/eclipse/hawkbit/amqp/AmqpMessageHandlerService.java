@@ -215,7 +215,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         action.getDistributionSet().getModules().forEach(module -> modules.put(module, metadata.get(module.getId())));
 
         amqpMessageDispatcherService.sendUpdateMessageToTarget(action.getTenant(), action.getTarget(), action.getId(),
-                modules);
+                modules, action.isMaintenanceWindowAvailable());
     }
 
     /**

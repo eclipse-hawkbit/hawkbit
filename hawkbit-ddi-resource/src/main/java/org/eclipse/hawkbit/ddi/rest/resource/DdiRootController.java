@@ -146,8 +146,12 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         checkAndCancelExpiredAction(action);
 
-        return new ResponseEntity<>(DataConversionHelper.fromTarget(target, action,
-                controllerManagement.getPollingTimeForAction(action), tenantAware), HttpStatus.OK);
+        return new ResponseEntity<>(
+                DataConversionHelper.fromTarget(target, action,
+                        action == null ? controllerManagement.getPollingTime()
+                                : controllerManagement.getPollingTimeForAction(action.getId()),
+                        tenantAware),
+                HttpStatus.OK);
     }
 
     @Override
@@ -288,13 +292,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
                     : new DdiActionHistory(action.getStatus().name(), actionHistoryMsgs);
 
             final HandlingType downloadType = action.isForce() ? HandlingType.FORCED : HandlingType.ATTEMPT;
-            final HandlingType updateType = action.hasMaintenanceSchedule()
-                    ? (action.isMaintenanceWindowAvailable() ? downloadType : HandlingType.SKIP) : downloadType;
+            final HandlingType updateType = calculateUpdateType(action, downloadType);
 
-            MaintenanceWindowStatus maintenanceWindow = action.hasMaintenanceSchedule()
-                    ? (action.isMaintenanceWindowAvailable() ? MaintenanceWindowStatus.AVAILABLE
-                            : MaintenanceWindowStatus.UNAVAILABLE)
-                    : null;
+            final MaintenanceWindowStatus maintenanceWindow = calculateMaintenanceWindow(action);
 
             final DdiDeploymentBase base = new DdiDeploymentBase(Long.toString(action.getId()),
                     new DdiDeployment(downloadType, updateType, chunks, maintenanceWindow), actionHistory);
@@ -308,6 +308,21 @@ public class DdiRootController implements DdiRootControllerRestApi {
         }
 
         return ResponseEntity.notFound().build();
+    }
+
+    private static MaintenanceWindowStatus calculateMaintenanceWindow(final Action action) {
+        if (action.hasMaintenanceSchedule()) {
+            return action.isMaintenanceWindowAvailable() ? MaintenanceWindowStatus.AVAILABLE
+                    : MaintenanceWindowStatus.UNAVAILABLE;
+        }
+        return null;
+    }
+
+    private static HandlingType calculateUpdateType(final Action action, final HandlingType downloadType) {
+        if (action.hasMaintenanceSchedule()) {
+            return action.isMaintenanceWindowAvailable() ? downloadType : HandlingType.SKIP;
+        }
+        return downloadType;
     }
 
     @Override

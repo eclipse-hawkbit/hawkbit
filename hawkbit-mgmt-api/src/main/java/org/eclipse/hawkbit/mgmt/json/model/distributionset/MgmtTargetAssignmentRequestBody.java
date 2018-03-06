@@ -31,69 +31,37 @@ public class MgmtTargetAssignmentRequestBody {
      * {@link MaintenanceWindow} object containing schedule, duration and
      * timezone.
      */
-    private MaintenanceWindow maintenanceWindow = null;
+    private MaintenanceWindow maintenanceWindow;
 
-    /**
-     * @return the id
-     */
     public String getId() {
         return id;
     }
 
-    /**
-     * @param id
-     *            the id to set
-     */
     public void setId(final String id) {
         this.id = id;
     }
 
-    /**
-     * @return the type
-     */
     public MgmtActionType getType() {
         return type;
     }
 
-    /**
-     * @param type
-     *            the type to set
-     */
     public void setType(final MgmtActionType type) {
         this.type = type;
     }
 
-    /**
-     * @return the forcetime
-     */
     public long getForcetime() {
         return forcetime;
     }
 
-    /**
-     * @param forcetime
-     *            the forcetime to set
-     */
     public void setForcetime(final long forcetime) {
         this.forcetime = forcetime;
     }
 
-    /**
-     * Returns {@link MaintenanceWindow} for the target assignment request.
-     *
-     * @return {@link MaintenanceWindow}.
-     */
     public MaintenanceWindow getMaintenanceWindow() {
         return maintenanceWindow;
     }
 
-    /**
-     * Sets {@link MaintenanceWindow} for the target assignment request.
-     *
-     * @param maintenanceWindow
-     *            as {@link MaintenanceWindow}.
-     */
-    public void setMaintenanceWindow(MaintenanceWindow maintenanceWindow) {
+    public void setMaintenanceWindow(final MaintenanceWindow maintenanceWindow) {
         this.maintenanceWindow = maintenanceWindow;
     }
 
