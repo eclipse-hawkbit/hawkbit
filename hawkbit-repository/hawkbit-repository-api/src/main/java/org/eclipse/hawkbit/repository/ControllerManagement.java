@@ -21,6 +21,7 @@ import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
+import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
@@ -211,10 +212,50 @@ public interface ControllerManagement {
     Optional<Action> getActionForDownloadByTargetAndSoftwareModule(@NotEmpty String controllerId, long moduleId);
 
     /**
+     * Returns configured polling interval at which the controller polls hawkBit
+     * server.
+     *
      * @return current {@link TenantConfigurationKey#POLLING_TIME_INTERVAL}.
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     String getPollingTime();
+
+    /**
+     * Returns the configured minimum polling interval.
+     *
+     * @return current {@link TenantConfigurationKey#MIN_POLLING_TIME_INTERVAL}.
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    String getMinPollingTime();
+
+    /**
+     * Returns the count to be used for reducing polling interval while calling
+     * {@link ControllerManagement#getPollingTimeForAction()}.
+     *
+     * @return configured value of
+     *         {@link TenantConfigurationKey#MAINTENANCE_WINDOW_POLL_COUNT}.
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    public int getMaintenanceWindowPollCount();
+
+    /**
+     * Returns polling time based on the maintenance window for an action.
+     * Server will reduce the polling interval as the start time for maintenance
+     * window approaches, so that at least these many attempts are made between
+     * current polling until start of maintenance window. Poll time keeps
+     * reducing with MinPollingTime as lower limit
+     * {@link TenantConfigurationKey#MIN_POLLING_TIME_INTERVAL}. After the start
+     * of maintenance window, it resets to default
+     * {@link TenantConfigurationKey#POLLING_TIME_INTERVAL}.
+     *
+     * @param action
+     *            id the {@link Action} for which polling time is calculated
+     *            based on it having maintenance window or not
+     *
+     * @return current {@link TenantConfigurationKey#POLLING_TIME_INTERVAL}.
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    String getPollingTimeForAction(final Action action);
 
     /**
      * Checks if a given target has currently or has even been assigned to the
@@ -349,4 +390,23 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     List<String> getActionHistoryMessages(long actionId, int messageCount);
+
+    /**
+     * Cancels given {@link Action} for this {@link Target}. However, it might
+     * be possible that the controller will continue to work on the cancelation.
+     * The controller needs to acknowledge or reject the cancelation using
+     * {@link DdiRootController#postCancelActionFeedback}.
+     *
+     * @param actionId
+     *            to be canceled
+     *
+     * @return canceled {@link Action}
+     *
+     * @throws CancelActionNotAllowedException
+     *             in case the given action is not active or is already canceled
+     * @throws EntityNotFoundException
+     *             if action with given actionId does not exist.
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    Action cancelAction(long actionId);
 }

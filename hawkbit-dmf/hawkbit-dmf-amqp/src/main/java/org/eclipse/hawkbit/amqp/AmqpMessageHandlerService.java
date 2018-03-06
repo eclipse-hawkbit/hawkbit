@@ -271,7 +271,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
         final Action addUpdateActionStatus = getUpdateActionStatus(status, actionStatus);
 
-        if (!addUpdateActionStatus.isActive()) {
+        if (!addUpdateActionStatus.isActive() || (addUpdateActionStatus.hasMaintenanceSchedule()
+                && addUpdateActionStatus.isMaintenanceWindowAvailable())) {
             lookIfUpdateAvailable(action.getTarget());
         }
     }
@@ -305,6 +306,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             break;
         case WARNING:
             status = Status.WARNING;
+            break;
+        case DOWNLOADED:
+            status = Status.DOWNLOADED;
             break;
         case CANCEL_REJECTED:
             status = hanldeCancelRejectedState(message, action);

@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.distributionset;
 
+import org.eclipse.hawkbit.mgmt.json.model.MaintenanceWindow;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -24,6 +26,12 @@ public class MgmtTargetAssignmentRequestBody {
     private long forcetime;
 
     private MgmtActionType type;
+
+    /**
+     * {@link MaintenanceWindow} object containing schedule, duration and
+     * timezone.
+     */
+    private MaintenanceWindow maintenanceWindow = null;
 
     /**
      * @return the id
@@ -68,6 +76,25 @@ public class MgmtTargetAssignmentRequestBody {
      */
     public void setForcetime(final long forcetime) {
         this.forcetime = forcetime;
+    }
+
+    /**
+     * Returns {@link MaintenanceWindow} for the target assignment request.
+     *
+     * @return {@link MaintenanceWindow}.
+     */
+    public MaintenanceWindow getMaintenanceWindow() {
+        return maintenanceWindow;
+    }
+
+    /**
+     * Sets {@link MaintenanceWindow} for the target assignment request.
+     *
+     * @param maintenanceWindow
+     *            as {@link MaintenanceWindow}.
+     */
+    public void setMaintenanceWindow(MaintenanceWindow maintenanceWindow) {
+        this.maintenanceWindow = maintenanceWindow;
     }
 
 }

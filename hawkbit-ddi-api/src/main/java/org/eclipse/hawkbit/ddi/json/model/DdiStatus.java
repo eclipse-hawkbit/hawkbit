@@ -102,7 +102,12 @@ public class DdiStatus {
         /**
          * Action is started after a reset, power loss, etc.
          */
-        RESUMED("resumed");
+        RESUMED("resumed"),
+
+        /**
+         * The action has been downloaded by the target.
+         */
+        DOWNLOADED("downloaded");
 
         private String name;
 

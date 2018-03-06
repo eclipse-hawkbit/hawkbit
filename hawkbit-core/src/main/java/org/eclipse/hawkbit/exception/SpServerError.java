@@ -169,7 +169,12 @@ public enum SpServerError {
     /**
     *
     */
-    SP_REPO_OPERATION_NOT_SUPPORTED("hawkbit.server.error.operation.notSupported", "Operation or method is (no longer) supported by service.");
+    SP_REPO_OPERATION_NOT_SUPPORTED("hawkbit.server.error.operation.notSupported", "Operation or method is (no longer) supported by service."),
+
+    /**
+     * Error message informing that the maintenance schedule is invalid.
+     */
+    SP_MAINTENANCE_SCHEDULE_INVALID("hawkbit.server.error.maintenanceScheduleInvalid", "Information for schedule, duration or timezone is missing; or there is no valid maintenance window available in future.");
 
     private final String key;
     private final String message;
