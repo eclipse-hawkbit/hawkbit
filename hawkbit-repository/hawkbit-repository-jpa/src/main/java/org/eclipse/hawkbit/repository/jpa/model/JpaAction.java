@@ -316,43 +316,17 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
         return getMaintenanceWindowStartTime().map(start -> start.plus(getMaintenanceWindowDuration()));
     }
 
-    /**
-     * The method checks whether the action has a maintenance schedule defined
-     * for it. A maintenance schedule defines a set of maintenance windows
-     * during which actual update can be performed. A valid schedule defines at
-     * least one maintenance window.
-     *
-     * @return true if action has a maintenance schedule, else false.
-     */
     @Override
     public boolean hasMaintenanceSchedule() {
         return this.maintenanceSchedule != null;
     }
 
-    /**
-     * The method checks whether the maintenance schedule has already lapsed for
-     * the action, i.e. there are no more windows available for maintenance.
-     * Controller manager uses the method to check if the maintenance schedule
-     * has lapsed, and automatically cancels the action if it is lapsed.
-     *
-     * @return true if maintenance schedule has lapsed, else false.
-     */
     @Override
     public boolean isMaintenanceScheduleLapsed() {
         final ZonedDateTime now = ZonedDateTime.now(ZoneOffset.of(maintenanceWindowTimeZone));
         return !getScheduler().nextExecution(now.minus(getMaintenanceWindowDuration())).isPresent();
     }
 
-    /**
-     * The method checks whether a maintenance window is available for the
-     * action to proceed. If it is available, a 'true' value is returned. The
-     * maintenance window is considered available: 1) If there is no maintenance
-     * schedule at all, in which case device can start update any time after
-     * download is finished; or 2) the current time is within a scheduled
-     * maintenance window start and end time.
-     *
-     * @return true if maintenance window is available, else false.
-     */
     @Override
     public boolean isMaintenanceWindowAvailable() {
         if (!hasMaintenanceSchedule()) {
