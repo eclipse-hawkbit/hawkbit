@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
 /**
@@ -15,7 +18,9 @@ import com.fasterxml.jackson.annotation.JsonSetter;
  * schedule defined as cron expression, duration in HH:mm:ss format and time
  * zone as offset from UTC.
  */
-public class MaintenanceWindow {
+@JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class MgmtMaintenanceWindow {
 
     private String maintenanceSchedule;
     private String maintenanceWindowDuration;
@@ -31,7 +36,7 @@ public class MaintenanceWindow {
      *            year".
      */
     @JsonSetter("schedule")
-    public void setMaintenanceSchedule(String maintenanceSchedule) {
+    public void setMaintenanceSchedule(final String maintenanceSchedule) {
         this.maintenanceSchedule = maintenanceSchedule;
     }
 
@@ -43,7 +48,7 @@ public class MaintenanceWindow {
      *            window, for example 00:30:00 for 30 minutes.
      */
     @JsonSetter("duration")
-    public void setMaintenanceWindowDuration(String maintenanceWindowDuration) {
+    public void setMaintenanceWindowDuration(final String maintenanceWindowDuration) {
         this.maintenanceWindowDuration = maintenanceWindowDuration;
     }
 
@@ -57,7 +62,7 @@ public class MaintenanceWindow {
      *            cron expression is relative to this time zone.
      */
     @JsonSetter("timezone")
-    public void setMaintenanceWindowTimeZone(String maintenanceWindowTimeZone) {
+    public void setMaintenanceWindowTimeZone(final String maintenanceWindowTimeZone) {
         this.maintenanceWindowTimeZone = maintenanceWindowTimeZone;
     }
 

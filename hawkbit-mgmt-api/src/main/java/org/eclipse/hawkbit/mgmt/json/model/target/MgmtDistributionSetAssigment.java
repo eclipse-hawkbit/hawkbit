@@ -3,7 +3,7 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.target;
 
-import org.eclipse.hawkbit.mgmt.json.model.MaintenanceWindow;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindow;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 
@@ -16,10 +16,10 @@ public class MgmtDistributionSetAssigment extends MgmtId {
     private MgmtActionType type;
 
     /**
-     * {@link MaintenanceWindow} object defining a schedule, duration and
+     * {@link MgmtMaintenanceWindow} object defining a schedule, duration and
      * timezone.
      */
-    private MaintenanceWindow maintenanceWindow = null;
+    private MgmtMaintenanceWindow maintenanceWindow = null;
 
     /**
      * @return the type
@@ -52,21 +52,21 @@ public class MgmtDistributionSetAssigment extends MgmtId {
     }
 
     /**
-     * Returns {@link MaintenanceWindow} for distribution set assignment.
+     * Returns {@link MgmtMaintenanceWindow} for distribution set assignment.
      *
-     * @return {@link MaintenanceWindow}.
+     * @return {@link MgmtMaintenanceWindow}.
      */
-    public MaintenanceWindow getMaintenanceWindow() {
+    public MgmtMaintenanceWindow getMaintenanceWindow() {
         return maintenanceWindow;
     }
 
     /**
-     * Sets {@link MaintenanceWindow} for distribution set assignment.
+     * Sets {@link MgmtMaintenanceWindow} for distribution set assignment.
      *
      * @param maintenanceWindow
-     *            as {@link MaintenanceWindow}.
+     *            as {@link MgmtMaintenanceWindow}.
      */
-    public void setMaintenanceWindow(MaintenanceWindow maintenanceWindow) {
+    public void setMaintenanceWindow(MgmtMaintenanceWindow maintenanceWindow) {
         this.maintenanceWindow = maintenanceWindow;
     }
 }
