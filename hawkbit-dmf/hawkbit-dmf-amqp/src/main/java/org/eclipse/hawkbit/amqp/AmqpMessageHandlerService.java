@@ -102,8 +102,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      * @return a message if <null> no message is send back to sender
      */
     @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.receiverQueue:dmf_receiver}", containerFactory = "listenerContainerFactory")
-    public Message onMessage(final Message message, @Header(MessageHeaderKey.TYPE) final String type,
-            @Header(MessageHeaderKey.TENANT) final String tenant) {
+    public Message onMessage(final Message message,
+            @Header(name = MessageHeaderKey.TYPE, required = false) final String type,
+            @Header(name = MessageHeaderKey.TENANT, required = false) final String tenant) {
         return onMessage(message, type, tenant, getRabbitTemplate().getConnectionFactory().getVirtualHost());
     }
 
@@ -121,6 +122,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      * @return the rpc message back to supplier.
      */
     public Message onMessage(final Message message, final String type, final String tenant, final String virtualHost) {
+        if (StringUtils.isEmpty(type) || StringUtils.isEmpty(tenant)) {
+            throw new AmqpRejectAndDontRequeueException("Invalid message! tenant and type header are mandatory!");
+        }
 
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         try {

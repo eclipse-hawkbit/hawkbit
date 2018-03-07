@@ -3,15 +3,15 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.target;
 
-import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindow;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindow;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 
 /**
  * Request Body of DistributionSet for assignment operations (ID only).
  *
  */
-public class MgmtDistributionSetAssigment extends MgmtId {
+public class MgmtDistributionSetAssignment extends MgmtId {
     private long forcetime;
     private MgmtActionType type;
 
@@ -21,32 +21,18 @@ public class MgmtDistributionSetAssigment extends MgmtId {
      */
     private MgmtMaintenanceWindow maintenanceWindow = null;
 
-    /**
-     * @return the type
-     */
     public MgmtActionType getType() {
         return type;
     }
 
-    /**
-     * @param type
-     *            the type to set
-     */
     public void setType(final MgmtActionType type) {
         this.type = type;
     }
 
-    /**
-     * @return the forcetime
-     */
     public long getForcetime() {
         return forcetime;
     }
 
-    /**
-     * @param forcetime
-     *            the forcetime to set
-     */
     public void setForcetime(final long forcetime) {
         this.forcetime = forcetime;
     }
@@ -66,7 +52,7 @@ public class MgmtDistributionSetAssigment extends MgmtId {
      * @param maintenanceWindow
      *            as {@link MgmtMaintenanceWindow}.
      */
-    public void setMaintenanceWindow(MgmtMaintenanceWindow maintenanceWindow) {
+    public void setMaintenanceWindow(final MgmtMaintenanceWindow maintenanceWindow) {
         this.maintenanceWindow = maintenanceWindow;
     }
 }

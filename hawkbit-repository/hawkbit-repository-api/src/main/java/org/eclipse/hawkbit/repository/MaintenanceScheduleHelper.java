@@ -86,7 +86,7 @@ public class MaintenanceScheduleHelper {
      * @return true if there is at least one valid schedule remaining, else
      *         false.
      */
-    public boolean hasValidScheduleAfter(final ZonedDateTime after) {
+    private boolean hasValidScheduleAfter(final ZonedDateTime after) {
         return nextExecution(after).isPresent();
     }
 

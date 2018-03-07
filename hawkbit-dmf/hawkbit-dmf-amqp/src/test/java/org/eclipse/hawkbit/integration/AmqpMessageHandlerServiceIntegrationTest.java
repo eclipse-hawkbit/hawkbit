@@ -387,6 +387,20 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     }
 
     @Test
+    @Description("Register a target and send a update action status (downloaded). Verfiy if the updated action status is correct.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionUpdatedEvent.class, count = 0), @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
+    public void downloadedActionStatus() {
+        final String controllerId = TARGET_PREFIX + "downloadedActionStatus";
+        registerTargetAndSendAndAssertUpdateActionStatus(DmfActionStatus.DOWNLOADED, Status.DOWNLOADED, controllerId);
+    }
+
+    @Test
     @Description("Register a target and send a update action status (download). Verfiy if the updated action status is correct.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
@@ -470,10 +484,64 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         final String controllerId = TARGET_PREFIX + "receiveDownLoadAndInstallMessageAfterAssignment";
 
         // setup
-        createAndSendTarget(controllerId, TENANT_EXIST);
+        registerAndAssertTargetWithExistingTenant(controllerId);
         final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         testdataFactory.addSoftwareModuleMetadata(distributionSet);
         assignDistributionSet(distributionSet.getId(), controllerId);
+
+        // test
+        registerSameTargetAndAssertBasedOnVersion(controllerId, 1, TargetUpdateStatus.PENDING);
+
+        // verify
+        assertDownloadAndInstallMessage(distributionSet.getModules(), controllerId);
+        Mockito.verifyZeroInteractions(getDeadletterListener());
+    }
+
+    @Test
+    @Description("Verfiy receiving a download message if a deployment is done with window configured but before maintenance window start time.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 2) })
+    public void receiveDownLoadMessageBeforeMaintenanceWindowStartTime() {
+        final String controllerId = TARGET_PREFIX + "receiveDownLoadMessageBeforeMaintenanceWindowStartTime";
+
+        // setup
+        registerAndAssertTargetWithExistingTenant(controllerId);
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        testdataFactory.addSoftwareModuleMetadata(distributionSet);
+        assignDistributionSetWithMaintenanceWindow(distributionSet.getId(), controllerId, getTestSchedule(2),
+                getTestDuration(1), getTestTimeZone());
+
+        // test
+        registerSameTargetAndAssertBasedOnVersion(controllerId, 1, TargetUpdateStatus.PENDING);
+
+        // verify
+        assertDownloadMessage(distributionSet.getModules(), controllerId);
+        Mockito.verifyZeroInteractions(getDeadletterListener());
+    }
+
+    @Test
+    @Description("Verfiy receiving a download_and_install message if a deployment is done with window configured and during maintenance window start time.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 2) })
+    public void receiveDownLoadAndInstallMessageDuringMaintenanceWindow() {
+        final String controllerId = TARGET_PREFIX + "receiveDownLoadAndInstallMessageDuringMaintenanceWindow";
+
+        // setup
+        registerAndAssertTargetWithExistingTenant(controllerId);
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        testdataFactory.addSoftwareModuleMetadata(distributionSet);
+        assignDistributionSetWithMaintenanceWindow(distributionSet.getId(), controllerId, getTestSchedule(-5),
+                getTestDuration(10), getTestTimeZone());
 
         // test
         registerSameTargetAndAssertBasedOnVersion(controllerId, 1, TargetUpdateStatus.PENDING);
@@ -497,7 +565,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         final String controllerId = TARGET_PREFIX + "receiveCancelUpdateMessageAfterAssignmentWasCanceled";
 
         // Setup
-        createAndSendTarget(controllerId, TENANT_EXIST);
+        registerAndAssertTargetWithExistingTenant(controllerId);
         final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         final DistributionSetAssignmentResult distributionSetAssignmentResult = assignDistributionSet(
                 distributionSet.getId(), controllerId);
@@ -573,7 +641,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         final String controllerId = TARGET_PREFIX + "updateAttributes";
 
         // setup
-        registerAndAssertTargetWithExistingTenant(controllerId, 1);
+        registerAndAssertTargetWithExistingTenant(controllerId);
         final DmfAttributeUpdate controllerAttribute = new DmfAttributeUpdate();
         controllerAttribute.getAttributes().put("test1", "testA");
         controllerAttribute.getAttributes().put("test2", "testB");
@@ -593,7 +661,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         final String controllerId = TARGET_PREFIX + "updateAttributesWithNoThingId";
 
         // setup
-        registerAndAssertTargetWithExistingTenant(controllerId, 1);
+        registerAndAssertTargetWithExistingTenant(controllerId);
         final DmfAttributeUpdate controllerAttribute = new DmfAttributeUpdate();
         controllerAttribute.getAttributes().put("test1", "testA");
         controllerAttribute.getAttributes().put("test2", "testB");
@@ -618,7 +686,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
 
         // setup
         final String target = "ControllerAttributeTestTarget";
-        registerAndAssertTargetWithExistingTenant(target, 1);
+        registerAndAssertTargetWithExistingTenant(target);
         final DmfAttributeUpdate controllerAttribute = new DmfAttributeUpdate();
         controllerAttribute.getAttributes().put("test1", "testA");
         controllerAttribute.getAttributes().put("test2", "testB");
@@ -707,8 +775,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
 
     private void verifyOneDeadLetterMessage() {
         assertEmptyReceiverQueueCount();
-        createConditionFactory().until(() -> {
-            Mockito.verify(getDeadletterListener(), Mockito.times(1)).handleMessage(Mockito.any());
-        });
+        createConditionFactory()
+                .until(() -> Mockito.verify(getDeadletterListener(), Mockito.times(1)).handleMessage(Mockito.any()));
     }
 }

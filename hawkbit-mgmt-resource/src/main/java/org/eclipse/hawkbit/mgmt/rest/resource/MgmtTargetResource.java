@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionStatus;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentResponseBody;
-import org.eclipse.hawkbit.mgmt.json.model.target.MgmtDistributionSetAssigment;
+import org.eclipse.hawkbit.mgmt.json.model.target.MgmtDistributionSetAssignment;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAttributes;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
@@ -266,7 +266,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     @Override
     public ResponseEntity<MgmtTargetAssignmentResponseBody> postAssignedDistributionSet(
             @PathVariable("controllerId") final String controllerId,
-            @RequestBody final MgmtDistributionSetAssigment dsId,
+            @RequestBody final MgmtDistributionSetAssignment dsId,
             @RequestParam(value = "offline", required = false) final boolean offline) {
 
         if (offline) {
