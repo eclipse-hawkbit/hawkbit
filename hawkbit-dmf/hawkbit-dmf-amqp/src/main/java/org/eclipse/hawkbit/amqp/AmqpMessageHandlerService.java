@@ -318,7 +318,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             status = Status.DOWNLOADED;
             break;
         case CANCEL_REJECTED:
-            status = hanldeCancelRejectedState(message, action);
+            status = handleCancelRejectedState(message, action);
             break;
         default:
             logAndThrowMessageError(message, "Status for action does not exisit.");
@@ -327,7 +327,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         return status;
     }
 
-    private Status hanldeCancelRejectedState(final Message message, final Action action) {
+    private Status handleCancelRejectedState(final Message message, final Action action) {
         if (action.isCancelingOrCanceled()) {
             return Status.CANCEL_REJECTED;
         }

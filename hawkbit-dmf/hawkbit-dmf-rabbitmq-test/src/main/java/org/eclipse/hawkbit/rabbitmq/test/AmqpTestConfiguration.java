@@ -94,7 +94,7 @@ public class AmqpTestConfiguration {
             // test should break or not
         } catch (@SuppressWarnings("squid:S2221") final Exception e) {
             Throwables.propagateIfInstanceOf(e, AlivenessException.class);
-            LOG.error("Cannot create virtual host {}", e);
+            LOG.error("Cannot create virtual host.", e);
         }
         return factory;
     }

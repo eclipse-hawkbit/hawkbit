@@ -116,7 +116,7 @@ public class MaintenanceScheduleHelper {
     public static void validateMaintenanceSchedule(final String cronSchedule, final String duration,
             final String timezone) {
         // check if schedule, duration and timezone are all not empty.
-        if (!StringUtils.isEmpty(cronSchedule) && !StringUtils.isEmpty(duration) && !StringUtils.isEmpty(timezone)) {
+        if (allNotEmpty(cronSchedule, duration, timezone)) {
             final ZonedDateTime now;
             try {
                 now = ZonedDateTime.now(ZoneOffset.of(timezone));
@@ -133,11 +133,18 @@ public class MaintenanceScheduleHelper {
                         "No valid maintenance window available after current time");
             }
 
-        } else if (!(StringUtils.isEmpty(cronSchedule) && StringUtils.isEmpty(duration)
-                && StringUtils.isEmpty(timezone))) {
+        } else if (atLeastOneNotEmpty(cronSchedule, duration, timezone)) {
             throw new InvalidMaintenanceScheduleException(
                     "All of schedule, duration and timezone should either be null or non empty.");
         }
+    }
+
+    private static boolean atLeastOneNotEmpty(final String cronSchedule, final String duration, final String timezone) {
+        return !(StringUtils.isEmpty(cronSchedule) && StringUtils.isEmpty(duration) && StringUtils.isEmpty(timezone));
+    }
+
+    private static boolean allNotEmpty(final String cronSchedule, final String duration, final String timezone) {
+        return !StringUtils.isEmpty(cronSchedule) && !StringUtils.isEmpty(duration) && !StringUtils.isEmpty(timezone);
     }
 
     /**
