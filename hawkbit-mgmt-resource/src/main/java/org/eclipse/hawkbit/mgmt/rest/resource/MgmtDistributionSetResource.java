@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -248,12 +249,18 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
                             .stream().map(MgmtTargetAssignmentRequestBody::getId).collect(Collectors.toList()))));
         }
 
-        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(this.deployManagament.assignDistributionSet(
+        final DistributionSetAssignmentResult assignDistributionSet = this.deployManagament.assignDistributionSet(
                 distributionSetId,
-                assignments.stream()
-                        .map(assignment -> new TargetWithActionType(assignment.getId(),
-                                MgmtRestModelMapper.convertActionType(assignment.getType()), assignment.getForcetime()))
-                        .collect(Collectors.toList()))));
+                assignments.stream().map(t -> new TargetWithActionType(t.getId(),
+                        MgmtRestModelMapper.convertActionType(t.getType()), t.getForcetime(),
+                        t.getMaintenanceWindow() == null ? null : t.getMaintenanceWindow().getMaintenanceSchedule(),
+                        t.getMaintenanceWindow() == null ? null
+                                : t.getMaintenanceWindow().getMaintenanceWindowDuration(),
+                        t.getMaintenanceWindow() == null ? null
+                                : t.getMaintenanceWindow().getMaintenanceWindowTimeZone()))
+                        .collect(Collectors.toList()));
+
+        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(assignDistributionSet));
 
     }
 
@@ -299,8 +306,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtMetadata> updateMetadata(
-            @PathVariable("distributionSetId") final Long distributionSetId,
+    public ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("distributionSetId") final Long distributionSetId,
             @PathVariable("metadataKey") final String metadataKey, @RequestBody final MgmtMetadataBodyPut metadata) {
         // check if distribution set exists otherwise throw exception
         // immediately

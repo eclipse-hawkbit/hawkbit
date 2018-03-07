@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import org.eclipse.hawkbit.repository.event.entitiy.EntityUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.entity.EntityUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 
 /**

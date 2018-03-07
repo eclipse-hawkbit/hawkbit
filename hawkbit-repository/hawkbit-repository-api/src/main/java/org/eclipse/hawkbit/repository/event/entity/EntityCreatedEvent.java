@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.event.entitiy;
+package org.eclipse.hawkbit.repository.event.entity;
 
 /**
  * Marker interface to indicate event has created a newly entity.

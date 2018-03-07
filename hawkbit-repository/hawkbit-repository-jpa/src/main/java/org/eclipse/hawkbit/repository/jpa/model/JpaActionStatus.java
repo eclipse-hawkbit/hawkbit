@@ -72,7 +72,8 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
             @ConversionValue(objectValue = "RETRIEVED", dataValue = "6"),
             @ConversionValue(objectValue = "DOWNLOAD", dataValue = "7"),
             @ConversionValue(objectValue = "SCHEDULED", dataValue = "8"),
-            @ConversionValue(objectValue = "CANCEL_REJECTED", dataValue = "9") })
+            @ConversionValue(objectValue = "CANCEL_REJECTED", dataValue = "9"),
+            @ConversionValue(objectValue = "DOWNLOADED", dataValue = "10")})
     @Convert("status")
     @NotNull
     private Status status;

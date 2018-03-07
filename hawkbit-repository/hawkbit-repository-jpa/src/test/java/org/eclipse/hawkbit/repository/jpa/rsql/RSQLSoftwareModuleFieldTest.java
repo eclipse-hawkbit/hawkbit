@@ -37,6 +37,8 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
                 .version("1.7.2").description("aa"));
         softwareModuleManagement.create(
                 entityFactory.softwareModule().create().type(osType).name("poky").version("3.0.2").description("aa"));
+        softwareModuleManagement
+                .create(entityFactory.softwareModule().create().type(osType).name("noDesc").version("noDesc"));
 
         final JpaSoftwareModule ah2 = (JpaSoftwareModule) softwareModuleManagement.create(entityFactory.softwareModule()
                 .create().type(appType).name("agent-hub2").version("1.0.1").description("agent-hub2"));
@@ -53,24 +55,26 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test filter software module by id")
     public void testFilterByParameterId() {
-        assertRSQLQuery(SoftwareModuleFields.ID.name() + "==*", 4);
+        assertRSQLQuery(SoftwareModuleFields.ID.name() + "==*", 5);
     }
 
     @Test
     @Description("Test filter software module by name")
     public void testFilterByParameterName() {
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==agent-hub", 1);
-        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "!=agent-hub", 3);
+        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "!=agent-hub", 4);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==agent-hub*", 2);
-        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "!=agent-hub*", 2);
+        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "!=agent-hub*", 3);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==noExist*", 0);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "=in=(agent-hub,notexist)", 1);
-        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "=out=(agent-hub,notexist)", 3);
+        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "=out=(agent-hub,notexist)", 4);
     }
 
     @Test
     @Description("Test filter software module by description")
     public void testFilterByParameterDescription() {
+        assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "==''", 1);
+        assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "!=''", 4);
         assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "==agent-hub", 1);
         assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "!=agent-hub", 3);
         assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "==noExist*", 0);
@@ -82,19 +86,19 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
     @Description("Test filter software module by version")
     public void testFilterByParameterVersion() {
         assertRSQLQuery(SoftwareModuleFields.VERSION.name() + "==1.0.1", 2);
-        assertRSQLQuery(SoftwareModuleFields.VERSION.name() + "!=v1.0", 4);
+        assertRSQLQuery(SoftwareModuleFields.VERSION.name() + "!=v1.0", 5);
         assertRSQLQuery(SoftwareModuleFields.VERSION.name() + "=in=(1.0.1,1.0.2)", 2);
-        assertRSQLQuery(SoftwareModuleFields.VERSION.name() + "=out=(1.0.1)", 2);
+        assertRSQLQuery(SoftwareModuleFields.VERSION.name() + "=out=(1.0.1)", 3);
     }
 
     @Test
     @Description("Test filter software module by type")
     public void testFilterByType() {
         assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "==" + TestdataFactory.SM_TYPE_APP, 2);
-        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "!=" + TestdataFactory.SM_TYPE_APP, 2);
+        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "!=" + TestdataFactory.SM_TYPE_APP, 3);
         assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "==noExist*", 0);
         assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "=in=(" + TestdataFactory.SM_TYPE_APP + ")", 2);
-        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "=out=(" + TestdataFactory.SM_TYPE_APP + ")", 2);
+        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "=out=(" + TestdataFactory.SM_TYPE_APP + ")", 3);
     }
 
     @Test

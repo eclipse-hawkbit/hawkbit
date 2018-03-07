@@ -155,7 +155,10 @@ public final class DataConversionHelper {
     private static int calculateEtag(final Action action) {
         final int prime = 31;
         int result = action.hashCode();
-        result = prime * result + (action.isHitAutoForceTime(System.currentTimeMillis()) ? 1231 : 1237);
+        int offsetPrime = action.isHitAutoForceTime(System.currentTimeMillis()) ? 1231 : 1237;
+        offsetPrime = (action.hasMaintenanceSchedule() && action.isMaintenanceWindowAvailable()) ? 1249 : offsetPrime;
+
+        result = prime * result + offsetPrime;
         return result;
     }
 

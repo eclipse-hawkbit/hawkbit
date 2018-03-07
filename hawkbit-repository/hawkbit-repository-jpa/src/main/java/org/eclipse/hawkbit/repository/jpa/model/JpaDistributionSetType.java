@@ -25,7 +25,7 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.DistributionSetTypeDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTypeCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTypeUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -249,7 +249,7 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
 
     @Override
     public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new DistributionSetDeletedEvent(getTenant(),
-                getId(), getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new DistributionSetTypeDeletedEvent(
+                getTenant(), getId(), getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
     }
 }

@@ -34,7 +34,7 @@ public class RSQLRolloutGroupFields extends AbstractJpaIntegrationTest {
     private Rollout rollout;
 
     @Before
-    public void seuptBeforeTest() {
+    public void setupBeforeTest() {
         final int amountTargets = 20;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");

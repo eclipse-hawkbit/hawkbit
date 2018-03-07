@@ -12,9 +12,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.validation.ValidationException;
 
+import org.eclipse.hawkbit.mgmt.json.model.MaintenanceWindow;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionRequestBodyPut;
@@ -37,6 +39,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -276,8 +279,18 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         findTargetWithExceptionIfNotFound(controllerId);
         final ActionType type = (dsId.getType() != null) ? MgmtRestModelMapper.convertActionType(dsId.getType())
                 : ActionType.FORCED;
-        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(deploymentManagement
-                .assignDistributionSet(dsId.getId(), type, dsId.getForcetime(), Arrays.asList(controllerId))));
+        MaintenanceWindow maintenanceWindow = dsId.getMaintenanceWindow();
+
+        return ResponseEntity
+                .ok(MgmtDistributionSetMapper.toResponse(this.deploymentManagement.assignDistributionSet(dsId.getId(),
+                        Arrays.asList(controllerId).stream()
+                                .map(t -> new TargetWithActionType(t, type, dsId.getForcetime(),
+                                        maintenanceWindow == null ? null : maintenanceWindow.getMaintenanceSchedule(),
+                                        maintenanceWindow == null ? null
+                                                : maintenanceWindow.getMaintenanceWindowDuration(),
+                                        maintenanceWindow == null ? null
+                                                : maintenanceWindow.getMaintenanceWindowTimeZone()))
+                                .collect(Collectors.toList()))));
     }
 
     @Override

@@ -16,8 +16,15 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -227,6 +234,41 @@ public abstract class AbstractIntegrationTest {
                 new TargetWithActionType(controllerId, ActionType.FORCED, RepositoryModelConstants.NO_FORCE_TIME)));
     }
 
+    /**
+     * Test helper method to assign distribution set to a target with a
+     * maintenance schedule.
+     *
+     * @param dsID
+     *            is the ID for the distribution set being assigned
+     * @param controllerId
+     *            is the ID for the controller to which the distribution set is
+     *            being assigned
+     * @param maintenanceSchedule
+     *            is the cron expression to be used for scheduling the
+     *            maintenance window. Expression has 6 mandatory fields and 1
+     *            last optional field: "second minute hour dayofmonth month
+     *            weekday year"
+     * @param maintenanceWindowDuration
+     *            in HH:mm:ss format specifying the duration of a maintenance
+     *            window, for example 00:30:00 for 30 minutes
+     * @param maintenanceWindowTimeZone
+     *            is the time zone specified as +/-hh:mm offset from UTC, for
+     *            example +02:00 for CET summer time and +00:00 for UTC. The
+     *            start time of a maintenance window calculated based on the
+     *            cron expression is relative to this time zone
+     *
+     * @return result of the assignment as
+     *         {@link DistributionSetAssignmentResult}.
+     */
+    protected DistributionSetAssignmentResult assignDistributionSetWithMaintenanceWindow(final Long dsID,
+            final String controllerId, final String maintenanceSchedule, final String maintenanceWindowDuration,
+            final String maintenanceWindowTimeZone) {
+        return deploymentManagement.assignDistributionSet(dsID,
+                Arrays.asList(new TargetWithActionType(controllerId, ActionType.FORCED,
+                        RepositoryModelConstants.NO_FORCE_TIME, maintenanceSchedule, maintenanceWindowDuration,
+                        maintenanceWindowTimeZone)));
+    }
+
     protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset,
             final List<Target> targets) {
         return deploymentManagement.assignDistributionSet(pset.getId(),
@@ -324,5 +366,39 @@ public abstract class AbstractIntegrationTest {
                 LOG.warn("Cannot delete file-directory", e);
             }
         }
+    }
+
+    /**
+     * Gets a valid cron expression describing a schedule with a single
+     * maintenance window, starting specified number of minutes after current
+     * time.
+     *
+     * @param minutesToAdd
+     *            is the number of minutes after the current time
+     *
+     * @return {@link String} containing a valid cron expression.
+     */
+    public static String getTestSchedule(int minutesToAdd) {
+        ZonedDateTime currentTime = ZonedDateTime.now();
+        currentTime = currentTime.plusMinutes(minutesToAdd);
+        return String.format("0 %d %d %d %d ? %d", currentTime.getMinute(), currentTime.getHour(),
+                currentTime.getDayOfMonth(), currentTime.getMonthValue(), currentTime.getYear());
+    }
+
+    public static String getTestDuration(int duration) {
+        return String.format("%02d:%02d:00", duration / 60, duration % 60);
+    }
+
+    public static String getTestTimeZone() {
+        ZonedDateTime currentTime = ZonedDateTime.now();
+        return currentTime.getOffset().getId().replace("Z", "+00:00");
+    }
+
+    public static Map<String, String> getMaintenanceWindow(String schedule, String duration, String timezone) {
+        Map<String, String> maintenanceWindowMap = new HashMap<>();
+        maintenanceWindowMap.put("schedule", schedule);
+        maintenanceWindowMap.put("duration", duration);
+        maintenanceWindowMap.put("timezone", timezone);
+        return maintenanceWindowMap;
     }
 }

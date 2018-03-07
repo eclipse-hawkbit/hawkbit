@@ -45,6 +45,7 @@ import org.springframework.beans.TypeMismatchException;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.RSQLParserException;
@@ -641,18 +642,36 @@ public final class RSQLUtility {
         private Predicate getEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath,
                 final Database database) {
             if (transformedValue instanceof String) {
+                if (StringUtils.isEmpty(transformedValue)) {
+                    return cb.or(cb.isNull(pathOfString(fieldPath)), cb.equal(pathOfString(fieldPath), ""));
+                }
+
                 final String preFormattedValue = escapeValueToSQL((String) transformedValue, database, ESCAPE_CHAR);
                 return cb.like(cb.upper(pathOfString(fieldPath)), preFormattedValue.toUpperCase(), ESCAPE_CHAR);
             }
+
+            if (transformedValue == null) {
+                return cb.isNull(pathOfString(fieldPath));
+            }
+
             return cb.equal(fieldPath, transformedValue);
         }
 
         private Predicate getNotEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath,
                 final Database database) {
             if (transformedValue instanceof String) {
+                if (StringUtils.isEmpty(transformedValue)) {
+                    return cb.and(cb.isNotNull(pathOfString(fieldPath)), cb.notEqual(pathOfString(fieldPath), ""));
+                }
+
                 final String preFormattedValue = escapeValueToSQL((String) transformedValue, database, ESCAPE_CHAR);
                 return cb.notLike(cb.upper(pathOfString(fieldPath)), preFormattedValue.toUpperCase(), ESCAPE_CHAR);
             }
+
+            if (transformedValue == null) {
+                return cb.isNotNull(pathOfString(fieldPath));
+            }
+
             return cb.notEqual(fieldPath, transformedValue);
         }
 
