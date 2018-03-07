@@ -118,13 +118,13 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @JoinColumn(name = "rollout", updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rollout"))
     private JpaRollout rollout;
 
-    @Column(name = "maintenance_cron_schedule", length = Action.MAINTENANCE_SCHEDULE_CRON_LENGTH)
+    @Column(name = "maintenance_cron_schedule", updatable = false, length = Action.MAINTENANCE_SCHEDULE_CRON_LENGTH)
     private String maintenanceSchedule;
 
-    @Column(name = "maintenance_duration", length = Action.MAINTENANCE_WINDOW_DURATION_LENGTH)
+    @Column(name = "maintenance_duration", updatable = false, length = Action.MAINTENANCE_WINDOW_DURATION_LENGTH)
     private String maintenanceWindowDuration;
 
-    @Column(name = "maintenance_time_zone", length = Action.MAINTENANCE_WINDOW_TIMEZONE_LENGTH)
+    @Column(name = "maintenance_time_zone", updatable = false, length = Action.MAINTENANCE_WINDOW_TIMEZONE_LENGTH)
     private String maintenanceWindowTimeZone;
 
     /**
