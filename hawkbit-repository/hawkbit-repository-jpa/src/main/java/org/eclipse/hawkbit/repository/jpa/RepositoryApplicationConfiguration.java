@@ -330,14 +330,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         // needed for reports
         properties.put(PersistenceUnitProperties.ALLOW_NATIVE_SQL_QUERIES, "true");
         // flyway
-        properties.put(PersistenceUnitProperties.DDL_GENERATION, "create-tables");
-
-        properties.put(PersistenceUnitProperties.DDL_GENERATION_MODE, "sql-script");
+        properties.put(PersistenceUnitProperties.DDL_GENERATION, "none");
         // Embeed into hawkBit logging
         properties.put(PersistenceUnitProperties.LOGGING_LOGGER, "JavaLogger");
         // Ensure that we flush only at the end of the transaction
         properties.put(PersistenceUnitProperties.PERSISTENCE_CONTEXT_FLUSH_MODE, "COMMIT");
-
         // Enable batch writing
         properties.put(PersistenceUnitProperties.BATCH_WRITING, "JDBC");
         // Batch size
