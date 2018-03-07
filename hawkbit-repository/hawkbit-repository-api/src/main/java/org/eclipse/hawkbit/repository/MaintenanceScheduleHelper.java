@@ -16,9 +16,9 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Optional;
-import java.util.TimeZone;
 
 import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
+import org.springframework.util.StringUtils;
 
 import com.cronutils.model.Cron;
 import com.cronutils.model.definition.CronDefinition;
@@ -115,25 +115,26 @@ public class MaintenanceScheduleHelper {
      */
     public static void validateMaintenanceSchedule(final String cronSchedule, final String duration,
             final String timezone) {
-        // check if schedule, duration and timezone are all not null.
-        if (cronSchedule != null && duration != null && timezone != null) {
-            // check if schedule, duration and timezone are all not empty.
-            if (!(cronSchedule.isEmpty() || duration.isEmpty() || timezone.isEmpty())) {
-                final ZonedDateTime now = ZonedDateTime.now(ZoneOffset.of(timezone));
-                TimeZone.getTimeZone(ZoneOffset.of(timezone));
+        // check if schedule, duration and timezone are all not empty.
+        if (!StringUtils.isEmpty(cronSchedule) && !StringUtils.isEmpty(duration) && !StringUtils.isEmpty(timezone)) {
+            final ZonedDateTime now;
+            try {
+                now = ZonedDateTime.now(ZoneOffset.of(timezone));
                 Duration.parse(convertToISODuration(duration));
-
-                final MaintenanceScheduleHelper scheduleHelper = new MaintenanceScheduleHelper(cronSchedule);
-                // check if there is a window currently active or available in
-                // future.
-                if (!scheduleHelper.hasValidScheduleAfter(now.minus(Duration.parse(convertToISODuration(duration))))) {
-                    throw new InvalidMaintenanceScheduleException(
-                            "No valid maintenance window available after current time");
-                }
-            } else {
-                throw new InvalidMaintenanceScheduleException("Either of schedule, duration or timezone empty.");
+            } catch (final RuntimeException validationFailed) {
+                throw new InvalidMaintenanceScheduleException("No valid maintenance window provided", validationFailed);
             }
-        } else if (!(cronSchedule == null && duration == null && timezone == null)) {
+
+            final MaintenanceScheduleHelper scheduleHelper = new MaintenanceScheduleHelper(cronSchedule);
+            // check if there is a window currently active or available in
+            // future.
+            if (!scheduleHelper.hasValidScheduleAfter(now.minus(Duration.parse(convertToISODuration(duration))))) {
+                throw new InvalidMaintenanceScheduleException(
+                        "No valid maintenance window available after current time");
+            }
+
+        } else if (!(StringUtils.isEmpty(cronSchedule) && StringUtils.isEmpty(duration)
+                && StringUtils.isEmpty(timezone))) {
             throw new InvalidMaintenanceScheduleException(
                     "All of schedule, duration and timezone should either be null or non empty.");
         }

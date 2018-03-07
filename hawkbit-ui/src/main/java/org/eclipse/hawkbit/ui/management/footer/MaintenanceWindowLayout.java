@@ -83,7 +83,7 @@ public class MaintenanceWindowLayout extends VerticalLayout {
     /**
      * Validates if the maintenance schedule is a valid cron expression.
      */
-    class CronValidation implements Validator {
+    private static class CronValidation implements Validator {
         private static final long serialVersionUID = 1L;
 
         @Override
@@ -104,7 +104,7 @@ public class MaintenanceWindowLayout extends VerticalLayout {
     /**
      * Validates if the duration is specified in expected format.
      */
-    class DurationValidator implements Validator {
+    private static class DurationValidator implements Validator {
         private static final long serialVersionUID = 1L;
 
         @Override
@@ -214,7 +214,7 @@ public class MaintenanceWindowLayout extends VerticalLayout {
      *
      * @return boolean.
      */
-    public boolean getMaintenanceOption() {
+    public boolean isMaintenanceWindowEnabled() {
         return maintenanceWindowSelection.getValue();
     }
 

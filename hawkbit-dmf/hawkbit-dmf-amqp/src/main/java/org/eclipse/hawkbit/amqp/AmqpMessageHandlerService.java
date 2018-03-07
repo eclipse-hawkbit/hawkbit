@@ -282,6 +282,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 && message.getMessageProperties().getCorrelationId().length > 0;
     }
 
+    // Exception squid:MethodCyclomaticComplexity - false positive, is a simple
+    // mapping
+    @SuppressWarnings("squid:MethodCyclomaticComplexity")
     private Status mapStatus(final Message message, final DmfActionUpdateStatus actionUpdateStatus,
             final Action action) {
         Status status = null;
@@ -327,7 +330,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         logAndThrowMessageError(message,
                 "Cancel rejected message is not allowed, if action is on state: " + action.getStatus());
         return null;
-
     }
 
     private static String convertCorrelationId(final Message message) {
