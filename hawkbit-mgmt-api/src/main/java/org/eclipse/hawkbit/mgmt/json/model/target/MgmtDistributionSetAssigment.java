@@ -3,6 +3,7 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.target;
 
+import org.eclipse.hawkbit.mgmt.json.model.MaintenanceWindow;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 
@@ -13,6 +14,12 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 public class MgmtDistributionSetAssigment extends MgmtId {
     private long forcetime;
     private MgmtActionType type;
+
+    /**
+     * {@link MaintenanceWindow} object defining a schedule, duration and
+     * timezone.
+     */
+    private MaintenanceWindow maintenanceWindow = null;
 
     /**
      * @return the type
@@ -44,4 +51,22 @@ public class MgmtDistributionSetAssigment extends MgmtId {
         this.forcetime = forcetime;
     }
 
+    /**
+     * Returns {@link MaintenanceWindow} for distribution set assignment.
+     *
+     * @return {@link MaintenanceWindow}.
+     */
+    public MaintenanceWindow getMaintenanceWindow() {
+        return maintenanceWindow;
+    }
+
+    /**
+     * Sets {@link MaintenanceWindow} for distribution set assignment.
+     *
+     * @param maintenanceWindow
+     *            as {@link MaintenanceWindow}.
+     */
+    public void setMaintenanceWindow(MaintenanceWindow maintenanceWindow) {
+        this.maintenanceWindow = maintenanceWindow;
+    }
 }

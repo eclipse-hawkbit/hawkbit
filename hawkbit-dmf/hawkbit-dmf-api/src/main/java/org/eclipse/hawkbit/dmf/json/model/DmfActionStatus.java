@@ -59,5 +59,10 @@ public enum DmfActionStatus {
     /**
      * Cancellation has been rejected by the target..
      */
-    CANCEL_REJECTED;
+    CANCEL_REJECTED,
+
+    /**
+     * Action has been downloaded for this target.
+     */
+    DOWNLOADED;
 }
