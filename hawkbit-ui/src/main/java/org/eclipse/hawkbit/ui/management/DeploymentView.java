@@ -159,7 +159,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
                     uiExecutor);
             this.deleteAndActionsLayout = new DeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
                     targetTagManagement, distributionSetTagManagement, managementViewClientCriterion, managementUIState,
-                    targetManagement, targetTable, deploymentManagement, distributionSetManagement);
+                    targetManagement, targetTable, deploymentManagement, distributionSetManagement, uiNotification);
 
             actionHistoryLayout.registerDetails(((ActionStatusGrid) actionStatusLayout.getGrid()).getDetailsSupport());
             actionStatusLayout

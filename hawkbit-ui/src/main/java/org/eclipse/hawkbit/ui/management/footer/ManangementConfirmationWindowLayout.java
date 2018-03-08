@@ -22,10 +22,10 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
+import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.AbstractConfirmationWindowLayout;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
 import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
@@ -41,6 +41,7 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -48,8 +49,10 @@ import com.google.common.collect.Maps;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.ui.Accordion;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Table.Align;
+import com.vaadin.ui.VerticalLayout;
 
 /**
  * Confirmation window for target/distributionSet delete and assignment
@@ -85,15 +88,15 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
     public ManangementConfirmationWindowLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final ManagementUIState managementUIState, final TargetManagement targetManagement,
-            final DeploymentManagement deploymentManagement,
-            final DistributionSetManagement distributionSetManagement) {
+            final DeploymentManagement deploymentManagement, final DistributionSetManagement distributionSetManagement,
+            final UINotification uiNotification) {
         super(i18n, eventBus);
         this.managementUIState = managementUIState;
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
         this.distributionSetManagement = distributionSetManagement;
         this.actionTypeOptionGroupLayout = new ActionTypeOptionGroupLayout(i18n);
-        this.maintenanceWindowLayout = new MaintenanceWindowLayout(i18n);
+        this.maintenanceWindowLayout = new MaintenanceWindowLayout(i18n, uiNotification);
     }
 
     @Override
@@ -141,10 +144,29 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         assignmentTab.getTable().setColumnAlignment(DISCARD_CHANGES, Align.CENTER);
 
         actionTypeOptionGroupLayout.selectDefaultOption();
-        assignmentTab.addComponent(actionTypeOptionGroupLayout, 1);
-        assignmentTab.addComponent(maintenanceWindowLayout, 1);
+        // assignmentTab.addComponent(actionTypeOptionGroupLayout, 1);
+        // assignmentTab.addComponent(maintenanceWindowLayout, 1);
+
+        assignmentTab.addComponent(createAccordion(), 1);
+
         return assignmentTab;
 
+    }
+
+    private Accordion createAccordion() {
+        final Accordion accordion = new Accordion();
+        accordion.setSizeFull();
+        accordion.setHeightUndefined();
+
+        final VerticalLayout maintenanceWindow = new VerticalLayout();
+        maintenanceWindow.addComponent(maintenanceWindowLayout);
+        accordion.addTab(maintenanceWindow, "Maintenance Schedule");
+
+        final VerticalLayout actionTypes = new VerticalLayout();
+        actionTypes.addComponent(actionTypeOptionGroupLayout);
+        accordion.addTab(actionTypes, "Action Types");
+
+        return accordion;
     }
 
     private void saveAllAssignments(final ConfirmationTab tab) {
@@ -159,14 +181,9 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
                         ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
                         : RepositoryModelConstants.NO_FORCE_TIME;
 
-        final String maintenanceSchedule = maintenanceWindowLayout.getMaintenanceOption()
-                ? maintenanceWindowLayout.getMaintenanceSchedule() : null;
-
-        final String maintenanceDuration = maintenanceWindowLayout.getMaintenanceOption()
-                ? maintenanceWindowLayout.getMaintenanceDuration() : null;
-
-        final String maintenanceTimeZone = maintenanceWindowLayout.getMaintenanceOption()
-                ? maintenanceWindowLayout.getMaintenanceTimeZone() : null;
+        final String maintenanceSchedule = maintenanceWindowLayout.getMaintenanceSchedule();
+        final String maintenanceDuration = maintenanceWindowLayout.getMaintenanceDuration();
+        final String maintenanceTimeZone = maintenanceWindowLayout.getMaintenanceTimeZone();
 
         final Map<Long, List<TargetIdName>> saveAssignedList = Maps.newHashMapWithExpectedSize(itemIds.size());
 
