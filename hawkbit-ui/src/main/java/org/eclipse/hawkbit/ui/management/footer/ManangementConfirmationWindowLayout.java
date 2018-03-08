@@ -52,7 +52,6 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Accordion;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Table.Align;
-import com.vaadin.ui.VerticalLayout;
 
 /**
  * Confirmation window for target/distributionSet delete and assignment
@@ -144,9 +143,6 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         assignmentTab.getTable().setColumnAlignment(DISCARD_CHANGES, Align.CENTER);
 
         actionTypeOptionGroupLayout.selectDefaultOption();
-        // assignmentTab.addComponent(actionTypeOptionGroupLayout, 1);
-        // assignmentTab.addComponent(maintenanceWindowLayout, 1);
-
         assignmentTab.addComponent(createAccordion(), 1);
 
         return assignmentTab;
@@ -155,17 +151,9 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
     private Accordion createAccordion() {
         final Accordion accordion = new Accordion();
-        accordion.setSizeFull();
         accordion.setHeightUndefined();
-
-        final VerticalLayout maintenanceWindow = new VerticalLayout();
-        maintenanceWindow.addComponent(maintenanceWindowLayout);
-        accordion.addTab(maintenanceWindow, "Maintenance Schedule");
-
-        final VerticalLayout actionTypes = new VerticalLayout();
-        actionTypes.addComponent(actionTypeOptionGroupLayout);
-        accordion.addTab(actionTypes, "Action Types");
-
+        accordion.addTab(maintenanceWindowLayout, "Maintenance Schedule");
+        accordion.addTab(actionTypeOptionGroupLayout, "Action Types");
         return accordion;
     }
 

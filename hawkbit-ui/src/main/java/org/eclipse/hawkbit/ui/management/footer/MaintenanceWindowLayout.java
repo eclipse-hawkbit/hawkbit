@@ -16,20 +16,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
-import org.eclipse.hawkbit.ui.common.builder.ComboBoxBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import com.vaadin.data.Validator;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * {@link MaintenanceWindowLayout} defines UI layout that is used to specify the
@@ -42,8 +40,6 @@ public class MaintenanceWindowLayout extends HorizontalLayout {
     private final VaadinMessageSource i18n;
 
     private final UINotification uiNotification;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MaintenanceWindowLayout.class);
 
     private TextField schedule;
     private TextField duration;
@@ -136,11 +132,16 @@ public class MaintenanceWindowLayout extends HorizontalLayout {
      * Combo box to pick the time zone offset.
      */
     private void createMaintenanceTimeZoneControl() {
-        timeZone = new ComboBoxBuilder().setId(UIComponentIdProvider.MAINTENANCE_WINDOW_TIME_ZONE_ID)
-                .setCaption(i18n.getMessage("caption.maintenancewindow.timezone")).buildCombBox();
+        // ComboBoxBuilder cannot be used here, because Builder do
+        // 'comboBox.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);'
+        // which interferes our code: 'timeZone.addItems(getAllTimeZones());'
+        timeZone = new ComboBox();
+        timeZone.setId(UIComponentIdProvider.MAINTENANCE_WINDOW_TIME_ZONE_ID);
+        timeZone.setCaption(i18n.getMessage("caption.maintenancewindow.timezone"));
         timeZone.addItems(getAllTimeZones());
-        timeZone.setTextInputAllowed(false);
         timeZone.setValue(getClientTimeZone());
+        timeZone.addStyleName(ValoTheme.COMBOBOX_SMALL);
+        timeZone.setTextInputAllowed(false);
     }
 
     /**
