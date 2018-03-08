@@ -40,15 +40,24 @@
          <version>${project.version}</version>
       </dependency>
       <dependency>
-      	<groupId>com.microsoft.sqlserver</groupId>
-       	<artifactId>mssql-jdbc</artifactId>
-       	<version>6.2.2</version>
+         <groupId>com.h2database</groupId>
+         <artifactId>h2</artifactId>
       </dependency>
       <dependency>
-         <groupId>com.ibm.db2.jcc</groupId>
-         <artifactId>db2jcc4</artifactId>
-         <version>11.1.2.2</version>
+         <groupId>org.mariadb.jdbc</groupId>
+         <artifactId>mariadb-java-client</artifactId>
       </dependency>
+      <dependency>
+      	<groupId>com.microsoft.sqlserver</groupId>
+       	<artifactId>mssql-jdbc</artifactId>
+       	<version>6.4.0.jre8</version>
+      </dependency>
+      <!-- Comment in a JDBC DB2 compatabile driver to run tests against DB2 -->
+<!--       <dependency> -->
+<!--          <groupId>com.ibm.db2.jcc</groupId> -->
+<!--          <artifactId>db2jcc4</artifactId> -->
+<!--          <version>11.1.2.2</version> -->
+<!--       </dependency> -->
       <dependency>
          <groupId>org.springframework.boot</groupId>
          <artifactId>spring-boot-starter-logging</artifactId>

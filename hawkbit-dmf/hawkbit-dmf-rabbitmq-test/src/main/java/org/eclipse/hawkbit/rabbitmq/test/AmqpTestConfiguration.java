@@ -94,19 +94,19 @@ public class AmqpTestConfiguration {
             // test should break or not
         } catch (@SuppressWarnings("squid:S2221") final Exception e) {
             Throwables.propagateIfInstanceOf(e, AlivenessException.class);
-            LOG.error("Cannot create virtual host {}", e.getMessage());
+            LOG.error("Cannot create virtual host.", e);
         }
         return factory;
     }
 
     @Bean
-    RabbitMqSetupService rabbitmqSetupService(RabbitProperties properties) {
+    RabbitMqSetupService rabbitmqSetupService(final RabbitProperties properties) {
         return new RabbitMqSetupService(properties);
     }
 
     @Bean
     @Primary
-    public RabbitTemplate rabbitTemplateForTest(ConnectionFactory connectionFactory) {
+    public RabbitTemplate rabbitTemplateForTest(final ConnectionFactory connectionFactory) {
         final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
         rabbitTemplate.setReplyTimeout(TimeUnit.SECONDS.toMillis(3));
@@ -115,7 +115,7 @@ public class AmqpTestConfiguration {
     }
 
     @Bean
-    BrokerRunning brokerRunning(RabbitMqSetupService rabbitmqSetupService) {
+    BrokerRunning brokerRunning(final RabbitMqSetupService rabbitmqSetupService) {
         final BrokerRunning brokerRunning = BrokerRunning.isRunning();
         brokerRunning.setHostName(rabbitmqSetupService.getHostname());
         brokerRunning.getConnectionFactory().setUsername(rabbitmqSetupService.getUsername());

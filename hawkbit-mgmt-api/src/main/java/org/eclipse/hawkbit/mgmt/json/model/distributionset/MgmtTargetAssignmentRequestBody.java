@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.distributionset;
 
-import org.eclipse.hawkbit.mgmt.json.model.MaintenanceWindow;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindow;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -28,72 +28,40 @@ public class MgmtTargetAssignmentRequestBody {
     private MgmtActionType type;
 
     /**
-     * {@link MaintenanceWindow} object containing schedule, duration and
+     * {@link MgmtMaintenanceWindow} object containing schedule, duration and
      * timezone.
      */
-    private MaintenanceWindow maintenanceWindow = null;
+    private MgmtMaintenanceWindow maintenanceWindow;
 
-    /**
-     * @return the id
-     */
     public String getId() {
         return id;
     }
 
-    /**
-     * @param id
-     *            the id to set
-     */
     public void setId(final String id) {
         this.id = id;
     }
 
-    /**
-     * @return the type
-     */
     public MgmtActionType getType() {
         return type;
     }
 
-    /**
-     * @param type
-     *            the type to set
-     */
     public void setType(final MgmtActionType type) {
         this.type = type;
     }
 
-    /**
-     * @return the forcetime
-     */
     public long getForcetime() {
         return forcetime;
     }
 
-    /**
-     * @param forcetime
-     *            the forcetime to set
-     */
     public void setForcetime(final long forcetime) {
         this.forcetime = forcetime;
     }
 
-    /**
-     * Returns {@link MaintenanceWindow} for the target assignment request.
-     *
-     * @return {@link MaintenanceWindow}.
-     */
-    public MaintenanceWindow getMaintenanceWindow() {
+    public MgmtMaintenanceWindow getMaintenanceWindow() {
         return maintenanceWindow;
     }
 
-    /**
-     * Sets {@link MaintenanceWindow} for the target assignment request.
-     *
-     * @param maintenanceWindow
-     *            as {@link MaintenanceWindow}.
-     */
-    public void setMaintenanceWindow(MaintenanceWindow maintenanceWindow) {
+    public void setMaintenanceWindow(final MgmtMaintenanceWindow maintenanceWindow) {
         this.maintenanceWindow = maintenanceWindow;
     }
 

@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.api.ApiType;
@@ -30,7 +29,6 @@ import org.eclipse.hawkbit.dmf.json.model.DmfArtifactHash;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMetadata;
 import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
-import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
@@ -42,7 +40,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignment
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
-import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.util.IpUtil;
@@ -76,7 +73,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private final AmqpMessageSenderService amqpSenderService;
     private final SystemSecurityContext systemSecurityContext;
     private final SystemManagement systemManagement;
-    private final ControllerManagement controllerManagement;
     private final TargetManagement targetManagement;
     private final ServiceMatcher serviceMatcher;
     private final DistributionSetManagement distributionSetManagement;
@@ -95,8 +91,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      *            for execution with system permissions
      * @param systemManagement
      *            the systemManagement
-     * @param controllerManagement
-     *            for target repository access
      * @param targetManagement
      *            to access target information
      * @param serviceMatcher
@@ -108,15 +102,14 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     protected AmqpMessageDispatcherService(final RabbitTemplate rabbitTemplate,
             final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
-            final ControllerManagement controllerManagement, final TargetManagement targetManagement,
-            final ServiceMatcher serviceMatcher, final DistributionSetManagement distributionSetManagement,
+            final TargetManagement targetManagement, final ServiceMatcher serviceMatcher,
+            final DistributionSetManagement distributionSetManagement,
             final SoftwareModuleManagement softwareModuleManagement) {
         super(rabbitTemplate);
         this.artifactUrlHandler = artifactUrlHandler;
         this.amqpSenderService = amqpSenderService;
         this.systemSecurityContext = systemSecurityContext;
         this.systemManagement = systemManagement;
-        this.controllerManagement = controllerManagement;
         this.targetManagement = targetManagement;
         this.serviceMatcher = serviceMatcher;
         this.distributionSetManagement = distributionSetManagement;
@@ -151,7 +144,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
             targetManagement.getByControllerID(assignedEvent.getActions().keySet())
                     .forEach(target -> sendUpdateMessageToTarget(assignedEvent.getTenant(), target,
-                            assignedEvent.getActions().get(target.getControllerId()), modules));
+                            assignedEvent.getActions().get(target.getControllerId()), modules,
+                            assignedEvent.isMaintenanceWindowAvailable()));
 
         });
     }
@@ -161,25 +155,15 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      * valid maintenance window available or not based on defined maintenance
      * schedule. In case of no maintenance schedule or if there is a valid
      * window available, the topic {@link EventTopic#DOWNLOAD_AND_INSTALL} is
-     * returned else {@link EventTopic#DOWNLOAD_AND_SKIP} is returned.
+     * returned else {@link EventTopic#DOWNLOAD} is returned.
      *
      * @param target
      *            for which to find the event type
      *
      * @return {@link EventTopic} to use for message.
      */
-    EventTopic getEventTypeForTarget(Target target) {
-        Optional<Action> action = controllerManagement.findOldestActiveActionByTarget(target.getControllerId());
-
-        if (action.isPresent()) {
-            if (action.get().isMaintenanceWindowAvailable()) {
-                return EventTopic.DOWNLOAD_AND_INSTALL;
-            } else {
-                return EventTopic.DOWNLOAD_AND_SKIP;
-            }
-        }
-
-        return EventTopic.DOWNLOAD_AND_INSTALL;
+    private static EventTopic getEventTypeForTarget(final boolean maintenanceWindowAvailable) {
+        return maintenanceWindowAvailable ? EventTopic.DOWNLOAD_AND_INSTALL : EventTopic.DOWNLOAD;
     }
 
     /**
@@ -216,7 +200,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     protected void sendUpdateMessageToTarget(final String tenant, final Target target, final Long actionId,
-            final Map<SoftwareModule, List<SoftwareModuleMetadata>> modules) {
+            final Map<SoftwareModule, List<SoftwareModuleMetadata>> modules, final boolean maintenanceWindowAvailable) {
 
         final URI targetAdress = target.getAddress();
         if (!IpUtil.isAmqpUri(targetAdress)) {
@@ -236,7 +220,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         });
 
         final Message message = getMessageConverter().toMessage(downloadAndUpdateRequest,
-                createConnectorMessagePropertiesEvent(tenant, target.getControllerId(), getEventTypeForTarget(target)));
+                createConnectorMessagePropertiesEvent(tenant, target.getControllerId(),
+                        getEventTypeForTarget(maintenanceWindowAvailable)));
         amqpSenderService.sendMessage(message, targetAdress);
     }
 

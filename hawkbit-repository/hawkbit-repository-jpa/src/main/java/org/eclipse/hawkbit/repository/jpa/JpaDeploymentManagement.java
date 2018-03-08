@@ -405,6 +405,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             }
 
             final String tenant = rolloutGroupActions.getContent().get(0).getTenant();
+            final boolean maintenanceWindowAvailable = rolloutGroupActions.getContent().get(0)
+                    .isMaintenanceWindowAvailable();
 
             final List<Action> targetAssignments = rolloutGroupActions.getContent().stream()
                     .map(action -> (JpaAction) action).map(this::closeActionIfSetWasAlreadyAssigned)
@@ -413,7 +415,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
             if (!CollectionUtils.isEmpty(targetAssignments)) {
                 afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetAssignDistributionSetEvent(tenant,
-                        distributionSetId, targetAssignments, applicationContext.getId())));
+                        distributionSetId, targetAssignments, applicationContext.getId(), maintenanceWindowAvailable)));
             }
 
             return rolloutGroupActions.getTotalElements();

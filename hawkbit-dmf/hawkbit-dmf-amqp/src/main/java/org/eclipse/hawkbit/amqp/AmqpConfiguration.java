@@ -312,12 +312,11 @@ public class AmqpConfiguration {
     AmqpMessageDispatcherService amqpMessageDispatcherService(final RabbitTemplate rabbitTemplate,
             final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
-            final ControllerManagement controllerManagement, final TargetManagement targetManagement,
-            final DistributionSetManagement distributionSetManagement,
+            final TargetManagement targetManagement, final DistributionSetManagement distributionSetManagement,
             final SoftwareModuleManagement softwareModuleManagement) {
         return new AmqpMessageDispatcherService(rabbitTemplate, amqpSenderService, artifactUrlHandler,
-                systemSecurityContext, systemManagement, controllerManagement, targetManagement, serviceMatcher,
-                distributionSetManagement, softwareModuleManagement);
+                systemSecurityContext, systemManagement, targetManagement, serviceMatcher, distributionSetManagement,
+                softwareModuleManagement);
     }
 
     private static Map<String, Object> getTTLMaxArgsAuthenticationQueue() {

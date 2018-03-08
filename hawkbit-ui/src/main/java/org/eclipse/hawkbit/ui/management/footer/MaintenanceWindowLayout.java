@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.util.StringUtils;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -53,12 +54,12 @@ public class MaintenanceWindowLayout extends VerticalLayout {
      *            strings.
      */
     public MaintenanceWindowLayout(final VaadinMessageSource i18n) {
-        
+
         HorizontalLayout optionContainer;
         HorizontalLayout controlContainer;
-        
+
         this.i18n = i18n;
-        
+
         optionContainer = new HorizontalLayout();
         controlContainer = new HorizontalLayout();
         addComponent(optionContainer);
@@ -82,17 +83,18 @@ public class MaintenanceWindowLayout extends VerticalLayout {
     /**
      * Validates if the maintenance schedule is a valid cron expression.
      */
-    class CronValidation implements Validator {
+    private static class CronValidation implements Validator {
         private static final long serialVersionUID = 1L;
 
         @Override
-        public void validate(Object value) throws InvalidValueException {
+        public void validate(final Object value) throws InvalidValueException {
             try {
-                String expr = (String) value;
+                final String expr = (String) value;
                 if (!expr.isEmpty()) {
-                    new MaintenanceScheduleHelper((String) value, "00:00:00", getClientTimeZone());
+                    MaintenanceScheduleHelper.validateMaintenanceSchedule((String) value, "00:00:00",
+                            getClientTimeZone());
                 }
-            } catch (IllegalArgumentException e) {
+            } catch (final IllegalArgumentException e) {
                 Notification.show(e.getMessage());
                 throw e;
             }
@@ -102,17 +104,17 @@ public class MaintenanceWindowLayout extends VerticalLayout {
     /**
      * Validates if the duration is specified in expected format.
      */
-    class DurationValidator implements Validator {
+    private static class DurationValidator implements Validator {
         private static final long serialVersionUID = 1L;
 
         @Override
-        public void validate(Object value) throws InvalidValueException {
+        public void validate(final Object value) {
             try {
-                String expr = (String) value;
-                if (!expr.isEmpty()) {
+                final String expr = (String) value;
+                if (!StringUtils.isEmpty(expr)) {
                     MaintenanceScheduleHelper.convertToISODuration((String) value);
                 }
-            } catch (DateTimeParseException e) {
+            } catch (final DateTimeParseException e) {
                 Notification.show(e.getMessage());
                 throw e;
             }
@@ -176,7 +178,7 @@ public class MaintenanceWindowLayout extends VerticalLayout {
      * Get list of all time zone offsets supported.
      */
     private static List<String> getAllTimeZones() {
-        List<String> lst = ZoneId.getAvailableZoneIds().stream()
+        final List<String> lst = ZoneId.getAvailableZoneIds().stream()
                 .map(id -> ZonedDateTime.now(ZoneId.of(id)).getOffset().getId().replace("Z", "+00:00")).distinct()
                 .collect(Collectors.toList());
         lst.sort(null);
@@ -212,7 +214,7 @@ public class MaintenanceWindowLayout extends VerticalLayout {
      *
      * @return boolean.
      */
-    public boolean getMaintenanceOption() {
+    public boolean isMaintenanceWindowEnabled() {
         return maintenanceWindowSelection.getValue();
     }
 

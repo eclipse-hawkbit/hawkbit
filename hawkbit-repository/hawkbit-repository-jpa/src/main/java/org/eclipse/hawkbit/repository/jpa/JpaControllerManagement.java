@@ -14,10 +14,6 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.Collection;
-import java.time.Duration;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +58,7 @@ import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -210,31 +207,17 @@ public class JpaControllerManagement implements ControllerManagement {
                 .getConfigurationValue(TenantConfigurationKey.MAINTENANCE_WINDOW_POLL_COUNT, Integer.class).getValue());
     }
 
-    /**
-     * Returns polling time based on the maintenance window for an action.
-     * Server will reduce the polling interval as the start time for maintenance
-     * window approaches, so that at least these many attempts are made between
-     * current polling until start of maintenance window. Poll time keeps
-     * reducing with MinPollingTime as lower limit
-     * {@link TenantConfigurationKey#MIN_POLLING_TIME_INTERVAL}. After the start
-     * of maintenance window, it resets to default
-     * {@link TenantConfigurationKey#POLLING_TIME_INTERVAL}.
-     *
-     * @param action
-     *            id the {@link Action} for which polling time is calculated
-     *            based on it having maintenance window or not
-     *
-     * @return current {@link TenantConfigurationKey#POLLING_TIME_INTERVAL}.
-     */
     @Override
-    public String getPollingTimeForAction(final Action action) {
-        if (action == null || !action.hasMaintenanceSchedule() || action.isMaintenanceScheduleLapsed()) {
+    public String getPollingTimeForAction(final long actionId) {
+
+        final JpaAction action = getActionAndThrowExceptionIfNotFound(actionId);
+
+        if (!action.hasMaintenanceSchedule() || action.isMaintenanceScheduleLapsed()) {
             return getPollingTime();
         }
 
-        JpaAction jpaAction = getActionAndThrowExceptionIfNotFound(action.getId());
         return (new EventTimer(getPollingTime(), getMinPollingTime(), ChronoUnit.SECONDS))
-                .timeToNextEvent(getMaintenanceWindowPollCount(), jpaAction.getMaintenanceWindowStartTime().get());
+                .timeToNextEvent(getMaintenanceWindowPollCount(), action.getMaintenanceWindowStartTime().orElse(null));
     }
 
     /**
@@ -244,7 +227,7 @@ public class JpaControllerManagement implements ControllerManagement {
      * polling, should happen when timer expires. Class makes use of java.time
      * package to manipulate and calculate timer duration.
      */
-    private class EventTimer {
+    private static class EventTimer {
 
         private final String defaultEventInterval;
         private final Duration defaultEventIntervalDuration;
@@ -266,7 +249,7 @@ public class JpaControllerManagement implements ControllerManagement {
          * @param timerUnit
          *            representing the unit of time to be used for timer.
          */
-        EventTimer(String defaultEventInterval, String minimumEventInterval, TemporalUnit timeUnit) {
+        EventTimer(final String defaultEventInterval, final String minimumEventInterval, final TemporalUnit timeUnit) {
             this.defaultEventInterval = defaultEventInterval;
             this.defaultEventIntervalDuration = Duration
                     .parse(MaintenanceScheduleHelper.convertToISODuration(defaultEventInterval));
@@ -294,8 +277,8 @@ public class JpaControllerManagement implements ControllerManagement {
          *
          * @return String in HH:mm:ss format for time to next event.
          */
-        String timeToNextEvent(int eventCount, ZonedDateTime timerResetTime) {
-            ZonedDateTime currentTime = ZonedDateTime.now();
+        String timeToNextEvent(final int eventCount, final ZonedDateTime timerResetTime) {
+            final ZonedDateTime currentTime = ZonedDateTime.now();
 
             // If there is no reset time, or if we already past the reset time,
             // return the default interval.
@@ -304,7 +287,7 @@ public class JpaControllerManagement implements ControllerManagement {
             }
 
             // Calculate the interval timer based on desired event count.
-            Duration currentIntervalDuration = Duration.of(currentTime.until(timerResetTime, timeUnit), timeUnit)
+            final Duration currentIntervalDuration = Duration.of(currentTime.until(timerResetTime, timeUnit), timeUnit)
                     .dividedBy(eventCount);
 
             // Need not return interval greater than the default.
@@ -914,9 +897,10 @@ public class JpaControllerManagement implements ControllerManagement {
      * @throws EntityNotFoundException
      *             if action with given actionId does not exist.
      */
+    @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Action cancelAction(long actionId) {
+    public Action cancelAction(final long actionId) {
         LOG.debug("cancelAction({})", actionId);
 
         final JpaAction action = actionRepository.findById(actionId)

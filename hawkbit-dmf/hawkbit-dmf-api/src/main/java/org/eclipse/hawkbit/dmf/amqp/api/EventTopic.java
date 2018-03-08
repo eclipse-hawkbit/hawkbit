@@ -32,6 +32,6 @@ public enum EventTopic {
     /**
      * Topic when sending a download only task, skipping the install.
      */
-    DOWNLOAD_AND_SKIP;
+    DOWNLOAD;
 
 }
