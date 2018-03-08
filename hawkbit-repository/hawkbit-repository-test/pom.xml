@@ -50,9 +50,8 @@
       <dependency>
       	<groupId>com.microsoft.sqlserver</groupId>
        	<artifactId>mssql-jdbc</artifactId>
-       	<version>6.4.0.jre8</version>
       </dependency>
-      <!-- Comment in a JDBC DB2 compatabile driver to run tests against DB2 -->
+      <!-- Add a JDBC DB2 compatabile driver if you want to run tests against DB2, e.g. -->
 <!--       <dependency> -->
 <!--          <groupId>com.ibm.db2.jcc</groupId> -->
 <!--          <artifactId>db2jcc4</artifactId> -->

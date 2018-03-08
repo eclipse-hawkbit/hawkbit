@@ -161,6 +161,7 @@
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
       <guava.version>19.0</guava.version>
       <mariadb-java-client.version>2.0.2</mariadb-java-client.version>
+      <mssql-jdbc.version>6.4.0.jre8</mssql-jdbc.version>
       <embedded-mongo.version>1.50.5</embedded-mongo.version>
       <javax.el-api.version>2.2.4</javax.el-api.version>
       <corn-cps.version>1.1.7</corn-cps.version>
@@ -788,7 +789,11 @@
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
             <version>${mariadb-java-client.version}</version>
-            <scope>test</scope>
+        </dependency>
+        <dependency>
+           <groupId>com.microsoft.sqlserver</groupId>
+           <artifactId>mssql-jdbc</artifactId>
+           <version>${mssql-jdbc.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.amqp</groupId>
