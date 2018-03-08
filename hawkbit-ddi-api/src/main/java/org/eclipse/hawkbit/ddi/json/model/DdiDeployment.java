@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -30,7 +31,7 @@ public class DdiDeployment {
     @NotNull
     private List<DdiChunk> chunks;
 
-    private MaintenanceWindowStatus maintenanceWindow = null;
+    private MaintenanceWindowStatus maintenanceWindow;
 
     /**
      * Constructor.

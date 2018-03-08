@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.amqp;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -420,7 +421,7 @@ public class AmqpMessageHandlerServiceTest {
         final ArgumentCaptor<Long> actionIdCaptor = ArgumentCaptor.forClass(Long.class);
 
         verify(amqpMessageDispatcherServiceMock, times(1)).sendUpdateMessageToTarget(tenantCaptor.capture(),
-                targetCaptor.capture(), actionIdCaptor.capture(), any(Map.class));
+                targetCaptor.capture(), actionIdCaptor.capture(), any(Map.class), anyBoolean());
         final String tenant = tenantCaptor.getValue();
         final String controllerId = targetCaptor.getValue().getControllerId();
         final Long actionId = actionIdCaptor.getValue();
