@@ -19,7 +19,7 @@ public class MgmtDistributionSetAssignment extends MgmtId {
      * {@link MgmtMaintenanceWindow} object defining a schedule, duration and
      * timezone.
      */
-    private MgmtMaintenanceWindow maintenanceWindow = null;
+    private MgmtMaintenanceWindow maintenanceWindow;
 
     public MgmtActionType getType() {
         return type;

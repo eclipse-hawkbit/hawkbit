@@ -569,7 +569,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Test download and update values after maintenance window start time.")
-    public void testDownloadAndUpdateStatusDuringMaintenanceWindow() throws Exception {
+    public void downloadAndUpdateStatusDuringMaintenanceWindow() throws Exception {
         Target savedTarget = testdataFactory.createTarget("1911");
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         savedTarget = assignDistributionSetWithMaintenanceWindow(ds.getId(), savedTarget.getControllerId(),

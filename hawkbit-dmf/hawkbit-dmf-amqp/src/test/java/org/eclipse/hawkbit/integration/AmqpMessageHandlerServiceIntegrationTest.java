@@ -387,7 +387,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     }
 
     @Test
-    @Description("Register a target and send a update action status (downloaded). Verfiy if the updated action status is correct.")
+    @Description("Register a target and send an update action status (downloaded). Verfiy if the updated action status is correct.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionUpdatedEvent.class, count = 0), @Expect(type = ActionCreatedEvent.class, count = 1),
@@ -506,7 +506,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 2) })
-    public void receiveDownLoadMessageBeforeMaintenanceWindowStartTime() {
+    public void receiveDownloadMessageBeforeMaintenanceWindowStartTime() {
         final String controllerId = TARGET_PREFIX + "receiveDownLoadMessageBeforeMaintenanceWindowStartTime";
 
         // setup
@@ -525,7 +525,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     }
 
     @Test
-    @Description("Verfiy receiving a download_and_install message if a deployment is done with window configured and during maintenance window start time.")
+    @Description("Verify receiving a download_and_install message if a deployment is done with window configured and during maintenance window start time.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1),
@@ -533,7 +533,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 2) })
-    public void receiveDownLoadAndInstallMessageDuringMaintenanceWindow() {
+    public void receiveDownloadAndInstallMessageDuringMaintenanceWindow() {
         final String controllerId = TARGET_PREFIX + "receiveDownLoadAndInstallMessageDuringMaintenanceWindow";
 
         // setup
