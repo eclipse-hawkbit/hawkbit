@@ -34,7 +34,6 @@ public class DdiProgress {
      */
     @JsonCreator
     public DdiProgress(@JsonProperty("cnt") final Integer cnt, @JsonProperty("of") final Integer of) {
-        super();
         this.cnt = cnt;
         this.of = of;
     }

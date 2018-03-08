@@ -33,8 +33,6 @@ public class RandomGeneratedInputStream extends InputStream {
      *            target size of the stream [byte]
      */
     public RandomGeneratedInputStream(final long size) {
-        super();
-
         this.size = size;
     }
 

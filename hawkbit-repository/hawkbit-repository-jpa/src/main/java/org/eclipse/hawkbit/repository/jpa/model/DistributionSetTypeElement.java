@@ -71,7 +71,6 @@ public class DistributionSetTypeElement implements Serializable {
      */
     DistributionSetTypeElement(final JpaDistributionSetType dsType, final JpaSoftwareModuleType smType,
             final boolean mandatory) {
-        super();
         key = new DistributionSetTypeElementCompositeKey(dsType, smType);
         this.dsType = dsType;
         this.smType = smType;

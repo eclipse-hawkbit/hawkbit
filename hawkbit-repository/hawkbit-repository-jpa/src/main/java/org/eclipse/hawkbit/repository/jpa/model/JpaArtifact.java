@@ -61,10 +61,10 @@ public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Art
     private long size;
 
     /**
-     * Default constructor.
+     * Default constructor needed for JPA entities..
      */
     public JpaArtifact() {
-        super();
+        // Default constructor needed for JPA entities.
     }
 
     /**
