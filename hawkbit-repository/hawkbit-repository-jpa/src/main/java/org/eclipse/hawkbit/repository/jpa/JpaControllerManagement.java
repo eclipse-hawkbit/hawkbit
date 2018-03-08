@@ -38,6 +38,7 @@ import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
@@ -666,18 +667,33 @@ public class JpaControllerManagement implements ControllerManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Target updateControllerAttributes(final String controllerId, final Map<String, String> data) {
+    public Target updateControllerAttributes(final String controllerId, final Map<String, String> data,
+            final UpdateMode mode) {
         final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
-        target.getControllerAttributes().putAll(data);
+        // get the modifiable attribute map
+        final Map<String, String> controllerAttributes = target.getControllerAttributes();
 
-        if (target.getControllerAttributes().size() > quotaManagement.getMaxAttributeEntriesPerTarget()) {
-            throw new QuotaExceededException("Controller attribues", target.getControllerAttributes().size(),
-                    quotaManagement.getMaxAttributeEntriesPerTarget());
+        switch (mode) {
+        case REMOVE:
+            // remove the addressed attributes
+            data.keySet().forEach(controllerAttributes::remove);
+            break;
+        case REPLACE:
+            // clear the attributes before adding the new attributes
+            controllerAttributes.clear();
+        default:
+            // default is MERGE
+            controllerAttributes.putAll(data);
+            target.setRequestControllerAttributes(false);
         }
 
-        target.setRequestControllerAttributes(false);
+        final int attributeCount = controllerAttributes.size();
+        if (attributeCount > quotaManagement.getMaxAttributeEntriesPerTarget()) {
+            throw new QuotaExceededException("Controller attributes", attributeCount,
+                    quotaManagement.getMaxAttributeEntriesPerTarget());
+        }
 
         return targetRepository.save(target);
     }

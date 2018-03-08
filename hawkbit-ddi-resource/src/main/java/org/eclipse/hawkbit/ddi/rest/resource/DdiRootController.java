@@ -39,6 +39,7 @@ import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
@@ -51,6 +52,7 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.rest.exception.InvalidUpdateModeException;
 import org.eclipse.hawkbit.rest.util.FileStreamingUtil;
 import org.eclipse.hawkbit.rest.util.HttpUtil;
 import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
@@ -426,10 +428,14 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     @Override
     public ResponseEntity<Void> putConfigData(@Valid @RequestBody final DdiConfigData configData,
-            @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId) {
-        controllerManagement.updateControllerAttributes(controllerId, configData.getData());
+            @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId,
+            @RequestParam(value = "mode", required = false, defaultValue = DdiRestConstants.DEFAULT_UPDATE_MODE) final String mode) {
 
-        return ResponseEntity.ok().build();
+        // deserialize the update mode, then invoke the controller mgmt
+        return UpdateMode.valueOfIgnoreCase(mode).map(updateMode -> {
+            controllerManagement.updateControllerAttributes(controllerId, configData.getData(), updateMode);
+            return ResponseEntity.ok().<Void> build();
+        }).orElseThrow(() -> new InvalidUpdateModeException(mode));
     }
 
     @Override
