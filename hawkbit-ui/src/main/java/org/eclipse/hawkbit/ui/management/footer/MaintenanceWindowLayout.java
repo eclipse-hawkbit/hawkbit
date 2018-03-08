@@ -75,15 +75,17 @@ public class MaintenanceWindowLayout extends HorizontalLayout {
     /**
      * Validates if the maintenance schedule is a valid cron expression.
      */
-    class CronValidation implements Validator {
+    private class CronValidation implements Validator {
         private static final long serialVersionUID = 1L;
 
         @Override
         public void validate(final Object value) {
             try {
-                final String expression = (String) value;
-                if (StringUtils.hasText(expression)) {
-                    new MaintenanceScheduleHelper(expression, "00:00:00", getClientTimeZone());
+
+                final String expr = (String) value;
+                if (!expr.isEmpty()) {
+                    MaintenanceScheduleHelper.validateMaintenanceSchedule((String) value, "00:00:00",
+                            getClientTimeZone());
                 }
             } catch (final IllegalArgumentException e) {
                 uiNotification
@@ -95,7 +97,7 @@ public class MaintenanceWindowLayout extends HorizontalLayout {
     /**
      * Validates if the duration is specified in expected format.
      */
-    class DurationValidator implements Validator {
+    private class DurationValidator implements Validator {
         private static final long serialVersionUID = 1L;
 
         @Override

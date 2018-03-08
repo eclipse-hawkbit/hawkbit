@@ -102,8 +102,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      * @return a message if <null> no message is send back to sender
      */
     @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.receiverQueue:dmf_receiver}", containerFactory = "listenerContainerFactory")
-    public Message onMessage(final Message message, @Header(MessageHeaderKey.TYPE) final String type,
-            @Header(MessageHeaderKey.TENANT) final String tenant) {
+    public Message onMessage(final Message message,
+            @Header(name = MessageHeaderKey.TYPE, required = false) final String type,
+            @Header(name = MessageHeaderKey.TENANT, required = false) final String tenant) {
         return onMessage(message, type, tenant, getRabbitTemplate().getConnectionFactory().getVirtualHost());
     }
 
@@ -121,6 +122,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      * @return the rpc message back to supplier.
      */
     public Message onMessage(final Message message, final String type, final String tenant, final String virtualHost) {
+        if (StringUtils.isEmpty(type) || StringUtils.isEmpty(tenant)) {
+            throw new AmqpRejectAndDontRequeueException("Invalid message! tenant and type header are mandatory!");
+        }
 
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         try {
@@ -215,7 +219,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         action.getDistributionSet().getModules().forEach(module -> modules.put(module, metadata.get(module.getId())));
 
         amqpMessageDispatcherService.sendUpdateMessageToTarget(action.getTenant(), action.getTarget(), action.getId(),
-                modules);
+                modules, action.isMaintenanceWindowAvailable());
     }
 
     /**
@@ -282,6 +286,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 && message.getMessageProperties().getCorrelationId().length > 0;
     }
 
+    // Exception squid:MethodCyclomaticComplexity - false positive, is a simple
+    // mapping
+    @SuppressWarnings("squid:MethodCyclomaticComplexity")
     private Status mapStatus(final Message message, final DmfActionUpdateStatus actionUpdateStatus,
             final Action action) {
         Status status = null;
@@ -311,7 +318,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             status = Status.DOWNLOADED;
             break;
         case CANCEL_REJECTED:
-            status = hanldeCancelRejectedState(message, action);
+            status = handleCancelRejectedState(message, action);
             break;
         default:
             logAndThrowMessageError(message, "Status for action does not exisit.");
@@ -320,14 +327,13 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         return status;
     }
 
-    private Status hanldeCancelRejectedState(final Message message, final Action action) {
+    private Status handleCancelRejectedState(final Message message, final Action action) {
         if (action.isCancelingOrCanceled()) {
             return Status.CANCEL_REJECTED;
         }
         logAndThrowMessageError(message,
                 "Cancel rejected message is not allowed, if action is on state: " + action.getStatus());
         return null;
-
     }
 
     private static String convertCorrelationId(final Message message) {

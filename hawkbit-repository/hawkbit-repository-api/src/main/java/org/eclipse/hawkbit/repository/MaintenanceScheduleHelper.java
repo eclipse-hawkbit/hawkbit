@@ -16,10 +16,9 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Optional;
-import java.util.TimeZone;
-import java.util.regex.Pattern;
 
 import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
+import org.springframework.util.StringUtils;
 
 import com.cronutils.model.Cron;
 import com.cronutils.model.definition.CronDefinition;
@@ -35,9 +34,7 @@ import com.cronutils.parser.CronParser;
  */
 public class MaintenanceScheduleHelper {
 
-    ExecutionTime scheduleExecutor = null;
-    Duration duration = null;
-    TimeZone timeZone = null;
+    private final ExecutionTime scheduleExecutor;
 
     /**
      * Constructor that accepts a cron expression, duration and time zone and
@@ -48,22 +45,11 @@ public class MaintenanceScheduleHelper {
      *            maintenance window. Expression has 6 mandatory fields and 1
      *            last optional field: "second minute hour dayofmonth month
      *            weekday year"
-     * @param duration
-     *            in HH:mm:ss format specifying the duration of a maintenance
-     *            window, for example 00:30:00 for 30 minutes
-     * @param timezone
-     *            is the time zone specified as +/-hh:mm offset from UTC. For
-     *            example +02:00 for CET summer time and +00:00 for UTC. The
-     *            start time of a maintenance window calculated based on the
-     *            cron expression is relative to this time zone.
      */
-    public MaintenanceScheduleHelper(String cronSchedule, String duration, String timeZone) {
-        this.timeZone = TimeZone.getTimeZone(ZoneOffset.of(timeZone));
-        this.duration = Duration.parse(convertToISODuration(duration));
-
-        CronDefinition cronDefinition = CronDefinitionBuilder.instanceDefinitionFor(QUARTZ);
-        CronParser parser = new CronParser(cronDefinition);
-        Cron quartzCron = parser.parse(cronSchedule);
+    public MaintenanceScheduleHelper(final String cronSchedule) {
+        final CronDefinition cronDefinition = CronDefinitionBuilder.instanceDefinitionFor(QUARTZ);
+        final CronParser parser = new CronParser(cronDefinition);
+        final Cron quartzCron = parser.parse(cronSchedule);
         this.scheduleExecutor = ExecutionTime.forCron(quartzCron);
     }
 
@@ -78,11 +64,13 @@ public class MaintenanceScheduleHelper {
      * @return {@link Optional<ZonedDateTime>} of the next available window. In
      *         case there is none, returns empty value.
      */
-    public Optional<ZonedDateTime> nextExecution(ZonedDateTime after) {
+    // Exception squid:S1166 - lib throws exception as well if no value found
+    @SuppressWarnings("squid:S1166")
+    public Optional<ZonedDateTime> nextExecution(final ZonedDateTime after) {
         try {
-            ZonedDateTime next = this.scheduleExecutor.nextExecution(after);
-            return Optional.of(next);
-        } catch (IllegalArgumentException e) {
+            final ZonedDateTime next = this.scheduleExecutor.nextExecution(after);
+            return Optional.ofNullable(next);
+        } catch (final IllegalArgumentException ignored) {
             return Optional.empty();
         }
     }
@@ -98,7 +86,7 @@ public class MaintenanceScheduleHelper {
      * @return true if there is at least one valid schedule remaining, else
      *         false.
      */
-    public boolean hasValidScheduleAfter(ZonedDateTime after) {
+    private boolean hasValidScheduleAfter(final ZonedDateTime after) {
         return nextExecution(after).isPresent();
     }
 
@@ -122,34 +110,41 @@ public class MaintenanceScheduleHelper {
      *            start time of a maintenance window calculated based on the
      *            cron expression is relative to this time zone
      *
-     * @return true if the schedule is valid, else throw an exception
-     *
      * @throws InvalidMaintenanceScheduleException
      *             if the defined schedule fails the validity criteria.
      */
-    public static boolean validateMaintenanceSchedule(String cronSchedule, String duration, String timezone) {
-        // check if schedule, duration and timezone are all not null.
-        if (cronSchedule != null && duration != null && timezone != null) {
-            // check if schedule, duration and timezone are all not empty.
-            if (!(cronSchedule.isEmpty() || duration.isEmpty() || timezone.isEmpty())) {
-                ZonedDateTime now = ZonedDateTime.now(ZoneOffset.of(timezone));
-                MaintenanceScheduleHelper scheduleHelper = new MaintenanceScheduleHelper(cronSchedule, duration,
-                        timezone);
-                // check if there is a window currently active or available in
-                // future.
-                if (!scheduleHelper.hasValidScheduleAfter(now.minus(Duration.parse(convertToISODuration(duration))))) {
-                    throw new InvalidMaintenanceScheduleException(
-                            "No valid maintenance window available after current time");
-                }
-            } else {
-                throw new InvalidMaintenanceScheduleException("Either of schedule, duration or timezone empty.");
+    public static void validateMaintenanceSchedule(final String cronSchedule, final String duration,
+            final String timezone) {
+        // check if schedule, duration and timezone are all not empty.
+        if (allNotEmpty(cronSchedule, duration, timezone)) {
+            final ZonedDateTime now;
+            try {
+                now = ZonedDateTime.now(ZoneOffset.of(timezone));
+                Duration.parse(convertToISODuration(duration));
+            } catch (final RuntimeException validationFailed) {
+                throw new InvalidMaintenanceScheduleException("No valid maintenance window provided", validationFailed);
             }
-        } else if (!(cronSchedule == null && duration == null && timezone == null)) {
+
+            final MaintenanceScheduleHelper scheduleHelper = new MaintenanceScheduleHelper(cronSchedule);
+            // check if there is a window currently active or available in
+            // future.
+            if (!scheduleHelper.hasValidScheduleAfter(now.minus(Duration.parse(convertToISODuration(duration))))) {
+                throw new InvalidMaintenanceScheduleException(
+                        "No valid maintenance window available after current time");
+            }
+
+        } else if (atLeastOneNotEmpty(cronSchedule, duration, timezone)) {
             throw new InvalidMaintenanceScheduleException(
                     "All of schedule, duration and timezone should either be null or non empty.");
         }
+    }
 
-        return true;
+    private static boolean atLeastOneNotEmpty(final String cronSchedule, final String duration, final String timezone) {
+        return !(StringUtils.isEmpty(cronSchedule) && StringUtils.isEmpty(duration) && StringUtils.isEmpty(timezone));
+    }
+
+    private static boolean allNotEmpty(final String cronSchedule, final String duration, final String timezone) {
+        return !StringUtils.isEmpty(cronSchedule) && !StringUtils.isEmpty(duration) && !StringUtils.isEmpty(timezone);
     }
 
     /**
@@ -166,7 +161,7 @@ public class MaintenanceScheduleHelper {
      * @throws DateTimeParseException
      *             if the text cannot be converted to ISO format.
      */
-    public static String convertToISODuration(String timeInterval) {
+    public static String convertToISODuration(final String timeInterval) {
         return Duration.between(LocalTime.MIN, LocalTime.parse(timeInterval)).toString();
     }
 }

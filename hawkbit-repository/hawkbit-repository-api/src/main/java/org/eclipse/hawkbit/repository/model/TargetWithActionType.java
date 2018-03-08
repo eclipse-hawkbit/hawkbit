@@ -14,8 +14,6 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 
 /**
  * A custom view on {@link Target} with {@link ActionType}.
- * 
- *
  *
  */
 public class TargetWithActionType {
@@ -23,9 +21,9 @@ public class TargetWithActionType {
     private final String controllerId;
     private final ActionType actionType;
     private final long forceTime;
-    private String maintenanceSchedule = null;
-    private String maintenanceWindowDuration = null;
-    private String maintenanceWindowTimeZone = null;
+    private String maintenanceSchedule;
+    private String maintenanceWindowDuration;
+    private String maintenanceWindowTimeZone;
 
     public TargetWithActionType(final String controllerId) {
         this.controllerId = controllerId;
@@ -35,7 +33,7 @@ public class TargetWithActionType {
 
     public TargetWithActionType(final String controllerId, final ActionType actionType, final long forceTime) {
         this.controllerId = controllerId;
-        this.actionType = actionType;
+        this.actionType = actionType != null ? actionType : ActionType.FORCED;
         this.forceTime = forceTime;
     }
 
@@ -64,19 +62,16 @@ public class TargetWithActionType {
      *             if the parameters do not define a valid maintenance schedule.
      */
     public TargetWithActionType(final String controllerId, final ActionType actionType, final long forceTime,
-            String maintenanceSchedule, String maintenanceWindowDuration, String maintenanceWindowTimeZone) {
-        this.controllerId = controllerId;
-        this.actionType = actionType;
-        this.forceTime = forceTime;
+            final String maintenanceSchedule, final String maintenanceWindowDuration,
+            final String maintenanceWindowTimeZone) {
+        this(controllerId, actionType, forceTime);
 
-        if (MaintenanceScheduleHelper.validateMaintenanceSchedule(maintenanceSchedule, maintenanceWindowDuration,
-                maintenanceWindowTimeZone)) {
-            this.maintenanceSchedule = maintenanceSchedule;
-            this.maintenanceWindowDuration = maintenanceWindowDuration;
-            this.maintenanceWindowTimeZone = maintenanceWindowTimeZone;
-        } else {
-            throw new InvalidMaintenanceScheduleException("Invalid maintenance window definition");
-        }
+        this.maintenanceSchedule = maintenanceSchedule;
+        this.maintenanceWindowDuration = maintenanceWindowDuration;
+        this.maintenanceWindowTimeZone = maintenanceWindowTimeZone;
+
+        MaintenanceScheduleHelper.validateMaintenanceSchedule(maintenanceSchedule, maintenanceWindowDuration,
+                maintenanceWindowTimeZone);
     }
 
     public ActionType getActionType() {
