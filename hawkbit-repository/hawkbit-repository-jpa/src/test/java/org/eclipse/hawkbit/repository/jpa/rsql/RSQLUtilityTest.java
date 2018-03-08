@@ -201,7 +201,7 @@ public class RSQLUtilityTest {
         // verfication
         verify(criteriaBuilderMock, times(1)).and(any(Predicate.class));
         verify(criteriaBuilderMock, times(1)).notLike(eq(pathOfString(baseSoftwareModuleRootMock)),
-                eq("abc".toUpperCase()));
+                eq("abc".toUpperCase()), eq('\\'));
     }
 
     @Test

@@ -54,8 +54,8 @@ There are clients outside of the Eclipse IoT eco system as well, e.g.:
 | Test dependencies defined | X | X | X | - |
 | Versions tested | 1.4 | MySQL 5.6/5.7, AWS Aurora | MS SQL Server 2017 | DB2 Server v11.1 |
 | Docker image with driver provided  | X | X | - | - |
-| JDBC Driver | H2  | MariaDB  |   | - |
-| Status  | Test, Dev, Trial | Production grade  | Experimental | Test & Dev |
+| JDBC driver | [H2 1.4](https://github.com/h2database/h2database)  | [MariaDB Connector/J 2.0](https://github.com/MariaDB/mariadb-connector-j) | [MSSQL-JDBC 6.4](https://github.com/Microsoft/mssql-jdbc)  | - |
+| Status | Test, Dev, Trial | Production grade  | Experimental | Test & Dev |
 
 ## (Optional) RabbitMQ: 3.6,3.7
 
