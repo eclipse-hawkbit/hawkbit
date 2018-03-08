@@ -8,23 +8,30 @@ CREATE TABLE sp_ds_type_element
 
 CREATE TABLE sp_action 
   ( 
-     id               BIGINT GENERATED always AS IDENTITY NOT NULL, 
-     tenant           VARCHAR(40) NOT NULL, 
-     action_type      INTEGER NOT NULL, 
-     active           SMALLINT DEFAULT 0, 
-     created_at       BIGINT NOT NULL, 
-     created_by       VARCHAR(40) NOT NULL, 
-     forced_time      BIGINT, 
-     last_modified_at BIGINT NOT NULL, 
-     last_modified_by VARCHAR(40) NOT NULL, 
-     optlock_revision INTEGER, 
-     status           INTEGER NOT NULL, 
-     distribution_set BIGINT NOT NULL, 
-     rollout          BIGINT, 
-     rolloutgroup     BIGINT, 
-     target           BIGINT NOT NULL, 
+     id                         BIGINT GENERATED always AS IDENTITY NOT NULL, 
+     tenant                     VARCHAR(40) NOT NULL, 
+     action_type                INTEGER NOT NULL, 
+     active                     SMALLINT DEFAULT 0, 
+     created_at                 BIGINT NOT NULL, 
+     created_by                 VARCHAR(40) NOT NULL, 
+     forced_time                BIGINT, 
+     last_modified_at           BIGINT NOT NULL, 
+     last_modified_by           VARCHAR(40) NOT NULL, 
+     optlock_revision           INTEGER, 
+     status                     INTEGER NOT NULL, 
+     distribution_set           BIGINT NOT NULL, 
+     rollout                    BIGINT, 
+     rolloutgroup               BIGINT, 
+     target                     BIGINT NOT NULL, 
+     maintenance_cron_schedule  VARCHAR(40), 
+     maintenance_duration       VARCHAR(40), 
+     maintenance_time_zone      VARCHAR(40), 
      PRIMARY KEY (id) 
   ); 
+
+  ALTER TABLE sp_action ADD column maintenance_cron_schedule VARCHAR(40);
+ALTER TABLE sp_action ADD column maintenance_duration VARCHAR(40);
+ALTER TABLE sp_action ADD column maintenance_time_zone VARCHAR(40);
 
 CREATE INDEX sp_idx_action_01 
   ON sp_action (tenant, distribution_set); 

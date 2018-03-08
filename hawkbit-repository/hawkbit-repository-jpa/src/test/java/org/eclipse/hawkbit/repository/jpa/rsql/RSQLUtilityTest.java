@@ -179,7 +179,7 @@ public class RSQLUtilityTest {
         RSQLUtility.parse(correctRsql, SoftwareModuleFields.class, null, testDb).toPredicate(baseSoftwareModuleRootMock,
                 criteriaQueryMock, criteriaBuilderMock);
 
-        // verfication
+        // verification
         verify(criteriaBuilderMock, times(1)).and(any(Predicate.class));
     }
 
@@ -198,7 +198,7 @@ public class RSQLUtilityTest {
         RSQLUtility.parse(correctRsql, SoftwareModuleFields.class, null, testDb).toPredicate(baseSoftwareModuleRootMock,
                 criteriaQueryMock, criteriaBuilderMock);
 
-        // verfication
+        // verification
         verify(criteriaBuilderMock, times(1)).and(any(Predicate.class));
         verify(criteriaBuilderMock, times(1)).notLike(eq(pathOfString(baseSoftwareModuleRootMock)),
                 eq("abc".toUpperCase()), eq('\\'));
@@ -260,7 +260,7 @@ public class RSQLUtilityTest {
         RSQLUtility.parse(correctRsql, SoftwareModuleFields.class, null, testDb).toPredicate(baseSoftwareModuleRootMock,
                 criteriaQueryMock, criteriaBuilderMock);
 
-        // verfication
+        // verification
         verify(criteriaBuilderMock, times(1)).and(any(Predicate.class));
         verify(criteriaBuilderMock, times(1)).lessThan(eq(pathOfString(baseSoftwareModuleRootMock)), eq("abc"));
     }
@@ -277,7 +277,7 @@ public class RSQLUtilityTest {
         RSQLUtility.parse(correctRsql, TestFieldEnum.class, null, testDb).toPredicate(baseSoftwareModuleRootMock,
                 criteriaQueryMock, criteriaBuilderMock);
 
-        // verfication
+        // verification
         verify(criteriaBuilderMock, times(1)).and(any(Predicate.class));
         verify(criteriaBuilderMock, times(1)).equal(eq(baseSoftwareModuleRootMock), eq(TestValueEnum.BUMLUX));
     }

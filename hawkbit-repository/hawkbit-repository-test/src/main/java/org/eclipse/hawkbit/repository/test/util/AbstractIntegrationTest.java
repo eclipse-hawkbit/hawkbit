@@ -14,17 +14,13 @@ import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpre
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -104,7 +100,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 // test execution. So, the order execution between EventVerifier and Cleanup is
 // important!
 @TestExecutionListeners(inheritListeners = true, listeners = { EventVerifier.class, CleanupTestExecutionListener.class,
-        MySqlTestDatabase.class }, mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
+        MySqlTestDatabase.class, MsSqlTestDatabase.class }, mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
 public abstract class AbstractIntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
@@ -378,24 +374,25 @@ public abstract class AbstractIntegrationTest {
      *
      * @return {@link String} containing a valid cron expression.
      */
-    public static String getTestSchedule(int minutesToAdd) {
+    public static String getTestSchedule(final int minutesToAdd) {
         ZonedDateTime currentTime = ZonedDateTime.now();
         currentTime = currentTime.plusMinutes(minutesToAdd);
         return String.format("0 %d %d %d %d ? %d", currentTime.getMinute(), currentTime.getHour(),
                 currentTime.getDayOfMonth(), currentTime.getMonthValue(), currentTime.getYear());
     }
 
-    public static String getTestDuration(int duration) {
+    public static String getTestDuration(final int duration) {
         return String.format("%02d:%02d:00", duration / 60, duration % 60);
     }
 
     public static String getTestTimeZone() {
-        ZonedDateTime currentTime = ZonedDateTime.now();
+        final ZonedDateTime currentTime = ZonedDateTime.now();
         return currentTime.getOffset().getId().replace("Z", "+00:00");
     }
 
-    public static Map<String, String> getMaintenanceWindow(String schedule, String duration, String timezone) {
-        Map<String, String> maintenanceWindowMap = new HashMap<>();
+    public static Map<String, String> getMaintenanceWindow(final String schedule, final String duration,
+            final String timezone) {
+        final Map<String, String> maintenanceWindowMap = new HashMap<>();
         maintenanceWindowMap.put("schedule", schedule);
         maintenanceWindowMap.put("duration", duration);
         maintenanceWindowMap.put("timezone", timezone);

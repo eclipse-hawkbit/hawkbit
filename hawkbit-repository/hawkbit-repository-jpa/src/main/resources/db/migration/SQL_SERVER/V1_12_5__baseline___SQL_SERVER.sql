@@ -22,6 +22,9 @@ CREATE TABLE sp_action
     rollout NUMERIC(19) NULL,
     rolloutgroup NUMERIC(19) NULL,
     target NUMERIC(19) NOT NULL,
+    maintenance_cron_schedule VARCHAR(40),
+    maintenance_duration VARCHAR(40),
+    maintenance_time_zone VARCHAR(40),
     PRIMARY KEY (id)
 );
 CREATE INDEX sp_idx_action_01 ON sp_action (tenant, distribution_set);
