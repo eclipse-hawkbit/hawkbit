@@ -48,14 +48,57 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 2) })
+            @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
     public void sendDownloadAndInstallStatus() {
         final String controllerId = TARGET_PREFIX + "sendDownloadAndInstallStatus";
         registerTargetAndAssignDistributionSet(controllerId);
 
-        createAndSendTarget(controllerId, TENANT_EXIST);
         waitUntilTargetStatusIsPending(controllerId);
         assertDownloadAndInstallMessage(getDistributionSet().getModules(), controllerId);
+    }
+
+    @Test
+    @Description("Verify that a distribution assignment sends a download message with window configured but before maintenance window start time.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
+    public void sendDownloadStatusBeforeMaintenanceWindowStartTime() {
+        final String controllerId = TARGET_PREFIX + "sendDownloadStatusBeforeWindowStartTime";
+
+        registerAndAssertTargetWithExistingTenant(controllerId);
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        testdataFactory.addSoftwareModuleMetadata(distributionSet);
+        assignDistributionSetWithMaintenanceWindow(distributionSet.getId(), controllerId, getTestSchedule(2),
+                getTestDuration(10), getTestTimeZone());
+
+        waitUntilTargetStatusIsPending(controllerId);
+        assertDownloadMessage(distributionSet.getModules(), controllerId);
+    }
+
+    @Test
+    @Description("Verify that a distribution assignment sends a download and install message with window configured and during maintenance window start time.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
+    public void sendDownloadAndInstallStatusMessageDuringMaintenanceWindow() {
+        final String controllerId = TARGET_PREFIX + "sendDAndIStatusMessageDuringWindow";
+
+        registerAndAssertTargetWithExistingTenant(controllerId);
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        testdataFactory.addSoftwareModuleMetadata(distributionSet);
+        assignDistributionSetWithMaintenanceWindow(distributionSet.getId(), controllerId, getTestSchedule(-5),
+                getTestDuration(10), getTestTimeZone());
+
+        waitUntilTargetStatusIsPending(controllerId);
+        assertDownloadAndInstallMessage(distributionSet.getModules(), controllerId);
     }
 
     @Test
@@ -111,7 +154,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
     public void sendDeleteMessage() {
         final String controllerId = TARGET_PREFIX + "sendDeleteMessage";
 
-        registerAndAssertTargetWithExistingTenant(controllerId, 1);
+        registerAndAssertTargetWithExistingTenant(controllerId);
         targetManagement.deleteByControllerID(controllerId);
         assertDeleteMessage(controllerId);
     }
@@ -125,8 +168,6 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
     }
 
     private void waitUntil(final Callable<Boolean> callable) {
-        createConditionFactory().until(() -> {
-            return securityRule.runAsPrivileged(callable);
-        });
+        createConditionFactory().until(() -> securityRule.runAsPrivileged(callable));
     }
 }

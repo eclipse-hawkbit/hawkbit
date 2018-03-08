@@ -249,16 +249,18 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
                             .stream().map(MgmtTargetAssignmentRequestBody::getId).collect(Collectors.toList()))));
         }
 
-        final DistributionSetAssignmentResult assignDistributionSet = this.deployManagament.assignDistributionSet(
-                distributionSetId,
-                assignments.stream().map(t -> new TargetWithActionType(t.getId(),
-                        MgmtRestModelMapper.convertActionType(t.getType()), t.getForcetime(),
-                        t.getMaintenanceWindow() == null ? null : t.getMaintenanceWindow().getMaintenanceSchedule(),
-                        t.getMaintenanceWindow() == null ? null
-                                : t.getMaintenanceWindow().getMaintenanceWindowDuration(),
-                        t.getMaintenanceWindow() == null ? null
-                                : t.getMaintenanceWindow().getMaintenanceWindowTimeZone()))
-                        .collect(Collectors.toList()));
+        final DistributionSetAssignmentResult assignDistributionSet = this.deployManagament
+                .assignDistributionSet(distributionSetId, assignments.stream().map(t -> {
+                    if (t.getMaintenanceWindow() == null) {
+                        return new TargetWithActionType(t.getId(), MgmtRestModelMapper.convertActionType(t.getType()),
+                                t.getForcetime());
+                    }
+
+                    return new TargetWithActionType(t.getId(), MgmtRestModelMapper.convertActionType(t.getType()),
+                            t.getForcetime(), t.getMaintenanceWindow().getMaintenanceSchedule(),
+                            t.getMaintenanceWindow().getMaintenanceWindowDuration(),
+                            t.getMaintenanceWindow().getMaintenanceWindowTimeZone());
+                }).collect(Collectors.toList()));
 
         return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(assignDistributionSet));
 

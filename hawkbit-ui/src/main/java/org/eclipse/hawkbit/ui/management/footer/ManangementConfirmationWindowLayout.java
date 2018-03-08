@@ -159,13 +159,13 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
                         ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
                         : RepositoryModelConstants.NO_FORCE_TIME;
 
-        final String maintenanceSchedule = maintenanceWindowLayout.getMaintenanceOption()
+        final String maintenanceSchedule = maintenanceWindowLayout.isMaintenanceWindowEnabled()
                 ? maintenanceWindowLayout.getMaintenanceSchedule() : null;
 
-        final String maintenanceDuration = maintenanceWindowLayout.getMaintenanceOption()
+        final String maintenanceDuration = maintenanceWindowLayout.isMaintenanceWindowEnabled()
                 ? maintenanceWindowLayout.getMaintenanceDuration() : null;
 
-        final String maintenanceTimeZone = maintenanceWindowLayout.getMaintenanceOption()
+        final String maintenanceTimeZone = maintenanceWindowLayout.isMaintenanceWindowEnabled()
                 ? maintenanceWindowLayout.getMaintenanceTimeZone() : null;
 
         final Map<Long, List<TargetIdName>> saveAssignedList = Maps.newHashMapWithExpectedSize(itemIds.size());

@@ -129,8 +129,9 @@ public abstract class AbstractDsAssignmentStrategy {
             return;
         }
 
-        afterCommit.afterCommit(() -> eventPublisher.publishEvent(
-                new TargetAssignDistributionSetEvent(tenant, distributionSetId, actions, applicationContext.getId())));
+        afterCommit.afterCommit(
+                () -> eventPublisher.publishEvent(new TargetAssignDistributionSetEvent(tenant, distributionSetId,
+                        actions, applicationContext.getId(), actions.get(0).isMaintenanceWindowAvailable())));
     }
 
     protected void sendTargetUpdatedEvent(final JpaTarget target) {

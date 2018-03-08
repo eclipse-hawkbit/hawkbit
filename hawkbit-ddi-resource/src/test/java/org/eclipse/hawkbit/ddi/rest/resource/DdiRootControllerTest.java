@@ -15,9 +15,8 @@ import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpre
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.SYSTEM_ROLE;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -45,7 +44,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
-import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
@@ -505,7 +503,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Test the polling time based on different maintenance window start and end time.")
-    public void testSleepTimeResponseForDifferentMaintenanceWindowParameters() throws Exception {
+    public void sleepTimeResponseForDifferentMaintenanceWindowParameters() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
         securityRule.runAs(WithSpringAuthorityRule.withUser("tenantadmin", HAS_AUTH_TENANT_CONFIGURATION), () -> {
@@ -516,38 +514,34 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
             return null;
         });
 
-        Target savedTarget = testdataFactory.createTarget("1911");
-        assignDistributionSetWithMaintenanceWindow(ds.getId(), savedTarget.getControllerId(),
-                AbstractIntegrationTest.getTestSchedule(16), AbstractIntegrationTest.getTestDuration(10),
-                AbstractIntegrationTest.getTestTimeZone()).getAssignedEntity().iterator().next();
+        final Target savedTarget = testdataFactory.createTarget("1911");
+        assignDistributionSetWithMaintenanceWindow(ds.getId(), savedTarget.getControllerId(), getTestSchedule(16),
+                getTestDuration(10), getTestTimeZone()).getAssignedEntity().iterator().next();
 
         mvc.perform(get("/default-tenant/controller/v1/1911/")).andExpect(status().isOk())
                 .andExpect(jsonPath("$.config.polling.sleep", greaterThanOrEqualTo("00:05:00")));
 
-        Target savedTarget1 = testdataFactory.createTarget("2911");
+        final Target savedTarget1 = testdataFactory.createTarget("2911");
         final DistributionSet ds1 = testdataFactory.createDistributionSet("1");
-        assignDistributionSetWithMaintenanceWindow(ds1.getId(), savedTarget1.getControllerId(),
-                AbstractIntegrationTest.getTestSchedule(10), AbstractIntegrationTest.getTestDuration(10),
-                AbstractIntegrationTest.getTestTimeZone()).getAssignedEntity().iterator().next();
+        assignDistributionSetWithMaintenanceWindow(ds1.getId(), savedTarget1.getControllerId(), getTestSchedule(10),
+                getTestDuration(10), getTestTimeZone()).getAssignedEntity().iterator().next();
 
         mvc.perform(get("/default-tenant/controller/v1/2911/")).andExpect(status().isOk())
                 .andExpect(jsonPath("$.config.polling.sleep", lessThan("00:05:00")))
                 .andExpect(jsonPath("$.config.polling.sleep", greaterThanOrEqualTo("00:03:00")));
 
-        Target savedTarget2 = testdataFactory.createTarget("3911");
+        final Target savedTarget2 = testdataFactory.createTarget("3911");
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2");
-        assignDistributionSetWithMaintenanceWindow(ds2.getId(), savedTarget2.getControllerId(),
-                AbstractIntegrationTest.getTestSchedule(5), AbstractIntegrationTest.getTestDuration(5),
-                AbstractIntegrationTest.getTestTimeZone()).getAssignedEntity().iterator().next();
+        assignDistributionSetWithMaintenanceWindow(ds2.getId(), savedTarget2.getControllerId(), getTestSchedule(5),
+                getTestDuration(5), getTestTimeZone()).getAssignedEntity().iterator().next();
 
         mvc.perform(get("/default-tenant/controller/v1/3911/")).andExpect(status().isOk())
                 .andExpect(jsonPath("$.config.polling.sleep", lessThan("00:02:00")));
 
-        Target savedTarget3 = testdataFactory.createTarget("4911");
+        final Target savedTarget3 = testdataFactory.createTarget("4911");
         final DistributionSet ds3 = testdataFactory.createDistributionSet("3");
-        assignDistributionSetWithMaintenanceWindow(ds3.getId(), savedTarget3.getControllerId(),
-                AbstractIntegrationTest.getTestSchedule(-5), AbstractIntegrationTest.getTestDuration(15),
-                AbstractIntegrationTest.getTestTimeZone()).getAssignedEntity().iterator().next();
+        assignDistributionSetWithMaintenanceWindow(ds3.getId(), savedTarget3.getControllerId(), getTestSchedule(-5),
+                getTestDuration(15), getTestTimeZone()).getAssignedEntity().iterator().next();
 
         mvc.perform(get("/default-tenant/controller/v1/4911/")).andExpect(status().isOk())
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:05:00")));
@@ -556,12 +550,11 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Test download and update values before maintenance window start time.")
-    public void testDownloadAndUpdateStatusBeforeMaintenaceWindowStartTime() throws Exception {
+    public void downloadAndUpdateStatusBeforeMaintenanceWindowStartTime() throws Exception {
         Target savedTarget = testdataFactory.createTarget("1911");
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         savedTarget = assignDistributionSetWithMaintenanceWindow(ds.getId(), savedTarget.getControllerId(),
-                AbstractIntegrationTest.getTestSchedule(2), AbstractIntegrationTest.getTestDuration(1),
-                AbstractIntegrationTest.getTestTimeZone()).getAssignedEntity().iterator().next();
+                getTestSchedule(2), getTestDuration(1), getTestTimeZone()).getAssignedEntity().iterator().next();
 
         mvc.perform(get("/default-tenant/controller/v1/1911/")).andExpect(status().isOk());
 
@@ -576,12 +569,11 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Test download and update values after maintenance window start time.")
-    public void testDownloadAndUpdateStatusDuringMaintenaceWindow() throws Exception {
+    public void downloadAndUpdateStatusDuringMaintenanceWindow() throws Exception {
         Target savedTarget = testdataFactory.createTarget("1911");
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         savedTarget = assignDistributionSetWithMaintenanceWindow(ds.getId(), savedTarget.getControllerId(),
-                AbstractIntegrationTest.getTestSchedule(-5), AbstractIntegrationTest.getTestDuration(10),
-                AbstractIntegrationTest.getTestTimeZone()).getAssignedEntity().iterator().next();
+                getTestSchedule(-5), getTestDuration(10), getTestTimeZone()).getAssignedEntity().iterator().next();
 
         mvc.perform(get("/default-tenant/controller/v1/1911/")).andExpect(status().isOk());
 

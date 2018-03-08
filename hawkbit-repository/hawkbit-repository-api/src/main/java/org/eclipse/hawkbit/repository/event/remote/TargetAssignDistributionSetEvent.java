@@ -26,6 +26,8 @@ public class TargetAssignDistributionSetEvent extends RemoteTenantAwareEvent {
 
     private long distributionSetId;
 
+    private boolean maintenanceWindowAvailable;
+
     private final Map<String, Long> actions = new HashMap<>();
 
     /**
@@ -46,22 +48,30 @@ public class TargetAssignDistributionSetEvent extends RemoteTenantAwareEvent {
      *            the actions and the targets
      * @param applicationId
      *            the application id.
+     * @param maintenanceWindowAvailable
+     *            see {@link Action#isMaintenanceWindowAvailable()}
      */
     public TargetAssignDistributionSetEvent(final String tenant, final long distributionSetId, final List<Action> a,
-            final String applicationId) {
+            final String applicationId, final boolean maintenanceWindowAvailable) {
         super(distributionSetId, tenant, applicationId);
         this.distributionSetId = distributionSetId;
+        this.maintenanceWindowAvailable = maintenanceWindowAvailable;
         actions.putAll(a.stream().filter(action -> action.getDistributionSet().getId().longValue() == distributionSetId)
                 .collect(Collectors.toMap(action -> action.getTarget().getControllerId(), Action::getId)));
 
     }
 
     public TargetAssignDistributionSetEvent(final Action action, final String applicationId) {
-        this(action.getTenant(), action.getDistributionSet().getId(), Arrays.asList(action), applicationId);
+        this(action.getTenant(), action.getDistributionSet().getId(), Arrays.asList(action), applicationId,
+                action.isMaintenanceWindowAvailable());
     }
 
     public Long getDistributionSetId() {
         return distributionSetId;
+    }
+
+    public boolean isMaintenanceWindowAvailable() {
+        return maintenanceWindowAvailable;
     }
 
     public Map<String, Long> getActions() {

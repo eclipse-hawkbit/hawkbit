@@ -161,8 +161,9 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
 
     }
 
-    protected void assertDownloadAndInstallMessage(final Set<SoftwareModule> dsModules, final String controllerId) {
-        final Message replyMessage = assertReplyMessageHeader(EventTopic.DOWNLOAD_AND_INSTALL, controllerId);
+    private void assertAssignmentMessage(final Set<SoftwareModule> dsModules, final String controllerId,
+            final EventTopic topic) {
+        final Message replyMessage = assertReplyMessageHeader(topic, controllerId);
         assertAllTargetsCount(1);
 
         final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = (DmfDownloadAndUpdateRequest) getDmfClient()
@@ -178,6 +179,14 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         final Target updatedTarget = waitUntilIsPresent(() -> targetManagement.getByControllerID(controllerId));
 
         assertThat(updatedTarget.getSecurityToken()).isEqualTo(downloadAndUpdateRequest.getTargetSecurityToken());
+    }
+
+    protected void assertDownloadAndInstallMessage(final Set<SoftwareModule> dsModules, final String controllerId) {
+        assertAssignmentMessage(dsModules, controllerId, EventTopic.DOWNLOAD_AND_INSTALL);
+    }
+
+    protected void assertDownloadMessage(final Set<SoftwareModule> dsModules, final String controllerId) {
+        assertAssignmentMessage(dsModules, controllerId, EventTopic.DOWNLOAD);
     }
 
     protected void createAndSendTarget(final String target, final String tenant) {
@@ -222,6 +231,10 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         assertThat(headers.get(MessageHeaderKey.TENANT)).isEqualTo(TENANT_EXIST);
         assertThat(headers.get(MessageHeaderKey.TYPE)).isEqualTo(MessageType.EVENT.toString());
         return replyMessage;
+    }
+
+    protected void registerAndAssertTargetWithExistingTenant(final String controllerId) {
+        registerAndAssertTargetWithExistingTenant(controllerId, 1);
     }
 
     protected void registerAndAssertTargetWithExistingTenant(final String target,
