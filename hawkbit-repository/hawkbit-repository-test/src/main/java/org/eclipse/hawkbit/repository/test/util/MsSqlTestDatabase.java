@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2018 Bosch Software Innovations GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -21,8 +21,8 @@ import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 /**
- * A {@link TestExecutionListener} for creating and dropping MySql schemas if
- * tests are setup with MySql.
+ * A {@link TestExecutionListener} for creating and dropping MS SQL Server
+ * schemas if tests are setup with MS SQL Server.
  */
 public class MsSqlTestDatabase extends AbstractTestExecutionListener {
 
@@ -77,8 +77,9 @@ public class MsSqlTestDatabase extends AbstractTestExecutionListener {
 
     private void dropSchema() {
         try (Connection connection = DriverManager.getConnection(uri, username, password)) {
+            // Needed to avoid the DROP is rejected with "database still in use"
             try (PreparedStatement statement = connection
-                    .prepareStatement("ALTER DATABASE " + schemaName + " set single_user with rollback immediate;")) {
+                    .prepareStatement("ALTER DATABASE " + schemaName + " SET SINGLE_USER WITH ROLLBACK IMMEDIATE;")) {
                 statement.execute();
             }
 
