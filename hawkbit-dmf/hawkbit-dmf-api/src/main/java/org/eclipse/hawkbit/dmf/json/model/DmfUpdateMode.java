@@ -6,21 +6,17 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository;
+package org.eclipse.hawkbit.dmf.json.model;
 
-import java.util.Arrays;
-import java.util.Optional;
-
-public enum UpdateMode {
+/**
+ * Mode representing different attribute update strategies.
+ */
+public enum DmfUpdateMode {
 
     MERGE,
 
     REPLACE,
 
     REMOVE;
-
-    public static Optional<UpdateMode> valueOfIgnoreCase(final String name) {
-        return Arrays.stream(values()).filter(mode -> mode.name().equalsIgnoreCase(name)).findFirst();
-    }
 
 }

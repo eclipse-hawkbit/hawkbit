@@ -24,10 +24,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DmfAttributeUpdate {
+
     @JsonProperty
     private final Map<String, String> attributes = new HashMap<>();
+
+    @JsonProperty
+    private DmfUpdateMode mode;
+
+    public DmfUpdateMode getMode() {
+        return mode;
+    }
+
+    public void setMode(final DmfUpdateMode mode) {
+        this.mode = mode;
+    }
 
     public Map<String, String> getAttributes() {
         return attributes;
     }
+
 }
