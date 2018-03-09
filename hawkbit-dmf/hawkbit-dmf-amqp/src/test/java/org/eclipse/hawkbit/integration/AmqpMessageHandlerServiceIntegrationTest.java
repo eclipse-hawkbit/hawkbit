@@ -647,45 +647,53 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         registerAndAssertTargetWithExistingTenant(controllerId);
 
         // send a update message which does not specify a update mode
+        final Map<String, String> initialAttributes = new HashMap<>();
+        initialAttributes.put("k0", "v0");
+        initialAttributes.put("k1", "v1");
         final DmfAttributeUpdate defaultUpdate = new DmfAttributeUpdate();
-        defaultUpdate.getAttributes().put("k0", "v0");
-        defaultUpdate.getAttributes().put("k1", "v1");
+        defaultUpdate.getAttributes().putAll(initialAttributes);
         sendUpdateAttributeMessage(controllerId, TENANT_EXIST, defaultUpdate);
 
         // validate
-        Map<String, String> expectedAttributes = new HashMap<>(defaultUpdate.getAttributes());
+        Map<String, String> expectedAttributes = initialAttributes;
         assertUpdateAttributes(controllerId, expectedAttributes);
 
         // send a update message with update mode REPLACE
+        final Map<String, String> replacementAttributes = new HashMap<>();
+        replacementAttributes.put("k1", "v1_modified");
+        replacementAttributes.put("k2", "v2");
+        replacementAttributes.put("k3", "v3");
         final DmfAttributeUpdate replace = new DmfAttributeUpdate();
         replace.setMode(DmfUpdateMode.REPLACE);
-        replace.getAttributes().put("k1", "v1_modified");
-        replace.getAttributes().put("k2", "v2");
-        replace.getAttributes().put("k3", "v3");
+        replace.getAttributes().putAll(replacementAttributes);
         sendUpdateAttributeMessage(controllerId, TENANT_EXIST, replace);
 
         // validate
-        expectedAttributes = new HashMap<>(replace.getAttributes());
+        expectedAttributes = replacementAttributes;
         assertUpdateAttributes(controllerId, expectedAttributes);
 
         // send a update message with update mode MERGE
+        final Map<String, String> mergeAttributes = new HashMap<>();
+        mergeAttributes.put("k1", "v1_modified_again");
+        mergeAttributes.put("k4", "v4");
         final DmfAttributeUpdate merge = new DmfAttributeUpdate();
         merge.setMode(DmfUpdateMode.MERGE);
-        merge.getAttributes().put("k1", "v1_modified_again");
-        merge.getAttributes().put("k4", "v4");
+        merge.getAttributes().putAll(mergeAttributes);
         sendUpdateAttributeMessage(controllerId, TENANT_EXIST, merge);
 
         // validate
         expectedAttributes = new HashMap<>();
-        expectedAttributes.putAll(replace.getAttributes());
-        expectedAttributes.putAll(merge.getAttributes());
+        expectedAttributes.putAll(replacementAttributes);
+        expectedAttributes.putAll(mergeAttributes);
         assertUpdateAttributes(controllerId, expectedAttributes);
 
         // send a update message with update mode MERGE
+        final Map<String, String> removeAttributes = new HashMap<>();
+        removeAttributes.put("k1", "foo");
+        removeAttributes.put("k3", "bar");
         final DmfAttributeUpdate remove = new DmfAttributeUpdate();
         remove.setMode(DmfUpdateMode.REMOVE);
-        remove.getAttributes().put("k1", "foo");
-        remove.getAttributes().put("k3", "bar");
+        remove.getAttributes().putAll(removeAttributes);
         sendUpdateAttributeMessage(controllerId, TENANT_EXIST, remove);
 
         // validate
