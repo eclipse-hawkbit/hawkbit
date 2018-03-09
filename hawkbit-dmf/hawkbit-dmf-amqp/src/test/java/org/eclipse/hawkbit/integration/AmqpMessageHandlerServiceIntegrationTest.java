@@ -10,7 +10,9 @@ package org.eclipse.hawkbit.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -22,6 +24,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
+import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
@@ -634,7 +637,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     }
 
     @Test
-    @Description("Verify that sending an update controller attribute message to an existing target works.")
+    @Description("Verify that sending an update controller attribute message to an existing target works. Verify that different update modes (merge, replace, remove) can be used.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
     public void updateAttributes() {
@@ -642,15 +645,54 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
 
         // setup
         registerAndAssertTargetWithExistingTenant(controllerId);
-        final DmfAttributeUpdate controllerAttribute = new DmfAttributeUpdate();
-        controllerAttribute.getAttributes().put("test1", "testA");
-        controllerAttribute.getAttributes().put("test2", "testB");
 
-        // test
-        sendUpdateAttributeMessage(controllerId, TENANT_EXIST, controllerAttribute);
+        // send a update message which does not specify a update mode
+        final DmfAttributeUpdate defaultUpdate = new DmfAttributeUpdate();
+        defaultUpdate.getAttributes().put("k0", "v0");
+        defaultUpdate.getAttributes().put("k1", "v1");
+        sendUpdateAttributeMessage(controllerId, TENANT_EXIST, defaultUpdate);
 
         // validate
-        assertUpdateAttributes(controllerId, controllerAttribute.getAttributes());
+        Map<String, String> expectedAttributes = new HashMap<>(defaultUpdate.getAttributes());
+        assertUpdateAttributes(controllerId, expectedAttributes);
+
+        // send a update message with update mode REPLACE
+        final DmfAttributeUpdate replace = new DmfAttributeUpdate();
+        replace.setMode(DmfUpdateMode.REPLACE);
+        replace.getAttributes().put("k1", "v1_modified");
+        replace.getAttributes().put("k2", "v2");
+        replace.getAttributes().put("k3", "v3");
+        sendUpdateAttributeMessage(controllerId, TENANT_EXIST, replace);
+
+        // validate
+        expectedAttributes = new HashMap<>(replace.getAttributes());
+        assertUpdateAttributes(controllerId, expectedAttributes);
+
+        // send a update message with update mode MERGE
+        final DmfAttributeUpdate merge = new DmfAttributeUpdate();
+        merge.setMode(DmfUpdateMode.MERGE);
+        merge.getAttributes().put("k1", "v1_modified_again");
+        merge.getAttributes().put("k4", "v4");
+        sendUpdateAttributeMessage(controllerId, TENANT_EXIST, merge);
+
+        // validate
+        expectedAttributes = new HashMap<>();
+        expectedAttributes.putAll(replace.getAttributes());
+        expectedAttributes.putAll(merge.getAttributes());
+        assertUpdateAttributes(controllerId, expectedAttributes);
+
+        // send a update message with update mode MERGE
+        final DmfAttributeUpdate remove = new DmfAttributeUpdate();
+        remove.setMode(DmfUpdateMode.REMOVE);
+        remove.getAttributes().put("k1", "foo");
+        remove.getAttributes().put("k3", "bar");
+        sendUpdateAttributeMessage(controllerId, TENANT_EXIST, remove);
+
+        // validate
+        expectedAttributes.remove("k1");
+        expectedAttributes.remove("k4");
+        assertUpdateAttributes(controllerId, expectedAttributes);
+
     }
 
     @Test
