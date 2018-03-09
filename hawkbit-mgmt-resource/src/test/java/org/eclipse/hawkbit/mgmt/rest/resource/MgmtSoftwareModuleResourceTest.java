@@ -115,6 +115,39 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     }
 
     @Test
+    @Description("Tests the update of the deletion flag. It is verfied that the software module can't be marked as deleted through update operation.")
+    @WithUser(principal = "smUpdateTester", allSpPermissions = true)
+    public void updateSoftwareModuleDeletedFlag() throws Exception {
+        final String knownSWName = "name1";
+        final String knownSWVersion = "version1";
+
+        SoftwareModule sm = softwareModuleManagement
+                .create(entityFactory.softwareModule().create().type(osType).name(knownSWName).version(knownSWVersion));
+
+        assertThat(sm.getName()).as("Wrong name of the software module").isEqualTo(knownSWName);
+        assertThat(sm.isDeleted()).as("Created software module should not be deleted").isEqualTo(false);
+
+        final String body = new JSONObject().put("name", "nameShouldNotBeChanged").put("deleted", true).toString();
+
+        // ensures that we are not to fast so that last modified is not set
+        // correctly
+        Thread.sleep(1);
+
+        mvc.perform(put("/rest/v1/softwaremodules/{smId}", sm.getId()).content(body)
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", equalTo(sm.getId().intValue())))
+                .andExpect(jsonPath("$.lastModifiedBy", equalTo("smUpdateTester")))
+                .andExpect(jsonPath("$.lastModifiedAt", equalTo(sm.getLastModifiedAt())))
+                .andExpect(jsonPath("$.name", equalTo(knownSWName))).andExpect(jsonPath("$.deleted", equalTo(false)));
+
+        sm = softwareModuleManagement.get(sm.getId()).get();
+        assertThat(sm.getName()).isEqualTo(knownSWName);
+        assertThat(sm.getLastModifiedBy()).isEqualTo("smUpdateTester");
+        assertThat(sm.isDeleted()).isEqualTo(false);
+
+    }
+
+    @Test
     @Description("Tests the uppload of an artifact binary. The upload is executed and the content checked in the repository for completenes.")
     public void uploadArtifact() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
@@ -614,6 +647,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(jsonPath("$.description", equalTo(os.getDescription())))
                 .andExpect(jsonPath("$.vendor", equalTo(os.getVendor())))
                 .andExpect(jsonPath("$.type", equalTo(os.getType().getKey())))
+                .andExpect(jsonPath("$.deleted", equalTo(os.isDeleted())))
                 .andExpect(jsonPath("$.createdBy", equalTo("uploadTester")))
                 .andExpect(jsonPath("$.createdAt", equalTo(os.getCreatedAt())))
                 .andExpect(jsonPath("$._links.metadata.href",
@@ -706,28 +740,29 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     }
 
     @Test
-    @Description("Verifies successfull deletion of software modules that are in use, i.e. assigned to a DS which should result in movinf the module to the archive.")
+    @Description("Verifies successfull deletion of a software module that is in use, i.e. assigned to a DS which should result in movinf the module to the archive.")
     public void deleteAssignedSoftwareModule() throws Exception {
         final DistributionSet ds1 = testdataFactory.createDistributionSet("a");
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
-        artifactManagement.create(new ByteArrayInputStream(random), ds1.findFirstModuleByType(appType).get().getId(),
-                "file1", false);
+        final Long appTypeSmId = ds1.findFirstModuleByType(appType).get().getId();
+
+        artifactManagement.create(new ByteArrayInputStream(random), appTypeSmId, "file1", false);
 
         assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(3);
         assertThat(artifactManagement.count()).isEqualTo(1);
 
-        mvc.perform(delete("/rest/v1/softwaremodules/{smId}", ds1.findFirstModuleByType(appType).get().getId()))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
-        mvc.perform(delete("/rest/v1/softwaremodules/{smId}", ds1.findFirstModuleByType(runtimeType).get().getId()))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
-        mvc.perform(delete("/rest/v1/softwaremodules/{smId}", ds1.findFirstModuleByType(osType).get().getId()))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+        mvc.perform(get("/rest/v1/softwaremodules/{smId}", appTypeSmId)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.deleted", equalTo(false)));
 
-        // all 3 are now marked as deleted
-        assertThat(softwareModuleManagement.findAll(PAGE).getNumber())
-                .as("After delete no softwarmodule should be available").isEqualTo(0);
+        mvc.perform(delete("/rest/v1/softwaremodules/{smId}", appTypeSmId)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+
+        mvc.perform(get("/rest/v1/softwaremodules/{smId}", appTypeSmId)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.deleted", equalTo(true)));
+
+        assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(2);
         assertThat(artifactManagement.count()).isEqualTo(1);
     }
 

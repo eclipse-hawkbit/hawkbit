@@ -221,7 +221,8 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
                 .andExpect(jsonPath("$.createdBy", equalTo("uploadTester")))
                 .andExpect(jsonPath("$.createdAt", equalTo(testType.getCreatedAt())))
                 .andExpect(jsonPath("$.lastModifiedBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$.lastModifiedAt", equalTo(testType.getLastModifiedAt())));
+                .andExpect(jsonPath("$.lastModifiedAt", equalTo(testType.getLastModifiedAt())))
+                .andExpect(jsonPath("$.deleted", equalTo(testType.isDeleted())));
     }
 
     @Test
@@ -255,8 +256,14 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
 
         assertThat(softwareModuleTypeManagement.count()).isEqualTo(4);
 
+        mvc.perform(get("/rest/v1/softwaremoduletypes/{smId}", testType.getId())).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.deleted", equalTo(false)));
+
         mvc.perform(delete("/rest/v1/softwaremoduletypes/{smId}", testType.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
+
+        mvc.perform(get("/rest/v1/softwaremoduletypes/{smId}", testType.getId())).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.deleted", equalTo(true)));
 
         assertThat(softwareModuleTypeManagement.count()).isEqualTo(3);
     }
@@ -274,6 +281,21 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
                 .andExpect(jsonPath("$.id", equalTo(testType.getId().intValue())))
                 .andExpect(jsonPath("$.description", equalTo("foobardesc")))
                 .andExpect(jsonPath("$.name", equalTo("TestName123"))).andReturn();
+
+    }
+
+    @Test
+    @Description("Tests the update of the deletion flag. It is verfied that the software module type can't be marked as deleted through update operation.")
+    public void updateSoftwareModuleTypeDeletedFlag() throws Exception {
+        final SoftwareModuleType testType = createTestType();
+
+        final String body = new JSONObject().put("id", testType.getId()).put("name", "nameShouldNotBeChanged")
+                .put("deleted", true).toString();
+
+        mvc.perform(put("/rest/v1/softwaremoduletypes/{smId}", testType.getId()).content(body)
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", equalTo(testType.getId().intValue())))
+                .andExpect(jsonPath("$.name", equalTo("TestName123"))).andExpect(jsonPath("$.deleted", equalTo(false)));
 
     }
 

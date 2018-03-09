@@ -609,6 +609,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("$.requiredMigrationStep", equalTo(set.isRequiredMigrationStep())))
                 .andExpect(jsonPath("$.createdBy", equalTo(set.getCreatedBy())))
                 .andExpect(jsonPath("$.complete", equalTo(Boolean.TRUE)))
+                .andExpect(jsonPath("$.deleted", equalTo(set.isDeleted())))
                 .andExpect(jsonPath("$.createdAt", equalTo(set.getCreatedAt())))
                 .andExpect(jsonPath("$.lastModifiedBy", equalTo(set.getLastModifiedBy())))
                 .andExpect(jsonPath("$.lastModifiedAt", equalTo(set.getLastModifiedAt())))
@@ -771,9 +772,14 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(1);
 
-        // perform request
+        mvc.perform(get("/rest/v1/distributionsets/{smId}", set.getId())).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.deleted", equalTo(false)));
+
         mvc.perform(delete("/rest/v1/distributionsets/{smId}", set.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
+
+        mvc.perform(get("/rest/v1/distributionsets/{smId}", set.getId())).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.deleted", equalTo(true)));
 
         // check repository content
         assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(0);
@@ -790,16 +796,22 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         assertThat(distributionSetManagement.count()).isEqualTo(1);
 
-        mvc.perform(put("/rest/v1/distributionsets/{dsId}", set.getId())
-                .content("{\"version\":\"anotherVersion\",\"requiredMigrationStep\":\"true\"}")
+        final String body = new JSONObject().put("version", "anotherVersion").put("requiredMigrationStep", true)
+                .put("deleted", true).toString();
+
+        mvc.perform(put("/rest/v1/distributionsets/{dsId}", set.getId()).content(body)
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$.version", equalTo("anotherVersion")))
+                .andExpect(jsonPath("$.requiredMigrationStep", equalTo(true)))
+                .andExpect(jsonPath("$.deleted", equalTo(false)));
 
         final DistributionSet setupdated = distributionSetManagement.get(set.getId()).get();
 
         assertThat(setupdated.isRequiredMigrationStep()).isEqualTo(true);
         assertThat(setupdated.getVersion()).isEqualTo("anotherVersion");
         assertThat(setupdated.getName()).isEqualTo(set.getName());
+        assertThat(setupdated.isDeleted()).isEqualTo(false);
     }
 
     @Test

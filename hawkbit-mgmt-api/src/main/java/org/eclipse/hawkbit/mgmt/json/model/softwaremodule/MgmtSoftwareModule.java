@@ -35,63 +35,46 @@ public class MgmtSoftwareModule extends MgmtNamedEntity {
     @JsonProperty
     private String vendor;
 
-    /**
-     * @return the moduleId
-     */
+    @JsonProperty
+    private Boolean deleted;
+
+    public void setDeleted(final Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
     public Long getModuleId() {
         return moduleId;
     }
 
-    /**
-     * @param moduleId
-     *            the moduleId to set
-     */
     @JsonIgnore
     public void setModuleId(final Long moduleId) {
         this.moduleId = moduleId;
     }
 
-    /**
-     * @return the version
-     */
     public String getVersion() {
         return version;
     }
 
-    /**
-     * @param version
-     *            the version to set
-     */
     public void setVersion(final String version) {
         this.version = version;
     }
 
-    /**
-     * @return the type
-     */
     public String getType() {
         return type;
     }
 
-    /**
-     * @param type
-     *            the type to set
-     */
     public void setType(final String type) {
         this.type = type;
     }
 
-    /**
-     * @return the vendor
-     */
     public String getVendor() {
         return vendor;
     }
 
-    /**
-     * @param vendor
-     *            the vendor to set
-     */
     public void setVendor(final String vendor) {
         this.vendor = vendor;
     }
