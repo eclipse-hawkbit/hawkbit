@@ -639,7 +639,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     @Test
     @Description("Verify that sending an update controller attribute message to an existing target works. Verify that different update modes (merge, replace, remove) can be used.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
+            @Expect(type = TargetUpdatedEvent.class, count = 4), @Expect(type = TargetPollEvent.class, count = 1) })
     public void updateAttributes() {
         final String controllerId = TARGET_PREFIX + "updateAttributes";
 
@@ -698,7 +698,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
 
         // validate
         expectedAttributes.remove("k1");
-        expectedAttributes.remove("k4");
+        expectedAttributes.remove("k3");
         assertUpdateAttributes(controllerId, expectedAttributes);
 
     }
