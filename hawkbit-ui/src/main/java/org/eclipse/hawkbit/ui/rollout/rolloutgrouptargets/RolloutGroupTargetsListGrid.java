@@ -60,6 +60,8 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid<LazyQueryContainer
                 new StatusFontIcon(FontAwesome.ADJUST, SPUIStyleDefinitions.STATUS_ICON_YELLOW));
         statusIconMap.put(Status.DOWNLOAD,
                 new StatusFontIcon(FontAwesome.ADJUST, SPUIStyleDefinitions.STATUS_ICON_YELLOW));
+        statusIconMap.put(Status.DOWNLOADED,
+                new StatusFontIcon(FontAwesome.ADJUST, SPUIStyleDefinitions.STATUS_ICON_YELLOW));
         statusIconMap.put(Status.CANCELING,
                 new StatusFontIcon(FontAwesome.TIMES_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_PENDING));
         statusIconMap.put(Status.CANCELED,
