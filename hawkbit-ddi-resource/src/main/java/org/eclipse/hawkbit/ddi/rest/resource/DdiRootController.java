@@ -380,6 +380,12 @@ public class DdiRootController implements DdiRootControllerRestApi {
         case CLOSED:
             status = handleClosedCase(feedback, controllerId, actionid, messages);
             break;
+        case DOWNLOAD:
+            LOG.debug("Controller confirmed status of download (actionId: {}, controllerId: {}) as we got {} report.",
+                    actionid, controllerId, feedback.getStatus().getExecution());
+            status = Status.DOWNLOAD;
+            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target confirmed download of distribution set.");
+            break;
         case DOWNLOADED:
             LOG.debug("Controller confirmed download (actionId: {}, controllerId: {}) as we got {} report.", actionid,
                     controllerId, feedback.getStatus().getExecution());

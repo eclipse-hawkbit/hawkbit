@@ -107,7 +107,12 @@ public class DdiStatus {
         /**
          * The action has been downloaded by the target.
          */
-        DOWNLOADED("downloaded");
+        DOWNLOADED("downloaded"),
+
+        /**
+         * Target starts to download.
+         */
+        DOWNLOAD("download");
 
         private String name;
 
