@@ -724,6 +724,8 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
                     i18n.getMessage("label.cancelled"), statusLabelId));
             stateMap.put(Action.Status.RETRIEVED, new StatusFontIcon(FontAwesome.CIRCLE_O, STATUS_ICON_PENDING,
                     i18n.getMessage("label.retrieved"), statusLabelId));
+            stateMap.put(Action.Status.DOWNLOADED, new StatusFontIcon(FontAwesome.CLOUD_DOWNLOAD, STATUS_ICON_GREEN,
+                    i18n.getMessage("label.downloaded"), statusLabelId));
             stateMap.put(Action.Status.DOWNLOAD, new StatusFontIcon(FontAwesome.CLOUD_DOWNLOAD, STATUS_ICON_PENDING,
                     i18n.getMessage("label.download"), statusLabelId));
             stateMap.put(Action.Status.SCHEDULED, new StatusFontIcon(FontAwesome.HOURGLASS_1, STATUS_ICON_PENDING,
