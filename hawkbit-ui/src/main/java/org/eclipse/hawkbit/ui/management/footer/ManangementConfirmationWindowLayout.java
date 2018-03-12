@@ -49,8 +49,8 @@ import com.google.common.collect.Maps;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.Accordion;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.Table.Align;
 
 /**
@@ -143,18 +143,20 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         assignmentTab.getTable().setColumnAlignment(DISCARD_CHANGES, Align.CENTER);
 
         actionTypeOptionGroupLayout.selectDefaultOption();
-        assignmentTab.addComponent(createAccordion(), 1);
+        assignmentTab.addComponent(createTabSheet(), 1);
 
         return assignmentTab;
 
     }
 
-    private Accordion createAccordion() {
-        final Accordion accordion = new Accordion();
-        accordion.setHeightUndefined();
-        accordion.addTab(maintenanceWindowLayout, "Maintenance Schedule");
-        accordion.addTab(actionTypeOptionGroupLayout, "Action Types");
-        return accordion;
+    private TabSheet createTabSheet() {
+        final TabSheet tabSheet = new TabSheet();
+        tabSheet.setHeightUndefined();
+        tabSheet.addTab(actionTypeOptionGroupLayout, 
+                i18n.getMessage("caption.assign.software.dist.tab.actiontypes"));
+        tabSheet.addTab(maintenanceWindowLayout,
+                i18n.getMessage("caption.assign.software.dist.tab.maintananceschedule"));
+        return tabSheet;
     }
 
     private void saveAllAssignments(final ConfirmationTab tab) {
