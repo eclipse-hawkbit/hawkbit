@@ -16,32 +16,31 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
+import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.Validator;
-import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * {@link MaintenanceWindowLayout} defines UI layout that is used to specify the
  * maintenance schedule while assigning distribution set(s) to the target(s).
  */
-public class MaintenanceWindowLayout extends VerticalLayout {
+public class MaintenanceWindowLayout extends HorizontalLayout {
 
     private static final long serialVersionUID = 722511089585562455L;
 
     private final VaadinMessageSource i18n;
 
-    private CheckBox maintenanceWindowSelection;
+    private final UINotification uiNotification;
+
     private TextField schedule;
     private TextField duration;
     private ComboBox timeZone;
@@ -53,50 +52,40 @@ public class MaintenanceWindowLayout extends VerticalLayout {
      *            (@link VaadinMessageSource} to get the localized resource
      *            strings.
      */
-    public MaintenanceWindowLayout(final VaadinMessageSource i18n) {
-
-        HorizontalLayout optionContainer;
-        HorizontalLayout controlContainer;
+    public MaintenanceWindowLayout(final VaadinMessageSource i18n, final UINotification uiNotification) {
 
         this.i18n = i18n;
+        this.uiNotification = uiNotification;
 
-        optionContainer = new HorizontalLayout();
-        controlContainer = new HorizontalLayout();
-        addComponent(optionContainer);
-        addComponent(controlContainer);
-
-        createMaintenanceWindowOption();
         createMaintenanceScheduleControl();
         createMaintenanceDurationControl();
         createMaintenanceTimeZoneControl();
 
-        optionContainer.addComponent(maintenanceWindowSelection);
-        controlContainer.addComponent(schedule);
-        controlContainer.addComponent(duration);
-        controlContainer.addComponent(timeZone);
+        addComponent(schedule);
+        addComponent(duration);
+        addComponent(timeZone);
 
-        addValueChangeListener();
-        maintenanceWindowSelection.setValue(false);
         setStyleName("dist-window-maintenance-window-layout");
     }
 
     /**
      * Validates if the maintenance schedule is a valid cron expression.
      */
-    private static class CronValidation implements Validator {
+    private class CronValidation implements Validator {
         private static final long serialVersionUID = 1L;
 
         @Override
-        public void validate(final Object value) throws InvalidValueException {
+        public void validate(final Object value) {
             try {
+
                 final String expr = (String) value;
                 if (!expr.isEmpty()) {
                     MaintenanceScheduleHelper.validateMaintenanceSchedule((String) value, "00:00:00",
                             getClientTimeZone());
                 }
             } catch (final IllegalArgumentException e) {
-                Notification.show(e.getMessage());
-                throw e;
+                uiNotification
+                        .displayValidationError(i18n.getMessage("message.maintenancewindow.schedule.validation.error"));
             }
         }
     }
@@ -104,66 +93,55 @@ public class MaintenanceWindowLayout extends VerticalLayout {
     /**
      * Validates if the duration is specified in expected format.
      */
-    private static class DurationValidator implements Validator {
+    private class DurationValidator implements Validator {
         private static final long serialVersionUID = 1L;
 
         @Override
         public void validate(final Object value) {
             try {
-                final String expr = (String) value;
-                if (!StringUtils.isEmpty(expr)) {
-                    MaintenanceScheduleHelper.convertToISODuration((String) value);
+                final String expression = (String) value;
+                if (StringUtils.hasText(expression)) {
+                    MaintenanceScheduleHelper.convertToISODuration(expression);
                 }
             } catch (final DateTimeParseException e) {
-                Notification.show(e.getMessage());
-                throw e;
+                uiNotification
+                        .displayValidationError(i18n.getMessage("message.maintenancewindow.duration.validation.error"));
             }
         }
-    }
-
-    /**
-     * Create check box to enable or disable maintenance window.
-     */
-    private void createMaintenanceWindowOption() {
-        maintenanceWindowSelection = new CheckBox(i18n.getMessage("caption.maintenancewindow.enable"));
-        maintenanceWindowSelection.addStyleName(ValoTheme.CHECKBOX_SMALL);
     }
 
     /**
      * Text field to specify the schedule.
      */
     private void createMaintenanceScheduleControl() {
-        schedule = new TextField();
-        schedule.setCaption(i18n.getMessage("caption.maintenancewindow.schedule"));
-        schedule.addValidator(new CronValidation());
-        schedule.setEnabled(false);
-        schedule.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+        schedule = new TextFieldBuilder().id(UIComponentIdProvider.MAINTENANCE_WINDOW_SCHEDULE_ID)
+                .caption(i18n.getMessage("caption.maintenancewindow.schedule")).immediate(true)
+                .validator(new CronValidation()).prompt("Cron Expression").buildTextComponent();
     }
 
     /**
      * Text field to specify the duration.
      */
     private void createMaintenanceDurationControl() {
-        duration = new TextField();
-        duration.setCaption(i18n.getMessage("caption.maintenancewindow.duration"));
-        duration.addValidator(new DurationValidator());
-        duration.setEnabled(false);
-        schedule.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+        duration = new TextFieldBuilder().id(UIComponentIdProvider.MAINTENANCE_WINDOW_DURATION_ID)
+                .caption(i18n.getMessage("caption.maintenancewindow.duration")).immediate(true)
+                .validator(new DurationValidator()).prompt("hh:mm:ss").buildTextComponent();
     }
 
     /**
      * Combo box to pick the time zone offset.
      */
     private void createMaintenanceTimeZoneControl() {
+        // ComboBoxBuilder cannot be used here, because Builder do
+        // 'comboBox.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);'
+        // which interferes our code: 'timeZone.addItems(getAllTimeZones());'
         timeZone = new ComboBox();
+        timeZone.setId(UIComponentIdProvider.MAINTENANCE_WINDOW_TIME_ZONE_ID);
         timeZone.setCaption(i18n.getMessage("caption.maintenancewindow.timezone"));
-
         timeZone.addItems(getAllTimeZones());
-        timeZone.setTextInputAllowed(false);
         timeZone.setValue(getClientTimeZone());
-
-        timeZone.setEnabled(false);
         timeZone.addStyleName(ValoTheme.COMBOBOX_SMALL);
+        timeZone.setTextInputAllowed(false);
     }
 
     /**
@@ -183,39 +161,6 @@ public class MaintenanceWindowLayout extends VerticalLayout {
                 .collect(Collectors.toList());
         lst.sort(null);
         return lst;
-    }
-
-    /**
-     * Create a listener to enable and disable maintenance schedule controls.
-     */
-    private void addValueChangeListener() {
-        maintenanceWindowSelection.addValueChangeListener(new ValueChangeListener() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void valueChange(final ValueChangeEvent event) {
-                schedule.setEnabled(maintenanceWindowSelection.getValue());
-                schedule.setRequired(maintenanceWindowSelection.getValue());
-                schedule.setValue("");
-
-                duration.setEnabled(maintenanceWindowSelection.getValue());
-                duration.setRequired(maintenanceWindowSelection.getValue());
-                duration.setValue("");
-
-                timeZone.setEnabled(maintenanceWindowSelection.getValue());
-                timeZone.setRequired(maintenanceWindowSelection.getValue());
-                timeZone.setValue(getClientTimeZone());
-            }
-        });
-    }
-
-    /**
-     * Get whether the maintenance schedule option is enabled or not.
-     *
-     * @return boolean.
-     */
-    public boolean isMaintenanceWindowEnabled() {
-        return maintenanceWindowSelection.getValue();
     }
 
     /**

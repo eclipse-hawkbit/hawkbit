@@ -86,14 +86,14 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
             final ManagementViewClientCriterion managementViewClientCriterion,
             final ManagementUIState managementUIState, final TargetManagement targetManagement,
             final TargetTable targetTable, final DeploymentManagement deploymentManagement,
-            final DistributionSetManagement distributionSetManagement) {
+            final DistributionSetManagement distributionSetManagement, final UINotification uiNotification) {
         super(i18n, permChecker, eventBus, notification);
         this.distributionSetTagManagement = distributionSetTagManagement;
         this.targetTagManagement = targetTagManagement;
         this.managementViewClientCriterion = managementViewClientCriterion;
         this.managementUIState = managementUIState;
         this.manangementConfirmationWindowLayout = new ManangementConfirmationWindowLayout(i18n, eventBus,
-                managementUIState, targetManagement, deploymentManagement, distributionSetManagement);
+                managementUIState, targetManagement, deploymentManagement, distributionSetManagement, uiNotification);
         this.countMessageLabel = new CountMessageLabel(eventBus, targetManagement, i18n, managementUIState,
                 targetTable);
         this.targetManagement = targetManagement;
