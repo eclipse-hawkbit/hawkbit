@@ -32,26 +32,16 @@ public class MgmtArtifactHash {
 
     /**
      * Public constructor.
-     *
-     * @param sha1
-     * @param md5
      */
     public MgmtArtifactHash(final String sha1, final String md5) {
-        super();
         this.sha1 = sha1;
         this.md5 = md5;
     }
 
-    /**
-     * @return the sha1
-     */
     public String getSha1() {
         return sha1;
     }
 
-    /**
-     * @return the md5
-     */
     public String getMd5() {
         return md5;
     }

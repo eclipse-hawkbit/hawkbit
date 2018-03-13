@@ -331,8 +331,7 @@ public interface DeploymentManagement {
     Optional<Action> findActionWithDetails(long actionId);
 
     /**
-     * Retrieves all active {@link Action}s of a specific target ordered by
-     * action ID.
+     * Retrieves all active {@link Action}s of a specific target.
      * 
      * @param pageable
      *            the page request parameter for paging and sorting the result
@@ -347,8 +346,7 @@ public interface DeploymentManagement {
     Page<Action> findActiveActionsByTarget(@NotNull Pageable pageable, @NotEmpty String controllerId);
 
     /**
-     * Retrieves all inactive {@link Action}s of a specific target ordered by
-     * action ID.
+     * Retrieves all inactive {@link Action}s of a specific target.
      *
      * @param pageable
      *            the page request parameter for paging and sorting the result

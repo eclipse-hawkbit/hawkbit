@@ -59,8 +59,6 @@ public class DurationField extends DateField {
      * Creates a DurationField
      */
     protected DurationField() {
-        super();
-
         this.setTimeZone(TimeZone.getTimeZone(ZONEID_UTC));
         durationFormat.setTimeZone(TimeZone.getTimeZone(ZONEID_UTC));
         additionalFormat.setTimeZone(TimeZone.getTimeZone(ZONEID_UTC));

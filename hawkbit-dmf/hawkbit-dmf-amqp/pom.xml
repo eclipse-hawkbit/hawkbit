@@ -79,16 +79,6 @@
          <scope>test</scope>
       </dependency>
       <dependency>
-         <groupId>com.h2database</groupId>
-         <artifactId>h2</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.mariadb.jdbc</groupId>
-         <artifactId>mariadb-java-client</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
          <groupId>ru.yandex.qatools.allure</groupId>
          <artifactId>allure-junit-adaptor</artifactId>
          <scope>test</scope>

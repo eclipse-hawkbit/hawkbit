@@ -41,6 +41,24 @@ There are clients outside of the Eclipse IoT eco system as well, e.g.:
 
 * [rauc-hawkbit](https://github.com/rauc/rauc-hawkbit) which is a python-based hawkBit client application and library for the [RAUC](https://github.com/rauc/rauc) update framework.
 
+
+# Runtime dependencies and support
+
+## Java Runtime Environment: 1.8
+
+## SQL database
+
+| Database |  H2 |  MySQL/MariaDB | MS SQL Server | IBM DB2 |
+|---|---|---|---|---|
+| DDLs maintained by project  | X | X | X | X |
+| Test dependencies defined | X | X | X | - |
+| Versions tested | 1.4 | MySQL 5.6/5.7, AWS Aurora | MS SQL Server 2017 | DB2 Server v11.1 |
+| Docker image with driver provided  | X | X | - | - |
+| JDBC driver | [H2 1.4](https://github.com/h2database/h2database)  | [MariaDB Connector/J 2.0](https://github.com/MariaDB/mariadb-connector-j) | [MSSQL-JDBC 6.4](https://github.com/Microsoft/mssql-jdbc)  | - |
+| Status | Test, Dev, Trial | Production grade  | Experimental | Test, Dev |
+
+## (Optional) RabbitMQ: 3.6,3.7
+
 # Getting Started
 
 We are providing a [Spring Boot](https://projects.spring.io/spring-boot/) based reference [Update Server](hawkbit-runtime/hawkbit-update-server) including embedded H2 DB for test and evaluation purposes. 
@@ -101,7 +119,6 @@ $ java -jar ./hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulat
   * Provide standard runtime by means of Spring Boot based hawkBit update server (and hopefully a docker image).
   * And of course tons of usability improvements and bug fixes.
 * Future releases
-  * Complete repository refactoring.
   * Integrate with Eclipse hono as DMF provider.
   * Flexible DMF messaging infrastructure (e.g. with Spring Cloud Stream).
   * Migrate to Spring Framework 5, Spring Boot 2 and Vaadin 8

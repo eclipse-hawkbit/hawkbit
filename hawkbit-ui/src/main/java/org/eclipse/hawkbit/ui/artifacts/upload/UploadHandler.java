@@ -78,7 +78,6 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     UploadHandler(final String fileName, final long fileSize, final UploadLayout view, final long maxSize,
             final Upload upload, final String mimeType, final SoftwareModule selectedSw,
             final SoftwareModuleManagement softwareManagement) {
-        super();
         this.aborted = false;
         this.fileName = fileName;
         this.fileSize = fileSize;

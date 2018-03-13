@@ -491,7 +491,6 @@ public class CommonDialogWindow extends Window {
         private final Field<?> field;
 
         public ChangeListener(final Field<?> field) {
-            super();
             this.field = field;
         }
 

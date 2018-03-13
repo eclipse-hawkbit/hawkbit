@@ -24,7 +24,7 @@ public final class SpringContextHelper {
      * Private Constructor.
      */
     private SpringContextHelper() {
-        super();
+        // Utility class
     }
 
     public static void setContext(final ApplicationContext context) {

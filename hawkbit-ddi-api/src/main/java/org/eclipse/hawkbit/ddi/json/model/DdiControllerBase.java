@@ -32,7 +32,6 @@ public class DdiControllerBase extends ResourceSupport {
      *            configuration of the SP target
      */
     public DdiControllerBase(final DdiConfig config) {
-        super();
         this.config = config;
     }
 

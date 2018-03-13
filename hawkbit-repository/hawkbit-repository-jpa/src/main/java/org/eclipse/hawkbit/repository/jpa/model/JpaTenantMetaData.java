@@ -68,7 +68,6 @@ public class JpaTenantMetaData extends AbstractJpaBaseEntity implements TenantMe
      * @param tenant
      */
     public JpaTenantMetaData(final DistributionSetType defaultDsType, final String tenant) {
-        super();
         this.defaultDsType = (JpaDistributionSetType) defaultDsType;
         this.tenant = tenant;
     }
