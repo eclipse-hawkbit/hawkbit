@@ -73,8 +73,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     private TextArea descTextArea;
     private CheckBox reqMigStepCheckbox;
     private ComboBox distsetTypeNameComboBox;
-    private boolean editDistribution;
-    private Long editDistId;
 
     private FormLayout formLayout;
 
@@ -115,27 +113,19 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     }
 
     /**
-     * Save or update distribution set.
-     *
+     * Updates the distribution set on close.
      */
-    private final class SaveOnCloseDialogListener implements SaveDialogCloseListener {
+    private final class UpdateOnCloseDialogListener implements SaveDialogCloseListener {
+
+        private final Long editDistId;
+
+        public UpdateOnCloseDialogListener(final Long editDistId) {
+            this.editDistId = editDistId;
+        }
+
         @Override
         public void saveOrUpdate() {
-            if (editDistribution) {
-                updateDistribution();
-                return;
-            }
-            addNewDistribution();
-        }
-
-        @Override
-        public boolean canWindowSaveOrUpdate() {
-            return !isDuplicate();
-        }
-
-        private void updateDistribution() {
-
-            if (isDuplicate()) {
+            if (isDuplicate(editDistId)) {
                 return;
             }
             final boolean isMigStepReq = reqMigStepCheckbox.getValue();
@@ -152,12 +142,20 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             });
         }
 
-        /**
-         * Add new Distribution set.
-         */
-        private void addNewDistribution() {
-            editDistribution = Boolean.FALSE;
+        @Override
+        public boolean canWindowSaveOrUpdate() {
+            return !isDuplicate(editDistId);
+        }
+    }
 
+    /**
+     * Creates the distribution set on close.
+     *
+     */
+    private final class CreateOnCloseDialogListener implements SaveDialogCloseListener {
+
+        @Override
+        public void saveOrUpdate() {
             final String name = distNameTextField.getValue();
             final String version = distVersionTextField.getValue();
             final Long distSetTypeId = (Long) distsetTypeNameComboBox.getValue();
@@ -176,31 +174,33 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             distributionSetTable.setValue(Sets.newHashSet(newDist.getId()));
         }
 
-        private boolean isDuplicate() {
-            final String name = distNameTextField.getValue();
-            final String version = distVersionTextField.getValue();
+        @Override
+        public boolean canWindowSaveOrUpdate() {
+            return !isDuplicate(null);
+        }
+    }
 
-            final Optional<DistributionSet> existingDs = distributionSetManagement.getByNameAndVersion(name, version);
-            /*
-             * Distribution should not exists with the same name & version.
-             * Display error message, when the "existingDs" is not null and it
-             * is add window (or) when the "existingDs" is not null and it is
-             * edit window and the distribution Id of the edit window is
-             * different then the "existingDs"
-             */
-            if (existingDs.isPresent() && !existingDs.get().getId().equals(editDistId)) {
-                distNameTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_LAYOUT_ERROR_HIGHTLIGHT);
-                distVersionTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_LAYOUT_ERROR_HIGHTLIGHT);
-                notificationMessage.displayValidationError(i18n.getMessage("message.duplicate.dist",
-                        new Object[] { existingDs.get().getName(), existingDs.get().getVersion() }));
+    private boolean isDuplicate(final Long editDistId) {
+        final String name = distNameTextField.getValue();
+        final String version = distVersionTextField.getValue();
 
-                return true;
-            }
+        final Optional<DistributionSet> existingDs = distributionSetManagement.getByNameAndVersion(name, version);
+        /*
+         * Distribution should not exists with the same name & version. Display
+         * error message, when the "existingDs" is not null and it is add window
+         * (or) when the "existingDs" is not null and it is edit window and the
+         * distribution Id of the edit window is different then the "existingDs"
+         */
+        if (existingDs.isPresent() && !existingDs.get().getId().equals(editDistId)) {
+            distNameTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_LAYOUT_ERROR_HIGHTLIGHT);
+            distVersionTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_LAYOUT_ERROR_HIGHTLIGHT);
+            notificationMessage.displayValidationError(i18n.getMessage("message.duplicate.dist",
+                    new Object[] { existingDs.get().getName(), existingDs.get().getVersion() }));
 
-            return false;
-
+            return true;
         }
 
+        return false;
     }
 
     private void buildLayout() {
@@ -277,53 +277,64 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
      * clear all the fields.
      */
     public void resetComponents() {
-        editDistribution = Boolean.FALSE;
         distNameTextField.clear();
         distNameTextField.removeStyleName("v-textfield-error");
         distVersionTextField.clear();
         distVersionTextField.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_LAYOUT_ERROR_HIGHTLIGHT);
         distsetTypeNameComboBox.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_LAYOUT_ERROR_HIGHTLIGHT);
+        distsetTypeNameComboBox.clear();
+        distsetTypeNameComboBox.setEnabled(true);
         descTextArea.clear();
         reqMigStepCheckbox.clear();
     }
 
     private void populateValuesOfDistribution(final Long editDistId) {
-        this.editDistId = editDistId;
-
-        if (editDistId == null) {
-            return;
-        }
 
         final Optional<DistributionSet> distSet = distributionSetManagement.getWithDetails(editDistId);
         if (!distSet.isPresent()) {
             return;
         }
 
-        editDistribution = Boolean.TRUE;
         distNameTextField.setValue(distSet.get().getName());
         distVersionTextField.setValue(distSet.get().getVersion());
         if (distSet.get().getType().isDeleted()) {
             distsetTypeNameComboBox.addItem(distSet.get().getType().getId());
         }
         distsetTypeNameComboBox.setValue(distSet.get().getType().getId());
+        distsetTypeNameComboBox.setEnabled(false);
 
         reqMigStepCheckbox.setValue(distSet.get().isRequiredMigrationStep());
         descTextArea.setValue(distSet.get().getDescription());
     }
 
     /**
-     * Returns the dialog window for the distributions.
+     * Returns the dialog window for creating a distribution.
      * 
-     * @param editDistId
      * @return window
      */
-    public CommonDialogWindow getWindow(final Long editDistId) {
+    public CommonDialogWindow getWindowForCreation() {
+        resetComponents();
+        populateDistSetTypeNameCombo();
+        return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
+                .caption(i18n.getMessage(UIComponentIdProvider.DIST_ADD_CAPTION)).content(this).layout(formLayout)
+                .i18n(i18n).saveDialogCloseListener(new CreateOnCloseDialogListener()).buildCommonDialogWindow();
+    }
+
+    /**
+     * Returns the dialog window for updating a distribution.
+     * 
+     * @param editDistId
+     *            the id of the distribution that should be updated
+     * @return window
+     */
+    public CommonDialogWindow getWindowForUpdate(final Long editDistId) {
         resetComponents();
         populateDistSetTypeNameCombo();
         populateValuesOfDistribution(editDistId);
         return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
                 .caption(i18n.getMessage(UIComponentIdProvider.DIST_ADD_CAPTION)).content(this).layout(formLayout)
-                .i18n(i18n).saveDialogCloseListener(new SaveOnCloseDialogListener()).buildCommonDialogWindow();
+                .i18n(i18n).saveDialogCloseListener(new UpdateOnCloseDialogListener(editDistId))
+                .buildCommonDialogWindow();
     }
 
     /**

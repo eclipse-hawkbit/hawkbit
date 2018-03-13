@@ -98,7 +98,7 @@ public class DistributionSetTableHeader extends AbstractDistributionSetTableHead
 
     @Override
     protected void addNewItem(final ClickEvent event) {
-        final Window newDistWindow = addUpdateWindowLayout.getWindow(null);
+        final Window newDistWindow = addUpdateWindowLayout.getWindowForCreation();
         newDistWindow.setCaption(i18n.getMessage(UIComponentIdProvider.DIST_ADD_CAPTION));
         UI.getCurrent().addWindow(newDistWindow);
         newDistWindow.setVisible(Boolean.TRUE);

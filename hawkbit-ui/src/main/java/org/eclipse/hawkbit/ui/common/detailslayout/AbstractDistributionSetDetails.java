@@ -82,7 +82,7 @@ public abstract class AbstractDistributionSetDetails
 
     @Override
     protected void onEdit(final ClickEvent event) {
-        final Window newDistWindow = distributionAddUpdateWindowLayout.getWindow(getSelectedBaseEntityId());
+        final Window newDistWindow = distributionAddUpdateWindowLayout.getWindowForUpdate(getSelectedBaseEntityId());
         newDistWindow.setCaption(getI18n().getMessage(UIComponentIdProvider.DIST_UPDATE_CAPTION));
         UI.getCurrent().addWindow(newDistWindow);
         newDistWindow.setVisible(Boolean.TRUE);

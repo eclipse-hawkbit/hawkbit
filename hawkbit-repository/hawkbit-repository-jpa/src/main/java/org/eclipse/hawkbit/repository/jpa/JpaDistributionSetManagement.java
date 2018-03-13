@@ -225,18 +225,11 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         if (update.isRequiredMigrationStep() != null
                 && !update.isRequiredMigrationStep().equals(set.isRequiredMigrationStep())) {
-            checkDistributionSetIsAssignedToTargets(update.getId());
+            assertDistributionSetIsNotAssignedToTargets(update.getId());
             set.setRequiredMigrationStep(update.isRequiredMigrationStep());
         }
 
-        if (update.getType() != null) {
-            final DistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(update.getType());
-            if (!type.getId().equals(set.getType().getId())) {
-                checkDistributionSetIsAssignedToTargets(update.getId());
-
-                set.setType(type);
-            }
-        }
+        assertDistributionSetTypeHasNotChanged(update, set);
 
         return distributionSetRepository.save(set);
     }
@@ -330,7 +323,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                     modules.stream().map(SoftwareModule::getId).collect(Collectors.toList()));
         }
 
-        checkDistributionSetIsAssignedToTargets(setId);
+        assertDistributionSetIsNotAssignedToTargets(setId);
 
         final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(setId);
         modules.forEach(set::addModule);
@@ -346,7 +339,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(setId);
         final JpaSoftwareModule module = findSoftwareModuleAndThrowExceptionIfNotFound(moduleId);
 
-        checkDistributionSetIsAssignedToTargets(setId);
+        assertDistributionSetIsNotAssignedToTargets(setId);
 
         set.removeModule(module);
 
@@ -636,10 +629,21 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return specList;
     }
 
-    private void checkDistributionSetIsAssignedToTargets(final Long distributionSet) {
+    private void assertDistributionSetTypeHasNotChanged(final GenericDistributionSetUpdate update,
+            final JpaDistributionSet set) {
+        if (update.getType() != null) {
+            final DistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(update.getType());
+            if (!type.getId().equals(set.getType().getId())) {
+                throw new EntityReadOnlyException("Distribution set type is readonly and therfore cannot be changed");
+            }
+        }
+
+    }
+
+    private void assertDistributionSetIsNotAssignedToTargets(final Long distributionSet) {
         if (actionRepository.countByDistributionSetId(distributionSet) > 0) {
             throw new EntityReadOnlyException(String.format(
-                    "distribution set %s is already assigned to targets and cannot be changed", distributionSet));
+                    "Distribution set %s is already assigned to targets and cannot be changed", distributionSet));
         }
     }
 
