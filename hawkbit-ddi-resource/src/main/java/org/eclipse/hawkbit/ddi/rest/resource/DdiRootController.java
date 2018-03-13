@@ -407,7 +407,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     private static void addMessageIfEmpty(final String text, final List<String> messages) {
-        if (CollectionUtils.isEmpty(messages)) {
+        if (messages != null && messages.isEmpty()) {
             messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + text + ".");
         }
     }
