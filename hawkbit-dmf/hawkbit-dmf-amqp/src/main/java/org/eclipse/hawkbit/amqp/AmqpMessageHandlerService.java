@@ -371,7 +371,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     /**
      * Retrieve the update mode from the given update message.
      */
-    private UpdateMode getUpdateMode(final DmfAttributeUpdate update) {
+    private static UpdateMode getUpdateMode(final DmfAttributeUpdate update) {
         final DmfUpdateMode mode = update.getMode();
         if (mode != null) {
             return UpdateMode.valueOf(mode.name());

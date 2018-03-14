@@ -683,6 +683,10 @@ public class JpaControllerManagement implements ControllerManagement {
         case REPLACE:
             // clear the attributes before adding the new attributes
             controllerAttributes.clear();
+            // redundant code to satisfy Sonar
+            controllerAttributes.putAll(data);
+            target.setRequestControllerAttributes(false);
+            break;
         default:
             // default is MERGE
             controllerAttributes.putAll(data);
