@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ddi.rest.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -55,7 +56,7 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
-                .andExpect(jsonPath("$._links.configData.href", equalTo(
+                .andExpect(jsonPath("$._links.configData.href", startsWith(
                         "http://localhost/" + tenantAware.getCurrentTenant() + "/controller/v1/4712/configData")));
         Thread.sleep(1); // is required: otherwise processing the next line is
                          // often too fast and
@@ -71,8 +72,7 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         final Target updateControllerAttributes = controllerManagement
                 .updateControllerAttributes(savedTarget.getControllerId(), attributes);
         // request controller attributes need to be false because we don't want
-        // to request the
-        // controller attributes again
+        // to request the controller attributes again
         assertThat(updateControllerAttributes.isRequestControllerAttributes()).isFalse();
 
         mvc.perform(
@@ -133,7 +133,7 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
     @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) "
             + "resource behaves as exptected in cae of invalid request attempts.")
     public void badConfigData() throws Exception {
-        final Target savedTarget = testdataFactory.createTarget("4712");
+        testdataFactory.createTarget("4712");
 
         // not allowed methods
         mvc.perform(post("/{tenant}/controller/v1/4712/configData", tenantAware.getCurrentTenant()))

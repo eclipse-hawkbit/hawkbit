@@ -137,7 +137,8 @@ public final class DataConversionHelper {
         if (target.isRequestControllerAttributes()) {
             result.add(ControllerLinkBuilder
                     .linkTo(ControllerLinkBuilder.methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
-                            .putConfigData(null, tenantAware.getCurrentTenant(), target.getControllerId(), null))
+                            .putConfigData(null, tenantAware.getCurrentTenant(), target.getControllerId(),
+                                    DdiRestConstants.DEFAULT_UPDATE_MODE))
                     .withRel(DdiRestConstants.CONFIG_DATA_ACTION));
         }
         return result;
