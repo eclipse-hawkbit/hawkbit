@@ -38,7 +38,6 @@ import org.eclipse.hawkbit.repository.jpa.model.DsMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata_;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
@@ -229,15 +228,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             set.setRequiredMigrationStep(update.isRequiredMigrationStep());
         }
 
-        assertDistributionSetTypeHasNotChanged(update, set);
-
         return distributionSetRepository.save(set);
-    }
-
-    private JpaDistributionSetType findDistributionSetTypeAndThrowExceptionIfNotFound(final String key) {
-        return (JpaDistributionSetType) distributionSetTypeManagement.getByKey(key)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, key));
-
     }
 
     private JpaDistributionSet findDistributionSetAndThrowExceptionIfNotFound(final Long setId) {
@@ -627,17 +618,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             specList.add(spec);
         }
         return specList;
-    }
-
-    private void assertDistributionSetTypeHasNotChanged(final GenericDistributionSetUpdate update,
-            final JpaDistributionSet set) {
-        if (update.getType() != null) {
-            final DistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(update.getType());
-            if (!type.getId().equals(set.getType().getId())) {
-                throw new EntityReadOnlyException("Distribution set type is readonly and therfore cannot be changed");
-            }
-        }
-
     }
 
     private void assertDistributionSetIsNotAssignedToTargets(final Long distributionSet) {

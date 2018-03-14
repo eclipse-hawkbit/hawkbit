@@ -134,7 +134,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             distributionSetTypeManagement.get(distSetTypeId).ifPresent(type -> {
                 final DistributionSet currentDS = distributionSetManagement.update(entityFactory.distributionSet()
                         .update(editDistId).name(distNameTextField.getValue()).description(descTextArea.getValue())
-                        .version(distVersionTextField.getValue()).requiredMigrationStep(isMigStepReq).type(type));
+                        .version(distVersionTextField.getValue()).requiredMigrationStep(isMigStepReq));
                 notificationMessage.displaySuccess(i18n.getMessage("message.new.dist.save.success",
                         new Object[] { currentDS.getName(), currentDS.getVersion() }));
                 // update table row+details layout
