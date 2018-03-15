@@ -37,4 +37,7 @@ public interface SoftwareModuleMetadataRepository
     Page<Object[]> findBySoftwareModuleIdInAndTargetVisible(Pageable page, @Param("moduleId") Collection<Long> moduleId,
             @Param("targetVisible") boolean targetVisible);
 
+    @Query("SELECT COUNT (smd.key) from JpaSoftwareModuleMetadata smd WHERE smd.softwareModule.id = :moduleId")
+    long countBySoftwareModuleId(@Param("moduleId") Long moduleId);
+
 }

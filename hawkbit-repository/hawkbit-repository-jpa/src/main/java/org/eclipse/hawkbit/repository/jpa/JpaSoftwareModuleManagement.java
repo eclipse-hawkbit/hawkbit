@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,6 +29,7 @@ import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
@@ -38,6 +40,7 @@ import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataUpdate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleCreate;
@@ -60,6 +63,8 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
@@ -87,6 +92,11 @@ import com.google.common.collect.Lists;
 @Validated
 public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
+    /**
+     * Class logger
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(JpaSoftwareModuleManagement.class);
+
     private final EntityManager entityManager;
 
     private final DistributionSetRepository distributionSetRepository;
@@ -103,7 +113,10 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     private final ArtifactManagement artifactManagement;
 
+    private final QuotaManagement quotaManagement;
+
     private final VirtualPropertyReplacer virtualPropertyReplacer;
+
     private final Database database;
 
     JpaSoftwareModuleManagement(final EntityManager entityManager,
@@ -112,8 +125,8 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
             final SoftwareModuleMetadataRepository softwareModuleMetadataRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final NoCountPagingRepository criteriaNoCountDao, final AuditorAware<String> auditorProvider,
-            final ArtifactManagement artifactManagement, final VirtualPropertyReplacer virtualPropertyReplacer,
-            final Database database) {
+            final ArtifactManagement artifactManagement, final QuotaManagement quotaManagement,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final Database database) {
         this.entityManager = entityManager;
         this.distributionSetRepository = distributionSetRepository;
         this.softwareModuleRepository = softwareModuleRepository;
@@ -122,6 +135,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         this.criteriaNoCountDao = criteriaNoCountDao;
         this.auditorProvider = auditorProvider;
         this.artifactManagement = artifactManagement;
+        this.quotaManagement = quotaManagement;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.database = database;
     }
@@ -461,19 +475,12 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public SoftwareModuleMetadata createMetaData(final SoftwareModuleMetadataCreate c) {
-        final JpaSoftwareModuleMetadataCreate create = (JpaSoftwareModuleMetadataCreate) c;
 
-        checkAndThrowAlreadyIfSoftwareModuleMetadataExists(create.getSoftwareModuleId(), create);
-        touch(create.getSoftwareModuleId());
+        final Long moduleId = retrieveSoftwareModuleId(c);
+        assertSoftwareModuleExists(moduleId);
+        assertMetaDataQuota(moduleId, 1);
 
-        return softwareModuleMetadataRepository.save(create.build());
-    }
-
-    private void checkAndThrowAlreadyIfSoftwareModuleMetadataExists(final Long moduleId,
-            final JpaSoftwareModuleMetadataCreate md) {
-        if (softwareModuleMetadataRepository.exists(new SwMetadataCompositeKey(moduleId, md.getKey()))) {
-            throwMetadataKeyAlreadyExists(md.getKey());
-        }
+        return internalCreateMetaData(c);
     }
 
     @Override
@@ -482,7 +489,78 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<SoftwareModuleMetadata> createMetaData(final Collection<SoftwareModuleMetadataCreate> create) {
 
-        return create.stream().map(this::createMetaData).collect(Collectors.toList());
+        // check if we need to assert the meta data quota per software module
+        if (!create.isEmpty()) {
+
+            // check if all beans refer to the same software module
+            final Long moduleId = retrieveSoftwareModuleId(create.iterator().next());
+            if (create.stream().allMatch(c -> moduleId.equals(retrieveSoftwareModuleId(c)))) {
+
+                // same module
+                assertSoftwareModuleExists(moduleId);
+                assertMetaDataQuota(moduleId, create.size());
+
+                return create.stream().map(this::internalCreateMetaData).collect(Collectors.toList());
+
+            } else {
+
+                // group by software module id to minimize database access
+                final Map<Long, List<SoftwareModuleMetadataCreate>> groups = create.stream()
+                        .collect(Collectors.groupingBy(this::retrieveSoftwareModuleId));
+                return groups.entrySet().stream().flatMap(e -> {
+
+                    final Long id = e.getKey();
+                    final List<SoftwareModuleMetadataCreate> group = e.getValue();
+
+                    assertSoftwareModuleExists(id);
+                    assertMetaDataQuota(id, group.size());
+
+                    return group.stream().map(this::internalCreateMetaData);
+                }).collect(Collectors.toList());
+            }
+        }
+
+        return Collections.emptyList();
+    }
+
+    private SoftwareModuleMetadata internalCreateMetaData(final SoftwareModuleMetadataCreate c) {
+        final JpaSoftwareModuleMetadataCreate create = (JpaSoftwareModuleMetadataCreate) c;
+        assertSoftwareModuleMetadataDoesNotExist(create.getSoftwareModuleId(), create);
+        return softwareModuleMetadataRepository.save(create.build());
+    }
+
+    private Long retrieveSoftwareModuleId(final SoftwareModuleMetadataCreate create) {
+        return ((JpaSoftwareModuleMetadataCreate) create).getSoftwareModuleId();
+    }
+
+    private void assertSoftwareModuleMetadataDoesNotExist(final Long moduleId,
+            final JpaSoftwareModuleMetadataCreate md) {
+        if (softwareModuleMetadataRepository.exists(new SwMetadataCompositeKey(moduleId, md.getKey()))) {
+            throwMetadataKeyAlreadyExists(md.getKey());
+        }
+    }
+
+    private void assertSoftwareModuleExists(final Long moduleId) {
+        touch(moduleId);
+    }
+
+    private void assertMetaDataQuota(final Long moduleId, final int requested) {
+        final int limit = quotaManagement.getMaxMetaDataEntriesPerSoftwareModule();
+        if (requested > limit) {
+            LOG.warn(
+                    "Cannot create {} meta data entries for software module '{}' because of the configured quota limit {}.",
+                    requested, moduleId, limit);
+            throw new AssignmentQuotaExceededException(SoftwareModuleMetadata.class, SoftwareModule.class,
+                    moduleId.longValue(), requested);
+        }
+        final long currentCount = softwareModuleMetadataRepository.countBySoftwareModuleId(moduleId);
+        if (currentCount + requested > limit) {
+            LOG.warn(
+                    "Cannot create {} meta data entries for software module '{}' because of the configured quota limit {}. Currently, there are {} meta data entries assigned.",
+                    requested, moduleId, limit, currentCount);
+            throw new AssignmentQuotaExceededException(SoftwareModuleMetadata.class, SoftwareModule.class, moduleId,
+                    requested);
+        }
     }
 
     @Override

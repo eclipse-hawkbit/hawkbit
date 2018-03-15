@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.PropertiesQuotaManagement;
+import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryDefaultConfiguration;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
@@ -518,11 +519,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final SoftwareModuleMetadataRepository softwareModuleMetadataRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final NoCountPagingRepository criteriaNoCountDao, final AuditorAware<String> auditorProvider,
-            final ArtifactManagement artifactManagement, final VirtualPropertyReplacer virtualPropertyReplacer,
+            final ArtifactManagement artifactManagement, final QuotaManagement quotaManagement,
+            final VirtualPropertyReplacer virtualPropertyReplacer,
             final JpaProperties properties) {
         return new JpaSoftwareModuleManagement(entityManager, distributionSetRepository, softwareModuleRepository,
                 softwareModuleMetadataRepository, softwareModuleTypeRepository, criteriaNoCountDao, auditorProvider,
-                artifactManagement, virtualPropertyReplacer, properties.getDatabase());
+                artifactManagement, quotaManagement, virtualPropertyReplacer, properties.getDatabase());
     }
 
     /**

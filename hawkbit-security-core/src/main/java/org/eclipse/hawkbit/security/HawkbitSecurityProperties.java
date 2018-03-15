@@ -114,6 +114,11 @@ public class HawkbitSecurityProperties {
          */
         private int maxMessagesPerActionStatus = 50;
 
+        /**
+         * Maximum number of meta data entries per software module
+         */
+        private int maxMetaDataEntriesPerSoftwareModule = 100;
+
         private final Filter filter = new Filter();
         private final Filter uiFilter = new Filter();
 
@@ -155,6 +160,14 @@ public class HawkbitSecurityProperties {
 
         public void setMaxRolloutGroupsPerRollout(final int maxRolloutGroupsPerRollout) {
             this.maxRolloutGroupsPerRollout = maxRolloutGroupsPerRollout;
+        }
+
+        public int getMaxMetaDataEntriesPerSoftwareModule() {
+            return maxMetaDataEntriesPerSoftwareModule;
+        }
+
+        public void setMaxMetaDataEntriesPerSoftwareModule(final int maxMetaDataEntriesPerSoftwareModule) {
+            this.maxMetaDataEntriesPerSoftwareModule = maxMetaDataEntriesPerSoftwareModule;
         }
 
         /**
@@ -220,5 +233,6 @@ public class HawkbitSecurityProperties {
             }
 
         }
+
     }
 }

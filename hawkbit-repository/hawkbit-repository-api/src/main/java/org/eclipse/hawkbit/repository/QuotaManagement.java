@@ -43,4 +43,9 @@ public interface QuotaManagement {
      */
     int getMaxMessagesPerActionStatus();
 
+    /**
+     * @return maximum number of meta data entries per software module
+     */
+    int getMaxMetaDataEntriesPerSoftwareModule();
+
 }

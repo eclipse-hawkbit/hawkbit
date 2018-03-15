@@ -48,4 +48,9 @@ public class PropertiesQuotaManagement implements QuotaManagement {
         return securityProperties.getDos().getMaxMessagesPerActionStatus();
     }
 
+    @Override
+    public int getMaxMetaDataEntriesPerSoftwareModule() {
+        return securityProperties.getDos().getMaxMetaDataEntriesPerSoftwareModule();
+    }
+
 }
