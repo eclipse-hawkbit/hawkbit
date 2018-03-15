@@ -33,6 +33,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,16 +56,19 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     private final SoftwareModuleRepository softwareModuleRepository;
 
     private final NoCountPagingRepository criteriaNoCountDao;
+    private final Database database;
 
     JpaSoftwareModuleTypeManagement(final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer,
-            final SoftwareModuleRepository softwareModuleRepository, final NoCountPagingRepository criteriaNoCountDao) {
+            final SoftwareModuleRepository softwareModuleRepository, final NoCountPagingRepository criteriaNoCountDao,
+            final Database database) {
         this.distributionSetTypeRepository = distributionSetTypeRepository;
         this.softwareModuleTypeRepository = softwareModuleTypeRepository;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.softwareModuleRepository = softwareModuleRepository;
         this.criteriaNoCountDao = criteriaNoCountDao;
+        this.database = database;
     }
 
     @Override
@@ -87,7 +91,7 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     public Page<SoftwareModuleType> findByRsql(final Pageable pageable, final String rsqlParam) {
 
         final Specification<JpaSoftwareModuleType> spec = RSQLUtility.parse(rsqlParam, SoftwareModuleTypeFields.class,
-                virtualPropertyReplacer);
+                virtualPropertyReplacer, database);
 
         return convertPage(softwareModuleTypeRepository.findAll(spec, pageable), pageable);
     }

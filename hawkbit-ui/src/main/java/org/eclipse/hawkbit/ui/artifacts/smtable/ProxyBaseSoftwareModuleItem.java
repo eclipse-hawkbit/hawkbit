@@ -46,7 +46,6 @@ public class ProxyBaseSoftwareModuleItem {
      * Default constructor.
      */
     public ProxyBaseSoftwareModuleItem() {
-        super();
         swId = RANDOM_OBJ.nextLong();
     }
 

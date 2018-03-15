@@ -46,7 +46,6 @@ public class DdiStatus {
     @JsonCreator
     public DdiStatus(@JsonProperty("execution") final ExecutionStatus execution,
             @JsonProperty("result") final DdiResult result, @JsonProperty("details") final List<String> details) {
-        super();
         this.execution = execution;
         this.result = result;
         this.details = details;
@@ -107,7 +106,12 @@ public class DdiStatus {
         /**
          * The action has been downloaded by the target.
          */
-        DOWNLOADED("downloaded");
+        DOWNLOADED("downloaded"),
+
+        /**
+         * Target starts to download.
+         */
+        DOWNLOAD("download");
 
         private String name;
 
