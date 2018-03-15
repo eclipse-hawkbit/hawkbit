@@ -15,6 +15,7 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.List;
 import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
@@ -653,13 +655,40 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Verifies the enforcement of the metadata quota per software module.")
+    public void quotaSoftwareModuleMetadata() {
+
+        // add meta data one by one
+        final SoftwareModule module = testdataFactory.createSoftwareModuleApp("m1");
+        final int quota = quotaManagement.getMaxMetaDataEntriesPerSoftwareModule();
+        for (int i = 0; i < quota; ++i) {
+            softwareModuleManagement.createMetaData(
+                    entityFactory.softwareModuleMetadata().create(module.getId()).key("k" + i).value("v" + i));
+        }
+
+        // quota exceeded
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+                .isThrownBy(() -> softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata()
+                        .create(module.getId()).key("k" + quota).value("v" + quota)));
+
+        // add multiple meta data entries at once
+        final SoftwareModule module2 = testdataFactory.createSoftwareModuleApp("m2");
+        final List<SoftwareModuleMetadataCreate> create = new ArrayList<>();
+        for (int i = 0; i < quota + 1; ++i) {
+            create.add(entityFactory.softwareModuleMetadata().create(module2.getId()).key("k" + i).value("v" + i));
+        }
+        // quota exceeded
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+                .isThrownBy(() -> softwareModuleManagement.createMetaData(create));
+
+    }
+
+    @Test
     @Description("Checks that metadata for a software module cannot be created for an existing key.")
     public void createSoftwareModuleMetadataFailsIfKeyExists() {
 
         final String knownKey1 = "myKnownKey1";
         final String knownValue1 = "myKnownValue1";
-        final String knownValue2 = "myKnownValue2";
-
         final SoftwareModule ah = testdataFactory.createSoftwareModuleApp();
 
         softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(ah.getId()).key(knownKey1)
