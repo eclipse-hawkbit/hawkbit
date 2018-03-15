@@ -32,7 +32,7 @@ public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreat
         implements DistributionSetCreate {
 
     @ValidString
-    protected String type;
+    private String type;
 
     private final DistributionSetTypeManagement distributionSetTypeManagement;
     private final SoftwareModuleManagement softwareModuleManagement;

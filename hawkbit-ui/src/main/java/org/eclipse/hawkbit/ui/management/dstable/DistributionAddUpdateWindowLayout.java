@@ -312,12 +312,8 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
      * 
      * @return window
      */
-    public CommonDialogWindow getWindowForCreation() {
-        resetComponents();
-        populateDistSetTypeNameCombo();
-        return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
-                .caption(i18n.getMessage(UIComponentIdProvider.DIST_ADD_CAPTION)).content(this).layout(formLayout)
-                .i18n(i18n).saveDialogCloseListener(new CreateOnCloseDialogListener()).buildCommonDialogWindow();
+    public CommonDialogWindow getWindowForCreateDistributionSet() {
+        return getWindow(null);
     }
 
     /**
@@ -327,13 +323,39 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
      *            the id of the distribution that should be updated
      * @return window
      */
-    public CommonDialogWindow getWindowForUpdate(final Long editDistId) {
+    public CommonDialogWindow getWindowForUpdateDistributionSet(final Long editDistId) {
+        return getWindow(editDistId);
+    }
+
+    /**
+     * Internal method to create a window to create or update a DistributionSet.
+     * 
+     * @param editDistId
+     *            if <code>null</code> is provided the window is configured to
+     *            create a DistributionSet otherwise it is configured for
+     *            update.
+     * @return
+     */
+    private CommonDialogWindow getWindow(final Long editDistId) {
+
+        final SaveDialogCloseListener saveDialogCloseListener;
+        String captionId;
+
         resetComponents();
         populateDistSetTypeNameCombo();
-        populateValuesOfDistribution(editDistId);
-        return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
-                .caption(i18n.getMessage(UIComponentIdProvider.DIST_ADD_CAPTION)).content(this).layout(formLayout)
-                .i18n(i18n).saveDialogCloseListener(new UpdateOnCloseDialogListener(editDistId))
+
+        if (editDistId == null) {
+            saveDialogCloseListener = new CreateOnCloseDialogListener();
+            captionId = UIComponentIdProvider.DIST_ADD_CAPTION;
+        } else {
+            saveDialogCloseListener = new UpdateOnCloseDialogListener(editDistId);
+            captionId = UIComponentIdProvider.DIST_UPDATE_CAPTION;
+
+            populateValuesOfDistribution(editDistId);
+        }
+
+        return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(i18n.getMessage(captionId)).content(this)
+                .layout(formLayout).i18n(i18n).saveDialogCloseListener(saveDialogCloseListener)
                 .buildCommonDialogWindow();
     }
 
