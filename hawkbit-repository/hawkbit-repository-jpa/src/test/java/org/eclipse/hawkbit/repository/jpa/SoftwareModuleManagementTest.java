@@ -681,6 +681,23 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> softwareModuleManagement.createMetaData(create));
 
+        // add some meta data entries
+        final SoftwareModule module3 = testdataFactory.createSoftwareModuleApp("m3");
+        final int firstHalf = Math.round(quota / 2);
+        for (int i = 0; i < firstHalf; ++i) {
+            softwareModuleManagement.createMetaData(
+                    entityFactory.softwareModuleMetadata().create(module3.getId()).key("k" + i).value("v" + i));
+        }
+        // add too many data entries
+        final int secondHalf = quota - firstHalf;
+        final List<SoftwareModuleMetadataCreate> create2 = new ArrayList<>();
+        for (int i = 0; i < secondHalf + 1; ++i) {
+            create2.add(entityFactory.softwareModuleMetadata().create(module3.getId()).key("kk" + i).value("vv" + i));
+        }
+        // quota exceeded
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+                .isThrownBy(() -> softwareModuleManagement.createMetaData(create2));
+
     }
 
     @Test
