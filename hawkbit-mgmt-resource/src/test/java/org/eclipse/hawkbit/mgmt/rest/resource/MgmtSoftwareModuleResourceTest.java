@@ -49,6 +49,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
@@ -763,7 +764,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     }
 
     @Test
-    @Description("Verfies the successfull creation of metadata.")
+    @Description("Verfies the successful creation of metadata and the enforcement of the meta data quota.")
     public void createMetadata() throws Exception {
 
         final String knownKey1 = "knownKey1";
@@ -773,12 +774,12 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        final JSONArray jsonArray = new JSONArray();
-        jsonArray.put(new JSONObject().put("key", knownKey1).put("value", knownValue1));
-        jsonArray.put(new JSONObject().put("key", knownKey2).put("value", knownValue2).put("targetVisible", true));
+        final JSONArray metaData1 = new JSONArray();
+        metaData1.put(new JSONObject().put("key", knownKey1).put("value", knownValue1));
+        metaData1.put(new JSONObject().put("key", knownKey2).put("value", knownValue2).put("targetVisible", true));
 
         mvc.perform(post("/rest/v1/softwaremodules/{swId}/metadata", sm.getId()).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(jsonArray.toString()))
+                .contentType(MediaType.APPLICATION_JSON).content(metaData1.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("[0]key", equalTo(knownKey1))).andExpect(jsonPath("[0]value", equalTo(knownValue1)))
@@ -793,6 +794,25 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         assertThat(metaKey1.getValue()).as("Metadata key is wrong").isEqualTo(knownValue1);
         assertThat(metaKey2.getValue()).as("Metadata key is wrong").isEqualTo(knownValue2);
+
+        // verify quota enforcement
+        final int maxMetaData = quotaManagement.getMaxMetaDataEntriesPerSoftwareModule();
+
+        final JSONArray metaData2 = new JSONArray();
+        for (int i = 0; i < maxMetaData - metaData1.length() + 1; ++i) {
+            metaData2.put(new JSONObject().put("key", knownKey1 + i).put("value", knownValue1 + i));
+        }
+
+        mvc.perform(post("/rest/v1/softwaremodules/{swId}/metadata", sm.getId()).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(metaData2.toString()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden());
+
+        // verify that the number of meta data entries has not changed
+        // (we cannot use the PAGE constant here as it tries to sort by ID)
+        assertThat(softwareModuleManagement
+                .findMetaDataBySoftwareModuleId(new PageRequest(0, Integer.MAX_VALUE), sm.getId()).getTotalElements())
+                        .isEqualTo(metaData1.length());
+
     }
 
     @Test
