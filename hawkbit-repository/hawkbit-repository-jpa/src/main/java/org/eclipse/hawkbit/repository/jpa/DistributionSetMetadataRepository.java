@@ -12,7 +12,9 @@ import org.eclipse.hawkbit.repository.jpa.model.DsMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -22,5 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 public interface DistributionSetMetadataRepository
         extends PagingAndSortingRepository<JpaDistributionSetMetadata, DsMetadataCompositeKey>,
         JpaSpecificationExecutor<JpaDistributionSetMetadata> {
+
+    @Query("SELECT COUNT (dmd.key) from JpaDistributionSetMetadata dmd WHERE dmd.distributionSet.id = :id")
+    long countByDistributionSetId(@Param("id") Long id);
 
 }

@@ -544,6 +544,14 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         touch(moduleId);
     }
 
+    /**
+     * Asserts the meta data quota for the software module with the given ID.
+     * 
+     * @param moduleId
+     *            The software module ID.
+     * @param requested
+     *            Number of meta data entries to be created.
+     */
     private void assertMetaDataQuota(final Long moduleId, final int requested) {
         final int limit = quotaManagement.getMaxMetaDataEntriesPerSoftwareModule();
         if (requested > limit) {
@@ -592,9 +600,8 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
      */
     private JpaSoftwareModule touch(final SoftwareModule latestModule) {
         // merge base distribution set so optLockRevision gets updated and audit
-        // log written because
-        // modifying metadata is modifying the base distribution set itself for
-        // auditing purposes.
+        // log written because modifying metadata is modifying the base
+        // distribution set itself for auditing purposes.
         final JpaSoftwareModule result = entityManager.merge((JpaSoftwareModule) latestModule);
         result.setLastModifiedAt(0L);
 

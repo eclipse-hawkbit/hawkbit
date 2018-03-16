@@ -48,4 +48,9 @@ public interface QuotaManagement {
      */
     int getMaxMetaDataEntriesPerSoftwareModule();
 
+    /**
+     * @return maximum number of meta data entries per distribution set
+     */
+    int getMaxMetaDataEntriesPerDistributionSet();
+
 }

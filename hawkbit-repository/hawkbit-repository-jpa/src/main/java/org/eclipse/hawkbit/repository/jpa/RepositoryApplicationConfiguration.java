@@ -377,7 +377,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     DistributionSetManagement distributionSetManagement(final EntityManager entityManager,
             final DistributionSetRepository distributionSetRepository,
             final DistributionSetTagManagement distributionSetTagManagement, final SystemManagement systemManagement,
-            final DistributionSetTypeManagement distributionSetTypeManagement,
+            final DistributionSetTypeManagement distributionSetTypeManagement, final QuotaManagement quotaManagement,
             final DistributionSetMetadataRepository distributionSetMetadataRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository, final ActionRepository actionRepository,
             final NoCountPagingRepository criteriaNoCountDao, final ApplicationEventPublisher eventPublisher,
@@ -387,7 +387,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DistributionSetTagRepository distributionSetTagRepository,
             final AfterTransactionCommitExecutor afterCommit, final JpaProperties properties) {
         return new JpaDistributionSetManagement(entityManager, distributionSetRepository, distributionSetTagManagement,
-                systemManagement, distributionSetTypeManagement, distributionSetMetadataRepository,
+                systemManagement, distributionSetTypeManagement, quotaManagement, distributionSetMetadataRepository,
                 targetFilterQueryRepository, actionRepository, criteriaNoCountDao, eventPublisher, applicationContext,
                 tenantAware, virtualPropertyReplacer, softwareModuleRepository, distributionSetTagRepository,
                 afterCommit, properties.getDatabase());
@@ -520,8 +520,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final NoCountPagingRepository criteriaNoCountDao, final AuditorAware<String> auditorProvider,
             final ArtifactManagement artifactManagement, final QuotaManagement quotaManagement,
-            final VirtualPropertyReplacer virtualPropertyReplacer,
-            final JpaProperties properties) {
+            final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties) {
         return new JpaSoftwareModuleManagement(entityManager, distributionSetRepository, softwareModuleRepository,
                 softwareModuleMetadataRepository, softwareModuleTypeRepository, criteriaNoCountDao, auditorProvider,
                 artifactManagement, quotaManagement, virtualPropertyReplacer, properties.getDatabase());

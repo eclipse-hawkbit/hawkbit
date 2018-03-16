@@ -23,11 +23,13 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
+import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
 import org.eclipse.hawkbit.repository.builder.DistributionSetUpdate;
 import org.eclipse.hawkbit.repository.builder.GenericDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
@@ -56,6 +58,8 @@ import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -82,6 +86,11 @@ import com.google.common.collect.Lists;
 @Validated
 public class JpaDistributionSetManagement implements DistributionSetManagement {
 
+    /**
+     * Class logger
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(JpaDistributionSetManagement.class);
+
     private final EntityManager entityManager;
 
     private final DistributionSetRepository distributionSetRepository;
@@ -91,6 +100,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     private final SystemManagement systemManagement;
 
     private final DistributionSetTypeManagement distributionSetTypeManagement;
+
+    private final QuotaManagement quotaManagement;
 
     private final DistributionSetMetadataRepository distributionSetMetadataRepository;
 
@@ -119,7 +130,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     JpaDistributionSetManagement(final EntityManager entityManager,
             final DistributionSetRepository distributionSetRepository,
             final DistributionSetTagManagement distributionSetTagManagement, final SystemManagement systemManagement,
-            final DistributionSetTypeManagement distributionSetTypeManagement,
+            final DistributionSetTypeManagement distributionSetTypeManagement, final QuotaManagement quotaManagement,
             final DistributionSetMetadataRepository distributionSetMetadataRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository, final ActionRepository actionRepository,
             final NoCountPagingRepository criteriaNoCountDao, final ApplicationEventPublisher eventPublisher,
@@ -133,6 +144,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         this.distributionSetTagManagement = distributionSetTagManagement;
         this.systemManagement = systemManagement;
         this.distributionSetTypeManagement = distributionSetTypeManagement;
+        this.quotaManagement = quotaManagement;
         this.distributionSetMetadataRepository = distributionSetMetadataRepository;
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.actionRepository = actionRepository;
@@ -470,10 +482,39 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         final JpaDistributionSet set = touch(dsId);
 
+        assertMetaDataQuota(dsId, md.size());
+
         return Collections.unmodifiableList(md.stream()
                 .map(meta -> distributionSetMetadataRepository
                         .save(new JpaDistributionSetMetadata(meta.getKey(), set, meta.getValue())))
                 .collect(Collectors.toList()));
+    }
+
+    /**
+     * Asserts the meta data quota for the distribution set with the given ID.
+     * 
+     * @param dsId
+     *            The distribution set ID.
+     * @param requested
+     *            Number of meta data entries to be created.
+     */
+    private void assertMetaDataQuota(final Long dsId, final int requested) {
+        final int limit = quotaManagement.getMaxMetaDataEntriesPerDistributionSet();
+        if (requested > limit) {
+            LOG.warn(
+                    "Cannot create {} meta data entries for distribution set '{}' because of the configured quota limit {}.",
+                    requested, dsId, limit);
+            throw new AssignmentQuotaExceededException(DistributionSetMetadata.class, DistributionSet.class,
+                    dsId.longValue(), requested);
+        }
+        final long currentCount = distributionSetMetadataRepository.countByDistributionSetId(dsId);
+        if (currentCount + requested > limit) {
+            LOG.warn(
+                    "Cannot create {} meta data entries for distribution set '{}' because of the configured quota limit {}. Currently, there are {} meta data entries assigned.",
+                    requested, dsId, limit, currentCount);
+            throw new AssignmentQuotaExceededException(DistributionSetMetadata.class, DistributionSet.class, dsId,
+                    requested);
+        }
     }
 
     @Override
@@ -516,9 +557,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     private JpaDistributionSet touch(final DistributionSet ds) {
 
         // merge base distribution set so optLockRevision gets updated and audit
-        // log written because
-        // modifying metadata is modifying the base distribution set itself for
-        // auditing purposes.
+        // log written because modifying metadata is modifying the base
+        // distribution set itself for auditing purposes.
         final JpaDistributionSet result = entityManager.merge((JpaDistributionSet) ds);
         result.setLastModifiedAt(0L);
 
