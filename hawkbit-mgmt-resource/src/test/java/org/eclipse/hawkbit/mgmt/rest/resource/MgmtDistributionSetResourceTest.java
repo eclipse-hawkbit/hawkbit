@@ -44,6 +44,7 @@ import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -890,12 +891,12 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final String knownValue1 = "knownValue1";
         final String knownValue2 = "knownValue2";
 
-        final JSONArray jsonArray = new JSONArray();
-        jsonArray.put(new JSONObject().put("key", knownKey1).put("value", knownValue1));
-        jsonArray.put(new JSONObject().put("key", knownKey2).put("value", knownValue2));
+        final JSONArray metaData1 = new JSONArray();
+        metaData1.put(new JSONObject().put("key", knownKey1).put("value", knownValue1));
+        metaData1.put(new JSONObject().put("key", knownKey2).put("value", knownValue2));
 
         mvc.perform(post("/rest/v1/distributionsets/{dsId}/metadata", testDS.getId()).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(jsonArray.toString()))
+                .contentType(MediaType.APPLICATION_JSON).content(metaData1.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("[0]key", equalTo(knownKey1))).andExpect(jsonPath("[0]value", equalTo(knownValue1)))
@@ -909,6 +910,25 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         assertThat(metaKey1.getValue()).isEqualTo(knownValue1);
         assertThat(metaKey2.getValue()).isEqualTo(knownValue2);
+
+        // verify quota enforcement
+        final int maxMetaData = quotaManagement.getMaxMetaDataEntriesPerDistributionSet();
+
+        final JSONArray metaData2 = new JSONArray();
+        for (int i = 0; i < maxMetaData - metaData1.length() + 1; ++i) {
+            metaData2.put(new JSONObject().put("key", knownKey1 + i).put("value", knownValue1 + i));
+        }
+
+        mvc.perform(post("/rest/v1/distributionsets/{dsId}/metadata", testDS.getId()).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(metaData2.toString()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden());
+
+        // verify that the number of meta data entries has not changed
+        // (we cannot use the PAGE constant here as it tries to sort by ID)
+        assertThat(distributionSetManagement
+                .findMetaDataByDistributionSetId(new PageRequest(0, Integer.MAX_VALUE), testDS.getId())
+                .getTotalElements()).isEqualTo(metaData1.length());
+
     }
 
     @Test
