@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetTypeFields;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
+import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
 import org.eclipse.hawkbit.repository.builder.GenericDistributionSetTypeUpdate;
@@ -29,6 +30,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetTypeSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
+import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
@@ -64,17 +66,20 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     private final NoCountPagingRepository criteriaNoCountDao;
     private final Database database;
 
+    private final QuotaManagement quotaManagement;
+
     JpaDistributionSetTypeManagement(final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final DistributionSetRepository distributionSetRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer, final NoCountPagingRepository criteriaNoCountDao,
-            final Database database) {
+            final Database database, final QuotaManagement quotaManagement) {
         this.distributionSetTypeRepository = distributionSetTypeRepository;
         this.softwareModuleTypeRepository = softwareModuleTypeRepository;
         this.distributionSetRepository = distributionSetRepository;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.criteriaNoCountDao = criteriaNoCountDao;
         this.database = database;
+        this.quotaManagement = quotaManagement;
     }
 
     @Override
@@ -116,6 +121,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
         final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(dsTypeId);
         checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(dsTypeId);
+        assertSoftwareModuleTypeQuota(dsTypeId, softwareModulesTypeIds.size());
 
         modules.forEach(type::addMandatoryModuleType);
 
@@ -138,9 +144,17 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
         final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(dsTypeId);
         checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(dsTypeId);
+        assertSoftwareModuleTypeQuota(dsTypeId, softwareModulesTypeIds.size());
+
         modules.forEach(type::addOptionalModuleType);
 
         return distributionSetTypeRepository.save(type);
+    }
+
+    private void assertSoftwareModuleTypeQuota(final long dsTypeId, final int requested) {
+        QuotaHelper.assertAssignmentQuota(dsTypeId, requested,
+                quotaManagement.getMaxSoftwareModuleTypesPerDistributionSetType(), SoftwareModuleType.class,
+                DistributionSetType.class, distributionSetTypeRepository::countSmTypesById);
     }
 
     @Override

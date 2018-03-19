@@ -27,7 +27,9 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.assertj.core.util.Lists;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
@@ -236,6 +238,57 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
         assertThat(testType.getOptLockRevision()).isEqualTo(2);
         assertThat(testType.getOptionalModuleTypes()).containsExactly(osType);
         assertThat(testType.getMandatoryModuleTypes()).isEmpty();
+
+    }
+
+    @Test
+    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @Description("Verifies quota enforcement for /rest/v1/distributionsettypes/{ID}/optionalmoduletypes POST requests.")
+    public void assignModuleTypesToDistributionSetTypeUntilQuotaExceeded() throws Exception {
+
+        // create software module types
+        final int quota = quotaManagement.getMaxSoftwareModuleTypesPerDistributionSetType();
+        final List<Long> moduleTypeIds = Lists.newArrayList();
+        for (int i = 0; i < quota + 1; ++i) {
+            final SoftwareModuleTypeCreate smCreate = entityFactory.softwareModuleType().create().name("smType_" + i)
+                    .description("smType_" + i).maxAssignments(1).colour("blue").key("smType_" + i);
+            moduleTypeIds.add(softwareModuleTypeManagement.create(smCreate).getId());
+        }
+
+        // verify quota enforcement for optional module types
+
+        final DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType()
+                .create().key("testType").name("testType").description("testType").colour("col12"));
+        assertThat(testType.getOptLockRevision()).isEqualTo(1);
+
+        for (int i = 0; i < moduleTypeIds.size() - 1; ++i) {
+            mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes", testType.getId())
+                    .content("{\"id\":" + moduleTypeIds.get(i) + "}").contentType(MediaType.APPLICATION_JSON))
+                    .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+        }
+
+        mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes", testType.getId())
+                .content("{\"id\":" + moduleTypeIds.get(moduleTypeIds.size() - 1) + "}")
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isForbidden());
+
+
+        // verify quota enforcement for mandatory module types
+
+        final DistributionSetType testType2 = distributionSetTypeManagement.create(entityFactory.distributionSetType()
+                .create().key("testType2").name("testType2").description("testType2").colour("col12"));
+        assertThat(testType2.getOptLockRevision()).isEqualTo(1);
+
+        for (int i = 0; i < moduleTypeIds.size() - 1; ++i) {
+            mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes", testType2.getId())
+                    .content("{\"id\":" + moduleTypeIds.get(i) + "}").contentType(MediaType.APPLICATION_JSON))
+                    .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+        }
+
+        mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes", testType2.getId())
+                .content("{\"id\":" + moduleTypeIds.get(moduleTypeIds.size() - 1) + "}")
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isForbidden());
 
     }
 

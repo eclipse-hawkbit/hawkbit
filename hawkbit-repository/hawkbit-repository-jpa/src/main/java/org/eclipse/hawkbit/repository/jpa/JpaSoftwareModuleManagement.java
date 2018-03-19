@@ -40,7 +40,6 @@ import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataUpdate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleCreate;
@@ -56,6 +55,7 @@ import org.eclipse.hawkbit.repository.jpa.model.SwMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.SoftwareModuleSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
+import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.AssignedSoftwareModule;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -553,22 +553,9 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
      *            Number of meta data entries to be created.
      */
     private void assertMetaDataQuota(final Long moduleId, final int requested) {
-        final int limit = quotaManagement.getMaxMetaDataEntriesPerSoftwareModule();
-        if (requested > limit) {
-            LOG.warn(
-                    "Cannot create {} meta data entries for software module '{}' because of the configured quota limit {}.",
-                    requested, moduleId, limit);
-            throw new AssignmentQuotaExceededException(SoftwareModuleMetadata.class, SoftwareModule.class,
-                    moduleId.longValue(), requested);
-        }
-        final long currentCount = softwareModuleMetadataRepository.countBySoftwareModuleId(moduleId);
-        if (currentCount + requested > limit) {
-            LOG.warn(
-                    "Cannot create {} meta data entries for software module '{}' because of the configured quota limit {}. Currently, there are {} meta data entries assigned.",
-                    requested, moduleId, limit, currentCount);
-            throw new AssignmentQuotaExceededException(SoftwareModuleMetadata.class, SoftwareModule.class, moduleId,
-                    requested);
-        }
+        final int maxMetaData = quotaManagement.getMaxMetaDataEntriesPerSoftwareModule();
+        QuotaHelper.assertAssignmentQuota(moduleId, requested, maxMetaData, SoftwareModuleMetadata.class,
+                SoftwareModule.class, softwareModuleMetadataRepository::countBySoftwareModuleId);
     }
 
     @Override

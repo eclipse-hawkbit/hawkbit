@@ -82,4 +82,8 @@ public interface DistributionSetTypeRepository
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("SELECT d FROM JpaDistributionSetType d WHERE d.id IN ?1")
     List<JpaDistributionSetType> findAll(Iterable<Long> ids);
+
+    @Query("SELECT COUNT (DISTINCT e.smType) FROM JpaDistributionSetType d JOIN FETCH d.elements e WHERE d.id = :id")
+    long countSmTypesById(@Param("id") Long id);
+
 }

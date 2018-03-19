@@ -14,7 +14,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
@@ -30,7 +29,6 @@ import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
 import org.eclipse.hawkbit.repository.builder.DistributionSetUpdate;
 import org.eclipse.hawkbit.repository.builder.GenericDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
@@ -47,6 +45,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
+import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
@@ -504,7 +503,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
      */
     private void assertMetaDataQuota(final Long dsId, final int requested) {
         // dispatch
-        assertQuota(dsId, requested, quotaManagement.getMaxMetaDataEntriesPerDistributionSet(),
+        QuotaHelper.assertAssignmentQuota(dsId, requested, quotaManagement.getMaxMetaDataEntriesPerDistributionSet(),
                 DistributionSetMetadata.class, DistributionSet.class,
                 distributionSetMetadataRepository::countByDistributionSetId);
     }
@@ -520,40 +519,10 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
      */
     private void assertSoftwareModuleQuota(final Long dsId, final int requested) {
         // dispatch
-        assertQuota(dsId, requested, quotaManagement.getMaxSoftwareModulesPerDistributionSet(), SoftwareModule.class,
-                DistributionSet.class, id -> {
-                    // final long count =
-                    // distributionSetRepository.countModulesById(id);
-                    final long count = softwareModuleRepository.countByAssignedToId(id);
-                    System.out.println("Module count = " + count);
-                    return count;
-                });
-    }
-
-    /**
-     * Asserts the quota for the given entity type.
-     * 
-     * @param parentId
-     *            ID of the parent entity.
-     * @param requested
-     *            Number of entities that should be assigned to the parent
-     *            entity.
-     */
-    private void assertQuota(final Long parentId, final int requested, final int limit, final Class<?> type,
-            final Class<?> parentType, final Function<Long, Long> countFct) {
-        if (requested > limit) {
-            LOG.warn("Cannot assign {} {} entities to {} '{}' because of the configured quota limit {}.", requested,
-                    type.getSimpleName(), parentType.getSimpleName(), parentId, limit);
-            throw new AssignmentQuotaExceededException(type, parentType, parentId.longValue(), requested);
-        }
-        final long currentCount = countFct.apply(parentId);
-        if (currentCount + requested > limit) {
-            LOG.warn(
-                    "Cannot assign {} {} entities to {} '{}' because of the configured quota limit {}. Currently, there are {} {} entities assigned.",
-                    requested, type.getSimpleName(), parentType.getSimpleName(), parentId, limit, currentCount,
-                    type.getSimpleName());
-            throw new AssignmentQuotaExceededException(type, parentType, parentId.longValue(), requested);
-        }
+        QuotaHelper.assertAssignmentQuota(dsId, requested, quotaManagement.getMaxSoftwareModulesPerDistributionSet(),
+                SoftwareModule.class, DistributionSet.class,
+                // alternative: distributionSetRepository#countModulesById
+                softwareModuleRepository::countByAssignedToId);
     }
 
     @Override

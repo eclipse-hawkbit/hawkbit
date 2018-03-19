@@ -406,9 +406,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final DistributionSetRepository distributionSetRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer, final NoCountPagingRepository criteriaNoCountDao,
-            final JpaProperties properties) {
+            final JpaProperties properties, final QuotaManagement quotaManagement) {
         return new JpaDistributionSetTypeManagement(distributionSetTypeRepository, softwareModuleTypeRepository,
-                distributionSetRepository, virtualPropertyReplacer, criteriaNoCountDao, properties.getDatabase());
+                distributionSetRepository, virtualPropertyReplacer, criteriaNoCountDao, properties.getDatabase(),
+                quotaManagement);
     }
 
     /**

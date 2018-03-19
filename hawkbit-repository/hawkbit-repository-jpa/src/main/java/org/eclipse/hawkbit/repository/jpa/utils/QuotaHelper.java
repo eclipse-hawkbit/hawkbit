@@ -1,0 +1,69 @@
+/**
+ * Copyright (c) 2018 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+package org.eclipse.hawkbit.repository.jpa.utils;
+
+import java.util.function.Function;
+
+import javax.validation.constraints.NotNull;
+
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
+import org.eclipse.hawkbit.repository.jpa.JpaDistributionSetManagement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.validation.annotation.Validated;
+
+@Validated
+public class QuotaHelper {
+
+    /**
+     * Class logger
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(JpaDistributionSetManagement.class);
+
+    private QuotaHelper() {
+        // no need to instantiat this class
+    }
+
+    /**
+     * Asserts the specified assignment quota.
+     * 
+     * @param parentId
+     *            The ID of the parent entity.
+     * @param requested
+     *            The number of entities that shall be assigned to the parent
+     *            entity.
+     * @param limit
+     *            The maximum number of entities that may be assigned to the
+     *            parent entity.
+     * @param type
+     *            The type of the entities that shall be assigned.
+     * @param parentType
+     *            The type of the parent entity.
+     * @param countFct
+     *            Function to count the entities that are currently assigned to
+     *            the parent entity.
+     */
+    public static void assertAssignmentQuota(final long parentId, final int requested, final int limit,
+            @NotNull final Class<?> type, @NotNull final Class<?> parentType,
+            @NotNull final Function<Long, Long> countFct) {
+        if (requested > limit) {
+            LOG.warn("Cannot assign {} {} entities to {} '{}' because of the configured quota limit {}.", requested,
+                    type.getSimpleName(), parentType.getSimpleName(), parentId, limit);
+            throw new AssignmentQuotaExceededException(type, parentType, parentId, requested);
+        }
+        final long currentCount = countFct.apply(parentId);
+        if (currentCount + requested > limit) {
+            LOG.warn(
+                    "Cannot assign {} {} entities to {} '{}' because of the configured quota limit {}. Currently, there are {} {} entities assigned.",
+                    requested, type.getSimpleName(), parentType.getSimpleName(), parentId, limit, currentCount,
+                    type.getSimpleName());
+            throw new AssignmentQuotaExceededException(type, parentType, parentId, requested);
+        }
+    }
+}
