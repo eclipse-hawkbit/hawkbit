@@ -53,4 +53,9 @@ public interface QuotaManagement {
      */
     int getMaxMetaDataEntriesPerDistributionSet();
 
+    /**
+     * @return maximum number of software modules per distribution set
+     */
+    int getMaxSoftwareModulesPerDistributionSet();
+
 }

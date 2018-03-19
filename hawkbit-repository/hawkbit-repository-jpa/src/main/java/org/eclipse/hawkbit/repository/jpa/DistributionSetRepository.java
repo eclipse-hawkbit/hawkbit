@@ -85,6 +85,18 @@ public interface DistributionSetRepository
     Long countByModulesId(Long moduleId);
 
     /**
+     * Count the {@link SoftwareModule}s which are assigned to the
+     * {@link DistributionSet} with the given ID.
+     * 
+     * @param id
+     *            of the distribution set
+     * 
+     * @return The number of software module matching the distribution set ID.
+     */
+    @Query("SELECT COUNT (m.id) FROM JpaDistributionSet d JOIN FETCH d.modules m WHERE d.id = :id")
+    long countModulesById(@Param("id") Long id);
+
+    /**
      * Finds {@link DistributionSet}s based on given ID that are assigned yet to
      * an {@link Action}, i.e. in use.
      *

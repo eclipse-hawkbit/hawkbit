@@ -124,6 +124,11 @@ public class HawkbitSecurityProperties {
          */
         private int maxMetaDataEntriesPerDistributionSet = 100;
 
+        /**
+         * Maximum number of software modules per distribution set
+         */
+        private int maxSoftwareModulesPerDistributionSet = 100;
+
         private final Filter filter = new Filter();
         private final Filter uiFilter = new Filter();
 
@@ -181,6 +186,14 @@ public class HawkbitSecurityProperties {
 
         public void setMaxMetaDataEntriesPerDistributionSet(final int maxMetaDataEntriesPerDistributionSet) {
             this.maxMetaDataEntriesPerDistributionSet = maxMetaDataEntriesPerDistributionSet;
+        }
+
+        public int getMaxSoftwareModulesPerDistributionSet() {
+            return maxSoftwareModulesPerDistributionSet;
+        }
+
+        public void setMaxSoftwareModulesPerDistributionSet(final int maxSoftwareModulesPerDistributionSet) {
+            this.maxSoftwareModulesPerDistributionSet = maxSoftwareModulesPerDistributionSet;
         }
 
         /**

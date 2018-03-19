@@ -491,6 +491,47 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Verifies the enforcement of the software module quota per distribution set.")
+    public void quotaSoftwareModuleAssignment() {
+
+        // create some software modules
+        final DistributionSet ds = testdataFactory.createDistributionSet("ds");
+        final int quota = quotaManagement.getMaxSoftwareModulesPerDistributionSet()
+                - Math.toIntExact(softwareModuleRepository.countByAssignedToId(ds.getId()));
+        final List<Long> modules = Lists.newArrayList();
+        for (int i = 0; i < quota + 1; ++i) {
+            modules.add(testdataFactory.createSoftwareModuleApp("sm" + i).getId());
+        }
+
+        // assign software modules one by one
+        final DistributionSet ds1 = testdataFactory.createDistributionSet("ds1");
+        for (int i = 0; i < quota; ++i) {
+            distributionSetManagement.assignSoftwareModules(ds1.getId(), Collections.singletonList(modules.get(i)));
+        }
+        // add one more to cause the quota to be exceeded
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> {
+            distributionSetManagement.assignSoftwareModules(ds1.getId(), Collections.singletonList(modules.get(quota)));
+        });
+
+        // assign all software modules at once
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("ds2");
+        // verify quota is exceeded
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+                .isThrownBy(() -> distributionSetManagement.assignSoftwareModules(ds2.getId(), modules));
+
+        // assign some software modules
+        final DistributionSet ds3 = testdataFactory.createDistributionSet("ds3");
+        final int firstHalf = Math.round(quota / 2);
+        for (int i = 0; i < firstHalf; ++i) {
+            distributionSetManagement.assignSoftwareModules(ds3.getId(), Collections.singletonList(modules.get(i)));
+        }
+        // assign the remaining modules to cause the quota to be exceeded
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> distributionSetManagement
+                .assignSoftwareModules(ds3.getId(), modules.subList(firstHalf, modules.size())));
+
+    }
+
+    @Test
     @WithUser(allSpPermissions = true)
     @Description("Checks that metadata for a distribution set can be updated.")
     public void updateDistributionSetMetadata() throws InterruptedException {

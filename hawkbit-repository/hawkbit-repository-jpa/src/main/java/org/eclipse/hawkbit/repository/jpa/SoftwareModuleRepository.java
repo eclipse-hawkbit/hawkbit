@@ -88,6 +88,18 @@ public interface SoftwareModuleRepository
     Page<SoftwareModule> findByAssignedToId(Pageable pageable, Long setId);
 
     /**
+     * Count the software modules which are assigned to the distribution set
+     * with the given ID.
+     * 
+     * @param setId
+     *            the distribution set ID
+     * 
+     * @return the number of software modules matching the given distribution
+     *         set ID.
+     */
+    long countByAssignedToId(Long setId);
+
+    /**
      * @param pageable
      *            the page request to page the result set
      * @param set

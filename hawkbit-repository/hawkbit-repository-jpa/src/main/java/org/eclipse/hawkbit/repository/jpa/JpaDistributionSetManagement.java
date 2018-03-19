@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
@@ -345,6 +346,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         checkDistributionSetIsAssignedToTargets(setId);
 
         final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(setId);
+
+        assertSoftwareModuleQuota(setId, modules.size());
+
         modules.forEach(set::addModule);
 
         return distributionSetRepository.save(set);
@@ -499,21 +503,56 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
      *            Number of meta data entries to be created.
      */
     private void assertMetaDataQuota(final Long dsId, final int requested) {
-        final int limit = quotaManagement.getMaxMetaDataEntriesPerDistributionSet();
+        // dispatch
+        assertQuota(dsId, requested, quotaManagement.getMaxMetaDataEntriesPerDistributionSet(),
+                DistributionSetMetadata.class, DistributionSet.class,
+                distributionSetMetadataRepository::countByDistributionSetId);
+    }
+
+    /**
+     * Asserts the software module quota for the distribution set with the given
+     * ID.
+     * 
+     * @param dsId
+     *            The distribution set ID.
+     * @param requested
+     *            Number of software modules to be assigned.
+     */
+    private void assertSoftwareModuleQuota(final Long dsId, final int requested) {
+        // dispatch
+        assertQuota(dsId, requested, quotaManagement.getMaxSoftwareModulesPerDistributionSet(), SoftwareModule.class,
+                DistributionSet.class, id -> {
+                    // final long count =
+                    // distributionSetRepository.countModulesById(id);
+                    final long count = softwareModuleRepository.countByAssignedToId(id);
+                    System.out.println("Module count = " + count);
+                    return count;
+                });
+    }
+
+    /**
+     * Asserts the quota for the given entity type.
+     * 
+     * @param parentId
+     *            ID of the parent entity.
+     * @param requested
+     *            Number of entities that should be assigned to the parent
+     *            entity.
+     */
+    private void assertQuota(final Long parentId, final int requested, final int limit, final Class<?> type,
+            final Class<?> parentType, final Function<Long, Long> countFct) {
         if (requested > limit) {
-            LOG.warn(
-                    "Cannot create {} meta data entries for distribution set '{}' because of the configured quota limit {}.",
-                    requested, dsId, limit);
-            throw new AssignmentQuotaExceededException(DistributionSetMetadata.class, DistributionSet.class,
-                    dsId.longValue(), requested);
+            LOG.warn("Cannot assign {} {} entities to {} '{}' because of the configured quota limit {}.", requested,
+                    type.getSimpleName(), parentType.getSimpleName(), parentId, limit);
+            throw new AssignmentQuotaExceededException(type, parentType, parentId.longValue(), requested);
         }
-        final long currentCount = distributionSetMetadataRepository.countByDistributionSetId(dsId);
+        final long currentCount = countFct.apply(parentId);
         if (currentCount + requested > limit) {
             LOG.warn(
-                    "Cannot create {} meta data entries for distribution set '{}' because of the configured quota limit {}. Currently, there are {} meta data entries assigned.",
-                    requested, dsId, limit, currentCount);
-            throw new AssignmentQuotaExceededException(DistributionSetMetadata.class, DistributionSet.class, dsId,
-                    requested);
+                    "Cannot assign {} {} entities to {} '{}' because of the configured quota limit {}. Currently, there are {} {} entities assigned.",
+                    requested, type.getSimpleName(), parentType.getSimpleName(), parentId, limit, currentCount,
+                    type.getSimpleName());
+            throw new AssignmentQuotaExceededException(type, parentType, parentId.longValue(), requested);
         }
     }
 
