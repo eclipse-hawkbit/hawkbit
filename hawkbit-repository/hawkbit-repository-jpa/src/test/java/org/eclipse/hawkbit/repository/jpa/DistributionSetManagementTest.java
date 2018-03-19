@@ -495,16 +495,14 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     public void quotaSoftwareModuleAssignment() {
 
         // create some software modules
-        final DistributionSet ds = testdataFactory.createDistributionSet("ds");
-        final int quota = quotaManagement.getMaxSoftwareModulesPerDistributionSet()
-                - Math.toIntExact(softwareModuleRepository.countByAssignedToId(ds.getId()));
+        final int quota = quotaManagement.getMaxSoftwareModulesPerDistributionSet();
         final List<Long> modules = Lists.newArrayList();
         for (int i = 0; i < quota + 1; ++i) {
             modules.add(testdataFactory.createSoftwareModuleApp("sm" + i).getId());
         }
 
         // assign software modules one by one
-        final DistributionSet ds1 = testdataFactory.createDistributionSet("ds1");
+        final DistributionSet ds1 = testdataFactory.createDistributionSetWithNoSoftwareModules("ds1", "1.0");
         for (int i = 0; i < quota; ++i) {
             distributionSetManagement.assignSoftwareModules(ds1.getId(), Collections.singletonList(modules.get(i)));
         }
@@ -514,13 +512,13 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         });
 
         // assign all software modules at once
-        final DistributionSet ds2 = testdataFactory.createDistributionSet("ds2");
+        final DistributionSet ds2 = testdataFactory.createDistributionSetWithNoSoftwareModules("ds2", "1.0");
         // verify quota is exceeded
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> distributionSetManagement.assignSoftwareModules(ds2.getId(), modules));
 
         // assign some software modules
-        final DistributionSet ds3 = testdataFactory.createDistributionSet("ds3");
+        final DistributionSet ds3 = testdataFactory.createDistributionSetWithNoSoftwareModules("ds3", "1.0");
         final int firstHalf = Math.round(quota / 2);
         for (int i = 0; i < firstHalf; ++i) {
             distributionSetManagement.assignSoftwareModules(ds3.getId(), Collections.singletonList(modules.get(i)));

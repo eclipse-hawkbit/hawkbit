@@ -48,6 +48,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.jayway.jsonpath.JsonPath;
 
@@ -180,6 +181,40 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId() + "/assignedSM"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$.size", equalTo(smIDs.size())));
+
+        // verify quota enforcement
+        final int quota = quotaManagement.getMaxSoftwareModulesPerDistributionSet();
+        final List<Long> moduleIDs = Lists.newArrayList();
+        for (int i = 0; i < quota + 1; ++i) {
+            moduleIDs.add(testdataFactory.createSoftwareModuleApp("sm" + i).getId());
+        }
+
+        // post assignment
+        final String jsonIDs = JsonBuilder.ids(moduleIDs.subList(0, quota - smIDs.size()));
+        mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId() + "/assignedSM")
+                .contentType(MediaType.APPLICATION_JSON).content(jsonIDs)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+        // test if size corresponds with quota
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId()
+                + "/assignedSM?limit={limit}", quota * 2)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.size", equalTo(quota)));
+
+        // post one more to cause the quota to be exceeded
+        mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId() + "/assignedSM")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JsonBuilder.ids(Collections.singletonList(moduleIDs.get(moduleIDs.size() - 1)))))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden());
+
+        // verify quota is also enforced for bulk uploads
+        final DistributionSet disSet2 = testdataFactory.createDistributionSetWithNoSoftwareModules("Saturn", "4.0");
+        mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet2.getId() + "/assignedSM")
+                .contentType(MediaType.APPLICATION_JSON).content(JsonBuilder.ids(moduleIDs)))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden());
+        // verify size is still 0
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet2.getId() + "/assignedSM"))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$.size", equalTo(0)));
+
     }
 
     @Test
