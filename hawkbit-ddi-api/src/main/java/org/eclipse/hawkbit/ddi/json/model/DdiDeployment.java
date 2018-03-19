@@ -31,7 +31,7 @@ public class DdiDeployment {
     @NotNull
     private List<DdiChunk> chunks;
 
-    private MaintenanceWindowStatus maintenanceWindow;
+    private DdiMaintenanceWindowStatus maintenanceWindow;
 
     /**
      * Constructor.
@@ -59,7 +59,7 @@ public class DdiDeployment {
      *            the parameter is null.
      */
     public DdiDeployment(final HandlingType download, final HandlingType update, final List<DdiChunk> chunks,
-            final MaintenanceWindowStatus maintenanceWindow) {
+            final DdiMaintenanceWindowStatus maintenanceWindow) {
         this.download = download;
         this.update = update;
         this.chunks = chunks;
@@ -82,7 +82,7 @@ public class DdiDeployment {
         return Collections.unmodifiableList(chunks);
     }
 
-    public MaintenanceWindowStatus getMaintenanceWindow() {
+    public DdiMaintenanceWindowStatus getMaintenanceWindow() {
         return this.maintenanceWindow;
     }
 
@@ -121,7 +121,7 @@ public class DdiDeployment {
     /**
      * Status of the maintenance window for action.
      */
-    public enum MaintenanceWindowStatus {
+    public enum DdiMaintenanceWindowStatus {
         /**
          * A window is currently available, target can go ahead with
          * installation.
@@ -136,7 +136,7 @@ public class DdiDeployment {
 
         private String status;
 
-        MaintenanceWindowStatus(final String status) {
+        DdiMaintenanceWindowStatus(final String status) {
             this.status = status;
         }
 
