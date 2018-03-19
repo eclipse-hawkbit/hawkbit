@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.artifact.repository.HashNotMatchException;
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
@@ -26,6 +27,7 @@ import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -57,12 +59,16 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     private final TenantAware tenantAware;
 
+    private final QuotaManagement quotaManagement;
+
     JpaArtifactManagement(final LocalArtifactRepository localArtifactRepository,
             final SoftwareModuleRepository softwareModuleRepository, final ArtifactRepository artifactRepository,
+            final QuotaManagement quotaManagement,
             final TenantAware tenantAware) {
         this.localArtifactRepository = localArtifactRepository;
         this.softwareModuleRepository = softwareModuleRepository;
         this.artifactRepository = artifactRepository;
+        this.quotaManagement = quotaManagement;
         this.tenantAware = tenantAware;
     }
 
@@ -94,6 +100,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
         final Artifact existing = checkForExistingArtifact(filename, overrideExisting, softwareModule);
 
+        assertArtifactQuota(moduleId, 1);
+
         try {
             result = artifactRepository.store(tenantAware.getCurrentTenant(), stream, filename, contentType,
                     new DbArtifactHash(providedSha1Sum, providedMd5Sum));
@@ -111,6 +119,12 @@ public class JpaArtifactManagement implements ArtifactManagement {
         }
 
         return storeArtifactMetadata(softwareModule, filename, result, existing);
+    }
+
+    private void assertArtifactQuota(final long moduleId, final int requested) {
+        QuotaHelper.assertAssignmentQuota(moduleId, requested, quotaManagement.getMaxArtifactsPerSoftwareModule(),
+                Artifact.class, SoftwareModule.class, localArtifactRepository::countBySoftwareModuleId);
+
     }
 
     @Override

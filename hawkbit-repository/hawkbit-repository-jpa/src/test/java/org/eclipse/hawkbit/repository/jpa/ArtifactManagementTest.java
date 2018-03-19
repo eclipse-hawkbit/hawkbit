@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -24,6 +26,7 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
@@ -34,6 +37,8 @@ import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.HashGeneratorUtils;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.Test;
+
+import com.google.common.collect.Lists;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -124,6 +129,42 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         assertThat(softwareModuleRepository.findAll()).hasSize(3);
 
         assertThat(softwareModuleManagement.get(sm.getId()).get().getArtifacts()).hasSize(3);
+    }
+
+    @Test
+    @Description("Verifies that the quota specifying the maximum number of artifacts per software module is enforced.")
+    public void quotaMaxArtifactsPerSoftwareModule() throws NoSuchAlgorithmException, IOException {
+
+        // create a software module
+        final JpaSoftwareModule sm1 = softwareModuleRepository
+                .save(new JpaSoftwareModule(osType, "sm1", "1.0", null, null));
+
+        // now create artifacts for this module until the quota is exceeded
+        final long quota = quotaManagement.getMaxArtifactsPerSoftwareModule();
+        final List<Long> artifactIds = Lists.newArrayList();
+        for (int i = 0; i < quota; ++i) {
+            final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+            artifactIds.add(artifactManagement.create(new ByteArrayInputStream(random), sm1.getId(), "file" + i, false)
+                    .getId());
+        }
+        assertThat(artifactRepository.findBySoftwareModuleId(PAGE, sm1.getId()).getTotalElements()).isEqualTo(quota);
+
+        // create one mode to trigger the quota exceeded error
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> {
+            final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+            artifactManagement.create(new ByteArrayInputStream(random), sm1.getId(), "file" + quota, false);
+        });
+
+        // delete one of the artifacts
+        artifactManagement.delete(artifactIds.get(0));
+        assertThat(artifactRepository.findBySoftwareModuleId(PAGE, sm1.getId()).getTotalElements())
+                .isEqualTo(quota - 1);
+
+        // now we should be able to create an artifact again
+        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+        artifactManagement.create(new ByteArrayInputStream(random), sm1.getId(), "fileXYZ", false);
+        assertThat(artifactRepository.findBySoftwareModuleId(PAGE, sm1.getId()).getTotalElements()).isEqualTo(quota);
+
     }
 
     @Test

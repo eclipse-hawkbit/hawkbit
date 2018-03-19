@@ -64,4 +64,9 @@ public interface QuotaManagement {
      */
     int getMaxSoftwareModuleTypesPerDistributionSetType();
 
+    /**
+     * @return the maximum number of artifacts per software module
+     */
+    int getMaxArtifactsPerSoftwareModule();
+
 }

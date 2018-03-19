@@ -116,7 +116,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     }
 
     @Test
-    @Description("Tests the uppload of an artifact binary. The upload is executed and the content checked in the repository for completenes.")
+    @Description("Tests the upload of an artifact binary. The upload is executed and the content checked in the repository for completeness.")
     public void uploadArtifact() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
@@ -279,6 +279,42 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         assertArtifact(sm, random);
 
+    }
+
+    @Test
+    @Description("Verifies that only a limited number of artifacts can be uploaded for one software module.")
+    public void uploadArtifactsUntilQuotaExceeded() throws Exception {
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
+        final long quota = quotaManagement.getMaxArtifactsPerSoftwareModule();
+
+        for (int i = 0; i < quota; ++i) {
+            // create test file
+            final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+            final String md5sum = HashGeneratorUtils.generateMD5(random);
+            final String sha1sum = HashGeneratorUtils.generateSHA1(random);
+            final MockMultipartFile file = new MockMultipartFile("file", "origFilename" + i, null, random);
+
+            // upload
+            mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
+                    .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                    .andExpect(status().isCreated())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                    .andExpect(jsonPath("$.hashes.md5", equalTo(md5sum)))
+                    .andExpect(jsonPath("$.hashes.sha1", equalTo(sha1sum)))
+                    .andExpect(jsonPath("$.size", equalTo(random.length)))
+                    .andExpect(jsonPath("$.providedFilename", equalTo("origFilename" + i))).andReturn();
+        }
+
+        // upload one more file to cause the quota to be exceeded
+        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+        HashGeneratorUtils.generateMD5(random);
+        HashGeneratorUtils.generateSHA1(random);
+        final MockMultipartFile file = new MockMultipartFile("file", "origFilename_final", null, random);
+
+        // upload
+        mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isForbidden());
     }
 
     @Test

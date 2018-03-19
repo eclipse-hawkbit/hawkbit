@@ -93,12 +93,23 @@ public interface LocalArtifactRepository extends BaseEntityRepository<JpaArtifac
      *
      * @param pageReq
      *            Pageable
-     * @param swId
+     * @param softwareModuleId
      *            software module id
      *
      * @return Page<Artifact>
      */
-    Page<Artifact> findBySoftwareModuleId(Pageable pageReq, final Long swId);
+    Page<Artifact> findBySoftwareModuleId(Pageable pageReq, Long softwareModuleId);
+
+    /**
+     * Count the artifacts that are associated with the given software module.
+     * 
+     * @param softwareModuleId
+     *            software module ID
+     * 
+     * @return the current number of artifacts associated with the software
+     *         module.
+     */
+    long countBySoftwareModuleId(Long softwareModuleId);
 
     /**
      * Searches for a {@link Artifact} based user provided filename at upload
@@ -108,8 +119,9 @@ public interface LocalArtifactRepository extends BaseEntityRepository<JpaArtifac
      *            to search
      * @param softwareModuleId
      *            selected software module id
+     * 
      * @return list of {@link Artifact}.
      */
-    Optional<Artifact> findFirstByFilenameAndSoftwareModuleId(final String filename, final Long softwareModuleId);
+    Optional<Artifact> findFirstByFilenameAndSoftwareModuleId(String filename, Long softwareModuleId);
 
 }

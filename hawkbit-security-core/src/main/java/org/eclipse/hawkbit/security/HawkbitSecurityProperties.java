@@ -134,6 +134,11 @@ public class HawkbitSecurityProperties {
          */
         private int maxSoftwareModuleTypesPerDistributionSetType = 50;
 
+        /**
+         * Maximum number of artifacts per software module
+         */
+        private int maxArtifactsPerSoftwareModule = 50;
+
         private final Filter filter = new Filter();
         private final Filter uiFilter = new Filter();
 
@@ -208,6 +213,14 @@ public class HawkbitSecurityProperties {
         public void setMaxSoftwareModuleTypesPerDistributionSetType(
                 final int maxSoftwareModuleTypesPerDistributionSetType) {
             this.maxSoftwareModuleTypesPerDistributionSetType = maxSoftwareModuleTypesPerDistributionSetType;
+        }
+
+        public int getMaxArtifactsPerSoftwareModule() {
+            return maxArtifactsPerSoftwareModule;
+        }
+
+        public void setMaxArtifactsPerSoftwareModule(final int maxArtifactsPerSoftwareModule) {
+            this.maxArtifactsPerSoftwareModule = maxArtifactsPerSoftwareModule;
         }
 
         /**

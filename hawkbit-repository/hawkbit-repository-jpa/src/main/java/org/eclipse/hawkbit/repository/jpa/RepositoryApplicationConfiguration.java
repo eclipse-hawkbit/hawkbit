@@ -611,9 +611,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnMissingBean
     ArtifactManagement artifactManagement(final LocalArtifactRepository localArtifactRepository,
             final SoftwareModuleRepository softwareModuleRepository, final ArtifactRepository artifactRepository,
-            final TenantAware tenantAware) {
+            final QuotaManagement quotaManagement, final TenantAware tenantAware) {
         return new JpaArtifactManagement(localArtifactRepository, softwareModuleRepository, artifactRepository,
-                tenantAware);
+                quotaManagement, tenantAware);
     }
 
     /**
