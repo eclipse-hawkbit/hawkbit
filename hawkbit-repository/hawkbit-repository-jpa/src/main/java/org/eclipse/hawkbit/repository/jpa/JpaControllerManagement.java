@@ -691,6 +691,7 @@ public class JpaControllerManagement implements ControllerManagement {
             // default is MERGE
             controllerAttributes.putAll(data);
             target.setRequestControllerAttributes(false);
+            break;
         }
 
         final int attributeCount = controllerAttributes.size();
