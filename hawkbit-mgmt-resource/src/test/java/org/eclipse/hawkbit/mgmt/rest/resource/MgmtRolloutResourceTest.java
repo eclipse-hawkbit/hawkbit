@@ -217,7 +217,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
     }
 
     @Test
-    @Description("Terives sinle rollout from management API includinfg extra data that is delieverd only for single rollout access.")
+    @Description("Retrieves single rollout from management API including extra data that is delivered only for single rollout access.")
     public void retrieveSingleRollout() throws Exception {
         testdataFactory.createTargets(20, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");

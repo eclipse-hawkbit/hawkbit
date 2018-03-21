@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,6 +42,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
@@ -69,9 +73,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -1255,6 +1256,39 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 10L);
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.SCHEDULED, 40L);
         validateRolloutActionStatus(myRollout.getId(), expectedTargetCountStatus);
+    }
+
+    @Test
+    @Description("Verify the enforcement of the quota that specifies a maximum number of targets per rollout group.")
+    public void quotaMaxTargetsPerRolloutGroup() throws Exception {
+
+        final int quota = quotaManagement.getMaxTargetsPerRolloutGroup();
+
+        final int amountTargetsForRollout = quota + 1;
+        final int amountGroups = 1;
+        final String successCondition = "50";
+        final String errorCondition = "80";
+        final String rolloutName = "rolloutTest";
+        final String targetPrefixName = rolloutName;
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsFor" + rolloutName);
+        testdataFactory.createTargets(amountTargetsForRollout, targetPrefixName + "-", targetPrefixName);
+
+        final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults()
+                .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
+                .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
+                .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
+
+        final Rollout rollout = rolloutManagement.create(
+                entityFactory.rollout().create().name(rolloutName).description(rolloutName)
+                        .targetFilterQuery("controllerId==" + targetPrefixName + "-*").set(distributionSet),
+                amountGroups, conditions);
+
+        // assert quota is exceeded
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> rolloutManagement.handleRollouts());
+
+        assertThat(rolloutManagement.get(rollout.getId())).isNotEmpty();
+        assertThat(rolloutManagement.get(rollout.getId()).get().getStatus()).isEqualTo(RolloutStatus.CREATING);
+
     }
 
     @Test
