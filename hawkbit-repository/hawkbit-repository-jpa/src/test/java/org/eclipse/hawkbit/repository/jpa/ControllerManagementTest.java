@@ -689,12 +689,12 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Ensures that target attribute update fails if quota hits.")
+    @Description("Verifies that the quota specifying the maximum attributes per target is enforced.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 2) })
     public void updateTargetAttributesFailsIfTooManyEntries() throws Exception {
         final String controllerId = "test123";
-        final int allowedAttributes = 10;
+        final int allowedAttributes = quotaManagement.getMaxAttributeEntriesPerTarget();
         testdataFactory.createTarget(controllerId);
 
         assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> securityRule
@@ -706,7 +706,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         // verify that no attributes have been written
         assertThat(targetManagement.getControllerAttributes(controllerId)).isEmpty();
 
-        // Write allowed number of attributes twice with same key should result
+        // write allowed number of attributes twice with same key should result
         // in update but work
         securityRule.runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
             writeAttributes(controllerId, allowedAttributes, "key", "value1");
@@ -715,7 +715,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         });
         assertThat(targetManagement.getControllerAttributes(controllerId)).hasSize(10);
 
-        // Now rite one more
+        // now write one more
         assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> securityRule
                 .runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
                     writeAttributes(controllerId, 1, "additional", "value1");

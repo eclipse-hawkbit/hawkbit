@@ -108,7 +108,7 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) "
-            + "upload limitation is inplace which is meant to protect the server from malicious attempts.")
+            + "upload quota is enforced to protect the server from malicious attempts.")
     public void putToMuchConfigData() throws Exception {
         testdataFactory.createTarget("4717");
 
@@ -133,7 +133,7 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
     @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) "
             + "resource behaves as exptected in cae of invalid request attempts.")
     public void badConfigData() throws Exception {
-        final Target savedTarget = testdataFactory.createTarget("4712");
+        testdataFactory.createTarget("4712");
 
         // not allowed methods
         mvc.perform(post("/{tenant}/controller/v1/4712/configData", tenantAware.getCurrentTenant()))

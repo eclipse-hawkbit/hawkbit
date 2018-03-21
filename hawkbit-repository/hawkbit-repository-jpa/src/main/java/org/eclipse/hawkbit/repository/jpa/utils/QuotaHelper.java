@@ -55,6 +55,35 @@ public class QuotaHelper {
      */
     public static void assertAssignmentQuota(final Long parentId, final int requested, final int limit,
             @NotNull final Class<?> type, @NotNull final Class<?> parentType, final Function<Long, Long> countFct) {
+        // dispatch
+        assertAssignmentQuota(parentId, requested, limit, type.getSimpleName(), parentType.getSimpleName(), countFct);
+    }
+
+    /**
+     * Asserts the specified assignment quota.
+     * 
+     * @param parentId
+     *            The ID of the parent entity.
+     * @param requested
+     *            The number of entities that shall be assigned to the parent
+     *            entity.
+     * @param limit
+     *            The maximum number of entities that may be assigned to the
+     *            parent entity.
+     * @param type
+     *            The type of the entities that shall be assigned.
+     * @param parentType
+     *            The type of the parent entity.
+     * @param countFct
+     *            Function to count the entities that are currently assigned to
+     *            the parent entity.
+     * 
+     * @throws QuotaExceededException
+     *             if the assignment operation would cause the quota to be
+     *             exceeded
+     */
+    public static void assertAssignmentQuota(final Long parentId, final int requested, final int limit,
+            @NotNull final String type, @NotNull final String parentType, final Function<Long, Long> countFct) {
 
         // check if the quota is unlimited
         if (limit <= 0) {
@@ -63,8 +92,8 @@ public class QuotaHelper {
 
         if (requested > limit) {
             LOG.warn("Cannot assign {} {} entities to {} '{}' because of the configured quota limit {}.", requested,
-                    type.getSimpleName(), parentType.getSimpleName(), parentId, limit);
-            throw new QuotaExceededException(type, parentType, parentId, requested);
+                    type, parentType, parentId, limit);
+            throw new QuotaExceededException(type, parentType, parentId, requested, limit);
         }
 
         if (parentId != null && countFct != null) {
@@ -72,9 +101,8 @@ public class QuotaHelper {
             if (currentCount + requested > limit) {
                 LOG.warn(
                         "Cannot assign {} {} entities to {} '{}' because of the configured quota limit {}. Currently, there are {} {} entities assigned.",
-                        requested, type.getSimpleName(), parentType.getSimpleName(), parentId, limit, currentCount,
-                        type.getSimpleName());
-                throw new QuotaExceededException(type, parentType, parentId, requested);
+                        requested, type, parentType, parentId, limit, currentCount, type);
+                throw new QuotaExceededException(type, parentType, parentId, requested, limit);
             }
         }
     }

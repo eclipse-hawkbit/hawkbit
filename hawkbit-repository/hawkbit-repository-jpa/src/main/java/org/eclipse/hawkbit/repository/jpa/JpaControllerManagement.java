@@ -43,7 +43,6 @@ import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -95,8 +94,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
-import io.protostuff.Message;
 
 /**
  * JPA based {@link ControllerManagement} implementation.
@@ -552,7 +549,7 @@ public class JpaControllerManagement implements ControllerManagement {
 
     private void assertActionStatusMessageQuota(final JpaActionStatus actionStatus) {
         QuotaHelper.assertAssignmentQuota(actionStatus.getId(), actionStatus.getMessages().size(),
-                quotaManagement.getMaxMessagesPerActionStatus(), Message.class, ActionStatus.class, null);
+                quotaManagement.getMaxMessagesPerActionStatus(), "Message", ActionStatus.class.getSimpleName(), null);
     }
 
     private void handleFinishedCancelation(final JpaActionStatus actionStatus, final JpaAction action) {
@@ -663,16 +660,18 @@ public class JpaControllerManagement implements ControllerManagement {
         final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
+        // merge the map first before asserting the quota
         target.getControllerAttributes().putAll(data);
-
-        if (target.getControllerAttributes().size() > quotaManagement.getMaxAttributeEntriesPerTarget()) {
-            throw new QuotaExceededException("Controller attribues", target.getControllerAttributes().size(),
-                    quotaManagement.getMaxAttributeEntriesPerTarget());
-        }
-
+        assertTargetAttributesQuota(target);
         target.setRequestControllerAttributes(false);
 
         return targetRepository.save(target);
+    }
+
+    private void assertTargetAttributesQuota(final JpaTarget target) {
+        final int limit = quotaManagement.getMaxAttributeEntriesPerTarget();
+        QuotaHelper.assertAssignmentQuota(target.getId(), target.getControllerAttributes().size(), limit, "Attribute",
+                Target.class.getSimpleName(), null);
     }
 
     @Override
