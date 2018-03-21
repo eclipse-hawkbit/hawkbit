@@ -139,6 +139,11 @@ public class HawkbitSecurityProperties {
          */
         private int maxArtifactsPerSoftwareModule = 50;
 
+        /**
+         * Maximum number of targets per rollout group
+         */
+        private int maxTargetsPerRolloutGroup = 20000;
+
         private final Filter filter = new Filter();
         private final Filter uiFilter = new Filter();
 
@@ -221,6 +226,14 @@ public class HawkbitSecurityProperties {
 
         public void setMaxArtifactsPerSoftwareModule(final int maxArtifactsPerSoftwareModule) {
             this.maxArtifactsPerSoftwareModule = maxArtifactsPerSoftwareModule;
+        }
+
+        public int getMaxTargetsPerRolloutGroup() {
+            return maxTargetsPerRolloutGroup;
+        }
+
+        public void setMaxTargetsPerRolloutGroup(final int maxTargetsPerRolloutGroup) {
+            this.maxTargetsPerRolloutGroup = maxTargetsPerRolloutGroup;
         }
 
         /**
