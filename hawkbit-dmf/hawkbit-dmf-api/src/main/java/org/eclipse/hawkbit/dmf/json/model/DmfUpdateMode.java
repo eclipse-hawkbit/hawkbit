@@ -9,14 +9,26 @@
 package org.eclipse.hawkbit.dmf.json.model;
 
 /**
- * Mode representing different attribute update strategies.
+ * Enumerates the supported update modes. Each mode represents an attribute
+ * update strategy.
+ * 
+ * @see DmfAttributeUpdate
  */
 public enum DmfUpdateMode {
 
+    /**
+     * Merge update strategy
+     */
     MERGE,
 
+    /**
+     * Replacement update strategy
+     */
     REPLACE,
 
+    /**
+     * Removal update strategy
+     */
     REMOVE;
 
 }

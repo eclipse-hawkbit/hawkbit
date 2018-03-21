@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.dmf.json.model;
 
-import java.lang.annotation.Target;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,8 +17,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Map of {@link Target} attributes.
- *
+ * JSON representation of the Attribute Update message.
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
