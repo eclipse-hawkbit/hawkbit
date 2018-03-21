@@ -52,6 +52,7 @@ import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupConditio
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.RolloutSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
+import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -346,7 +347,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         // When all groups are ready the rollout status can be changed to be
         // ready, too.
         if (readyGroups == rolloutGroups.size()) {
-            LOGGER.debug("rollout {} creatin done. Switch to READY.", rollout.getId());
+            LOGGER.debug("rollout {} creation done. Switch to READY.", rollout.getId());
             rollout.setStatus(RolloutStatus.READY);
             rollout.setLastCheck(0);
             rollout.setTotalTargets(totalTargets);
@@ -385,6 +386,9 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
         long targetsLeftToAdd = expectedInGroup - currentlyInGroup;
 
+        // assert the max targets per rollout group quota
+        assertTargetsPerRolloutGroup(group, expectedInGroup);
+
         try {
             do {
                 // Add up to TRANSACTION_TARGETS of the left targets
@@ -402,6 +406,12 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             LOGGER.warn("Transaction assigning Targets to RolloutGroup failed", e);
             return group;
         }
+    }
+
+    private void assertTargetsPerRolloutGroup(final JpaRolloutGroup group, final long expectedInGroup) {
+        final int quota = quotaManagement.getMaxTargetsPerRolloutGroup();
+        QuotaHelper.assertAssignmentQuota(group.getId(), Math.toIntExact(expectedInGroup), quota, Target.class,
+                RolloutGroup.class, null);
     }
 
     private Long assignTargetsToGroupInNewTransaction(final JpaRollout rollout, final RolloutGroup group,
