@@ -26,11 +26,13 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.AbstractConfirmationWindowLayout;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
 import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.entity.TargetIdName;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
+import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
@@ -41,7 +43,6 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -50,8 +51,11 @@ import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Link;
 import com.vaadin.ui.Table.Align;
+import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Confirmation window for target/distributionSet delete and assignment
@@ -71,6 +75,8 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
     private static final String TARGET_ID = "TargetId";
 
+    private final UiProperties uiProperties;
+
     private final ManagementUIState managementUIState;
 
     private final transient TargetManagement targetManagement;
@@ -88,14 +94,15 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
     public ManangementConfirmationWindowLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final ManagementUIState managementUIState, final TargetManagement targetManagement,
             final DeploymentManagement deploymentManagement, final DistributionSetManagement distributionSetManagement,
-            final UINotification uiNotification) {
+            final UiProperties uiProperties) {
         super(i18n, eventBus);
+        this.uiProperties = uiProperties;
         this.managementUIState = managementUIState;
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
         this.distributionSetManagement = distributionSetManagement;
         this.actionTypeOptionGroupLayout = new ActionTypeOptionGroupLayout(i18n);
-        this.maintenanceWindowLayout = new MaintenanceWindowLayout(i18n, uiNotification);
+        this.maintenanceWindowLayout = new MaintenanceWindowLayout(i18n);
     }
 
     @Override
@@ -143,20 +150,40 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         assignmentTab.getTable().setColumnAlignment(DISCARD_CHANGES, Align.CENTER);
 
         actionTypeOptionGroupLayout.selectDefaultOption();
-        assignmentTab.addComponent(createTabSheet(), 1);
+        assignmentTab.addComponent(actionTypeOptionGroupLayout, 1);
+        assignmentTab.addComponent(enableMaintenanceWindowLayout(), 2);
+        maintenanceWindowLayout.setVisible(false);
+        assignmentTab.addComponent(maintenanceWindowLayout, 3);
 
         return assignmentTab;
 
     }
 
-    private TabSheet createTabSheet() {
-        final TabSheet tabSheet = new TabSheet();
-        tabSheet.setHeightUndefined();
-        tabSheet.addTab(actionTypeOptionGroupLayout, 
-                i18n.getMessage("caption.assign.software.dist.tab.actiontypes"));
-        tabSheet.addTab(maintenanceWindowLayout,
-                i18n.getMessage("caption.assign.software.dist.tab.maintananceschedule"));
-        return tabSheet;
+    private HorizontalLayout enableMaintenanceWindowLayout() {
+        final HorizontalLayout layout = new HorizontalLayout();
+        layout.addComponent(enableMaintenanceWindowControl());
+        layout.addComponent(maintenanceWindowHelpLinkControl());
+
+        return layout;
+    }
+
+    private CheckBox enableMaintenanceWindowControl() {
+        final CheckBox enableMaintenanceWindow = new CheckBox("Use maintenance window");
+        enableMaintenanceWindow.addStyleName(ValoTheme.CHECKBOX_SMALL);
+        enableMaintenanceWindow.addStyleName("dist-window-maintenance-window-enable");
+        enableMaintenanceWindow.addValueChangeListener(event -> {
+            final Boolean isMaintenanceWindowEnabled = enableMaintenanceWindow.getValue();
+            maintenanceWindowLayout.setVisible(isMaintenanceWindowEnabled);
+            assignmentTab.getConfirmAll().setEnabled(!isMaintenanceWindowEnabled);
+            maintenanceWindowLayout.clearAllControls();
+        });
+
+        return enableMaintenanceWindow;
+    }
+
+    private Link maintenanceWindowHelpLinkControl() {
+        final String maintenanceWindowHelpUrl = uiProperties.getLinks().getDocumentation().getMaintenanceWindowView();
+        return SPUIComponentProvider.getHelpLink(maintenanceWindowHelpUrl);
     }
 
     private void saveAllAssignments(final ConfirmationTab tab) {
@@ -246,12 +273,12 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
     private String getAssigmentSuccessMessage(final int assignedCount) {
         return FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
-                + i18n.getMessage("message.target.assignment", new Object[] { assignedCount });
+                + i18n.getMessage("message.target.assignment", assignedCount);
     }
 
     private String getDuplicateAssignmentMessage(final int alreadyAssignedCount) {
         return FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
-                + i18n.getMessage("message.target.alreadyAssigned", new Object[] { alreadyAssignedCount });
+                + i18n.getMessage("message.target.alreadyAssigned", alreadyAssignedCount);
     }
 
     private void discardAllAssignments(final ConfirmationTab tab) {

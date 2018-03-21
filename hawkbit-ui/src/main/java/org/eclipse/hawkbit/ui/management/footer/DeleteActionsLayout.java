@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.entity.TargetIdName;
 import org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout;
@@ -86,14 +87,14 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
             final ManagementViewClientCriterion managementViewClientCriterion,
             final ManagementUIState managementUIState, final TargetManagement targetManagement,
             final TargetTable targetTable, final DeploymentManagement deploymentManagement,
-            final DistributionSetManagement distributionSetManagement, final UINotification uiNotification) {
+            final DistributionSetManagement distributionSetManagement, final UiProperties uiProperties) {
         super(i18n, permChecker, eventBus, notification);
         this.distributionSetTagManagement = distributionSetTagManagement;
         this.targetTagManagement = targetTagManagement;
         this.managementViewClientCriterion = managementViewClientCriterion;
         this.managementUIState = managementUIState;
         this.manangementConfirmationWindowLayout = new ManangementConfirmationWindowLayout(i18n, eventBus,
-                managementUIState, targetManagement, deploymentManagement, distributionSetManagement, uiNotification);
+                managementUIState, targetManagement, deploymentManagement, distributionSetManagement, uiProperties);
         this.countMessageLabel = new CountMessageLabel(eventBus, targetManagement, i18n, managementUIState,
                 targetTable);
         this.targetManagement = targetManagement;
@@ -248,7 +249,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         final String tagName = HawkbitCommonUtil.removePrefix(source.getId(),
                 SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS);
         if (managementUIState.getDistributionTableFilters().getDistSetTags().contains(tagName)) {
-            notification.displayValidationError(i18n.getMessage("message.tag.delete", new Object[] { tagName }));
+            notification.displayValidationError(i18n.getMessage("message.tag.delete", tagName));
         } else {
             distributionSetTagManagement.delete(tagName);
 
@@ -258,14 +259,14 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
                         new DistributionSetTagTableEvent(BaseEntityEventType.REMOVE_ENTITY, Arrays.asList(id)));
             }
 
-            notification.displaySuccess(i18n.getMessage("message.delete.success", new Object[] { tagName }));
+            notification.displaySuccess(i18n.getMessage("message.delete.success", tagName));
         }
     }
 
     private void deleteTargetTag(final Component source) {
         final String tagName = HawkbitCommonUtil.removePrefix(source.getId(), SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
         if (managementUIState.getTargetTableFilters().getClickedTargetTags().contains(tagName)) {
-            notification.displayValidationError(i18n.getMessage("message.tag.delete", new Object[] { tagName }));
+            notification.displayValidationError(i18n.getMessage("message.tag.delete", tagName));
         } else {
             targetTagManagement.delete(tagName);
 
@@ -274,7 +275,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
                 eventBus.publish(this, new TargetTagTableEvent(BaseEntityEventType.REMOVE_ENTITY, Arrays.asList(id)));
             }
 
-            notification.displaySuccess(i18n.getMessage("message.delete.success", new Object[] { tagName }));
+            notification.displaySuccess(i18n.getMessage("message.delete.success", tagName));
         }
     }
 

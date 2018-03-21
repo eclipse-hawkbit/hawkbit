@@ -162,6 +162,6 @@ public class MaintenanceScheduleHelper {
      *             if the text cannot be converted to ISO format.
      */
     public static String convertToISODuration(final String timeInterval) {
-        return Duration.between(LocalTime.MIN, LocalTime.parse(timeInterval)).toString();
+        return Duration.between(LocalTime.MIN, LocalTime.parse(StringUtils.trimWhitespace(timeInterval))).toString();
     }
 }

@@ -13,37 +13,47 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
 
+import com.cronutils.descriptor.CronDescriptor;
+import com.cronutils.model.CronType;
+import com.cronutils.model.definition.CronDefinition;
+import com.cronutils.model.definition.CronDefinitionBuilder;
+import com.cronutils.parser.CronParser;
 import com.vaadin.data.Validator;
+import com.vaadin.event.FieldEvents.TextChangeEvent;
+import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * {@link MaintenanceWindowLayout} defines UI layout that is used to specify the
  * maintenance schedule while assigning distribution set(s) to the target(s).
  */
-public class MaintenanceWindowLayout extends HorizontalLayout {
-
+public class MaintenanceWindowLayout extends VerticalLayout {
     private static final long serialVersionUID = 722511089585562455L;
 
     private final VaadinMessageSource i18n;
 
-    private final UINotification uiNotification;
+    private static final String CRON_VALIDATION_ERROR = "message.maintenancewindow.schedule.validation.error";
 
     private TextField schedule;
     private TextField duration;
     private ComboBox timeZone;
+    private Label scheduleTranslator;
 
     /**
      * Constructor for the control to specify the maintenance schedule.
@@ -52,26 +62,40 @@ public class MaintenanceWindowLayout extends HorizontalLayout {
      *            (@link VaadinMessageSource} to get the localized resource
      *            strings.
      */
-    public MaintenanceWindowLayout(final VaadinMessageSource i18n, final UINotification uiNotification) {
+    public MaintenanceWindowLayout(final VaadinMessageSource i18n) {
 
         this.i18n = i18n;
-        this.uiNotification = uiNotification;
 
         createMaintenanceScheduleControl();
         createMaintenanceDurationControl();
         createMaintenanceTimeZoneControl();
+        createMaintenanceScheduleTranslatorControl();
 
-        addComponent(schedule);
-        addComponent(duration);
-        addComponent(timeZone);
+        final HorizontalLayout controlContainer = new HorizontalLayout();
+        controlContainer.addComponent(schedule);
+        controlContainer.addComponent(duration);
+        controlContainer.addComponent(timeZone);
+        addComponent(controlContainer);
+
+        addComponent(scheduleTranslator);
 
         setStyleName("dist-window-maintenance-window-layout");
     }
 
     /**
+     * Text field to specify the schedule.
+     */
+    private void createMaintenanceScheduleControl() {
+        schedule = new TextFieldBuilder().id(UIComponentIdProvider.MAINTENANCE_WINDOW_SCHEDULE_ID)
+                .caption(i18n.getMessage("caption.maintenancewindow.schedule")).immediate(true)
+                .validator(new CronValidator()).prompt("0 0 3 ? * 6").required(true).buildTextComponent();
+        schedule.addTextChangeListener(new CronTranslationListener());
+    }
+
+    /**
      * Validates if the maintenance schedule is a valid cron expression.
      */
-    private class CronValidation implements Validator {
+    private class CronValidator implements Validator {
         private static final long serialVersionUID = 1L;
 
         @Override
@@ -84,10 +108,47 @@ public class MaintenanceWindowLayout extends HorizontalLayout {
                             getClientTimeZone());
                 }
             } catch (final IllegalArgumentException e) {
-                uiNotification
-                        .displayValidationError(i18n.getMessage("message.maintenancewindow.schedule.validation.error"));
+                throw new InvalidValueException(i18n.getMessage(CRON_VALIDATION_ERROR));
             }
         }
+    }
+
+    /**
+     * Used for cron expression translation.
+     */
+    private class CronTranslationListener implements TextChangeListener {
+        private static final long serialVersionUID = 1L;
+
+        private final transient CronParser cronParser;
+        private final transient CronDescriptor cronDescriptor;
+
+        public CronTranslationListener() {
+            final CronDefinition cronDefinition = CronDefinitionBuilder.instanceDefinitionFor(CronType.QUARTZ);
+            cronParser = new CronParser(cronDefinition);
+            cronDescriptor = CronDescriptor.instance(Locale.UK);
+        }
+
+        @Override
+        public void textChange(final TextChangeEvent event) {
+            scheduleTranslator.setValue(translateCron(event.getText()));
+        }
+
+        private String translateCron(final String cronExpression) {
+            try {
+                return cronDescriptor.describe(cronParser.parse(cronExpression));
+            } catch (final IllegalArgumentException ex) {
+                return i18n.getMessage(CRON_VALIDATION_ERROR);
+            }
+        }
+    }
+
+    /**
+     * Text field to specify the duration.
+     */
+    private void createMaintenanceDurationControl() {
+        duration = new TextFieldBuilder().id(UIComponentIdProvider.MAINTENANCE_WINDOW_DURATION_ID)
+                .caption(i18n.getMessage("caption.maintenancewindow.duration")).immediate(true)
+                .validator(new DurationValidator()).prompt("hh:mm:ss").required(true).buildTextComponent();
     }
 
     /**
@@ -104,28 +165,9 @@ public class MaintenanceWindowLayout extends HorizontalLayout {
                     MaintenanceScheduleHelper.convertToISODuration(expression);
                 }
             } catch (final DateTimeParseException e) {
-                uiNotification
-                        .displayValidationError(i18n.getMessage("message.maintenancewindow.duration.validation.error"));
+                throw new InvalidValueException(i18n.getMessage("message.maintenancewindow.duration.validation.error"));
             }
         }
-    }
-
-    /**
-     * Text field to specify the schedule.
-     */
-    private void createMaintenanceScheduleControl() {
-        schedule = new TextFieldBuilder().id(UIComponentIdProvider.MAINTENANCE_WINDOW_SCHEDULE_ID)
-                .caption(i18n.getMessage("caption.maintenancewindow.schedule")).immediate(true)
-                .validator(new CronValidation()).prompt("Cron Expression").buildTextComponent();
-    }
-
-    /**
-     * Text field to specify the duration.
-     */
-    private void createMaintenanceDurationControl() {
-        duration = new TextFieldBuilder().id(UIComponentIdProvider.MAINTENANCE_WINDOW_DURATION_ID)
-                .caption(i18n.getMessage("caption.maintenancewindow.duration")).immediate(true)
-                .validator(new DurationValidator()).prompt("hh:mm:ss").buildTextComponent();
     }
 
     /**
@@ -142,14 +184,7 @@ public class MaintenanceWindowLayout extends HorizontalLayout {
         timeZone.setValue(getClientTimeZone());
         timeZone.addStyleName(ValoTheme.COMBOBOX_SMALL);
         timeZone.setTextInputAllowed(false);
-    }
-
-    /**
-     * Get time zone of the browser client to be used as default.
-     */
-    private static String getClientTimeZone() {
-        return ZonedDateTime.now(ZoneId.of(SPDateTimeUtil.getBrowserTimeZone().getID())).getOffset().getId()
-                .replaceAll("Z", "+00:00");
+        timeZone.setNullSelectionAllowed(false);
     }
 
     /**
@@ -161,6 +196,22 @@ public class MaintenanceWindowLayout extends HorizontalLayout {
                 .collect(Collectors.toList());
         lst.sort(null);
         return lst;
+    }
+
+    /**
+     * Get time zone of the browser client to be used as default.
+     */
+    private static String getClientTimeZone() {
+        return ZonedDateTime.now(ZoneId.of(SPDateTimeUtil.getBrowserTimeZone().getID())).getOffset().getId()
+                .replaceAll("Z", "+00:00");
+    }
+
+    /**
+     * Label to translate the cron schedule to human readable format.
+     */
+    private void createMaintenanceScheduleTranslatorControl() {
+        scheduleTranslator = new LabelBuilder().name(i18n.getMessage(CRON_VALIDATION_ERROR)).buildLabel();
+        scheduleTranslator.addStyleName(ValoTheme.LABEL_TINY);
     }
 
     /**
@@ -189,5 +240,11 @@ public class MaintenanceWindowLayout extends HorizontalLayout {
 
     public String getMaintenanceTimeZone() {
         return timeZone.getValue().toString();
+    }
+
+    public void clearAllControls() {
+        schedule.setValue("");
+        duration.setValue("");
+        timeZone.setValue(getClientTimeZone());
     }
 }
