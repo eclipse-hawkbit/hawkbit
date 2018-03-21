@@ -17,7 +17,10 @@ import org.eclipse.hawkbit.repository.model.BaseEntity;
  *
  */
 public final class QuotaExceededException extends AbstractServerRtException {
+
     private static final long serialVersionUID = 1L;
+
+    private static final String ASSIGNMENT_QUOTA_EXCEEDED_MESSAGE = "Quota exceeded: Cannot assign %s more %s entities to %s '%s'.";
 
     /**
      * Creates a new QuotaExceededException with
@@ -57,7 +60,29 @@ public final class QuotaExceededException extends AbstractServerRtException {
      *            that is defined by the repository
      */
     public QuotaExceededException(final String type, final long inserted, final int quota) {
-        super("Request contains too many entries of {" + type + "}. {" + inserted + "} is bejond the permitted {"
+        super("Request contains too many entries of {" + type + "}. {" + inserted + "} is beyond the permitted {"
                 + quota + "}.", SpServerError.SP_QUOTA_EXCEEDED);
     }
+
+    /**
+     * Creates a QuotaExceededException which is to be thrown when an assignment
+     * quota is exceeded.
+     * 
+     * @param type
+     *            The type of the entities that shall be assigned to the
+     *            specified parent entity.
+     * @param parentType
+     *            The type of the parent entity.
+     * @param parentId
+     *            The ID of the parent entity.
+     * @param requested
+     *            The number of entities that shall be assigned to the specified
+     *            parent entity.
+     */
+    public QuotaExceededException(final Class<?> type, final Class<?> parentType, final Long parentId,
+            final int requested) {
+        super(String.format(ASSIGNMENT_QUOTA_EXCEEDED_MESSAGE, requested, type.getSimpleName(),
+                parentType.getSimpleName(), parentId), SpServerError.SP_QUOTA_EXCEEDED);
+    }
+
 }

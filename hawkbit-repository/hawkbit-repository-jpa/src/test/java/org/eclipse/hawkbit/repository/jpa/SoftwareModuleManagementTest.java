@@ -23,8 +23,8 @@ import java.util.List;
 import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
@@ -667,7 +667,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         }
 
         // quota exceeded
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+        assertThatExceptionOfType(QuotaExceededException.class)
                 .isThrownBy(() -> softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata()
                         .create(module.getId()).key("k" + quota).value("v" + quota)));
 
@@ -678,7 +678,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
             create.add(entityFactory.softwareModuleMetadata().create(module2.getId()).key("k" + i).value("v" + i));
         }
         // quota exceeded
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+        assertThatExceptionOfType(QuotaExceededException.class)
                 .isThrownBy(() -> softwareModuleManagement.createMetaData(create));
 
         // add some meta data entries
@@ -695,7 +695,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
             create2.add(entityFactory.softwareModuleMetadata().create(module3.getId()).key("kk" + i).value("vv" + i));
         }
         // quota exceeded
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+        assertThatExceptionOfType(QuotaExceededException.class)
                 .isThrownBy(() -> softwareModuleManagement.createMetaData(create2));
 
     }
@@ -814,12 +814,12 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         final SoftwareModule sw2 = testdataFactory.createSoftwareModuleOs();
 
-        for (int index = 0; index < 10; index++) {
+        for (int index = 0; index < 8; index++) {
             softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(sw1.getId())
                     .key("key" + index).value("value" + index).targetVisible(true));
         }
 
-        for (int index = 0; index < 20; index++) {
+        for (int index = 0; index < 10; index++) {
             softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(sw2.getId())
                     .key("key" + index).value("value" + index).targetVisible(false));
         }
@@ -830,11 +830,11 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         Page<SoftwareModuleMetadata> metadataOfSw2 = softwareModuleManagement
                 .findMetaDataBySoftwareModuleId(new PageRequest(0, 100), sw2.getId());
 
-        assertThat(metadataOfSw1.getNumberOfElements()).isEqualTo(10);
-        assertThat(metadataOfSw1.getTotalElements()).isEqualTo(10);
+        assertThat(metadataOfSw1.getNumberOfElements()).isEqualTo(8);
+        assertThat(metadataOfSw1.getTotalElements()).isEqualTo(8);
 
-        assertThat(metadataOfSw2.getNumberOfElements()).isEqualTo(20);
-        assertThat(metadataOfSw2.getTotalElements()).isEqualTo(20);
+        assertThat(metadataOfSw2.getNumberOfElements()).isEqualTo(10);
+        assertThat(metadataOfSw2.getTotalElements()).isEqualTo(10);
 
         metadataOfSw1 = softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(new PageRequest(0, 100),
                 sw1.getId());
@@ -842,8 +842,8 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         metadataOfSw2 = softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(new PageRequest(0, 100),
                 sw2.getId());
 
-        assertThat(metadataOfSw1.getNumberOfElements()).isEqualTo(10);
-        assertThat(metadataOfSw1.getTotalElements()).isEqualTo(10);
+        assertThat(metadataOfSw1.getNumberOfElements()).isEqualTo(8);
+        assertThat(metadataOfSw1.getTotalElements()).isEqualTo(8);
 
         assertThat(metadataOfSw2.getNumberOfElements()).isEqualTo(0);
         assertThat(metadataOfSw2.getTotalElements()).isEqualTo(0);

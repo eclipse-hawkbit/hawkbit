@@ -26,8 +26,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreated
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTypeCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -238,9 +238,9 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
         // assign all types at once
         final DistributionSetType dsType1 = distributionSetTypeManagement
                 .create(entityFactory.distributionSetType().create().key("dst1").name("dst1"));
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(
                 () -> distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(dsType1.getId(), moduleTypeIds));
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(
                 () -> distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(dsType1.getId(), moduleTypeIds));
 
         // assign as many mandatory modules as possible
@@ -252,7 +252,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
         assertThat(distributionSetTypeManagement.get(dsType2.getId()).get().getMandatoryModuleTypes().size())
                 .isEqualTo(quota);
         // assign one more to trigger the quota exceeded error
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+        assertThatExceptionOfType(QuotaExceededException.class)
                 .isThrownBy(() -> distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(dsType2.getId(),
                         Collections.singletonList(moduleTypeIds.get(quota))));
 
@@ -265,7 +265,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
         assertThat(distributionSetTypeManagement.get(dsType3.getId()).get().getOptionalModuleTypes().size())
                 .isEqualTo(quota);
         // assign one more to trigger the quota exceeded error
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+        assertThatExceptionOfType(QuotaExceededException.class)
                 .isThrownBy(() -> distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(dsType3.getId(),
                         Collections.singletonList(moduleTypeIds.get(quota))));
 

@@ -29,10 +29,10 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreated
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
@@ -348,7 +348,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         }
 
         // quota exceeded
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+        assertThatExceptionOfType(QuotaExceededException.class)
                 .isThrownBy(() -> createDistributionSetMetadata(ds1.getId(), createDistributionSetMetadata(ds1.getId(),
                         new JpaDistributionSetMetadata("k" + quota, ds1, "v" + quota))));
 
@@ -359,7 +359,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
             metaData2.add(new JpaDistributionSetMetadata("k" + i, ds2, "v" + i));
         }
         // verify quota is exceeded
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+        assertThatExceptionOfType(QuotaExceededException.class)
                 .isThrownBy(() -> createDistributionSetMetadata(ds2.getId(), metaData2));
 
         // add some meta data entries
@@ -375,7 +375,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
             metaData3.add(new JpaDistributionSetMetadata("kk" + i, ds3, "vv" + i));
         }
         // verify quota is exceeded
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+        assertThatExceptionOfType(QuotaExceededException.class)
                 .isThrownBy(() -> createDistributionSetMetadata(ds3.getId(), metaData3));
 
     }
@@ -507,14 +507,14 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
             distributionSetManagement.assignSoftwareModules(ds1.getId(), Collections.singletonList(modules.get(i)));
         }
         // add one more to cause the quota to be exceeded
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> {
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> {
             distributionSetManagement.assignSoftwareModules(ds1.getId(), Collections.singletonList(modules.get(quota)));
         });
 
         // assign all software modules at once
         final DistributionSet ds2 = testdataFactory.createDistributionSetWithNoSoftwareModules("ds2", "1.0");
         // verify quota is exceeded
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+        assertThatExceptionOfType(QuotaExceededException.class)
                 .isThrownBy(() -> distributionSetManagement.assignSoftwareModules(ds2.getId(), modules));
 
         // assign some software modules
@@ -524,7 +524,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
             distributionSetManagement.assignSoftwareModules(ds3.getId(), Collections.singletonList(modules.get(i)));
         }
         // assign the remaining modules to cause the quota to be exceeded
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> distributionSetManagement
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> distributionSetManagement
                 .assignSoftwareModules(ds3.getId(), modules.subList(firstHalf, modules.size())));
 
     }

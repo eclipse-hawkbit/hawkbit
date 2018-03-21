@@ -55,6 +55,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
+import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -94,6 +95,8 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
+import io.protostuff.Message;
 
 /**
  * JPA based {@link ControllerManagement} implementation.
@@ -536,8 +539,8 @@ public class JpaControllerManagement implements ControllerManagement {
             break;
         default:
             // information status entry - check for a potential DOS attack
-            checkForTooManyStatusEntries(action);
-            checkForTooManyStatusMessages(actionStatus);
+            assertActionStatusQuota(action);
+            assertActionStatusMessageQuota(actionStatus);
             break;
         }
 
@@ -547,12 +550,9 @@ public class JpaControllerManagement implements ControllerManagement {
         return action;
     }
 
-    private void checkForTooManyStatusMessages(final JpaActionStatus actionStatus) {
-        if (actionStatus.getMessages().size() > quotaManagement.getMaxMessagesPerActionStatus()) {
-            throw new QuotaExceededException("ActionStatus messages", actionStatus.getMessages().size(),
-                    quotaManagement.getMaxStatusEntriesPerAction());
-        }
-
+    private void assertActionStatusMessageQuota(final JpaActionStatus actionStatus) {
+        QuotaHelper.assertAssignmentQuota(actionStatus.getId(), actionStatus.getMessages().size(),
+                quotaManagement.getMaxMessagesPerActionStatus(), Message.class, ActionStatus.class, null);
     }
 
     private void handleFinishedCancelation(final JpaActionStatus actionStatus, final JpaAction action) {
@@ -608,8 +608,8 @@ public class JpaControllerManagement implements ControllerManagement {
             break;
         default:
             // information status entry - check for a potential DOS attack
-            checkForTooManyStatusEntries(action);
-            checkForTooManyStatusMessages(actionStatus);
+            assertActionStatusQuota(action);
+            assertActionStatusMessageQuota(actionStatus);
             break;
         }
 
@@ -629,16 +629,9 @@ public class JpaControllerManagement implements ControllerManagement {
         targetRepository.save(mergedTarget);
     }
 
-    private void checkForTooManyStatusEntries(final JpaAction action) {
-        if (quotaManagement.getMaxStatusEntriesPerAction() > 0) {
-
-            final Long statusCount = actionStatusRepository.countByAction(action);
-
-            if (statusCount >= quotaManagement.getMaxStatusEntriesPerAction()) {
-                throw new QuotaExceededException(ActionStatus.class, statusCount + 1,
-                        quotaManagement.getMaxStatusEntriesPerAction());
-            }
-        }
+    private void assertActionStatusQuota(final JpaAction action) {
+        QuotaHelper.assertAssignmentQuota(action.getId(), 1, quotaManagement.getMaxStatusEntriesPerAction(),
+                ActionStatus.class, Action.class, actionStatusRepository::countByActionId);
     }
 
     private void handleFinishedAndStoreInTargetStatus(final JpaAction action) {
@@ -753,8 +746,8 @@ public class JpaControllerManagement implements ControllerManagement {
         final JpaActionStatus statusMessage = create.build();
         statusMessage.setAction(action);
 
-        checkForTooManyStatusEntries(action);
-        checkForTooManyStatusMessages(statusMessage);
+        assertActionStatusQuota(action);
+        assertActionStatusMessageQuota(statusMessage);
 
         return actionStatusRepository.save(statusMessage);
     }

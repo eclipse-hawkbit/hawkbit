@@ -26,8 +26,8 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -150,7 +150,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         assertThat(artifactRepository.findBySoftwareModuleId(PAGE, sm1.getId()).getTotalElements()).isEqualTo(quota);
 
         // create one mode to trigger the quota exceeded error
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> {
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> {
             final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
             artifactManagement.create(new ByteArrayInputStream(random), sm1.getId(), "file" + quota, false);
         });

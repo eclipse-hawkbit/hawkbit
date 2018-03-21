@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.validation.ConstraintViolationException;
 
@@ -734,33 +735,6 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Controller providing status entries fails if providing more than permitted by quota.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
-    public void controllerProvidesIntermediateFeedbackFailsIfQuotaHit() {
-        final int allowStatusEntries = 10;
-        final Long actionId = createTargetAndAssignDs();
-
-        // Fails as one entry is already in there from the assignment
-        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> securityRule
-                .runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
-                    writeStatus(actionId, allowStatusEntries);
-                    return null;
-                })).withMessageContaining("" + allowStatusEntries);
-
-    }
-
-    private void writeStatus(final Long actionId, final int allowedStatusEntries) {
-        for (int i = 0; i < allowedStatusEntries; i++) {
-            controllerManagement.addInformationalActionStatus(
-                    entityFactory.actionStatus().create(actionId).status(Status.RUNNING).message("test" + i));
-        }
-    }
-
-    @Test
     @Description("Test to verify the storage and retrieval of action history.")
     public void findMessagesByActionStatusId() {
         final DistributionSet testDs = testdataFactory.createDistributionSet("1");
@@ -780,4 +754,69 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(messages.get(0)).as("Message of action-status").isEqualTo("proceeding message 2");
         assertThat(messages.get(1)).as("Message of action-status").isEqualTo("proceeding message 1");
     }
+
+    @Test
+    @Description("Verifies that the quota specifying the maximum number of status entries per action is enforced.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 2),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+            @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = TargetUpdatedEvent.class, count = 2),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6) })
+    public void quotaMaxActionStatusPerAction() {
+
+        // any distribution set assignment causes 1 status entity to be created
+        final int quota = quotaManagement.getMaxStatusEntriesPerAction() - 1;
+
+        // test for informational status
+        final Long actionId1 = assignDistributionSet(testdataFactory.createDistributionSet("ds1"),
+                testdataFactory.createTargets(1, "t1")).getActions().get(0);
+        assertThat(actionId1).isNotNull();
+        for (int i = 0; i < quota; ++i) {
+            controllerManagement.addInformationalActionStatus(entityFactory.actionStatus().create(actionId1)
+                    .status(Status.WARNING).message("Msg " + i).occurredAt(System.currentTimeMillis()));
+        }
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> controllerManagement
+                .addInformationalActionStatus(entityFactory.actionStatus().create(actionId1).status(Status.WARNING)));
+
+        // test for update status
+        final Long actionId2 = assignDistributionSet(testdataFactory.createDistributionSet("ds2"),
+                testdataFactory.createTargets(1, "t2")).getActions().get(0);
+        assertThat(actionId2).isNotEqualTo(actionId1);
+        for (int i = 0; i < quota; ++i) {
+            controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId2)
+                    .status(Status.WARNING).message("Msg " + i).occurredAt(System.currentTimeMillis()));
+        }
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId2).status(Status.WARNING)));
+
+    }
+
+    @Test
+    @Description("Verifies that the quota specifying the maximum number of messages per action status is enforced.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void quotaMaxMessagesPerActionStatus() {
+
+        final int quota = quotaManagement.getMaxMessagesPerActionStatus();
+
+        final Long actionId = assignDistributionSet(testdataFactory.createDistributionSet("ds1"),
+                testdataFactory.createTargets(1)).getActions().get(0);
+        assertThat(actionId).isNotNull();
+
+        final List<String> messages = Lists.newArrayList();
+        IntStream.range(0, quota).forEach(i -> messages.add(i, "msg"));
+
+        assertThat(controllerManagement.addInformationalActionStatus(
+                entityFactory.actionStatus().create(actionId).messages(messages).status(Status.WARNING))).isNotNull();
+
+        messages.add("msg");
+        assertThatExceptionOfType(QuotaExceededException.class)
+                .isThrownBy(() -> controllerManagement.addInformationalActionStatus(
+                        entityFactory.actionStatus().create(actionId).messages(messages).status(Status.WARNING)));
+
+    }
+
 }
