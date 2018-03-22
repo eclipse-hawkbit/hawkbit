@@ -684,17 +684,17 @@ public class JpaControllerManagement implements ControllerManagement {
         case REPLACE:
             // clear the attributes before adding the new attributes
             controllerAttributes.clear();
-            // redundant code to satisfy Sonar
             controllerAttributes.putAll(data);
             target.setRequestControllerAttributes(false);
             break;
         case MERGE:
-            // default is MERGE
+            // just merge the attributes in
             controllerAttributes.putAll(data);
             target.setRequestControllerAttributes(false);
             break;
         default:
-            break;
+            // unknown update mode
+            throw new IllegalStateException("The update mode " + updateMode + " is not supported.");
         }
 
         final int attributeCount = controllerAttributes.size();
