@@ -208,8 +208,7 @@ public class AmqpMessageHandlerServiceTest {
     }
 
     @Test
-    @Description("Verifies that the update mode is retrieved from the UPDATE_ATTRIBUTES message and passed to the controller management. "
-            + "Verifies that a fallback to a default update mode is applied if needed.")
+    @Description("Verifies that the update mode is retrieved from the UPDATE_ATTRIBUTES message and passed to the controller management.")
     public void attributeUpdateModes() {
         final String knownThingId = "1";
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
@@ -225,7 +224,8 @@ public class AmqpMessageHandlerServiceTest {
         // send a message which does not specify a update mode
         Message message = amqpMessageHandlerService.getMessageConverter().toMessage(attributeUpdate, messageProperties);
         amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
-        // verify that a fallback to a default is applied
+        // verify that NO fallback is made on the way to the controller
+        // management layer
         assertThat(modeCaptor.getValue()).isNull();
 
         // send a message which specifies update mode MERGE
