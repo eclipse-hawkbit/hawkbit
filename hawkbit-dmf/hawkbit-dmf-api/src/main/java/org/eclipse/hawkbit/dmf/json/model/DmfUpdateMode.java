@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.dmf.json.model;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-
 /**
  * Enumerates the supported update modes. Each mode represents an attribute
  * update strategy.
@@ -21,27 +19,16 @@ public enum DmfUpdateMode {
     /**
      * Merge update strategy
      */
-    MERGE("merge"),
+    MERGE,
 
     /**
      * Replacement update strategy
      */
-    REPLACE("replace"),
+    REPLACE,
 
     /**
      * Removal update strategy
      */
-    REMOVE("remove");
-
-    private String name;
-
-    DmfUpdateMode(final String name) {
-        this.name = name;
-    }
-
-    @JsonValue
-    public String getName() {
-        return name;
-    }
+    REMOVE;
 
 }
