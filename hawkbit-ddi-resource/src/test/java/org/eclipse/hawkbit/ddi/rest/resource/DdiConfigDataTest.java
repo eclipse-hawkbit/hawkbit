@@ -47,6 +47,7 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
     @Test
     @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) "
             + "are requested only once from the device.")
+    @SuppressWarnings("squid:S2925")
     public void requestConfigDataIfEmpty() throws Exception {
         final Target savedTarget = testdataFactory.createTarget("4712");
 
@@ -70,7 +71,7 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         attributes.put("dsafsdf", "sdsds");
 
         final Target updateControllerAttributes = controllerManagement
-                .updateControllerAttributes(savedTarget.getControllerId(), attributes);
+                .updateControllerAttributes(savedTarget.getControllerId(), attributes, null);
         // request controller attributes need to be false because we don't want
         // to request the controller attributes again
         assertThat(updateControllerAttributes.isRequestControllerAttributes()).isFalse();
@@ -193,8 +194,8 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         replacementAttributes.put("k1", "v1_modified");
         replacementAttributes.put("k2", "v2");
         replacementAttributes.put("k3", "v3");
-        mvc.perform(put(configDataPath, tenantAware.getCurrentTenant()).param("mode", "replace")
-                .content(JsonBuilder.configData("", replacementAttributes, "closed"))
+        mvc.perform(put(configDataPath, tenantAware.getCurrentTenant())
+                .content(JsonBuilder.configData("", replacementAttributes, "closed", "replace"))
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
@@ -209,9 +210,10 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         final Map<String, String> mergeAttributes = new HashMap<>();
         mergeAttributes.put("k1", "v1_modified_again");
         mergeAttributes.put("k4", "v4");
-        mvc.perform(put(configDataPath, tenantAware.getCurrentTenant()).param("mode", "merge")
-                .content(JsonBuilder.configData("", mergeAttributes, "closed")).contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+        mvc.perform(put(configDataPath, tenantAware.getCurrentTenant())
+                .content(JsonBuilder.configData("", mergeAttributes, "closed", "merge"))
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
 
         // verify attribute merge
         updatedAttributes = targetManagement.getControllerAttributes(controllerId);
@@ -224,8 +226,8 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         final Map<String, String> removeAttributes = new HashMap<>();
         removeAttributes.put("k1", "foo");
         removeAttributes.put("k3", "bar");
-        mvc.perform(put(configDataPath, tenantAware.getCurrentTenant()).param("mode", "remove")
-                .content(JsonBuilder.configData("", removeAttributes, "closed"))
+        mvc.perform(put(configDataPath, tenantAware.getCurrentTenant())
+                .content(JsonBuilder.configData("", removeAttributes, "closed", "remove"))
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
@@ -236,8 +238,8 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         assertThat(updatedAttributes).containsKeys("k2", "k4");
 
         // use an invalid update mode
-        mvc.perform(put(configDataPath, tenantAware.getCurrentTenant()).param("mode", "KJHGKJHGKJHG")
-                .content(JsonBuilder.configData("", removeAttributes, "closed"))
+        mvc.perform(put(configDataPath, tenantAware.getCurrentTenant())
+                .content(JsonBuilder.configData("", removeAttributes, "closed", "KJHGKJHGKJHG"))
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
     }

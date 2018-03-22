@@ -60,10 +60,10 @@ import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.hateoas.MediaTypes;
 
 import com.jayway.jsonpath.JsonPath;
 
@@ -1390,7 +1390,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         knownControllerAttrs.put("a", "1");
         knownControllerAttrs.put("b", "2");
         testdataFactory.createTarget(knownTargetId);
-        controllerManagement.updateControllerAttributes(knownTargetId, knownControllerAttrs);
+        controllerManagement.updateControllerAttributes(knownTargetId, knownControllerAttrs, null);
 
         // test query target over rest resource
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/attributes"))

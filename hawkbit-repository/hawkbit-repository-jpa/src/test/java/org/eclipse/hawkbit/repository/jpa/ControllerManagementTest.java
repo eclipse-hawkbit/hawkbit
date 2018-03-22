@@ -123,7 +123,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         verifyThrownExceptionBy(() -> controllerManagement.registerRetrieved(NOT_EXIST_IDL, "test message"), "Action");
 
-        verifyThrownExceptionBy(() -> controllerManagement.updateControllerAttributes(NOT_EXIST_ID, Maps.newHashMap()),
+        verifyThrownExceptionBy(
+                () -> controllerManagement.updateControllerAttributes(NOT_EXIST_ID, Maps.newHashMap(), null),
                 "Target");
     }
 
@@ -651,7 +652,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     private void addAttributeAndVerify(final String controllerId) {
         final Map<String, String> testData = Maps.newHashMapWithExpectedSize(1);
         testData.put("test1", "testdata1");
-        controllerManagement.updateControllerAttributes(controllerId, testData);
+        controllerManagement.updateControllerAttributes(controllerId, testData, null);
 
         assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong")
                 .isEqualTo(testData);
@@ -661,7 +662,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     private void addSecondAttributeAndVerify(final String controllerId) {
         final Map<String, String> testData = Maps.newHashMapWithExpectedSize(2);
         testData.put("test2", "testdata20");
-        controllerManagement.updateControllerAttributes(controllerId, testData);
+        controllerManagement.updateControllerAttributes(controllerId, testData, null);
 
         testData.put("test1", "testdata1");
         assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong")
@@ -673,7 +674,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Map<String, String> testData = Maps.newHashMapWithExpectedSize(2);
         testData.put("test1", "testdata12");
 
-        controllerManagement.updateControllerAttributes(controllerId, testData);
+        controllerManagement.updateControllerAttributes(controllerId, testData, null);
 
         testData.put("test2", "testdata20");
         assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong")
@@ -693,7 +694,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Map<String, String> attributes = new HashMap<>();
         attributes.put("k0", "v0");
         attributes.put("k1", "v1");
-        controllerManagement.updateControllerAttributes(controllerId, attributes);
+        controllerManagement.updateControllerAttributes(controllerId, attributes, null);
 
         // verify initial attributes
         Map<String, String> updatedAttributes = targetManagement.getControllerAttributes(controllerId);
@@ -784,7 +785,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         for (int i = 0; i < allowedAttributes; i++) {
             testData.put(keyPrefix + i, valuePrefix);
         }
-        controllerManagement.updateControllerAttributes(controllerId, testData);
+        controllerManagement.updateControllerAttributes(controllerId, testData, null);
     }
 
     @Test

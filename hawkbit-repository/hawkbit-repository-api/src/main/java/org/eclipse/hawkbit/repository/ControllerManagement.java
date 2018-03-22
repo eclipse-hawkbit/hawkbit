@@ -319,29 +319,6 @@ public interface ControllerManagement {
     Action registerRetrieved(long actionId, String message);
 
     /**
-     * Updates attributes of the controller. The given attributes are merged
-     * into the existing controller attributes.
-     *
-     * @param controllerId
-     *            to update
-     * @param attributes
-     *            to insert
-     *
-     * @return updated {@link Target}
-     *
-     * @throws EntityNotFoundException
-     *             if target that has to be updated could not be found
-     * @throws QuotaExceededException
-     *             if maximum number of attribzes per target is exceeded
-     */
-    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    default Target updateControllerAttributes(@NotEmpty final String controllerId,
-            @NotNull final Map<String, String> attributes) {
-        // apply default update mode
-        return updateControllerAttributes(controllerId, attributes, UpdateMode.MERGE);
-    }
-
-    /**
      * Updates attributes of the controller according to the given
      * {@link UpdateMode}.
      *
@@ -350,7 +327,7 @@ public interface ControllerManagement {
      * @param attributes
      *            to insert
      * @param mode
-     *            the update mode
+     *            the update mode or <code>null</code>
      *
      * @return updated {@link Target}
      *
@@ -361,7 +338,7 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     Target updateControllerAttributes(@NotEmpty String controllerId, @NotNull Map<String, String> attributes,
-            @NotNull UpdateMode mode);
+            UpdateMode mode);
 
     /**
      * Finds {@link Target} based on given controller ID returns found Target

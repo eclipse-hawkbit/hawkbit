@@ -675,7 +675,8 @@ public class JpaControllerManagement implements ControllerManagement {
         // get the modifiable attribute map
         final Map<String, String> controllerAttributes = target.getControllerAttributes();
 
-        switch (mode) {
+        final UpdateMode updateMode = mode != null ? mode : UpdateMode.MERGE;
+        switch (updateMode) {
         case REMOVE:
             // remove the addressed attributes
             data.keySet().forEach(controllerAttributes::remove);
@@ -687,10 +688,12 @@ public class JpaControllerManagement implements ControllerManagement {
             controllerAttributes.putAll(data);
             target.setRequestControllerAttributes(false);
             break;
-        default:
+        case MERGE:
             // default is MERGE
             controllerAttributes.putAll(data);
             target.setRequestControllerAttributes(false);
+            break;
+        default:
             break;
         }
 

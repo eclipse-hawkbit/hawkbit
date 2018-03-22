@@ -226,7 +226,7 @@ public class AmqpMessageHandlerServiceTest {
         Message message = amqpMessageHandlerService.getMessageConverter().toMessage(attributeUpdate, messageProperties);
         amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
         // verify that a fallback to a default is applied
-        assertThat(modeCaptor.getValue()).isEqualTo(UpdateMode.MERGE);
+        assertThat(modeCaptor.getValue()).isNull();
 
         // send a message which specifies update mode MERGE
         attributeUpdate.setMode(DmfUpdateMode.MERGE);

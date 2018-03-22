@@ -23,6 +23,8 @@ public class DdiConfigData extends DdiActionFeedback {
     @NotEmpty
     private final Map<String, String> data;
 
+    private final DdiUpdateMode mode;
+
     /**
      * Constructor.
      *
@@ -38,18 +40,24 @@ public class DdiConfigData extends DdiActionFeedback {
     @JsonCreator
     public DdiConfigData(@JsonProperty(value = "id") final Long id, @JsonProperty(value = "time") final String time,
             @JsonProperty(value = "status") final DdiStatus status,
-            @JsonProperty(value = "data") final Map<String, String> data) {
+            @JsonProperty(value = "data") final Map<String, String> data,
+            @JsonProperty(value = "mode") final DdiUpdateMode mode) {
         super(id, time, status);
         this.data = data;
+        this.mode = mode;
     }
 
     public Map<String, String> getData() {
         return data;
     }
 
+    public DdiUpdateMode getMode() {
+        return mode;
+    }
+
     @Override
     public String toString() {
-        return "ConfigData [data=" + data + ", toString()=" + super.toString() + "]";
+        return "ConfigData [data=" + data + ", mode=" + mode + ", toString()=" + super.toString() + "]";
     }
 
 }

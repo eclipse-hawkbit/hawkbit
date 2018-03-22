@@ -50,11 +50,6 @@ public final class DdiRestConstants {
      */
     public static final String NO_ACTION_HISTORY = "0";
 
-    /**
-     * The default mode for attribute updates.
-     */
-    public static final String DEFAULT_UPDATE_MODE = "merge";
-
     private DdiRestConstants() {
         // constant class, private constructor.
     }

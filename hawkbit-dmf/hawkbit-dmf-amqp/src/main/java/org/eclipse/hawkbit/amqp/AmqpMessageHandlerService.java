@@ -250,7 +250,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     private void updateAttributes(final Message message) {
         final DmfAttributeUpdate attributeUpdate = convertMessage(message, DmfAttributeUpdate.class);
         final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, "ThingId is null");
-
         controllerManagement.updateControllerAttributes(thingId, attributeUpdate.getAttributes(),
                 getUpdateMode(attributeUpdate));
     }
@@ -375,9 +374,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final DmfUpdateMode mode = update.getMode();
         if (mode != null) {
             return UpdateMode.valueOf(mode.name());
-        } else {
-            return UpdateMode.MERGE;
         }
+        return null;
     }
 
 }

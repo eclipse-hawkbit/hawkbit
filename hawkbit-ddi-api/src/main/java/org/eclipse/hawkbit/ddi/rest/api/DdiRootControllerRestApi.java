@@ -193,16 +193,13 @@ public interface DdiRootControllerRestApi {
      *            to provide data for
      * @param request
      *            the HTTP request injected by spring
-     * @param mode
-     *            the update mode
      *
      * @return status of the request
      */
     @RequestMapping(value = "/{controllerId}/"
             + DdiRestConstants.CONFIG_DATA_ACTION, method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<Void> putConfigData(@Valid final DdiConfigData configData,
-            @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId,
-            @RequestParam(value = "mode", required = false, defaultValue = DdiRestConstants.DEFAULT_UPDATE_MODE) final String mode);
+            @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId);
 
     /**
      * RequestMethod.GET method for the {@link DdiCancel} action.

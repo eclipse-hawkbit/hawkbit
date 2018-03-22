@@ -6,7 +6,8 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.dmf.json.model;
+
+package org.eclipse.hawkbit.ddi.json.model;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
@@ -14,9 +15,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * Enumerates the supported update modes. Each mode represents an attribute
  * update strategy.
  * 
- * @see DmfAttributeUpdate
+ * @see DdiConfigData
  */
-public enum DmfUpdateMode {
+public enum DdiUpdateMode {
 
     /**
      * Merge update strategy
@@ -35,7 +36,7 @@ public enum DmfUpdateMode {
 
     private String name;
 
-    DmfUpdateMode(final String name) {
+    DdiUpdateMode(final String name) {
         this.name = name;
     }
 
