@@ -587,12 +587,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final ApplicationEventPublisher eventPublisher, final ApplicationContext applicationContext,
             final AfterTransactionCommitExecutor afterCommit, final VirtualPropertyReplacer virtualPropertyReplacer,
             final PlatformTransactionManager txManager,
-            final TenantConfigurationManagement tenantConfigurationManagement,
+            final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final JpaProperties properties) {
         return new JpaDeploymentManagement(entityManager, actionRepository, distributionSetRepository, targetRepository,
                 actionStatusRepository, targetManagement, auditorProvider, eventPublisher, applicationContext,
-                afterCommit, virtualPropertyReplacer, txManager, tenantConfigurationManagement, systemSecurityContext,
-                properties.getDatabase());
+                afterCommit, virtualPropertyReplacer, txManager, tenantConfigurationManagement, quotaManagement,
+                systemSecurityContext, properties.getDatabase());
     }
 
     /**

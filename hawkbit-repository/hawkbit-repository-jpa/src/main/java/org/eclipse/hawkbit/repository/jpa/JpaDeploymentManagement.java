@@ -28,6 +28,7 @@ import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
@@ -124,7 +125,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final AuditorAware<String> auditorProvider, final ApplicationEventPublisher eventPublisher,
             final ApplicationContext applicationContext, final AfterTransactionCommitExecutor afterCommit,
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
-            final TenantConfigurationManagement tenantConfigurationManagement,
+            final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final Database database) {
         this.entityManager = entityManager;
         this.actionRepository = actionRepository;
@@ -139,9 +140,9 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.txManager = txManager;
         onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, afterCommit, eventPublisher,
-                applicationContext, actionRepository, actionStatusRepository);
+                applicationContext, actionRepository, actionStatusRepository, quotaManagement);
         offlineDsAssignmentStrategy = new OfflineDsAssignmentStrategy(targetRepository, afterCommit, eventPublisher,
-                applicationContext, actionRepository, actionStatusRepository);
+                applicationContext, actionRepository, actionStatusRepository, quotaManagement);
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.systemSecurityContext = systemSecurityContext;
         this.database = database;

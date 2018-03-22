@@ -78,4 +78,9 @@ public class PropertiesQuotaManagement implements QuotaManagement {
         return securityProperties.getDos().getMaxTargetsPerRolloutGroup();
     }
 
+    @Override
+    public int getMaxActionsPerTarget() {
+        return securityProperties.getDos().getMaxActionsPerTarget();
+    }
+
 }

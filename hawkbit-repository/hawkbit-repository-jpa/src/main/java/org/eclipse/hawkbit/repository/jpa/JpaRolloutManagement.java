@@ -260,7 +260,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             group.setTargetPercentage(groupFactor * 100);
 
             // enforce the 'max targets per group' quota
-            assertTargetsPerRolloutGroup(group, Math.round(groupFactor * totalTargets));
+            assertTargetsPerRolloutGroupQuota(group, Math.round(groupFactor * totalTargets));
 
             lastSavedGroup = rolloutGroupRepository.save(group);
             publishRolloutGroupCreatedEventAfterCommit(lastSavedGroup, rollout);
@@ -565,6 +565,9 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         final List<Long> targetIds = targets.stream().map(Target::getId).collect(Collectors.toList());
         actionRepository.switchStatus(Action.Status.CANCELED, targetIds, false, Action.Status.SCHEDULED);
         targets.forEach(target -> {
+            // enforce the 'max actions per target' quota
+            assertActionsPerTargetQuota(target, 1);
+            // create the action
             final JpaAction action = new JpaAction();
             action.setTarget(target);
             action.setActive(false);
@@ -1056,10 +1059,15 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         }
     }
 
-    private void assertTargetsPerRolloutGroup(final JpaRolloutGroup group, final long expectedInGroup) {
+    private void assertTargetsPerRolloutGroupQuota(final RolloutGroup group, final int requested) {
         final int quota = quotaManagement.getMaxTargetsPerRolloutGroup();
-        QuotaHelper.assertAssignmentQuota(group.getId(), Math.toIntExact(expectedInGroup), quota, Target.class,
-                RolloutGroup.class, null);
+        QuotaHelper.assertAssignmentQuota(group.getId(), requested, quota, Target.class, RolloutGroup.class, null);
+    }
+
+    private void assertActionsPerTargetQuota(final Target target, final int requested) {
+        final int quota = quotaManagement.getMaxActionsPerTarget();
+        QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class,
+                actionRepository::countByTargetId);
     }
 
 }

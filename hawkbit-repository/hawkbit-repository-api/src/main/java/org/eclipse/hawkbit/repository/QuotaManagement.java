@@ -74,4 +74,9 @@ public interface QuotaManagement {
      */
     int getMaxTargetsPerRolloutGroup();
 
+    /**
+     * @return the maximum nummber of actions per target
+     */
+    int getMaxActionsPerTarget();
+
 }
