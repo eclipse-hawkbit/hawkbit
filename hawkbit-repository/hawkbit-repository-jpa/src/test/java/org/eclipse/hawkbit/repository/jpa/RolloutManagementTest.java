@@ -42,6 +42,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
@@ -1258,8 +1259,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verify the enforcement of the quota that specifies a maximum number of targets per rollout group.")
-    public void quotaMaxTargetsPerRolloutGroup() throws Exception {
+    @Description("Verify that a rollout cannot be created if the quota for 'max targets per rollout group' would be violated.")
+    public void createRolloutFailsIfQuotaGroupQuotaIsViolated() throws Exception {
 
         final int quota = quotaManagement.getMaxTargetsPerRolloutGroup();
 
@@ -1277,22 +1278,10 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
 
-        final Rollout rollout = rolloutManagement.create(
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> rolloutManagement.create(
                 entityFactory.rollout().create().name(rolloutName).description(rolloutName)
                         .targetFilterQuery("controllerId==" + targetPrefixName + "-*").set(distributionSet),
-                amountGroups, conditions);
-
-        // simulate a RolloutScheduler run
-        rolloutManagement.handleRollouts();
-        
-        // verify the rollout groups
-        final Page<RolloutGroup> groups = rolloutGroupManagement.findByRollout(PAGE, rollout.getId());
-        
-        assertThat(groups.getTotalElements()).isEqualTo(amountGroups);
-        assertThat(groups.getContent().get(0).getStatus()).isEqualTo(RolloutGroupStatus.ERROR);
-        
-        assertThat(rolloutManagement.get(rollout.getId())).isNotEmpty();
-        assertThat(rolloutManagement.get(rollout.getId()).get().getStatus()).isEqualTo(RolloutStatus.CREATING);
+                amountGroups, conditions));
 
     }
 
@@ -1453,14 +1442,15 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     public void createRolloutWithIllegalAmountOfGroups() throws Exception {
         final String rolloutName = "rolloutTest5";
         final int amountTargetsForRollout = 10;
-        final int illegalGroupAmount = 501;
+        final int quota = quotaManagement.getMaxRolloutGroupsPerRollout();
+        final int illegalGroupAmount = quota + 1;
 
         final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults().build();
         final RolloutCreate myRollout = generateTargetsAndRollout(rolloutName, amountTargetsForRollout);
 
         assertThatExceptionOfType(ValidationException.class)
                 .isThrownBy(() -> rolloutManagement.create(myRollout, illegalGroupAmount, conditions))
-                .withMessageContaining("not be greater than " + quotaManagement.getMaxRolloutGroupsPerRollout());
+                .withMessageContaining("not be greater than " + quota);
 
     }
 

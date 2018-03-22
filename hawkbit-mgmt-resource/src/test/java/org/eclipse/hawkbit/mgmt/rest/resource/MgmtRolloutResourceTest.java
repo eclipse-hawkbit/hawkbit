@@ -132,6 +132,21 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
     }
 
     @Test
+    @Description("Testing that rollout cannot be created if the 'max targets per rollout group' quota would be violated for one of the groups.")
+    public void createRolloutFailsIfRolloutGroupQuotaIsViolated() throws Exception {
+
+        final int quota = quotaManagement.getMaxTargetsPerRolloutGroup();
+        testdataFactory.createTargets(quota + 1, "target", "rollout");
+
+        mvc.perform(post("/rest/v1/rollouts")
+                .content(JsonBuilder.rollout("rollout1", "rollout1Desc", 1,
+                        testdataFactory.createDistributionSet("ds").getId(), "id==target*",
+                        new RolloutGroupConditionBuilder().withDefaults().build()))
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden());
+    }
+
+    @Test
     @Description("Testing that rollout can be created with groups")
     public void createRolloutWithGroupsDefinitions() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("ro");
@@ -399,28 +414,6 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(jsonPath("$.content[1].status", equalTo("ready")))
                 .andExpect(jsonPath("$.content[2].status", equalTo("ready")))
                 .andExpect(jsonPath("$.content[3].status", equalTo("ready")));
-    }
-
-    @Test
-    @Description("Testing that rollout group is in status ERROR if the 'max targets per group' quota is exceeded.")
-    public void retrieveRolloutGroupsAfterQuotaHit() throws Exception {
-
-        // setup
-        final int quota = quotaManagement.getMaxTargetsPerRolloutGroup();
-        final int amountTargets = quota + 1;
-        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
-        final DistributionSet dsA = testdataFactory.createDistributionSet("");
-
-        // create rollout with one group to trigger a quota exceeded error
-        final Rollout rollout = createRollout("rollout1", 1, dsA.getId(), "controllerId==rollout*");
-
-        // retrieve rollout group from created rollout
-        mvc.perform(
-                get("/rest/v1/rollouts/{rolloutId}/deploygroups", rollout.getId()).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(jsonPath("$.content", hasSize(1))).andExpect(jsonPath("$.total", equalTo(1)))
-                .andExpect(jsonPath("$.content[0].status", equalTo("error")));
     }
 
     @Test

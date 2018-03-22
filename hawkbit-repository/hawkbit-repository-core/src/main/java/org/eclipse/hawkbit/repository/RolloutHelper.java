@@ -77,7 +77,8 @@ public final class RolloutHelper {
         if (amountGroup <= 0) {
             throw new ValidationException("the amount of groups cannot be lower than zero");
         } else if (amountGroup > quotaManagement.getMaxRolloutGroupsPerRollout()) {
-            throw new ValidationException("the amount of groups cannot be greater than 500");
+            throw new ValidationException(
+                    "the amount of groups cannot be greater than " + quotaManagement.getMaxRolloutGroupsPerRollout());
         }
     }
 

@@ -40,7 +40,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEve
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -228,11 +227,12 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private Rollout createRolloutGroups(final int amountOfGroups, final RolloutGroupConditions conditions,
-            final Rollout rollout) {
+            final JpaRollout rollout) {
         RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.CREATING);
         RolloutHelper.verifyRolloutGroupConditions(conditions);
 
-        final JpaRollout savedRollout = (JpaRollout) rollout;
+        final JpaRollout savedRollout = rollout;
+        final long totalTargets = rollout.getTotalTargets();
 
         RolloutGroup lastSavedGroup = null;
         for (int i = 0; i < amountOfGroups; i++) {
@@ -256,7 +256,11 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             group.setErrorAction(conditions.getErrorAction());
             group.setErrorActionExp(conditions.getErrorActionExp());
 
-            group.setTargetPercentage(1.0F / (amountOfGroups - i) * 100);
+            final float groupFactor = 1.0F / (amountOfGroups - i);
+            group.setTargetPercentage(groupFactor * 100);
+
+            // enforce the 'max targets per group' quota
+            assertTargetsPerRolloutGroup(group, Math.round(groupFactor * totalTargets));
 
             lastSavedGroup = rolloutGroupRepository.save(group);
             publishRolloutGroupCreatedEventAfterCommit(lastSavedGroup, rollout);
@@ -387,9 +391,6 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
         try {
 
-            // assert the max targets per rollout group quota
-            assertTargetsPerRolloutGroup(group, expectedInGroup);
-
             long targetsLeftToAdd = expectedInGroup - currentlyInGroup;
 
             do {
@@ -407,18 +408,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         } catch (final TransactionException e) {
             LOGGER.warn("Transaction assigning Targets to RolloutGroup failed", e);
             return group;
-        } catch (final QuotaExceededException e) {
-            LOGGER.warn("Cannot assign targets to rollout group due to a quota violation.", e);
-            group.setStatus(RolloutGroupStatus.ERROR);
-            return group;
-
         }
-    }
-
-    private void assertTargetsPerRolloutGroup(final JpaRolloutGroup group, final long expectedInGroup) {
-        final int quota = quotaManagement.getMaxTargetsPerRolloutGroup();
-        QuotaHelper.assertAssignmentQuota(group.getId(), Math.toIntExact(expectedInGroup), quota, Target.class,
-                RolloutGroup.class, null);
     }
 
     private Long assignTargetsToGroupInNewTransaction(final JpaRollout rollout, final RolloutGroup group,
@@ -1023,6 +1013,11 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         return rollout;
     }
 
+    @Override
+    public boolean exists(final long rolloutId) {
+        return rolloutRepository.exists(rolloutId);
+    }
+
     private Map<Long, List<TotalTargetCountActionStatus>> getStatusCountItemForRollout(final List<Long> rollouts) {
         if (rollouts.isEmpty()) {
             return null;
@@ -1061,8 +1056,10 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         }
     }
 
-    @Override
-    public boolean exists(final long rolloutId) {
-        return rolloutRepository.exists(rolloutId);
+    private void assertTargetsPerRolloutGroup(final JpaRolloutGroup group, final long expectedInGroup) {
+        final int quota = quotaManagement.getMaxTargetsPerRolloutGroup();
+        QuotaHelper.assertAssignmentQuota(group.getId(), Math.toIntExact(expectedInGroup), quota, Target.class,
+                RolloutGroup.class, null);
     }
+
 }
