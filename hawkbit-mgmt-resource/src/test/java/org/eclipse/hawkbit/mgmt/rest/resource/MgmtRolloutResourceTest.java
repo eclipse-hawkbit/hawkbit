@@ -402,6 +402,28 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
     }
 
     @Test
+    @Description("Testing that rollout group is in status ERROR if the 'max targets per group' quota is exceeded.")
+    public void retrieveRolloutGroupsAfterQuotaHit() throws Exception {
+
+        // setup
+        final int quota = quotaManagement.getMaxTargetsPerRolloutGroup();
+        final int amountTargets = quota + 1;
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
+
+        // create rollout with one group to trigger a quota exceeded error
+        final Rollout rollout = createRollout("rollout1", 1, dsA.getId(), "controllerId==rollout*");
+
+        // retrieve rollout group from created rollout
+        mvc.perform(
+                get("/rest/v1/rollouts/{rolloutId}/deploygroups", rollout.getId()).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("$.content", hasSize(1))).andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("$.content[0].status", equalTo("error")));
+    }
+
+    @Test
     @Description("Testing that starting the rollout switches the state to starting and then to running")
     public void startingRolloutSwitchesIntoRunningState() throws Exception {
         // setup
@@ -854,6 +876,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     }
 
+    @SuppressWarnings("squid:S2925")
     protected <T> T doWithTimeout(final Callable<T> callable, final SuccessCondition<T> successCondition,
             final long timeout, final long pollInterval) throws Exception // NOPMD
     {
