@@ -85,12 +85,6 @@ public enum SpServerError {
             "The given request body is not well formed"),
 
     /**
-     * Error message informing that the specified update mode is invalid.
-     */
-    SP_REST_UPDATE_MODE_INVALID("hawkbit.server.error.rest.param.modeInvalidField",
-            "The given mode parameter is invalid. Valid values are 'merge', 'replace', and 'remove'."),
-
-    /**
      *
      */
     SP_ARTIFACT_UPLOAD_FAILED("hawkbit.server.error.artifact.uploadFailed",

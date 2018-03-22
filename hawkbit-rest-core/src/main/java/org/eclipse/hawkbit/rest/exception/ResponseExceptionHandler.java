@@ -75,7 +75,6 @@ public class ResponseExceptionHandler {
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_OPERATION_NOT_SUPPORTED, HttpStatus.GONE);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_CONCURRENT_MODIFICATION, HttpStatus.CONFLICT);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_MAINTENANCE_SCHEDULE_INVALID, HttpStatus.BAD_REQUEST);
-        ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REST_UPDATE_MODE_INVALID, HttpStatus.BAD_REQUEST);
 
     }
 
