@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ddi.rest.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -34,6 +33,7 @@ import com.google.common.collect.Maps;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Step;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
@@ -57,7 +57,7 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
-                .andExpect(jsonPath("$._links.configData.href", startsWith(
+                .andExpect(jsonPath("$._links.configData.href", equalTo(
                         "http://localhost/" + tenantAware.getCurrentTenant() + "/controller/v1/4712/configData")));
         Thread.sleep(1); // is required: otherwise processing the next line is
                          // often too fast and
@@ -167,27 +167,101 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Verify that config data (device attributes) can be updated by the controller using different update modes (merge, replace, remove).")
-    public void putConfigDataMergeReplaceRemove() throws Exception {
+    public void putConfigDataWithDifferentUpdateModes() throws Exception {
 
         // create a target
         final String controllerId = "4717";
         testdataFactory.createTarget(controllerId);
         final String configDataPath = "/{tenant}/controller/v1/" + controllerId + "/configData";
 
+        // no update mode
+        putConfigDataWithoutUpdateMode(controllerId, configDataPath);
+
+        // update mode REPLACE
+        putConfigDataWithUpdateModeReplace(controllerId, configDataPath);
+
+        // update mode MERGE
+        putConfigDataWithUpdateModeMerge(controllerId, configDataPath);
+
+        // update mode REMOVE
+        putConfigDataWithUpdateModeRemove(controllerId, configDataPath);
+
+        // invalid update mode
+        putConfigDataWithInvalidUpdateMode(controllerId, configDataPath);
+
+    }
+
+    @Step
+    private void putConfigDataWithInvalidUpdateMode(final String controllerId, final String configDataPath)
+            throws Exception {
+
         // create some attriutes
         final Map<String, String> attributes = new HashMap<>();
         attributes.put("k0", "v0");
         attributes.put("k1", "v1");
 
-        // set the initial attributes
+        // use an invalid update mode
         mvc.perform(put(configDataPath, tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData("", attributes, "closed")).contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+                .content(JsonBuilder.configData("", attributes, "closed", "KJHGKJHGKJHG"))
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+    }
 
-        // verify the initial parameters
-        Map<String, String> updatedAttributes = targetManagement.getControllerAttributes(controllerId);
-        assertThat(updatedAttributes.size()).isEqualTo(attributes.size());
-        assertThat(updatedAttributes).containsAllEntriesOf(attributes);
+    @Step
+    private void putConfigDataWithUpdateModeRemove(final String controllerId, final String configDataPath)
+            throws Exception {
+
+        // get the current attributes
+        final int previousSize = targetManagement.getControllerAttributes(controllerId).size();
+
+        // update the attributes using update mode REMOVE
+        final Map<String, String> removeAttributes = new HashMap<>();
+        removeAttributes.put("k1", "foo");
+        removeAttributes.put("k3", "bar");
+
+        mvc.perform(put(configDataPath, tenantAware.getCurrentTenant())
+                .content(JsonBuilder.configData("", removeAttributes, "closed", "remove"))
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+
+        // verify attribute removal
+        final Map<String, String> updatedAttributes = targetManagement.getControllerAttributes(controllerId);
+        assertThat(updatedAttributes.size()).isEqualTo(previousSize - 2);
+        assertThat(updatedAttributes).doesNotContainKeys("k1", "k3");
+
+    }
+
+    @Step
+    private void putConfigDataWithUpdateModeMerge(final String controllerId, final String configDataPath)
+            throws Exception {
+
+        // get the current attributes
+        final Map<String, String> attributes = new HashMap<>(targetManagement.getControllerAttributes(controllerId));
+
+        // update the attributes using update mode MERGE
+        final Map<String, String> mergeAttributes = new HashMap<>();
+        mergeAttributes.put("k1", "v1_modified_again");
+        mergeAttributes.put("k4", "v4");
+        mvc.perform(put(configDataPath, tenantAware.getCurrentTenant())
+                .content(JsonBuilder.configData("", mergeAttributes, "closed", "merge"))
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+
+        // verify attribute merge
+        final Map<String, String> updatedAttributes = targetManagement.getControllerAttributes(controllerId);
+        assertThat(updatedAttributes.size()).isEqualTo(4);
+        assertThat(updatedAttributes).containsAllEntriesOf(mergeAttributes);
+        assertThat(updatedAttributes.get("k1")).isEqualTo("v1_modified_again");
+        attributes.keySet().forEach(assertThat(updatedAttributes)::containsKey);
+
+    }
+
+    @Step
+    private void putConfigDataWithUpdateModeReplace(final String controllerId, final String configDataPath)
+            throws Exception {
+
+        // get the current attributes
+        final Map<String, String> attributes = new HashMap<>(targetManagement.getControllerAttributes(controllerId));
 
         // update the attributes using update mode REPLACE
         final Map<String, String> replacementAttributes = new HashMap<>();
@@ -200,48 +274,33 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(status().isOk());
 
         // verify attribute replacement
-        updatedAttributes = targetManagement.getControllerAttributes(controllerId);
+        final Map<String, String> updatedAttributes = targetManagement.getControllerAttributes(controllerId);
         assertThat(updatedAttributes.size()).isEqualTo(replacementAttributes.size());
         assertThat(updatedAttributes).containsAllEntriesOf(replacementAttributes);
         assertThat(updatedAttributes.get("k1")).isEqualTo("v1_modified");
         attributes.entrySet().forEach(assertThat(updatedAttributes)::doesNotContain);
 
-        // update the attributes using update mode MERGE
-        final Map<String, String> mergeAttributes = new HashMap<>();
-        mergeAttributes.put("k1", "v1_modified_again");
-        mergeAttributes.put("k4", "v4");
+    }
+
+    @Step
+    private void putConfigDataWithoutUpdateMode(final String controllerId, final String configDataPath)
+            throws Exception {
+
+        // create some attriutes
+        final Map<String, String> attributes = new HashMap<>();
+        attributes.put("k0", "v0");
+        attributes.put("k1", "v1");
+
+        // set the initial attributes
         mvc.perform(put(configDataPath, tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData("", mergeAttributes, "closed", "merge"))
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .content(JsonBuilder.configData("", attributes, "closed")).contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        // verify attribute merge
-        updatedAttributes = targetManagement.getControllerAttributes(controllerId);
-        assertThat(updatedAttributes.size()).isEqualTo(4);
-        assertThat(updatedAttributes).containsAllEntriesOf(mergeAttributes);
-        assertThat(updatedAttributes.get("k1")).isEqualTo("v1_modified_again");
-        assertThat(updatedAttributes).containsKeys("k2", "k3");
+        // verify the initial parameters
+        final Map<String, String> updatedAttributes = targetManagement.getControllerAttributes(controllerId);
+        assertThat(updatedAttributes.size()).isEqualTo(attributes.size());
+        assertThat(updatedAttributes).containsAllEntriesOf(attributes);
 
-        // update the attributes using update mode REMOVE
-        final Map<String, String> removeAttributes = new HashMap<>();
-        removeAttributes.put("k1", "foo");
-        removeAttributes.put("k3", "bar");
-        mvc.perform(put(configDataPath, tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData("", removeAttributes, "closed", "remove"))
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
-
-        // verify attribute removal
-        updatedAttributes = targetManagement.getControllerAttributes(controllerId);
-        assertThat(updatedAttributes.size()).isEqualTo(2);
-        assertThat(updatedAttributes).doesNotContainKeys("k1", "k3");
-        assertThat(updatedAttributes).containsKeys("k2", "k4");
-
-        // use an invalid update mode
-        mvc.perform(put(configDataPath, tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData("", removeAttributes, "closed", "KJHGKJHGKJHG"))
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isBadRequest());
     }
 
 }
