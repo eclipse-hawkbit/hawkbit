@@ -42,7 +42,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
@@ -1283,9 +1282,15 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
                         .targetFilterQuery("controllerId==" + targetPrefixName + "-*").set(distributionSet),
                 amountGroups, conditions);
 
-        // assert quota is exceeded
-        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> rolloutManagement.handleRollouts());
-
+        // simulate a RolloutScheduler run
+        rolloutManagement.handleRollouts();
+        
+        // verify the rollout groups
+        final Page<RolloutGroup> groups = rolloutGroupManagement.findByRollout(PAGE, rollout.getId());
+        
+        assertThat(groups.getTotalElements()).isEqualTo(amountGroups);
+        assertThat(groups.getContent().get(0).getStatus()).isEqualTo(RolloutGroupStatus.ERROR);
+        
         assertThat(rolloutManagement.get(rollout.getId())).isNotEmpty();
         assertThat(rolloutManagement.get(rollout.getId()).get().getStatus()).isEqualTo(RolloutStatus.CREATING);
 
@@ -1389,7 +1394,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         assertThat(myRollout.getTotalTargets()).isEqualTo(amountTargetsInGroup1and2 + amountTargetsInGroup1);
 
         final List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(PAGE, myRollout.getId()).getContent();
-        ;
+
         assertThat(groups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.READY);
         assertThat(groups.get(0).getTotalTargets()).isEqualTo(amountTargetsInGroup1);
 

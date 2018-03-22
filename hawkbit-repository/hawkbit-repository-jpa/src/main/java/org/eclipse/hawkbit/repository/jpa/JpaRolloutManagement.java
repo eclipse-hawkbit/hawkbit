@@ -40,6 +40,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEve
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -384,12 +385,13 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             return rolloutGroupRepository.save(group);
         }
 
-        long targetsLeftToAdd = expectedInGroup - currentlyInGroup;
-
-        // assert the max targets per rollout group quota
-        assertTargetsPerRolloutGroup(group, expectedInGroup);
-
         try {
+
+            // assert the max targets per rollout group quota
+            assertTargetsPerRolloutGroup(group, expectedInGroup);
+
+            long targetsLeftToAdd = expectedInGroup - currentlyInGroup;
+
             do {
                 // Add up to TRANSACTION_TARGETS of the left targets
                 // In case a TransactionException is thrown this loop aborts
@@ -405,6 +407,11 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         } catch (final TransactionException e) {
             LOGGER.warn("Transaction assigning Targets to RolloutGroup failed", e);
             return group;
+        } catch (final QuotaExceededException e) {
+            LOGGER.warn("Cannot assign targets to rollout group due to a quota violation.", e);
+            group.setStatus(RolloutGroupStatus.ERROR);
+            return group;
+
         }
     }
 
