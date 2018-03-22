@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.ui.artifacts.state;
 
 import java.io.Serializable;
 
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
+
 /**
  * Custom file to hold details of uploaded file.
  *
@@ -26,21 +28,23 @@ public class CustomFile implements Serializable {
 
     private String filePath;
 
-    private String baseSoftwareModuleName;
+    private final String baseSoftwareModuleName;
 
-    private String baseSoftwareModuleVersion;
+    private final String baseSoftwareModuleVersion;
 
     private String mimeType;
 
     /**
      * Used to specify if the file is uploaded successfully.
      */
-    private Boolean isValid = Boolean.TRUE;
+    private final Boolean isValid = Boolean.TRUE;
 
     /**
      * Reason if upload fails.
      */
     private String failureReason;
+
+    private SoftwareModule softwareModule;
 
     /**
      * Initialize details.
@@ -59,13 +63,15 @@ public class CustomFile implements Serializable {
      *            the mimeType of the file
      */
     public CustomFile(final String fileName, final long fileSize, final String filePath,
-            final String baseSoftwareModuleName, final String baseSoftwareModuleVersion, final String mimeType) {
+            final String baseSoftwareModuleName, final String baseSoftwareModuleVersion, final String mimeType,
+            final SoftwareModule softwareModule) {
         this.fileName = fileName;
         this.fileSize = fileSize;
         this.filePath = filePath;
         this.baseSoftwareModuleName = baseSoftwareModuleName;
         this.baseSoftwareModuleVersion = baseSoftwareModuleVersion;
         this.mimeType = mimeType;
+        this.softwareModule = softwareModule;
     }
 
     /**
@@ -89,17 +95,10 @@ public class CustomFile implements Serializable {
         return baseSoftwareModuleName;
     }
 
-    public void setBaseSoftwareModuleName(final String baseSoftwareModuleName) {
-        this.baseSoftwareModuleName = baseSoftwareModuleName;
-    }
-
     public String getBaseSoftwareModuleVersion() {
         return baseSoftwareModuleVersion;
     }
 
-    public void setBaseSoftwareModuleVersion(final String baseSoftwareModuleVersion) {
-        this.baseSoftwareModuleVersion = baseSoftwareModuleVersion;
-    }
 
     public String getFileName() {
         return fileName;
@@ -117,43 +116,20 @@ public class CustomFile implements Serializable {
         return filePath;
     }
 
-    public void setFilePath(final String filePath) {
-        this.filePath = filePath;
-    }
-
     public String getMimeType() {
         return mimeType;
     }
 
-    /**
-     *
-     * @return the isValid
-     */
     public Boolean getIsValid() {
         return isValid;
     }
 
-    /**
-     * @param isValid
-     *            the isValid to set
-     */
-    public void setIsValid(final Boolean isValid) {
-        this.isValid = isValid;
-    }
-
-    /**
-     * @param mimeType
-     *            the mimeType to set
-     */
-    public void setMimeType(final String mimeType) {
-        this.mimeType = mimeType;
-    }
-
-    /**
-     * @return the failureReason
-     */
     public String getFailureReason() {
         return failureReason;
+    }
+
+    public SoftwareModule getSoftwareModule() {
+        return softwareModule;
     }
 
     @Override
@@ -163,6 +139,7 @@ public class CustomFile implements Serializable {
         result = prime * result + ((baseSoftwareModuleName == null) ? 0 : baseSoftwareModuleName.hashCode());
         result = prime * result + ((baseSoftwareModuleVersion == null) ? 0 : baseSoftwareModuleVersion.hashCode());
         result = prime * result + ((fileName == null) ? 0 : fileName.hashCode());
+        result = prime * result + ((softwareModule == null) ? 0 : softwareModule.hashCode());
         return result;
     }
 
@@ -190,6 +167,13 @@ public class CustomFile implements Serializable {
                 return false;
             }
         } else if (!baseSoftwareModuleVersion.equals(other.baseSoftwareModuleVersion)) {
+            return false;
+        }
+        if (softwareModule == null) {
+            if (other.softwareModule != null) {
+                return false;
+            }
+        } else if (!softwareModule.equals(other.softwareModule)) {
             return false;
         }
         if (fileName == null) {

@@ -17,7 +17,7 @@ import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.VaadinSessionScope;
 
 /**
- * Softwrae module filters.
+ * Software module filters.
  *
  *
  */

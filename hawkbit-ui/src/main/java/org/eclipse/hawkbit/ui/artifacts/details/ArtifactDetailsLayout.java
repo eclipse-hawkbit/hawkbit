@@ -94,6 +94,8 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private SPUIButton maxMinButton;
 
+    private SPUIButton addArtifactButton;
+
     private Table artifactDetailsTable;
 
     private Table maxArtifactDetailsTable;
@@ -167,6 +169,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         titleOfArtifactDetails.setSizeFull();
         titleOfArtifactDetails.setImmediate(true);
         maxMinButton = createMaxMinButton();
+        addArtifactButton = createAddButton();
 
         artifactDetailsTable = createArtifactDetailsTable();
 
@@ -186,6 +189,16 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     }
 
+    private SPUIButton createAddButton() {
+        // TODO adapt
+        final SPUIButton button = (SPUIButton) SPUIComponentProvider.getButton(
+                SPUIDefinitions.ADD_DISTRIBUTION_TYPE_TAG, "", "", null, true, FontAwesome.PLUS,
+                SPUIButtonStyleSmallNoBorder.class);
+        button.addClickListener(event -> maxArtifactDetails());
+        return button;
+
+    }
+
     private void buildLayout() {
         final HorizontalLayout header = new HorizontalLayout();
         header.addStyleName("artifact-details-header");
@@ -196,8 +209,9 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         header.setSizeFull();
         header.setHeightUndefined();
         header.setImmediate(true);
-        header.addComponents(titleOfArtifactDetails, maxMinButton);
+        header.addComponents(titleOfArtifactDetails, addArtifactButton, maxMinButton);
         header.setComponentAlignment(titleOfArtifactDetails, Alignment.TOP_LEFT);
+        header.setComponentAlignment(addArtifactButton, Alignment.TOP_CENTER);
         header.setComponentAlignment(maxMinButton, Alignment.TOP_RIGHT);
         header.setExpandRatio(titleOfArtifactDetails, 1.0F);
 

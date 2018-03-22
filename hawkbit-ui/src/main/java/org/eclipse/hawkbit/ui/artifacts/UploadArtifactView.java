@@ -25,7 +25,9 @@ import org.eclipse.hawkbit.ui.artifacts.footer.SMDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleTableLayout;
 import org.eclipse.hawkbit.ui.artifacts.smtype.SMTypeFilterLayout;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
-import org.eclipse.hawkbit.ui.artifacts.upload.UploadLayout;
+import org.eclipse.hawkbit.ui.artifacts.upload.UploadAndStatusButtonLayout;
+import org.eclipse.hawkbit.ui.artifacts.upload.UploadDropAreaLayout;
+import org.eclipse.hawkbit.ui.artifacts.upload.UploadLogic;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -77,7 +79,9 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
 
     private final ArtifactDetailsLayout artifactDetailsLayout;
 
-    private final UploadLayout uploadLayout;
+    private final UploadAndStatusButtonLayout uploadLayout;
+
+    private final UploadDropAreaLayout dropAreaLayout;
 
     private final SMDeleteActionsLayout deleteActionsLayout;
 
@@ -88,6 +92,8 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
     private GridLayout mainLayout;
 
     private DragAndDropWrapper dadw;
+
+    private final UploadLogic uploadLogic;
 
     @Autowired
     UploadArtifactView(final UIEventBus eventBus, final SpPermissionChecker permChecker, final VaadinMessageSource i18n,
@@ -108,8 +114,11 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
                 uploadViewClientCriterion);
         this.artifactDetailsLayout = new ArtifactDetailsLayout(i18n, eventBus, artifactUploadState, uiNotification,
                 artifactManagement, softwareModuleManagement);
-        this.uploadLayout = new UploadLayout(i18n, uiNotification, eventBus, artifactUploadState,
-                multipartConfigElement, artifactManagement, softwareModuleManagement);
+        this.uploadLogic = new UploadLogic(artifactUploadState);
+        this.uploadLayout = new UploadAndStatusButtonLayout(i18n, uiNotification, eventBus, artifactUploadState,
+                multipartConfigElement, artifactManagement, softwareModuleManagement, uploadLogic);
+        this.dropAreaLayout = new UploadDropAreaLayout(i18n, uiNotification, eventBus, artifactUploadState,
+                multipartConfigElement, softwareModuleManagement, uploadLogic);
         this.deleteActionsLayout = new SMDeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
                 artifactUploadState, softwareModuleManagement, softwareModuleTypeManagement, uploadViewClientCriterion);
     }
@@ -171,7 +180,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         detailAndUploadLayout.setComponentAlignment(artifactDetailsLayout, Alignment.MIDDLE_CENTER);
 
         if (permChecker.hasCreateRepositoryPermission()) {
-            dadw = uploadLayout.getDropAreaWrapper();
+            dadw = dropAreaLayout.getDropAreaWrapper();
             detailAndUploadLayout.addComponent(dadw);
             detailAndUploadLayout.setComponentAlignment(dadw, Alignment.MIDDLE_CENTER);
         }
@@ -205,7 +214,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
     private void createUploadButtonLayout() {
         uplaodButtonsLayout = new HorizontalLayout();
         if (permChecker.hasCreateRepositoryPermission()) {
-            uplaodButtonsLayout = uploadLayout.getFileUploadLayout();
+            uplaodButtonsLayout = uploadLayout.getFileUploadButtonLayout();
         }
     }
 

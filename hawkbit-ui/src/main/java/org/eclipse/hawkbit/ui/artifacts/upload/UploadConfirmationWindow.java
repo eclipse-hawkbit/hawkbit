@@ -101,7 +101,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
 
     private Table uploadDetailsTable;
 
-    private final UploadLayout uploadLayout;
+    private final UploadAndStatusButtonLayout uploadLayout;
 
     private IndexedContainer tableContainer;
 
@@ -127,13 +127,14 @@ public class UploadConfirmationWindow implements Button.ClickListener {
      * @param artifactUploadState
      *            reference of session variable {@link ArtifactUploadState}.
      */
-    UploadConfirmationWindow(final UploadLayout artifactUploadView, final ArtifactUploadState artifactUploadState,
-            final UIEventBus eventBus, final ArtifactManagement artifactManagement) {
+    UploadConfirmationWindow(final UploadAndStatusButtonLayout artifactUploadView,
+            final ArtifactUploadState artifactUploadState,
+            final UIEventBus eventBus, final ArtifactManagement artifactManagement, final VaadinMessageSource i18n) {
         this.uploadLayout = artifactUploadView;
         this.artifactUploadState = artifactUploadState;
         this.eventBus = eventBus;
         this.artifactManagement = artifactManagement;
-        i18n = artifactUploadView.getI18n();
+        this.i18n = i18n;
         createRequiredComponents();
         buildLayout();
     }
@@ -231,7 +232,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
     }
 
     private void populateUploadDetailsTable() {
-        for (final CustomFile customFile : uploadLayout.getFileSelected()) {
+        for (final CustomFile customFile : artifactUploadState.getFileSelected()) {
             final String swNameVersion = HawkbitCommonUtil.getFormattedNameVersion(
                     customFile.getBaseSoftwareModuleName(), customFile.getBaseSoftwareModuleVersion());
             final String itemId = swNameVersion + "/" + customFile.getFileName();
@@ -543,7 +544,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
         if (event.getComponent().getId().equals(UIComponentIdProvider.UPLOAD_ARTIFACT_DETAILS_CLOSE)) {
             window.close();
         } else if (event.getComponent().getId().equals(UIComponentIdProvider.UPLOAD_DISCARD_DETAILS_BUTTON)) {
-            uploadLayout.clearUploadedFileDetails();
+            // uploadLayout.clearUploadedFileDetails();
             window.close();
         } else if (event.getComponent().getId().equals(UIComponentIdProvider.UPLOAD_BUTTON)) {
             processArtifactUpload();
@@ -564,11 +565,11 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             enableOrDisableUploadBtn();
 
             uploadDetailsTable.removeItem(((Button) event.getComponent()).getData());
-            uploadLayout.getFileSelected().remove(customFile);
-            uploadLayout.updateUploadCounts();
+            artifactUploadState.removeSelectedFile(customFile);
+            // uploadLayout.updateUploadCounts();
             if (uploadDetailsTable.getItemIds().isEmpty()) {
                 window.close();
-                uploadLayout.clearUploadedFileDetails();
+                // uploadLayout.clearUploadedFileDetails();
             }
         }
     }
@@ -586,7 +587,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
                 final String fileName = itemDet[1];
                 final SoftwareModule bSoftwareModule = artifactUploadState.getBaseSwModuleList()
                         .get(baseSoftwareModuleNameVersion);
-                for (final CustomFile customFile : uploadLayout.getFileSelected()) {
+                for (final CustomFile customFile : artifactUploadState.getFileSelected()) {
                     final String baseSwModuleNameVersion = HawkbitCommonUtil.getFormattedNameVersion(
                             customFile.getBaseSoftwareModuleName(), customFile.getBaseSoftwareModuleVersion());
                     if (customFile.getFileName().equals(fileName)
@@ -600,7 +601,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             if (refreshArtifactDetailsLayout) {
                 uploadLayout.refreshArtifactDetailsLayout(artifactUploadState.getSelectedBaseSwModuleId().get());
             }
-            uploadLayout.clearFileList();
+            // uploadLayout.clearFileList();
             window.close();
             // call upload result window
             currentUploadResultWindow = new UploadResultWindow(uploadResultList, i18n, eventBus);

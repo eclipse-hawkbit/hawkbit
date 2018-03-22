@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.upload.UploadStatusObject;
 import org.eclipse.hawkbit.ui.common.ManagementEntityState;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
@@ -60,13 +61,11 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
 
     private boolean statusPopupMinimized;
 
-    private boolean uploadCompleted;
-
-    private List<UploadStatusObject> uploadedFileStatusList = new ArrayList<>();
+    private final List<UploadStatusObject> uploadedFileStatusList = new ArrayList<>();
 
     private final AtomicInteger numberOfFileUploadsExpected = new AtomicInteger();
 
-    private final AtomicInteger numberOfFilesActuallyUpload = new AtomicInteger();
+    private final AtomicInteger numberOfFilesActuallyUploading = new AtomicInteger();
 
     private final AtomicInteger numberOfFileUploadsFailed = new AtomicInteger();
 
@@ -75,32 +74,64 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
         this.softwareModuleFilters = softwareModuleFilters;
     }
 
+    public void clearNumberOfFileUploadsFailed() {
+        numberOfFileUploadsFailed.set(0);
+    }
+
+    public void incrementNumberOfFileUploadsFailed() {
+        numberOfFileUploadsFailed.incrementAndGet();
+    }
+
+    public void decrementNumberOfFileUploadsFailed() {
+        numberOfFileUploadsFailed.decrementAndGet();
+    }
+
     public AtomicInteger getNumberOfFileUploadsFailed() {
         return numberOfFileUploadsFailed;
     }
 
-    public AtomicInteger getNumberOfFilesActuallyUpload() {
-        return numberOfFilesActuallyUpload;
+    public void clearNumberOfFilesActuallyUploading() {
+        numberOfFilesActuallyUploading.set(0);
+    }
+
+    public void incrementNumberOfFilesActuallyUploading() {
+        numberOfFilesActuallyUploading.incrementAndGet();
+    }
+
+    public void decrementNumberOfFilesActuallyUploading() {
+        numberOfFilesActuallyUploading.decrementAndGet();
+    }
+
+    public AtomicInteger getNumberOfFilesActuallyUploading() {
+        return numberOfFilesActuallyUploading;
+    }
+
+    public void clearNumberOfFileUploadsExpected() {
+        numberOfFileUploadsExpected.set(0);
+    }
+
+    public void incrementNumberOfFileUploadsExpected() {
+        numberOfFileUploadsExpected.incrementAndGet();
+    }
+
+    public void decrementNumberOfFileUploadsExpected() {
+        numberOfFileUploadsExpected.decrementAndGet();
     }
 
     public AtomicInteger getNumberOfFileUploadsExpected() {
         return numberOfFileUploadsExpected;
     }
 
-    public List<UploadStatusObject> getUploadedFileStatusList() {
+    public void addFileUploadStatus(final UploadStatusObject uploadStatus) {
+        uploadedFileStatusList.add(uploadStatus);
+    }
+
+    public void clearFileUploadStatus() {
+        uploadedFileStatusList.clear();
+    }
+
+    public List<UploadStatusObject> getFileUploadStatusList() {
         return uploadedFileStatusList;
-    }
-
-    public void setUploadedFileStatusList(final List<UploadStatusObject> uploadedFileStatusList) {
-        this.uploadedFileStatusList = uploadedFileStatusList;
-    }
-
-    public boolean isUploadCompleted() {
-        return uploadCompleted;
-    }
-
-    public void setUploadCompleted(final boolean uploadCompleted) {
-        this.uploadCompleted = uploadCompleted;
     }
 
     public void setStatusPopupMinimized(final boolean statusPopupMinimized) {
@@ -119,12 +150,41 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
         return deleteSofwareModules;
     }
 
+    public void addFileSelected(final CustomFile customFile) {
+        fileSelected.add(customFile);
+    }
+
+    public void removeSelectedFile(final CustomFile customFile) {
+        fileSelected.remove(customFile);
+    }
+
+    public void clearFileSelected() {
+        fileSelected.clear();
+    }
+
     public Set<CustomFile> getFileSelected() {
         return fileSelected;
     }
 
     public Optional<Long> getSelectedBaseSwModuleId() {
         return selectedBaseSwModuleId;
+    }
+
+    public void clearBaseSwModuleList() {
+        baseSwModuleList.clear();
+    }
+
+    public String getKeyForSoftwareModule(final SoftwareModule softwareModule) {
+        return HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(), softwareModule.getVersion());
+    }
+
+
+    public void addBaseSoftwareModule(final SoftwareModule softwareModule) {
+        final String currentBaseSoftwareModuleKey = HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(),
+                softwareModule.getVersion());
+        if (!baseSwModuleList.keySet().contains(currentBaseSoftwareModuleKey)) {
+            baseSwModuleList.put(currentBaseSoftwareModuleKey, softwareModule);
+        }
     }
 
     public Map<String, SoftwareModule> getBaseSwModuleList() {
