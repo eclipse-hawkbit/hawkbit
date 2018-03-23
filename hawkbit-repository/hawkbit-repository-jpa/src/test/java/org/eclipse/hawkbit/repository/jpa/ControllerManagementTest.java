@@ -762,16 +762,16 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6) })
-    public void quotaMaxActionStatusPerAction() {
+    public void addActionStatusUpdatesUntilQuotaIsExceeded() {
 
         // any distribution set assignment causes 1 status entity to be created
-        final int quota = quotaManagement.getMaxStatusEntriesPerAction() - 1;
+        final int maxStatusEntries = quotaManagement.getMaxStatusEntriesPerAction() - 1;
 
         // test for informational status
         final Long actionId1 = assignDistributionSet(testdataFactory.createDistributionSet("ds1"),
                 testdataFactory.createTargets(1, "t1")).getActions().get(0);
         assertThat(actionId1).isNotNull();
-        for (int i = 0; i < quota; ++i) {
+        for (int i = 0; i < maxStatusEntries; ++i) {
             controllerManagement.addInformationalActionStatus(entityFactory.actionStatus().create(actionId1)
                     .status(Status.WARNING).message("Msg " + i).occurredAt(System.currentTimeMillis()));
         }
@@ -782,7 +782,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId2 = assignDistributionSet(testdataFactory.createDistributionSet("ds2"),
                 testdataFactory.createTargets(1, "t2")).getActions().get(0);
         assertThat(actionId2).isNotEqualTo(actionId1);
-        for (int i = 0; i < quota; ++i) {
+        for (int i = 0; i < maxStatusEntries; ++i) {
             controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId2)
                     .status(Status.WARNING).message("Msg " + i).occurredAt(System.currentTimeMillis()));
         }
@@ -798,16 +798,16 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
-    public void quotaMaxMessagesPerActionStatus() {
+    public void createActionStatusWithTooManyMessages() {
 
-        final int quota = quotaManagement.getMaxMessagesPerActionStatus();
+        final int maxMessages = quotaManagement.getMaxMessagesPerActionStatus();
 
         final Long actionId = assignDistributionSet(testdataFactory.createDistributionSet("ds1"),
                 testdataFactory.createTargets(1)).getActions().get(0);
         assertThat(actionId).isNotNull();
 
         final List<String> messages = Lists.newArrayList();
-        IntStream.range(0, quota).forEach(i -> messages.add(i, "msg"));
+        IntStream.range(0, maxMessages).forEach(i -> messages.add(i, "msg"));
 
         assertThat(controllerManagement.addInformationalActionStatus(
                 entityFactory.actionStatus().create(actionId).messages(messages).status(Status.WARNING))).isNotNull();

@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
@@ -263,6 +264,26 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         assertThat(targetManagement.findByAssignedDistributionSet(PAGE, createdDs.getId()).getContent())
                 .as("Five targets in repository have DS assigned").hasSize(5);
+    }
+
+    @Test
+    @Description("Ensures that the 'max actions per target' quota is enforced if the same target is assigned to too many distribution sets.")
+    public void assignTargetToManyDistributionSetsUntilQuotaIsExceeded() throws Exception {
+
+        // create one target
+        final Target testTarget = testdataFactory.createTarget("1");
+        final int maxActions = quotaManagement.getMaxActionsPerTarget();
+
+        IntStream.range(0, maxActions).forEach(i -> {
+            assignDistributionSet(testdataFactory.createDistributionSet("ds_" + i), testTarget);
+        });
+
+        // assign our test target to another distribution set and verify that
+        // the 'max actions per target' quota is exceeded
+        final DistributionSet ds = testdataFactory.createDistributionSet("final");
+        final String json = new JSONArray().put(new JSONObject().put("id", testTarget.getId())).toString();
+        mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + ds.getId() + "/assignedTargets")
+                .contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isForbidden());
     }
 
     @Test
