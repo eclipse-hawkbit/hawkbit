@@ -217,8 +217,10 @@ public abstract class AbstractDsAssignmentStrategy {
 
     JpaAction createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap, final JpaTarget target,
             final JpaDistributionSet set) {
+
         // enforce the 'max actions per target' quota
         assertActionsPerTargetQuota(target, 1);
+
         // create the action
         final JpaAction actionForTarget = new JpaAction();
         final TargetWithActionType targetWithActionType = targetsWithActionMap.get(target.getControllerId());

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
@@ -35,6 +36,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
@@ -169,6 +171,21 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(count).as("One Action for target").isEqualTo(1L).isEqualTo(actions.getContent().size());
         assertThat(actions.getContent().get(0).getId()).as("Action of target").isEqualTo(actionId);
+    }
+
+    @Test
+    @Description("Test verifies that the 'max actions per target' quota is enforced.")
+    public void assignDistributionSetsUntilMaxActionsPerTargetQuotaIsExceeded() {
+
+        final int maxActions = quotaManagement.getMaxActionsPerTarget();
+        final List<Target> testTarget = testdataFactory.createTargets(1);
+
+        IntStream.range(0, maxActions).forEach(i -> {
+            assignDistributionSet(testdataFactory.createDistributionSet("ds_" + i), testTarget);
+        });
+
+        final DistributionSet ds = testdataFactory.createDistributionSet("ds_final");
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> assignDistributionSet(ds, testTarget));
     }
 
     @Test
