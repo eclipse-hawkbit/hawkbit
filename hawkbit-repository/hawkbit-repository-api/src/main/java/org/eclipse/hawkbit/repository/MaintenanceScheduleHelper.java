@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import static com.cronutils.model.CronType.QUARTZ;
-
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
@@ -21,6 +19,7 @@ import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleExcept
 import org.springframework.util.StringUtils;
 
 import com.cronutils.model.Cron;
+import com.cronutils.model.CronType;
 import com.cronutils.model.definition.CronDefinition;
 import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.model.time.ExecutionTime;
@@ -34,60 +33,61 @@ import com.cronutils.parser.CronParser;
  */
 public class MaintenanceScheduleHelper {
 
-    private final ExecutionTime scheduleExecutor;
+    private static final CronParser cronParser;
 
-    /**
-     * Constructor that accepts a cron expression, duration and time zone and
-     * instantiates the cron parser and scheduler executor.
-     *
-     * @param cronSchedule
-     *            is the cron expression to be used for scheduling the
-     *            maintenance window. Expression has 6 mandatory fields and 1
-     *            last optional field: "second minute hour dayofmonth month
-     *            weekday year"
-     */
-    public MaintenanceScheduleHelper(final String cronSchedule) {
-        final CronDefinition cronDefinition = CronDefinitionBuilder.instanceDefinitionFor(QUARTZ);
-        final CronParser parser = new CronParser(cronDefinition);
-        final Cron quartzCron = parser.parse(cronSchedule);
-        this.scheduleExecutor = ExecutionTime.forCron(quartzCron);
+    static {
+        final CronDefinition cronDefinition = CronDefinitionBuilder.instanceDefinitionFor(CronType.QUARTZ);
+        cronParser = new CronParser(cronDefinition);
     }
 
     /**
-     * Method calculates the next available maintenance window within the
-     * schedule but after a given time.
+     * Calculate the next available maintenance window.
      *
-     * @param after
-     *            is the {@link ZonedDateTime} after which the window is
-     *            required
+     * @param cronSchedule
+     *            is a cron expression with 6 mandatory fields and 1 last
+     *            optional field: "second minute hour dayofmonth month weekday
+     *            year".
+     * @param duration
+     *            in HH:mm:ss format specifying the duration of a maintenance
+     *            window, for example 00:30:00 for 30 minutes.
+     * @param timezone
+     *            is the time zone specified as +/-hh:mm offset from UTC. For
+     *            example +02:00 for CET summer time and +00:00 for UTC. The
+     *            start time of a maintenance window calculated based on the
+     *            cron expression is relative to this time zone.
      *
      * @return {@link Optional<ZonedDateTime>} of the next available window. In
      *         case there is none, returns empty value.
+     * 
      */
-    // Exception squid:S1166 - lib throws exception as well if no value found
-    @SuppressWarnings("squid:S1166")
-    public Optional<ZonedDateTime> nextExecution(final ZonedDateTime after) {
+    public static Optional<ZonedDateTime> getNextMaintenanceWindow(final String cronSchedule, final String duration,
+            final String timezone) {
         try {
-            final ZonedDateTime next = this.scheduleExecutor.nextExecution(after);
+            final ExecutionTime scheduleExecutor = ExecutionTime.forCron(getCronFromExpression(cronSchedule));
+            final ZonedDateTime now = ZonedDateTime.now(ZoneOffset.of(timezone));
+            final ZonedDateTime after = now.minus(convertToISODuration(duration));
+            final ZonedDateTime next = scheduleExecutor.nextExecution(after);
             return Optional.ofNullable(next);
-        } catch (final IllegalArgumentException ignored) {
+        } catch (final IllegalArgumentException | NullPointerException ignored) {
             return Optional.empty();
         }
     }
 
     /**
-     * Method checks if there are any more valid maintenance windows after a
-     * given time.
+     * Parse the given cron expression with quartz parser.
      *
-     * @param after
-     *            is the {@link ZonedDateTime} after which the windows are
-     *            checked
+     * @param cronSchedule
+     *            is a cron expression with 6 mandatory fields and 1 last
+     *            optional field: "second minute hour dayofmonth month weekday
+     *            year".
      *
-     * @return true if there is at least one valid schedule remaining, else
-     *         false.
+     * @return {@link Cron} object, that corresponds to the expression.
+     * 
+     * @throws IllegalArgumentException
+     *             if the cron expression doesn't have a valid format.
      */
-    private boolean hasValidScheduleAfter(final ZonedDateTime after) {
-        return nextExecution(after).isPresent();
+    public static Cron getCronFromExpression(final String cronSchedule) {
+        return cronParser.parse(cronSchedule);
     }
 
     /**
@@ -100,39 +100,30 @@ public class MaintenanceScheduleHelper {
      * @param cronSchedule
      *            is a cron expression with 6 mandatory fields and 1 last
      *            optional field: "second minute hour dayofmonth month weekday
-     *            year"
+     *            year".
      * @param duration
      *            in HH:mm:ss format specifying the duration of a maintenance
-     *            window, for example 00:30:00 for 30 minutes
+     *            window, for example 00:30:00 for 30 minutes.
      * @param timezone
      *            is the time zone specified as +/-hh:mm offset from UTC. For
      *            example +02:00 for CET summer time and +00:00 for UTC. The
      *            start time of a maintenance window calculated based on the
-     *            cron expression is relative to this time zone
+     *            cron expression is relative to this time zone.
      *
      * @throws InvalidMaintenanceScheduleException
      *             if the defined schedule fails the validity criteria.
      */
     public static void validateMaintenanceSchedule(final String cronSchedule, final String duration,
             final String timezone) {
-        // check if schedule, duration and timezone are all not empty.
         if (allNotEmpty(cronSchedule, duration, timezone)) {
-            final ZonedDateTime now;
-            try {
-                now = ZonedDateTime.now(ZoneOffset.of(timezone));
-                Duration.parse(convertToISODuration(duration));
-            } catch (final RuntimeException validationFailed) {
-                throw new InvalidMaintenanceScheduleException("No valid maintenance window provided", validationFailed);
-            }
-
-            final MaintenanceScheduleHelper scheduleHelper = new MaintenanceScheduleHelper(cronSchedule);
+            validateCronSchedule(cronSchedule);
+            validateDuration(duration);
             // check if there is a window currently active or available in
             // future.
-            if (!scheduleHelper.hasValidScheduleAfter(now.minus(Duration.parse(convertToISODuration(duration))))) {
+            if (!getNextMaintenanceWindow(cronSchedule, duration, timezone).isPresent()) {
                 throw new InvalidMaintenanceScheduleException(
                         "No valid maintenance window available after current time");
             }
-
         } else if (atLeastOneNotEmpty(cronSchedule, duration, timezone)) {
             throw new InvalidMaintenanceScheduleException(
                     "All of schedule, duration and timezone should either be null or non empty.");
@@ -154,14 +145,61 @@ public class MaintenanceScheduleHelper {
      * @param timeInterval
      *            in "HH:mm:ss" string format. This format is popularly used but
      *            can be confused with time of the day, hence conversion to ISO
-     *            specified format for time duration is required
+     *            specified format for time duration is required.
      *
-     * @return the time interval or duration in ISO format
+     * @return {@link Duration} in ISO format.
      *
      * @throws DateTimeParseException
      *             if the text cannot be converted to ISO format.
      */
-    public static String convertToISODuration(final String timeInterval) {
-        return Duration.between(LocalTime.MIN, LocalTime.parse(StringUtils.trimWhitespace(timeInterval))).toString();
+    public static Duration convertToISODuration(final String timeInterval) {
+        return Duration.between(LocalTime.MIN, convertDurationToLocalTime(timeInterval));
+    }
+
+    /**
+     * Validates the format of the maintenance window duration
+     *
+     * @param duration
+     *            in "HH:mm:ss" string format. This format is popularly used but
+     *            can be confused with time of the day, hence conversion to ISO
+     *            specified format for time duration is required.
+     *
+     * @throws InvalidMaintenanceScheduleException
+     *             if the duration doesn't have a valid format to be converted
+     *             to ISO.
+     */
+    public static void validateDuration(final String duration) {
+        try {
+            if (StringUtils.hasText(duration)) {
+                convertDurationToLocalTime(duration);
+            }
+        } catch (final DateTimeParseException e) {
+            throw new InvalidMaintenanceScheduleException("Provided duration is not valid", e.getErrorIndex());
+        }
+    }
+
+    private static LocalTime convertDurationToLocalTime(final String timeInterval) {
+        return LocalTime.parse(StringUtils.trimWhitespace(timeInterval));
+    }
+
+    /**
+     * Validates the format of the maintenance window cron expression
+     *
+     * @param cronSchedule
+     *            is a cron expression with 6 mandatory fields and 1 last
+     *            optional field: "second minute hour dayofmonth month weekday
+     *            year".
+     *
+     * @throws InvalidMaintenanceScheduleException
+     *             if the cron expression doesn't have a valid quartz format.
+     */
+    public static void validateCronSchedule(final String cronSchedule) {
+        try {
+            if (StringUtils.hasText(cronSchedule)) {
+                getCronFromExpression(cronSchedule);
+            }
+        } catch (final IllegalArgumentException e) {
+            throw new InvalidMaintenanceScheduleException(e.getMessage());
+        }
     }
 }

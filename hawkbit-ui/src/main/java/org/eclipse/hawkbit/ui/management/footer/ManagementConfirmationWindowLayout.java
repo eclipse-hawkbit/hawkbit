@@ -21,7 +21,9 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
@@ -43,6 +45,7 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -61,7 +64,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * Confirmation window for target/distributionSet delete and assignment
  * operations on the Deployment View.
  */
-public class ManangementConfirmationWindowLayout extends AbstractConfirmationWindowLayout {
+public class ManagementConfirmationWindowLayout extends AbstractConfirmationWindowLayout {
 
     private static final long serialVersionUID = 1L;
 
@@ -77,6 +80,8 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
     private final UiProperties uiProperties;
 
+    private final UINotification uiNotification;
+
     private final ManagementUIState managementUIState;
 
     private final transient TargetManagement targetManagement;
@@ -91,12 +96,13 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
     private ConfirmationTab assignmentTab;
 
-    public ManangementConfirmationWindowLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
+    public ManagementConfirmationWindowLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final ManagementUIState managementUIState, final TargetManagement targetManagement,
             final DeploymentManagement deploymentManagement, final DistributionSetManagement distributionSetManagement,
-            final UiProperties uiProperties) {
+            final UiProperties uiProperties, final UINotification uiNotification) {
         super(i18n, eventBus);
         this.uiProperties = uiProperties;
+        this.uiNotification = uiNotification;
         this.managementUIState = managementUIState;
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
@@ -152,7 +158,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         actionTypeOptionGroupLayout.selectDefaultOption();
         assignmentTab.addComponent(actionTypeOptionGroupLayout, 1);
         assignmentTab.addComponent(enableMaintenanceWindowLayout(), 2);
-        maintenanceWindowLayout.setVisible(false);
+        initMaintenanceWindow();
         assignmentTab.addComponent(maintenanceWindowLayout, 3);
 
         return assignmentTab;
@@ -174,11 +180,16 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         enableMaintenanceWindow.addValueChangeListener(event -> {
             final Boolean isMaintenanceWindowEnabled = enableMaintenanceWindow.getValue();
             maintenanceWindowLayout.setVisible(isMaintenanceWindowEnabled);
-            assignmentTab.getConfirmAll().setEnabled(!isMaintenanceWindowEnabled);
+            maintenanceWindowLayout.setEnabled(isMaintenanceWindowEnabled);
+            enableSaveButton(!isMaintenanceWindowEnabled);
             maintenanceWindowLayout.clearAllControls();
         });
 
         return enableMaintenanceWindow;
+    }
+
+    private void enableSaveButton(final boolean enabled) {
+        assignmentTab.getConfirmAll().setEnabled(enabled);
     }
 
     private Link maintenanceWindowHelpLinkControl() {
@@ -186,7 +197,20 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         return SPUIComponentProvider.getHelpLink(maintenanceWindowHelpUrl);
     }
 
+    private void initMaintenanceWindow() {
+        maintenanceWindowLayout.setVisible(false);
+        maintenanceWindowLayout.setEnabled(false);
+        maintenanceWindowLayout.getScheduleControl()
+                .addTextChangeListener(event -> enableSaveButton(maintenanceWindowLayout.onScheduleChange(event)));
+        maintenanceWindowLayout.getDurationControl()
+                .addTextChangeListener(event -> enableSaveButton(maintenanceWindowLayout.onDurationChange(event)));
+    }
+
     private void saveAllAssignments(final ConfirmationTab tab) {
+        if (!isMaintenanceWindowValid()) {
+            return;
+        }
+
         final Set<TargetIdName> itemIds = managementUIState.getAssignedList().keySet();
         Long distId;
         List<TargetIdName> targetIdSetList;
@@ -197,10 +221,6 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
                 .getActionTypeOptionGroup().getValue()) == ActionTypeOption.AUTO_FORCED)
                         ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
                         : RepositoryModelConstants.NO_FORCE_TIME;
-
-        final String maintenanceSchedule = maintenanceWindowLayout.getMaintenanceSchedule();
-        final String maintenanceDuration = maintenanceWindowLayout.getMaintenanceDuration();
-        final String maintenanceTimeZone = maintenanceWindowLayout.getMaintenanceTimeZone();
 
         final Map<Long, List<TargetIdName>> saveAssignedList = Maps.newHashMapWithExpectedSize(itemIds.size());
 
@@ -219,13 +239,18 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
             saveAssignedList.put(distId, targetIdSetList);
         }
 
+        final String maintenanceSchedule = maintenanceWindowLayout.getMaintenanceSchedule();
+        final String maintenanceDuration = maintenanceWindowLayout.getMaintenanceDuration();
+        final String maintenanceTimeZone = maintenanceWindowLayout.getMaintenanceTimeZone();
+
         for (final Map.Entry<Long, List<TargetIdName>> mapEntry : saveAssignedList.entrySet()) {
             tempIdList = saveAssignedList.get(mapEntry.getKey());
             final DistributionSetAssignmentResult distributionSetAssignmentResult = deploymentManagement
                     .assignDistributionSet(mapEntry.getKey(),
-                            tempIdList.stream()
-                                    .map(t -> new TargetWithActionType(t.getControllerId(), actionType, forcedTimeStamp,
-                                            maintenanceSchedule, maintenanceDuration, maintenanceTimeZone))
+                            tempIdList.stream().map(t -> maintenanceWindowLayout.isEnabled()
+                                    ? new TargetWithActionType(t.getControllerId(), actionType, forcedTimeStamp,
+                                            maintenanceSchedule, maintenanceDuration, maintenanceTimeZone)
+                                    : new TargetWithActionType(t.getControllerId(), actionType, forcedTimeStamp))
                                     .collect(Collectors.toList()));
 
             if (distributionSetAssignmentResult.getAssigned() > 0) {
@@ -242,6 +267,21 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         setActionMessage(i18n.getMessage("message.target.ds.assign.success"));
         removeCurrentTab(tab);
         eventBus.publish(this, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
+    }
+
+    private boolean isMaintenanceWindowValid() {
+        if (maintenanceWindowLayout.isEnabled()) {
+            try {
+                MaintenanceScheduleHelper.validateMaintenanceSchedule(maintenanceWindowLayout.getMaintenanceSchedule(),
+                        maintenanceWindowLayout.getMaintenanceDuration(),
+                        maintenanceWindowLayout.getMaintenanceTimeZone());
+            } catch (final InvalidMaintenanceScheduleException e) {
+                uiNotification.displayValidationError(e.getMessage());
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private void addMessage(final int successAssignmentCount, final int duplicateAssignmentCount) {

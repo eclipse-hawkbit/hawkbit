@@ -11,27 +11,23 @@ package org.eclipse.hawkbit.ui.management.footer;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
+import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.springframework.util.StringUtils;
 
 import com.cronutils.descriptor.CronDescriptor;
-import com.cronutils.model.CronType;
-import com.cronutils.model.definition.CronDefinition;
-import com.cronutils.model.definition.CronDefinitionBuilder;
-import com.cronutils.parser.CronParser;
 import com.vaadin.data.Validator;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
+import com.vaadin.server.Page;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -101,14 +97,9 @@ public class MaintenanceWindowLayout extends VerticalLayout {
         @Override
         public void validate(final Object value) {
             try {
-
-                final String expr = (String) value;
-                if (!expr.isEmpty()) {
-                    MaintenanceScheduleHelper.validateMaintenanceSchedule((String) value, "00:00:00",
-                            getClientTimeZone());
-                }
-            } catch (final IllegalArgumentException e) {
-                throw new InvalidValueException(i18n.getMessage(CRON_VALIDATION_ERROR));
+                MaintenanceScheduleHelper.validateCronSchedule((String) value);
+            } catch (final InvalidMaintenanceScheduleException e) {
+                throw new InvalidValueException(i18n.getMessage(CRON_VALIDATION_ERROR) + ": " + e.getMessage());
             }
         }
     }
@@ -119,13 +110,10 @@ public class MaintenanceWindowLayout extends VerticalLayout {
     private class CronTranslationListener implements TextChangeListener {
         private static final long serialVersionUID = 1L;
 
-        private final transient CronParser cronParser;
         private final transient CronDescriptor cronDescriptor;
 
         public CronTranslationListener() {
-            final CronDefinition cronDefinition = CronDefinitionBuilder.instanceDefinitionFor(CronType.QUARTZ);
-            cronParser = new CronParser(cronDefinition);
-            cronDescriptor = CronDescriptor.instance(Locale.UK);
+            cronDescriptor = CronDescriptor.instance(getClientsLocale());
         }
 
         @Override
@@ -135,10 +123,14 @@ public class MaintenanceWindowLayout extends VerticalLayout {
 
         private String translateCron(final String cronExpression) {
             try {
-                return cronDescriptor.describe(cronParser.parse(cronExpression));
+                return cronDescriptor.describe(MaintenanceScheduleHelper.getCronFromExpression(cronExpression));
             } catch (final IllegalArgumentException ex) {
                 return i18n.getMessage(CRON_VALIDATION_ERROR);
             }
+        }
+
+        private Locale getClientsLocale() {
+            return Page.getCurrent().getWebBrowser().getLocale();
         }
     }
 
@@ -160,12 +152,10 @@ public class MaintenanceWindowLayout extends VerticalLayout {
         @Override
         public void validate(final Object value) {
             try {
-                final String expression = (String) value;
-                if (StringUtils.hasText(expression)) {
-                    MaintenanceScheduleHelper.convertToISODuration(expression);
-                }
-            } catch (final DateTimeParseException e) {
-                throw new InvalidValueException(i18n.getMessage("message.maintenancewindow.duration.validation.error"));
+                MaintenanceScheduleHelper.validateDuration((String) value);
+            } catch (final InvalidMaintenanceScheduleException e) {
+                throw new InvalidValueException(i18n.getMessage("message.maintenancewindow.duration.validation.error",
+                        e.getDurationErrorIndex()));
             }
         }
     }
@@ -233,7 +223,7 @@ public class MaintenanceWindowLayout extends VerticalLayout {
     }
 
     /**
-     * Get the cron expression for maintenance window timezone.
+     * Get the timezone for maintenance window.
      *
      * @return {@link String}.
      */
@@ -242,9 +232,54 @@ public class MaintenanceWindowLayout extends VerticalLayout {
         return timeZone.getValue().toString();
     }
 
+    /**
+     * Set all the controls to their default values.
+     */
     public void clearAllControls() {
         schedule.setValue("");
         duration.setValue("");
         timeZone.setValue(getClientTimeZone());
+    }
+
+    /**
+     * Method, used for validity check, when schedule text is changed.
+     *
+     * @param event
+     *            (@link TextChangeEvent} the event object after schedule text
+     *            change.
+     * @return validity of maintenance window controls.
+     */
+    public boolean onScheduleChange(final TextChangeEvent event) {
+        schedule.setValue(event.getText());
+        return isScheduleAndDurationValid();
+    }
+
+    /**
+     * Method, used for validity check, when duration text is changed.
+     *
+     * @param event
+     *            (@link TextChangeEvent} the event object after duration text
+     *            change.
+     * @return validity of maintenance window controls.
+     */
+    public boolean onDurationChange(final TextChangeEvent event) {
+        duration.setValue(event.getText());
+        return isScheduleAndDurationValid();
+    }
+
+    private boolean isScheduleAndDurationValid() {
+        if (schedule.isEmpty() || duration.isEmpty()) {
+            return false;
+        }
+
+        return schedule.isValid() && duration.isValid();
+    }
+
+    public TextField getScheduleControl() {
+        return schedule;
+    }
+
+    public TextField getDurationControl() {
+        return duration;
     }
 }

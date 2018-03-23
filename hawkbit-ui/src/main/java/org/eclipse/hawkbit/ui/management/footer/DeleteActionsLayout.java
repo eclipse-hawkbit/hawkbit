@@ -73,7 +73,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private final ManagementUIState managementUIState;
 
-    private final ManangementConfirmationWindowLayout manangementConfirmationWindowLayout;
+    private final ManagementConfirmationWindowLayout manangementConfirmationWindowLayout;
 
     private final CountMessageLabel countMessageLabel;
 
@@ -93,8 +93,9 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         this.targetTagManagement = targetTagManagement;
         this.managementViewClientCriterion = managementViewClientCriterion;
         this.managementUIState = managementUIState;
-        this.manangementConfirmationWindowLayout = new ManangementConfirmationWindowLayout(i18n, eventBus,
-                managementUIState, targetManagement, deploymentManagement, distributionSetManagement, uiProperties);
+        this.manangementConfirmationWindowLayout = new ManagementConfirmationWindowLayout(i18n, eventBus,
+                managementUIState, targetManagement, deploymentManagement, distributionSetManagement, uiProperties,
+                notification);
         this.countMessageLabel = new CountMessageLabel(eventBus, targetManagement, i18n, managementUIState,
                 targetTable);
         this.targetManagement = targetManagement;

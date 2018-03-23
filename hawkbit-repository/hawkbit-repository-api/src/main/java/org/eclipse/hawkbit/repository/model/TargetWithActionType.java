@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 
@@ -69,9 +68,6 @@ public class TargetWithActionType {
         this.maintenanceSchedule = maintenanceSchedule;
         this.maintenanceWindowDuration = maintenanceWindowDuration;
         this.maintenanceWindowTimeZone = maintenanceWindowTimeZone;
-
-        MaintenanceScheduleHelper.validateMaintenanceSchedule(maintenanceSchedule, maintenanceWindowDuration,
-                maintenanceWindowTimeZone);
     }
 
     public ActionType getActionType() {

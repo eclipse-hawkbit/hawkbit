@@ -251,12 +251,10 @@ public class JpaControllerManagement implements ControllerManagement {
          */
         EventTimer(final String defaultEventInterval, final String minimumEventInterval, final TemporalUnit timeUnit) {
             this.defaultEventInterval = defaultEventInterval;
-            this.defaultEventIntervalDuration = Duration
-                    .parse(MaintenanceScheduleHelper.convertToISODuration(defaultEventInterval));
+            this.defaultEventIntervalDuration = MaintenanceScheduleHelper.convertToISODuration(defaultEventInterval);
 
             this.minimumEventInterval = minimumEventInterval;
-            this.minimumEventIntervalDuration = Duration
-                    .parse(MaintenanceScheduleHelper.convertToISODuration(minimumEventInterval));
+            this.minimumEventIntervalDuration = MaintenanceScheduleHelper.convertToISODuration(minimumEventInterval);
 
             this.timeUnit = timeUnit;
         }
