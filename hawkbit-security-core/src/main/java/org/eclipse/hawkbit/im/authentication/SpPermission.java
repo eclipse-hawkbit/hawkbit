@@ -191,9 +191,6 @@ public final class SpPermission {
      * isAuthenticated() Returns true if the user is not anonymous
      * isFullyAuthenticated()  Returns true if the user is not an anonymous or a remember-me user
      * }
-     * 
-     *
-     *
      *
      */
     public static final class SpringEvalExpressions {
