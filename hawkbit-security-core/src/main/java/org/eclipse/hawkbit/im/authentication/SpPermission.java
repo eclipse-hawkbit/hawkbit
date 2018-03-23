@@ -32,12 +32,6 @@ import org.springframework.security.core.GrantedAuthority;
  * including metadata, {@link TargetTag}s, {@link TargetRegistrationRule}s<br/>
  * XX_Repository CRUD which covers: {@link DistributionSet}s,
  * {@link SoftwareModule}s, DS Tags<br/>
- * </p>
- *
- *
- *
- *
- *
  */
 public final class SpPermission {
 
@@ -112,7 +106,7 @@ public final class SpPermission {
 
     /**
      * Permission to administrate the system on a global, i.e. tenant
-     * independent scale. Thta inlcuds the deletion of tenants.
+     * independent scale. That includes the deletion of tenants.
      */
     public static final String SYSTEM_ADMIN = "SYSTEM_ADMIN";
 
