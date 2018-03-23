@@ -284,6 +284,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         RolloutHelper.verifyRemainingTargets(
                 calculateRemainingTargets(groups, savedRollout.getTargetFilterQuery(), savedRollout.getCreatedAt()));
 
+        final long totalTargets = rollout.getTotalTargets();
+
         // Persisting the groups
         RolloutGroup lastSavedGroup = null;
         for (final RolloutGroup srcGroup : groups) {
@@ -294,7 +296,12 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             group.setParent(lastSavedGroup);
             group.setStatus(RolloutGroupStatus.CREATING);
 
-            group.setTargetPercentage(srcGroup.getTargetPercentage());
+            final float perc = srcGroup.getTargetPercentage();
+
+            // enforce the 'max targets per group' quota
+            assertTargetsPerRolloutGroupQuota(group, Math.round(totalTargets * perc / 100));
+
+            group.setTargetPercentage(perc);
             if (srcGroup.getTargetFilterQuery() != null) {
                 group.setTargetFilterQuery(srcGroup.getTargetFilterQuery());
             } else {
