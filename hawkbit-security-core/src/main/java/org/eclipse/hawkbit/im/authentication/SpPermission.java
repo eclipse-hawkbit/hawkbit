@@ -111,18 +111,6 @@ public final class SpPermission {
     public static final String DELETE_REPOSITORY = "DELETE_REPOSITORY";
 
     /**
-     * Permission to monitor the SP system. E.g. retrieving health, monitor
-     * checks through REST API provided by the spring actuator.
-     */
-    public static final String SYSTEM_MONITOR = "SYSTEM_MONITOR";
-
-    /**
-     * Permission to retrieve diagnosis of the SP system. E.g. retrieving
-     * metrics, configuration through REST API provided by the spring actuator.
-     */
-    public static final String SYSTEM_DIAG = "SYSTEM_DIAG";
-
-    /**
      * Permission to administrate the system on a global, i.e. tenant
      * independent scale. Thta inlcuds the deletion of tenants.
      */
@@ -433,14 +421,6 @@ public final class SpPermission {
          */
         public static final String HAS_AUTH_TENANT_CONFIGURATION = HAS_AUTH_PREFIX + TENANT_CONFIGURATION
                 + HAS_AUTH_SUFFIX + HAS_AUTH_OR + IS_SYSTEM_CODE;
-
-        /**
-         * Spring security eval hasAuthority expression to check if spring
-         * context contains {@link SpPermission#SYSTEM_MONITOR} or
-         * {@link #IS_SYSTEM_CODE}.
-         */
-        public static final String HAS_AUTH_SYSTEM_MONITOR = HAS_AUTH_PREFIX + SYSTEM_MONITOR + HAS_AUTH_SUFFIX
-                + HAS_AUTH_OR + IS_SYSTEM_CODE;
 
         private SpringEvalExpressions() {
             // utility class

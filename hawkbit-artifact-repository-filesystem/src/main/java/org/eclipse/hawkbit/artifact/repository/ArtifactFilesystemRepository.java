@@ -17,8 +17,6 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.base.Splitter;
@@ -38,8 +36,6 @@ import com.google.common.io.Files;
  */
 @Validated
 public class ArtifactFilesystemRepository extends AbstractArtifactRepository {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ArtifactFilesystemRepository.class);
 
     private final ArtifactFilesystemProperties artifactResourceProperties;
 
