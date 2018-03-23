@@ -12,9 +12,6 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -173,31 +170,11 @@ public final class SpPermission {
     /**
      * Return all permission.
      * 
-     * @return all permission
+     * @param exclusionRoles
+     *            roles which will excluded
+     * @return all permissions
      */
     public static List<String> getAllAuthorities() {
-        return getAllAuthorities(Collections.emptyList());
-    }
-
-    /**
-     * Return all permission.
-     * 
-     * @param exclusionRoles
-     *            roles which will excluded
-     * @return all permissions
-     */
-    public static List<String> getAllAuthorities(final String... exclusionRoles) {
-        return getAllAuthorities(Arrays.asList(exclusionRoles));
-    }
-
-    /**
-     * Return all permission.
-     * 
-     * @param exclusionRoles
-     *            roles which will excluded
-     * @return all permissions
-     */
-    public static List<String> getAllAuthorities(final Collection<String> exclusionRoles) {
         final List<String> allPermissions = new ArrayList<>();
         final Field[] declaredFields = SpPermission.class.getDeclaredFields();
         for (final Field field : declaredFields) {
@@ -205,20 +182,13 @@ public final class SpPermission {
                 field.setAccessible(true);
                 try {
                     final String role = (String) field.get(null);
-                    addIfNotExcluded(exclusionRoles, allPermissions, role);
+                    allPermissions.add(role);
                 } catch (final IllegalAccessException e) {
                     LOGGER.error(e.getMessage(), e);
                 }
             }
         }
         return allPermissions;
-    }
-
-    private static void addIfNotExcluded(final Collection<String> exclusionRoles, final List<String> allPermissions,
-            final String role) {
-        if (!(exclusionRoles.contains(role))) {
-            allPermissions.add(role);
-        }
     }
 
     /**

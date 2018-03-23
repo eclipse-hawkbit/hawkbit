@@ -41,16 +41,5 @@ public final class PermissionTest {
         assertThat(allAuthoritiesList.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()))
                 .containsAll(allAuthorities);
 
-        final Collection<String> authoritiesWithoutSystem = SpPermission.getAllAuthorities(SpPermission.SYSTEM_ADMIN,
-                SpPermission.SYSTEM_DIAG, SpPermission.SYSTEM_MONITOR);
-        final List<GrantedAuthority> authoritiesListWithoutSystem = PermissionUtils.createAuthorityList(SpPermission
-                .getAllAuthorities(SpPermission.SYSTEM_ADMIN, SpPermission.SYSTEM_DIAG, SpPermission.SYSTEM_MONITOR));
-
-        assertThat(authoritiesWithoutSystem).hasSize(permissionWithoutSystem);
-        // times 2 because we add also all authorities as prefix 'ROLE_';
-        assertThat(authoritiesListWithoutSystem).hasSize(permissionWithoutSystem * 2);
-        assertThat(authoritiesListWithoutSystem.stream().map(authority -> authority.getAuthority())
-                .collect(Collectors.toList())).containsAll(authoritiesWithoutSystem);
-
     }
 }
