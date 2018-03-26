@@ -70,9 +70,21 @@ public interface QuotaManagement {
     int getMaxArtifactsPerSoftwareModule();
 
     /**
-     * @return the maximum nummber of targets per rollout group
+     * @return the maximum number of targets per rollout group
      */
     int getMaxTargetsPerRolloutGroup();
+
+    /**
+     * @return the maximum number of targets which for a manual distribution set
+     *         assignment
+     */
+    int getMaxTargetsPerManualAssignment();
+
+    /**
+     * @return the maximum number of targets for an automatic distribution set
+     *         assignment
+     */
+    int getMaxTargetsPerAutoAssignment();
 
     /**
      * @return the maximum nummber of actions per target

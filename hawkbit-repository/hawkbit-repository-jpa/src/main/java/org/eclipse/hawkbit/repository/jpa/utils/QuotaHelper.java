@@ -27,7 +27,31 @@ public class QuotaHelper {
     private static final Logger LOG = LoggerFactory.getLogger(JpaDistributionSetManagement.class);
 
     private QuotaHelper() {
-        // no need to instantiat this class
+        // no need to instantiate this class
+    }
+
+    /**
+     * Asserts the specified assignment quota.
+     * 
+     * @param requested
+     *            The number of entities that shall be assigned to the parent
+     *            entity.
+     * @param limit
+     *            The maximum number of entities that may be assigned to the
+     *            parent entity.
+     * @param type
+     *            The type of the entities that shall be assigned.
+     * @param parentType
+     *            The type of the parent entity.
+     * 
+     * @throws QuotaExceededException
+     *             if the assignment operation would cause the quota to be
+     *             exceeded
+     */
+    public static void assertAssignmentQuota(final long requested, final long limit, @NotNull final Class<?> type,
+            @NotNull final Class<?> parentType) {
+        // dispatch
+        assertAssignmentQuota(null, requested, limit, type.getSimpleName(), parentType.getSimpleName(), null);
     }
 
     /**
@@ -53,7 +77,7 @@ public class QuotaHelper {
      *             if the assignment operation would cause the quota to be
      *             exceeded
      */
-    public static void assertAssignmentQuota(final Long parentId, final int requested, final int limit,
+    public static void assertAssignmentQuota(final Long parentId, final long requested, final long limit,
             @NotNull final Class<?> type, @NotNull final Class<?> parentType, final Function<Long, Long> countFct) {
         // dispatch
         assertAssignmentQuota(parentId, requested, limit, type.getSimpleName(), parentType.getSimpleName(), countFct);
@@ -82,7 +106,7 @@ public class QuotaHelper {
      *             if the assignment operation would cause the quota to be
      *             exceeded
      */
-    public static void assertAssignmentQuota(final Long parentId, final int requested, final int limit,
+    public static void assertAssignmentQuota(final Long parentId, final long requested, final long limit,
             @NotNull final String type, @NotNull final String parentType, final Function<Long, Long> countFct) {
 
         // check if the quota is unlimited

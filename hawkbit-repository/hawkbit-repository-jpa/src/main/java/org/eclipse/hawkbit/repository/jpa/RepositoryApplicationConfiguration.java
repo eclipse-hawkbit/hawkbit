@@ -70,6 +70,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
@@ -459,22 +460,29 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      * {@link JpaTargetFilterQueryManagement} bean.
      * 
      * @param targetFilterQueryRepository
-     *            to query entity access
+     *            holding {@link TargetFilterQuery} entities
+     * @param targetRepository
+     *            holding {@link Target} entities
      * @param virtualPropertyReplacer
      *            for RSQL handling
      * @param distributionSetManagement
      *            for auto assign DS access
-     *
+     * @param quotaManagement
+     *            to access quotas
+     * @param properties
+     *            JPA properties
+     * 
      * @return a new {@link TargetFilterQueryManagement}
      */
     @Bean
     @ConditionalOnMissingBean
     TargetFilterQueryManagement targetFilterQueryManagement(
-            final TargetFilterQueryRepository targetFilterQueryRepository,
+            final TargetFilterQueryRepository targetFilterQueryRepository, final TargetRepository targetRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer,
-            final DistributionSetManagement distributionSetManagement, final JpaProperties properties) {
-        return new JpaTargetFilterQueryManagement(targetFilterQueryRepository, virtualPropertyReplacer,
-                distributionSetManagement, properties.getDatabase());
+            final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
+            final JpaProperties properties) {
+        return new JpaTargetFilterQueryManagement(targetFilterQueryRepository, targetRepository,
+                virtualPropertyReplacer, distributionSetManagement, quotaManagement, properties.getDatabase());
     }
 
     /**

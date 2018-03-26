@@ -83,4 +83,14 @@ public class PropertiesQuotaManagement implements QuotaManagement {
         return securityProperties.getDos().getMaxActionsPerTarget();
     }
 
+    @Override
+    public int getMaxTargetsPerManualAssignment() {
+        return securityProperties.getDos().getMaxTargetsPerManualAssignment();
+    }
+
+    @Override
+    public int getMaxTargetsPerAutoAssignment() {
+        return securityProperties.getDos().getMaxTargetsPerAutoAssignment();
+    }
+
 }

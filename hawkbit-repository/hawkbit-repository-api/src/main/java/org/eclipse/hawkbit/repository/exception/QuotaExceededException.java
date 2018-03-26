@@ -80,7 +80,7 @@ public final class QuotaExceededException extends AbstractServerRtException {
      *            parent entity.
      */
     public QuotaExceededException(final Class<?> type, final Class<?> parentType, final Long parentId,
-            final int requested, final int quota) {
+            final long requested, final long quota) {
         this(type.getSimpleName(), parentType.getSimpleName(), parentId, requested, quota);
     }
 
@@ -99,8 +99,8 @@ public final class QuotaExceededException extends AbstractServerRtException {
      *            The number of entities that shall be assigned to the specified
      *            parent entity.
      */
-    public QuotaExceededException(final String type, final String parentType, final Long parentId, final int requested,
-            final int quota) {
+    public QuotaExceededException(final String type, final String parentType, final Long parentId, final long requested,
+            final long quota) {
         super(String.format(ASSIGNMENT_QUOTA_EXCEEDED_MESSAGE, requested, type, parentType, parentId, quota),
                 SpServerError.SP_QUOTA_EXCEEDED);
     }

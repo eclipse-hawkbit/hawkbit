@@ -65,9 +65,10 @@ public class AutoAssignScheduler {
         LOGGER.debug("auto assign schedule checker has been triggered.");
         // run this code in system code privileged to have the necessary
         // permission to query and create entities.
-        systemSecurityContext.runAsSystem(() -> executeAutoAssign());
+        systemSecurityContext.runAsSystem(this::executeAutoAssign);
     }
 
+    @SuppressWarnings("squid:S3516")
     private Object executeAutoAssign() {
         // workaround eclipselink that is currently not possible to
         // execute a query without multitenancy if MultiTenant

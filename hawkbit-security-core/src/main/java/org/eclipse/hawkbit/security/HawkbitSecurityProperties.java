@@ -152,6 +152,9 @@ public class HawkbitSecurityProperties {
         private final Filter filter = new Filter();
         private final Filter uiFilter = new Filter();
 
+        private int maxTargetsPerManualAssignment;
+
+        private int maxTargetsPerAutoAssignment;
 
         public Filter getUiFilter() {
             return uiFilter;
@@ -248,6 +251,22 @@ public class HawkbitSecurityProperties {
 
         public void setMaxActionsPerTarget(final int maxActionsPerTarget) {
             this.maxActionsPerTarget = maxActionsPerTarget;
+        }
+
+        public int getMaxTargetsPerManualAssignment() {
+            return maxTargetsPerManualAssignment;
+        }
+
+        public void setMaxTargetsPerManualAssignment(final int maxTargetsPerManualAssignment) {
+            this.maxTargetsPerManualAssignment = maxTargetsPerManualAssignment;
+        }
+
+        public int getMaxTargetsPerAutoAssignment() {
+            return maxTargetsPerAutoAssignment;
+        }
+
+        public void setMaxTargetsPerAutoAssignment(final int maxTargetsPerAutoAssignment) {
+            this.maxTargetsPerAutoAssignment = maxTargetsPerAutoAssignment;
         }
 
         /**

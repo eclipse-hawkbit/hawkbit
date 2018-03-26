@@ -1068,7 +1068,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     private void assertTargetsPerRolloutGroupQuota(final RolloutGroup group, final int requested) {
         final int quota = quotaManagement.getMaxTargetsPerRolloutGroup();
-        QuotaHelper.assertAssignmentQuota(group.getId(), requested, quota, Target.class, RolloutGroup.class, null);
+        QuotaHelper.assertAssignmentQuota(requested, quota, Target.class, RolloutGroup.class);
     }
 
     private void assertActionsPerTargetQuota(final Target target, final int requested) {

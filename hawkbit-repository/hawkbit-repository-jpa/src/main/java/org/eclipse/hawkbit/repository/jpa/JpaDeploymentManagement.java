@@ -216,8 +216,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      *            a list of all targets and their action type
      * @param actionMessage
      *            an optional message to be written into the action status
-     * @param offline
-     *            to <code>true</code> in offline case
+     * @param assignmentStrategy
+     *            the assignment strategy (online /offline)
      * @return the assignment result
      *
      * @throw IncompleteDistributionSetException if mandatory
