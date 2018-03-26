@@ -46,6 +46,8 @@ public final class ActionStatusIconMapper {
                 SPUIStyleDefinitions.STATUS_ICON_PENDING, FontAwesome.CIRCLE_O));
         MAPPINGS.put(Action.Status.DOWNLOAD, new ActionStatusIconMapper("label.download",
                 SPUIStyleDefinitions.STATUS_ICON_PENDING, FontAwesome.CLOUD_DOWNLOAD));
+        MAPPINGS.put(Action.Status.DOWNLOADED, new ActionStatusIconMapper("label.downloaded",
+                SPUIStyleDefinitions.STATUS_ICON_GREEN, FontAwesome.CLOUD_DOWNLOAD));
         MAPPINGS.put(Action.Status.SCHEDULED, new ActionStatusIconMapper("label.scheduled",
                 SPUIStyleDefinitions.STATUS_ICON_PENDING, FontAwesome.HOURGLASS_1));
     }

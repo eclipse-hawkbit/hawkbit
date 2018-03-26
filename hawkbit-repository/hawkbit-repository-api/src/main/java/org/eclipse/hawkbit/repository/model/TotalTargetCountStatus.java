@@ -152,6 +152,7 @@ public class TotalTargetCountStatus {
         case RUNNING:
         case WARNING:
         case DOWNLOAD:
+        case DOWNLOADED:
         case CANCELING:
             final Long runningItemsCount = statusTotalCountMap.get(Status.RUNNING) + item.getCount();
             statusTotalCountMap.put(Status.RUNNING, runningItemsCount);

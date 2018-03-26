@@ -335,7 +335,6 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         properties.put(PersistenceUnitProperties.LOGGING_LOGGER, "JavaLogger");
         // Ensure that we flush only at the end of the transaction
         properties.put(PersistenceUnitProperties.PERSISTENCE_CONTEXT_FLUSH_MODE, "COMMIT");
-
         // Enable batch writing
         properties.put(PersistenceUnitProperties.BATCH_WRITING, "JDBC");
         // Batch size
@@ -374,8 +373,24 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    DistributionSetManagement distributionSetManagement() {
-        return new JpaDistributionSetManagement();
+    DistributionSetManagement distributionSetManagement(final EntityManager entityManager,
+            final DistributionSetRepository distributionSetRepository,
+            final DistributionSetTagManagement distributionSetTagManagement, final SystemManagement systemManagement,
+            final DistributionSetTypeManagement distributionSetTypeManagement,
+            final DistributionSetMetadataRepository distributionSetMetadataRepository,
+            final TargetFilterQueryRepository targetFilterQueryRepository, final ActionRepository actionRepository,
+            final NoCountPagingRepository criteriaNoCountDao, final ApplicationEventPublisher eventPublisher,
+            final ApplicationContext applicationContext, final TenantAware tenantAware,
+            final VirtualPropertyReplacer virtualPropertyReplacer,
+            final SoftwareModuleRepository softwareModuleRepository,
+            final DistributionSetTagRepository distributionSetTagRepository,
+            final AfterTransactionCommitExecutor afterCommit, final JpaProperties properties) {
+        return new JpaDistributionSetManagement(entityManager, distributionSetRepository, distributionSetTagManagement,
+                systemManagement, distributionSetTypeManagement, distributionSetMetadataRepository,
+                targetFilterQueryRepository, actionRepository, criteriaNoCountDao, eventPublisher, applicationContext,
+                tenantAware, virtualPropertyReplacer, softwareModuleRepository, distributionSetTagRepository,
+                afterCommit, properties.getDatabase());
+
     }
 
     /**
@@ -389,9 +404,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final DistributionSetRepository distributionSetRepository,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final NoCountPagingRepository criteriaNoCountDao) {
+            final VirtualPropertyReplacer virtualPropertyReplacer, final NoCountPagingRepository criteriaNoCountDao,
+            final JpaProperties properties) {
         return new JpaDistributionSetTypeManagement(distributionSetTypeRepository, softwareModuleTypeRepository,
-                distributionSetRepository, virtualPropertyReplacer, criteriaNoCountDao);
+                distributionSetRepository, virtualPropertyReplacer, criteriaNoCountDao, properties.getDatabase());
     }
 
     /**
@@ -423,8 +439,18 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    TargetManagement targetManagement() {
-        return new JpaTargetManagement();
+    TargetManagement targetManagement(final EntityManager entityManager, final TargetRepository targetRepository,
+            final RolloutGroupRepository rolloutGroupRepository,
+            final DistributionSetRepository distributionSetRepository,
+            final TargetFilterQueryRepository targetFilterQueryRepository,
+            final TargetTagRepository targetTagRepository, final NoCountPagingRepository criteriaNoCountDao,
+            final ApplicationEventPublisher eventPublisher, final ApplicationContext applicationContext,
+            final TenantAware tenantAware, final AfterTransactionCommitExecutor afterCommit,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties) {
+        return new JpaTargetManagement(entityManager, targetRepository, rolloutGroupRepository,
+                distributionSetRepository, targetFilterQueryRepository, targetTagRepository, criteriaNoCountDao,
+                eventPublisher, applicationContext, tenantAware, afterCommit, virtualPropertyReplacer,
+                properties.getDatabase());
     }
 
     /**
@@ -444,9 +470,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     TargetFilterQueryManagement targetFilterQueryManagement(
             final TargetFilterQueryRepository targetFilterQueryRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer,
-            final DistributionSetManagement distributionSetManagement) {
+            final DistributionSetManagement distributionSetManagement, final JpaProperties properties) {
         return new JpaTargetFilterQueryManagement(targetFilterQueryRepository, virtualPropertyReplacer,
-                distributionSetManagement);
+                distributionSetManagement, properties.getDatabase());
     }
 
     /**
@@ -457,8 +483,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     TargetTagManagement targetTagManagement(final TargetTagRepository targetTagRepository,
-            final TargetRepository targetRepository, final VirtualPropertyReplacer virtualPropertyReplacer) {
-        return new JpaTargetTagManagement(targetTagRepository, targetRepository, virtualPropertyReplacer);
+            final TargetRepository targetRepository, final VirtualPropertyReplacer virtualPropertyReplacer,
+            final JpaProperties properties) {
+        return new JpaTargetTagManagement(targetTagRepository, targetRepository, virtualPropertyReplacer,
+                properties.getDatabase());
     }
 
     /**
@@ -471,9 +499,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     DistributionSetTagManagement distributionSetTagManagement(
             final DistributionSetTagRepository distributionSetTagRepository,
             final DistributionSetRepository distributionSetRepository,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final NoCountPagingRepository criteriaNoCountDao) {
+            final VirtualPropertyReplacer virtualPropertyReplacer, final NoCountPagingRepository criteriaNoCountDao,
+            final JpaProperties properties) {
         return new JpaDistributionSetTagManagement(distributionSetTagRepository, distributionSetRepository,
-                virtualPropertyReplacer, criteriaNoCountDao);
+                virtualPropertyReplacer, criteriaNoCountDao, properties.getDatabase());
     }
 
     /**
@@ -483,8 +512,17 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    SoftwareModuleManagement softwareModuleManagement() {
-        return new JpaSoftwareModuleManagement();
+    SoftwareModuleManagement softwareModuleManagement(final EntityManager entityManager,
+            final DistributionSetRepository distributionSetRepository,
+            final SoftwareModuleRepository softwareModuleRepository,
+            final SoftwareModuleMetadataRepository softwareModuleMetadataRepository,
+            final SoftwareModuleTypeRepository softwareModuleTypeRepository,
+            final NoCountPagingRepository criteriaNoCountDao, final AuditorAware<String> auditorProvider,
+            final ArtifactManagement artifactManagement, final VirtualPropertyReplacer virtualPropertyReplacer,
+            final JpaProperties properties) {
+        return new JpaSoftwareModuleManagement(entityManager, distributionSetRepository, softwareModuleRepository,
+                softwareModuleMetadataRepository, softwareModuleTypeRepository, criteriaNoCountDao, auditorProvider,
+                artifactManagement, virtualPropertyReplacer, properties.getDatabase());
     }
 
     /**
@@ -498,9 +536,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer,
-            final SoftwareModuleRepository softwareModuleRepository, final NoCountPagingRepository criteriaNoCountDao) {
+            final SoftwareModuleRepository softwareModuleRepository, final NoCountPagingRepository criteriaNoCountDao,
+            final JpaProperties properties) {
         return new JpaSoftwareModuleTypeManagement(distributionSetTypeRepository, softwareModuleTypeRepository,
-                virtualPropertyReplacer, softwareModuleRepository, criteriaNoCountDao);
+                virtualPropertyReplacer, softwareModuleRepository, criteriaNoCountDao, properties.getDatabase());
     }
 
     @Bean
@@ -509,11 +548,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DeploymentManagement deploymentManagement, final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
             final ApplicationEventPublisher eventPublisher, final VirtualPropertyReplacer virtualPropertyReplacer,
-            final PlatformTransactionManager txManager, final TenantAware tenantAware,
-            final LockRegistry lockRegistry) {
+            final PlatformTransactionManager txManager, final TenantAware tenantAware, final LockRegistry lockRegistry,
+            final JpaProperties properties) {
         return new JpaRolloutManagement(targetManagement, deploymentManagement, rolloutGroupManagement,
                 distributionSetManagement, context, eventPublisher, virtualPropertyReplacer, txManager, tenantAware,
-                lockRegistry);
+                lockRegistry, properties.getDatabase());
     }
 
     /**
@@ -523,8 +562,13 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    RolloutGroupManagement rolloutGroupManagement() {
-        return new JpaRolloutGroupManagement();
+    RolloutGroupManagement rolloutGroupManagement(final RolloutGroupRepository rolloutGroupRepository,
+            final RolloutRepository rolloutRepository, final ActionRepository actionRepository,
+            final TargetRepository targetRepository, final EntityManager entityManager,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final RolloutStatusCache rolloutStatusCache,
+            final JpaProperties properties) {
+        return new JpaRolloutGroupManagement(rolloutGroupRepository, rolloutRepository, actionRepository,
+                targetRepository, entityManager, virtualPropertyReplacer, rolloutStatusCache, properties.getDatabase());
     }
 
     /**
@@ -542,10 +586,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final AfterTransactionCommitExecutor afterCommit, final VirtualPropertyReplacer virtualPropertyReplacer,
             final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement,
-            final SystemSecurityContext systemSecurityContext) {
+            final SystemSecurityContext systemSecurityContext, final JpaProperties properties) {
         return new JpaDeploymentManagement(entityManager, actionRepository, distributionSetRepository, targetRepository,
                 actionStatusRepository, targetManagement, auditorProvider, eventPublisher, applicationContext,
-                afterCommit, virtualPropertyReplacer, txManager, tenantConfigurationManagement, systemSecurityContext);
+                afterCommit, virtualPropertyReplacer, txManager, tenantConfigurationManagement, systemSecurityContext,
+                properties.getDatabase());
     }
 
     /**

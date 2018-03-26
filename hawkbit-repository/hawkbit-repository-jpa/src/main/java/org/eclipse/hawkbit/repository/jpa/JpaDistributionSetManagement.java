@@ -38,7 +38,6 @@ import org.eclipse.hawkbit.repository.jpa.model.DsMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata_;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
@@ -56,7 +55,6 @@ import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -65,6 +63,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,53 +81,70 @@ import com.google.common.collect.Lists;
 @Validated
 public class JpaDistributionSetManagement implements DistributionSetManagement {
 
-    @Autowired
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
 
-    @Autowired
-    private DistributionSetRepository distributionSetRepository;
+    private final DistributionSetRepository distributionSetRepository;
 
-    @Autowired
-    private DistributionSetTagManagement distributionSetTagManagement;
+    private final DistributionSetTagManagement distributionSetTagManagement;
 
-    @Autowired
-    private SystemManagement systemManagement;
+    private final SystemManagement systemManagement;
 
-    @Autowired
-    private DistributionSetTypeManagement distributionSetTypeManagement;
+    private final DistributionSetTypeManagement distributionSetTypeManagement;
 
-    @Autowired
-    private DistributionSetMetadataRepository distributionSetMetadataRepository;
+    private final DistributionSetMetadataRepository distributionSetMetadataRepository;
 
-    @Autowired
-    private TargetFilterQueryRepository targetFilterQueryRepository;
+    private final TargetFilterQueryRepository targetFilterQueryRepository;
 
-    @Autowired
-    private ActionRepository actionRepository;
+    private final ActionRepository actionRepository;
 
-    @Autowired
-    private NoCountPagingRepository criteriaNoCountDao;
+    private final NoCountPagingRepository criteriaNoCountDao;
 
-    @Autowired
-    private ApplicationEventPublisher eventPublisher;
+    private final ApplicationEventPublisher eventPublisher;
 
-    @Autowired
-    private ApplicationContext applicationContext;
+    private final ApplicationContext applicationContext;
 
-    @Autowired
-    private TenantAware tenantAware;
+    private final TenantAware tenantAware;
 
-    @Autowired
-    private VirtualPropertyReplacer virtualPropertyReplacer;
+    private final VirtualPropertyReplacer virtualPropertyReplacer;
 
-    @Autowired
-    private SoftwareModuleRepository softwareModuleRepository;
+    private final SoftwareModuleRepository softwareModuleRepository;
 
-    @Autowired
-    private DistributionSetTagRepository distributionSetTagRepository;
+    private final DistributionSetTagRepository distributionSetTagRepository;
 
-    @Autowired
-    private AfterTransactionCommitExecutor afterCommit;
+    private final AfterTransactionCommitExecutor afterCommit;
+
+    private final Database database;
+
+    JpaDistributionSetManagement(final EntityManager entityManager,
+            final DistributionSetRepository distributionSetRepository,
+            final DistributionSetTagManagement distributionSetTagManagement, final SystemManagement systemManagement,
+            final DistributionSetTypeManagement distributionSetTypeManagement,
+            final DistributionSetMetadataRepository distributionSetMetadataRepository,
+            final TargetFilterQueryRepository targetFilterQueryRepository, final ActionRepository actionRepository,
+            final NoCountPagingRepository criteriaNoCountDao, final ApplicationEventPublisher eventPublisher,
+            final ApplicationContext applicationContext, final TenantAware tenantAware,
+            final VirtualPropertyReplacer virtualPropertyReplacer,
+            final SoftwareModuleRepository softwareModuleRepository,
+            final DistributionSetTagRepository distributionSetTagRepository,
+            final AfterTransactionCommitExecutor afterCommit, final Database database) {
+        this.entityManager = entityManager;
+        this.distributionSetRepository = distributionSetRepository;
+        this.distributionSetTagManagement = distributionSetTagManagement;
+        this.systemManagement = systemManagement;
+        this.distributionSetTypeManagement = distributionSetTypeManagement;
+        this.distributionSetMetadataRepository = distributionSetMetadataRepository;
+        this.targetFilterQueryRepository = targetFilterQueryRepository;
+        this.actionRepository = actionRepository;
+        this.criteriaNoCountDao = criteriaNoCountDao;
+        this.eventPublisher = eventPublisher;
+        this.applicationContext = applicationContext;
+        this.tenantAware = tenantAware;
+        this.virtualPropertyReplacer = virtualPropertyReplacer;
+        this.softwareModuleRepository = softwareModuleRepository;
+        this.distributionSetTagRepository = distributionSetTagRepository;
+        this.afterCommit = afterCommit;
+        this.database = database;
+    }
 
     @Override
     public Optional<DistributionSet> getWithDetails(final long distid) {
@@ -208,26 +224,11 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         if (update.isRequiredMigrationStep() != null
                 && !update.isRequiredMigrationStep().equals(set.isRequiredMigrationStep())) {
-            checkDistributionSetIsAssignedToTargets(update.getId());
+            assertDistributionSetIsNotAssignedToTargets(update.getId());
             set.setRequiredMigrationStep(update.isRequiredMigrationStep());
         }
 
-        if (update.getType() != null) {
-            final DistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(update.getType());
-            if (!type.getId().equals(set.getType().getId())) {
-                checkDistributionSetIsAssignedToTargets(update.getId());
-
-                set.setType(type);
-            }
-        }
-
         return distributionSetRepository.save(set);
-    }
-
-    private JpaDistributionSetType findDistributionSetTypeAndThrowExceptionIfNotFound(final String key) {
-        return (JpaDistributionSetType) distributionSetTypeManagement.getByKey(key)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, key));
-
     }
 
     private JpaDistributionSet findDistributionSetAndThrowExceptionIfNotFound(final Long setId) {
@@ -313,7 +314,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                     modules.stream().map(SoftwareModule::getId).collect(Collectors.toList()));
         }
 
-        checkDistributionSetIsAssignedToTargets(setId);
+        assertDistributionSetIsNotAssignedToTargets(setId);
 
         final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(setId);
         modules.forEach(set::addModule);
@@ -329,7 +330,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(setId);
         final JpaSoftwareModule module = findSoftwareModuleAndThrowExceptionIfNotFound(moduleId);
 
-        checkDistributionSetIsAssignedToTargets(setId);
+        assertDistributionSetIsNotAssignedToTargets(setId);
 
         set.removeModule(module);
 
@@ -538,7 +539,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         throwExceptionIfDistributionSetDoesNotExist(distributionSetId);
 
         final Specification<JpaDistributionSetMetadata> spec = RSQLUtility.parse(rsqlParam,
-                DistributionSetMetadataFields.class, virtualPropertyReplacer);
+                DistributionSetMetadataFields.class, virtualPropertyReplacer, database);
 
         return convertMdPage(
                 distributionSetMetadataRepository
@@ -619,10 +620,10 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return specList;
     }
 
-    private void checkDistributionSetIsAssignedToTargets(final Long distributionSet) {
+    private void assertDistributionSetIsNotAssignedToTargets(final Long distributionSet) {
         if (actionRepository.countByDistributionSetId(distributionSet) > 0) {
             throw new EntityReadOnlyException(String.format(
-                    "distribution set %s is already assigned to targets and cannot be changed", distributionSet));
+                    "Distribution set %s is already assigned to targets and cannot be changed", distributionSet));
         }
     }
 
@@ -746,7 +747,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         throwEntityNotFoundExceptionIfDsTagDoesNotExist(tagId);
 
         final Specification<JpaDistributionSet> spec = RSQLUtility.parse(rsqlParam, DistributionSetFields.class,
-                virtualPropertyReplacer);
+                virtualPropertyReplacer, database);
 
         return convertDsPage(findByCriteriaAPI(pageable, Arrays.asList(spec, DistributionSetSpecification.hasTag(tagId),
                 DistributionSetSpecification.isDeleted(false))), pageable);
@@ -761,7 +762,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     public Page<DistributionSet> findByRsql(final Pageable pageable, final String rsqlParam) {
         final Specification<JpaDistributionSet> spec = RSQLUtility.parse(rsqlParam, DistributionSetFields.class,
-                virtualPropertyReplacer);
+                virtualPropertyReplacer, database);
 
         return convertDsPage(
                 findByCriteriaAPI(pageable, Arrays.asList(spec, DistributionSetSpecification.isDeleted(false))),

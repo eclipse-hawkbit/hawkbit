@@ -46,7 +46,6 @@ public abstract class AbstractGridComponentLayout extends VerticalLayout {
      * @param managementUIState
      */
     public AbstractGridComponentLayout(final VaadinMessageSource i18n, final UIEventBus eventBus) {
-        super();
         this.i18n = i18n;
         this.eventBus = eventBus;
     }

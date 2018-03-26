@@ -456,8 +456,8 @@ public class JpaControllerManagement implements ControllerManagement {
         }
 
         final Query updateQuery = entityManager.createNativeQuery(
-                "UPDATE sp_target t SET t.last_target_query = #last_target_query WHERE t.controller_id IN ("
-                        + formatQueryInStatementParams(paramMapping.keySet()) + ") AND t.tenant = #tenant");
+                "UPDATE sp_target SET last_target_query = #last_target_query WHERE controller_id IN ("
+                        + formatQueryInStatementParams(paramMapping.keySet()) + ") AND tenant = #tenant");
 
         paramMapping.entrySet().forEach(entry -> updateQuery.setParameter(entry.getKey(), entry.getValue()));
         updateQuery.setParameter("last_target_query", currentTimeMillis);
@@ -635,7 +635,7 @@ public class JpaControllerManagement implements ControllerManagement {
             final Long statusCount = actionStatusRepository.countByAction(action);
 
             if (statusCount >= quotaManagement.getMaxStatusEntriesPerAction()) {
-                throw new QuotaExceededException(ActionStatus.class, statusCount,
+                throw new QuotaExceededException(ActionStatus.class, statusCount + 1,
                         quotaManagement.getMaxStatusEntriesPerAction());
             }
         }

@@ -45,7 +45,7 @@ public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Art
     @NotNull
     private String sha1Hash;
 
-    @Column(name = "provided_file_name", length = 256)
+    @Column(name = "provided_file_name", length = 256, updatable = false)
     @Size(min = 1, max = 256)
     @NotNull
     private String filename;
@@ -54,17 +54,17 @@ public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Art
     @JoinColumn(name = "software_module", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_assigned_sm"))
     private JpaSoftwareModule softwareModule;
 
-    @Column(name = "md5_hash", length = 32, nullable = true)
+    @Column(name = "md5_hash", length = 32, updatable = false, nullable = true)
     private String md5Hash;
 
-    @Column(name = "file_size")
+    @Column(name = "file_size", updatable = false)
     private long size;
 
     /**
-     * Default constructor.
+     * Default constructor needed for JPA entities..
      */
     public JpaArtifact() {
-        super();
+        // Default constructor needed for JPA entities.
     }
 
     /**

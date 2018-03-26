@@ -60,7 +60,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
@@ -70,6 +69,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -87,32 +87,44 @@ import com.google.common.collect.Lists;
 @Validated
 public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
-    @Autowired
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
 
-    @Autowired
-    private DistributionSetRepository distributionSetRepository;
+    private final DistributionSetRepository distributionSetRepository;
 
-    @Autowired
-    private SoftwareModuleRepository softwareModuleRepository;
+    private final SoftwareModuleRepository softwareModuleRepository;
 
-    @Autowired
-    private SoftwareModuleMetadataRepository softwareModuleMetadataRepository;
+    private final SoftwareModuleMetadataRepository softwareModuleMetadataRepository;
 
-    @Autowired
-    private SoftwareModuleTypeRepository softwareModuleTypeRepository;
+    private final SoftwareModuleTypeRepository softwareModuleTypeRepository;
 
-    @Autowired
-    private NoCountPagingRepository criteriaNoCountDao;
+    private final NoCountPagingRepository criteriaNoCountDao;
 
-    @Autowired
-    private AuditorAware<String> auditorProvider;
+    private final AuditorAware<String> auditorProvider;
 
-    @Autowired
-    private ArtifactManagement artifactManagement;
+    private final ArtifactManagement artifactManagement;
 
-    @Autowired
-    private VirtualPropertyReplacer virtualPropertyReplacer;
+    private final VirtualPropertyReplacer virtualPropertyReplacer;
+    private final Database database;
+
+    JpaSoftwareModuleManagement(final EntityManager entityManager,
+            final DistributionSetRepository distributionSetRepository,
+            final SoftwareModuleRepository softwareModuleRepository,
+            final SoftwareModuleMetadataRepository softwareModuleMetadataRepository,
+            final SoftwareModuleTypeRepository softwareModuleTypeRepository,
+            final NoCountPagingRepository criteriaNoCountDao, final AuditorAware<String> auditorProvider,
+            final ArtifactManagement artifactManagement, final VirtualPropertyReplacer virtualPropertyReplacer,
+            final Database database) {
+        this.entityManager = entityManager;
+        this.distributionSetRepository = distributionSetRepository;
+        this.softwareModuleRepository = softwareModuleRepository;
+        this.softwareModuleMetadataRepository = softwareModuleMetadataRepository;
+        this.softwareModuleTypeRepository = softwareModuleTypeRepository;
+        this.criteriaNoCountDao = criteriaNoCountDao;
+        this.auditorProvider = auditorProvider;
+        this.artifactManagement = artifactManagement;
+        this.virtualPropertyReplacer = virtualPropertyReplacer;
+        this.database = database;
+    }
 
     @Override
     @Transactional
@@ -279,7 +291,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     @Override
     public Page<SoftwareModule> findByRsql(final Pageable pageable, final String rsqlParam) {
         final Specification<JpaSoftwareModule> spec = RSQLUtility.parse(rsqlParam, SoftwareModuleFields.class,
-                virtualPropertyReplacer);
+                virtualPropertyReplacer, database);
 
         return convertSmPage(softwareModuleRepository.findAll(spec, pageable), pageable);
     }
@@ -547,7 +559,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         throwExceptionIfSoftwareModuleDoesNotExist(softwareModuleId);
 
         final Specification<JpaSoftwareModuleMetadata> spec = RSQLUtility.parse(rsqlParam,
-                SoftwareModuleMetadataFields.class, virtualPropertyReplacer);
+                SoftwareModuleMetadataFields.class, virtualPropertyReplacer, database);
         return convertSmMdPage(
                 softwareModuleMetadataRepository
                         .findAll(

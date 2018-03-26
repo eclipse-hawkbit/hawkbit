@@ -33,6 +33,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,12 +52,14 @@ public class JpaTargetTagManagement implements TargetTagManagement {
     private final TargetRepository targetRepository;
 
     private final VirtualPropertyReplacer virtualPropertyReplacer;
+    private final Database database;
 
     JpaTargetTagManagement(final TargetTagRepository targetTagRepository, final TargetRepository targetRepository,
-            final VirtualPropertyReplacer virtualPropertyReplacer) {
+            final VirtualPropertyReplacer virtualPropertyReplacer, final Database database) {
         this.targetTagRepository = targetTagRepository;
         this.targetRepository = targetRepository;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
+        this.database = database;
     }
 
     @Override
@@ -102,7 +105,8 @@ public class JpaTargetTagManagement implements TargetTagManagement {
     @Override
     public Page<TargetTag> findByRsql(final Pageable pageable, final String rsqlParam) {
 
-        final Specification<JpaTargetTag> spec = RSQLUtility.parse(rsqlParam, TagFields.class, virtualPropertyReplacer);
+        final Specification<JpaTargetTag> spec = RSQLUtility.parse(rsqlParam, TagFields.class, virtualPropertyReplacer,
+                database);
         return convertTPage(targetTagRepository.findAll(spec, pageable), pageable);
     }
 
