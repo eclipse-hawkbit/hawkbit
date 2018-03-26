@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.ddi.json.model.DdiDeployment.HandlingType;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeployment.DdiMaintenanceWindowStatus;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeploymentBase;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult.FinalResult;
+import org.eclipse.hawkbit.ddi.json.model.DdiUpdateMode;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
@@ -39,6 +40,7 @@ import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
@@ -440,8 +442,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
     @Override
     public ResponseEntity<Void> putConfigData(@Valid @RequestBody final DdiConfigData configData,
             @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId) {
-        controllerManagement.updateControllerAttributes(controllerId, configData.getData());
 
+        controllerManagement.updateControllerAttributes(controllerId, configData.getData(), getUpdateMode(configData));
         return ResponseEntity.ok().build();
     }
 
@@ -579,4 +581,16 @@ public class DdiRootController implements DdiRootControllerRestApi {
             }
         }
     }
+
+    /**
+     * Retrieve the update mode from the given update message.
+     */
+    private static UpdateMode getUpdateMode(final DdiConfigData configData) {
+        final DdiUpdateMode mode = configData.getMode();
+        if (mode != null) {
+            return UpdateMode.valueOf(mode.name());
+        }
+        return null;
+    }
+
 }

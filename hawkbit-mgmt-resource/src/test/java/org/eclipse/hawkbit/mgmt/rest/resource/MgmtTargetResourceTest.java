@@ -1383,7 +1383,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         knownControllerAttrs.put("a", "1");
         knownControllerAttrs.put("b", "2");
         testdataFactory.createTarget(knownTargetId);
-        controllerManagement.updateControllerAttributes(knownTargetId, knownControllerAttrs);
+        controllerManagement.updateControllerAttributes(knownTargetId, knownControllerAttrs, null);
 
         // test query target over rest resource
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/attributes"))

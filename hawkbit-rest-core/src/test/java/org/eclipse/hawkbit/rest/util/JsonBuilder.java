@@ -387,7 +387,7 @@ public abstract class JsonBuilder {
 
     public static String distributionSetUpdateValidFieldsOnly(final DistributionSet set) throws JSONException {
 
-        final List<JSONObject> modules = set.getModules().stream()
+        set.getModules().stream()
                 .map(module -> new JSONObject().put("id", module.getId())).collect(Collectors.toList());
 
         return new JSONObject().put("name", set.getName()).put("description", set.getDescription())
@@ -535,13 +535,21 @@ public abstract class JsonBuilder {
 
     public static String configData(final String id, final Map<String, String> attributes, final String execution)
             throws JSONException {
-        return new JSONObject().put("id", id).put("time", "20140511T121314")
+        return configData(id, attributes, execution, null);
+    }
+
+    public static String configData(final String id, final Map<String, String> attributes, final String execution,
+            final String mode) throws JSONException {
+        final JSONObject json = new JSONObject().put("id", id).put("time", "20140511T121314")
                 .put("status",
                         new JSONObject().put("execution", execution)
                                 .put("result", new JSONObject().put("finished", "success"))
                                 .put("details", new ArrayList<String>()))
-                .put("data", attributes).toString();
-
+                .put("data", attributes);
+        if (mode != null) {
+            json.put("mode", mode);
+        }
+        return json.toString();
     }
 
 }
