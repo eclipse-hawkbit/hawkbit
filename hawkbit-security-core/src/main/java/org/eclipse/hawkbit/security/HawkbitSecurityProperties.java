@@ -149,12 +149,20 @@ public class HawkbitSecurityProperties {
          */
         private int maxActionsPerTarget = 500;
 
+        /**
+         * Maximum number of targets for a manual distribution set assignment.
+         * Must be greater than 1000.
+         */
+        private int maxTargetsPerManualAssignment = 5000;
+
+        /**
+         * Maximum number of targets for an automatic distribution set
+         * assignment
+         */
+        private int maxTargetsPerAutoAssignment = 5000;
+
         private final Filter filter = new Filter();
         private final Filter uiFilter = new Filter();
-
-        private int maxTargetsPerManualAssignment;
-
-        private int maxTargetsPerAutoAssignment;
 
         public Filter getUiFilter() {
             return uiFilter;

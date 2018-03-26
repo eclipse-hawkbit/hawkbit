@@ -126,8 +126,8 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final String body = new JSONObject().put("name", filterName2).toString();
 
         // prepare
-        final TargetFilterQuery tfq = targetFilterQueryManagement.create(
-                entityFactory.targetFilterQuery().create().name(filterName).query(filterQuery));
+        final TargetFilterQuery tfq = targetFilterQueryManagement
+                .create(entityFactory.targetFilterQuery().create().name(filterName).query(filterQuery));
 
         mvc.perform(put(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId()).content(body)
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -230,6 +230,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     }
 
     @Test
+    @Description("Ensures that a single target filter query can be retrieved via its id.")
     public void getSingleTarget() throws Exception {
         // create first a target which can be retrieved by rest interface
         final String knownQuery = "name=test01";
@@ -247,6 +248,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     }
 
     @Test
+    @Description("Ensures that the retrieval of a non-existing target filter query results in a HTTP Not found error (404).")
     public void getSingleTargetNoExistsResponseNotFound() throws Exception {
         final String targetIdNotExists = "546546";
         // test
@@ -262,6 +264,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     }
 
     @Test
+    @Description("Ensures that the creation of a target filter query based on an invalid request payload results in a HTTP Bad Request error (400).")
     public void createTargetFilterQueryWithBadPayloadBadRequest() throws Exception {
         final String notJson = "abc";
 
@@ -280,6 +283,25 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     }
 
     @Test
+    @Description("Ensures that the assignment of a auto-assign distribution set results in a HTTP Forbidden error (403) "
+            + "if the query addresses too many targets.")
+    public void setAutoAssignDistributionSetAndTriggerQuotaHit() throws Exception {
+
+        // create targets
+        final int maxTargets = quotaManagement.getMaxTargetsPerAutoAssignment();
+        testdataFactory.generateTargets(maxTargets + 1, "target");
+
+        // create the filter query and the distribution set
+        final DistributionSet set = testdataFactory.createDistributionSet("ds1");
+        final TargetFilterQuery filterQuery = createSingleTargetFilterQuery("testquery", "controllerId==target*");
+
+        mvc.perform(
+                post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId() + "/autoAssignDS")
+                        .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden());
+    }
+
+    @Test
     public void setAutoAssignDistributionSetToTargetFilterQuery() throws Exception {
 
         final String knownQuery = "name=test05";
@@ -292,9 +314,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        assertThat(
-                targetFilterQueryManagement.get(tfq.getId()).get().getAutoAssignDistributionSet())
-                        .isEqualTo(set);
+        assertThat(targetFilterQueryManagement.get(tfq.getId()).get().getAutoAssignDistributionSet()).isEqualTo(set);
 
         final String hrefPrefix = "http://localhost" + MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/"
                 + tfq.getId();
@@ -319,9 +339,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final TargetFilterQuery tfq = createSingleTargetFilterQuery(knownName, knownQuery);
         targetFilterQueryManagement.updateAutoAssignDS(tfq.getId(), set.getId());
 
-        assertThat(
-                targetFilterQueryManagement.get(tfq.getId()).get().getAutoAssignDistributionSet())
-                        .isEqualTo(set);
+        assertThat(targetFilterQueryManagement.get(tfq.getId()).get().getAutoAssignDistributionSet()).isEqualTo(set);
 
         mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS"))
                 .andExpect(status().isOk()).andExpect(jsonPath(JSON_PATH_NAME, equalTo(dsName)));
@@ -329,9 +347,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         mvc.perform(delete(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS"))
                 .andExpect(status().isNoContent());
 
-        assertThat(
-                targetFilterQueryManagement.get(tfq.getId()).get().getAutoAssignDistributionSet())
-                        .isNull();
+        assertThat(targetFilterQueryManagement.get(tfq.getId()).get().getAutoAssignDistributionSet()).isNull();
 
         mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS"))
                 .andExpect(status().isNoContent());
@@ -339,8 +355,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     }
 
     private TargetFilterQuery createSingleTargetFilterQuery(final String name, final String query) {
-        return targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name(name).query(query));
+        return targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name(name).query(query));
     }
 
 }
