@@ -35,7 +35,7 @@ public enum UpdateMode {
     REMOVE;
 
     public static Optional<UpdateMode> valueOfIgnoreCase(final String name) {
-        return Arrays.stream(values()).filter(mode -> mode.name().equalsIgnoreCase(name)).findFirst();
+        return Arrays.stream(values()).filter(mode -> mode.name().equalsIgnoreCase(name)).findAny();
     }
 
 }

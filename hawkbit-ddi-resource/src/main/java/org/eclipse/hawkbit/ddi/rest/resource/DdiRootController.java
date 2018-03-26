@@ -431,7 +431,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId) {
 
         controllerManagement.updateControllerAttributes(controllerId, configData.getData(), getUpdateMode(configData));
-        return ResponseEntity.ok().<Void> build();
+        return ResponseEntity.ok().build();
     }
 
     @Override

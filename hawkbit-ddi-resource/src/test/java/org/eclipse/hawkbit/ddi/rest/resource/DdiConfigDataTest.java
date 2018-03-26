@@ -187,12 +187,12 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         putConfigDataWithUpdateModeRemove(controllerId, configDataPath);
 
         // invalid update mode
-        putConfigDataWithInvalidUpdateMode(controllerId, configDataPath);
+        putConfigDataWithInvalidUpdateMode(configDataPath);
 
     }
 
     @Step
-    private void putConfigDataWithInvalidUpdateMode(final String controllerId, final String configDataPath)
+    private void putConfigDataWithInvalidUpdateMode(final String configDataPath)
             throws Exception {
 
         // create some attriutes
