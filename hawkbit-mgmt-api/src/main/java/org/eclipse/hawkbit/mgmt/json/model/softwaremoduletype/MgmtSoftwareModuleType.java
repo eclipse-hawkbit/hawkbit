@@ -36,7 +36,7 @@ public class MgmtSoftwareModuleType extends MgmtNamedEntity {
     @JsonProperty
     private boolean deleted;
 
-    public boolean getDeleted() {
+    public boolean isDeleted() {
         return deleted;
     }
 

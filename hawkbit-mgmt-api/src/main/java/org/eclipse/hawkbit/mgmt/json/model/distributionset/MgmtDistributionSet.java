@@ -53,7 +53,7 @@ public class MgmtDistributionSet extends MgmtNamedEntity {
     @JsonProperty
     private boolean deleted;
 
-    public boolean getDeleted() {
+    public boolean isDeleted() {
         return deleted;
     }
 

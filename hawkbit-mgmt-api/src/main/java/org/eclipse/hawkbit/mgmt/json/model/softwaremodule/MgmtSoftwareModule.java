@@ -42,7 +42,7 @@ public class MgmtSoftwareModule extends MgmtNamedEntity {
         this.deleted = deleted;
     }
 
-    public boolean getDeleted() {
+    public boolean isDeleted() {
         return deleted;
     }
 
