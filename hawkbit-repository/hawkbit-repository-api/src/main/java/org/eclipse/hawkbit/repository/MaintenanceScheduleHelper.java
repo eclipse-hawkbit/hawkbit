@@ -35,6 +35,10 @@ public class MaintenanceScheduleHelper {
 
     private static final CronParser cronParser;
 
+    private MaintenanceScheduleHelper() {
+        throw new IllegalStateException("Utility class");
+    }
+
     static {
         final CronDefinition cronDefinition = CronDefinitionBuilder.instanceDefinitionFor(CronType.QUARTZ);
         cronParser = new CronParser(cronDefinition);
