@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
@@ -256,10 +257,14 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
                                 t.getForcetime());
                     }
 
+                    final String cronSchedule = t.getMaintenanceWindow().getMaintenanceSchedule();
+                    final String duration = t.getMaintenanceWindow().getMaintenanceWindowDuration();
+                    final String timezone = t.getMaintenanceWindow().getMaintenanceWindowTimeZone();
+
+                    MaintenanceScheduleHelper.validateMaintenanceSchedule(cronSchedule, duration, timezone);
+
                     return new TargetWithActionType(t.getId(), MgmtRestModelMapper.convertActionType(t.getType()),
-                            t.getForcetime(), t.getMaintenanceWindow().getMaintenanceSchedule(),
-                            t.getMaintenanceWindow().getMaintenanceWindowDuration(),
-                            t.getMaintenanceWindow().getMaintenanceWindowTimeZone());
+                            t.getForcetime(), cronSchedule, duration, timezone);
                 }).collect(Collectors.toList()));
 
         return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(assignDistributionSet));

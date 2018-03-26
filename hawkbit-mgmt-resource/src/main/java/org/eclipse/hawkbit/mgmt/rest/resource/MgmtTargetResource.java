@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -283,12 +284,17 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                             MgmtRestModelMapper.convertActionType(dsId.getType()), dsId.getForcetime())))));
         }
 
-        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(this.deploymentManagement.assignDistributionSet(
-                dsId.getId(),
-                Arrays.asList(new TargetWithActionType(controllerId,
-                        MgmtRestModelMapper.convertActionType(dsId.getType()), dsId.getForcetime(),
-                        maintenanceWindow.getMaintenanceSchedule(), maintenanceWindow.getMaintenanceWindowDuration(),
-                        maintenanceWindow.getMaintenanceWindowTimeZone())))));
+        final String cronSchedule = maintenanceWindow.getMaintenanceSchedule();
+        final String duration = maintenanceWindow.getMaintenanceWindowDuration();
+        final String timezone = maintenanceWindow.getMaintenanceWindowTimeZone();
+
+        MaintenanceScheduleHelper.validateMaintenanceSchedule(cronSchedule, duration, timezone);
+
+        return ResponseEntity
+                .ok(MgmtDistributionSetMapper.toResponse(this.deploymentManagement.assignDistributionSet(dsId.getId(),
+                        Arrays.asList(new TargetWithActionType(controllerId,
+                                MgmtRestModelMapper.convertActionType(dsId.getType()), dsId.getForcetime(),
+                                cronSchedule, duration, timezone)))));
 
     }
 
