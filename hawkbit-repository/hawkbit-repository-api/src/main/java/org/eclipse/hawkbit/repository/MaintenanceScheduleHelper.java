@@ -31,7 +31,7 @@ import com.cronutils.parser.CronParser;
  * also provides a helper method for conversion of duration specified in
  * HH:mm:ss format to ISO format.
  */
-public class MaintenanceScheduleHelper {
+public final class MaintenanceScheduleHelper {
 
     private static final CronParser cronParser;
 
