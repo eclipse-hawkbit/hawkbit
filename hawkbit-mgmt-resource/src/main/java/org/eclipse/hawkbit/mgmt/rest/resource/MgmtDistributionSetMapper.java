@@ -108,6 +108,7 @@ public final class MgmtDistributionSetMapper {
         response.setVersion(distributionSet.getVersion());
         response.setComplete(distributionSet.isComplete());
         response.setType(distributionSet.getType().getKey());
+        response.setDeleted(distributionSet.isDeleted());
 
         distributionSet.getModules()
                 .forEach(module -> response.getModules().add(MgmtSoftwareModuleMapper.toResponse(module)));

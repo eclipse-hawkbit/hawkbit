@@ -363,7 +363,8 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 .andExpect(jsonPath("$.description", equalTo("Desc1234")))
                 .andExpect(jsonPath("$.createdBy", equalTo("uploadTester")))
                 .andExpect(jsonPath("$.createdAt", equalTo(testType.getCreatedAt())))
-                .andExpect(jsonPath("$.lastModifiedBy", equalTo("uploadTester")));
+                .andExpect(jsonPath("$.lastModifiedBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$.deleted", equalTo(testType.isDeleted())));
     }
 
     @Test
@@ -401,8 +402,14 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
         assertThat(distributionSetTypeManagement.count()).isEqualTo(DEFAULT_DS_TYPES + 1);
         assertThat(distributionSetManagement.count()).isEqualTo(1);
 
-        mvc.perform(delete("/rest/v1/distributionsettypes/{smId}", testType.getId()))
+        mvc.perform(get("/rest/v1/distributionsettypes/{dstId}", testType.getId())).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.deleted", equalTo(false)));
+
+        mvc.perform(delete("/rest/v1/distributionsettypes/{dstId}", testType.getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        mvc.perform(get("/rest/v1/distributionsettypes/{dstId}", testType.getId())).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.deleted", equalTo(true)));
 
         assertThat(distributionSetManagement.count()).isEqualTo(1);
         assertThat(distributionSetTypeManagement.count()).isEqualTo(DEFAULT_DS_TYPES);
@@ -422,6 +429,20 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 .andExpect(jsonPath("$.id", equalTo(testType.getId().intValue())))
                 .andExpect(jsonPath("$.description", equalTo("foobardesc")))
                 .andExpect(jsonPath("$.name", equalTo("TestName123"))).andReturn();
+    }
+
+    @Test
+    @Description("Tests the update of the deletion flag. It is verfied that the distribution set type can't be marked as deleted through update operation.")
+    public void updateDistributionSetTypeDeletedFlag() throws Exception {
+        final DistributionSetType testType = distributionSetTypeManagement
+                .create(entityFactory.distributionSetType().create().key("test123").name("TestName123").colour("col"));
+
+        final String body = new JSONObject().put("id", testType.getId()).put("deleted", true).toString();
+
+        mvc.perform(put("/rest/v1/distributionsettypes/{dstId}", testType.getId()).content(body)
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", equalTo(testType.getId().intValue())))
+                .andExpect(jsonPath("$.deleted", equalTo(false)));
     }
 
     @Test

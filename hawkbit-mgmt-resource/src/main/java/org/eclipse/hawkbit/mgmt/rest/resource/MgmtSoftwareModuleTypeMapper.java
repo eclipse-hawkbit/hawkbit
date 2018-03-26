@@ -68,6 +68,7 @@ final class MgmtSoftwareModuleTypeMapper {
         result.setKey(type.getKey());
         result.setMaxAssignments(type.getMaxAssignments());
         result.setModuleId(type.getId());
+        result.setDeleted(type.isDeleted());
 
         result.add(linkTo(methodOn(MgmtSoftwareModuleTypeRestApi.class).getSoftwareModuleType(result.getModuleId()))
                 .withSelfRel());

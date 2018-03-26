@@ -40,84 +40,57 @@ public class MgmtRolloutResponseBody extends MgmtNamedEntity {
     @JsonProperty
     private Map<String, Long> totalTargetsPerStatus;
 
-    /**
-     * @return the status
-     */
+    @JsonProperty
+    private boolean deleted;
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(final boolean deleted) {
+        this.deleted = deleted;
+    }
+
     public String getStatus() {
         return status;
     }
 
-    /**
-     * @param status
-     *            the status to set
-     */
     public void setStatus(final String status) {
         this.status = status;
     }
 
-    /**
-     * @return the rolloutId
-     */
     public Long getRolloutId() {
         return rolloutId;
     }
 
-    /**
-     * @param rolloutId
-     *            the rolloutId to set
-     */
     public void setRolloutId(final Long rolloutId) {
         this.rolloutId = rolloutId;
     }
 
-    /**
-     * @return the targetFilterQuery
-     */
     public String getTargetFilterQuery() {
         return targetFilterQuery;
     }
 
-    /**
-     * @param targetFilterQuery
-     *            the targetFilterQuery to set
-     */
     public void setTargetFilterQuery(final String targetFilterQuery) {
         this.targetFilterQuery = targetFilterQuery;
     }
 
-    /**
-     * @return the distributionSetId
-     */
     public Long getDistributionSetId() {
         return distributionSetId;
     }
 
-    /**
-     * @param distributionSetId
-     *            the distributionSetId to set
-     */
     public void setDistributionSetId(final Long distributionSetId) {
         this.distributionSetId = distributionSetId;
     }
 
-    /**
-     * @param totalTargets
-     *            the totalTargets to set
-     */
     public void setTotalTargets(final Long totalTargets) {
         this.totalTargets = totalTargets;
     }
 
-    /**
-     * @return the totalTargets
-     */
     public Long getTotalTargets() {
         return totalTargets;
     }
 
-    /**
-     * @return the totalTargetsPerStatus
-     */
     public Map<String, Long> getTotalTargetsPerStatus() {
         return totalTargetsPerStatus;
     }

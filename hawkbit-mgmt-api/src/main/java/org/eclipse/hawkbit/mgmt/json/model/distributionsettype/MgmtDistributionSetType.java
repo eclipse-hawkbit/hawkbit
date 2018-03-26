@@ -33,6 +33,17 @@ public class MgmtDistributionSetType extends MgmtNamedEntity {
     @JsonProperty
     private String key;
 
+    @JsonProperty
+    private boolean deleted;
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(final boolean deleted) {
+        this.deleted = deleted;
+    }
+
     /**
      * @return the moduleId
      */

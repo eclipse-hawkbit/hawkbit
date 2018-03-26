@@ -50,93 +50,62 @@ public class MgmtDistributionSet extends MgmtNamedEntity {
     @JsonProperty
     private Boolean complete;
 
-    /**
-     * @return the id
-     */
+    @JsonProperty
+    private boolean deleted;
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(final boolean deleted) {
+        this.deleted = deleted;
+    }
+
     public Long getDsId() {
         return dsId;
     }
 
-    /**
-     * @param id
-     *            the id to set
-     */
     @JsonIgnore
     public void setDsId(final Long id) {
         dsId = id;
     }
 
-    /**
-     * @return the version
-     */
     public String getVersion() {
         return version;
     }
 
-    /**
-     * @param version
-     *            the version to set
-     */
     public void setVersion(final String version) {
         this.version = version;
     }
 
-    /**
-     * @return the requiredMigrationStep
-     */
     public boolean isRequiredMigrationStep() {
         return requiredMigrationStep;
     }
 
-    /**
-     * @param requiredMigrationStep
-     *            the requiredMigrationStep to set
-     */
     public void setRequiredMigrationStep(final boolean requiredMigrationStep) {
         this.requiredMigrationStep = requiredMigrationStep;
     }
 
-    /**
-     * @return the modules
-     */
     public List<MgmtSoftwareModule> getModules() {
         return modules;
     }
 
-    /**
-     * @param modules
-     *            the modules to set
-     */
     public void setModules(final List<MgmtSoftwareModule> modules) {
         this.modules = modules;
     }
 
-    /**
-     * @return the type
-     */
     public String getType() {
         return type;
     }
 
-    /**
-     * @param type
-     *            the type to set
-     */
     public void setType(final String type) {
         this.type = type;
     }
 
-    /**
-     * @return the complete
-     */
     public Boolean getComplete() {
         return complete;
     }
 
-    /**
-     * @param complete
-     *            the complete to set
-     */
     public void setComplete(final Boolean complete) {
         this.complete = complete;
     }
