@@ -269,6 +269,9 @@ public class ManagementConfirmationWindowLayout extends AbstractConfirmationWind
         eventBus.publish(this, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
     }
 
+    // Exception squid:S1166 - the user is notified when the maintenance
+    // schedule validation fails
+    @SuppressWarnings("squid:S1166")
     private boolean isMaintenanceWindowValid() {
         if (maintenanceWindowLayout.isEnabled()) {
             try {

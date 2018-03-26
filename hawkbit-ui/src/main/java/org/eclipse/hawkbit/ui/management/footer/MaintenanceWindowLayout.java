@@ -94,6 +94,12 @@ public class MaintenanceWindowLayout extends VerticalLayout {
     private class CronValidator implements Validator {
         private static final long serialVersionUID = 1L;
 
+        // Exception squid:S1166 - Vaadin validation class,
+        // InvalidValueException,
+        // doesn't have the constructor to pass throwable, but shows the
+        // validation
+        // errors to the user
+        @SuppressWarnings("squid:S1166")
         @Override
         public void validate(final Object value) {
             try {
@@ -121,6 +127,9 @@ public class MaintenanceWindowLayout extends VerticalLayout {
             scheduleTranslator.setValue(translateCron(event.getText()));
         }
 
+        // Exception squid:S1166 - when the format of the cron expression is not
+        // valid, the hint is shown to provide the valid one
+        @SuppressWarnings("squid:S1166")
         private String translateCron(final String cronExpression) {
             try {
                 return cronDescriptor.describe(MaintenanceScheduleHelper.getCronFromExpression(cronExpression));
@@ -149,6 +158,12 @@ public class MaintenanceWindowLayout extends VerticalLayout {
     private class DurationValidator implements Validator {
         private static final long serialVersionUID = 1L;
 
+        // Exception squid:S1166 - Vaadin validation class,
+        // InvalidValueException,
+        // doesn't have the constructor to pass throwable, but shows the
+        // validation
+        // errors to the user
+        @SuppressWarnings("squid:S1166")
         @Override
         public void validate(final Object value) {
             try {

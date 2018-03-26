@@ -57,9 +57,13 @@ public class MaintenanceScheduleHelper {
      *            cron expression is relative to this time zone.
      *
      * @return {@link Optional<ZonedDateTime>} of the next available window. In
-     *         case there is none, returns empty value.
+     *         case there is none, or there are maintenance window validation
+     *         errors, returns empty value.
      * 
      */
+    // Exception squid:S1166 - if there are validation error(format of cron
+    // expression or duration is wrong), we simply return empty value
+    @SuppressWarnings("squid:S1166")
     public static Optional<ZonedDateTime> getNextMaintenanceWindow(final String cronSchedule, final String duration,
             final String timezone) {
         try {
@@ -68,7 +72,7 @@ public class MaintenanceScheduleHelper {
             final ZonedDateTime after = now.minus(convertToISODuration(duration));
             final ZonedDateTime next = scheduleExecutor.nextExecution(after);
             return Optional.ofNullable(next);
-        } catch (final IllegalArgumentException | NullPointerException ignored) {
+        } catch (final RuntimeException ignored) {
             return Optional.empty();
         }
     }
@@ -174,7 +178,7 @@ public class MaintenanceScheduleHelper {
                 convertDurationToLocalTime(duration);
             }
         } catch (final DateTimeParseException e) {
-            throw new InvalidMaintenanceScheduleException("Provided duration is not valid", e.getErrorIndex());
+            throw new InvalidMaintenanceScheduleException("Provided duration is not valid", e, e.getErrorIndex());
         }
     }
 
@@ -199,7 +203,7 @@ public class MaintenanceScheduleHelper {
                 getCronFromExpression(cronSchedule);
             }
         } catch (final IllegalArgumentException e) {
-            throw new InvalidMaintenanceScheduleException(e.getMessage());
+            throw new InvalidMaintenanceScheduleException(e.getMessage(), e);
         }
     }
 }
