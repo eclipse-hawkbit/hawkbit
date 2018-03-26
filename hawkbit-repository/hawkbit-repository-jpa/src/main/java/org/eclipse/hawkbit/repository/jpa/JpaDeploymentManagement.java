@@ -47,6 +47,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -116,6 +117,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private final OnlineDsAssignmentStrategy onlineDsAssignmentStrategy;
     private final OfflineDsAssignmentStrategy offlineDsAssignmentStrategy;
     private final TenantConfigurationManagement tenantConfigurationManagement;
+    private final QuotaManagement quotaManagement;
     private final SystemSecurityContext systemSecurityContext;
     private final Database database;
 
@@ -144,6 +146,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         offlineDsAssignmentStrategy = new OfflineDsAssignmentStrategy(targetRepository, afterCommit, eventPublisher,
                 applicationContext, actionRepository, actionStatusRepository, quotaManagement);
         this.tenantConfigurationManagement = tenantConfigurationManagement;
+        this.quotaManagement = quotaManagement;
         this.systemSecurityContext = systemSecurityContext;
         this.database = database;
     }
@@ -241,6 +244,11 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         final List<String> controllerIDs = targetsWithActionType.stream().map(TargetWithActionType::getControllerId)
                 .collect(Collectors.toList());
 
+        // enforce the 'max targets per manual assignment' quota
+        if (!controllerIDs.isEmpty()) {
+            assertMaxTargetsPerManualAssignmentQuota(set.getId(), controllerIDs.size());
+        }
+
         LOG.debug("assignDistribution({}) to {} targets", set, controllerIDs.size());
 
         final Map<String, TargetWithActionType> targetsWithActionMap = targetsWithActionType.stream()
@@ -317,6 +325,11 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 targets.stream().map(Target::getControllerId).collect(Collectors.toList()), targets.size(),
                 controllerIDs.size() - targets.size(), Lists.newArrayList(targetIdsToActions.values()),
                 targetManagement);
+    }
+
+    private void assertMaxTargetsPerManualAssignmentQuota(final Long dsId, final int requested) {
+        QuotaHelper.assertAssignmentQuota(dsId, requested, quotaManagement.getMaxTargetsPerManualAssignment(),
+                Target.class, DistributionSet.class, null);
     }
 
     @Override
