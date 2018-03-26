@@ -787,26 +787,9 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
     }
 
     @Test
-    @Description("Soft deletion of a running rollout")
+    @Description("Soft deletion of a rollout: soft deletion appears when already running rollout is being deleted")
     public void deleteRunningRollout() throws Exception {
-        final int amountTargets = 10;
-        testdataFactory.createTargets(amountTargets, "rolloutDelete", "rolloutDelete");
-        final DistributionSet dsA = testdataFactory.createDistributionSet("");
-
-        // create rollout including the created targets with prefix 'rollout'
-        final Rollout rollout = createRollout("rolloutDelete", 4, dsA.getId(), "controllerId==rolloutDelete*");
-
-        mvc.perform(get("/rest/v1/rollouts/{rolloutid}", rollout.getId())).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk()).andExpect(jsonPath("$.deleted", equalTo(false)));
-
-        rolloutManagement.start(rollout.getId());
-        rolloutManagement.handleRollouts();
-
-        mvc.perform(delete("/rest/v1/rollouts/{rolloutid}", rollout.getId())).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
-        assertThat(getRollout(rollout.getId()).getStatus()).isEqualTo(RolloutStatus.DELETING);
-
-        rolloutManagement.handleRollouts();
+        final Rollout rollout = testdataFactory.createSoftDeletedRollout("softDeletedRollout");
 
         mvc.perform(get("/rest/v1/rollouts/{rolloutid}", rollout.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(jsonPath("$.deleted", equalTo(true)));

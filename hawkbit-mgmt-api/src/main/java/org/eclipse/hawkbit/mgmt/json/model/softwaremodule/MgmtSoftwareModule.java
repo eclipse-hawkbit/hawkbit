@@ -36,13 +36,13 @@ public class MgmtSoftwareModule extends MgmtNamedEntity {
     private String vendor;
 
     @JsonProperty
-    private Boolean deleted;
+    private boolean deleted;
 
-    public void setDeleted(final Boolean deleted) {
+    public void setDeleted(final boolean deleted) {
         this.deleted = deleted;
     }
 
-    public Boolean getDeleted() {
+    public boolean getDeleted() {
         return deleted;
     }
 

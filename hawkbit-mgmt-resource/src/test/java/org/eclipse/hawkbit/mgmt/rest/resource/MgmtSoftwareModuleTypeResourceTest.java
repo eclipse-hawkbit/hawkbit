@@ -256,13 +256,13 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
 
         assertThat(softwareModuleTypeManagement.count()).isEqualTo(4);
 
-        mvc.perform(get("/rest/v1/softwaremoduletypes/{smId}", testType.getId())).andDo(MockMvcResultPrinter.print())
+        mvc.perform(get("/rest/v1/softwaremoduletypes/{smtId}", testType.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(jsonPath("$.deleted", equalTo(false)));
 
-        mvc.perform(delete("/rest/v1/softwaremoduletypes/{smId}", testType.getId())).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+        mvc.perform(delete("/rest/v1/softwaremoduletypes/{smtId}", testType.getId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        mvc.perform(get("/rest/v1/softwaremoduletypes/{smId}", testType.getId())).andDo(MockMvcResultPrinter.print())
+        mvc.perform(get("/rest/v1/softwaremoduletypes/{smtId}", testType.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(jsonPath("$.deleted", equalTo(true)));
 
         assertThat(softwareModuleTypeManagement.count()).isEqualTo(3);
@@ -287,16 +287,19 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     @Test
     @Description("Tests the update of the deletion flag. It is verfied that the software module type can't be marked as deleted through update operation.")
     public void updateSoftwareModuleTypeDeletedFlag() throws Exception {
-        final SoftwareModuleType testType = createTestType();
+        SoftwareModuleType testType = createTestType();
 
-        final String body = new JSONObject().put("id", testType.getId()).put("name", "nameShouldNotBeChanged")
-                .put("deleted", true).toString();
+        final String body = new JSONObject().put("id", testType.getId()).put("deleted", true).toString();
 
-        mvc.perform(put("/rest/v1/softwaremoduletypes/{smId}", testType.getId()).content(body)
+        mvc.perform(put("/rest/v1/softwaremoduletypes/{smtId}", testType.getId()).content(body)
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(testType.getId().intValue())))
-                .andExpect(jsonPath("$.name", equalTo("TestName123"))).andExpect(jsonPath("$.deleted", equalTo(false)));
+                .andExpect(jsonPath("$.lastModifiedAt", equalTo(testType.getLastModifiedAt())))
+                .andExpect(jsonPath("$.deleted", equalTo(false)));
 
+        testType = softwareModuleTypeManagement.get(testType.getId()).get();
+        assertThat(testType.getLastModifiedAt()).isEqualTo(testType.getLastModifiedAt());
+        assertThat(testType.isDeleted()).isEqualTo(false);
     }
 
     @Test

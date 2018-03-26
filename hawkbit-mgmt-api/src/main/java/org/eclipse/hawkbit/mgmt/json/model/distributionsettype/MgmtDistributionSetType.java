@@ -34,13 +34,13 @@ public class MgmtDistributionSetType extends MgmtNamedEntity {
     private String key;
 
     @JsonProperty
-    private Boolean deleted;
+    private boolean deleted;
 
-    public Boolean getDeleted() {
+    public boolean getDeleted() {
         return deleted;
     }
 
-    public void setDeleted(final Boolean deleted) {
+    public void setDeleted(final boolean deleted) {
         this.deleted = deleted;
     }
 

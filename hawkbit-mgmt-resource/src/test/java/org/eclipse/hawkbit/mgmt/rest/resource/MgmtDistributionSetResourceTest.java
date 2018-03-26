@@ -772,13 +772,13 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(1);
 
-        mvc.perform(get("/rest/v1/distributionsets/{smId}", set.getId())).andDo(MockMvcResultPrinter.print())
+        mvc.perform(get("/rest/v1/distributionsets/{dsId}", set.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(jsonPath("$.deleted", equalTo(false)));
 
-        mvc.perform(delete("/rest/v1/distributionsets/{smId}", set.getId())).andDo(MockMvcResultPrinter.print())
+        mvc.perform(delete("/rest/v1/distributionsets/{dsId}", set.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        mvc.perform(get("/rest/v1/distributionsets/{smId}", set.getId())).andDo(MockMvcResultPrinter.print())
+        mvc.perform(get("/rest/v1/distributionsets/{dsId}", set.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(jsonPath("$.deleted", equalTo(true)));
 
         // check repository content

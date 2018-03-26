@@ -124,10 +124,9 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         SoftwareModule sm = softwareModuleManagement
                 .create(entityFactory.softwareModule().create().type(osType).name(knownSWName).version(knownSWVersion));
 
-        assertThat(sm.getName()).as("Wrong name of the software module").isEqualTo(knownSWName);
         assertThat(sm.isDeleted()).as("Created software module should not be deleted").isEqualTo(false);
 
-        final String body = new JSONObject().put("name", "nameShouldNotBeChanged").put("deleted", true).toString();
+        final String body = new JSONObject().put("deleted", true).toString();
 
         // ensures that we are not to fast so that last modified is not set
         // correctly
@@ -138,11 +137,11 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(jsonPath("$.id", equalTo(sm.getId().intValue())))
                 .andExpect(jsonPath("$.lastModifiedBy", equalTo("smUpdateTester")))
                 .andExpect(jsonPath("$.lastModifiedAt", equalTo(sm.getLastModifiedAt())))
-                .andExpect(jsonPath("$.name", equalTo(knownSWName))).andExpect(jsonPath("$.deleted", equalTo(false)));
+                .andExpect(jsonPath("$.deleted", equalTo(false)));
 
         sm = softwareModuleManagement.get(sm.getId()).get();
-        assertThat(sm.getName()).isEqualTo(knownSWName);
         assertThat(sm.getLastModifiedBy()).isEqualTo("smUpdateTester");
+        assertThat(sm.getLastModifiedAt()).isEqualTo(sm.getLastModifiedAt());
         assertThat(sm.isDeleted()).isEqualTo(false);
 
     }
@@ -750,7 +749,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         artifactManagement.create(new ByteArrayInputStream(random), appTypeSmId, "file1", false);
 
-        assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(3);
+        assertThat(softwareModuleManagement.count()).isEqualTo(3);
         assertThat(artifactManagement.count()).isEqualTo(1);
 
         mvc.perform(get("/rest/v1/softwaremodules/{smId}", appTypeSmId)).andDo(MockMvcResultPrinter.print())
@@ -762,7 +761,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         mvc.perform(get("/rest/v1/softwaremodules/{smId}", appTypeSmId)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(jsonPath("$.deleted", equalTo(true)));
 
-        assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(2);
+        assertThat(softwareModuleManagement.count()).isEqualTo(2);
         assertThat(artifactManagement.count()).isEqualTo(1);
     }
 
