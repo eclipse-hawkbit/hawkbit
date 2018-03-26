@@ -145,8 +145,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
                 Action.Status.FINISHED, Action.Status.FINISHED, false);
 
-        assertThat(actionStatusRepository.count()).isEqualTo(6);
-        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(6);
+        assertThat(actionStatusRepository.count()).isEqualTo(7);
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(7);
     }
 
     @Test
@@ -172,8 +172,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                                 .messages(Arrays.asList("this is valid.", INVALID_TEXT_HTML))))
                 .as("set invalid description text should not be created");
 
-        assertThat(actionStatusRepository.count()).isEqualTo(5);
-        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(5);
+        assertThat(actionStatusRepository.count()).isEqualTo(6);
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(6);
     }
 
     @Test
@@ -248,8 +248,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
                 Action.Status.CANCELED, Action.Status.FINISHED, false);
 
-        assertThat(actionStatusRepository.count()).isEqualTo(7);
-        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(7);
+        assertThat(actionStatusRepository.count()).isEqualTo(8);
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(8);
     }
 
     @Test
@@ -275,8 +275,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
                 Action.Status.CANCELED, Action.Status.CANCELED, false);
 
-        assertThat(actionStatusRepository.count()).isEqualTo(7);
-        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(7);
+        assertThat(actionStatusRepository.count()).isEqualTo(8);
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(8);
     }
 
     @Test
@@ -303,8 +303,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.RUNNING, Action.Status.CANCEL_REJECTED, true);
 
-        assertThat(actionStatusRepository.count()).isEqualTo(7);
-        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(7);
+        assertThat(actionStatusRepository.count()).isEqualTo(8);
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(8);
     }
 
     @Test
@@ -331,8 +331,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.RUNNING, Action.Status.ERROR, true);
 
-        assertThat(actionStatusRepository.count()).isEqualTo(7);
-        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(7);
+        assertThat(actionStatusRepository.count()).isEqualTo(8);
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(8);
     }
 
     @Step
@@ -360,6 +360,11 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 Action.Status.CANCELING, Action.Status.DOWNLOAD, true);
 
         controllerManagement
+                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.DOWNLOADED));
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+                Action.Status.CANCELING, Action.Status.DOWNLOADED, true);
+
+        controllerManagement
                 .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RETRIEVED));
         assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.CANCELING, Action.Status.RETRIEVED, true);
@@ -381,6 +386,10 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.DOWNLOAD));
         assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.RUNNING, Action.Status.DOWNLOAD, true);
+        controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.DOWNLOADED));
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+                Action.Status.RUNNING, Action.Status.DOWNLOADED, true);
 
         controllerManagement
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RETRIEVED));

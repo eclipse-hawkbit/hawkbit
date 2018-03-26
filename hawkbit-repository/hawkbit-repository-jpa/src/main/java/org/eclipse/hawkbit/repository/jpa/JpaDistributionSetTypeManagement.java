@@ -38,6 +38,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,16 +62,19 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     private final VirtualPropertyReplacer virtualPropertyReplacer;
 
     private final NoCountPagingRepository criteriaNoCountDao;
+    private final Database database;
 
     JpaDistributionSetTypeManagement(final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final DistributionSetRepository distributionSetRepository,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final NoCountPagingRepository criteriaNoCountDao) {
+            final VirtualPropertyReplacer virtualPropertyReplacer, final NoCountPagingRepository criteriaNoCountDao,
+            final Database database) {
         this.distributionSetTypeRepository = distributionSetTypeRepository;
         this.softwareModuleTypeRepository = softwareModuleTypeRepository;
         this.distributionSetRepository = distributionSetRepository;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.criteriaNoCountDao = criteriaNoCountDao;
+        this.database = database;
     }
 
     @Override
@@ -155,9 +159,10 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
     @Override
     public Page<DistributionSetType> findByRsql(final Pageable pageable, final String rsqlParam) {
-        return convertPage(findByCriteriaAPI(pageable,
-                Arrays.asList(RSQLUtility.parse(rsqlParam, DistributionSetTypeFields.class, virtualPropertyReplacer),
-                        DistributionSetTypeSpecification.isDeleted(false))),
+        return convertPage(
+                findByCriteriaAPI(pageable,
+                        Arrays.asList(RSQLUtility.parse(rsqlParam, DistributionSetTypeFields.class,
+                                virtualPropertyReplacer, database), DistributionSetTypeSpecification.isDeleted(false))),
                 pageable);
     }
 

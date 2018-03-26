@@ -60,28 +60,28 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     @Override
     @Access(AccessType.PROPERTY)
-    @Column(name = "created_at", insertable = true, updatable = false)
+    @Column(name = "created_at", insertable = true, updatable = false, nullable = false)
     public long getCreatedAt() {
         return createdAt;
     }
 
     @Override
     @Access(AccessType.PROPERTY)
-    @Column(name = "created_by", insertable = true, updatable = false, length = 40)
+    @Column(name = "created_by", insertable = true, updatable = false, nullable = false, length = 40)
     public String getCreatedBy() {
         return createdBy;
     }
 
     @Override
     @Access(AccessType.PROPERTY)
-    @Column(name = "last_modified_at", insertable = true, updatable = true)
+    @Column(name = "last_modified_at", insertable = true, updatable = true, nullable = false)
     public long getLastModifiedAt() {
         return lastModifiedAt;
     }
 
     @Override
     @Access(AccessType.PROPERTY)
-    @Column(name = "last_modified_by", insertable = true, updatable = true, length = 40)
+    @Column(name = "last_modified_by", insertable = true, updatable = true, nullable = false, length = 40)
     public String getLastModifiedBy() {
         return lastModifiedBy;
     }
@@ -90,6 +90,11 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
     public void setCreatedBy(final String createdBy) {
         if (isController()) {
             this.createdBy = "CONTROLLER_PLUG_AND_PLAY";
+
+            // In general modification audit entry is not changed by the
+            // controller. However, we want to stay consistent with
+            // EnableJpaAuditing#modifyOnCreate=true.
+            this.lastModifiedBy = this.createdBy;
             return;
         }
 
@@ -99,6 +104,13 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
     @CreatedDate
     public void setCreatedAt(final long createdAt) {
         this.createdAt = createdAt;
+
+        // In general modification audit entry is not changed by the controller.
+        // However, we want to stay consistent with
+        // EnableJpaAuditing#modifyOnCreate=true.
+        if (isController()) {
+            this.lastModifiedAt = createdAt;
+        }
     }
 
     @LastModifiedDate

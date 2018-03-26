@@ -304,8 +304,8 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         assertThat(target.getAddress()).isEqualTo(IpUtil.createHttpUri("127.0.0.1"));
         assertThat(target.getCreatedBy()).isEqualTo("CONTROLLER_PLUG_AND_PLAY");
         assertThat(target.getCreatedAt()).isGreaterThanOrEqualTo(create);
-        assertThat(target.getLastModifiedBy()).isNull();
-        assertThat(target.getLastModifiedAt()).isZero();
+        assertThat(target.getLastModifiedBy()).isEqualTo("CONTROLLER_PLUG_AND_PLAY");
+        assertThat(target.getLastModifiedAt()).isGreaterThanOrEqualTo(create);
 
     }
 
@@ -564,7 +564,8 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(get("/{tenant}/controller/v1/1911/deploymentBase/{actionId}", tenantAware.getCurrentTenant(),
                 action.getId()).accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(jsonPath("$.deployment.download", equalTo("forced")))
-                .andExpect(jsonPath("$.deployment.update", equalTo("skip")));
+                .andExpect(jsonPath("$.deployment.update", equalTo("skip")))
+                .andExpect(jsonPath("$.deployment.maintenanceWindow", equalTo("unavailable")));
     }
 
     @Test
@@ -583,6 +584,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(get("/{tenant}/controller/v1/1911/deploymentBase/{actionId}", tenantAware.getCurrentTenant(),
                 action.getId()).accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(jsonPath("$.deployment.download", equalTo("forced")))
-                .andExpect(jsonPath("$.deployment.update", equalTo("forced")));
+                .andExpect(jsonPath("$.deployment.update", equalTo("forced")))
+                .andExpect(jsonPath("$.deployment.maintenanceWindow", equalTo("available")));
     }
 }

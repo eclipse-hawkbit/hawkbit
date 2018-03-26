@@ -29,7 +29,7 @@ import org.eclipse.hawkbit.ddi.json.model.DdiConfigData;
 import org.eclipse.hawkbit.ddi.json.model.DdiControllerBase;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeployment;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeployment.HandlingType;
-import org.eclipse.hawkbit.ddi.json.model.DdiDeployment.MaintenanceWindowStatus;
+import org.eclipse.hawkbit.ddi.json.model.DdiDeployment.DdiMaintenanceWindowStatus;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeploymentBase;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult.FinalResult;
 import org.eclipse.hawkbit.ddi.json.model.DdiUpdateMode;
@@ -69,6 +69,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -296,7 +297,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             final HandlingType downloadType = action.isForce() ? HandlingType.FORCED : HandlingType.ATTEMPT;
             final HandlingType updateType = calculateUpdateType(action, downloadType);
 
-            final MaintenanceWindowStatus maintenanceWindow = calculateMaintenanceWindow(action);
+            final DdiMaintenanceWindowStatus maintenanceWindow = calculateMaintenanceWindow(action);
 
             final DdiDeploymentBase base = new DdiDeploymentBase(Long.toString(action.getId()),
                     new DdiDeployment(downloadType, updateType, chunks, maintenanceWindow), actionHistory);
@@ -312,10 +313,10 @@ public class DdiRootController implements DdiRootControllerRestApi {
         return ResponseEntity.notFound().build();
     }
 
-    private static MaintenanceWindowStatus calculateMaintenanceWindow(final Action action) {
+    private static DdiMaintenanceWindowStatus calculateMaintenanceWindow(final Action action) {
         if (action.hasMaintenanceSchedule()) {
-            return action.isMaintenanceWindowAvailable() ? MaintenanceWindowStatus.AVAILABLE
-                    : MaintenanceWindowStatus.UNAVAILABLE;
+            return action.isMaintenanceWindowAvailable() ? DdiMaintenanceWindowStatus.AVAILABLE
+                    : DdiMaintenanceWindowStatus.UNAVAILABLE;
         }
         return null;
     }
@@ -365,39 +366,52 @@ public class DdiRootController implements DdiRootControllerRestApi {
             final Long actionid) {
 
         final List<String> messages = new ArrayList<>();
+
+        if (!CollectionUtils.isEmpty(feedback.getStatus().getDetails())) {
+            messages.addAll(feedback.getStatus().getDetails());
+        }
+
         Status status;
         switch (feedback.getStatus().getExecution()) {
         case CANCELED:
             LOG.debug("Controller confirmed cancel (actionid: {}, controllerId: {}) as we got {} report.", actionid,
                     controllerId, feedback.getStatus().getExecution());
             status = Status.CANCELED;
-            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target confirmed cancelation.");
+            addMessageIfEmpty("Target confirmed cancelation.", messages);
             break;
         case REJECTED:
             LOG.info("Controller reported internal error (actionid: {}, controllerId: {}) as we got {} report.",
                     actionid, controllerId, feedback.getStatus().getExecution());
             status = Status.WARNING;
-            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target REJECTED update.");
+            addMessageIfEmpty("Target REJECTED update", messages);
             break;
         case CLOSED:
             status = handleClosedCase(feedback, controllerId, actionid, messages);
+            break;
+        case DOWNLOAD:
+            LOG.debug("Controller confirmed status of download (actionId: {}, controllerId: {}) as we got {} report.",
+                    actionid, controllerId, feedback.getStatus().getExecution());
+            status = Status.DOWNLOAD;
+            addMessageIfEmpty("Target confirmed download start", messages);
             break;
         case DOWNLOADED:
             LOG.debug("Controller confirmed download (actionId: {}, controllerId: {}) as we got {} report.", actionid,
                     controllerId, feedback.getStatus().getExecution());
             status = Status.DOWNLOADED;
-            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target confirmed download of distribution set.");
+            addMessageIfEmpty("Target confirmed download finished", messages);
             break;
         default:
             status = handleDefaultCase(feedback, controllerId, actionid, messages);
             break;
         }
 
-        if (feedback.getStatus().getDetails() != null) {
-            messages.addAll(feedback.getStatus().getDetails());
-        }
-
         return entityFactory.actionStatus().create(actionid).status(status).messages(messages);
+    }
+
+    private static void addMessageIfEmpty(final String text, final List<String> messages) {
+        if (messages != null && messages.isEmpty()) {
+            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + text + ".");
+        }
     }
 
     private Status handleDefaultCase(final DdiActionFeedback feedback, final String controllerId, final Long actionid,
@@ -406,8 +420,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         LOG.debug("Controller reported intermediate status (actionid: {}, controllerId: {}) as we got {} report.",
                 actionid, controllerId, feedback.getStatus().getExecution());
         status = Status.RUNNING;
-        messages.add(
-                RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target reported " + feedback.getStatus().getExecution());
+        addMessageIfEmpty("Target reported " + feedback.getStatus().getExecution(), messages);
         return status;
     }
 
@@ -418,10 +431,10 @@ public class DdiRootController implements DdiRootControllerRestApi {
                 controllerId, feedback.getStatus().getExecution());
         if (feedback.getStatus().getResult().getFinished() == FinalResult.FAILURE) {
             status = Status.ERROR;
-            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target reported CLOSED with ERROR!");
+            addMessageIfEmpty("Target reported CLOSED with ERROR!", messages);
         } else {
             status = Status.FINISHED;
-            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target reported CLOSED with OK!");
+            addMessageIfEmpty("Target reported CLOSED with OK!", messages);
         }
         return status;
     }
@@ -527,10 +540,10 @@ public class DdiRootController implements DdiRootControllerRestApi {
         Status status;
         if (feedback.getStatus().getResult().getFinished() == FinalResult.FAILURE) {
             status = Status.ERROR;
-            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target was not able to complete cancelation.");
+            addMessageIfEmpty("Target was not able to complete cancelation", messages);
         } else {
             status = Status.CANCELED;
-            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Cancelation confirmed.");
+            addMessageIfEmpty("Cancelation confirmed", messages);
         }
         return status;
     }

@@ -16,7 +16,6 @@ import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionAddUpdateWindowLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.RefreshDistributionTableByFilterEvent;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
@@ -98,8 +97,7 @@ public class DistributionSetTableHeader extends AbstractDistributionSetTableHead
 
     @Override
     protected void addNewItem(final ClickEvent event) {
-        final Window newDistWindow = addUpdateWindowLayout.getWindow(null);
-        newDistWindow.setCaption(i18n.getMessage(UIComponentIdProvider.DIST_ADD_CAPTION));
+        final Window newDistWindow = addUpdateWindowLayout.getWindowForCreateDistributionSet();
         UI.getCurrent().addWindow(newDistWindow);
         newDistWindow.setVisible(Boolean.TRUE);
     }

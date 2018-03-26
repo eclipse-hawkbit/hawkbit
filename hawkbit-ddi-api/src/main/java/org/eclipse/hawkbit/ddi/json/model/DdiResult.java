@@ -38,7 +38,6 @@ public class DdiResult {
     @JsonCreator
     public DdiResult(@JsonProperty("finished") final FinalResult finished,
             @JsonProperty("progress") final DdiProgress progress) {
-        super();
         this.finished = finished;
         this.progress = progress;
     }
