@@ -174,18 +174,22 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Test verifies that the 'max actions per target' quota is enforced.")
-    public void assignDistributionSetsUntilMaxActionsPerTargetQuotaIsExceeded() {
+    @Description("Test verifies that the 'max actions per target' quota is enforced if the assigned distribution set is changed permanently.")
+    public void changeDistributionSetAssignmentUntilMaxActionsPerTargetQuotaIsExceeded() {
 
         final int maxActions = quotaManagement.getMaxActionsPerTarget();
         final List<Target> testTarget = testdataFactory.createTargets(1);
+        final DistributionSet ds1 = testdataFactory.createDistributionSet("ds1");
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("ds2");
+        final DistributionSet ds3 = testdataFactory.createDistributionSet("ds3");
 
         IntStream.range(0, maxActions).forEach(i -> {
-            assignDistributionSet(testdataFactory.createDistributionSet("ds_" + i), testTarget);
+            assignDistributionSet(i % 2 == 0 ? ds1 : ds2, testTarget);
         });
 
-        final DistributionSet ds = testdataFactory.createDistributionSet("ds_final");
-        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> assignDistributionSet(ds, testTarget));
+        // change the distribution set one last time to trigger a quota hit
+        assertThatExceptionOfType(QuotaExceededException.class)
+                .isThrownBy(() -> assignDistributionSet(ds3, testTarget));
     }
 
     @Test

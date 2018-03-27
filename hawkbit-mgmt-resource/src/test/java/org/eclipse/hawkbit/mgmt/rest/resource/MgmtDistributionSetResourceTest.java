@@ -267,22 +267,27 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     }
 
     @Test
-    @Description("Ensures that the 'max actions per target' quota is enforced if the same target is assigned to too many distribution sets.")
-    public void assignTargetToManyDistributionSetsUntilQuotaIsExceeded() throws Exception {
+    @Description("Ensures that the 'max actions per target' quota is enforced if the distribution set assignment of a target is changed permanently")
+    public void assignTargetToDifferentDistributionSetsUntilQuotaIsExceeded() throws Exception {
 
         // create one target
         final Target testTarget = testdataFactory.createTarget("1");
         final int maxActions = quotaManagement.getMaxActionsPerTarget();
 
+        // create a set of distribution sets
+        final DistributionSet ds1 = testdataFactory.createDistributionSet("ds1");
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("ds2");
+        final DistributionSet ds3 = testdataFactory.createDistributionSet("ds3");
+
         IntStream.range(0, maxActions).forEach(i -> {
-            assignDistributionSet(testdataFactory.createDistributionSet("ds_" + i), testTarget);
+            // toggle the distribution set
+            assignDistributionSet(i % 2 == 0 ? ds1 : ds2, testTarget);
         });
 
         // assign our test target to another distribution set and verify that
         // the 'max actions per target' quota is exceeded
-        final DistributionSet ds = testdataFactory.createDistributionSet("final");
         final String json = new JSONArray().put(new JSONObject().put("id", testTarget.getId())).toString();
-        mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + ds.getId() + "/assignedTargets")
+        mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + ds3.getId() + "/assignedTargets")
                 .contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isForbidden());
     }
 
