@@ -36,9 +36,11 @@ import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadResponse;
+import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusBuilder;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -123,6 +125,9 @@ public class AmqpMessageHandlerServiceTest {
     @Captor
     private ArgumentCaptor<String> targetIdCaptor;
 
+    @Captor
+    private ArgumentCaptor<UpdateMode> modeCaptor;
+
     @Before
     public void before() throws Exception {
         messageConverter = new Jackson2JsonMessageConverter();
@@ -181,7 +186,7 @@ public class AmqpMessageHandlerServiceTest {
     public void updateAttributes() {
         final String knownThingId = "1";
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
-        messageProperties.setHeader(MessageHeaderKey.THING_ID, "1");
+        messageProperties.setHeader(MessageHeaderKey.THING_ID, knownThingId);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, "UPDATE_ATTRIBUTES");
         final DmfAttributeUpdate attributeUpdate = new DmfAttributeUpdate();
         attributeUpdate.getAttributes().put("testKey1", "testValue1");
@@ -190,8 +195,8 @@ public class AmqpMessageHandlerServiceTest {
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(attributeUpdate,
                 messageProperties);
 
-        when(controllerManagementMock.updateControllerAttributes(targetIdCaptor.capture(), attributesCaptor.capture()))
-                .thenReturn(null);
+        when(controllerManagementMock.updateControllerAttributes(targetIdCaptor.capture(), attributesCaptor.capture(),
+                modeCaptor.capture())).thenReturn(null);
 
         amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
 
@@ -199,6 +204,50 @@ public class AmqpMessageHandlerServiceTest {
         assertThat(targetIdCaptor.getValue()).as("Thing id is wrong").isEqualTo(knownThingId);
         assertThat(attributesCaptor.getValue()).as("Attributes is not right")
                 .isEqualTo(attributeUpdate.getAttributes());
+
+    }
+
+    @Test
+    @Description("Verifies that the update mode is retrieved from the UPDATE_ATTRIBUTES message and passed to the controller management.")
+    public void attributeUpdateModes() {
+        final String knownThingId = "1";
+        final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
+        messageProperties.setHeader(MessageHeaderKey.THING_ID, knownThingId);
+        messageProperties.setHeader(MessageHeaderKey.TOPIC, "UPDATE_ATTRIBUTES");
+        final DmfAttributeUpdate attributeUpdate = new DmfAttributeUpdate();
+        attributeUpdate.getAttributes().put("testKey1", "testValue1");
+        attributeUpdate.getAttributes().put("testKey2", "testValue2");
+
+        when(controllerManagementMock.updateControllerAttributes(targetIdCaptor.capture(), attributesCaptor.capture(),
+                modeCaptor.capture())).thenReturn(null);
+
+        // send a message which does not specify a update mode
+        Message message = amqpMessageHandlerService.getMessageConverter().toMessage(attributeUpdate, messageProperties);
+        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
+        // verify that NO fallback is made on the way to the controller
+        // management layer
+        assertThat(modeCaptor.getValue()).isNull();
+
+        // send a message which specifies update mode MERGE
+        attributeUpdate.setMode(DmfUpdateMode.MERGE);
+        message = amqpMessageHandlerService.getMessageConverter().toMessage(attributeUpdate, messageProperties);
+        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
+        // verify that the update mode is converted and forwarded as expected
+        assertThat(modeCaptor.getValue()).isEqualTo(UpdateMode.MERGE);
+
+        // send a message which specifies update mode REPLACE
+        attributeUpdate.setMode(DmfUpdateMode.REPLACE);
+        message = amqpMessageHandlerService.getMessageConverter().toMessage(attributeUpdate, messageProperties);
+        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
+        // verify that the update mode is converted and forwarded as expected
+        assertThat(modeCaptor.getValue()).isEqualTo(UpdateMode.REPLACE);
+
+        // send a message which specifies update mode REMOVE
+        attributeUpdate.setMode(DmfUpdateMode.REMOVE);
+        message = amqpMessageHandlerService.getMessageConverter().toMessage(attributeUpdate, messageProperties);
+        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
+        // verify that the update mode is converted and forwarded as expected
+        assertThat(modeCaptor.getValue()).isEqualTo(UpdateMode.REMOVE);
 
     }
 

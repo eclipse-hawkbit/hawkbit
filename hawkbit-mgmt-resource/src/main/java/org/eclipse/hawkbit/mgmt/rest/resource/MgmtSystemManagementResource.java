@@ -81,7 +81,8 @@ public class MgmtSystemManagementResource implements MgmtSystemManagementRestApi
     }
 
     private static MgmtSystemTenantServiceUsage convertTenant(final TenantUsage tenant) {
-        final MgmtSystemTenantServiceUsage result = new MgmtSystemTenantServiceUsage(tenant.getTenantName());
+        final MgmtSystemTenantServiceUsage result = new MgmtSystemTenantServiceUsage();
+        result.setTenantName(tenant.getTenantName());
         result.setActions(tenant.getActions());
         result.setArtifacts(tenant.getArtifacts());
         result.setOverallArtifactVolumeInBytes(tenant.getOverallArtifactVolumeInBytes());

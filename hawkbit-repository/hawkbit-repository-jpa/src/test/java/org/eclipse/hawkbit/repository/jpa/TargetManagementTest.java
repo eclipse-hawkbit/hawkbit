@@ -418,7 +418,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         testData.put("test1", "testdata1");
 
         targetManagement.create(entityFactory.target().create().controllerId(controllerId));
-        final Target target = controllerManagement.updateControllerAttributes(controllerId, testData);
+        final Target target = controllerManagement.updateControllerAttributes(controllerId, testData, null);
 
         assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong")
                 .isEqualTo(testData);

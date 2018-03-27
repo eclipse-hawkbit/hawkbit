@@ -13,6 +13,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Body for system statistics.
@@ -22,12 +23,22 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtSystemStatisticsRest {
 
+    @JsonProperty
     private long overallTargets;
+
+    @JsonProperty
     private long overallArtifacts;
+
+    @JsonProperty
     private long overallArtifactVolumeInBytes;
+
+    @JsonProperty
     private long overallActions;
+
+    @JsonProperty
     private long overallTenants;
 
+    @JsonProperty
     private List<MgmtSystemTenantServiceUsage> tenantStats;
 
     public long getOverallTargets() {

@@ -1028,4 +1028,22 @@ public class TestdataFactory {
         return createRolloutByVariables(prefix, prefix + " description", 10, "controllerId==" + prefix + "*",
                 createDistributionSet(prefix), "50", "5");
     }
+
+    /**
+     * Create the soft deleted {@link Rollout} with a new
+     * {@link DistributionSet} and {@link Target}s.
+     * 
+     * @param prefix
+     *            for rollouts name, description,
+     *            {@link Target#getControllerId()} filter
+     * @return created {@link Rollout}
+     */
+    public Rollout createSoftDeletedRollout(final String prefix) {
+        final Rollout newRollout = createRollout(prefix);
+        rolloutManagement.start(newRollout.getId());
+        rolloutManagement.handleRollouts();
+        rolloutManagement.delete(newRollout.getId());
+        rolloutManagement.handleRollouts();
+        return newRollout;
+    }
 }
