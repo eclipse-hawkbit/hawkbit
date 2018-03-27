@@ -75,7 +75,7 @@ public final class MaintenanceScheduleHelper {
             final ZonedDateTime now = ZonedDateTime.now(ZoneOffset.of(timezone));
             final ZonedDateTime after = now.minus(convertToISODuration(duration));
             final ZonedDateTime next = scheduleExecutor.nextExecution(after);
-            return Optional.ofNullable(next);
+            return Optional.of(next);
         } catch (final RuntimeException ignored) {
             return Optional.empty();
         }
@@ -164,6 +164,10 @@ public final class MaintenanceScheduleHelper {
         return Duration.between(LocalTime.MIN, convertDurationToLocalTime(timeInterval));
     }
 
+    private static LocalTime convertDurationToLocalTime(final String timeInterval) {
+        return LocalTime.parse(StringUtils.trimWhitespace(timeInterval));
+    }
+
     /**
      * Validates the format of the maintenance window duration
      *
@@ -184,10 +188,6 @@ public final class MaintenanceScheduleHelper {
         } catch (final DateTimeParseException e) {
             throw new InvalidMaintenanceScheduleException("Provided duration is not valid", e, e.getErrorIndex());
         }
-    }
-
-    private static LocalTime convertDurationToLocalTime(final String timeInterval) {
-        return LocalTime.parse(StringUtils.trimWhitespace(timeInterval));
     }
 
     /**
