@@ -209,7 +209,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             // query is going to change
             if (targetFilterQuery.getAutoAssignDistributionSet() != null
                     && !query.equals(targetFilterQuery.getQuery())) {
-                assertMaxTargetsQuota(targetFilterQuery.getId());
+                assertMaxTargetsQuota(query);
             }
 
             // set the new query
@@ -231,10 +231,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         // because the Target Filter Query REST API does not allow to specify an
         // auto-assign distribution set when creating a target filter query
         if (dsId != null) {
-            final String query = targetFilterQuery.getQuery();
-            if (query != null) {
-                assertMaxTargetsQuota(targetFilterQuery.getId());
-            }
+            assertMaxTargetsQuota(targetFilterQuery.getQuery());
         }
 
         return targetFilterQueryRepository.save(targetFilterQuery);
@@ -254,12 +251,6 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     public boolean verifyTargetFilterQuerySyntax(final String query) {
         RSQLUtility.parse(query, TargetFields.class, virtualPropertyReplacer, database);
         return true;
-    }
-
-    private void assertMaxTargetsQuota(final Long filterQueryId) {
-        System.out.println(">>>>>>> " + targetManagement.countByTargetFilterQuery(filterQueryId));
-        QuotaHelper.assertAssignmentQuota(targetManagement.countByTargetFilterQuery(filterQueryId),
-                quotaManagement.getMaxTargetsPerAutoAssignment(), Target.class, TargetFilterQuery.class);
     }
 
     private void assertMaxTargetsQuota(final String query) {

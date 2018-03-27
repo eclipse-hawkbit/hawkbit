@@ -289,11 +289,11 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
 
         // create targets
         final int maxTargets = quotaManagement.getMaxTargetsPerAutoAssignment();
-        testdataFactory.generateTargets(maxTargets + 1, "target");
+        testdataFactory.createTargets(maxTargets + 1, "target%s");
 
         // create the filter query and the distribution set
-        final DistributionSet set = testdataFactory.createDistributionSet("ds1");
-        final TargetFilterQuery filterQuery = createSingleTargetFilterQuery("testquery", "controllerId==target*");
+        final DistributionSet set = testdataFactory.createDistributionSet();
+        final TargetFilterQuery filterQuery = createSingleTargetFilterQuery("1", "controllerId==target*");
 
         mvc.perform(
                 post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId() + "/autoAssignDS")
@@ -302,12 +302,41 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     }
 
     @Test
+    @Description("Ensures that the update of a target filter query results in a HTTP Forbidden error (403) "
+            + "if the updated query addresses too many targets.")
+    public void updateTargetFilterQueryAndTriggerQuotaHit() throws Exception {
+
+        // create targets
+        final int maxTargets = quotaManagement.getMaxTargetsPerAutoAssignment();
+        testdataFactory.createTargets(maxTargets + 1, "target%s");
+
+        // create the filter query and the distribution set
+        final DistributionSet set = testdataFactory.createDistributionSet();
+        final TargetFilterQuery filterQuery = createSingleTargetFilterQuery("1", "controllerId==target1");
+
+        // assign the auto-assign distribution set, this should work
+        mvc.perform(
+                post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId() + "/autoAssignDS")
+                        .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        assertThat(targetFilterQueryManagement.get(filterQuery.getId()).get().getAutoAssignDistributionSet())
+                .isEqualTo(set);
+
+        // update the query of the filter query to trigger a quota hit
+        mvc.perform(put(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId())
+                .content("{\"query\":\"controllerId==target*\"}").contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden());
+
+    }
+
+    @Test
     public void setAutoAssignDistributionSetToTargetFilterQuery() throws Exception {
 
-        final String knownQuery = "name=test05";
+        final String knownQuery = "name==test05";
         final String knownName = "filter05";
 
-        final DistributionSet set = testdataFactory.createDistributionSet("one");
+        final DistributionSet set = testdataFactory.createDistributionSet();
         final TargetFilterQuery tfq = createSingleTargetFilterQuery(knownName, knownQuery);
 
         mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
@@ -331,7 +360,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     @Test
     public void deleteAutoAssignDistributionSetOfTargetFilterQuery() throws Exception {
 
-        final String knownQuery = "name=test06";
+        final String knownQuery = "name==test06";
         final String knownName = "filter06";
         final String dsName = "testDS";
 
