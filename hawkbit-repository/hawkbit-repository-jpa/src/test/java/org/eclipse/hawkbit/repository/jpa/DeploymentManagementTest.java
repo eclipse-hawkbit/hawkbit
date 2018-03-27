@@ -178,18 +178,30 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     public void changeDistributionSetAssignmentUntilMaxActionsPerTargetQuotaIsExceeded() {
 
         final int maxActions = quotaManagement.getMaxActionsPerTarget();
-        final List<Target> testTarget = testdataFactory.createTargets(1);
+        final List<Target> testTargets = testdataFactory.createTargets(1);
         final DistributionSet ds1 = testdataFactory.createDistributionSet("ds1");
         final DistributionSet ds2 = testdataFactory.createDistributionSet("ds2");
         final DistributionSet ds3 = testdataFactory.createDistributionSet("ds3");
 
         IntStream.range(0, maxActions).forEach(i -> {
-            assignDistributionSet(i % 2 == 0 ? ds1 : ds2, testTarget);
+            assignDistributionSet(i % 2 == 0 ? ds1 : ds2, testTargets);
         });
 
         // change the distribution set one last time to trigger a quota hit
         assertThatExceptionOfType(QuotaExceededException.class)
-                .isThrownBy(() -> assignDistributionSet(ds3, testTarget));
+                .isThrownBy(() -> assignDistributionSet(ds3, testTargets));
+    }
+
+    @Test
+    @Description("Assigns the same distribution set to many targets until the 'max targets per manual assignment' quota is exceeded.")
+    public void assignDistributionSetUntilQuotaIsExceeded() {
+
+        final int maxTargets = quotaManagement.getMaxTargetsPerManualAssignment();
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+
+        assignDistributionSet(ds, testdataFactory.createTargets(maxTargets, "ok"));
+        assertThatExceptionOfType(QuotaExceededException.class)
+                .isThrownBy(() -> assignDistributionSet(ds, testdataFactory.createTargets(maxTargets + 1, "fail")));
     }
 
     @Test

@@ -267,8 +267,25 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     }
 
     @Test
+    @Description("Ensures that multi target assignment is protected by our 'max targets per manual assignment' quota.")
+    public void assignMultipleTargetsToDistributionSetUntilQuotaIsExceeded() throws Exception {
+
+        final int maxTargets = quotaManagement.getMaxTargetsPerManualAssignment();
+        final List<Target> targets = testdataFactory.createTargets(maxTargets + 1);
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+
+        final JSONArray payload = new JSONArray();
+        targets.forEach(trg -> payload.put(new JSONObject().put("id", trg.getId())));
+
+        mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + ds.getId() + "/assignedTargets")
+                .contentType(MediaType.APPLICATION_JSON).content(payload.toString())).andExpect(status().isForbidden());
+
+        assertThat(targetManagement.findByAssignedDistributionSet(PAGE, ds.getId()).getContent()).isEmpty();
+    }
+
+    @Test
     @Description("Ensures that the 'max actions per target' quota is enforced if the distribution set assignment of a target is changed permanently")
-    public void assignTargetToDifferentDistributionSetsUntilQuotaIsExceeded() throws Exception {
+    public void changeDistributionSetAssignmentForTargetUntilQuotaIsExceeded() throws Exception {
 
         // create one target
         final Target testTarget = testdataFactory.createTarget("1");
