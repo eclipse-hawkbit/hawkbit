@@ -862,7 +862,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                     new JpaDistributionSetMetadata("key" + index, ds1, "value" + index));
         }
 
-        for (int index = 0; index < 20; index++) {
+        for (int index = 0; index < 8; index++) {
             createDistributionSetMetadata(ds2.getId(),
                     new JpaDistributionSetMetadata("key" + index, ds2, "value" + index));
         }
@@ -876,8 +876,8 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(metadataOfDs1.getNumberOfElements()).isEqualTo(10);
         assertThat(metadataOfDs1.getTotalElements()).isEqualTo(10);
 
-        assertThat(metadataOfDs2.getNumberOfElements()).isEqualTo(20);
-        assertThat(metadataOfDs2.getTotalElements()).isEqualTo(20);
+        assertThat(metadataOfDs2.getNumberOfElements()).isEqualTo(8);
+        assertThat(metadataOfDs2.getTotalElements()).isEqualTo(8);
     }
 
     @Test
