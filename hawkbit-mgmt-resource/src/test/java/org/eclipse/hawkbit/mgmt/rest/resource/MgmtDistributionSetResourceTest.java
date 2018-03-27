@@ -288,22 +288,22 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     public void changeDistributionSetAssignmentForTargetUntilQuotaIsExceeded() throws Exception {
 
         // create one target
-        final Target testTarget = testdataFactory.createTarget("1");
+        final List<Target> testTargets = testdataFactory.createTargets(1, "test-target-%s");
         final int maxActions = quotaManagement.getMaxActionsPerTarget();
 
         // create a set of distribution sets
-        final DistributionSet ds1 = testdataFactory.createDistributionSet("ds1");
-        final DistributionSet ds2 = testdataFactory.createDistributionSet("ds2");
-        final DistributionSet ds3 = testdataFactory.createDistributionSet("ds3");
+        final DistributionSet ds1 = testdataFactory.createDistributionSet("test-ds1");
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("test-ds2");
+        final DistributionSet ds3 = testdataFactory.createDistributionSet("test-ds3");
 
         IntStream.range(0, maxActions).forEach(i -> {
             // toggle the distribution set
-            assignDistributionSet(i % 2 == 0 ? ds1 : ds2, testTarget);
+            assignDistributionSet(i % 2 == 0 ? ds1 : ds2, testTargets);
         });
 
         // assign our test target to another distribution set and verify that
         // the 'max actions per target' quota is exceeded
-        final String json = new JSONArray().put(new JSONObject().put("id", testTarget.getId())).toString();
+        final String json = new JSONArray().put(new JSONObject().put("id", testTargets.get(0).getId())).toString();
         mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + ds3.getId() + "/assignedTargets")
                 .contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isForbidden());
     }
@@ -512,14 +512,13 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
         final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
 
-        targetFilterQueryManagement.updateAutoAssignDS(
-                targetFilterQueryManagement
-                        .create(entityFactory.targetFilterQuery().create().name(knownFilterName).query("x==y")).getId(),
+        targetFilterQueryManagement.updateAutoAssignDS(targetFilterQueryManagement
+                .create(entityFactory.targetFilterQuery().create().name(knownFilterName).query("name==y")).getId(),
                 createdDs.getId());
 
         // create some dummy target filter queries
-        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("b").query("x==y"));
-        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("c").query("x==y"));
+        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("b").query("name==y"));
+        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("c").query("name==y"));
 
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId()
                 + "/autoAssignTargetFilters")).andExpect(status().isOk()).andExpect(jsonPath("$.size", equalTo(1)))
@@ -574,16 +573,16 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     private void prepareTestFilters(final String filterNamePrefix, final DistributionSet createdDs) {
         // create target filter queries that should be found
         targetFilterQueryManagement.updateAutoAssignDS(targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "1").query("x==y")).getId(),
-                createdDs.getId());
+                .create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "1").query("name==y"))
+                .getId(), createdDs.getId());
         targetFilterQueryManagement.updateAutoAssignDS(targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "2").query("x==y")).getId(),
-                createdDs.getId());
+                .create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "2").query("name==y"))
+                .getId(), createdDs.getId());
         // create some dummy target filter queries
         targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "b").query("x==y"));
+                .create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "b").query("name==y"));
         targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "c").query("x==y"));
+                .create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "c").query("name==y"));
     }
 
     @Test
