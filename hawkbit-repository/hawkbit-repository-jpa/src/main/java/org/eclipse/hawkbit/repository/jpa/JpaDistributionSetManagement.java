@@ -39,7 +39,6 @@ import org.eclipse.hawkbit.repository.jpa.model.DsMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata_;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
@@ -237,26 +236,11 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         if (update.isRequiredMigrationStep() != null
                 && !update.isRequiredMigrationStep().equals(set.isRequiredMigrationStep())) {
-            checkDistributionSetIsAssignedToTargets(update.getId());
+            assertDistributionSetIsNotAssignedToTargets(update.getId());
             set.setRequiredMigrationStep(update.isRequiredMigrationStep());
         }
 
-        if (update.getType() != null) {
-            final DistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(update.getType());
-            if (!type.getId().equals(set.getType().getId())) {
-                checkDistributionSetIsAssignedToTargets(update.getId());
-
-                set.setType(type);
-            }
-        }
-
         return distributionSetRepository.save(set);
-    }
-
-    private JpaDistributionSetType findDistributionSetTypeAndThrowExceptionIfNotFound(final String key) {
-        return (JpaDistributionSetType) distributionSetTypeManagement.getByKey(key)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, key));
-
     }
 
     private JpaDistributionSet findDistributionSetAndThrowExceptionIfNotFound(final Long setId) {
@@ -342,7 +326,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                     modules.stream().map(SoftwareModule::getId).collect(Collectors.toList()));
         }
 
-        checkDistributionSetIsAssignedToTargets(setId);
+        assertDistributionSetIsNotAssignedToTargets(setId);
 
         final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(setId);
 
@@ -361,7 +345,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(setId);
         final JpaSoftwareModule module = findSoftwareModuleAndThrowExceptionIfNotFound(moduleId);
 
-        checkDistributionSetIsAssignedToTargets(setId);
+        assertDistributionSetIsNotAssignedToTargets(setId);
 
         set.removeModule(module);
 
@@ -684,10 +668,10 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return specList;
     }
 
-    private void checkDistributionSetIsAssignedToTargets(final Long distributionSet) {
+    private void assertDistributionSetIsNotAssignedToTargets(final Long distributionSet) {
         if (actionRepository.countByDistributionSetId(distributionSet) > 0) {
             throw new EntityReadOnlyException(String.format(
-                    "distribution set %s is already assigned to targets and cannot be changed", distributionSet));
+                    "Distribution set %s is already assigned to targets and cannot be changed", distributionSet));
         }
     }
 

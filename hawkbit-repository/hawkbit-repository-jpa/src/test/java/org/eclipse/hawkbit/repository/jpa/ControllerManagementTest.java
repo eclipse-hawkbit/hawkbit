@@ -735,6 +735,33 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Controller providing status entries fails if providing more than permitted by quota.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void controllerProvidesIntermediateFeedbackFailsIfQuotaHit() {
+        final int allowStatusEntries = 10;
+        final Long actionId = createTargetAndAssignDs();
+
+        // Fails as one entry is already in there from the assignment
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> securityRule
+                .runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+                    writeStatus(actionId, allowStatusEntries);
+                    return null;
+                })).withMessageContaining("" + allowStatusEntries);
+
+    }
+
+    private void writeStatus(final Long actionId, final int allowedStatusEntries) {
+        for (int i = 0; i < allowedStatusEntries; i++) {
+            controllerManagement.addInformationalActionStatus(
+                    entityFactory.actionStatus().create(actionId).status(Status.RUNNING).message("test" + i));
+        }
+    }
+
+    @Test
     @Description("Test to verify the storage and retrieval of action history.")
     public void findMessagesByActionStatusId() {
         final DistributionSet testDs = testdataFactory.createDistributionSet("1");

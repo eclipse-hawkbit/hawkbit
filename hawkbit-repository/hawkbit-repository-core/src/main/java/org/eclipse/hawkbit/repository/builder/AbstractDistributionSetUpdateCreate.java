@@ -25,8 +25,7 @@ public abstract class AbstractDistributionSetUpdateCreate<T> extends AbstractNam
     protected String version;
     protected Boolean requiredMigrationStep;
 
-    @ValidString
-    protected String type;
+
     protected Collection<Long> modules;
 
     public T modules(final Collection<Long> modules) {
@@ -36,15 +35,6 @@ public abstract class AbstractDistributionSetUpdateCreate<T> extends AbstractNam
 
     public Collection<Long> getModules() {
         return modules;
-    }
-
-    public T type(final String type) {
-        this.type = StringUtils.trimWhitespace(type);
-        return (T) this;
-    }
-
-    public String getType() {
-        return type;
     }
 
     public T requiredMigrationStep(final Boolean requiredMigrationStep) {

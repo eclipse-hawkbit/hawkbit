@@ -38,11 +38,13 @@ import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -54,7 +56,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
-import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -656,14 +657,36 @@ public class JpaControllerManagement implements ControllerManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Target updateControllerAttributes(final String controllerId, final Map<String, String> data) {
+    public Target updateControllerAttributes(final String controllerId, final Map<String, String> data,
+            final UpdateMode mode) {
         final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
-        // merge the map first before asserting the quota
-        target.getControllerAttributes().putAll(data);
+        // get the modifiable attribute map
+        final Map<String, String> controllerAttributes = target.getControllerAttributes();
+
+        final UpdateMode updateMode = mode != null ? mode : UpdateMode.MERGE;
+        switch (updateMode) {
+        case REMOVE:
+            // remove the addressed attributes
+            data.keySet().forEach(controllerAttributes::remove);
+            break;
+        case REPLACE:
+            // clear the attributes before adding the new attributes
+            controllerAttributes.clear();
+            controllerAttributes.putAll(data);
+            target.setRequestControllerAttributes(false);
+            break;
+        case MERGE:
+            // just merge the attributes in
+            controllerAttributes.putAll(data);
+            target.setRequestControllerAttributes(false);
+            break;
+        default:
+            // unknown update mode
+            throw new IllegalStateException("The update mode " + updateMode + " is not supported.");
+        }
         assertTargetAttributesQuota(target);
-        target.setRequestControllerAttributes(false);
 
         return targetRepository.save(target);
     }

@@ -77,6 +77,7 @@ final class MgmtRolloutMapper {
         body.setDistributionSetId(rollout.getDistributionSet().getId());
         body.setStatus(rollout.getStatus().toString().toLowerCase());
         body.setTotalTargets(rollout.getTotalTargets());
+        body.setDeleted(rollout.isDeleted());
 
         if (withDetails) {
             for (final TotalTargetCountStatus.Status status : TotalTargetCountStatus.Status.values()) {

@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.ValidString;
 import org.eclipse.hawkbit.repository.builder.AbstractDistributionSetUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -21,6 +22,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Create/build implementation.
@@ -28,6 +30,9 @@ import org.springframework.util.CollectionUtils;
  */
 public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreate<DistributionSetCreate>
         implements DistributionSetCreate {
+
+    @ValidString
+    private String type;
 
     private final DistributionSetTypeManagement distributionSetTypeManagement;
     private final SoftwareModuleManagement softwareModuleManagement;
@@ -44,6 +49,16 @@ public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreat
                 Optional.ofNullable(type).map(this::findDistributionSetTypeWithExceptionIfNotFound).orElse(null),
                 findSoftwareModuleWithExceptionIfNotFound(modules),
                 Optional.ofNullable(requiredMigrationStep).orElse(Boolean.FALSE));
+    }
+
+    @Override
+    public DistributionSetCreate type(final String type) {
+        this.type = StringUtils.trimWhitespace(type);
+        return this;
+    }
+
+    public String getType() {
+        return type;
     }
 
     private DistributionSetType findDistributionSetTypeWithExceptionIfNotFound(final String distributionSetTypekey) {

@@ -564,7 +564,8 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(get("/{tenant}/controller/v1/1911/deploymentBase/{actionId}", tenantAware.getCurrentTenant(),
                 action.getId()).accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(jsonPath("$.deployment.download", equalTo("forced")))
-                .andExpect(jsonPath("$.deployment.update", equalTo("skip")));
+                .andExpect(jsonPath("$.deployment.update", equalTo("skip")))
+                .andExpect(jsonPath("$.deployment.maintenanceWindow", equalTo("unavailable")));
     }
 
     @Test
@@ -583,6 +584,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(get("/{tenant}/controller/v1/1911/deploymentBase/{actionId}", tenantAware.getCurrentTenant(),
                 action.getId()).accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(jsonPath("$.deployment.download", equalTo("forced")))
-                .andExpect(jsonPath("$.deployment.update", equalTo("forced")));
+                .andExpect(jsonPath("$.deployment.update", equalTo("forced")))
+                .andExpect(jsonPath("$.deployment.maintenanceWindow", equalTo("available")));
     }
 }

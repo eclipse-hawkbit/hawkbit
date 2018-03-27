@@ -264,7 +264,8 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(jsonPath("$.totalTargetsPerStatus.scheduled", equalTo(15)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.cancelled", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.finished", equalTo(0)))
-                .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)));
+                .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)))
+                .andExpect(jsonPath("$.deleted", equalTo(false)));
     }
 
     @Step
@@ -281,7 +282,8 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(jsonPath("$.totalTargetsPerStatus.scheduled", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.cancelled", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.finished", equalTo(0)))
-                .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)));
+                .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)))
+                .andExpect(jsonPath("$.deleted", equalTo(false)));
     }
 
     @Step
@@ -300,7 +302,8 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(jsonPath("$.totalTargetsPerStatus.scheduled", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.cancelled", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.finished", equalTo(0)))
-                .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)));
+                .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)))
+                .andExpect(jsonPath("$.deleted", equalTo(false)));
     }
 
     @Step
@@ -329,7 +332,8 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(
                         jsonPath("$._links.resume.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/resume"))))
                 .andExpect(jsonPath("$._links.groups.href",
-                        allOf(startsWith(HREF_ROLLOUT_PREFIX), containsString("/deploygroups"))));
+                        allOf(startsWith(HREF_ROLLOUT_PREFIX), containsString("/deploygroups"))))
+                .andExpect(jsonPath("$.deleted", equalTo(false)));
     }
 
     @Test
@@ -795,6 +799,16 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(status().isOk());
 
         assertThat(getRollout(rollout.getId()).getStatus()).isEqualTo(RolloutStatus.DELETING);
+    }
+
+    @Test
+    @Description("Soft deletion of a rollout: soft deletion appears when already running rollout is being deleted")
+    public void deleteRunningRollout() throws Exception {
+        final Rollout rollout = testdataFactory.createSoftDeletedRollout("softDeletedRollout");
+
+        mvc.perform(get("/rest/v1/rollouts/{rolloutid}", rollout.getId())).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.deleted", equalTo(true)));
+        assertThat(getRollout(rollout.getId()).getStatus()).isEqualTo(RolloutStatus.DELETED);
     }
 
     @Test
