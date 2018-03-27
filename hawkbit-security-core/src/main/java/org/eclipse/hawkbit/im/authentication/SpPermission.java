@@ -12,9 +12,6 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -35,12 +32,6 @@ import org.springframework.security.core.GrantedAuthority;
  * including metadata, {@link TargetTag}s, {@link TargetRegistrationRule}s<br/>
  * XX_Repository CRUD which covers: {@link DistributionSet}s,
  * {@link SoftwareModule}s, DS Tags<br/>
- * </p>
- *
- *
- *
- *
- *
  */
 public final class SpPermission {
 
@@ -114,20 +105,8 @@ public final class SpPermission {
     public static final String DELETE_REPOSITORY = "DELETE_REPOSITORY";
 
     /**
-     * Permission to monitor the SP system. E.g. retrieving health, monitor
-     * checks through REST API provided by the spring actuator.
-     */
-    public static final String SYSTEM_MONITOR = "SYSTEM_MONITOR";
-
-    /**
-     * Permission to retrieve diagnosis of the SP system. E.g. retrieving
-     * metrics, configuration through REST API provided by the spring actuator.
-     */
-    public static final String SYSTEM_DIAG = "SYSTEM_DIAG";
-
-    /**
      * Permission to administrate the system on a global, i.e. tenant
-     * independent scale. Thta inlcuds the deletion of tenants.
+     * independent scale. That includes the deletion of tenants.
      */
     public static final String SYSTEM_ADMIN = "SYSTEM_ADMIN";
 
@@ -173,31 +152,11 @@ public final class SpPermission {
     /**
      * Return all permission.
      * 
-     * @return all permission
+     * @param exclusionRoles
+     *            roles which will excluded
+     * @return all permissions
      */
     public static List<String> getAllAuthorities() {
-        return getAllAuthorities(Collections.emptyList());
-    }
-
-    /**
-     * Return all permission.
-     * 
-     * @param exclusionRoles
-     *            roles which will excluded
-     * @return all permissions
-     */
-    public static List<String> getAllAuthorities(final String... exclusionRoles) {
-        return getAllAuthorities(Arrays.asList(exclusionRoles));
-    }
-
-    /**
-     * Return all permission.
-     * 
-     * @param exclusionRoles
-     *            roles which will excluded
-     * @return all permissions
-     */
-    public static List<String> getAllAuthorities(final Collection<String> exclusionRoles) {
         final List<String> allPermissions = new ArrayList<>();
         final Field[] declaredFields = SpPermission.class.getDeclaredFields();
         for (final Field field : declaredFields) {
@@ -205,20 +164,13 @@ public final class SpPermission {
                 field.setAccessible(true);
                 try {
                     final String role = (String) field.get(null);
-                    addIfNotExcluded(exclusionRoles, allPermissions, role);
+                    allPermissions.add(role);
                 } catch (final IllegalAccessException e) {
                     LOGGER.error(e.getMessage(), e);
                 }
             }
         }
         return allPermissions;
-    }
-
-    private static void addIfNotExcluded(final Collection<String> exclusionRoles, final List<String> allPermissions,
-            final String role) {
-        if (!(exclusionRoles.contains(role))) {
-            allPermissions.add(role);
-        }
     }
 
     /**
@@ -239,9 +191,6 @@ public final class SpPermission {
      * isAuthenticated() Returns true if the user is not anonymous
      * isFullyAuthenticated()  Returns true if the user is not an anonymous or a remember-me user
      * }
-     * 
-     *
-     *
      *
      */
     public static final class SpringEvalExpressions {
@@ -463,14 +412,6 @@ public final class SpPermission {
          */
         public static final String HAS_AUTH_TENANT_CONFIGURATION = HAS_AUTH_PREFIX + TENANT_CONFIGURATION
                 + HAS_AUTH_SUFFIX + HAS_AUTH_OR + IS_SYSTEM_CODE;
-
-        /**
-         * Spring security eval hasAuthority expression to check if spring
-         * context contains {@link SpPermission#SYSTEM_MONITOR} or
-         * {@link #IS_SYSTEM_CODE}.
-         */
-        public static final String HAS_AUTH_SYSTEM_MONITOR = HAS_AUTH_PREFIX + SYSTEM_MONITOR + HAS_AUTH_SUFFIX
-                + HAS_AUTH_OR + IS_SYSTEM_CODE;
 
         private SpringEvalExpressions() {
             // utility class

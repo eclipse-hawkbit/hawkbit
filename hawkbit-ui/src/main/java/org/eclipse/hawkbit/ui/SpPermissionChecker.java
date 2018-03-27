@@ -27,24 +27,6 @@ public class SpPermissionChecker implements Serializable {
     }
 
     /**
-     * Gets the monitor View Permission.
-     * 
-     * @return SYSTEM_MONITOR boolean value
-     */
-    public boolean hasSpMonitorViewPermission() {
-        return permissionService.hasPermission(SpPermission.SYSTEM_MONITOR);
-    }
-
-    /**
-     * Gets the diagnosis retrieval Permission.
-     * 
-     * @return SYSTEM_DIAG boolean value
-     */
-    public boolean hasSpdiagnosisViewPermission() {
-        return permissionService.hasPermission(SpPermission.SYSTEM_DIAG);
-    }
-
-    /**
      * Gets the read Target & Dist Permission.
      * 
      * @return TARGET_REPOSITORY_READ boolean value

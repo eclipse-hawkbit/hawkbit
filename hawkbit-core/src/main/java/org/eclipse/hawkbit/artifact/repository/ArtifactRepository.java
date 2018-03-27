@@ -23,28 +23,6 @@ import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
  *
  */
 public interface ArtifactRepository {
-
-    /**
-     * Stores an artifact into the repository.
-     * 
-     * @param tenant
-     *            the tenant to store the artifact
-     * @param content
-     *            the content to store
-     * @param filename
-     *            the filename of the artifact
-     * @param contentType
-     *            the content type of the artifact
-     * @return the stored artifact
-     * 
-     * @throws MethodNotSupportedException
-     *             if implementation does not support the operation
-     * @throws ArtifactStoreException
-     *             in case storing of the artifact was not successful
-     */
-    AbstractDbArtifact store(@NotEmpty String tenant, @NotNull InputStream content, @NotEmpty String filename,
-            String contentType);
-
     /**
      * Stores an artifact into the repository.
      * 

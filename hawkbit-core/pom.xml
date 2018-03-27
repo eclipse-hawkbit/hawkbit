@@ -32,6 +32,10 @@
          <groupId>javax.validation</groupId>
          <artifactId>validation-api</artifactId>
       </dependency>
+      <dependency>
+         <groupId>com.google.guava</groupId>
+         <artifactId>guava</artifactId>
+      </dependency>
     
       <!-- Test -->
       <dependency>
