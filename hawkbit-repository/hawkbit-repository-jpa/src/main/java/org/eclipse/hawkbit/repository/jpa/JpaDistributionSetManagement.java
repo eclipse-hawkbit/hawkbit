@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -480,10 +481,13 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     /**
      * Asserts the meta data quota for the distribution set with the given ID.
      * 
-     * @param dsId
-     *            The distribution set ID.
+     * @param id
+     *            of the distribution set
      * @param requested
-     *            Number of meta data entries to be created.
+     *            number of meta data entries to check
+     * 
+     * @throws QuotaExceededException
+     *             if the meta data quota is exceeded
      */
     private void assertMetaDataQuota(final Long dsId, final int requested) {
         // dispatch
@@ -496,14 +500,17 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
      * Asserts the software module quota for the distribution set with the given
      * ID.
      * 
-     * @param dsId
-     *            The distribution set ID.
+     * @param id
+     *            of the distribution set
      * @param requested
-     *            Number of software modules to be assigned.
+     *            number of software modules to check
+     * 
+     * @throws QuotaExceededException
+     *             if the software module quota is exceeded
      */
-    private void assertSoftwareModuleQuota(final Long dsId, final int requested) {
+    private void assertSoftwareModuleQuota(final Long id, final int requested) {
         // dispatch
-        QuotaHelper.assertAssignmentQuota(dsId, requested, quotaManagement.getMaxSoftwareModulesPerDistributionSet(),
+        QuotaHelper.assertAssignmentQuota(id, requested, quotaManagement.getMaxSoftwareModulesPerDistributionSet(),
                 SoftwareModule.class, DistributionSet.class,
                 // alternative: distributionSetRepository#countModulesById
                 softwareModuleRepository::countByAssignedToId);

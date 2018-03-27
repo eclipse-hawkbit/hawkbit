@@ -1066,11 +1066,29 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         }
     }
 
+    /**
+     * Enforces the quota defining the maximum number of {@link Target}s per
+     * {@link RolloutGroup}.
+     * 
+     * @param group
+     *            The rollout group
+     * @param requested
+     *            number of targets to check
+     */
     private void assertTargetsPerRolloutGroupQuota(final RolloutGroup group, final int requested) {
         final int quota = quotaManagement.getMaxTargetsPerRolloutGroup();
         QuotaHelper.assertAssignmentQuota(requested, quota, Target.class, RolloutGroup.class);
     }
 
+    /**
+     * Enforces the quota defining the maximum number of {@link Action}s per
+     * {@link Target}.
+     * 
+     * @param target
+     *            The target
+     * @param requested
+     *            number of actions to check
+     */
     private void assertActionsPerTargetQuota(final Target target, final int requested) {
         final int quota = quotaManagement.getMaxActionsPerTarget();
         QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class,

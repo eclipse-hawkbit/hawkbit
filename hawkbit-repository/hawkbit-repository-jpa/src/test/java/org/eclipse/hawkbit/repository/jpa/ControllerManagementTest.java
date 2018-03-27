@@ -794,7 +794,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetUpdatedEvent.class, count = 2) })
     public void updateTargetAttributesFailsIfTooManyEntries() throws Exception {
         final String controllerId = "test123";
-        final int allowedAttributes = 10;
+        final int allowedAttributes = quotaManagement.getMaxAttributeEntriesPerTarget();
         testdataFactory.createTarget(controllerId);
 
         assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> securityRule

@@ -327,8 +327,17 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 targetManagement);
     }
 
-    private void assertMaxTargetsPerManualAssignmentQuota(final Long dsId, final int requested) {
-        QuotaHelper.assertAssignmentQuota(dsId, requested, quotaManagement.getMaxTargetsPerManualAssignment(),
+    /**
+     * Enforces the quota defining the maximum number of {@link Target}s per
+     * manual {@link DistributionSet} assignment.
+     * 
+     * @param id
+     *            of the distribution set
+     * @param requested
+     *            number of targets to check
+     */
+    private void assertMaxTargetsPerManualAssignmentQuota(final Long id, final int requested) {
+        QuotaHelper.assertAssignmentQuota(id, requested, quotaManagement.getMaxTargetsPerManualAssignment(),
                 Target.class, DistributionSet.class, null);
     }
 

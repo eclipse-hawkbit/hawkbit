@@ -656,12 +656,12 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies the enforcement of the metadata quota per software module.")
-    public void quotaSoftwareModuleMetadata() {
+    public void createSoftwareModuleMetadataUntilQuotaIsExceeded() {
 
         // add meta data one by one
         final SoftwareModule module = testdataFactory.createSoftwareModuleApp("m1");
-        final int quota = quotaManagement.getMaxMetaDataEntriesPerSoftwareModule();
-        for (int i = 0; i < quota; ++i) {
+        final int maxMetaData = quotaManagement.getMaxMetaDataEntriesPerSoftwareModule();
+        for (int i = 0; i < maxMetaData; ++i) {
             softwareModuleManagement.createMetaData(
                     entityFactory.softwareModuleMetadata().create(module.getId()).key("k" + i).value("v" + i));
         }
@@ -669,12 +669,12 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         // quota exceeded
         assertThatExceptionOfType(QuotaExceededException.class)
                 .isThrownBy(() -> softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata()
-                        .create(module.getId()).key("k" + quota).value("v" + quota)));
+                        .create(module.getId()).key("k" + maxMetaData).value("v" + maxMetaData)));
 
         // add multiple meta data entries at once
         final SoftwareModule module2 = testdataFactory.createSoftwareModuleApp("m2");
         final List<SoftwareModuleMetadataCreate> create = new ArrayList<>();
-        for (int i = 0; i < quota + 1; ++i) {
+        for (int i = 0; i < maxMetaData + 1; ++i) {
             create.add(entityFactory.softwareModuleMetadata().create(module2.getId()).key("k" + i).value("v" + i));
         }
         // quota exceeded
@@ -683,13 +683,13 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         // add some meta data entries
         final SoftwareModule module3 = testdataFactory.createSoftwareModuleApp("m3");
-        final int firstHalf = Math.round(quota / 2);
+        final int firstHalf = Math.round(maxMetaData / 2);
         for (int i = 0; i < firstHalf; ++i) {
             softwareModuleManagement.createMetaData(
                     entityFactory.softwareModuleMetadata().create(module3.getId()).key("k" + i).value("v" + i));
         }
         // add too many data entries
-        final int secondHalf = quota - firstHalf;
+        final int secondHalf = maxMetaData - firstHalf;
         final List<SoftwareModuleMetadataCreate> create2 = new ArrayList<>();
         for (int i = 0; i < secondHalf + 1; ++i) {
             create2.add(entityFactory.softwareModuleMetadata().create(module3.getId()).key("kk" + i).value("vv" + i));

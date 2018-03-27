@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
 import org.eclipse.hawkbit.repository.builder.GenericDistributionSetTypeUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetTypeCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
@@ -151,8 +152,20 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
         return distributionSetTypeRepository.save(type);
     }
 
-    private void assertSoftwareModuleTypeQuota(final long dsTypeId, final int requested) {
-        QuotaHelper.assertAssignmentQuota(dsTypeId, requested,
+    /**
+     * Enforces the quota specifiying the maximum number of
+     * {@link SoftwareModuleType}s per {@link DistributionSetType}.
+     * 
+     * @param id
+     *            of the distribution set type
+     * @param requested
+     *            number of software module types to check
+     * 
+     * @throws QuotaExceededException
+     *             if the software module type quota is exceeded
+     */
+    private void assertSoftwareModuleTypeQuota(final long id, final int requested) {
+        QuotaHelper.assertAssignmentQuota(id, requested,
                 quotaManagement.getMaxSoftwareModuleTypesPerDistributionSetType(), SoftwareModuleType.class,
                 DistributionSetType.class, distributionSetTypeRepository::countSmTypesById);
     }
