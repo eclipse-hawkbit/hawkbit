@@ -288,22 +288,22 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     public void changeDistributionSetAssignmentForTargetUntilQuotaIsExceeded() throws Exception {
 
         // create one target
-        final List<Target> testTargets = testdataFactory.createTargets(1, "test-target-%s");
+        final Target testTarget = testdataFactory.createTarget("trg1");
         final int maxActions = quotaManagement.getMaxActionsPerTarget();
 
         // create a set of distribution sets
-        final DistributionSet ds1 = testdataFactory.createDistributionSet("test-ds1");
-        final DistributionSet ds2 = testdataFactory.createDistributionSet("test-ds2");
-        final DistributionSet ds3 = testdataFactory.createDistributionSet("test-ds3");
+        final DistributionSet ds1 = testdataFactory.createDistributionSet("ds1");
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("ds2");
+        final DistributionSet ds3 = testdataFactory.createDistributionSet("ds3");
 
         IntStream.range(0, maxActions).forEach(i -> {
             // toggle the distribution set
-            assignDistributionSet(i % 2 == 0 ? ds1 : ds2, testTargets);
+            assignDistributionSet(i % 2 == 0 ? ds1 : ds2, testTarget);
         });
 
         // assign our test target to another distribution set and verify that
         // the 'max actions per target' quota is exceeded
-        final String json = new JSONArray().put(new JSONObject().put("id", testTargets.get(0).getId())).toString();
+        final String json = new JSONArray().put(new JSONObject().put("id", testTarget.getControllerId())).toString();
         mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + ds3.getId() + "/assignedTargets")
                 .contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isForbidden());
     }
