@@ -283,9 +283,9 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     }
 
     @Test
-    @Description("Ensures that the assignment of a auto-assign distribution set results in a HTTP Forbidden error (403) "
-            + "if the query addresses too many targets.")
-    public void setAutoAssignDistributionSetAndTriggerQuotaHit() throws Exception {
+    @Description("Ensures that the assignment of an auto-assign distribution set results in a HTTP Forbidden error (403) "
+            + "if the (existing) query addresses too many targets.")
+    public void setAutoAssignDistributionSetOnFilterQueryThatExceedsQuota() throws Exception {
 
         // create targets
         final int maxTargets = quotaManagement.getMaxTargetsPerAutoAssignment();
@@ -304,7 +304,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     @Test
     @Description("Ensures that the update of a target filter query results in a HTTP Forbidden error (403) "
             + "if the updated query addresses too many targets.")
-    public void updateTargetFilterQueryAndTriggerQuotaHit() throws Exception {
+    public void updateTargetFilterQueryWithQueryThatExceedsQuota() throws Exception {
 
         // create targets
         final int maxTargets = quotaManagement.getMaxTargetsPerAutoAssignment();
