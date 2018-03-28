@@ -43,7 +43,7 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
     // is not used security related
     @SuppressWarnings("squid:S2070")
     public AbstractDbArtifact store(final String tenant, final InputStream content, final String filename,
-            final String contentType, final DbArtifactHash hash) {
+            final String contentType, final DbArtifactHash hash, final long maxBytes) {
         final MessageDigest mdSHA1;
         final MessageDigest mdMD5;
         try {
@@ -60,6 +60,9 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
         try (final DigestOutputStream outputstream = openFileOutputStream(file, mdSHA1, mdMD5)) {
             ByteStreams.copy(content, outputstream);
             outputstream.flush();
+
+            checkFile(filename, file, maxBytes);
+
             final String sha1Hash16 = BaseEncoding.base16().lowerCase().encode(mdSHA1.digest());
             final String md5Hash16 = BaseEncoding.base16().lowerCase().encode(mdMD5.digest());
 
@@ -73,6 +76,33 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
         } finally {
             if (file.exists() && !file.delete()) {
                 LOG.error("Could not delete temp file {}", file);
+            }
+        }
+    }
+
+    /**
+     * Checks if the given file can be stored.
+     * 
+     * @param filename
+     *            The name of the file to be stored.
+     * @param file
+     *            The file to be stored.
+     * @param maxBytes
+     *            The maximum file size that is allowed.
+     */
+    private void checkFile(final String filename, final File file, final long maxBytes) {
+        if (file == null || file.isDirectory()) {
+            return;
+        }
+        // make sure the artifact is not too big
+        if (maxBytes > 0) {
+            final long bytes = file.length();
+            if (bytes > maxBytes) {
+                LOG.warn(
+                        "The uploaded artifact '{}' exceeds the maximum artifact size that is allowed. "
+                                + "The artifact has a size of {} bytes. The configured maximum size is {} bytes.",
+                        filename, bytes, maxBytes);
+                throw new ArtifactExceedsMaxSizeException(filename, bytes, maxBytes);
             }
         }
     }

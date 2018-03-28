@@ -37,6 +37,8 @@ public interface ArtifactRepository {
      * @param hash
      *            the hashes of the artifact to do hash-checks after storing the
      *            artifact, might be {@code null}
+     * @param maxBytes
+     *            the maximum artifact size in bytes that is allowed
      * @return the stored artifact
      * 
      * @throws MethodNotSupportedException
@@ -48,7 +50,7 @@ public interface ArtifactRepository {
      *             calculated hashes during storing
      */
     AbstractDbArtifact store(@NotEmpty String tenant, @NotNull InputStream content, @NotEmpty String filename,
-            String contentType, DbArtifactHash hash);
+            String contentType, DbArtifactHash hash, long maxBytes);
 
     /**
      * Deletes an artifact by its SHA1 hash.

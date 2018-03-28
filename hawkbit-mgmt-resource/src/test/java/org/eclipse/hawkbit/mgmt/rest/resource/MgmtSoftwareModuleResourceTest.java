@@ -317,9 +317,9 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     @Description("Verifies that only a limited number of artifacts can be uploaded for one software module.")
     public void uploadArtifactsUntilQuotaExceeded() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
-        final long quota = quotaManagement.getMaxArtifactsPerSoftwareModule();
+        final long maxArtifacts = quotaManagement.getMaxArtifactsPerSoftwareModule();
 
-        for (int i = 0; i < quota; ++i) {
+        for (int i = 0; i < maxArtifacts; ++i) {
             // create test file
             final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
             final String md5sum = HashGeneratorUtils.generateMD5(random);
@@ -344,6 +344,22 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final MockMultipartFile file = new MockMultipartFile("file", "origFilename_final", null, random);
 
         // upload
+        mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @Description("Verifies that artifacts which exceed the configured maximum size cannot be uploaded.")
+    public void uploadArtifactFailsIfTooLarge() throws Exception {
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
+        final long maxSize = quotaManagement.getMaxArtifactSize();
+
+        // create a file which exceeds the configured maximum size
+        final byte[] random = RandomStringUtils.random(Math.toIntExact(maxSize + 1)).getBytes();
+        final MockMultipartFile file = new MockMultipartFile("file", "origFilename", null, random);
+
+        // try to upload
         mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden());
@@ -386,6 +402,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+
         final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1",
                 false);
 
@@ -986,4 +1003,5 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
             character++;
         }
     }
+
 }

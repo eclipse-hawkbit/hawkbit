@@ -91,18 +91,16 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test if a local artifact can be created by API including metadata.")
     public void createArtifact() throws NoSuchAlgorithmException, IOException {
-        // checkbaseline
+
+        // check baseline
         assertThat(softwareModuleRepository.findAll()).hasSize(0);
         assertThat(artifactRepository.findAll()).hasSize(0);
 
-        JpaSoftwareModule sm = new JpaSoftwareModule(osType, "name 1", "version 1", null, null);
-        sm = softwareModuleRepository.save(sm);
-
-        JpaSoftwareModule sm2 = new JpaSoftwareModule(osType, "name 2", "version 2", null, null);
-        sm2 = softwareModuleRepository.save(sm2);
-
-        JpaSoftwareModule sm3 = new JpaSoftwareModule(osType, "name 3", "version 3", null, null);
-        sm3 = softwareModuleRepository.save(sm3);
+        final JpaSoftwareModule sm = softwareModuleRepository
+                .save(new JpaSoftwareModule(osType, "name 1", "version 1", null, null));
+        final JpaSoftwareModule sm2 = softwareModuleRepository
+                .save(new JpaSoftwareModule(osType, "name 2", "version 2", null, null));
+        softwareModuleRepository.save(new JpaSoftwareModule(osType, "name 3", "version 3", null, null));
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
@@ -133,7 +131,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that the quota specifying the maximum number of artifacts per software module is enforced.")
-    public void createSoftwareModuleArtifactsUntilQuotaIsExceeded() throws NoSuchAlgorithmException, IOException {
+    public void createArtifactsUntilQuotaIsExceeded() throws NoSuchAlgorithmException, IOException {
 
         // create a software module
         final JpaSoftwareModule sm1 = softwareModuleRepository
@@ -170,10 +168,26 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Verifies that you cannot create artifacts which exceed the configured maximum size.")
+    public void createArtifactFailsIfTooLarge() throws NoSuchAlgorithmException, IOException {
+
+        // create a software module
+        final JpaSoftwareModule sm1 = softwareModuleRepository
+                .save(new JpaSoftwareModule(osType, "sm1", "1.0", null, null));
+
+        // create an artifact that exceeds the configured quota
+        final long maxSize = quotaManagement.getMaxArtifactSize();
+        final byte random[] = RandomStringUtils.random(Math.toIntExact(maxSize) + 1).getBytes();
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(
+                () -> artifactManagement.create(new ByteArrayInputStream(random), sm1.getId(), "file", false));
+    }
+
+    @Test
     @Description("Tests hard delete directly on repository.")
     public void hardDeleteSoftwareModule() throws NoSuchAlgorithmException, IOException {
-        JpaSoftwareModule sm = new JpaSoftwareModule(osType, "name 1", "version 1", null, null);
-        sm = softwareModuleRepository.save(sm);
+
+        final JpaSoftwareModule sm = softwareModuleRepository
+                .save(new JpaSoftwareModule(osType, "name 1", "version 1", null, null));
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
@@ -195,11 +209,11 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests the deletion of a local artifact including metadata.")
     public void deleteArtifact() throws NoSuchAlgorithmException, IOException {
-        JpaSoftwareModule sm = new JpaSoftwareModule(osType, "name 1", "version 1", null, null);
-        sm = softwareModuleRepository.save(sm);
 
-        JpaSoftwareModule sm2 = new JpaSoftwareModule(osType, "name 2", "version 2", null, null);
-        sm2 = softwareModuleRepository.save(sm2);
+        final JpaSoftwareModule sm = softwareModuleRepository
+                .save(new JpaSoftwareModule(osType, "name 1", "version 1", null, null));
+        final JpaSoftwareModule sm2 = softwareModuleRepository
+                .save(new JpaSoftwareModule(osType, "name 2", "version 2", null, null));
 
         assertThat(artifactRepository.findAll()).isEmpty();
 
@@ -237,11 +251,11 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     @Description("Test the deletion of an artifact metadata where the binary is still linked to another "
             + "metadata element. The expected result is that the metadata is deleted but the binary kept.")
     public void deleteDuplicateArtifacts() throws NoSuchAlgorithmException, IOException {
-        JpaSoftwareModule sm = new JpaSoftwareModule(osType, "name 1", "version 1", null, null);
-        sm = softwareModuleRepository.save(sm);
 
-        JpaSoftwareModule sm2 = new JpaSoftwareModule(osType, "name 2", "version 2", null, null);
-        sm2 = softwareModuleRepository.save(sm2);
+        final JpaSoftwareModule sm = softwareModuleRepository
+                .save(new JpaSoftwareModule(osType, "name 1", "version 1", null, null));
+        final JpaSoftwareModule sm2 = softwareModuleRepository
+                .save(new JpaSoftwareModule(osType, "name 2", "version 2", null, null));
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 

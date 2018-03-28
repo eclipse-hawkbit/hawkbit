@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.artifact.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -28,6 +29,8 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class ArtifactFilesystemRepositoryTest {
     private static final String TENANT = "test_tenant";
 
+    private static final int MAX_ARTIFACT_SIZE = 1_000_000;
+
     private final ArtifactFilesystemProperties artifactResourceProperties = new ArtifactFilesystemProperties();
 
     private final ArtifactFilesystemRepository artifactFilesystemRepository = new ArtifactFilesystemRepository(
@@ -43,6 +46,13 @@ public class ArtifactFilesystemRepositoryTest {
         IOUtils.read(artifact.getFileInputStream(), readContent);
 
         assertThat(readContent).isEqualTo(fileContent);
+    }
+
+    @Test
+    @Description("Verfies that an artifact that exceeds the maximum artifact size cannot be stored.")
+    public void storeFailsBecauseArtifactIsTooLarge() throws IOException {
+        final byte[] fileContent = randomBytes(MAX_ARTIFACT_SIZE + 1);
+        assertThatExceptionOfType(ArtifactStoreException.class).isThrownBy(() -> storeRandomArtifact(fileContent));
     }
 
     @Test
@@ -97,11 +107,16 @@ public class ArtifactFilesystemRepositoryTest {
     private AbstractDbArtifact storeRandomArtifact(final byte[] fileContent) {
         final String fileName = "filename.tmp";
         final ByteArrayInputStream inputStream = new ByteArrayInputStream(fileContent);
-        return artifactFilesystemRepository.store(TENANT, inputStream, fileName, "application/txt", null);
+        return artifactFilesystemRepository.store(TENANT, inputStream, fileName, "application/txt", null,
+                MAX_ARTIFACT_SIZE);
     }
 
     private static byte[] randomBytes() {
-        final byte[] randomBytes = new byte[20];
+        return randomBytes(20);
+    }
+
+    private static byte[] randomBytes(final int len) {
+        final byte[] randomBytes = new byte[len];
         final Random ran = new Random();
         ran.nextBytes(randomBytes);
         return randomBytes;

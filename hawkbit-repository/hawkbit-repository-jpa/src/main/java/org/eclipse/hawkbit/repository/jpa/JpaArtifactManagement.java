@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.io.InputStream;
 import java.util.Optional;
 
+import org.eclipse.hawkbit.artifact.repository.ArtifactExceedsMaxSizeException;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.artifact.repository.ArtifactStoreException;
 import org.eclipse.hawkbit.artifact.repository.HashNotMatchException;
@@ -24,6 +25,7 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
@@ -103,9 +105,12 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
         try {
             result = artifactRepository.store(tenantAware.getCurrentTenant(), stream, filename, contentType,
-                    new DbArtifactHash(providedSha1Sum, providedMd5Sum));
+                    new DbArtifactHash(providedSha1Sum, providedMd5Sum), quotaManagement.getMaxArtifactSize());
         } catch (final ArtifactStoreException e) {
             throw new ArtifactUploadFailedException(e);
+        } catch (final ArtifactExceedsMaxSizeException e) {
+            // throw new ArtifactUploadFailedException(e.getMessage(), e);
+            throw new QuotaExceededException(e.getMessage(), e);
         } catch (final HashNotMatchException e) {
             if (e.getHashFunction().equals(HashNotMatchException.SHA1)) {
                 throw new InvalidSHA1HashException(e.getMessage(), e);

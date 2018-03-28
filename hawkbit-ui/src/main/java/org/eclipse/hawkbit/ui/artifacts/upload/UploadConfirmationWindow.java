@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
@@ -642,7 +643,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             saveUploadStatus(providedFileName, swModuleNameVersion, SPUILabelDefinitions.SUCCESS, "");
 
         } catch (final ArtifactUploadFailedException | InvalidSHA1HashException | InvalidMD5HashException
-                | FileNotFoundException e) {
+                | FileNotFoundException | QuotaExceededException e) {
 
             saveUploadStatus(providedFileName, swModuleNameVersion, SPUILabelDefinitions.FAILED, e.getMessage());
             LOG.error(ARTIFACT_UPLOAD_EXCEPTION, e);

@@ -39,6 +39,18 @@ public final class QuotaExceededException extends AbstractServerRtException {
     }
 
     /**
+     * Creates a QuotaExceededException with a custom error message.
+     * 
+     * @param message
+     *            The custom error message.
+     * @param cause
+     *            for the exception
+     */
+    public QuotaExceededException(final String message, final Throwable cause) {
+        super(message, SpServerError.SP_QUOTA_EXCEEDED, cause);
+    }
+
+    /**
      * @param type
      *            that hit quota
      * @param inserted

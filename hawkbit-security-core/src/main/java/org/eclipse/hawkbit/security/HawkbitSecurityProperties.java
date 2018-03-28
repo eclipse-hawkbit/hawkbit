@@ -161,6 +161,11 @@ public class HawkbitSecurityProperties {
          */
         private int maxTargetsPerAutoAssignment = 5000;
 
+        /**
+         * Maximum software module artifact size in bytes
+         */
+        private long maxArtifactSize = 100000;
+
         private final Filter filter = new Filter();
         private final Filter uiFilter = new Filter();
 
@@ -275,6 +280,14 @@ public class HawkbitSecurityProperties {
 
         public void setMaxTargetsPerAutoAssignment(final int maxTargetsPerAutoAssignment) {
             this.maxTargetsPerAutoAssignment = maxTargetsPerAutoAssignment;
+        }
+
+        public long getMaxArtifactSize() {
+            return maxArtifactSize;
+        }
+
+        public void setMaxArtifactSize(final long maxArtifactSize) {
+            this.maxArtifactSize = maxArtifactSize;
         }
 
         /**
