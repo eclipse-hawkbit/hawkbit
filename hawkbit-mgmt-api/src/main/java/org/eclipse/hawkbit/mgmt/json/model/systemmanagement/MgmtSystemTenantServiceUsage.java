@@ -13,6 +13,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Response body for system usage report.
@@ -22,19 +23,25 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtSystemTenantServiceUsage {
 
-    private final String tenantName;
+    @JsonProperty
+    private String tenantName;
+
+    @JsonProperty
     private long targets;
+
+    @JsonProperty
     private long artifacts;
+
+    @JsonProperty
     private long actions;
+
+    @JsonProperty
     private long overallArtifactVolumeInBytes;
+
+    @JsonProperty
     private Map<String, String> usageData;
 
-    /**
-     * Constructor.
-     *
-     * @param tenantName
-     */
-    public MgmtSystemTenantServiceUsage(final String tenantName) {
+    public void setTenantName(final String tenantName) {
         this.tenantName = tenantName;
     }
 

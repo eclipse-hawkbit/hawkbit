@@ -74,9 +74,6 @@
       </developer>
       <developer>
          <id>michahirsch</id>
-         <email>michael.hirsch@bosch-si.com</email>
-         <organization>Bosch Software Innovations GmbH</organization>
-         <organizationUrl>https://www.bosch-si.com</organizationUrl>
          <roles>
             <role>Committer</role>
          </roles>
