@@ -58,8 +58,6 @@ import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -85,11 +83,6 @@ import com.google.common.collect.Lists;
 @Transactional(readOnly = true)
 @Validated
 public class JpaDistributionSetManagement implements DistributionSetManagement {
-
-    /**
-     * Class logger
-     */
-    private static final Logger LOG = LoggerFactory.getLogger(JpaDistributionSetManagement.class);
 
     private final EntityManager entityManager;
 

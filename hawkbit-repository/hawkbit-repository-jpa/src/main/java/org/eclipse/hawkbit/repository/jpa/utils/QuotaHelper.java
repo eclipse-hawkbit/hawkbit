@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
-public class QuotaHelper {
+public final class QuotaHelper {
 
     /**
      * Class logger

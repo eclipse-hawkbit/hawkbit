@@ -63,8 +63,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
@@ -91,11 +89,6 @@ import com.google.common.collect.Lists;
 @Transactional(readOnly = true)
 @Validated
 public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
-
-    /**
-     * Class logger
-     */
-    private static final Logger LOG = LoggerFactory.getLogger(JpaSoftwareModuleManagement.class);
 
     private final EntityManager entityManager;
 

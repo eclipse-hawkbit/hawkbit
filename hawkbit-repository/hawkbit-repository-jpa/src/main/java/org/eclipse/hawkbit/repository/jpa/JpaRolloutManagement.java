@@ -260,7 +260,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             group.setTargetPercentage(groupFactor * 100);
 
             // enforce the 'max targets per group' quota
-            assertTargetsPerRolloutGroupQuota(group, Math.round(groupFactor * totalTargets));
+            assertTargetsPerRolloutGroupQuota(Math.round(groupFactor * totalTargets));
 
             lastSavedGroup = rolloutGroupRepository.save(group);
             publishRolloutGroupCreatedEventAfterCommit(lastSavedGroup, rollout);
@@ -299,7 +299,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             final float perc = srcGroup.getTargetPercentage();
 
             // enforce the 'max targets per group' quota
-            assertTargetsPerRolloutGroupQuota(group, Math.round(totalTargets * perc / 100));
+            assertTargetsPerRolloutGroupQuota(Math.round(totalTargets * perc / 100));
 
             group.setTargetPercentage(perc);
             if (srcGroup.getTargetFilterQuery() != null) {
@@ -1075,7 +1075,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
      * @param requested
      *            number of targets to check
      */
-    private void assertTargetsPerRolloutGroupQuota(final RolloutGroup group, final int requested) {
+    private void assertTargetsPerRolloutGroupQuota(final int requested) {
         final int quota = quotaManagement.getMaxTargetsPerRolloutGroup();
         QuotaHelper.assertAssignmentQuota(requested, quota, Target.class, RolloutGroup.class);
     }

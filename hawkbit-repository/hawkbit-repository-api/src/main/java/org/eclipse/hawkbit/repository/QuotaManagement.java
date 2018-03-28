@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 public interface QuotaManagement {
 
     /**
-     * @return Maximum number of {@link ActionStatus} entries that the
+     * @return maximum number of {@link ActionStatus} entries that the
      *         controller can report for an {@link Action}.
      */
     int getMaxStatusEntriesPerAction();
@@ -87,7 +87,7 @@ public interface QuotaManagement {
     int getMaxTargetsPerAutoAssignment();
 
     /**
-     * @return the maximum nummber of actions per target
+     * @return the maximum number of actions per target
      */
     int getMaxActionsPerTarget();
 

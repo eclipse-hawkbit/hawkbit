@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetFilterQueryFields;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
-import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.builder.GenericTargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryUpdate;
@@ -65,20 +64,18 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     private final VirtualPropertyReplacer virtualPropertyReplacer;
 
     private final DistributionSetManagement distributionSetManagement;
-    private final TargetManagement targetManagement;
     private final QuotaManagement quotaManagement;
 
     private final Database database;
 
     JpaTargetFilterQueryManagement(final TargetFilterQueryRepository targetFilterQueryRepository,
             final TargetRepository targetRepository, final VirtualPropertyReplacer virtualPropertyReplacer,
-            final DistributionSetManagement distributionSetManagement, final TargetManagement targetManagement,
-            final QuotaManagement quotaManagement, final Database database) {
+            final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
+            final Database database) {
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.targetRepository = targetRepository;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.distributionSetManagement = distributionSetManagement;
-        this.targetManagement = targetManagement;
         this.quotaManagement = quotaManagement;
         this.database = database;
     }

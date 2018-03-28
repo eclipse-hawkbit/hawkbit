@@ -479,11 +479,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     TargetFilterQueryManagement targetFilterQueryManagement(
             final TargetFilterQueryRepository targetFilterQueryRepository, final TargetRepository targetRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer,
-            final DistributionSetManagement distributionSetManagement, final TargetManagement targetManagement,
-            final QuotaManagement quotaManagement, final JpaProperties properties) {
+            final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
+            final JpaProperties properties) {
         return new JpaTargetFilterQueryManagement(targetFilterQueryRepository, targetRepository,
-                virtualPropertyReplacer, distributionSetManagement, targetManagement, quotaManagement,
-                properties.getDatabase());
+                virtualPropertyReplacer, distributionSetManagement, quotaManagement, properties.getDatabase());
     }
 
     /**
