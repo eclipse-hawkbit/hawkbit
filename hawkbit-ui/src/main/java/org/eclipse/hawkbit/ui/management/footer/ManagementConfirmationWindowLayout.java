@@ -174,7 +174,8 @@ public class ManagementConfirmationWindowLayout extends AbstractConfirmationWind
     }
 
     private CheckBox enableMaintenanceWindowControl() {
-        final CheckBox enableMaintenanceWindow = new CheckBox("Use maintenance window");
+        final CheckBox enableMaintenanceWindow = new CheckBox(i18n.getMessage("caption.maintenancewindow.enabled"));
+        enableMaintenanceWindow.setId(UIComponentIdProvider.MAINTENANCE_WINDOW_ENABLED_ID);
         enableMaintenanceWindow.addStyleName(ValoTheme.CHECKBOX_SMALL);
         enableMaintenanceWindow.addStyleName("dist-window-maintenance-window-enable");
         enableMaintenanceWindow.addValueChangeListener(event -> {

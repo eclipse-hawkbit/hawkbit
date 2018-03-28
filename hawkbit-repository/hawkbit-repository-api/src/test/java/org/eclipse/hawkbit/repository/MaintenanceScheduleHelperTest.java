@@ -9,11 +9,11 @@
 package org.eclipse.hawkbit.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
 
-import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
 import org.junit.Test;
 
@@ -45,7 +45,7 @@ public class MaintenanceScheduleHelperTest {
     @Description("Verifies that the InvalidMaintenanceScheduleException is thrown for invalid duration format")
     public void validateDurationInvalid() {
         final String duration = "10";
-        Assertions.assertThatThrownBy(() -> MaintenanceScheduleHelper.validateDuration(duration))
+        assertThatThrownBy(() -> MaintenanceScheduleHelper.validateDuration(duration))
                 .isInstanceOf(InvalidMaintenanceScheduleException.class).hasMessage("Provided duration is not valid")
                 .extracting("durationErrorIndex").containsExactly(2);
     }
@@ -54,7 +54,7 @@ public class MaintenanceScheduleHelperTest {
     @Description("Verifies that the InvalidMaintenanceScheduleException is thrown for invalid cron expression")
     public void validateCronScheduleInvalid() {
         final String invalidCron = "0 0 0 * * 6";
-        Assertions.assertThatThrownBy(() -> MaintenanceScheduleHelper.validateCronSchedule(invalidCron))
+        assertThatThrownBy(() -> MaintenanceScheduleHelper.validateCronSchedule(invalidCron))
                 .isInstanceOf(InvalidMaintenanceScheduleException.class)
                 .hasMessageContaining("Both, a day-of-week AND a day-of-month parameter, are not supported");
     }
@@ -74,7 +74,7 @@ public class MaintenanceScheduleHelperTest {
     @Description("Verifies the maintenance schedule when only one required field is present")
     public void validateMaintenanceScheduleAtLeastOneNotEmpty() {
         final String duration = "00:10";
-        Assertions.assertThatThrownBy(() -> MaintenanceScheduleHelper.validateMaintenanceSchedule(null, duration, null))
+        assertThatThrownBy(() -> MaintenanceScheduleHelper.validateMaintenanceSchedule(null, duration, null))
                 .isInstanceOf(InvalidMaintenanceScheduleException.class)
                 .hasMessage("All of schedule, duration and timezone should either be null or non empty.");
     }
@@ -88,10 +88,9 @@ public class MaintenanceScheduleHelperTest {
                 currentTime.getDayOfMonth(), currentTime.getMonthValue(), currentTime.getYear());
         final String duration = "00:10";
         final String timezone = ZonedDateTime.now().getOffset().getId().replace("Z", "+00:00");
-        Assertions
-                .assertThatThrownBy(
-                        () -> MaintenanceScheduleHelper.validateMaintenanceSchedule(cronSchedule, duration, timezone))
-                .isInstanceOf(InvalidMaintenanceScheduleException.class)
-                .hasMessage("No valid maintenance window available after current time");
+        assertThatThrownBy(
+                () -> MaintenanceScheduleHelper.validateMaintenanceSchedule(cronSchedule, duration, timezone))
+                        .isInstanceOf(InvalidMaintenanceScheduleException.class)
+                        .hasMessage("No valid maintenance window available after current time");
     }
 }

@@ -73,7 +73,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private final ManagementUIState managementUIState;
 
-    private final ManagementConfirmationWindowLayout manangementConfirmationWindowLayout;
+    private final ManagementConfirmationWindowLayout managementConfirmationWindowLayout;
 
     private final CountMessageLabel countMessageLabel;
 
@@ -93,7 +93,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         this.targetTagManagement = targetTagManagement;
         this.managementViewClientCriterion = managementViewClientCriterion;
         this.managementUIState = managementUIState;
-        this.manangementConfirmationWindowLayout = new ManagementConfirmationWindowLayout(i18n, eventBus,
+        this.managementConfirmationWindowLayout = new ManagementConfirmationWindowLayout(i18n, eventBus,
                 managementUIState, targetManagement, deploymentManagement, distributionSetManagement, uiProperties,
                 notification);
         this.countMessageLabel = new CountMessageLabel(eventBus, targetManagement, i18n, managementUIState,
@@ -116,7 +116,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
             UI.getCurrent().access(() -> {
                 if (!hasUnsavedActions()) {
                     closeUnsavedActionsWindow();
-                    final String message = manangementConfirmationWindowLayout.getConsolidatedMessage();
+                    final String message = managementConfirmationWindowLayout.getConsolidatedMessage();
                     if (message != null && message.length() > 0) {
                         notification.displaySuccess(message);
                     }
@@ -217,7 +217,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected void unsavedActionsWindowClosed() {
-        final String message = manangementConfirmationWindowLayout.getConsolidatedMessage();
+        final String message = managementConfirmationWindowLayout.getConsolidatedMessage();
         if (message != null && message.length() > 0) {
             notification.displaySuccess(message);
         }
@@ -225,8 +225,8 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected Component getUnsavedActionsWindowContent() {
-        manangementConfirmationWindowLayout.initialize();
-        return manangementConfirmationWindowLayout;
+        managementConfirmationWindowLayout.initialize();
+        return managementConfirmationWindowLayout;
     }
 
     @Override

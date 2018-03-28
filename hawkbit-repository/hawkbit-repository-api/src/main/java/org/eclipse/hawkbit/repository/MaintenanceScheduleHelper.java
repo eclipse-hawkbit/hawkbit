@@ -20,7 +20,6 @@ import org.springframework.util.StringUtils;
 
 import com.cronutils.model.Cron;
 import com.cronutils.model.CronType;
-import com.cronutils.model.definition.CronDefinition;
 import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.model.time.ExecutionTime;
 import com.cronutils.parser.CronParser;
@@ -33,15 +32,11 @@ import com.cronutils.parser.CronParser;
  */
 public final class MaintenanceScheduleHelper {
 
-    private static final CronParser cronParser;
+    private static final CronParser cronParser = new CronParser(
+            CronDefinitionBuilder.instanceDefinitionFor(CronType.QUARTZ));
 
     private MaintenanceScheduleHelper() {
         throw new IllegalStateException("Utility class");
-    }
-
-    static {
-        final CronDefinition cronDefinition = CronDefinitionBuilder.instanceDefinitionFor(CronType.QUARTZ);
-        cronParser = new CronParser(cronDefinition);
     }
 
     /**

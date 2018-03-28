@@ -29,8 +29,7 @@ public class InvalidMaintenanceScheduleException extends AbstractServerRtExcepti
      *            the message for this exception.
      */
     public InvalidMaintenanceScheduleException(final String message) {
-        super(message, SpServerError.SP_MAINTENANCE_SCHEDULE_INVALID);
-        this.durationErrorIndex = -1;
+        this(message, -1);
     }
 
     /**
@@ -55,8 +54,7 @@ public class InvalidMaintenanceScheduleException extends AbstractServerRtExcepti
      *            the cause for this exception.
      */
     public InvalidMaintenanceScheduleException(final String message, final Throwable cause) {
-        super(message, SpServerError.SP_MAINTENANCE_SCHEDULE_INVALID, cause);
-        this.durationErrorIndex = -1;
+        this(message, cause, -1);
     }
 
     /**

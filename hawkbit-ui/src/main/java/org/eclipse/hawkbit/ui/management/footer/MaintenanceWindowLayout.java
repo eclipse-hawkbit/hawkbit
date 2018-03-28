@@ -40,7 +40,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * maintenance schedule while assigning distribution set(s) to the target(s).
  */
 public class MaintenanceWindowLayout extends VerticalLayout {
-    private static final long serialVersionUID = 722511089585562455L;
+    private static final long serialVersionUID = 1L;
 
     private final VaadinMessageSource i18n;
 
@@ -215,7 +215,8 @@ public class MaintenanceWindowLayout extends VerticalLayout {
      * Label to translate the cron schedule to human readable format.
      */
     private void createMaintenanceScheduleTranslatorControl() {
-        scheduleTranslator = new LabelBuilder().name(i18n.getMessage(CRON_VALIDATION_ERROR)).buildLabel();
+        scheduleTranslator = new LabelBuilder().id(UIComponentIdProvider.MAINTENANCE_WINDOW_SCHEDULE_TRANSLATOR_ID)
+                .name(i18n.getMessage(CRON_VALIDATION_ERROR)).buildLabel();
         scheduleTranslator.addStyleName(ValoTheme.LABEL_TINY);
     }
 
