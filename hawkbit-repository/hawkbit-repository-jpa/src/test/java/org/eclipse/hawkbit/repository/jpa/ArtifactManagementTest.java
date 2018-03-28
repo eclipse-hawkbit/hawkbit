@@ -133,37 +133,39 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that the quota specifying the maximum number of artifacts per software module is enforced.")
-    public void quotaMaxArtifactsPerSoftwareModule() throws NoSuchAlgorithmException, IOException {
+    public void createSoftwareModuleArtifactsUntilQuotaIsExceeded() throws NoSuchAlgorithmException, IOException {
 
         // create a software module
         final JpaSoftwareModule sm1 = softwareModuleRepository
                 .save(new JpaSoftwareModule(osType, "sm1", "1.0", null, null));
 
         // now create artifacts for this module until the quota is exceeded
-        final long quota = quotaManagement.getMaxArtifactsPerSoftwareModule();
+        final long maxArtifacts = quotaManagement.getMaxArtifactsPerSoftwareModule();
         final List<Long> artifactIds = Lists.newArrayList();
-        for (int i = 0; i < quota; ++i) {
+        for (int i = 0; i < maxArtifacts; ++i) {
             final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
             artifactIds.add(artifactManagement.create(new ByteArrayInputStream(random), sm1.getId(), "file" + i, false)
                     .getId());
         }
-        assertThat(artifactRepository.findBySoftwareModuleId(PAGE, sm1.getId()).getTotalElements()).isEqualTo(quota);
+        assertThat(artifactRepository.findBySoftwareModuleId(PAGE, sm1.getId()).getTotalElements())
+                .isEqualTo(maxArtifacts);
 
         // create one mode to trigger the quota exceeded error
         assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> {
             final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
-            artifactManagement.create(new ByteArrayInputStream(random), sm1.getId(), "file" + quota, false);
+            artifactManagement.create(new ByteArrayInputStream(random), sm1.getId(), "file" + maxArtifacts, false);
         });
 
         // delete one of the artifacts
         artifactManagement.delete(artifactIds.get(0));
         assertThat(artifactRepository.findBySoftwareModuleId(PAGE, sm1.getId()).getTotalElements())
-                .isEqualTo(quota - 1);
+                .isEqualTo(maxArtifacts - 1);
 
         // now we should be able to create an artifact again
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
         artifactManagement.create(new ByteArrayInputStream(random), sm1.getId(), "fileXYZ", false);
-        assertThat(artifactRepository.findBySoftwareModuleId(PAGE, sm1.getId()).getTotalElements()).isEqualTo(quota);
+        assertThat(artifactRepository.findBySoftwareModuleId(PAGE, sm1.getId()).getTotalElements())
+                .isEqualTo(maxArtifacts);
 
     }
 

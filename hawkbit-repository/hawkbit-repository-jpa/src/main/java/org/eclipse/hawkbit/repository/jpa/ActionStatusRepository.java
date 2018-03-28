@@ -43,8 +43,8 @@ public interface ActionStatusRepository
      * Counts {@link ActionStatus} entries of given {@link Action} in
      * repository.
      *
-     * @param action
-     *            to count status entries
+     * @param actionId
+     *            of the action to count status entries for
      * @return number of actions in repository
      */
     long countByActionId(Long actionId);

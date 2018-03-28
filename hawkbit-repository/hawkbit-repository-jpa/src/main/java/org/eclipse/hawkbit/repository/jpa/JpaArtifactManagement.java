@@ -63,8 +63,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     JpaArtifactManagement(final LocalArtifactRepository localArtifactRepository,
             final SoftwareModuleRepository softwareModuleRepository, final ArtifactRepository artifactRepository,
-            final QuotaManagement quotaManagement,
-            final TenantAware tenantAware) {
+            final QuotaManagement quotaManagement, final TenantAware tenantAware) {
         this.localArtifactRepository = localArtifactRepository;
         this.softwareModuleRepository = softwareModuleRepository;
         this.artifactRepository = artifactRepository;
@@ -121,10 +120,18 @@ public class JpaArtifactManagement implements ArtifactManagement {
         return storeArtifactMetadata(softwareModule, filename, result, existing);
     }
 
-    private void assertArtifactQuota(final long moduleId, final int requested) {
-        QuotaHelper.assertAssignmentQuota(moduleId, requested, quotaManagement.getMaxArtifactsPerSoftwareModule(),
+    /**
+     * Enforces the 'max artifacts per software module' quota for the software
+     * module with the given ID.
+     * 
+     * @param id
+     *            of the software module
+     * @param requested
+     *            number of artifacts to check
+     */
+    private void assertArtifactQuota(final long id, final int requested) {
+        QuotaHelper.assertAssignmentQuota(id, requested, quotaManagement.getMaxArtifactsPerSoftwareModule(),
                 Artifact.class, SoftwareModule.class, localArtifactRepository::countBySoftwareModuleId);
-
     }
 
     @Override

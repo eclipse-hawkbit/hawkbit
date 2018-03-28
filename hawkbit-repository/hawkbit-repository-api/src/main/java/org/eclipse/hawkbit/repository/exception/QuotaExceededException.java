@@ -78,6 +78,9 @@ public final class QuotaExceededException extends AbstractServerRtException {
      * @param requested
      *            The number of entities that shall be assigned to the specified
      *            parent entity.
+     * @param quota
+     *            The maximum number of entities that can be assigned to the
+     *            parent entity.
      */
     public QuotaExceededException(final Class<?> type, final Class<?> parentType, final Long parentId,
             final long requested, final long quota) {
@@ -97,6 +100,9 @@ public final class QuotaExceededException extends AbstractServerRtException {
      *            The ID of the parent entity.
      * @param requested
      *            The number of entities that shall be assigned to the specified
+     *            parent entity.
+     * @param quota
+     *            The maximum number of entities that can be assigned to the
      *            parent entity.
      */
     public QuotaExceededException(final String type, final String parentType, final Long parentId, final long requested,
