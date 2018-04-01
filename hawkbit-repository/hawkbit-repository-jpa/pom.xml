@@ -20,7 +20,6 @@
    <name>hawkBit :: Repository :: JPA Implementation</name>
 
    <properties>
-      <powermock.version>1.7.1</powermock.version> 
       <javassist.version>3.20.0-GA</javassist.version>
       <jaxb.api.version>2.3.0</jaxb.api.version>
    </properties>
@@ -104,17 +103,15 @@
          <scope>test</scope>
       </dependency>
       <dependency>
-         <groupId>org.powermock</groupId>
-         <artifactId>powermock-module-junit4</artifactId>
-         <version>${powermock.version}</version>
-         <scope>test</scope>
+        <groupId>org.powermock</groupId>
+        <artifactId>powermock-module-junit4</artifactId>
+        <scope>test</scope>
       </dependency>      
       <dependency>
         <groupId>org.powermock</groupId>
-        <artifactId>powermock-api-mockito2</artifactId>
-        <version>${powermock.version}</version>
+        <artifactId>powermock-api-mockito</artifactId>
         <scope>test</scope>
-      </dependency>
+      </dependency>   
       <dependency>
         <groupId>javax.annotation</groupId>
         <artifactId>javax.annotation-api</artifactId>

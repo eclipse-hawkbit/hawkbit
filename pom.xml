@@ -123,8 +123,6 @@
       <spring-hateoas.version>0.23.0.RELEASE</spring-hateoas.version>      
       <!-- Java 8 support -->
       <assertj.version>3.6.2</assertj.version>
-      <!-- Java 9 support -->
-      <mockito.version>2.13.0</mockito.version>
       <!-- Repeatable migrations, Disabling clean etc. -->
       <flyway.version>4.0.3</flyway.version>
       <!-- Improved integration test capabilities -->
@@ -168,8 +166,9 @@
       <allure.version>1.5.4</allure.version>
       <eclipselink.version>2.7.1</eclipselink.version>
       <gwtmockito.version>1.1.6</gwtmockito.version>
+      <powermock.version>1.6.5</powermock.version>
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
-      <guava.version>19.0</guava.version>
+      <guava.version>24.1-jre</guava.version>
       <mariadb-java-client.version>2.0.2</mariadb-java-client.version>
       <mssql-jdbc.version>6.4.0.jre8</mssql-jdbc.version>
       <embedded-mongo.version>1.50.5</embedded-mongo.version>
@@ -807,6 +806,19 @@
             <version>${gwtmockito.version}</version>
             <scope>test</scope>
          </dependency>
+         <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-junit4</artifactId>
+            <version>${powermock.version}</version>
+            <scope>test</scope>
+         </dependency>
+         <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito</artifactId>
+            <version>${powermock.version}</version>
+            <scope>test</scope>
+         </dependency>
+         
          <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
