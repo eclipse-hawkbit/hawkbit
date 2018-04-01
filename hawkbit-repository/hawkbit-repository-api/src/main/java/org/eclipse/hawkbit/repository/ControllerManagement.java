@@ -15,10 +15,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.validation.ConstraintViolationException;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
+import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
@@ -30,7 +33,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -64,7 +66,7 @@ public interface ControllerManagement {
      * 
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Action addCancelActionStatus(@NotNull ActionStatusCreate create);
+    Action addCancelActionStatus(@NotNull @Valid ActionStatusCreate create);
 
     /**
      * Retrieves assigned {@link SoftwareModule} of a target.
@@ -74,7 +76,7 @@ public interface ControllerManagement {
      * @return {@link SoftwareModule} identified by ID
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Optional<SoftwareModule> getSoftwareModule(@NotNull Long moduleId);
+    Optional<SoftwareModule> getSoftwareModule(long moduleId);
 
     /**
      * Retrieves {@link SoftwareModuleMetadata} where
@@ -108,7 +110,7 @@ public interface ControllerManagement {
      *             {@link ActionStatusCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    ActionStatus addInformationalActionStatus(@NotNull ActionStatusCreate create);
+    ActionStatus addInformationalActionStatus(@NotNull @Valid ActionStatusCreate create);
 
     /**
      * Adds an {@link ActionStatus} entry for an update {@link Action} including
@@ -130,7 +132,7 @@ public interface ControllerManagement {
      *             {@link ActionStatusCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Action addUpdateActionStatus(@NotNull ActionStatusCreate create);
+    Action addUpdateActionStatus(@NotNull @Valid ActionStatusCreate create);
 
     /**
      * Retrieves oldest {@link Action} that is active and assigned to a
@@ -146,7 +148,7 @@ public interface ControllerManagement {
      * 
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Optional<Action> findOldestActiveActionByTarget(@NotNull String controllerId);
+    Optional<Action> findOldestActiveActionByTarget(@NotEmpty String controllerId);
 
     /**
      * Get the {@link Action} entity for given actionId with all lazy
@@ -157,7 +159,7 @@ public interface ControllerManagement {
      * @return the corresponding {@link Action}
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Optional<Action> findActionWithDetails(@NotNull Long actionId);
+    Optional<Action> findActionWithDetails(long actionId);
 
     /**
      * Retrieves all the {@link ActionStatus} entries of the given
@@ -173,7 +175,7 @@ public interface ControllerManagement {
      *             if action with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Page<ActionStatus> findActionStatusByAction(@NotNull Pageable pageReq, @NotNull Long actionId);
+    Page<ActionStatus> findActionStatusByAction(@NotNull Pageable pageReq, long actionId);
 
     /**
      * Register new target in the repository (plug-and-play) and in case it
@@ -207,14 +209,53 @@ public interface ControllerManagement {
      *
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Optional<Action> getActionForDownloadByTargetAndSoftwareModule(@NotEmpty String controllerId,
-            @NotNull Long moduleId);
+    Optional<Action> getActionForDownloadByTargetAndSoftwareModule(@NotEmpty String controllerId, long moduleId);
 
     /**
+     * Returns configured polling interval at which the controller polls hawkBit
+     * server.
+     *
      * @return current {@link TenantConfigurationKey#POLLING_TIME_INTERVAL}.
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     String getPollingTime();
+
+    /**
+     * Returns the configured minimum polling interval.
+     *
+     * @return current {@link TenantConfigurationKey#MIN_POLLING_TIME_INTERVAL}.
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    String getMinPollingTime();
+
+    /**
+     * Returns the count to be used for reducing polling interval while calling
+     * {@link ControllerManagement#getPollingTimeForAction()}.
+     *
+     * @return configured value of
+     *         {@link TenantConfigurationKey#MAINTENANCE_WINDOW_POLL_COUNT}.
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    int getMaintenanceWindowPollCount();
+
+    /**
+     * Returns polling time based on the maintenance window for an action.
+     * Server will reduce the polling interval as the start time for maintenance
+     * window approaches, so that at least these many attempts are made between
+     * current polling until start of maintenance window. Poll time keeps
+     * reducing with MinPollingTime as lower limit
+     * {@link TenantConfigurationKey#MIN_POLLING_TIME_INTERVAL}. After the start
+     * of maintenance window, it resets to default
+     * {@link TenantConfigurationKey#POLLING_TIME_INTERVAL}.
+     *
+     * @param actionId
+     *            id the {@link Action} for which polling time is calculated
+     *            based on it having maintenance window or not
+     *
+     * @return current {@link TenantConfigurationKey#POLLING_TIME_INTERVAL}.
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    String getPollingTimeForAction(long actionId);
 
     /**
      * Checks if a given target has currently or has even been assigned to the
@@ -258,7 +299,7 @@ public interface ControllerManagement {
      *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    boolean hasTargetArtifactAssigned(@NotNull Long targetId, @NotEmpty String sha1Hash);
+    boolean hasTargetArtifactAssigned(long targetId, @NotEmpty String sha1Hash);
 
     /**
      * Registers retrieved status for given {@link Target} and {@link Action} if
@@ -275,15 +316,18 @@ public interface ControllerManagement {
      *             if action with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Action registerRetrieved(@NotNull Long actionId, String message);
+    Action registerRetrieved(long actionId, String message);
 
     /**
-     * Updates attributes of the controller.
+     * Updates attributes of the controller according to the given
+     * {@link UpdateMode}.
      *
      * @param controllerId
      *            to update
      * @param attributes
      *            to insert
+     * @param mode
+     *            the update mode or <code>null</code>
      *
      * @return updated {@link Target}
      *
@@ -293,7 +337,8 @@ public interface ControllerManagement {
      *             if maximum number of attribzes per target is exceeded
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Target updateControllerAttributes(@NotEmpty String controllerId, @NotNull Map<String, String> attributes);
+    Target updateControllerAttributes(@NotEmpty String controllerId, @NotNull Map<String, String> attributes,
+            UpdateMode mode);
 
     /**
      * Finds {@link Target} based on given controller ID returns found Target
@@ -321,7 +366,7 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
-    Optional<Target> get(@NotNull Long targetId);
+    Optional<Target> get(long targetId);
 
     /**
      * Retrieves the specified number of messages from action history of the
@@ -348,5 +393,24 @@ public interface ControllerManagement {
      * @return action history.
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    List<String> getActionHistoryMessages(@NotNull Long actionId, final int messageCount);
+    List<String> getActionHistoryMessages(long actionId, int messageCount);
+
+    /**
+     * Cancels given {@link Action} for this {@link Target}. However, it might
+     * be possible that the controller will continue to work on the cancelation.
+     * The controller needs to acknowledge or reject the cancelation using
+     * {@link DdiRootController#postCancelActionFeedback}.
+     *
+     * @param actionId
+     *            to be canceled
+     *
+     * @return canceled {@link Action}
+     *
+     * @throws CancelActionNotAllowedException
+     *             in case the given action is not active or is already canceled
+     * @throws EntityNotFoundException
+     *             if action with given actionId does not exist.
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    Action cancelAction(long actionId);
 }

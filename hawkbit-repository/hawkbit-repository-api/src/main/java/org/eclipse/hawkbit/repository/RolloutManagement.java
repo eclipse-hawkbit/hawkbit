@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.validation.ConstraintViolationException;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -31,7 +33,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.RolloutGroupsValidation;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -71,7 +72,7 @@ public interface RolloutManagement {
      * otherwise.
      * 
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
+    @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
     void handleRollouts();
 
     /**
@@ -123,7 +124,7 @@ public interface RolloutManagement {
      * @throws ConstraintViolationException
      *             if rollout or group parameters are invalid.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_CREATE)
     Rollout create(@NotNull RolloutCreate create, int amountGroup, @NotNull RolloutGroupConditions conditions);
 
     /**
@@ -157,8 +158,8 @@ public interface RolloutManagement {
      * @throws ConstraintViolationException
      *             if rollout or group parameters are invalid
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    Rollout create(@NotNull RolloutCreate rollout, @NotNull List<RolloutGroupCreate> groups,
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_CREATE)
+    Rollout create(@NotNull @Valid RolloutCreate rollout, @NotNull @Valid List<RolloutGroupCreate> groups,
             RolloutGroupConditions conditions);
 
     /**
@@ -179,7 +180,7 @@ public interface RolloutManagement {
      *             {@link RolloutGroupCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
-    ListenableFuture<RolloutGroupsValidation> validateTargetsInGroups(List<RolloutGroupCreate> groups,
+    ListenableFuture<RolloutGroupsValidation> validateTargetsInGroups(@Valid List<RolloutGroupCreate> groups,
             String targetFilter, Long createdAt);
 
     /**
@@ -253,7 +254,7 @@ public interface RolloutManagement {
      *         not exists
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Optional<Rollout> get(@NotNull Long rolloutId);
+    Optional<Rollout> get(long rolloutId);
 
     /**
      * Retrieves a specific rollout by its name.
@@ -278,7 +279,7 @@ public interface RolloutManagement {
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Optional<Rollout> getWithDetailedStatus(@NotNull Long rolloutId);
+    Optional<Rollout> getWithDetailedStatus(long rolloutId);
 
     /**
      * Checks if rollout with given ID exists.
@@ -288,7 +289,7 @@ public interface RolloutManagement {
      * 
      * @return <code>true</code> if rollout exists
      */
-    boolean exists(@NotNull Long rolloutId);
+    boolean exists(long rolloutId);
 
     /**
      * Pauses a rollout which is currently running. The Rollout switches
@@ -312,8 +313,8 @@ public interface RolloutManagement {
      *             Only running rollouts can be paused.
      * 
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    void pauseRollout(@NotNull Long rolloutId);
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_HANDLE)
+    void pauseRollout(long rolloutId);
 
     /**
      * Resumes a paused rollout. The rollout switches back to
@@ -329,8 +330,8 @@ public interface RolloutManagement {
      *             if given rollout is not in {@link RolloutStatus#PAUSED}. Only
      *             paused rollouts can be resumed.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    void resumeRollout(@NotNull Long rolloutId);
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_HANDLE)
+    void resumeRollout(long rolloutId);
 
     /**
      * Starts a rollout which has been created. The rollout must be in
@@ -350,8 +351,8 @@ public interface RolloutManagement {
      *             if given rollout is not in {@link RolloutStatus#READY}. Only
      *             ready rollouts can be started.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    Rollout start(@NotNull Long rolloutId);
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_HANDLE)
+    Rollout start(long rolloutId);
 
     /**
      * Update rollout details.
@@ -368,8 +369,8 @@ public interface RolloutManagement {
      *             reference
      * 
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    Rollout update(@NotNull RolloutUpdate update);
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
+    Rollout update(@NotNull @Valid RolloutUpdate update);
 
     /**
      * Deletes a rollout. A rollout might be deleted asynchronously by
@@ -379,7 +380,7 @@ public interface RolloutManagement {
      * @param rolloutId
      *            the ID of the rollout to be deleted
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    void delete(@NotNull Long rolloutId);
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_DELETE)
+    void delete(long rolloutId);
 
 }

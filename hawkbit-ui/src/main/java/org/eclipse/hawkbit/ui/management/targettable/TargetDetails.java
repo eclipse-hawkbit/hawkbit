@@ -12,8 +12,8 @@ import java.net.URI;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.ui.common.tagdetails.TargetTagToken;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -141,9 +140,9 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
                     getSelectedBaseEntity().getSecurityToken(),
                     SPDateTimeUtil.getFormattedDate(getSelectedBaseEntity().getLastTargetQuery()));
 
-            populateDistributionDtls(installedDistLayout, deploymentManagement
-                    .getAssignedDistributionSet(getSelectedBaseEntity().getControllerId()).orElse(null));
             populateDistributionDtls(assignedDistLayout, deploymentManagement
+                    .getAssignedDistributionSet(getSelectedBaseEntity().getControllerId()).orElse(null));
+            populateDistributionDtls(installedDistLayout, deploymentManagement
                     .getInstalledDistributionSet(getSelectedBaseEntity().getControllerId()).orElse(null));
         } else {
             updateDetailsLayout(null, null, null, null);
@@ -164,14 +163,12 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         detailsTabLayout.removeAllComponents();
 
         final Label controllerLabel = SPUIComponentProvider.createNameValueLabel(
-                getI18n().getMessage("label.target.id"),
-                HawkbitCommonUtil.trimAndNullIfEmpty(controllerId) == null ? "" : controllerId);
+                getI18n().getMessage("label.target.id"), controllerId == null ? "" : controllerId);
         controllerLabel.setId(UIComponentIdProvider.TARGET_CONTROLLER_ID);
         detailsTabLayout.addComponent(controllerLabel);
 
         final Label lastPollDtLabel = SPUIComponentProvider.createNameValueLabel(
-                getI18n().getMessage("label.target.lastpolldate"),
-                HawkbitCommonUtil.trimAndNullIfEmpty(lastQueryDate) == null ? "" : lastQueryDate);
+                getI18n().getMessage("label.target.lastpolldate"), lastQueryDate == null ? "" : lastQueryDate);
         lastPollDtLabel.setId(UIComponentIdProvider.TARGET_LAST_QUERY_DT);
         detailsTabLayout.addComponent(lastPollDtLabel);
 

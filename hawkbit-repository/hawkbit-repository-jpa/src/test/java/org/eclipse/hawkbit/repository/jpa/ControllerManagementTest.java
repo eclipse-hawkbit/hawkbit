@@ -15,6 +15,8 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -23,6 +25,7 @@ import javax.validation.ConstraintViolationException;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
+import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
@@ -120,8 +123,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         verifyThrownExceptionBy(() -> controllerManagement.registerRetrieved(NOT_EXIST_IDL, "test message"), "Action");
 
-        verifyThrownExceptionBy(() -> controllerManagement.updateControllerAttributes(NOT_EXIST_ID, Maps.newHashMap()),
-                "Target");
+        verifyThrownExceptionBy(
+                () -> controllerManagement.updateControllerAttributes(NOT_EXIST_ID, Maps.newHashMap(), null), "Target");
     }
 
     @Test
@@ -141,6 +144,33 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
         assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
                 Action.Status.FINISHED, Action.Status.FINISHED, false);
+
+        assertThat(actionStatusRepository.count()).isEqualTo(7);
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(7);
+    }
+
+    @Test
+    @Description("Controller confirmation failes with invalid messages.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void controllerConfirmationFailsWithInvalidMessages() {
+        final Long actionId = createTargetAndAssignDs();
+
+        simulateIntermediateStatusOnUpdate(actionId);
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> controllerManagement.addUpdateActionStatus(entityFactory.actionStatus()
+                        .create(actionId).status(Action.Status.FINISHED).message(INVALID_TEXT_HTML)))
+                .as("set invalid description text should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> controllerManagement.addUpdateActionStatus(
+                        entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED)
+                                .messages(Arrays.asList("this is valid.", INVALID_TEXT_HTML))))
+                .as("set invalid description text should not be created");
 
         assertThat(actionStatusRepository.count()).isEqualTo(6);
         assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(6);
@@ -218,8 +248,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
                 Action.Status.CANCELED, Action.Status.FINISHED, false);
 
-        assertThat(actionStatusRepository.count()).isEqualTo(7);
-        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(7);
+        assertThat(actionStatusRepository.count()).isEqualTo(8);
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(8);
     }
 
     @Test
@@ -245,8 +275,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
                 Action.Status.CANCELED, Action.Status.CANCELED, false);
 
-        assertThat(actionStatusRepository.count()).isEqualTo(7);
-        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(7);
+        assertThat(actionStatusRepository.count()).isEqualTo(8);
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(8);
     }
 
     @Test
@@ -273,8 +303,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.RUNNING, Action.Status.CANCEL_REJECTED, true);
 
-        assertThat(actionStatusRepository.count()).isEqualTo(7);
-        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(7);
+        assertThat(actionStatusRepository.count()).isEqualTo(8);
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(8);
     }
 
     @Test
@@ -301,8 +331,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.RUNNING, Action.Status.ERROR, true);
 
-        assertThat(actionStatusRepository.count()).isEqualTo(7);
-        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(7);
+        assertThat(actionStatusRepository.count()).isEqualTo(8);
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(8);
     }
 
     @Step
@@ -330,6 +360,11 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 Action.Status.CANCELING, Action.Status.DOWNLOAD, true);
 
         controllerManagement
+                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.DOWNLOADED));
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+                Action.Status.CANCELING, Action.Status.DOWNLOADED, true);
+
+        controllerManagement
                 .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RETRIEVED));
         assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.CANCELING, Action.Status.RETRIEVED, true);
@@ -351,6 +386,10 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.DOWNLOAD));
         assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.RUNNING, Action.Status.DOWNLOAD, true);
+        controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.DOWNLOADED));
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+                Action.Status.RUNNING, Action.Status.DOWNLOADED, true);
 
         controllerManagement
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RETRIEVED));
@@ -621,7 +660,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     private void addAttributeAndVerify(final String controllerId) {
         final Map<String, String> testData = Maps.newHashMapWithExpectedSize(1);
         testData.put("test1", "testdata1");
-        controllerManagement.updateControllerAttributes(controllerId, testData);
+        controllerManagement.updateControllerAttributes(controllerId, testData, null);
 
         assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong")
                 .isEqualTo(testData);
@@ -631,7 +670,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     private void addSecondAttributeAndVerify(final String controllerId) {
         final Map<String, String> testData = Maps.newHashMapWithExpectedSize(2);
         testData.put("test2", "testdata20");
-        controllerManagement.updateControllerAttributes(controllerId, testData);
+        controllerManagement.updateControllerAttributes(controllerId, testData, null);
 
         testData.put("test1", "testdata1");
         assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong")
@@ -643,11 +682,109 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Map<String, String> testData = Maps.newHashMapWithExpectedSize(2);
         testData.put("test1", "testdata12");
 
-        controllerManagement.updateControllerAttributes(controllerId, testData);
+        controllerManagement.updateControllerAttributes(controllerId, testData, null);
 
         testData.put("test2", "testdata20");
         assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong")
                 .isEqualTo(testData);
+    }
+
+    @Test
+    @Description("Ensures that target attributes can be updated using different update modes.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 4) })
+    public void updateTargetAttributesWithDifferentUpdateModes() {
+
+        final String controllerId = "testCtrl";
+        testdataFactory.createTarget(controllerId);
+
+        // no update mode
+        updateTargetAttributesWithoutUpdateMode(controllerId);
+
+        // update mode REPLACE
+        updateTargetAttributesWithUpdateModeReplace(controllerId);
+
+        // update mode MERGE
+        updateTargetAttributesWithUpdateModeMerge(controllerId);
+
+        // update mode REMOVE
+        updateTargetAttributesWithUpdateModeRemove(controllerId);
+
+    }
+
+    @Step
+    private void updateTargetAttributesWithUpdateModeRemove(final String controllerId) {
+
+        final int previousSize = targetManagement.getControllerAttributes(controllerId).size();
+
+        // update the attributes using update mode REMOVE
+        final Map<String, String> removeAttributes = new HashMap<>();
+        removeAttributes.put("k1", "foo");
+        removeAttributes.put("k3", "bar");
+        controllerManagement.updateControllerAttributes(controllerId, removeAttributes, UpdateMode.REMOVE);
+
+        // verify attribute removal
+        final Map<String, String> updatedAttributes = targetManagement.getControllerAttributes(controllerId);
+        assertThat(updatedAttributes.size()).isEqualTo(previousSize - 2);
+        assertThat(updatedAttributes).doesNotContainKeys("k1", "k3");
+
+    }
+
+    @Step
+    private void updateTargetAttributesWithUpdateModeMerge(final String controllerId) {
+        // get the current attributes
+        final HashMap<String, String> attributes = new HashMap<>(
+                targetManagement.getControllerAttributes(controllerId));
+
+        // update the attributes using update mode MERGE
+        final Map<String, String> mergeAttributes = new HashMap<>();
+        mergeAttributes.put("k1", "v1_modified_again");
+        mergeAttributes.put("k4", "v4");
+        controllerManagement.updateControllerAttributes(controllerId, mergeAttributes, UpdateMode.MERGE);
+
+        // verify attribute merge
+        final Map<String, String> updatedAttributes = targetManagement.getControllerAttributes(controllerId);
+        assertThat(updatedAttributes.size()).isEqualTo(4);
+        assertThat(updatedAttributes).containsAllEntriesOf(mergeAttributes);
+        assertThat(updatedAttributes.get("k1")).isEqualTo("v1_modified_again");
+        attributes.keySet().forEach(assertThat(updatedAttributes)::containsKey);
+    }
+
+    @Step
+    private void updateTargetAttributesWithUpdateModeReplace(final String controllerId) {
+
+        // get the current attributes
+        final HashMap<String, String> attributes = new HashMap<>(
+                targetManagement.getControllerAttributes(controllerId));
+
+        // update the attributes using update mode REPLACE
+        final Map<String, String> replacementAttributes = new HashMap<>();
+        replacementAttributes.put("k1", "v1_modified");
+        replacementAttributes.put("k2", "v2");
+        replacementAttributes.put("k3", "v3");
+        controllerManagement.updateControllerAttributes(controllerId, replacementAttributes, UpdateMode.REPLACE);
+
+        // verify attribute replacement
+        final Map<String, String> updatedAttributes = targetManagement.getControllerAttributes(controllerId);
+        assertThat(updatedAttributes.size()).isEqualTo(replacementAttributes.size());
+        assertThat(updatedAttributes).containsAllEntriesOf(replacementAttributes);
+        assertThat(updatedAttributes.get("k1")).isEqualTo("v1_modified");
+        attributes.entrySet().forEach(assertThat(updatedAttributes)::doesNotContain);
+    }
+
+    @Step
+    private void updateTargetAttributesWithoutUpdateMode(final String controllerId) {
+
+        // set the initial attributes
+        final Map<String, String> attributes = new HashMap<>();
+        attributes.put("k0", "v0");
+        attributes.put("k1", "v1");
+        controllerManagement.updateControllerAttributes(controllerId, attributes, null);
+
+        // verify initial attributes
+        final Map<String, String> updatedAttributes = targetManagement.getControllerAttributes(controllerId);
+        assertThat(updatedAttributes.size()).isEqualTo(attributes.size());
+        assertThat(updatedAttributes).containsAllEntriesOf(attributes);
     }
 
     @Test
@@ -693,7 +830,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         for (int i = 0; i < allowedAttributes; i++) {
             testData.put(keyPrefix + i, valuePrefix);
         }
-        controllerManagement.updateControllerAttributes(controllerId, testData);
+        controllerManagement.updateControllerAttributes(controllerId, testData, null);
     }
 
     @Test

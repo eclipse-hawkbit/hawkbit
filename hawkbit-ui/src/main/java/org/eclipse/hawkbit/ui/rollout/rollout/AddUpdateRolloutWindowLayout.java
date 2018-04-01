@@ -52,7 +52,6 @@ import org.eclipse.hawkbit.ui.management.footer.ActionTypeOptionGroupLayout;
 import org.eclipse.hawkbit.ui.management.footer.ActionTypeOptionGroupLayout.ActionTypeOption;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.groupschart.GroupsPieChart;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -77,6 +76,7 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Validator;
 import com.vaadin.data.util.converter.StringToIntegerConverter;
 import com.vaadin.data.validator.IntegerRangeValidator;
+import com.vaadin.data.validator.LongRangeValidator;
 import com.vaadin.data.validator.NullValidator;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.ComboBox;
@@ -98,6 +98,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     private static final Logger LOGGER = LoggerFactory.getLogger(AddUpdateRolloutWindowLayout.class);
 
     private static final String MESSAGE_ROLLOUT_FIELD_VALUE_RANGE = "message.rollout.field.value.range";
+
+    private static final String MESSAGE_ROLLOUT_FILTER_TARGET_EXISTS = "message.rollout.filter.target.exists";
 
     private static final String MESSAGE_ENTER_NUMBER = "message.enter.number";
 
@@ -201,8 +203,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
      * Save or update the rollout.
      */
     private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
+
         @Override
         public void saveOrUpdate() {
+
             if (editRolloutEnabled) {
                 editRollout();
                 return;
@@ -224,6 +228,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         }
 
         private boolean duplicateCheck() {
+            if (!StringUtils.hasText(rolloutName.getValue())) {
+                uiNotification.displayValidationError(i18n.getMessage("message.rollout.name.empty"));
+                return false;
+            }
             if (rolloutManagement.getByName(getRolloutName()).isPresent()) {
                 uiNotification
                         .displayValidationError(i18n.getMessage("message.rollout.duplicate.check", getRolloutName()));
@@ -266,9 +274,12 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         }
 
         private boolean duplicateCheckForEdit() {
+            if (!StringUtils.hasText(rolloutName.getValue())) {
+                uiNotification.displayValidationError(i18n.getMessage("message.rollout.name.empty"));
+                return false;
+            }
             final String rolloutNameVal = getRolloutName();
-            if (!rollout.getName().equals(rolloutNameVal)
-                    && rolloutManagement.getByName(rolloutNameVal).isPresent()) {
+            if (!rollout.getName().equals(rolloutNameVal) && rolloutManagement.getByName(rolloutNameVal).isPresent()) {
                 uiNotification
                         .displayValidationError(i18n.getMessage("message.rollout.duplicate.check", rolloutNameVal));
                 return false;
@@ -277,7 +288,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         }
 
         private String getRolloutName() {
-            return HawkbitCommonUtil.trimAndNullIfEmpty(rolloutName.getValue());
+            return StringUtils.trimWhitespace(rolloutName.getValue());
         }
 
         private Rollout saveRollout() {
@@ -344,6 +355,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             return (AutoStartOptionGroupLayout.AutoStartOption) autoStartOptionGroupLayout.getAutoStartOptionGroup()
                     .getValue();
         }
+
     }
 
     CommonDialogWindow getWindow(final Long rolloutId, final boolean copy) {
@@ -443,6 +455,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         addComponent(getMandatoryLabel("prompt.target.filter"), 0, 2);
         addComponent(targetFilterQueryCombo, 1, 2);
         targetFilterQueryCombo.addValidator(nullValidator);
+        targetFilterQueryCombo.addValidator(new TargetExistsValidator());
         targetFilterQuery.removeValidator(nullValidator);
 
         addComponent(getLabel("textfield.description"), 0, 3);
@@ -734,8 +747,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private void populateTargetFilterQuery(final Rollout rollout) {
-        final Page<TargetFilterQuery> filterQueries = targetFilterQueryManagement
-                .findByQuery(new PageRequest(0, 1), rollout.getTargetFilterQuery());
+        final Page<TargetFilterQuery> filterQueries = targetFilterQueryManagement.findByQuery(new PageRequest(0, 1),
+                rollout.getTargetFilterQuery());
         if (filterQueries.getTotalElements() > 0) {
             final TargetFilterQuery filterQuery = filterQueries.getContent().get(0);
             targetFilterQueryCombo.setValue(filterQuery.getName());
@@ -751,13 +764,12 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private String getTargetFilterQuery() {
-        if (null != targetFilterQueryCombo.getValue()
-                && HawkbitCommonUtil.trimAndNullIfEmpty((String) targetFilterQueryCombo.getValue()) != null) {
-            final Item filterItem = targetFilterQueryCombo.getContainerDataSource()
-                    .getItem(targetFilterQueryCombo.getValue());
-            return (String) filterItem.getItemProperty("query").getValue();
+        if (StringUtils.isEmpty(targetFilterQueryCombo.getValue())) {
+            return null;
         }
-        return null;
+        final Item filterItem = targetFilterQueryCombo.getContainerDataSource()
+                .getItem(targetFilterQueryCombo.getValue());
+        return (String) filterItem.getItemProperty("query").getValue();
     }
 
     private void setDefaultSaveStartGroupOption() {
@@ -858,14 +870,26 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         }
 
         private boolean isNoOfGroupsOrTargetFilterEmpty() {
-            return HawkbitCommonUtil.trimAndNullIfEmpty(noOfGroups.getValue()) == null
-                    || (HawkbitCommonUtil.trimAndNullIfEmpty((String) targetFilterQueryCombo.getValue()) == null
-                            && targetFilterQuery.getValue() == null);
+            return !StringUtils.hasText(noOfGroups.getValue())
+                    || (!StringUtils.hasText((String) targetFilterQueryCombo.getValue())
+                            && !StringUtils.hasText(targetFilterQuery.getValue()));
         }
     }
 
     private int getGroupSize() {
         return (int) Math.ceil((double) totalTargetsCount / Double.parseDouble(noOfGroups.getValue()));
+    }
+
+    class TargetExistsValidator implements Validator {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public void validate(final Object value) {
+            if (value != null) {
+                new LongRangeValidator(i18n.getMessage(MESSAGE_ROLLOUT_FILTER_TARGET_EXISTS), 1L, null)
+                        .validate(totalTargetsCount);
+            }
+        }
     }
 
     class ThresholdFieldValidator implements Validator {
@@ -936,10 +960,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             window.updateAllComponents(this);
             window.setOrginaleValues();
 
-            updateGroupsChart(
-                    rolloutGroupManagement.findByRollout(new PageRequest(0, quotaManagement.getMaxRolloutGroupsPerRollout()),
-                            rollout.getId()).getContent(),
-                    rollout.getTotalTargets());
+            updateGroupsChart(rolloutGroupManagement
+                    .findByRollout(new PageRequest(0, quotaManagement.getMaxRolloutGroupsPerRollout()), rollout.getId())
+                    .getContent(), rollout.getTotalTargets());
         }
 
         totalTargetsCount = targetManagement.countByRsql(rollout.getTargetFilterQuery());

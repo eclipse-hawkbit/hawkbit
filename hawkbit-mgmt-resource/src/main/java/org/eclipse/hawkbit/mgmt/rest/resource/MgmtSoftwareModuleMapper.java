@@ -79,8 +79,7 @@ public final class MgmtSoftwareModuleMapper {
                 softwareModules.stream().map(MgmtSoftwareModuleMapper::toResponse).collect(Collectors.toList()));
     }
 
-    static List<MgmtSoftwareModuleMetadata> toResponseSwMetadata(
-            final Collection<SoftwareModuleMetadata> metadata) {
+    static List<MgmtSoftwareModuleMetadata> toResponseSwMetadata(final Collection<SoftwareModuleMetadata> metadata) {
         if (metadata == null) {
             return Collections.emptyList();
         }
@@ -107,6 +106,7 @@ public final class MgmtSoftwareModuleMapper {
         response.setVersion(softwareModule.getVersion());
         response.setType(softwareModule.getType().getKey());
         response.setVendor(softwareModule.getVendor());
+        response.setDeleted(softwareModule.isDeleted());
 
         response.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getSoftwareModule(response.getModuleId()))
                 .withSelfRel());

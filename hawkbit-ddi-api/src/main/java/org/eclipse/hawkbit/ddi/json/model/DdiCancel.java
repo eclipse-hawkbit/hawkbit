@@ -29,7 +29,6 @@ public class DdiCancel {
      *            the action
      */
     public DdiCancel(final String id, final DdiCancelActionToStop cancelAction) {
-        super();
         this.id = id;
         this.cancelAction = cancelAction;
     }

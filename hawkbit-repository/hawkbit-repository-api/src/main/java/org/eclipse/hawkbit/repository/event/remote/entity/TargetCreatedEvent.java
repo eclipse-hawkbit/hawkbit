@@ -8,13 +8,14 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import org.eclipse.hawkbit.repository.event.entity.EntityCreatedEvent;
 import org.eclipse.hawkbit.repository.model.Target;
 
 /**
  * Defines the remote event of creating a new {@link Target}.
  *
  */
-public class TargetCreatedEvent extends RemoteEntityEvent<Target> {
+public class TargetCreatedEvent extends RemoteEntityEvent<Target> implements EntityCreatedEvent {
     private static final long serialVersionUID = 1L;
 
     /**

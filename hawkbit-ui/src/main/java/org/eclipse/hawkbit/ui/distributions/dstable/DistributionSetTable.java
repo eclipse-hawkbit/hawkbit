@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.distributions.dstable;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +19,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -219,7 +222,9 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
 
         final Object distItemId = dropData.getItemIdOver();
-        handleDropEvent(source, softwareModulesIdList, distItemId);
+        if (distItemId != null) {
+            handleDropEvent(source, softwareModulesIdList, distItemId);
+        }
     }
 
     @Override
@@ -238,8 +243,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     private void handleDropEvent(final Table source, final Set<Long> softwareModulesIdList, final Object distId) {
-        final Optional<DistributionSet> distributionSet = distributionSetManagement
-                .get((Long) distId);
+        final Optional<DistributionSet> distributionSet = distributionSetManagement.get((Long) distId);
 
         if (!distributionSet.isPresent()) {
             notification.displayWarning(i18n.getMessage("distributionset.not.exists"));
@@ -261,8 +265,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             final String name = (String) softwareItem.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
             final String swVersion = (String) softwareItem.getItemProperty(SPUILabelDefinitions.VAR_VERSION).getValue();
 
-            final Optional<SoftwareModule> softwareModule = softwareModuleManagement
-                    .get(softwareModuleId);
+            final Optional<SoftwareModule> softwareModule = softwareModuleManagement.get(softwareModuleId);
 
             if (softwareModule.isPresent() && validSoftwareModule((Long) distId, softwareModule.get())) {
                 final SoftwareModuleIdName softwareModuleIdName = new SoftwareModuleIdName(softwareModuleId,
@@ -384,8 +387,9 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     @Override
-    protected boolean hasDropPermission() {
-        return permissionChecker.hasUpdateRepositoryPermission();
+    protected List<String> hasMissingPermissionsForDrop() {
+        return permissionChecker.hasUpdateRepositoryPermission() ? Collections.emptyList()
+                : Arrays.asList(SpPermission.UPDATE_REPOSITORY);
     }
 
     private void addTableStyleGenerator() {

@@ -57,7 +57,7 @@
    </scm>
 
    <ciManagement>
-      <system>Hudson</system>
+      <system>Jenkins</system>
       <url>https://hudson.eclipse.org/hawkbit/</url>
    </ciManagement>
 
@@ -74,7 +74,13 @@
       </developer>
       <developer>
          <id>michahirsch</id>
-         <email>michael.hirsch@bosch-si.com</email>
+         <roles>
+            <role>Committer</role>
+         </roles>
+      </developer>
+      <developer>
+         <id>schabdo</id>
+         <email>Dominic.Schabel@bosch-si.com</email>
          <organization>Bosch Software Innovations GmbH</organization>
          <organizationUrl>https://www.bosch-si.com</organizationUrl>
          <roles>
@@ -122,7 +128,9 @@
       <!-- Repeatable migrations, Disabling clean etc. -->
       <flyway.version>4.0.3</flyway.version>
       <!-- Improved integration test capabilities -->
-      <spring-amqp.version>1.7.4.RELEASE</spring-amqp.version>
+      <spring-amqp.version>1.7.6.RELEASE</spring-amqp.version>
+      <!-- Compatability with RabbitMQ >= 3.7.3 -->
+      <rabbitmq.http-client.version>1.3.1.RELEASE</rabbitmq.http-client.version>
       <!-- Older versions needed than defined in Boot -->
       <!-- Incompatible changes in 2.2 -->
       <json-path.version>2.0.0</json-path.version>
@@ -131,12 +139,14 @@
       <!-- Avoid extra CQs through transitive dependencies -->
       <jboss-logging.version>3.2.1.Final</jboss-logging.version>
       <tomcat.version>8.0.28</tomcat.version>
+      
+      <hibernate-validator.version>6.0.7.Final</hibernate-validator.version>
       <!-- Spring boot version overrides - END -->
 
       <!-- Vaadin versions - START -->
       <vaadin.spring.version>1.1.1</vaadin.spring.version>
       <vaadin.spring.addon.version>0.0.6.RELEASE</vaadin.spring.addon.version>
-      <vaadin.version>7.7.9</vaadin.version>
+      <vaadin.version>7.7.13</vaadin.version>
       <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
       <vaadin.addon.vaadin-lazyquerycontainer.version>7.6.1.3</vaadin.addon.vaadin-lazyquerycontainer.version>
       <vaadin.addon.flexibleoptiongroup.version>2.2.0</vaadin.addon.flexibleoptiongroup.version>
@@ -152,13 +162,16 @@
 
       <!-- Misc libraries versions - START -->
       <javax.annotation.version>1.3.1</javax.annotation.version>
-      <validation-api.version>1.1.0.Final</validation-api.version>
+      <cron-utils.version>5.0.5</cron-utils.version>
+      <jsoup.version>1.8.3</jsoup.version>
+      <validation-api.version>2.0.1.Final</validation-api.version>
       <allure.version>1.5.4</allure.version>
-      <eclipselink.version>2.6.4</eclipselink.version>
+      <eclipselink.version>2.7.1</eclipselink.version>
       <gwtmockito.version>1.1.6</gwtmockito.version>
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
       <guava.version>19.0</guava.version>
       <mariadb-java-client.version>2.0.2</mariadb-java-client.version>
+      <mssql-jdbc.version>6.4.0.jre8</mssql-jdbc.version>
       <embedded-mongo.version>1.50.5</embedded-mongo.version>
       <javax.el-api.version>2.2.4</javax.el-api.version>
       <corn-cps.version>1.1.7</corn-cps.version>
@@ -300,9 +313,11 @@
                <artifactId>license-maven-plugin</artifactId>
                <version>2.11</version>
                <configuration>
-                  <header>licenses/LICENSE_HEADER_TEMPLATE_BOSCH.txt</header>
+                  <header>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_18.txt</header>
                   <validHeaders>
                       <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS.txt</validHeader>
+                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS_18.txt</validHeader>
+                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH.txt</validHeader>
                   </validHeaders>
                   <excludes>
                      <exclude>**/README</exclude>
@@ -591,6 +606,29 @@
          </dependency>
 
          <!-- Misc -->
+         
+         <dependency>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>http-client</artifactId>
+            <version>${rabbitmq.http-client.version}</version>
+            <scope>compile</scope>
+            <exclusions>
+              <exclusion>
+                <artifactId>spring-web</artifactId>
+                <groupId>org.springframework</groupId>
+              </exclusion>
+            </exclusions>
+         </dependency>
+         <dependency>
+            <groupId>com.cronutils</groupId>
+            <artifactId>cron-utils</artifactId>
+            <version>${cron-utils.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>${jsoup.version}</version>
+         </dependency>
          <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
@@ -773,7 +811,11 @@
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
             <version>${mariadb-java-client.version}</version>
-            <scope>test</scope>
+        </dependency>
+        <dependency>
+           <groupId>com.microsoft.sqlserver</groupId>
+           <artifactId>mssql-jdbc</artifactId>
+           <version>${mssql-jdbc.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.amqp</groupId>

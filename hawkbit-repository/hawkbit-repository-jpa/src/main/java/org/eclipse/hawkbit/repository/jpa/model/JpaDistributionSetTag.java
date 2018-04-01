@@ -34,7 +34,8 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
  */
 @Entity
 @Table(name = "sp_distributionset_tag", indexes = {
-        @Index(name = "sp_idx_distribution_set_tag_prim", columnList = "tenant,id") }, uniqueConstraints = @UniqueConstraint(columnNames = {
+        @Index(name = "sp_idx_distribution_set_tag_prim", columnList = "tenant,id"),
+        @Index(name = "sp_idx_distribution_set_tag_01", columnList = "tenant,name") }, uniqueConstraints = @UniqueConstraint(columnNames = {
                 "name", "tenant" }, name = "uk_ds_tag"))
 public class JpaDistributionSetTag extends JpaTag implements DistributionSetTag, EventAwareEntity {
     private static final long serialVersionUID = 1L;

@@ -129,8 +129,9 @@ public abstract class AbstractDsAssignmentStrategy {
             return;
         }
 
-        afterCommit.afterCommit(() -> eventPublisher.publishEvent(
-                new TargetAssignDistributionSetEvent(tenant, distributionSetId, actions, applicationContext.getId())));
+        afterCommit.afterCommit(
+                () -> eventPublisher.publishEvent(new TargetAssignDistributionSetEvent(tenant, distributionSetId,
+                        actions, applicationContext.getId(), actions.get(0).isMaintenanceWindowAvailable())));
     }
 
     protected void sendTargetUpdatedEvent(final JpaTarget target) {
@@ -219,6 +220,9 @@ public abstract class AbstractDsAssignmentStrategy {
         actionForTarget.setActive(true);
         actionForTarget.setTarget(target);
         actionForTarget.setDistributionSet(set);
+        actionForTarget.setMaintenanceSchedule(targetWithActionType.getMaintenanceSchedule());
+        actionForTarget.setMaintenanceWindowDuration(targetWithActionType.getMaintenanceWindowDuration());
+        actionForTarget.setMaintenanceWindowTimeZone(targetWithActionType.getMaintenanceWindowTimeZone());
         return actionForTarget;
     }
 

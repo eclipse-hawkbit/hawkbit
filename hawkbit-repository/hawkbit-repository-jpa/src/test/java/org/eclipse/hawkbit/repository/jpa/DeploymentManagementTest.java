@@ -230,7 +230,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         assertThatExceptionOfType(EntityNotFoundException.class)
                 .isThrownBy(() -> distributionSetManagement.assignTag(assignDS, tag.getId()))
-                .withMessageContaining("DistributionSet").withMessageContaining(String.valueOf(tag.getId()));
+                .withMessageContaining("DistributionSet").withMessageContaining(String.valueOf(100L));
     }
 
     @Test
@@ -458,7 +458,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .as("TargetUpdateStatus IN_SYNC")
                 .allMatch(target -> TargetUpdateStatus.IN_SYNC.equals(target.getUpdateStatus()))
                 .as("InstallationDate equal to LastModifiedAt")
-                .allMatch(target -> target.getLastModifiedAt().equals(target.getInstallationDate()));
+                .allMatch(target -> target.getLastModifiedAt() == target.getInstallationDate());
     }
 
     @Test
@@ -469,7 +469,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2) })
-    public void assigneDistributionSetAndAutoCloseActiveActions() {
+    public void assignDistributionSetAndAutoCloseActiveActions() {
         tenantConfigurationManagement
                 .addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, true);
 
@@ -481,8 +481,9 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             assignDistributionSet(ds1, targets);
 
             List<Action> assignmentOne = actionRepository.findByDistributionSetId(PAGE, ds1.getId()).getContent();
-            assertThat(assignmentOne).hasSize(10).as("Is active").allMatch(Action::isActive).as("Is assigned DS")
-                    .allMatch(action -> action.getDistributionSet().getId() == ds1.getId()).as("Is running")
+            assertThat(assignmentOne).hasSize(10).as("Is active").allMatch(Action::isActive)
+                    .as("Is assigned to DS " + ds1.getId())
+                    .allMatch(action -> action.getDistributionSet().getId().equals(ds1.getId())).as("Is running")
                     .allMatch(action -> action.getStatus() == Status.RUNNING);
 
             // Second assignment
@@ -491,12 +492,14 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
             final List<Action> assignmentTwo = actionRepository.findByDistributionSetId(PAGE, ds2.getId()).getContent();
             assignmentOne = actionRepository.findByDistributionSetId(PAGE, ds1.getId()).getContent();
-            assertThat(assignmentTwo).hasSize(10).as("Is active").allMatch(Action::isActive).as("Is assigned DS")
-                    .allMatch(action -> action.getDistributionSet().getId() == ds2.getId()).as("Is running")
+            assertThat(assignmentTwo).hasSize(10).as("Is active").allMatch(Action::isActive)
+                    .as("Is assigned to DS " + ds2.getId())
+                    .allMatch(action -> action.getDistributionSet().getId().equals(ds2.getId())).as("Is running")
                     .allMatch(action -> action.getStatus() == Status.RUNNING);
             assertThat(assignmentOne).hasSize(10).as("Is active").allMatch(action -> !action.isActive())
-                    .as("Is assigned to DS").allMatch(action -> action.getDistributionSet().getId() == ds1.getId())
-                    .as("Is cancelled").allMatch(action -> action.getStatus() == Status.CANCELED);
+                    .as("Is assigned to DS " + ds1.getId())
+                    .allMatch(action -> action.getDistributionSet().getId().equals(ds1.getId())).as("Is cancelled")
+                    .allMatch(action -> action.getStatus() == Status.CANCELED);
 
             assertThat(targetManagement.findByAssignedDistributionSet(PAGE, ds2.getId()).getContent()).hasSize(10)
                     .as("InstallationDate not set").allMatch(target -> (target.getInstallationDate() == null));

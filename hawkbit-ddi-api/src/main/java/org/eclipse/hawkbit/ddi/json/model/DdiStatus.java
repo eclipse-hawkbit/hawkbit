@@ -46,7 +46,6 @@ public class DdiStatus {
     @JsonCreator
     public DdiStatus(@JsonProperty("execution") final ExecutionStatus execution,
             @JsonProperty("result") final DdiResult result, @JsonProperty("details") final List<String> details) {
-        super();
         this.execution = execution;
         this.result = result;
         this.details = details;
@@ -102,7 +101,17 @@ public class DdiStatus {
         /**
          * Action is started after a reset, power loss, etc.
          */
-        RESUMED("resumed");
+        RESUMED("resumed"),
+
+        /**
+         * The action has been downloaded by the target.
+         */
+        DOWNLOADED("downloaded"),
+
+        /**
+         * Target starts to download.
+         */
+        DOWNLOAD("download");
 
         private String name;
 

@@ -33,6 +33,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,16 +56,19 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     private final SoftwareModuleRepository softwareModuleRepository;
 
     private final NoCountPagingRepository criteriaNoCountDao;
+    private final Database database;
 
     JpaSoftwareModuleTypeManagement(final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer,
-            final SoftwareModuleRepository softwareModuleRepository, final NoCountPagingRepository criteriaNoCountDao) {
+            final SoftwareModuleRepository softwareModuleRepository, final NoCountPagingRepository criteriaNoCountDao,
+            final Database database) {
         this.distributionSetTypeRepository = distributionSetTypeRepository;
         this.softwareModuleTypeRepository = softwareModuleTypeRepository;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.softwareModuleRepository = softwareModuleRepository;
         this.criteriaNoCountDao = criteriaNoCountDao;
+        this.database = database;
     }
 
     @Override
@@ -87,7 +91,7 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     public Page<SoftwareModuleType> findByRsql(final Pageable pageable, final String rsqlParam) {
 
         final Specification<JpaSoftwareModuleType> spec = RSQLUtility.parse(rsqlParam, SoftwareModuleTypeFields.class,
-                virtualPropertyReplacer);
+                virtualPropertyReplacer, database);
 
         return convertPage(softwareModuleTypeRepository.findAll(spec, pageable), pageable);
     }
@@ -128,7 +132,7 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void delete(final Long typeId) {
+    public void delete(final long typeId) {
         final JpaSoftwareModuleType toDelete = softwareModuleTypeRepository.findById(typeId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, typeId));
 
@@ -180,12 +184,12 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     }
 
     @Override
-    public Optional<SoftwareModuleType> get(final Long id) {
+    public Optional<SoftwareModuleType> get(final long id) {
         return Optional.ofNullable(softwareModuleTypeRepository.findOne(id));
     }
 
     @Override
-    public boolean exists(final Long id) {
+    public boolean exists(final long id) {
         return softwareModuleTypeRepository.exists(id);
     }
 

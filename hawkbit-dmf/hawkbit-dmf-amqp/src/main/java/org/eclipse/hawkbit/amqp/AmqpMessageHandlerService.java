@@ -22,11 +22,13 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
+import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
+import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -102,8 +104,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      * @return a message if <null> no message is send back to sender
      */
     @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.receiverQueue:dmf_receiver}", containerFactory = "listenerContainerFactory")
-    public Message onMessage(final Message message, @Header(MessageHeaderKey.TYPE) final String type,
-            @Header(MessageHeaderKey.TENANT) final String tenant) {
+    public Message onMessage(final Message message,
+            @Header(name = MessageHeaderKey.TYPE, required = false) final String type,
+            @Header(name = MessageHeaderKey.TENANT, required = false) final String tenant) {
         return onMessage(message, type, tenant, getRabbitTemplate().getConnectionFactory().getVirtualHost());
     }
 
@@ -121,6 +124,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      * @return the rpc message back to supplier.
      */
     public Message onMessage(final Message message, final String type, final String tenant, final String virtualHost) {
+        if (StringUtils.isEmpty(type) || StringUtils.isEmpty(tenant)) {
+            throw new AmqpRejectAndDontRequeueException("Invalid message! tenant and type header are mandatory!");
+        }
 
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         try {
@@ -215,7 +221,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         action.getDistributionSet().getModules().forEach(module -> modules.put(module, metadata.get(module.getId())));
 
         amqpMessageDispatcherService.sendUpdateMessageToTarget(action.getTenant(), action.getTarget(), action.getId(),
-                modules);
+                modules, action.isMaintenanceWindowAvailable());
     }
 
     /**
@@ -244,8 +250,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     private void updateAttributes(final Message message) {
         final DmfAttributeUpdate attributeUpdate = convertMessage(message, DmfAttributeUpdate.class);
         final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, "ThingId is null");
-
-        controllerManagement.updateControllerAttributes(thingId, attributeUpdate.getAttributes());
+        controllerManagement.updateControllerAttributes(thingId, attributeUpdate.getAttributes(),
+                getUpdateMode(attributeUpdate));
     }
 
     /**
@@ -271,7 +277,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
         final Action addUpdateActionStatus = getUpdateActionStatus(status, actionStatus);
 
-        if (!addUpdateActionStatus.isActive()) {
+        if (!addUpdateActionStatus.isActive() || (addUpdateActionStatus.hasMaintenanceSchedule()
+                && addUpdateActionStatus.isMaintenanceWindowAvailable())) {
             lookIfUpdateAvailable(action.getTarget());
         }
     }
@@ -281,6 +288,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 && message.getMessageProperties().getCorrelationId().length > 0;
     }
 
+    // Exception squid:MethodCyclomaticComplexity - false positive, is a simple
+    // mapping
+    @SuppressWarnings("squid:MethodCyclomaticComplexity")
     private Status mapStatus(final Message message, final DmfActionUpdateStatus actionUpdateStatus,
             final Action action) {
         Status status = null;
@@ -306,8 +316,11 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         case WARNING:
             status = Status.WARNING;
             break;
+        case DOWNLOADED:
+            status = Status.DOWNLOADED;
+            break;
         case CANCEL_REJECTED:
-            status = hanldeCancelRejectedState(message, action);
+            status = handleCancelRejectedState(message, action);
             break;
         default:
             logAndThrowMessageError(message, "Status for action does not exisit.");
@@ -316,14 +329,13 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         return status;
     }
 
-    private Status hanldeCancelRejectedState(final Message message, final Action action) {
+    private Status handleCancelRejectedState(final Message message, final Action action) {
         if (action.isCancelingOrCanceled()) {
             return Status.CANCEL_REJECTED;
         }
         logAndThrowMessageError(message,
                 "Cancel rejected message is not allowed, if action is on state: " + action.getStatus());
         return null;
-
     }
 
     private static String convertCorrelationId(final Message message) {
@@ -354,4 +366,16 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
         return findActionWithDetails.get();
     }
+
+    /**
+     * Retrieve the update mode from the given update message.
+     */
+    private static UpdateMode getUpdateMode(final DmfAttributeUpdate update) {
+        final DmfUpdateMode mode = update.getMode();
+        if (mode != null) {
+            return UpdateMode.valueOf(mode.name());
+        }
+        return null;
+    }
+
 }

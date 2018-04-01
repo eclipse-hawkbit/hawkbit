@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.management;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.ui.Label;
 
@@ -22,6 +23,12 @@ public abstract class AbstractDashboardMenuItemNotification implements Dashboard
     private static final long serialVersionUID = 1L;
 
     private final Label notificationsLabel = new Label();
+
+    private final VaadinMessageSource i18n;
+
+    protected AbstractDashboardMenuItemNotification(final VaadinMessageSource i18n) {
+        this.i18n = i18n;
+    }
 
     @Override
     public void setNotificationUnreadValue(final AtomicInteger notificationUnread) {
@@ -35,4 +42,7 @@ public abstract class AbstractDashboardMenuItemNotification implements Dashboard
         return notificationsLabel;
     }
 
+    protected VaadinMessageSource getI18n() {
+        return i18n;
+    }
 }

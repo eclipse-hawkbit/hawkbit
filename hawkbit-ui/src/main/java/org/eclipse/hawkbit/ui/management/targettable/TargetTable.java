@@ -9,7 +9,9 @@
 package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +21,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -273,7 +276,7 @@ public class TargetTable extends AbstractTable<Target> {
         addGeneratedColumn(SPUIDefinitions.TARGET_STATUS_PIN_TOGGLE_ICON,
                 (source, itemId, columnId) -> getTagetPinButton(itemId));
         addGeneratedColumn(SPUIDefinitions.TARGET_STATUS_POLL_TIME,
-                (source, itemId, columnId) -> getTagetPollTime(itemId));
+                (source, itemId, columnId) -> getTargetPollTime(itemId));
     }
 
     @Override
@@ -360,14 +363,14 @@ public class TargetTable extends AbstractTable<Target> {
         return queryConfig;
     }
 
-    private Label getTagetPollTime(final Object itemId) {
+    private Label getTargetPollTime(final Object itemId) {
         final Label statusLabel = new Label();
         statusLabel.addStyleName(ValoTheme.LABEL_SMALL);
         statusLabel.setHeightUndefined();
         statusLabel.setContentMode(ContentMode.HTML);
         final String pollStatusToolTip = (String) getContainerDataSource().getItem(itemId)
                 .getItemProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP).getValue();
-        if (HawkbitCommonUtil.trimAndNullIfEmpty(pollStatusToolTip) != null) {
+        if (StringUtils.hasText(pollStatusToolTip)) {
             statusLabel.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
         } else {
             statusLabel.setValue(FontAwesome.CLOCK_O.getHtml());
@@ -479,8 +482,8 @@ public class TargetTable extends AbstractTable<Target> {
         final String tagName = ((DragAndDropWrapper) (event.getTransferable().getSourceComponent())).getData()
                 .toString();
         if (tagName.equals(SPUIDefinitions.TARGET_TAG_BUTTON)) {
-            notification.displayValidationError(i18n.getMessage("message.tag.cannot.be.assigned",
-                    new Object[] { i18n.getMessage("label.no.tag.assigned") }));
+            notification.displayValidationError(
+                    i18n.getMessage("message.tag.cannot.be.assigned", i18n.getMessage("label.no.tag.assigned")));
             return false;
         }
         return true;
@@ -528,7 +531,7 @@ public class TargetTable extends AbstractTable<Target> {
 
         final Optional<TargetTag> tag = tagManagement.getByName(targTagName);
         if (!tag.isPresent()) {
-            notification.displayWarning(i18n.getMessage("targettag.not.exists", new Object[] { targTagName }));
+            notification.displayWarning(i18n.getMessage("targettag.not.exists", targTagName));
             return new TargetTagAssignmentResult(0, 0, 0, Lists.newArrayListWithCapacity(0),
                     Lists.newArrayListWithCapacity(0), null);
         }
@@ -563,8 +566,9 @@ public class TargetTable extends AbstractTable<Target> {
     }
 
     @Override
-    protected boolean hasDropPermission() {
-        return permChecker.hasUpdateTargetPermission();
+    protected List<String> hasMissingPermissionsForDrop() {
+        return permChecker.hasUpdateTargetPermission() ? Collections.emptyList()
+                : Arrays.asList(SpPermission.UPDATE_TARGET);
     }
 
     private void dsToTargetAssignment(final DragAndDropEvent event) {
@@ -575,13 +579,13 @@ public class TargetTable extends AbstractTable<Target> {
         final Object targetItemId = dropData.getItemIdOver();
         LOG.debug("Adding a log to check if targetItemId is null : {} ", targetItemId);
         if (targetItemId == null) {
-            getNotification().displayWarning(i18n.getMessage("target.not.exists", new Object[] { "" }));
+            getNotification().displayWarning(i18n.getMessage("target.not.exists", ""));
             return;
         }
         final Long targetId = (Long) targetItemId;
         final Optional<Target> target = targetManagement.get(targetId);
         if (!target.isPresent()) {
-            getNotification().displayWarning(i18n.getMessage("target.not.exists", new Object[] { "" }));
+            getNotification().displayWarning(i18n.getMessage("target.not.exists", ""));
             return;
         }
         final TargetIdName createTargetIdName = new TargetIdName(target.get());
@@ -635,7 +639,7 @@ public class TargetTable extends AbstractTable<Target> {
 
     private String getPendingActionMessage(final String message, final String distName, final String controllerId) {
         if (message == null) {
-            return i18n.getMessage("message.dist.pending.action", new Object[] { controllerId, distName });
+            return i18n.getMessage("message.dist.pending.action", controllerId, distName);
         }
         return i18n.getMessage("message.target.assigned.pending");
     }

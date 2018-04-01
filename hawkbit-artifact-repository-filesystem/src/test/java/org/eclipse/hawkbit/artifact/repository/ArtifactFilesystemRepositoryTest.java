@@ -37,7 +37,7 @@ public class ArtifactFilesystemRepositoryTest {
     @Description("Verfies that an artifact can be successfully stored in the file-system repository")
     public void storeSuccessfully() throws IOException {
         final byte[] fileContent = randomBytes();
-        final ArtifactFilesystem artifact = storeRandomArtifact(fileContent);
+        final AbstractDbArtifact artifact = storeRandomArtifact(fileContent);
 
         final byte[] readContent = new byte[fileContent.length];
         IOUtils.read(artifact.getFileInputStream(), readContent);
@@ -50,7 +50,7 @@ public class ArtifactFilesystemRepositoryTest {
     public void getStoredArtifactBasedOnSHA1Hash() {
 
         final byte[] fileContent = randomBytes();
-        final ArtifactFilesystem artifact = storeRandomArtifact(fileContent);
+        final AbstractDbArtifact artifact = storeRandomArtifact(fileContent);
 
         final AbstractDbArtifact artifactBySha1 = artifactFilesystemRepository.getArtifactBySha1(TENANT,
                 artifact.getHashes().getSha1());
@@ -60,7 +60,7 @@ public class ArtifactFilesystemRepositoryTest {
     @Test
     @Description("Verfies that an artifact can be deleted in the file-system repository")
     public void deleteStoredArtifactBySHA1Hash() {
-        final ArtifactFilesystem artifact = storeRandomArtifact(randomBytes());
+        final AbstractDbArtifact artifact = storeRandomArtifact(randomBytes());
 
         artifactFilesystemRepository.deleteBySha1(TENANT, artifact.getHashes().getSha1());
 
@@ -70,7 +70,7 @@ public class ArtifactFilesystemRepositoryTest {
     @Test
     @Description("Verfies that all artifacts of a tenant can be deleted in the file-system repository")
     public void deleteStoredArtifactOfTenant() {
-        final ArtifactFilesystem artifact = storeRandomArtifact(randomBytes());
+        final AbstractDbArtifact artifact = storeRandomArtifact(randomBytes());
 
         artifactFilesystemRepository.deleteByTenant(TENANT);
 
@@ -86,7 +86,7 @@ public class ArtifactFilesystemRepositoryTest {
             Assertions.fail("did not expect an exception while deleting a file which does not exists");
         }
 
-        final ArtifactFilesystem artifact = storeRandomArtifact(randomBytes());
+        final AbstractDbArtifact artifact = storeRandomArtifact(randomBytes());
         try {
             artifactFilesystemRepository.deleteBySha1("tenantWhichDoesNotExist", artifact.getHashes().getSha1());
         } catch (final Exception e) {
@@ -94,12 +94,10 @@ public class ArtifactFilesystemRepositoryTest {
         }
     }
 
-    private ArtifactFilesystem storeRandomArtifact(final byte[] fileContent) {
+    private AbstractDbArtifact storeRandomArtifact(final byte[] fileContent) {
         final String fileName = "filename.tmp";
         final ByteArrayInputStream inputStream = new ByteArrayInputStream(fileContent);
-        final ArtifactFilesystem store = artifactFilesystemRepository.store(TENANT, inputStream, fileName,
-                "application/txt");
-        return store;
+        return artifactFilesystemRepository.store(TENANT, inputStream, fileName, "application/txt", null);
     }
 
     private static byte[] randomBytes() {

@@ -59,6 +59,7 @@ import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
@@ -129,7 +130,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath("content.[0].id", equalTo(status.getId().intValue())))
                 .andExpect(jsonPath("content.[0].type", equalTo("finished")))
                 .andExpect(jsonPath("content.[0].messages", hasSize(1)))
-                .andExpect(jsonPath("content.[0].reportedAt", equalTo(status.getCreatedAt().longValue())))
+                .andExpect(jsonPath("content.[0].reportedAt", equalTo(status.getCreatedAt())))
                 .andExpect(jsonPath("content.[1].type", equalTo("canceling")));
     }
 
@@ -713,8 +714,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     @Test
     @Description("Verfies that a  properties of new targets are validated as in allowed size range.")
     public void createTargetWithInvalidPropertyBadRequest() throws Exception {
-        final Target test1 = entityFactory.target().create().controllerId("id1").name(RandomStringUtils.randomAscii(80))
-                .build();
+        final Target test1 = entityFactory.target().create().controllerId("id1")
+                .name(RandomStringUtils.randomAlphanumeric(80)).build();
 
         final MvcResult mvcResult = mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING)
                 .content(JsonBuilder.targets(Arrays.asList(test1), true)).contentType(MediaType.APPLICATION_JSON))
@@ -1219,6 +1220,68 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     }
 
     @Test
+    @Description("Assigns distribution set to target with only maintenance schedule.")
+    public void assignDistributionSetToTargetWithMaintenanceWindowStartTimeOnly() throws Exception {
+
+        final Target target = testdataFactory.createTarget("fsdfsd");
+        final DistributionSet set = testdataFactory.createDistributionSet("one");
+
+        final String body = new JSONObject().put("id", set.getId()).put("type", "forced")
+                .put("maintenanceWindow", getMaintenanceWindow(getTestSchedule(0), "", "")).toString();
+
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
+                .content(body).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Description("Assigns distribution set to target with only maintenance window duration.")
+    public void assignDistributionSetToTargetWithMaintenanceWindowEndTimeOnly() throws Exception {
+
+        final Target target = testdataFactory.createTarget("fsdfsd");
+        final DistributionSet set = testdataFactory.createDistributionSet("one");
+
+        final String body = new JSONObject().put("id", set.getId()).put("type", "forced")
+                .put("maintenanceWindow", getMaintenanceWindow("", getTestDuration(10), "")).toString();
+
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
+                .content(body).contentType(MediaTypes.HAL_JSON_VALUE)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Description("Assigns distribution set to target with valid maintenance window.")
+    public void assignDistributionSetToTargetWithValidMaintenanceWindow() throws Exception {
+
+        final Target target = testdataFactory.createTarget("fsdfsd");
+        final DistributionSet set = testdataFactory.createDistributionSet("one");
+
+        final String body = new JSONObject().put("id", set.getId()).put("type", "forced").put("forcetime", "0")
+                .put("maintenanceWindow",
+                        getMaintenanceWindow(getTestSchedule(10), getTestDuration(10), getTestTimeZone()))
+                .toString();
+
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
+                .content(body).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @Description("Assigns distribution set to target with last maintenance window scheduled before current time.")
+    public void assignDistributionSetToTargetWithMaintenanceWindowEndTimeBeforeStartTime() throws Exception {
+
+        final Target target = testdataFactory.createTarget("fsdfsd");
+        final DistributionSet set = testdataFactory.createDistributionSet("one");
+
+        final String body = new JSONObject().put("id", set.getId()).put("type", "forced").put("maintenanceWindow",
+                getMaintenanceWindow(getTestSchedule(-30), getTestDuration(5), getTestTimeZone())).toString();
+
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
+                .content(body).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     public void invalidRequestsOnAssignDistributionSetToTarget() throws Exception {
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
@@ -1320,7 +1383,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         knownControllerAttrs.put("a", "1");
         knownControllerAttrs.put("b", "2");
         testdataFactory.createTarget(knownTargetId);
-        controllerManagement.updateControllerAttributes(knownTargetId, knownControllerAttrs);
+        controllerManagement.updateControllerAttributes(knownTargetId, knownControllerAttrs, null);
 
         // test query target over rest resource
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/attributes"))

@@ -15,6 +15,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
@@ -28,8 +29,10 @@ import org.eclipse.hawkbit.ddi.json.model.DdiConfigData;
 import org.eclipse.hawkbit.ddi.json.model.DdiControllerBase;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeployment;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeployment.HandlingType;
+import org.eclipse.hawkbit.ddi.json.model.DdiDeployment.DdiMaintenanceWindowStatus;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeploymentBase;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult.FinalResult;
+import org.eclipse.hawkbit.ddi.json.model.DdiUpdateMode;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
@@ -37,9 +40,11 @@ import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
+import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.SoftwareModuleNotAssignedToTargetException;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -54,7 +59,6 @@ import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.util.IpUtil;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +69,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -140,9 +145,16 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist(controllerId, IpUtil
                 .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
-        return new ResponseEntity<>(DataConversionHelper.fromTarget(target,
-                controllerManagement.findOldestActiveActionByTarget(controllerId).orElse(null),
-                controllerManagement.getPollingTime(), tenantAware), HttpStatus.OK);
+        final Action action = controllerManagement.findOldestActiveActionByTarget(controllerId).orElse(null);
+
+        checkAndCancelExpiredAction(action);
+
+        return new ResponseEntity<>(
+                DataConversionHelper.fromTarget(target, action,
+                        action == null ? controllerManagement.getPollingTime()
+                                : controllerManagement.getPollingTimeForAction(action.getId()),
+                        tenantAware),
+                HttpStatus.OK);
     }
 
     @Override
@@ -179,8 +191,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
                 final Long statusId = action.getId();
 
-                result = FileStreamingUtil.writeFileResponse(file, artifact.getFilename(),
-                        artifact.getLastModifiedAt() != null ? artifact.getLastModifiedAt() : artifact.getCreatedAt(),
+                result = FileStreamingUtil.writeFileResponse(file, artifact.getFilename(), artifact.getCreatedAt(),
                         requestResponseContextHolder.getHttpServletResponse(),
                         requestResponseContextHolder.getHttpServletRequest(),
                         (length, shippedSinceLastEvent, total) -> eventPublisher
@@ -267,14 +278,14 @@ public class DdiRootController implements DdiRootControllerRestApi {
             return ResponseEntity.notFound().build();
         }
 
+        checkAndCancelExpiredAction(action);
+
         if (!action.isCancelingOrCanceled()) {
 
             final List<DdiChunk> chunks = DataConversionHelper.createChunks(target, action, artifactUrlHandler,
                     systemManagement,
                     new ServletServerHttpRequest(requestResponseContextHolder.getHttpServletRequest()),
                     controllerManagement);
-
-            final HandlingType handlingType = action.isForce() ? HandlingType.FORCED : HandlingType.ATTEMPT;
 
             final List<String> actionHistoryMsgs = controllerManagement.getActionHistoryMessages(action.getId(),
                     actionHistoryMessageCount == null ? Integer.parseInt(DdiRestConstants.NO_ACTION_HISTORY)
@@ -283,8 +294,13 @@ public class DdiRootController implements DdiRootControllerRestApi {
             final DdiActionHistory actionHistory = actionHistoryMsgs.isEmpty() ? null
                     : new DdiActionHistory(action.getStatus().name(), actionHistoryMsgs);
 
+            final HandlingType downloadType = action.isForce() ? HandlingType.FORCED : HandlingType.ATTEMPT;
+            final HandlingType updateType = calculateUpdateType(action, downloadType);
+
+            final DdiMaintenanceWindowStatus maintenanceWindow = calculateMaintenanceWindow(action);
+
             final DdiDeploymentBase base = new DdiDeploymentBase(Long.toString(action.getId()),
-                    new DdiDeployment(handlingType, handlingType, chunks), actionHistory);
+                    new DdiDeployment(downloadType, updateType, chunks, maintenanceWindow), actionHistory);
 
             LOG.debug("Found an active UpdateAction for target {}. returning deyploment: {}", controllerId, base);
 
@@ -295,6 +311,21 @@ public class DdiRootController implements DdiRootControllerRestApi {
         }
 
         return ResponseEntity.notFound().build();
+    }
+
+    private static DdiMaintenanceWindowStatus calculateMaintenanceWindow(final Action action) {
+        if (action.hasMaintenanceSchedule()) {
+            return action.isMaintenanceWindowAvailable() ? DdiMaintenanceWindowStatus.AVAILABLE
+                    : DdiMaintenanceWindowStatus.UNAVAILABLE;
+        }
+        return null;
+    }
+
+    private static HandlingType calculateUpdateType(final Action action, final HandlingType downloadType) {
+        if (action.hasMaintenanceSchedule()) {
+            return action.isMaintenanceWindowAvailable() ? downloadType : HandlingType.SKIP;
+        }
+        return downloadType;
     }
 
     @Override
@@ -335,33 +366,52 @@ public class DdiRootController implements DdiRootControllerRestApi {
             final Long actionid) {
 
         final List<String> messages = new ArrayList<>();
+
+        if (!CollectionUtils.isEmpty(feedback.getStatus().getDetails())) {
+            messages.addAll(feedback.getStatus().getDetails());
+        }
+
         Status status;
         switch (feedback.getStatus().getExecution()) {
         case CANCELED:
             LOG.debug("Controller confirmed cancel (actionid: {}, controllerId: {}) as we got {} report.", actionid,
                     controllerId, feedback.getStatus().getExecution());
             status = Status.CANCELED;
-            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target confirmed cancelation.");
+            addMessageIfEmpty("Target confirmed cancelation.", messages);
             break;
         case REJECTED:
             LOG.info("Controller reported internal error (actionid: {}, controllerId: {}) as we got {} report.",
                     actionid, controllerId, feedback.getStatus().getExecution());
             status = Status.WARNING;
-            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target REJECTED update.");
+            addMessageIfEmpty("Target REJECTED update", messages);
             break;
         case CLOSED:
             status = handleClosedCase(feedback, controllerId, actionid, messages);
+            break;
+        case DOWNLOAD:
+            LOG.debug("Controller confirmed status of download (actionId: {}, controllerId: {}) as we got {} report.",
+                    actionid, controllerId, feedback.getStatus().getExecution());
+            status = Status.DOWNLOAD;
+            addMessageIfEmpty("Target confirmed download start", messages);
+            break;
+        case DOWNLOADED:
+            LOG.debug("Controller confirmed download (actionId: {}, controllerId: {}) as we got {} report.", actionid,
+                    controllerId, feedback.getStatus().getExecution());
+            status = Status.DOWNLOADED;
+            addMessageIfEmpty("Target confirmed download finished", messages);
             break;
         default:
             status = handleDefaultCase(feedback, controllerId, actionid, messages);
             break;
         }
 
-        if (feedback.getStatus().getDetails() != null) {
-            messages.addAll(feedback.getStatus().getDetails());
-        }
-
         return entityFactory.actionStatus().create(actionid).status(status).messages(messages);
+    }
+
+    private static void addMessageIfEmpty(final String text, final List<String> messages) {
+        if (messages != null && messages.isEmpty()) {
+            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + text + ".");
+        }
     }
 
     private Status handleDefaultCase(final DdiActionFeedback feedback, final String controllerId, final Long actionid,
@@ -370,8 +420,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         LOG.debug("Controller reported intermediate status (actionid: {}, controllerId: {}) as we got {} report.",
                 actionid, controllerId, feedback.getStatus().getExecution());
         status = Status.RUNNING;
-        messages.add(
-                RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target reported " + feedback.getStatus().getExecution());
+        addMessageIfEmpty("Target reported " + feedback.getStatus().getExecution(), messages);
         return status;
     }
 
@@ -382,10 +431,10 @@ public class DdiRootController implements DdiRootControllerRestApi {
                 controllerId, feedback.getStatus().getExecution());
         if (feedback.getStatus().getResult().getFinished() == FinalResult.FAILURE) {
             status = Status.ERROR;
-            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target reported CLOSED with ERROR!");
+            addMessageIfEmpty("Target reported CLOSED with ERROR!", messages);
         } else {
             status = Status.FINISHED;
-            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target reported CLOSED with OK!");
+            addMessageIfEmpty("Target reported CLOSED with OK!", messages);
         }
         return status;
     }
@@ -393,8 +442,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
     @Override
     public ResponseEntity<Void> putConfigData(@Valid @RequestBody final DdiConfigData configData,
             @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId) {
-        controllerManagement.updateControllerAttributes(controllerId, configData.getData());
 
+        controllerManagement.updateControllerAttributes(controllerId, configData.getData(), getUpdateMode(configData));
         return ResponseEntity.ok().build();
     }
 
@@ -491,10 +540,10 @@ public class DdiRootController implements DdiRootControllerRestApi {
         Status status;
         if (feedback.getStatus().getResult().getFinished() == FinalResult.FAILURE) {
             status = Status.ERROR;
-            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target was not able to complete cancelation.");
+            addMessageIfEmpty("Target was not able to complete cancelation", messages);
         } else {
             status = Status.CANCELED;
-            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Cancelation confirmed.");
+            addMessageIfEmpty("Cancelation confirmed", messages);
         }
         return status;
     }
@@ -515,4 +564,33 @@ public class DdiRootController implements DdiRootControllerRestApi {
         return controllerManagement.findActionWithDetails(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
     }
+
+    /**
+     * If the action has a maintenance schedule defined but is no longer valid,
+     * cancel the action.
+     *
+     * @param action
+     *            is the {@link Action} to check.
+     */
+    private void checkAndCancelExpiredAction(final Action action) {
+        if (action != null && action.hasMaintenanceSchedule() && action.isMaintenanceScheduleLapsed()) {
+            try {
+                controllerManagement.cancelAction(action.getId());
+            } catch (final CancelActionNotAllowedException e) {
+                LOG.info("Cancel action not allowed exception :{}", e);
+            }
+        }
+    }
+
+    /**
+     * Retrieve the update mode from the given update message.
+     */
+    private static UpdateMode getUpdateMode(final DdiConfigData configData) {
+        final DdiUpdateMode mode = configData.getMode();
+        if (mode != null) {
+            return UpdateMode.valueOf(mode.name());
+        }
+        return null;
+    }
+
 }

@@ -12,6 +12,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -28,7 +30,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -71,7 +72,7 @@ public interface SoftwareModuleManagement
      *             if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    List<SoftwareModuleMetadata> createMetaData(@NotNull Collection<SoftwareModuleMetadataCreate> metadata);
+    List<SoftwareModuleMetadata> createMetaData(@NotNull @Valid Collection<SoftwareModuleMetadataCreate> metadata);
 
     /**
      * creates or updates a single software module meta data entry.
@@ -86,7 +87,7 @@ public interface SoftwareModuleManagement
      *             if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    SoftwareModuleMetadata createMetaData(@NotNull SoftwareModuleMetadataCreate metadata);
+    SoftwareModuleMetadata createMetaData(@NotNull @Valid SoftwareModuleMetadataCreate metadata);
 
     /**
      * deletes a software module meta data entry.
@@ -100,9 +101,11 @@ public interface SoftwareModuleManagement
      *             of module or metadata entry does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    void deleteMetaData(@NotNull Long moduleId, @NotEmpty String key);
+    void deleteMetaData(long moduleId, @NotEmpty String key);
 
     /**
+     * returns all modules assigned to given {@link DistributionSet}.
+     * 
      * @param pageable
      *            the page request to page the result set
      * @param setId
@@ -114,7 +117,7 @@ public interface SoftwareModuleManagement
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<SoftwareModule> findByAssignedTo(@NotNull Pageable pageable, @NotNull Long setId);
+    Page<SoftwareModule> findByAssignedTo(@NotNull Pageable pageable, long setId);
 
     /**
      * Filter {@link SoftwareModule}s with given
@@ -150,8 +153,7 @@ public interface SoftwareModuleManagement
      *             if software module type with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Optional<SoftwareModule> getByNameAndVersionAndType(@NotEmpty String name, @NotEmpty String version,
-            @NotNull Long typeId);
+    Optional<SoftwareModule> getByNameAndVersionAndType(@NotEmpty String name, @NotEmpty String version, long typeId);
 
     /**
      * finds a single software module meta data by its id.
@@ -166,7 +168,7 @@ public interface SoftwareModuleManagement
      *             is module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Optional<SoftwareModuleMetadata> getMetaDataBySoftwareModuleId(@NotNull Long moduleId, @NotEmpty String key);
+    Optional<SoftwareModuleMetadata> getMetaDataBySoftwareModuleId(long moduleId, @NotEmpty String key);
 
     /**
      * finds all meta data by the given software module id.
@@ -183,7 +185,7 @@ public interface SoftwareModuleManagement
      *             if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleId(@NotNull Pageable pageable, @NotNull Long moduleId);
+    Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleId(@NotNull Pageable pageable, long moduleId);
 
     /**
      * finds all meta data by the given software module id where
@@ -202,7 +204,7 @@ public interface SoftwareModuleManagement
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleIdAndTargetVisible(@NotNull Pageable pageable,
-            @NotNull Long moduleId);
+            long moduleId);
 
     /**
      * finds all meta data by the given software module id.
@@ -226,7 +228,7 @@ public interface SoftwareModuleManagement
      *             if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<SoftwareModuleMetadata> findMetaDataByRsql(@NotNull Pageable pageable, @NotNull Long moduleId,
+    Page<SoftwareModuleMetadata> findMetaDataByRsql(@NotNull Pageable pageable, long moduleId,
             @NotNull String rsqlParam);
 
     /**
@@ -254,7 +256,7 @@ public interface SoftwareModuleManagement
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Slice<AssignedSoftwareModule> findAllOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(
-            @NotNull Pageable pageable, @NotNull Long orderByDistributionId, String searchText, Long typeId);
+            @NotNull Pageable pageable, long orderByDistributionId, String searchText, Long typeId);
 
     /**
      * retrieves the {@link SoftwareModule}s by their {@link SoftwareModuleType}
@@ -270,7 +272,7 @@ public interface SoftwareModuleManagement
      *             if software module type with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Slice<SoftwareModule> findByType(@NotNull Pageable pageable, @NotNull Long typeId);
+    Slice<SoftwareModule> findByType(@NotNull Pageable pageable, long typeId);
 
     /**
      * updates a distribution set meta data value if corresponding entry exists.
@@ -285,5 +287,5 @@ public interface SoftwareModuleManagement
      *             updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    SoftwareModuleMetadata updateMetaData(@NotNull SoftwareModuleMetadataUpdate update);
+    SoftwareModuleMetadata updateMetaData(@NotNull @Valid SoftwareModuleMetadataUpdate update);
 }

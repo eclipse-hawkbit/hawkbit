@@ -9,6 +9,10 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.net.URI;
+import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -29,12 +33,15 @@ import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
@@ -52,6 +59,7 @@ import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -71,6 +79,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -175,9 +184,131 @@ public class JpaControllerManagement implements ControllerManagement {
                 .getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class).getValue());
     }
 
+    /**
+     * Returns the configured minimum polling interval.
+     *
+     * @return current {@link TenantConfigurationKey#MIN_POLLING_TIME_INTERVAL}.
+     */
+    @Override
+    public String getMinPollingTime() {
+        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
+                .getConfigurationValue(TenantConfigurationKey.MIN_POLLING_TIME_INTERVAL, String.class).getValue());
+    }
+
+    /**
+     * Returns the count to be used for reducing polling interval while calling
+     * {@link ControllerManagement#getPollingTimeForAction()}.
+     *
+     * @return configured value of
+     *         {@link TenantConfigurationKey#MAINTENANCE_WINDOW_POLL_COUNT}.
+     */
+    @Override
+    public int getMaintenanceWindowPollCount() {
+        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
+                .getConfigurationValue(TenantConfigurationKey.MAINTENANCE_WINDOW_POLL_COUNT, Integer.class).getValue());
+    }
+
+    @Override
+    public String getPollingTimeForAction(final long actionId) {
+
+        final JpaAction action = getActionAndThrowExceptionIfNotFound(actionId);
+
+        if (!action.hasMaintenanceSchedule() || action.isMaintenanceScheduleLapsed()) {
+            return getPollingTime();
+        }
+
+        return (new EventTimer(getPollingTime(), getMinPollingTime(), ChronoUnit.SECONDS))
+                .timeToNextEvent(getMaintenanceWindowPollCount(), action.getMaintenanceWindowStartTime().orElse(null));
+    }
+
+    /**
+     * EventTimer to handle reduction of polling interval based on maintenance
+     * window start time. Class models the next polling time as an event to be
+     * raised and time to next polling as a timer. The event, in this case the
+     * polling, should happen when timer expires. Class makes use of java.time
+     * package to manipulate and calculate timer duration.
+     */
+    private static class EventTimer {
+
+        private final String defaultEventInterval;
+        private final Duration defaultEventIntervalDuration;
+
+        private final String minimumEventInterval;
+        private final Duration minimumEventIntervalDuration;
+
+        private final TemporalUnit timeUnit;
+
+        /**
+         * Constructor.
+         *
+         * @param defaultEventInterval
+         *            default timer value to use for interval between events.
+         *            This puts an upper bound for the timer value
+         * @param minimumEventInterval
+         *            for loading {@link DistributionSet#getModules()}. This
+         *            puts a lower bound to the timer value
+         * @param timerUnit
+         *            representing the unit of time to be used for timer.
+         */
+        EventTimer(final String defaultEventInterval, final String minimumEventInterval, final TemporalUnit timeUnit) {
+            this.defaultEventInterval = defaultEventInterval;
+            this.defaultEventIntervalDuration = Duration
+                    .parse(MaintenanceScheduleHelper.convertToISODuration(defaultEventInterval));
+
+            this.minimumEventInterval = minimumEventInterval;
+            this.minimumEventIntervalDuration = Duration
+                    .parse(MaintenanceScheduleHelper.convertToISODuration(minimumEventInterval));
+
+            this.timeUnit = timeUnit;
+        }
+
+        /**
+         * This method calculates the time interval until the next event based
+         * on the desired number of events before the time when interval is
+         * reset to default. The return value is bounded by
+         * {@link EventTimer#defaultEventInterval} and
+         * {@link EventTimer#minimumEventInterval}.
+         *
+         * @param eventCount
+         *            number of events desired until the interval is reset to
+         *            default. This is not guaranteed as the interval between
+         *            events cannot be less than the minimum interval
+         * @param timerResetTime
+         *            time when exponential forwarding should reset to default
+         *
+         * @return String in HH:mm:ss format for time to next event.
+         */
+        String timeToNextEvent(final int eventCount, final ZonedDateTime timerResetTime) {
+            final ZonedDateTime currentTime = ZonedDateTime.now();
+
+            // If there is no reset time, or if we already past the reset time,
+            // return the default interval.
+            if (timerResetTime == null || currentTime.compareTo(timerResetTime) > 0) {
+                return defaultEventInterval;
+            }
+
+            // Calculate the interval timer based on desired event count.
+            final Duration currentIntervalDuration = Duration.of(currentTime.until(timerResetTime, timeUnit), timeUnit)
+                    .dividedBy(eventCount);
+
+            // Need not return interval greater than the default.
+            if (currentIntervalDuration.compareTo(defaultEventIntervalDuration) > 0) {
+                return defaultEventInterval;
+            }
+
+            // Should not return interval less than minimum.
+            if (currentIntervalDuration.compareTo(minimumEventIntervalDuration) < 0) {
+                return minimumEventInterval;
+            }
+
+            return String.format("%02d:%02d:%02d", currentIntervalDuration.toHours(),
+                    currentIntervalDuration.toMinutes() % 60, currentIntervalDuration.getSeconds() % 60);
+        }
+    }
+
     @Override
     public Optional<Action> getActionForDownloadByTargetAndSoftwareModule(final String controllerId,
-            final Long moduleId) {
+            final long moduleId) {
         throwExceptionIfTargetDoesNotExist(controllerId);
         throwExceptionIfSoftwareModuleDoesNotExist(moduleId);
 
@@ -215,7 +346,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public boolean hasTargetArtifactAssigned(final Long targetId, final String sha1Hash) {
+    public boolean hasTargetArtifactAssigned(final long targetId, final String sha1Hash) {
         throwExceptionIfTargetDoesNotExist(targetId);
         return actionRepository.count(ActionSpecifications.hasTargetAssignedArtifact(targetId, sha1Hash)) > 0;
     }
@@ -233,7 +364,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public Optional<Action> findActionWithDetails(final Long actionId) {
+    public Optional<Action> findActionWithDetails(final long actionId) {
         return actionRepository.getById(actionId);
     }
 
@@ -326,8 +457,8 @@ public class JpaControllerManagement implements ControllerManagement {
         }
 
         final Query updateQuery = entityManager.createNativeQuery(
-                "UPDATE sp_target t SET t.last_target_query = #last_target_query WHERE t.controller_id IN ("
-                        + formatQueryInStatementParams(paramMapping.keySet()) + ") AND t.tenant = #tenant");
+                "UPDATE sp_target SET last_target_query = #last_target_query WHERE controller_id IN ("
+                        + formatQueryInStatementParams(paramMapping.keySet()) + ") AND tenant = #tenant");
 
         paramMapping.entrySet().forEach(entry -> updateQuery.setParameter(entry.getKey(), entry.getValue()));
         updateQuery.setParameter("last_target_query", currentTimeMillis);
@@ -505,7 +636,7 @@ public class JpaControllerManagement implements ControllerManagement {
             final Long statusCount = actionStatusRepository.countByAction(action);
 
             if (statusCount >= quotaManagement.getMaxStatusEntriesPerAction()) {
-                throw new QuotaExceededException(ActionStatus.class, statusCount,
+                throw new QuotaExceededException(ActionStatus.class, statusCount + 1,
                         quotaManagement.getMaxStatusEntriesPerAction());
             }
         }
@@ -536,18 +667,41 @@ public class JpaControllerManagement implements ControllerManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Target updateControllerAttributes(final String controllerId, final Map<String, String> data) {
+    public Target updateControllerAttributes(final String controllerId, final Map<String, String> data,
+            final UpdateMode mode) {
         final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
-        target.getControllerAttributes().putAll(data);
+        // get the modifiable attribute map
+        final Map<String, String> controllerAttributes = target.getControllerAttributes();
 
-        if (target.getControllerAttributes().size() > quotaManagement.getMaxAttributeEntriesPerTarget()) {
-            throw new QuotaExceededException("Controller attribues", target.getControllerAttributes().size(),
-                    quotaManagement.getMaxAttributeEntriesPerTarget());
+        final UpdateMode updateMode = mode != null ? mode : UpdateMode.MERGE;
+        switch (updateMode) {
+        case REMOVE:
+            // remove the addressed attributes
+            data.keySet().forEach(controllerAttributes::remove);
+            break;
+        case REPLACE:
+            // clear the attributes before adding the new attributes
+            controllerAttributes.clear();
+            controllerAttributes.putAll(data);
+            target.setRequestControllerAttributes(false);
+            break;
+        case MERGE:
+            // just merge the attributes in
+            controllerAttributes.putAll(data);
+            target.setRequestControllerAttributes(false);
+            break;
+        default:
+            // unknown update mode
+            throw new IllegalStateException("The update mode " + updateMode + " is not supported.");
         }
 
-        target.setRequestControllerAttributes(false);
+        final int attributeCount = controllerAttributes.size();
+        if (attributeCount > quotaManagement.getMaxAttributeEntriesPerTarget()) {
+            throw new QuotaExceededException("Controller attributes", attributeCount,
+                    quotaManagement.getMaxAttributeEntriesPerTarget());
+        }
 
         return targetRepository.save(target);
     }
@@ -556,7 +710,7 @@ public class JpaControllerManagement implements ControllerManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Action registerRetrieved(final Long actionId, final String message) {
+    public Action registerRetrieved(final long actionId, final String message) {
         return handleRegisterRetrieved(actionId, message);
     }
 
@@ -640,12 +794,12 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public Optional<Target> get(final Long targetId) {
+    public Optional<Target> get(final long targetId) {
         return Optional.ofNullable(targetRepository.findOne(targetId));
     }
 
     @Override
-    public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final Long actionId) {
+    public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final long actionId) {
         if (!actionRepository.exists(actionId)) {
             throw new EntityNotFoundException(Action.class, actionId);
         }
@@ -654,7 +808,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public List<String> getActionHistoryMessages(final Long actionId, final int messageCount) {
+    public List<String> getActionHistoryMessages(final long actionId, final int messageCount) {
         // Just return empty list in case messageCount is zero.
         if (messageCount == 0) {
             return Collections.emptyList();
@@ -663,7 +817,8 @@ public class JpaControllerManagement implements ControllerManagement {
         // For negative and large value of messageCount, limit the number of
         // messages.
         final int limit = messageCount < 0 || messageCount >= RepositoryConstants.MAX_ACTION_HISTORY_MSG_COUNT
-                ? RepositoryConstants.MAX_ACTION_HISTORY_MSG_COUNT : messageCount;
+                ? RepositoryConstants.MAX_ACTION_HISTORY_MSG_COUNT
+                : messageCount;
 
         final PageRequest pageable = new PageRequest(0, limit, new Sort(Direction.DESC, "occurredAt"));
         final Page<String> messages = actionStatusRepository.findMessagesByActionIdAndMessageNotLike(pageable, actionId,
@@ -676,7 +831,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public Optional<SoftwareModule> getSoftwareModule(final Long id) {
+    public Optional<SoftwareModule> getSoftwareModule(final long id) {
         return Optional.ofNullable(softwareModuleRepository.findOne(id));
     }
 
@@ -747,5 +902,57 @@ public class JpaControllerManagement implements ControllerManagement {
             return true;
         }
 
+    }
+
+    /**
+     * Cancels given {@link Action} for this {@link Target}. The method will
+     * immediately add a {@link Status#CANCELED} status to the action. However,
+     * it might be possible that the controller will continue to work on the
+     * cancelation. The controller needs to acknowledge or reject the
+     * cancelation using {@link DdiRootController#postCancelActionFeedback}.
+     *
+     * @param actionId
+     *            to be canceled
+     *
+     * @return canceled {@link Action}
+     *
+     * @throws CancelActionNotAllowedException
+     *             in case the given action is not active or is already canceled
+     * @throws EntityNotFoundException
+     *             if action with given actionId does not exist.
+     */
+    @Override
+    @Modifying
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public Action cancelAction(final long actionId) {
+        LOG.debug("cancelAction({})", actionId);
+
+        final JpaAction action = actionRepository.findById(actionId)
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
+
+        if (action.isCancelingOrCanceled()) {
+            throw new CancelActionNotAllowedException("Actions in canceling or canceled state cannot be canceled");
+        }
+
+        if (action.isActive()) {
+            LOG.debug("action ({}) was still active. Change to {}.", action, Status.CANCELING);
+            action.setStatus(Status.CANCELING);
+
+            // document that the status has been retrieved
+            actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELING, System.currentTimeMillis(),
+                    "manual cancelation requested"));
+            final Action saveAction = actionRepository.save(action);
+            cancelAssignDistributionSetEvent((JpaTarget) action.getTarget(), action.getId());
+
+            return saveAction;
+        } else {
+            throw new CancelActionNotAllowedException(
+                    "Action [id: " + action.getId() + "] is not active and cannot be canceled");
+        }
+    }
+
+    private void cancelAssignDistributionSetEvent(final JpaTarget target, final Long actionId) {
+        afterCommit.afterCommit(() -> eventPublisher
+                .publishEvent(new CancelTargetAssignmentEvent(target, actionId, applicationContext.getId())));
     }
 }

@@ -8,8 +8,12 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.time.Duration;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
@@ -27,6 +31,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -95,7 +100,8 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
             @ConversionValue(objectValue = "RETRIEVED", dataValue = "6"),
             @ConversionValue(objectValue = "DOWNLOAD", dataValue = "7"),
             @ConversionValue(objectValue = "SCHEDULED", dataValue = "8"),
-            @ConversionValue(objectValue = "CANCEL_REJECTED", dataValue = "9") })
+            @ConversionValue(objectValue = "CANCEL_REJECTED", dataValue = "9"),
+            @ConversionValue(objectValue = "DOWNLOADED", dataValue = "10") })
     @Convert("status")
     @NotNull
     private Status status;
@@ -111,6 +117,20 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rollout", updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rollout"))
     private JpaRollout rollout;
+
+    @Column(name = "maintenance_cron_schedule", updatable = false, length = Action.MAINTENANCE_SCHEDULE_CRON_LENGTH)
+    private String maintenanceSchedule;
+
+    @Column(name = "maintenance_duration", updatable = false, length = Action.MAINTENANCE_WINDOW_DURATION_LENGTH)
+    private String maintenanceWindowDuration;
+
+    @Column(name = "maintenance_time_zone", updatable = false, length = Action.MAINTENANCE_WINDOW_TIMEZONE_LENGTH)
+    private String maintenanceWindowTimeZone;
+
+    /**
+     * A transient (non serialized) maintenance schedule helper.
+     */
+    private transient MaintenanceScheduleHelper scheduleHelper = null;
 
     @Override
     public DistributionSet getDistributionSet() {
@@ -217,4 +237,116 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
         // there is no action deletion
     }
 
+    /**
+     * Sets the maintenance schedule.
+     *
+     * @param maintenanceSchedule
+     *            is a cron expression to be used for scheduling.
+     */
+    public void setMaintenanceSchedule(final String maintenanceSchedule) {
+        this.maintenanceSchedule = maintenanceSchedule;
+    }
+
+    /**
+     * Sets the maintenance window duration.
+     *
+     * @param maintenanceWindowDuration
+     *            is the duration of an available maintenance schedule in
+     *            HH:mm:ss format.
+     */
+    public void setMaintenanceWindowDuration(final String maintenanceWindowDuration) {
+        this.maintenanceWindowDuration = maintenanceWindowDuration;
+    }
+
+    /**
+     * Sets the time zone to be used for maintenance window.
+     *
+     * @param maintenanceWindowTimeZone
+     *            is the time zone specified as +/-hh:mm offset from UTC for
+     *            example +02:00 for CET summer time and +00:00 for UTC. The
+     *            start time of a maintenance window calculated based on the
+     *            cron expression is relative to this time zone.
+     */
+    public void setMaintenanceWindowTimeZone(final String maintenanceWindowTimeZone) {
+        this.maintenanceWindowTimeZone = maintenanceWindowTimeZone;
+    }
+
+    /**
+     * Get the transient schedule helper. Instantiate one if not already done
+     * after deserialization.
+     *
+     * @return the {@link MaintenanceScheduleHelper} object.
+     */
+    private MaintenanceScheduleHelper getScheduler() {
+        if (this.scheduleHelper == null) {
+            this.scheduleHelper = new MaintenanceScheduleHelper(maintenanceSchedule);
+        }
+        return this.scheduleHelper;
+    }
+
+    /**
+     * Returns the duration of each maintenance window in ISO 8601 format.
+     *
+     * @return the {@link Duration} of each maintenance window.
+     */
+    private Duration getMaintenanceWindowDuration() {
+        return Duration.parse(MaintenanceScheduleHelper.convertToISODuration(this.maintenanceWindowDuration));
+    }
+
+    /**
+     * Returns the start time of next available maintenance window for the
+     * {@link Action} as {@link ZonedDateTime}. If a maintenance window is
+     * already active, the start time of currently active window is returned.
+     *
+     * @return the start time as {@link Optional<ZonedDateTime>}.
+     */
+    public Optional<ZonedDateTime> getMaintenanceWindowStartTime() {
+        final ZonedDateTime now = ZonedDateTime.now(ZoneOffset.of(maintenanceWindowTimeZone));
+        return getScheduler().nextExecution(now.minus(getMaintenanceWindowDuration()));
+    }
+
+    /**
+     * Returns the end time of next available or active maintenance window for
+     * the {@link Action} as {@link ZonedDateTime}. If a maintenance window is
+     * already active, the end time of currently active window is returned.
+     *
+     * @return the end time of window as {@link Optional<ZonedDateTime>}.
+     */
+    private Optional<ZonedDateTime> getMaintenanceWindowEndTime() {
+        return getMaintenanceWindowStartTime().map(start -> start.plus(getMaintenanceWindowDuration()));
+    }
+
+    @Override
+    public boolean hasMaintenanceSchedule() {
+        return this.maintenanceSchedule != null;
+    }
+
+    @Override
+    public boolean isMaintenanceScheduleLapsed() {
+        final ZonedDateTime now = ZonedDateTime.now(ZoneOffset.of(maintenanceWindowTimeZone));
+        return !getScheduler().nextExecution(now.minus(getMaintenanceWindowDuration())).isPresent();
+    }
+
+    @Override
+    public boolean isMaintenanceWindowAvailable() {
+        if (!hasMaintenanceSchedule()) {
+            // if there is no defined maintenance schedule, a window is always
+            // available.
+            return true;
+        } else if (isMaintenanceScheduleLapsed()) {
+            // if a defined maintenance schedule has lapsed, a window is never
+            // available.
+            return false;
+        } else {
+            final ZonedDateTime now = ZonedDateTime.now(ZoneOffset.of(maintenanceWindowTimeZone));
+            final Optional<ZonedDateTime> start = getMaintenanceWindowStartTime();
+            final Optional<ZonedDateTime> end = getMaintenanceWindowEndTime();
+
+            if (start.isPresent() && end.isPresent()) {
+                return now.isAfter(start.get()) && now.isBefore(end.get());
+            } else {
+                return false;
+            }
+        }
+    }
 }

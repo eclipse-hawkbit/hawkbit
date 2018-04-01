@@ -8,12 +8,13 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import org.eclipse.hawkbit.repository.event.entity.EntityDeletedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 
 /**
  * Defines the the remote event of delete a {@link DistributionSetTag}.
  */
-public class DistributionSetTagDeletedEvent extends RemoteIdEvent {
+public class DistributionSetTagDeletedEvent extends RemoteIdEvent implements EntityDeletedEvent {
 
     private static final long serialVersionUID = 1L;
 

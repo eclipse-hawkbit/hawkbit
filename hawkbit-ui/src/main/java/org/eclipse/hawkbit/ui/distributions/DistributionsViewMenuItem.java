@@ -13,6 +13,8 @@ import java.util.List;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.ui.management.AbstractDashboardMenuItemNotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 
 import com.vaadin.server.FontAwesome;
@@ -22,16 +24,18 @@ import com.vaadin.spring.annotation.UIScope;
 
 /**
  * Menu item for distributions view.
- * 
- *
- * 
  */
 @SpringComponent
 @UIScope
 @Order(400)
 public class DistributionsViewMenuItem extends AbstractDashboardMenuItemNotification {
 
-    private static final long serialVersionUID = -4048522766974227222L;
+    private static final long serialVersionUID = 1L;
+
+    @Autowired
+    DistributionsViewMenuItem(final VaadinMessageSource i18n) {
+        super(i18n);
+    }
 
     @Override
     public String getViewName() {
@@ -45,18 +49,17 @@ public class DistributionsViewMenuItem extends AbstractDashboardMenuItemNotifica
 
     @Override
     public String getDashboardCaption() {
-        return "Distributions";
+        return getI18n().getMessage("dashboard.distributions.caption");
     }
 
     @Override
     public String getDashboardCaptionLong() {
-        return "Distributions Management";
+        return getI18n().getMessage("dashboard.distributions.caption-long");
     }
 
     @Override
     public List<String> getPermissions() {
-        return Arrays.asList(SpPermission.CREATE_REPOSITORY, SpPermission.READ_REPOSITORY,
-                SpPermission.UPDATE_REPOSITORY);
+        return Arrays.asList(SpPermission.READ_REPOSITORY);
     }
 
 }

@@ -31,7 +31,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroupItemComponent;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.vaadin.data.Container.ItemSetChangeEvent;
 import com.vaadin.data.Container.ItemSetChangeListener;
@@ -65,10 +64,10 @@ import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * 
+ *
  * Table pop-up-windows including a minimize and close icon in the upper right
  * corner and a save and cancel button at the bottom. Is not intended to reuse.
- * 
+ *
  */
 public class CommonDialogWindow extends Window {
 
@@ -104,7 +103,7 @@ public class CommonDialogWindow extends Window {
 
     /**
      * Constructor.
-     * 
+     *
      * @param caption
      *            the caption
      * @param content
@@ -326,17 +325,13 @@ public class CommonDialogWindow extends Window {
     private boolean isMandatoryFieldNotEmptyAndValid(final Component currentChangedComponent, final Object newValue) {
 
         boolean valid = true;
-        final List<AbstractField<?>> requiredComponents = allComponents.stream().filter(field -> field.isRequired())
-                .collect(Collectors.toList());
+        final List<AbstractField<?>> requiredComponents = allComponents.stream().filter(AbstractField::isRequired)
+                .filter(AbstractField::isEnabled).collect(Collectors.toList());
 
         requiredComponents.addAll(allComponents.stream().filter(this::hasNullValidator).collect(Collectors.toList()));
 
         for (final AbstractField field : requiredComponents) {
             Object value = getCurrentVaue(currentChangedComponent, newValue, field);
-
-            if (String.class.equals(field.getType())) {
-                value = Strings.emptyToNull((String) value);
-            }
 
             if (Set.class.equals(field.getType())) {
                 value = emptyToNull((Collection<?>) value);
@@ -396,12 +391,18 @@ public class CommonDialogWindow extends Window {
 
             if (c instanceof TabSheet) {
                 final TabSheet tabSheet = (TabSheet) c;
-                for (final Iterator<Component> i = tabSheet.iterator(); i.hasNext();) {
-                    final Component component = i.next();
-                    if (component instanceof AbstractLayout) {
-                        components.addAll(getAllComponents((AbstractLayout) component));
-                    }
-                }
+                components.addAll(getAllComponentsFromTabSheet(tabSheet));
+            }
+        }
+        return components;
+    }
+
+    private static List<AbstractField<?>> getAllComponentsFromTabSheet(final TabSheet tabSheet) {
+        final List<AbstractField<?>> components = new ArrayList<>();
+        for (final Iterator<Component> i = tabSheet.iterator(); i.hasNext();) {
+            final Component component = i.next();
+            if (component instanceof AbstractLayout) {
+                components.addAll(getAllComponents((AbstractLayout) component));
             }
         }
         return components;
@@ -490,7 +491,6 @@ public class CommonDialogWindow extends Window {
         private final Field<?> field;
 
         public ChangeListener(final Field<?> field) {
-            super();
             this.field = field;
         }
 
@@ -519,7 +519,7 @@ public class CommonDialogWindow extends Window {
      * Adds the component manually to the allComponents-List and adds a
      * ValueChangeListener to it. Necessary in Update Distribution Type as the
      * CheckBox concerned is an ItemProperty...
-     * 
+     *
      * @param component
      *            AbstractField
      */
@@ -550,7 +550,7 @@ public class CommonDialogWindow extends Window {
 
         /**
          * Checks if the safe action can executed.
-         * 
+         *
          * @return <true> = save action can executed <false> = cannot execute
          *         safe action .
          */
@@ -558,7 +558,7 @@ public class CommonDialogWindow extends Window {
 
         /**
          * Checks if the window can closed after the safe action is executed
-         * 
+         *
          * @return <true> = window will close <false> = will not closed.
          */
         default boolean canWindowClose() {
@@ -567,7 +567,7 @@ public class CommonDialogWindow extends Window {
 
         /**
          * Saves/Updates action. Is called if canWindowSaveOrUpdate is <true>.
-         * 
+         *
          */
         void saveOrUpdate();
     }
@@ -575,7 +575,7 @@ public class CommonDialogWindow extends Window {
     /**
      * Updates the field allComponents. All components existing on the given
      * layout are added to the list of allComponents
-     * 
+     *
      * @param layout
      *            AbstractLayout
      */

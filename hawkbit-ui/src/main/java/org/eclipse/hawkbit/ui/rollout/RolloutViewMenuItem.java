@@ -13,6 +13,8 @@ import java.util.List;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.ui.management.AbstractDashboardMenuItemNotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 
 import com.vaadin.server.FontAwesome;
@@ -21,17 +23,19 @@ import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 
 /**
- * Menu item for rollout .
- * 
- *
- *
+ * Menu item for rollouts.
  */
 @SpringComponent
 @UIScope
 @Order(200)
 public class RolloutViewMenuItem extends AbstractDashboardMenuItemNotification {
 
-    private static final long serialVersionUID = 6112540239655168995L;
+    private static final long serialVersionUID = 1L;
+
+    @Autowired
+    RolloutViewMenuItem(final VaadinMessageSource i18n) {
+        super(i18n);
+    }
 
     @Override
     public String getViewName() {
@@ -45,16 +49,16 @@ public class RolloutViewMenuItem extends AbstractDashboardMenuItemNotification {
 
     @Override
     public String getDashboardCaption() {
-        return "Rollout";
+        return getI18n().getMessage("dashboard.rollouts.caption");
     }
 
     @Override
     public String getDashboardCaptionLong() {
-        return "Rollout Management";
+        return getI18n().getMessage("dashboard.rollouts.caption-long");
     }
 
     @Override
     public List<String> getPermissions() {
-        return Arrays.asList(SpPermission.ROLLOUT_MANAGEMENT);
+        return Arrays.asList(SpPermission.READ_ROLLOUT);
     }
 }

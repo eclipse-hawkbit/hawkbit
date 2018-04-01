@@ -10,13 +10,19 @@ package org.eclipse.hawkbit.repository.jpa.autoassign;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Slice;
@@ -36,6 +42,50 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
 
     @Autowired
     private AutoAssignChecker autoAssignChecker;
+
+    @Test
+    @Description("Verifies that a running action is auto canceled by a AutoAssignment which assigns another distribution-set.")
+    public void autoAssignDistributionSetAndAutoCloseOldActions() {
+
+        tenantConfigurationManagement
+                .addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, true);
+
+        try {
+            final String knownControllerId = "controller12345";
+            final DistributionSet firstDistributionSet = testdataFactory.createDistributionSet();
+            final DistributionSet secondDistributionSet = testdataFactory.createDistributionSet("second");
+            testdataFactory.createTarget(knownControllerId);
+            final DistributionSetAssignmentResult assignmentResult = deploymentManagement.assignDistributionSet(
+                    firstDistributionSet.getId(), ActionType.FORCED, 0, Collections.singleton(knownControllerId));
+            final Long manuallyAssignedActionId = assignmentResult.getActions().get(0);
+
+            // target filter query that matches all targets
+            final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
+                    .create(entityFactory.targetFilterQuery().create().name("filterA").query("name==*"));
+            targetFilterQueryManagement.updateAutoAssignDS(targetFilterQuery.getId(), secondDistributionSet.getId());
+
+            // Run the check
+            autoAssignChecker.check();
+
+            // verify that manually created action is canceled and action
+            // created from AutoAssign is running
+            final List<Action> actionsByKnownTarget = deploymentManagement.findActionsByTarget(knownControllerId, PAGE)
+                    .getContent();
+            // should be 2 actions, one manually and one from the AutoAssign
+            assertThat(actionsByKnownTarget).hasSize(2);
+            // verify that manually assigned action is still running
+            assertThat(deploymentManagement.findAction(manuallyAssignedActionId).get().getStatus())
+                    .isEqualTo(Status.CANCELED);
+            // verify that AutoAssign created action is running
+            final Action rolloutCreatedAction = actionsByKnownTarget.stream()
+                    .filter(action -> !action.getId().equals(manuallyAssignedActionId)).findAny().get();
+            assertThat(rolloutCreatedAction.getStatus()).isEqualTo(Status.RUNNING);
+
+        } finally {
+            tenantConfigurationManagement
+                    .addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, false);
+        }
+    }
 
     @Test
     @Description("Test auto assignment of a DS to filtered targets")
@@ -72,8 +122,7 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         verifyThatTargetsHaveDistributionSetAssignment(setB, targets.subList(10, 20), targetsCount);
 
         // Count the number of targets that will be assigned with setA
-        assertThat(targetManagement.countByRsqlAndNonDS(setA.getId(), targetFilterQuery.getQuery()))
-                .isEqualTo(90);
+        assertThat(targetManagement.countByRsqlAndNonDS(setA.getId(), targetFilterQuery.getQuery())).isEqualTo(90);
 
         // Run the check
         autoAssignChecker.check();
@@ -90,8 +139,8 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
     public void checkAutoAssignWithFailures() {
 
         // incomplete distribution set that will be assigned
-        final DistributionSet setF = distributionSetManagement.create(entityFactory.distributionSet()
-                .create().name("dsA").version("1").type(testdataFactory.findOrCreateDefaultTestDsType()));
+        final DistributionSet setF = distributionSetManagement.create(entityFactory.distributionSet().create()
+                .name("dsA").version("1").type(testdataFactory.findOrCreateDefaultTestDsType()));
         final DistributionSet setA = testdataFactory.createDistributionSet("dsA");
         final DistributionSet setB = testdataFactory.createDistributionSet("dsB");
 
@@ -100,16 +149,14 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
 
         // target filter query that matches first bunch of targets, that should
         // fail
-        targetFilterQueryManagement.updateAutoAssignDS(
-                targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create()
-                        .name("filterA").query("id==" + targetDsFIdPref + "*")).getId(),
-                setF.getId());
+        targetFilterQueryManagement.updateAutoAssignDS(targetFilterQueryManagement.create(
+                entityFactory.targetFilterQuery().create().name("filterA").query("id==" + targetDsFIdPref + "*"))
+                .getId(), setF.getId());
 
         // target filter query that matches failed bunch of targets
-        targetFilterQueryManagement.updateAutoAssignDS(
-                targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create()
-                        .name("filterB").query("id==" + targetDsAIdPref + "*")).getId(),
-                setA.getId());
+        targetFilterQueryManagement.updateAutoAssignDS(targetFilterQueryManagement.create(
+                entityFactory.targetFilterQuery().create().name("filterB").query("id==" + targetDsAIdPref + "*"))
+                .getId(), setA.getId());
 
         final List<Target> targetsF = testdataFactory.createTargets(10, targetDsFIdPref,
                 targetDsFIdPref.concat(" description"));

@@ -17,10 +17,10 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.util.StringUtils;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -113,9 +113,9 @@ public abstract class AbstractTableHeader extends VerticalLayout {
     private void restoreState() {
 
         final String onLoadSearchBoxValue = onLoadSearchBoxValue();
-        if (HawkbitCommonUtil.trimAndNullIfEmpty(onLoadSearchBoxValue) != null) {
+        if (StringUtils.hasText(onLoadSearchBoxValue)) {
             openSearchTextField();
-            searchField.setValue(onLoadSearchBoxValue);
+            searchField.setValue(onLoadSearchBoxValue.trim());
         }
 
         if (onLoadIsTableMaximized()) {

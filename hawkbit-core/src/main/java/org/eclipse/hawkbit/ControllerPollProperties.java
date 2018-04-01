@@ -49,6 +49,16 @@ public class ControllerPollProperties implements Serializable {
      */
     private String pollingOverdueTime = "00:05:00";
 
+    /**
+     * This configuration value is used to change the polling interval so that
+     * controller tries to poll at least these many times between the last
+     * polling and before start of maintenance window. The polling interval is
+     * bounded by configured pollingTime and minPollingTime. The polling
+     * interval is modified as per following scheme: pollingTime(@time=t) =
+     * (maintenanceWindowStartTime - t)/maintenanceWindowPollCount.
+     */
+    private int maintenanceWindowPollCount = 3;
+
     public String getPollingTime() {
         return pollingTime;
     }
@@ -81,4 +91,23 @@ public class ControllerPollProperties implements Serializable {
         this.minPollingTime = minPollingTime;
     }
 
+    /**
+     * Returns poll count for maintenance window
+     * ({@link ControllerPollProperties#maintenanceWindowPollCount}).
+     *
+     * @return maintenanceWindowPollCount as int.
+     */
+    public int getMaintenanceWindowPollCount() {
+        return maintenanceWindowPollCount;
+    }
+
+    /**
+     * Sets poll count for maintenance window
+     * ({@link ControllerPollProperties#maintenanceWindowPollCount}).
+     *
+     * @param maintenanceWindowPollCount.
+     */
+    public void setMaintenanceWindowPollCount(int maintenanceWindowPollCount) {
+        this.maintenanceWindowPollCount = maintenanceWindowPollCount;
+    }
 }

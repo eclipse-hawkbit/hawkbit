@@ -30,7 +30,6 @@ public class SoftwareModuleIdName implements Serializable {
      *            of the {@link SoftwareModule}
      */
     public SoftwareModuleIdName(final Long id, final String name) {
-        super();
         this.id = id;
         this.name = name;
     }

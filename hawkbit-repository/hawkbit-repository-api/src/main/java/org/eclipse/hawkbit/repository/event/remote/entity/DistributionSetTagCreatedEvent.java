@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import org.eclipse.hawkbit.repository.event.entity.EntityCreatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 
 /**
@@ -15,7 +16,8 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
  * {@link DistributionSetTag}.
  *
  */
-public class DistributionSetTagCreatedEvent extends RemoteEntityEvent<DistributionSetTag> {
+public class DistributionSetTagCreatedEvent extends RemoteEntityEvent<DistributionSetTag>
+        implements EntityCreatedEvent {
 
     private static final long serialVersionUID = 1L;
 

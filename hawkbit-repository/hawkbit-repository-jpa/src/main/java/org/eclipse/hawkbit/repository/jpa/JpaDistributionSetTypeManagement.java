@@ -38,6 +38,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,16 +62,19 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     private final VirtualPropertyReplacer virtualPropertyReplacer;
 
     private final NoCountPagingRepository criteriaNoCountDao;
+    private final Database database;
 
     JpaDistributionSetTypeManagement(final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final DistributionSetRepository distributionSetRepository,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final NoCountPagingRepository criteriaNoCountDao) {
+            final VirtualPropertyReplacer virtualPropertyReplacer, final NoCountPagingRepository criteriaNoCountDao,
+            final Database database) {
         this.distributionSetTypeRepository = distributionSetTypeRepository;
         this.softwareModuleTypeRepository = softwareModuleTypeRepository;
         this.distributionSetRepository = distributionSetRepository;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.criteriaNoCountDao = criteriaNoCountDao;
+        this.database = database;
     }
 
     @Override
@@ -101,7 +105,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetType assignMandatorySoftwareModuleTypes(final Long dsTypeId,
+    public DistributionSetType assignMandatorySoftwareModuleTypes(final long dsTypeId,
             final Collection<Long> softwareModulesTypeIds) {
         final Collection<JpaSoftwareModuleType> modules = softwareModuleTypeRepository.findAll(softwareModulesTypeIds);
 
@@ -122,7 +126,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetType assignOptionalSoftwareModuleTypes(final Long dsTypeId,
+    public DistributionSetType assignOptionalSoftwareModuleTypes(final long dsTypeId,
             final Collection<Long> softwareModulesTypeIds) {
 
         final Collection<JpaSoftwareModuleType> modules = softwareModuleTypeRepository.findAll(softwareModulesTypeIds);
@@ -143,7 +147,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetType unassignSoftwareModuleType(final Long dsTypeId, final Long softwareModuleTypeId) {
+    public DistributionSetType unassignSoftwareModuleType(final long dsTypeId, final long softwareModuleTypeId) {
         final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(dsTypeId);
 
         checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(dsTypeId);
@@ -155,9 +159,10 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
     @Override
     public Page<DistributionSetType> findByRsql(final Pageable pageable, final String rsqlParam) {
-        return convertPage(findByCriteriaAPI(pageable,
-                Arrays.asList(RSQLUtility.parse(rsqlParam, DistributionSetTypeFields.class, virtualPropertyReplacer),
-                        DistributionSetTypeSpecification.isDeleted(false))),
+        return convertPage(
+                findByCriteriaAPI(pageable,
+                        Arrays.asList(RSQLUtility.parse(rsqlParam, DistributionSetTypeFields.class,
+                                virtualPropertyReplacer, database), DistributionSetTypeSpecification.isDeleted(false))),
                 pageable);
     }
 
@@ -197,7 +202,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void delete(final Long typeId) {
+    public void delete(final long typeId) {
 
         final JpaDistributionSetType toDelete = distributionSetTypeRepository.findById(typeId)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, typeId));
@@ -275,12 +280,12 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     }
 
     @Override
-    public Optional<DistributionSetType> get(final Long id) {
+    public Optional<DistributionSetType> get(final long id) {
         return Optional.ofNullable(distributionSetTypeRepository.findOne(id));
     }
 
     @Override
-    public boolean exists(final Long id) {
+    public boolean exists(final long id) {
         return distributionSetTypeRepository.exists(id);
     }
 

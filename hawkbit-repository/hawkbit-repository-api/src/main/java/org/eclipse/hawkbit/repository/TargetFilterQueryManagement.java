@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository;
 import java.util.Optional;
 
 import javax.validation.ConstraintViolationException;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -41,7 +42,7 @@ public interface TargetFilterQueryManagement {
      *             {@link TargetFilterQueryCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
-    TargetFilterQuery create(@NotNull TargetFilterQueryCreate create);
+    TargetFilterQuery create(@NotNull @Valid TargetFilterQueryCreate create);
 
     /**
      * Delete target filter query.
@@ -53,7 +54,7 @@ public interface TargetFilterQueryManagement {
      *             if filter with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
-    void delete(@NotNull Long targetFilterQueryId);
+    void delete(long targetFilterQueryId);
 
     /**
      * Verifies provided filter syntax.
@@ -145,7 +146,7 @@ public interface TargetFilterQueryManagement {
      *             if DS with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetFilterQuery> findByAutoAssignDSAndRsql(@NotNull Pageable pageable, @NotNull Long setId,
+    Page<TargetFilterQuery> findByAutoAssignDSAndRsql(@NotNull Pageable pageable, long setId,
             String rsqlParam);
 
     /**
@@ -168,7 +169,7 @@ public interface TargetFilterQueryManagement {
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Optional<TargetFilterQuery> get(@NotNull Long targetFilterQueryId);
+    Optional<TargetFilterQuery> get(long targetFilterQueryId);
 
     /**
      * Find target filter query by name.
@@ -197,7 +198,7 @@ public interface TargetFilterQueryManagement {
      *             {@link TargetFilterQueryUpdate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    TargetFilterQuery update(@NotNull TargetFilterQueryUpdate update);
+    TargetFilterQuery update(@NotNull @Valid TargetFilterQueryUpdate update);
 
     /**
      * updates the {@link TargetFilterQuery#getAutoAssignDistributionSet()}.
@@ -213,6 +214,6 @@ public interface TargetFilterQueryManagement {
      *             provided but not found
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    TargetFilterQuery updateAutoAssignDS(@NotNull Long queryId, Long dsId);
+    TargetFilterQuery updateAutoAssignDS(long queryId, Long dsId);
 
 }

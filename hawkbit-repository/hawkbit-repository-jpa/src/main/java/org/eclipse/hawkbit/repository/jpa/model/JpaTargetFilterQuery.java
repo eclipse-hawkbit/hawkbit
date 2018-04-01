@@ -17,12 +17,17 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
+import org.eclipse.hawkbit.repository.event.remote.TargetFilterQueryDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.hibernate.validator.constraints.NotEmpty;
+import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
+import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
  * Stored target filter.
@@ -34,7 +39,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
-public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity implements TargetFilterQuery {
+public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
+        implements TargetFilterQuery, EventAwareEntity {
     private static final long serialVersionUID = 7493966984413479089L;
 
     @Column(name = "name", length = NamedEntity.NAME_MAX_SIZE, nullable = false)
@@ -97,5 +103,23 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity imple
 
     public void setAutoAssignDistributionSet(final JpaDistributionSet distributionSet) {
         this.autoAssignDistributionSet = distributionSet;
+    }
+
+    @Override
+    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
+                new TargetFilterQueryCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+    }
+
+    @Override
+    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
+                new TargetFilterQueryUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+    }
+
+    @Override
+    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetFilterQueryDeletedEvent(
+                getTenant(), getId(), getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
     }
 }

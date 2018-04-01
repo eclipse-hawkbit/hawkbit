@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import org.eclipse.hawkbit.repository.event.entity.EntityCreatedEvent;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 
 /**
@@ -15,7 +16,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
  * has been created for a specific rollout.
  *
  */
-public class RolloutGroupCreatedEvent extends AbstractRolloutGroupEvent {
+public class RolloutGroupCreatedEvent extends AbstractRolloutGroupEvent implements EntityCreatedEvent {
     private static final long serialVersionUID = 1L;
 
     /**

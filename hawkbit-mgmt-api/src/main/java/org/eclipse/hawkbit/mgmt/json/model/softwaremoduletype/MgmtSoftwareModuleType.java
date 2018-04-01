@@ -33,47 +33,37 @@ public class MgmtSoftwareModuleType extends MgmtNamedEntity {
     @JsonProperty
     private int maxAssignments;
 
-    /**
-     * @return the moduleId
-     */
+    @JsonProperty
+    private boolean deleted;
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(final boolean deleted) {
+        this.deleted = deleted;
+    }
+
     public Long getModuleId() {
         return moduleId;
     }
 
-    /**
-     * @param moduleId
-     *            the moduleId to set
-     */
     public void setModuleId(final Long moduleId) {
         this.moduleId = moduleId;
     }
 
-    /**
-     * @return the key
-     */
     public String getKey() {
         return key;
     }
 
-    /**
-     * @param key
-     *            the key to set
-     */
     public void setKey(final String key) {
         this.key = key;
     }
 
-    /**
-     * @return the maxAssignments
-     */
     public int getMaxAssignments() {
         return maxAssignments;
     }
 
-    /**
-     * @param maxAssignments
-     *            the maxAssignments to set
-     */
     public void setMaxAssignments(final int maxAssignments) {
         this.maxAssignments = maxAssignments;
     }

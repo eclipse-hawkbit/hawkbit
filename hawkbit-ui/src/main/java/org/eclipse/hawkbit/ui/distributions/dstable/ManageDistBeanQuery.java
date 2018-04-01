@@ -120,7 +120,7 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
 
     @Override
     public int size() {
-        if (StringUtils.isEmpty(searchText) && null == distributionSetType) {
+        if (StringUtils.isEmpty(searchText) && distributionSetType == null) {
             // if no search filters available
             firstPageDistributionSets = getDistributionSetManagement()
                     .findByCompleted(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), dsComplete);

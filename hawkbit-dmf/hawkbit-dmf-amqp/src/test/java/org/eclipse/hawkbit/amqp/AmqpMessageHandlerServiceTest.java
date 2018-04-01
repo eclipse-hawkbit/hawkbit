@@ -11,7 +11,8 @@ package org.eclipse.hawkbit.amqp;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -35,9 +36,11 @@ import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadResponse;
+import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusBuilder;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -122,6 +125,9 @@ public class AmqpMessageHandlerServiceTest {
     @Captor
     private ArgumentCaptor<String> targetIdCaptor;
 
+    @Captor
+    private ArgumentCaptor<UpdateMode> modeCaptor;
+
     @Before
     public void before() throws Exception {
         messageConverter = new Jackson2JsonMessageConverter();
@@ -180,7 +186,7 @@ public class AmqpMessageHandlerServiceTest {
     public void updateAttributes() {
         final String knownThingId = "1";
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
-        messageProperties.setHeader(MessageHeaderKey.THING_ID, "1");
+        messageProperties.setHeader(MessageHeaderKey.THING_ID, knownThingId);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, "UPDATE_ATTRIBUTES");
         final DmfAttributeUpdate attributeUpdate = new DmfAttributeUpdate();
         attributeUpdate.getAttributes().put("testKey1", "testValue1");
@@ -189,8 +195,8 @@ public class AmqpMessageHandlerServiceTest {
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(attributeUpdate,
                 messageProperties);
 
-        when(controllerManagementMock.updateControllerAttributes(targetIdCaptor.capture(), attributesCaptor.capture()))
-                .thenReturn(null);
+        when(controllerManagementMock.updateControllerAttributes(targetIdCaptor.capture(), attributesCaptor.capture(),
+                modeCaptor.capture())).thenReturn(null);
 
         amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
 
@@ -198,6 +204,50 @@ public class AmqpMessageHandlerServiceTest {
         assertThat(targetIdCaptor.getValue()).as("Thing id is wrong").isEqualTo(knownThingId);
         assertThat(attributesCaptor.getValue()).as("Attributes is not right")
                 .isEqualTo(attributeUpdate.getAttributes());
+
+    }
+
+    @Test
+    @Description("Verifies that the update mode is retrieved from the UPDATE_ATTRIBUTES message and passed to the controller management.")
+    public void attributeUpdateModes() {
+        final String knownThingId = "1";
+        final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
+        messageProperties.setHeader(MessageHeaderKey.THING_ID, knownThingId);
+        messageProperties.setHeader(MessageHeaderKey.TOPIC, "UPDATE_ATTRIBUTES");
+        final DmfAttributeUpdate attributeUpdate = new DmfAttributeUpdate();
+        attributeUpdate.getAttributes().put("testKey1", "testValue1");
+        attributeUpdate.getAttributes().put("testKey2", "testValue2");
+
+        when(controllerManagementMock.updateControllerAttributes(targetIdCaptor.capture(), attributesCaptor.capture(),
+                modeCaptor.capture())).thenReturn(null);
+
+        // send a message which does not specify a update mode
+        Message message = amqpMessageHandlerService.getMessageConverter().toMessage(attributeUpdate, messageProperties);
+        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
+        // verify that NO fallback is made on the way to the controller
+        // management layer
+        assertThat(modeCaptor.getValue()).isNull();
+
+        // send a message which specifies update mode MERGE
+        attributeUpdate.setMode(DmfUpdateMode.MERGE);
+        message = amqpMessageHandlerService.getMessageConverter().toMessage(attributeUpdate, messageProperties);
+        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
+        // verify that the update mode is converted and forwarded as expected
+        assertThat(modeCaptor.getValue()).isEqualTo(UpdateMode.MERGE);
+
+        // send a message which specifies update mode REPLACE
+        attributeUpdate.setMode(DmfUpdateMode.REPLACE);
+        message = amqpMessageHandlerService.getMessageConverter().toMessage(attributeUpdate, messageProperties);
+        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
+        // verify that the update mode is converted and forwarded as expected
+        assertThat(modeCaptor.getValue()).isEqualTo(UpdateMode.REPLACE);
+
+        // send a message which specifies update mode REMOVE
+        attributeUpdate.setMode(DmfUpdateMode.REMOVE);
+        message = amqpMessageHandlerService.getMessageConverter().toMessage(attributeUpdate, messageProperties);
+        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
+        // verify that the update mode is converted and forwarded as expected
+        assertThat(modeCaptor.getValue()).isEqualTo(UpdateMode.REMOVE);
 
     }
 
@@ -277,7 +327,7 @@ public class AmqpMessageHandlerServiceTest {
     @Test
     @Description("Tests the update of an action of a target without a exist action id")
     public void updateActionStatusWithoutActionId() {
-        when(controllerManagementMock.findActionWithDetails(any())).thenReturn(Optional.empty());
+        when(controllerManagementMock.findActionWithDetails(anyLong())).thenReturn(Optional.empty());
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
         final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(1L, DmfActionStatus.DOWNLOAD);
@@ -297,7 +347,7 @@ public class AmqpMessageHandlerServiceTest {
     public void updateActionStatusWithoutExistActionId() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
-        when(controllerManagementMock.findActionWithDetails(any())).thenReturn(Optional.empty());
+        when(controllerManagementMock.findActionWithDetails(anyLong())).thenReturn(Optional.empty());
 
         final DmfActionUpdateStatus actionUpdateStatus = createActionUpdateStatus(DmfActionStatus.DOWNLOAD);
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(actionUpdateStatus,
@@ -342,7 +392,7 @@ public class AmqpMessageHandlerServiceTest {
 
         final Artifact localArtifactMock = mock(Artifact.class);
         when(artifactManagementMock.findFirstBySHA1(anyString())).thenReturn(Optional.of(localArtifactMock));
-        when(controllerManagementMock.getActionForDownloadByTargetAndSoftwareModule(anyObject(), anyObject()))
+        when(controllerManagementMock.getActionForDownloadByTargetAndSoftwareModule(anyString(), anyLong()))
                 .thenThrow(EntityNotFoundException.class);
 
         // test
@@ -396,7 +446,7 @@ public class AmqpMessageHandlerServiceTest {
 
         // Mock
         final Action action = createActionWithTarget(22L, Status.FINISHED);
-        when(controllerManagementMock.findActionWithDetails(any())).thenReturn(Optional.of(action));
+        when(controllerManagementMock.findActionWithDetails(anyLong())).thenReturn(Optional.of(action));
         when(controllerManagementMock.addUpdateActionStatus(any())).thenReturn(action);
         final ActionStatusBuilder builder = mock(ActionStatusBuilder.class);
         final ActionStatusCreate create = mock(ActionStatusCreate.class);
@@ -420,7 +470,7 @@ public class AmqpMessageHandlerServiceTest {
         final ArgumentCaptor<Long> actionIdCaptor = ArgumentCaptor.forClass(Long.class);
 
         verify(amqpMessageDispatcherServiceMock, times(1)).sendUpdateMessageToTarget(tenantCaptor.capture(),
-                targetCaptor.capture(), actionIdCaptor.capture(), any(Map.class));
+                targetCaptor.capture(), actionIdCaptor.capture(), any(Map.class), anyBoolean());
         final String tenant = tenantCaptor.getValue();
         final String controllerId = targetCaptor.getValue().getControllerId();
         final Long actionId = actionIdCaptor.getValue();

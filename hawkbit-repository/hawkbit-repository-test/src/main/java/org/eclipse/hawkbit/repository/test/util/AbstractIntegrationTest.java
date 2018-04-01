@@ -14,9 +14,12 @@ import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpre
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -70,6 +73,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -96,7 +100,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 // test execution. So, the order execution between EventVerifier and Cleanup is
 // important!
 @TestExecutionListeners(inheritListeners = true, listeners = { EventVerifier.class, CleanupTestExecutionListener.class,
-        MySqlTestDatabase.class }, mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
+        MySqlTestDatabase.class, MsSqlTestDatabase.class }, mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
 public abstract class AbstractIntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
@@ -196,6 +200,9 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     protected ServiceMatcher serviceMatcher;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
     @Rule
     public final WithSpringAuthorityRule securityRule = new WithSpringAuthorityRule();
 
@@ -221,6 +228,41 @@ public abstract class AbstractIntegrationTest {
     protected DistributionSetAssignmentResult assignDistributionSet(final Long dsID, final String controllerId) {
         return deploymentManagement.assignDistributionSet(dsID, Arrays.asList(
                 new TargetWithActionType(controllerId, ActionType.FORCED, RepositoryModelConstants.NO_FORCE_TIME)));
+    }
+
+    /**
+     * Test helper method to assign distribution set to a target with a
+     * maintenance schedule.
+     *
+     * @param dsID
+     *            is the ID for the distribution set being assigned
+     * @param controllerId
+     *            is the ID for the controller to which the distribution set is
+     *            being assigned
+     * @param maintenanceSchedule
+     *            is the cron expression to be used for scheduling the
+     *            maintenance window. Expression has 6 mandatory fields and 1
+     *            last optional field: "second minute hour dayofmonth month
+     *            weekday year"
+     * @param maintenanceWindowDuration
+     *            in HH:mm:ss format specifying the duration of a maintenance
+     *            window, for example 00:30:00 for 30 minutes
+     * @param maintenanceWindowTimeZone
+     *            is the time zone specified as +/-hh:mm offset from UTC, for
+     *            example +02:00 for CET summer time and +00:00 for UTC. The
+     *            start time of a maintenance window calculated based on the
+     *            cron expression is relative to this time zone
+     *
+     * @return result of the assignment as
+     *         {@link DistributionSetAssignmentResult}.
+     */
+    protected DistributionSetAssignmentResult assignDistributionSetWithMaintenanceWindow(final Long dsID,
+            final String controllerId, final String maintenanceSchedule, final String maintenanceWindowDuration,
+            final String maintenanceWindowTimeZone) {
+        return deploymentManagement.assignDistributionSet(dsID,
+                Arrays.asList(new TargetWithActionType(controllerId, ActionType.FORCED,
+                        RepositoryModelConstants.NO_FORCE_TIME, maintenanceSchedule, maintenanceWindowDuration,
+                        maintenanceWindowTimeZone)));
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset,
@@ -263,6 +305,7 @@ public abstract class AbstractIntegrationTest {
 
     @Before
     public void before() throws Exception {
+
         final String description = "Updated description.";
 
         osType = securityRule
@@ -281,6 +324,15 @@ public abstract class AbstractIntegrationTest {
                 .update(entityFactory.softwareModuleType().update(runtimeType.getId()).description(description)));
 
         standardDsType = securityRule.runAsPrivileged(() -> testdataFactory.findOrCreateDefaultTestDsType());
+
+        // publish the reset counter market event to reset the counters after
+        // setup. The setup is transparent by the test and its @ExpectedEvent
+        // counting so we reset the counter here after the setup. Note that this
+        // approach is only working when using a single-thread executor in the
+        // ApplicationEventMultiCaster which the TestConfiguration is doing so
+        // the order of the events keep the same.
+        EventVerifier.publishResetMarkerEvent(eventPublisher);
+
     }
 
     private static String artifactDirectory = "./artifactrepo/" + RandomStringUtils.randomAlphanumeric(20);
@@ -310,5 +362,40 @@ public abstract class AbstractIntegrationTest {
                 LOG.warn("Cannot delete file-directory", e);
             }
         }
+    }
+
+    /**
+     * Gets a valid cron expression describing a schedule with a single
+     * maintenance window, starting specified number of minutes after current
+     * time.
+     *
+     * @param minutesToAdd
+     *            is the number of minutes after the current time
+     *
+     * @return {@link String} containing a valid cron expression.
+     */
+    public static String getTestSchedule(final int minutesToAdd) {
+        ZonedDateTime currentTime = ZonedDateTime.now();
+        currentTime = currentTime.plusMinutes(minutesToAdd);
+        return String.format("0 %d %d %d %d ? %d", currentTime.getMinute(), currentTime.getHour(),
+                currentTime.getDayOfMonth(), currentTime.getMonthValue(), currentTime.getYear());
+    }
+
+    public static String getTestDuration(final int duration) {
+        return String.format("%02d:%02d:00", duration / 60, duration % 60);
+    }
+
+    public static String getTestTimeZone() {
+        final ZonedDateTime currentTime = ZonedDateTime.now();
+        return currentTime.getOffset().getId().replace("Z", "+00:00");
+    }
+
+    public static Map<String, String> getMaintenanceWindow(final String schedule, final String duration,
+            final String timezone) {
+        final Map<String, String> maintenanceWindowMap = new HashMap<>();
+        maintenanceWindowMap.put("schedule", schedule);
+        maintenanceWindowMap.put("duration", duration);
+        maintenanceWindowMap.put("timezone", timezone);
+        return maintenanceWindowMap;
     }
 }

@@ -33,6 +33,7 @@ import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
+import org.eclipse.hawkbit.dmf.json.model.DmfActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMetadata;
 import org.eclipse.hawkbit.repository.SystemManagement;
@@ -277,8 +278,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     private void assertCancelMessage(final Message sendMessage) {
         assertEventMessage(sendMessage);
-        final Long actionId = convertMessage(sendMessage, Long.class);
-        assertEquals("Action ID should be 1", actionId, Long.valueOf(1));
+        final DmfActionRequest actionId = convertMessage(sendMessage, DmfActionRequest.class);
+        assertEquals("Action ID should be 1", actionId.getActionId(), Long.valueOf(1));
         assertEquals("The topc in the message should be a CANCEL_DOWNLOAD value", EventTopic.CANCEL_DOWNLOAD,
                 sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC));
     }

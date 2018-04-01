@@ -8,9 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,6 +30,7 @@ import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEv
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RolloutCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
@@ -65,11 +63,15 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -120,6 +122,49 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Verifies that a running action is auto canceled by a rollout which assigns another distribution-set.")
+    public void rolloutAssignesNewDistributionSetAndAutoCloseActiveActions() {
+        tenantConfigurationManagement
+                .addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, true);
+
+        try {
+            // manually assign distribution set to target
+            final String knownControllerId = "controller12345";
+            final DistributionSet firstDistributionSet = testdataFactory.createDistributionSet();
+            final DistributionSet secondDistributionSet = testdataFactory.createDistributionSet("second");
+            testdataFactory.createTarget(knownControllerId);
+            final DistributionSetAssignmentResult assignmentResult = deploymentManagement.assignDistributionSet(
+                    firstDistributionSet.getId(), ActionType.FORCED, 0, Collections.singleton(knownControllerId));
+            final Long manuallyAssignedActionId = assignmentResult.getActions().get(0);
+
+            // create rollout with the same distribution set already assigned
+            // start rollout
+            final Rollout rollout = testdataFactory.createRolloutByVariables("rolloutNotCancelRunningAction",
+                    "description", 1, "name==*", secondDistributionSet, "50", "5");
+            rolloutManagement.start(rollout.getId());
+            rolloutManagement.handleRollouts();
+
+            // verify that manually created action is canceled and action
+            // created from rollout is running
+            final List<Action> actionsByKnownTarget = deploymentManagement.findActionsByTarget(knownControllerId, PAGE)
+                    .getContent();
+            // should be 2 actions, one manually and one from the rollout
+            assertThat(actionsByKnownTarget).hasSize(2);
+            // verify that manually assigned action is still running
+            assertThat(deploymentManagement.findAction(manuallyAssignedActionId).get().getStatus())
+                    .isEqualTo(Status.CANCELED);
+            // verify that rollout management created action is running
+            final Action rolloutCreatedAction = actionsByKnownTarget.stream()
+                    .filter(action -> !action.getId().equals(manuallyAssignedActionId)).findAny().get();
+            assertThat(rolloutCreatedAction.getStatus()).isEqualTo(Status.RUNNING);
+        } finally {
+            tenantConfigurationManagement
+                    .addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, false);
+        }
+
+    }
+
+    @Test
     @Description("Verifies that management get access reacts as specfied on calls for non existing entities by means "
             + "of Optional not present.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
@@ -137,7 +182,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = RolloutGroupUpdatedEvent.class, count = 10),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = RolloutUpdatedEvent.class, count = 1),
+            @Expect(type = RolloutUpdatedEvent.class, count = 1), @Expect(type = RolloutCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 10) })
     public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         testdataFactory.createRollout("xxx");
@@ -1419,7 +1464,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = RolloutGroupCreatedEvent.class, count = 5),
             @Expect(type = RolloutGroupDeletedEvent.class, count = 5),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = RolloutGroupUpdatedEvent.class, count = 5) })
+            @Expect(type = RolloutGroupUpdatedEvent.class, count = 5),
+            @Expect(type = RolloutCreatedEvent.class, count = 1) })
     public void deleteRolloutWhichHasNeverStartedIsHardDeleted() {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
@@ -1450,7 +1496,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = RolloutGroupCreatedEvent.class, count = 5),
             @Expect(type = RolloutGroupDeletedEvent.class, count = 5),
             @Expect(type = ActionCreatedEvent.class, count = 10), @Expect(type = ActionUpdatedEvent.class, count = 2),
-            @Expect(type = RolloutDeletedEvent.class, count = 1) })
+            @Expect(type = RolloutDeletedEvent.class, count = 1),
+            @Expect(type = RolloutCreatedEvent.class, count = 1) })
     public void deleteRolloutWhichHasBeenStartedBeforeIsSoftDeleted() {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;

@@ -35,6 +35,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,13 +57,17 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
 
     private final NoCountPagingRepository criteriaNoCountDao;
 
+    private final Database database;
+
     JpaDistributionSetTagManagement(final DistributionSetTagRepository distributionSetTagRepository,
             final DistributionSetRepository distributionSetRepository,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final NoCountPagingRepository criteriaNoCountDao) {
+            final VirtualPropertyReplacer virtualPropertyReplacer, final NoCountPagingRepository criteriaNoCountDao,
+            final Database database) {
         this.distributionSetTagRepository = distributionSetTagRepository;
         this.distributionSetRepository = distributionSetRepository;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.criteriaNoCountDao = criteriaNoCountDao;
+        this.database = database;
     }
 
     @Override
@@ -130,13 +135,13 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     @Override
     public Page<DistributionSetTag> findByRsql(final Pageable pageable, final String rsqlParam) {
         final Specification<JpaDistributionSetTag> spec = RSQLUtility.parse(rsqlParam, TagFields.class,
-                virtualPropertyReplacer);
+                virtualPropertyReplacer, database);
 
         return convertDsPage(distributionSetTagRepository.findAll(spec, pageable), pageable);
     }
 
     @Override
-    public Page<DistributionSetTag> findByDistributionSet(final Pageable pageable, final Long setId) {
+    public Page<DistributionSetTag> findByDistributionSet(final Pageable pageable, final long setId) {
         if (!distributionSetRepository.exists(setId)) {
             throw new EntityNotFoundException(DistributionSet.class, setId);
         }
@@ -176,7 +181,7 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     }
 
     @Override
-    public Optional<DistributionSetTag> get(final Long id) {
+    public Optional<DistributionSetTag> get(final long id) {
         return Optional.ofNullable(distributionSetTagRepository.findOne(id));
     }
 
@@ -184,12 +189,12 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void delete(final Long id) {
+    public void delete(final long id) {
         distributionSetTagRepository.delete(id);
     }
 
     @Override
-    public boolean exists(final Long id) {
+    public boolean exists(final long id) {
         return distributionSetTagRepository.exists(id);
     }
 

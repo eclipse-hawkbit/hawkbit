@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
+import org.eclipse.hawkbit.ui.common.EmptyStringValidator;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
@@ -133,14 +134,13 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         }
 
         private void addNewBaseSoftware() {
-            final String name = HawkbitCommonUtil.trimAndNullIfEmpty(nameTextField.getValue());
-            final String version = HawkbitCommonUtil.trimAndNullIfEmpty(versionTextField.getValue());
-            final String vendor = HawkbitCommonUtil.trimAndNullIfEmpty(vendorTextField.getValue());
-            final String description = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
+            final String name = nameTextField.getValue();
+            final String version = versionTextField.getValue();
+            final String vendor = vendorTextField.getValue();
+            final String description = descTextArea.getValue();
             final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
 
-            final SoftwareModuleType softwareModuleTypeByName = softwareModuleTypeManagement
-                    .getByName(type)
+            final SoftwareModuleType softwareModuleTypeByName = softwareModuleTypeManagement.getByName(type)
                     .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, type));
             final SoftwareModuleCreate softwareModule = entityFactory.softwareModule().create()
                     .type(softwareModuleTypeByName).name(name).version(version).description(description).vendor(vendor);
@@ -172,9 +172,8 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
          * updates a softwareModule
          */
         private void updateSwModule() {
-            final SoftwareModule newSWModule = softwareModuleManagement
-                    .update(entityFactory.softwareModule().update(baseSwModuleId)
-                            .description(descTextArea.getValue()).vendor(vendorTextField.getValue()));
+            final SoftwareModule newSWModule = softwareModuleManagement.update(entityFactory.softwareModule()
+                    .update(baseSwModuleId).description(descTextArea.getValue()).vendor(vendorTextField.getValue()));
             if (newSWModule != null) {
                 uiNotifcation.displaySuccess(i18n.getMessage("message.save.success",
                         new Object[] { newSWModule.getName() + ":" + newSWModule.getVersion() }));
@@ -213,8 +212,10 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
     private void createRequiredComponents() {
 
         nameTextField = createTextField("textfield.name", UIComponentIdProvider.SOFT_MODULE_NAME);
+        nameTextField.addValidator(new EmptyStringValidator(i18n));
 
         versionTextField = createTextField("textfield.version", UIComponentIdProvider.SOFT_MODULE_VERSION);
+        versionTextField.addValidator(new EmptyStringValidator(i18n));
 
         vendorTextField = createTextField("textfield.vendor", UIComponentIdProvider.SOFT_MODULE_VENDOR);
         vendorTextField.setRequired(false);
@@ -292,8 +293,8 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         softwareModuleManagement.get(baseSwModuleId).ifPresent(swModule -> {
             nameTextField.setValue(swModule.getName());
             versionTextField.setValue(swModule.getVersion());
-            vendorTextField.setValue(HawkbitCommonUtil.trimAndNullIfEmpty(swModule.getVendor()));
-            descTextArea.setValue(HawkbitCommonUtil.trimAndNullIfEmpty(swModule.getDescription()));
+            vendorTextField.setValue(swModule.getVendor());
+            descTextArea.setValue(swModule.getDescription());
 
             if (swModule.getType().isDeleted()) {
                 typeComboBox.addItem(swModule.getType().getName());

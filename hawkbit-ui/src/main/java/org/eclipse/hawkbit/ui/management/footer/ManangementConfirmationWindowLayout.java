@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
@@ -78,6 +79,8 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
     private final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout;
 
+    private final MaintenanceWindowLayout maintenanceWindowLayout;
+
     private ConfirmationTab assignmentTab;
 
     public ManangementConfirmationWindowLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
@@ -90,6 +93,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         this.deploymentManagement = deploymentManagement;
         this.distributionSetManagement = distributionSetManagement;
         this.actionTypeOptionGroupLayout = new ActionTypeOptionGroupLayout(i18n);
+        this.maintenanceWindowLayout = new MaintenanceWindowLayout(i18n);
     }
 
     @Override
@@ -138,6 +142,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
         actionTypeOptionGroupLayout.selectDefaultOption();
         assignmentTab.addComponent(actionTypeOptionGroupLayout, 1);
+        assignmentTab.addComponent(maintenanceWindowLayout, 1);
         return assignmentTab;
 
     }
@@ -153,6 +158,15 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
                 .getActionTypeOptionGroup().getValue()) == ActionTypeOption.AUTO_FORCED)
                         ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
                         : RepositoryModelConstants.NO_FORCE_TIME;
+
+        final String maintenanceSchedule = maintenanceWindowLayout.isMaintenanceWindowEnabled()
+                ? maintenanceWindowLayout.getMaintenanceSchedule() : null;
+
+        final String maintenanceDuration = maintenanceWindowLayout.isMaintenanceWindowEnabled()
+                ? maintenanceWindowLayout.getMaintenanceDuration() : null;
+
+        final String maintenanceTimeZone = maintenanceWindowLayout.isMaintenanceWindowEnabled()
+                ? maintenanceWindowLayout.getMaintenanceTimeZone() : null;
 
         final Map<Long, List<TargetIdName>> saveAssignedList = Maps.newHashMapWithExpectedSize(itemIds.size());
 
@@ -174,8 +188,11 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         for (final Map.Entry<Long, List<TargetIdName>> mapEntry : saveAssignedList.entrySet()) {
             tempIdList = saveAssignedList.get(mapEntry.getKey());
             final DistributionSetAssignmentResult distributionSetAssignmentResult = deploymentManagement
-                    .assignDistributionSet(mapEntry.getKey(), actionType, forcedTimeStamp,
-                            tempIdList.stream().map(t -> t.getControllerId()).collect(Collectors.toList()));
+                    .assignDistributionSet(mapEntry.getKey(),
+                            tempIdList.stream()
+                                    .map(t -> new TargetWithActionType(t.getControllerId(), actionType, forcedTimeStamp,
+                                            maintenanceSchedule, maintenanceDuration, maintenanceTimeZone))
+                                    .collect(Collectors.toList()));
 
             if (distributionSetAssignmentResult.getAssigned() > 0) {
                 successAssignmentCount += distributionSetAssignmentResult.getAssigned();

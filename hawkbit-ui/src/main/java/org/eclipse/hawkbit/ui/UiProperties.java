@@ -21,6 +21,24 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class UiProperties implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    private boolean gravatar;
+
+    private final Links links = new Links();
+
+    private final Login login = new Login();
+
+    private final Demo demo = new Demo();
+
+    private final Event event = new Event();
+
+    public boolean isGravatar() {
+        return gravatar;
+    }
+
+    public void setGravatar(final boolean gravatar) {
+        this.gravatar = gravatar;
+    }
+
     /**
      * Demo account login information.
      *
@@ -305,14 +323,6 @@ public class UiProperties implements Serializable {
             return push;
         }
     }
-
-    private final Links links = new Links();
-
-    private final Login login = new Login();
-
-    private final Demo demo = new Demo();
-
-    private final Event event = new Event();
 
     public Demo getDemo() {
         return demo;

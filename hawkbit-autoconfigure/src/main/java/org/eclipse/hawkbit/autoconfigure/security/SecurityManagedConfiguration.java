@@ -79,6 +79,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -646,13 +647,16 @@ public class SecurityManagedConfiguration {
                 httpSec.headers().contentSecurityPolicy(hawkbitSecurityProperties.getContentSecurityPolicy());
             }
 
+            final SimpleUrlLogoutSuccessHandler simpleUrlLogoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
+            simpleUrlLogoutSuccessHandler.setTargetUrlParameter("login");
+
             httpSec
                     // UI
                     .authorizeRequests().antMatchers("/UI/login/**").permitAll().antMatchers("/UI/UIDL/**").permitAll()
                     .anyRequest().authenticated().and()
                     // UI login / logout
                     .exceptionHandling().authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/UI/login/#/"))
-                    .and().logout().logoutUrl("/UI/logout").logoutSuccessUrl("/UI/login/#/");
+                    .and().logout().logoutUrl("/UI/logout").logoutSuccessHandler(simpleUrlLogoutSuccessHandler);
         }
 
         @Override

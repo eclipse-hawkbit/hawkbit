@@ -8,13 +8,14 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import org.eclipse.hawkbit.repository.event.entity.EntityUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 
 /**
  * Defines the remote event for updating a {@link DistributionSet}.
  *
  */
-public class DistributionSetUpdatedEvent extends RemoteEntityEvent<DistributionSet> {
+public class DistributionSetUpdatedEvent extends RemoteEntityEvent<DistributionSet> implements EntityUpdatedEvent {
 
     private static final long serialVersionUID = 1L;
 

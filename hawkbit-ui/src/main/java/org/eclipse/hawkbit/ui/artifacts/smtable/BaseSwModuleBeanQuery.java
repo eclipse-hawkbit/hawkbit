@@ -76,9 +76,7 @@ public class BaseSwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSoftwareMo
         final Slice<SoftwareModule> swModuleBeans;
 
         if (type == null && StringUtils.isEmpty(searchText)) {
-            swModuleBeans = getSoftwareManagementService()
-                    .findAll(new OffsetBasedPageRequest(startIndex, count, sort));
-
+            swModuleBeans = getSoftwareManagementService().findAll(new OffsetBasedPageRequest(startIndex, count, sort));
         } else {
             swModuleBeans = getSoftwareManagementService()
                     .findByTextAndType(new OffsetBasedPageRequest(startIndex, count, sort), searchText, type);

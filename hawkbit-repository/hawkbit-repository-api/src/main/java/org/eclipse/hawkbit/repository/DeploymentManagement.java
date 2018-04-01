@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository;
 import java.util.Collection;
 import java.util.Optional;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -31,7 +32,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -68,7 +68,7 @@ public interface DeploymentManagement {
      *             do not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    DistributionSetAssignmentResult assignDistributionSet(@NotNull Long dsID, @NotNull ActionType actionType,
+    DistributionSetAssignmentResult assignDistributionSet(long dsID, @NotNull ActionType actionType,
             long forcedTimestamp, @NotEmpty Collection<String> controllerIDs);
 
     /**
@@ -90,7 +90,7 @@ public interface DeploymentManagement {
      *             do not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    DistributionSetAssignmentResult assignDistributionSet(@NotNull Long dsID,
+    DistributionSetAssignmentResult assignDistributionSet(long dsID,
             @NotEmpty Collection<TargetWithActionType> targets);
 
     /**
@@ -114,8 +114,8 @@ public interface DeploymentManagement {
      *             do not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    DistributionSetAssignmentResult assignDistributionSet(@NotNull Long dsID,
-            @NotEmpty Collection<TargetWithActionType> targets, String actionMessage);
+    DistributionSetAssignmentResult assignDistributionSet(long dsID, @NotEmpty Collection<TargetWithActionType> targets,
+            String actionMessage);
 
     /**
      * Method registers an "offline" assignment, i.e. adds a completed action
@@ -167,7 +167,7 @@ public interface DeploymentManagement {
      *             if action with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    Action cancelAction(@NotNull Long actionId);
+    Action cancelAction(long actionId);
 
     /**
      * counts all actions associated to a specific target.
@@ -223,7 +223,7 @@ public interface DeploymentManagement {
      * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Optional<Action> findAction(@NotNull Long actionId);
+    Optional<Action> findAction(long actionId);
 
     /**
      * Retrieves all {@link Action}s from repository.
@@ -251,7 +251,7 @@ public interface DeploymentManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<Action> findActionsByDistributionSet(@NotNull Pageable pageable, @NotNull Long distributionSetId);
+    Slice<Action> findActionsByDistributionSet(@NotNull Pageable pageable, long distributionSetId);
 
     /**
      * Retrieves all {@link Action}s assigned to a specific {@link Target} and a
@@ -304,7 +304,7 @@ public interface DeploymentManagement {
      *             if action with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<ActionStatus> findActionStatusByAction(@NotNull Pageable pageReq, @NotNull Long actionId);
+    Page<ActionStatus> findActionStatusByAction(@NotNull Pageable pageReq, long actionId);
 
     /**
      * Retrieves all messages for an {@link ActionStatus}.
@@ -317,7 +317,7 @@ public interface DeploymentManagement {
      * @return a page of messages by a specific {@link ActionStatus} id
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<String> findMessagesByActionStatusId(@NotNull Pageable pageable, @NotNull Long actionStatusId);
+    Page<String> findMessagesByActionStatusId(@NotNull Pageable pageable, long actionStatusId);
 
     /**
      * Get the {@link Action} entity for given actionId with all lazy attributes
@@ -328,11 +328,10 @@ public interface DeploymentManagement {
      * @return the corresponding {@link Action}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Optional<Action> findActionWithDetails(@NotNull Long actionId);
+    Optional<Action> findActionWithDetails(long actionId);
 
     /**
-     * Retrieves all active {@link Action}s of a specific target ordered by
-     * action ID.
+     * Retrieves all active {@link Action}s of a specific target.
      * 
      * @param pageable
      *            the page request parameter for paging and sorting the result
@@ -347,8 +346,7 @@ public interface DeploymentManagement {
     Page<Action> findActiveActionsByTarget(@NotNull Pageable pageable, @NotEmpty String controllerId);
 
     /**
-     * Retrieves all inactive {@link Action}s of a specific target ordered by
-     * action ID.
+     * Retrieves all inactive {@link Action}s of a specific target.
      *
      * @param pageable
      *            the page request parameter for paging and sorting the result
@@ -380,7 +378,7 @@ public interface DeploymentManagement {
      *             if action with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    Action forceQuitAction(@NotNull Long actionId);
+    Action forceQuitAction(long actionId);
 
     /**
      * Updates a {@link Action} and forces the {@link Action} if it's not
@@ -394,7 +392,7 @@ public interface DeploymentManagement {
      *             if action with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    Action forceTargetAction(@NotNull Long actionId);
+    Action forceTargetAction(long actionId);
 
     /**
      * Starts all scheduled actions of an RolloutGroup parent.
@@ -407,8 +405,7 @@ public interface DeploymentManagement {
      * @return the amount of started actions
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long startScheduledActionsByRolloutGroupParent(@NotNull Long rolloutId, @NotNull Long distributionSetId,
-            Long rolloutGroupParentId);
+    long startScheduledActionsByRolloutGroupParent(long rolloutId, long distributionSetId, Long rolloutGroupParentId);
 
     /**
      * All {@link ActionStatus} entries in the repository.

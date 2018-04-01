@@ -25,7 +25,6 @@ public class SPUITabSheet extends TabSheet {
      * Constructor.
      */
     public SPUITabSheet() {
-        super();
         decorate();
     }
 

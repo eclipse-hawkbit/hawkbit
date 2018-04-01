@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
+import org.eclipse.hawkbit.dmf.json.model.DmfActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMetadata;
@@ -47,6 +48,8 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.test.RabbitListenerTestHarness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+
+import ru.yandex.qatools.allure.annotations.Step;
 
 /**
  *
@@ -128,8 +131,9 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
     protected void assertCancelActionMessage(final Long actionId, final String controllerId) {
         final Message replyMessage = assertReplyMessageHeader(EventTopic.CANCEL_DOWNLOAD, controllerId);
 
-        final Long actionUpdateStatus = (Long) getDmfClient().getMessageConverter().fromMessage(replyMessage);
-        assertThat(actionUpdateStatus).isEqualTo(actionId);
+        final DmfActionRequest actionUpdateStatus = (DmfActionRequest) getDmfClient().getMessageConverter()
+                .fromMessage(replyMessage);
+        assertThat(actionUpdateStatus.getActionId()).isEqualTo(actionId);
     }
 
     protected void assertDeleteMessage(final String target) {
@@ -159,8 +163,9 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
 
     }
 
-    protected void assertDownloadAndInstallMessage(final Set<SoftwareModule> dsModules, final String controllerId) {
-        final Message replyMessage = assertReplyMessageHeader(EventTopic.DOWNLOAD_AND_INSTALL, controllerId);
+    private void assertAssignmentMessage(final Set<SoftwareModule> dsModules, final String controllerId,
+            final EventTopic topic) {
+        final Message replyMessage = assertReplyMessageHeader(topic, controllerId);
         assertAllTargetsCount(1);
 
         final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = (DmfDownloadAndUpdateRequest) getDmfClient()
@@ -176,6 +181,14 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         final Target updatedTarget = waitUntilIsPresent(() -> targetManagement.getByControllerID(controllerId));
 
         assertThat(updatedTarget.getSecurityToken()).isEqualTo(downloadAndUpdateRequest.getTargetSecurityToken());
+    }
+
+    protected void assertDownloadAndInstallMessage(final Set<SoftwareModule> dsModules, final String controllerId) {
+        assertAssignmentMessage(dsModules, controllerId, EventTopic.DOWNLOAD_AND_INSTALL);
+    }
+
+    protected void assertDownloadMessage(final Set<SoftwareModule> dsModules, final String controllerId) {
+        assertAssignmentMessage(dsModules, controllerId, EventTopic.DOWNLOAD);
     }
 
     protected void createAndSendTarget(final String target, final String tenant) {
@@ -220,6 +233,11 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         assertThat(headers.get(MessageHeaderKey.TENANT)).isEqualTo(TENANT_EXIST);
         assertThat(headers.get(MessageHeaderKey.TYPE)).isEqualTo(MessageType.EVENT.toString());
         return replyMessage;
+    }
+
+    @Step
+    protected void registerAndAssertTargetWithExistingTenant(final String controllerId) {
+        registerAndAssertTargetWithExistingTenant(controllerId, 1);
     }
 
     protected void registerAndAssertTargetWithExistingTenant(final String target,
@@ -311,6 +329,7 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
 
     }
 
+    @Step
     protected void assertUpdateAttributes(final String controllerId, final Map<String, String> attributes) {
         final Target findByControllerId = waitUntilIsPresent(
                 () -> controllerManagement.getByControllerId(controllerId));

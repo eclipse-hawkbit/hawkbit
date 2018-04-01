@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
+import org.eclipse.hawkbit.ui.common.EmptyStringValidator;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -39,6 +40,7 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -137,7 +139,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
     private TextField createTextField(final String in18Key, final String styleName, final String id) {
         return new TextFieldBuilder().caption(i18n.getMessage(in18Key))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + styleName).required(true).prompt(i18n.getMessage(in18Key))
-                .immediate(true).id(id).buildTextComponent();
+                .validator(new EmptyStringValidator(i18n)).immediate(true).id(id).buildTextComponent();
     }
 
     @Override
@@ -235,7 +237,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
             public String generateDescription(final Component source, final Object itemId, final Object propertyId) {
                 final Item item = selectedTable.getItem(itemId);
                 final String description = (String) (item.getItemProperty(DIST_TYPE_DESCRIPTION).getValue());
-                if (DIST_TYPE_NAME.equals(propertyId) && HawkbitCommonUtil.trimAndNullIfEmpty(description) != null) {
+                if (DIST_TYPE_NAME.equals(propertyId) && !StringUtils.isEmpty(description)) {
                     return i18n.getMessage("label.description") + description;
                 } else if (DIST_TYPE_MANDATORY.equals(propertyId)) {
                     return i18n.getMessage("tooltip.check.for.mandatory");
@@ -339,7 +341,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
             public String generateDescription(final Component source, final Object itemId, final Object propertyId) {
                 final Item item = sourceTable.getItem(itemId);
                 final String description = (String) item.getItemProperty(DIST_TYPE_DESCRIPTION).getValue();
-                if (DIST_TYPE_NAME.equals(propertyId) && HawkbitCommonUtil.trimAndNullIfEmpty(description) != null) {
+                if (DIST_TYPE_NAME.equals(propertyId) && !StringUtils.isEmpty(description)) {
                     return i18n.getMessage("label.description") + description;
                 }
                 return null;
@@ -389,11 +391,11 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
     private void createNewDistributionSetType() {
 
         final String colorPicked = ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview());
-        final String typeNameValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagName.getValue());
-        final String typeKeyValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeKey.getValue());
-        final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
+        final String typeNameValue = tagName.getValue();
+        final String typeKeyValue = typeKey.getValue();
+        final String typeDescValue = tagDesc.getValue();
         final List<Long> itemIds = (List<Long>) selectedTable.getItemIds();
-        if (null != typeNameValue && null != typeKeyValue && !CollectionUtils.isEmpty(itemIds)) {
+        if (typeNameValue != null && typeKeyValue != null && !CollectionUtils.isEmpty(itemIds)) {
 
             final List<Long> mandatory = itemIds.stream()
                     .filter(itemId -> isMandatoryModuleType(selectedTable.getItem(itemId)))

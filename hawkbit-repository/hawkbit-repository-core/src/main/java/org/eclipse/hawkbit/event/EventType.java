@@ -14,12 +14,15 @@ import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.DistributionSetTypeDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleTypeDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetFilterQueryDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
@@ -28,13 +31,20 @@ import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignment
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTypeCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTypeUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RolloutCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleTypeCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleTypeUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
@@ -101,6 +111,23 @@ public class EventType {
         TYPES.put(24, TargetPollEvent.class);
         TYPES.put(25, RolloutDeletedEvent.class);
         TYPES.put(26, RolloutGroupDeletedEvent.class);
+        TYPES.put(27, RolloutCreatedEvent.class);
+
+        // distribution set type
+        TYPES.put(28, DistributionSetTypeCreatedEvent.class);
+        TYPES.put(29, DistributionSetTypeUpdatedEvent.class);
+        TYPES.put(30, DistributionSetTypeDeletedEvent.class);
+
+        // software module type
+        TYPES.put(31, SoftwareModuleTypeCreatedEvent.class);
+        TYPES.put(32, SoftwareModuleTypeUpdatedEvent.class);
+        TYPES.put(33, SoftwareModuleTypeDeletedEvent.class);
+
+        // target filter query
+        TYPES.put(34, TargetFilterQueryCreatedEvent.class);
+        TYPES.put(35, TargetFilterQueryUpdatedEvent.class);
+        TYPES.put(36, TargetFilterQueryDeletedEvent.class);
+
     }
 
     private int value;

@@ -59,7 +59,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
 
     @Before
     public void testSetup() {
-        enableTargetTokenAuthentification();
+        enableTargetTokenAuthentication();
     }
 
     @Test
@@ -380,6 +380,8 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
         final DmfDownloadResponse convertedMessage = verifyResult(returnMessage, HttpStatus.OK, null);
         assertThat(convertedMessage.getDownloadUrl()).isNotNull();
         assertThat(convertedMessage.getArtifact()).isNotNull();
+        assertThat(convertedMessage.getArtifact().getLastModified())
+                .isEqualTo(artifactManagement.findFirstBySHA1(artifact.getSha1Hash()).get().getCreatedAt());
         assertThat(convertedMessage.getArtifact().getHashes().getSha1()).isEqualTo(artifact.getSha1Hash());
 
     }
@@ -391,7 +393,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
                 TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, false);
     }
 
-    private void enableTargetTokenAuthentification() {
+    private void enableTargetTokenAuthentication() {
         tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED,
                 false);
         tenantConfigurationManagement.addOrUpdateConfiguration(

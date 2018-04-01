@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.components;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -71,10 +72,11 @@ public abstract class AbstractNotificationView extends VerticalLayout implements
             return;
         }
 
-        eventContainer.getEvents().stream().filter(this::noEventMatch).forEach(event -> {
-            notificationUnreadButton.incrementUnreadNotification(this, eventContainer);
-            viewUnreadNotifcations.incrementAndGet();
-        });
+        eventContainer.getEvents().stream().filter(Objects::nonNull).filter(event -> noEventMatch(event))
+                .forEach(event -> {
+                    notificationUnreadButton.incrementUnreadNotification(this, eventContainer);
+                    viewUnreadNotifcations.incrementAndGet();
+                });
         getDashboardMenuItem().setNotificationUnreadValue(viewUnreadNotifcations);
     }
 

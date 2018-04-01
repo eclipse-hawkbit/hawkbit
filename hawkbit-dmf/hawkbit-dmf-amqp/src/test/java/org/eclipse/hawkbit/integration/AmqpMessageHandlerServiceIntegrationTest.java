@@ -10,7 +10,9 @@ package org.eclipse.hawkbit.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -22,6 +24,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
+import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
@@ -49,6 +52,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Step;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Device Management Federation API")
@@ -387,6 +391,20 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     }
 
     @Test
+    @Description("Register a target and send an update action status (downloaded). Verfiy if the updated action status is correct.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionUpdatedEvent.class, count = 0), @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
+    public void downloadedActionStatus() {
+        final String controllerId = TARGET_PREFIX + "downloadedActionStatus";
+        registerTargetAndSendAndAssertUpdateActionStatus(DmfActionStatus.DOWNLOADED, Status.DOWNLOADED, controllerId);
+    }
+
+    @Test
     @Description("Register a target and send a update action status (download). Verfiy if the updated action status is correct.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
@@ -470,10 +488,64 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         final String controllerId = TARGET_PREFIX + "receiveDownLoadAndInstallMessageAfterAssignment";
 
         // setup
-        createAndSendTarget(controllerId, TENANT_EXIST);
+        registerAndAssertTargetWithExistingTenant(controllerId);
         final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         testdataFactory.addSoftwareModuleMetadata(distributionSet);
         assignDistributionSet(distributionSet.getId(), controllerId);
+
+        // test
+        registerSameTargetAndAssertBasedOnVersion(controllerId, 1, TargetUpdateStatus.PENDING);
+
+        // verify
+        assertDownloadAndInstallMessage(distributionSet.getModules(), controllerId);
+        Mockito.verifyZeroInteractions(getDeadletterListener());
+    }
+
+    @Test
+    @Description("Verfiy receiving a download message if a deployment is done with window configured but before maintenance window start time.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 2) })
+    public void receiveDownloadMessageBeforeMaintenanceWindowStartTime() {
+        final String controllerId = TARGET_PREFIX + "receiveDownLoadMessageBeforeMaintenanceWindowStartTime";
+
+        // setup
+        registerAndAssertTargetWithExistingTenant(controllerId);
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        testdataFactory.addSoftwareModuleMetadata(distributionSet);
+        assignDistributionSetWithMaintenanceWindow(distributionSet.getId(), controllerId, getTestSchedule(2),
+                getTestDuration(1), getTestTimeZone());
+
+        // test
+        registerSameTargetAndAssertBasedOnVersion(controllerId, 1, TargetUpdateStatus.PENDING);
+
+        // verify
+        assertDownloadMessage(distributionSet.getModules(), controllerId);
+        Mockito.verifyZeroInteractions(getDeadletterListener());
+    }
+
+    @Test
+    @Description("Verify receiving a download_and_install message if a deployment is done with window configured and during maintenance window start time.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 2) })
+    public void receiveDownloadAndInstallMessageDuringMaintenanceWindow() {
+        final String controllerId = TARGET_PREFIX + "receiveDownLoadAndInstallMessageDuringMaintenanceWindow";
+
+        // setup
+        registerAndAssertTargetWithExistingTenant(controllerId);
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        testdataFactory.addSoftwareModuleMetadata(distributionSet);
+        assignDistributionSetWithMaintenanceWindow(distributionSet.getId(), controllerId, getTestSchedule(-5),
+                getTestDuration(10), getTestTimeZone());
 
         // test
         registerSameTargetAndAssertBasedOnVersion(controllerId, 1, TargetUpdateStatus.PENDING);
@@ -497,7 +569,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         final String controllerId = TARGET_PREFIX + "receiveCancelUpdateMessageAfterAssignmentWasCanceled";
 
         // Setup
-        createAndSendTarget(controllerId, TENANT_EXIST);
+        registerAndAssertTargetWithExistingTenant(controllerId);
         final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         final DistributionSetAssignmentResult distributionSetAssignmentResult = assignDistributionSet(
                 distributionSet.getId(), controllerId);
@@ -566,23 +638,104 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     }
 
     @Test
-    @Description("Verify that sending an update controller attribute message to an existing target works.")
+    @Description("Verify that sending an update controller attribute message to an existing target works. Verify that different update modes (merge, replace, remove) can be used.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
-    public void updateAttributes() {
+            @Expect(type = TargetUpdatedEvent.class, count = 4), @Expect(type = TargetPollEvent.class, count = 1) })
+    public void updateAttributesWithDifferentUpdateModes() {
         final String controllerId = TARGET_PREFIX + "updateAttributes";
 
         // setup
-        registerAndAssertTargetWithExistingTenant(controllerId, 1);
-        final DmfAttributeUpdate controllerAttribute = new DmfAttributeUpdate();
-        controllerAttribute.getAttributes().put("test1", "testA");
-        controllerAttribute.getAttributes().put("test2", "testB");
+        registerAndAssertTargetWithExistingTenant(controllerId);
 
-        // test
-        sendUpdateAttributeMessage(controllerId, TENANT_EXIST, controllerAttribute);
+        // no update mode specified
+        updateAttributesWithoutUpdateMode(controllerId);
+
+        // update mode REPLACE
+        updateAttributesWithUpdateModeReplace(controllerId);
+
+        // update mode REPLACE
+        updateAttributesWithUpdateModeMerge(controllerId);
+
+        // update mode REMOVE
+        updateAttributesWithUpdateModeRemove(controllerId);
+
+    }
+
+    @Step
+    private void updateAttributesWithUpdateModeRemove(final String controllerId) {
+
+        // assemble the expected attributes
+        final Map<String, String> expectedAttributes = targetManagement.getControllerAttributes(controllerId);
+        expectedAttributes.remove("k1");
+        expectedAttributes.remove("k3");
+
+        // send a update message with update mode
+        final Map<String, String> removeAttributes = new HashMap<>();
+        removeAttributes.put("k1", "foo");
+        removeAttributes.put("k3", "bar");
+        final DmfAttributeUpdate remove = new DmfAttributeUpdate();
+        remove.setMode(DmfUpdateMode.REMOVE);
+        remove.getAttributes().putAll(removeAttributes);
+        sendUpdateAttributeMessage(controllerId, TENANT_EXIST, remove);
 
         // validate
-        assertUpdateAttributes(controllerId, controllerAttribute.getAttributes());
+        assertUpdateAttributes(controllerId, expectedAttributes);
+    }
+
+    @Step
+    private void updateAttributesWithUpdateModeMerge(final String controllerId) {
+
+        // get the current attributes
+        final Map<String, String> attributes = new HashMap<>(targetManagement.getControllerAttributes(controllerId));
+
+        // send a update message with update mode MERGE
+        final Map<String, String> mergeAttributes = new HashMap<>();
+        mergeAttributes.put("k1", "v1_modified_again");
+        mergeAttributes.put("k4", "v4");
+        final DmfAttributeUpdate merge = new DmfAttributeUpdate();
+        merge.setMode(DmfUpdateMode.MERGE);
+        merge.getAttributes().putAll(mergeAttributes);
+        sendUpdateAttributeMessage(controllerId, TENANT_EXIST, merge);
+
+        // validate
+        final Map<String, String> expectedAttributes = new HashMap<>();
+        expectedAttributes.putAll(attributes);
+        expectedAttributes.putAll(mergeAttributes);
+        assertUpdateAttributes(controllerId, expectedAttributes);
+    }
+
+    @Step
+    private void updateAttributesWithUpdateModeReplace(final String controllerId) {
+
+        // send a update message with update mode REPLACE
+        final Map<String, String> replacementAttributes = new HashMap<>();
+        replacementAttributes.put("k1", "v1_modified");
+        replacementAttributes.put("k2", "v2");
+        replacementAttributes.put("k3", "v3");
+        final DmfAttributeUpdate replace = new DmfAttributeUpdate();
+        replace.setMode(DmfUpdateMode.REPLACE);
+        replace.getAttributes().putAll(replacementAttributes);
+        sendUpdateAttributeMessage(controllerId, TENANT_EXIST, replace);
+
+        // validate
+        final Map<String, String> expectedAttributes = replacementAttributes;
+        assertUpdateAttributes(controllerId, expectedAttributes);
+    }
+
+    @Step
+    private void updateAttributesWithoutUpdateMode(final String controllerId) {
+
+        // send a update message which does not specify a update mode
+        final Map<String, String> initialAttributes = new HashMap<>();
+        initialAttributes.put("k0", "v0");
+        initialAttributes.put("k1", "v1");
+        final DmfAttributeUpdate defaultUpdate = new DmfAttributeUpdate();
+        defaultUpdate.getAttributes().putAll(initialAttributes);
+        sendUpdateAttributeMessage(controllerId, TENANT_EXIST, defaultUpdate);
+
+        // validate
+        final Map<String, String> expectedAttributes = initialAttributes;
+        assertUpdateAttributes(controllerId, expectedAttributes);
     }
 
     @Test
@@ -593,7 +746,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         final String controllerId = TARGET_PREFIX + "updateAttributesWithNoThingId";
 
         // setup
-        registerAndAssertTargetWithExistingTenant(controllerId, 1);
+        registerAndAssertTargetWithExistingTenant(controllerId);
         final DmfAttributeUpdate controllerAttribute = new DmfAttributeUpdate();
         controllerAttribute.getAttributes().put("test1", "testA");
         controllerAttribute.getAttributes().put("test2", "testB");
@@ -618,7 +771,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
 
         // setup
         final String target = "ControllerAttributeTestTarget";
-        registerAndAssertTargetWithExistingTenant(target, 1);
+        registerAndAssertTargetWithExistingTenant(target);
         final DmfAttributeUpdate controllerAttribute = new DmfAttributeUpdate();
         controllerAttribute.getAttributes().put("test1", "testA");
         controllerAttribute.getAttributes().put("test2", "testB");
@@ -707,8 +860,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
 
     private void verifyOneDeadLetterMessage() {
         assertEmptyReceiverQueueCount();
-        createConditionFactory().until(() -> {
-            Mockito.verify(getDeadletterListener(), Mockito.times(1)).handleMessage(Mockito.any());
-        });
+        createConditionFactory()
+                .until(() -> Mockito.verify(getDeadletterListener(), Mockito.times(1)).handleMessage(Mockito.any()));
     }
 }

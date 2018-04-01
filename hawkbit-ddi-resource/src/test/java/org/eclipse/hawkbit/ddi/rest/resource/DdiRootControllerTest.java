@@ -15,7 +15,9 @@ import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpre
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.SYSTEM_ROLE;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -31,7 +33,9 @@ import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTypeCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleTypeCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -73,13 +77,15 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @WithUser(tenantId = "tenantDoesNotExists", allSpPermissions = true, authorities = { CONTROLLER_ROLE,
             SYSTEM_ROLE }, autoCreateTenant = false)
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetPollEvent.class, count = 1) })
+            @Expect(type = TargetPollEvent.class, count = 1),
+            @Expect(type = DistributionSetTypeCreatedEvent.class, count = 3),
+            @Expect(type = SoftwareModuleTypeCreatedEvent.class, count = 2) })
     public void targetCannotBeRegisteredIfTenantDoesNotExistsButWhenExists() throws Exception {
 
         mvc.perform(get("/default-tenant/", tenantAware.getCurrentTenant())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
-        // create tenant
+        // create tenant -- creates softwaremoduletypes and distributionsettypes
         systemManagement.getTenantMetadata("tenantDoesNotExists");
 
         mvc.perform(get("/{}/controller/v1/aControllerId", tenantAware.getCurrentTenant()))
@@ -298,8 +304,8 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         assertThat(target.getAddress()).isEqualTo(IpUtil.createHttpUri("127.0.0.1"));
         assertThat(target.getCreatedBy()).isEqualTo("CONTROLLER_PLUG_AND_PLAY");
         assertThat(target.getCreatedAt()).isGreaterThanOrEqualTo(create);
-        assertThat(target.getLastModifiedBy()).isNull();
-        assertThat(target.getLastModifiedAt()).isNull();
+        assertThat(target.getLastModifiedBy()).isEqualTo("CONTROLLER_PLUG_AND_PLAY");
+        assertThat(target.getLastModifiedAt()).isGreaterThanOrEqualTo(create);
 
     }
 
@@ -493,5 +499,92 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                         hasItem(containsString(TARGET_PROCEEDING_INSTALLATION_MSG))))
                 .andExpect(jsonPath("$.actionHistory.messages",
                         hasItem(containsString(TARGET_COMPLETED_INSTALLATION_MSG))));
+    }
+
+    @Test
+    @Description("Test the polling time based on different maintenance window start and end time.")
+    public void sleepTimeResponseForDifferentMaintenanceWindowParameters() throws Exception {
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+
+        securityRule.runAs(WithSpringAuthorityRule.withUser("tenantadmin", HAS_AUTH_TENANT_CONFIGURATION), () -> {
+            tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME_INTERVAL,
+                    "00:05:00");
+            tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.MIN_POLLING_TIME_INTERVAL,
+                    "00:01:00");
+            return null;
+        });
+
+        final Target savedTarget = testdataFactory.createTarget("1911");
+        assignDistributionSetWithMaintenanceWindow(ds.getId(), savedTarget.getControllerId(), getTestSchedule(16),
+                getTestDuration(10), getTestTimeZone()).getAssignedEntity().iterator().next();
+
+        mvc.perform(get("/default-tenant/controller/v1/1911/")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.config.polling.sleep", greaterThanOrEqualTo("00:05:00")));
+
+        final Target savedTarget1 = testdataFactory.createTarget("2911");
+        final DistributionSet ds1 = testdataFactory.createDistributionSet("1");
+        assignDistributionSetWithMaintenanceWindow(ds1.getId(), savedTarget1.getControllerId(), getTestSchedule(10),
+                getTestDuration(10), getTestTimeZone()).getAssignedEntity().iterator().next();
+
+        mvc.perform(get("/default-tenant/controller/v1/2911/")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.config.polling.sleep", lessThan("00:05:00")))
+                .andExpect(jsonPath("$.config.polling.sleep", greaterThanOrEqualTo("00:03:00")));
+
+        final Target savedTarget2 = testdataFactory.createTarget("3911");
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("2");
+        assignDistributionSetWithMaintenanceWindow(ds2.getId(), savedTarget2.getControllerId(), getTestSchedule(5),
+                getTestDuration(5), getTestTimeZone()).getAssignedEntity().iterator().next();
+
+        mvc.perform(get("/default-tenant/controller/v1/3911/")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.config.polling.sleep", lessThan("00:02:00")));
+
+        final Target savedTarget3 = testdataFactory.createTarget("4911");
+        final DistributionSet ds3 = testdataFactory.createDistributionSet("3");
+        assignDistributionSetWithMaintenanceWindow(ds3.getId(), savedTarget3.getControllerId(), getTestSchedule(-5),
+                getTestDuration(15), getTestTimeZone()).getAssignedEntity().iterator().next();
+
+        mvc.perform(get("/default-tenant/controller/v1/4911/")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:05:00")));
+
+    }
+
+    @Test
+    @Description("Test download and update values before maintenance window start time.")
+    public void downloadAndUpdateStatusBeforeMaintenanceWindowStartTime() throws Exception {
+        Target savedTarget = testdataFactory.createTarget("1911");
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+        savedTarget = assignDistributionSetWithMaintenanceWindow(ds.getId(), savedTarget.getControllerId(),
+                getTestSchedule(2), getTestDuration(1), getTestTimeZone()).getAssignedEntity().iterator().next();
+
+        mvc.perform(get("/default-tenant/controller/v1/1911/")).andExpect(status().isOk());
+
+        final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
+                .getContent().get(0);
+
+        mvc.perform(get("/{tenant}/controller/v1/1911/deploymentBase/{actionId}", tenantAware.getCurrentTenant(),
+                action.getId()).accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.deployment.download", equalTo("forced")))
+                .andExpect(jsonPath("$.deployment.update", equalTo("skip")))
+                .andExpect(jsonPath("$.deployment.maintenanceWindow", equalTo("unavailable")));
+    }
+
+    @Test
+    @Description("Test download and update values after maintenance window start time.")
+    public void downloadAndUpdateStatusDuringMaintenanceWindow() throws Exception {
+        Target savedTarget = testdataFactory.createTarget("1911");
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+        savedTarget = assignDistributionSetWithMaintenanceWindow(ds.getId(), savedTarget.getControllerId(),
+                getTestSchedule(-5), getTestDuration(10), getTestTimeZone()).getAssignedEntity().iterator().next();
+
+        mvc.perform(get("/default-tenant/controller/v1/1911/")).andExpect(status().isOk());
+
+        final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
+                .getContent().get(0);
+
+        mvc.perform(get("/{tenant}/controller/v1/1911/deploymentBase/{actionId}", tenantAware.getCurrentTenant(),
+                action.getId()).accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.deployment.download", equalTo("forced")))
+                .andExpect(jsonPath("$.deployment.update", equalTo("forced")))
+                .andExpect(jsonPath("$.deployment.maintenanceWindow", equalTo("available")));
     }
 }

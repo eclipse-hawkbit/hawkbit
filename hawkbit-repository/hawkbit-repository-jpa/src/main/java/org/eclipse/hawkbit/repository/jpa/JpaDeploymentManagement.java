@@ -72,6 +72,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -115,6 +116,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private final OfflineDsAssignmentStrategy offlineDsAssignmentStrategy;
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final SystemSecurityContext systemSecurityContext;
+    private final Database database;
 
     JpaDeploymentManagement(final EntityManager entityManager, final ActionRepository actionRepository,
             final DistributionSetRepository distributionSetRepository, final TargetRepository targetRepository,
@@ -123,7 +125,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final ApplicationContext applicationContext, final AfterTransactionCommitExecutor afterCommit,
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement,
-            final SystemSecurityContext systemSecurityContext) {
+            final SystemSecurityContext systemSecurityContext, final Database database) {
         this.entityManager = entityManager;
         this.actionRepository = actionRepository;
         this.distributionSetRepository = distributionSetRepository;
@@ -142,6 +144,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 applicationContext, actionRepository, actionStatusRepository);
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.systemSecurityContext = systemSecurityContext;
+        this.database = database;
     }
 
     @Override
@@ -161,7 +164,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetAssignmentResult assignDistributionSet(final Long dsID, final ActionType actionType,
+    public DistributionSetAssignmentResult assignDistributionSet(final long dsID, final ActionType actionType,
             final long forcedTimestamp, final Collection<String> controllerIDs) {
 
         return assignDistributionSetToTargets(dsID,
@@ -176,7 +179,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
+    public DistributionSetAssignmentResult assignDistributionSet(final long dsID,
             final Collection<TargetWithActionType> targets) {
 
         return assignDistributionSetToTargets(dsID, targets, null, onlineDsAssignmentStrategy);
@@ -186,7 +189,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
+    public DistributionSetAssignmentResult assignDistributionSet(final long dsID,
             final Collection<TargetWithActionType> targets, final String actionMessage) {
 
         return assignDistributionSetToTargets(dsID, targets, actionMessage, onlineDsAssignmentStrategy);
@@ -319,7 +322,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Action cancelAction(final Long actionId) {
+    public Action cancelAction(final long actionId) {
         LOG.debug("cancelAction({})", actionId);
 
         final JpaAction action = actionRepository.findById(actionId)
@@ -349,7 +352,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Action forceQuitAction(final Long actionId) {
+    public Action forceQuitAction(final long actionId) {
         final JpaAction action = actionRepository.findById(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
@@ -374,7 +377,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    public long startScheduledActionsByRolloutGroupParent(final Long rolloutId, final Long distributionSetId,
+    public long startScheduledActionsByRolloutGroupParent(final long rolloutId, final long distributionSetId,
             final Long rolloutGroupParentId) {
         long totalActionsCount = 0L;
         long lastStartedActionsCount;
@@ -402,6 +405,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             }
 
             final String tenant = rolloutGroupActions.getContent().get(0).getTenant();
+            final boolean maintenanceWindowAvailable = rolloutGroupActions.getContent().get(0)
+                    .isMaintenanceWindowAvailable();
 
             final List<Action> targetAssignments = rolloutGroupActions.getContent().stream()
                     .map(action -> (JpaAction) action).map(this::closeActionIfSetWasAlreadyAssigned)
@@ -410,7 +415,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
             if (!CollectionUtils.isEmpty(targetAssignments)) {
                 afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetAssignDistributionSetEvent(tenant,
-                        distributionSetId, targetAssignments, applicationContext.getId())));
+                        distributionSetId, targetAssignments, applicationContext.getId(), maintenanceWindowAvailable)));
             }
 
             return rolloutGroupActions.getTotalElements();
@@ -448,8 +453,18 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     private JpaAction startScheduledActionIfNoCancelationHasToBeHandledFirst(final JpaAction action) {
         // check if we need to override running update actions
-        final List<Long> overrideObsoleteUpdateActions = onlineDsAssignmentStrategy
-                .overrideObsoleteUpdateActions(Collections.singletonList(action.getTarget().getId()));
+        final List<Long> overrideObsoleteUpdateActions;
+
+        if (systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
+                .getConfigurationValue(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, Boolean.class)
+                .getValue())) {
+            overrideObsoleteUpdateActions = Collections.emptyList();
+            onlineDsAssignmentStrategy
+                    .closeObsoleteUpdateActions(Collections.singletonList(action.getTarget().getId()));
+        } else {
+            overrideObsoleteUpdateActions = onlineDsAssignmentStrategy
+                    .overrideObsoleteUpdateActions(Collections.singletonList(action.getTarget().getId()));
+        }
 
         action.setActive(true);
         action.setStatus(Status.RUNNING);
@@ -483,12 +498,12 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    public Optional<Action> findAction(final Long actionId) {
+    public Optional<Action> findAction(final long actionId) {
         return Optional.ofNullable(actionRepository.findOne(actionId));
     }
 
     @Override
-    public Optional<Action> findActionWithDetails(final Long actionId) {
+    public Optional<Action> findActionWithDetails(final long actionId) {
         return actionRepository.getById(actionId);
     }
 
@@ -509,7 +524,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private Specification<JpaAction> createSpecificationFor(final String controllerId, final String rsqlParam) {
-        final Specification<JpaAction> spec = RSQLUtility.parse(rsqlParam, ActionFields.class, virtualPropertyReplacer);
+        final Specification<JpaAction> spec = RSQLUtility.parse(rsqlParam, ActionFields.class, virtualPropertyReplacer,
+                database);
         return (root, query, cb) -> cb.and(spec.toPredicate(root, query, cb),
                 cb.equal(root.get(JpaAction_.target).get(JpaTarget_.controllerId), controllerId));
     }
@@ -562,7 +578,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Action forceTargetAction(final Long actionId) {
+    public Action forceTargetAction(final long actionId) {
         final JpaAction action = actionRepository.findById(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
@@ -574,7 +590,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final Long actionId) {
+    public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final long actionId) {
         if (!actionRepository.exists(actionId)) {
             throw new EntityNotFoundException(Action.class, actionId);
         }
@@ -583,7 +599,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    public Page<String> findMessagesByActionStatusId(final Pageable pageable, final Long actionStatusId) {
+    public Page<String> findMessagesByActionStatusId(final Pageable pageable, final long actionStatusId) {
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
         final CriteriaQuery<Long> countMsgQuery = cb.createQuery(Long.class);
@@ -625,7 +641,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    public Slice<Action> findActionsByDistributionSet(final Pageable pageable, final Long dsId) {
+    public Slice<Action> findActionsByDistributionSet(final Pageable pageable, final long dsId) {
         throwExceptionIfDistributionSetDoesNotExist(dsId);
 
         return actionRepository.findByDistributionSetId(pageable, dsId);

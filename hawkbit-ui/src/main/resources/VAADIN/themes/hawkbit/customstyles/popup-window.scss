@@ -83,6 +83,42 @@
     @include sp-button-icon-only-href;
   }
 
+  .dist-window-maintenance-window-layout {
+     vertical-align: middle;
+     horizontal-align: middle;
+
+    .v-slot {
+      vertical-align: middle;
+      padding-left: 8px;
+      padding-right: 5px;
+    }
+
+    .v-caption {
+      vertical-align: middle;
+      margin-top: 0;
+      font-size: 12px;
+    }
+
+    .v-checkbox {
+      font-size: 12px;
+      font-weight: 400;
+    }
+
+    .v-filterselect {
+      font-size: 12px;
+      font-weight: 400;
+      width: 160px;
+      height: 24px;
+    }
+
+    .v-textfield {
+      font-size: 12px;
+      font-weight: 400;
+      width: 160px;
+      height: 24px;
+    }
+  }
+
   ///force,soft,time forced radio button styles - start**
   .dist-window-actiontype-horz-layout {
     padding-bottom: 15px;

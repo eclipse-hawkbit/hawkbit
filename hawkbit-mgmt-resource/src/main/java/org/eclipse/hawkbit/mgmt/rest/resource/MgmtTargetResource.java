@@ -15,6 +15,7 @@ import java.util.Map;
 
 import javax.validation.ValidationException;
 
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindow;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionRequestBodyPut;
@@ -22,7 +23,7 @@ import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionStatus;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentResponseBody;
-import org.eclipse.hawkbit.mgmt.json.model.target.MgmtDistributionSetAssigment;
+import org.eclipse.hawkbit.mgmt.json.model.target.MgmtDistributionSetAssignment;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAttributes;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
@@ -34,9 +35,9 @@ import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -265,7 +266,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     @Override
     public ResponseEntity<MgmtTargetAssignmentResponseBody> postAssignedDistributionSet(
             @PathVariable("controllerId") final String controllerId,
-            @RequestBody final MgmtDistributionSetAssigment dsId,
+            @RequestBody final MgmtDistributionSetAssignment dsId,
             @RequestParam(value = "offline", required = false) final boolean offline) {
 
         if (offline) {
@@ -274,10 +275,21 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         }
 
         findTargetWithExceptionIfNotFound(controllerId);
-        final ActionType type = (dsId.getType() != null) ? MgmtRestModelMapper.convertActionType(dsId.getType())
-                : ActionType.FORCED;
-        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(deploymentManagement
-                .assignDistributionSet(dsId.getId(), type, dsId.getForcetime(), Arrays.asList(controllerId))));
+        final MgmtMaintenanceWindow maintenanceWindow = dsId.getMaintenanceWindow();
+
+        if (maintenanceWindow == null) {
+            return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(this.deploymentManagement
+                    .assignDistributionSet(dsId.getId(), Arrays.asList(new TargetWithActionType(controllerId,
+                            MgmtRestModelMapper.convertActionType(dsId.getType()), dsId.getForcetime())))));
+        }
+
+        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(this.deploymentManagement.assignDistributionSet(
+                dsId.getId(),
+                Arrays.asList(new TargetWithActionType(controllerId,
+                        MgmtRestModelMapper.convertActionType(dsId.getType()), dsId.getForcetime(),
+                        maintenanceWindow.getMaintenanceSchedule(), maintenanceWindow.getMaintenanceWindowDuration(),
+                        maintenanceWindow.getMaintenanceWindowTimeZone())))));
+
     }
 
     @Override

@@ -24,7 +24,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.TargetFields;
@@ -54,7 +53,6 @@ import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -64,12 +62,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
+
+import com.google.common.collect.Lists;
 
 /**
  * JPA implementation of {@link TargetManagement}.
@@ -79,41 +80,54 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class JpaTargetManagement implements TargetManagement {
 
-    @Autowired
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
 
-    @Autowired
-    private TargetRepository targetRepository;
+    private final TargetRepository targetRepository;
 
-    @Autowired
-    private RolloutGroupRepository rolloutGroupRepository;
+    private final RolloutGroupRepository rolloutGroupRepository;
 
-    @Autowired
-    private DistributionSetRepository distributionSetRepository;
+    private final DistributionSetRepository distributionSetRepository;
 
-    @Autowired
-    private TargetFilterQueryRepository targetFilterQueryRepository;
+    private final TargetFilterQueryRepository targetFilterQueryRepository;
 
-    @Autowired
-    private TargetTagRepository targetTagRepository;
+    private final TargetTagRepository targetTagRepository;
 
-    @Autowired
-    private NoCountPagingRepository criteriaNoCountDao;
+    private final NoCountPagingRepository criteriaNoCountDao;
 
-    @Autowired
-    private ApplicationEventPublisher eventPublisher;
+    private final ApplicationEventPublisher eventPublisher;
 
-    @Autowired
-    private ApplicationContext applicationContext;
+    private final ApplicationContext applicationContext;
 
-    @Autowired
-    private TenantAware tenantAware;
+    private final TenantAware tenantAware;
 
-    @Autowired
-    private AfterTransactionCommitExecutor afterCommit;
+    private final AfterTransactionCommitExecutor afterCommit;
 
-    @Autowired
-    private VirtualPropertyReplacer virtualPropertyReplacer;
+    private final VirtualPropertyReplacer virtualPropertyReplacer;
+
+    private final Database database;
+
+    JpaTargetManagement(final EntityManager entityManager, final TargetRepository targetRepository,
+            final RolloutGroupRepository rolloutGroupRepository,
+            final DistributionSetRepository distributionSetRepository,
+            final TargetFilterQueryRepository targetFilterQueryRepository,
+            final TargetTagRepository targetTagRepository, final NoCountPagingRepository criteriaNoCountDao,
+            final ApplicationEventPublisher eventPublisher, final ApplicationContext applicationContext,
+            final TenantAware tenantAware, final AfterTransactionCommitExecutor afterCommit,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final Database database) {
+        this.entityManager = entityManager;
+        this.targetRepository = targetRepository;
+        this.rolloutGroupRepository = rolloutGroupRepository;
+        this.distributionSetRepository = distributionSetRepository;
+        this.targetFilterQueryRepository = targetFilterQueryRepository;
+        this.targetTagRepository = targetTagRepository;
+        this.criteriaNoCountDao = criteriaNoCountDao;
+        this.eventPublisher = eventPublisher;
+        this.applicationContext = applicationContext;
+        this.tenantAware = tenantAware;
+        this.afterCommit = afterCommit;
+        this.virtualPropertyReplacer = virtualPropertyReplacer;
+        this.database = database;
+    }
 
     @Override
     public Optional<Target> getByControllerID(final String controllerId) {
@@ -137,18 +151,19 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Slice<Target> findByTargetFilterQuery(final Pageable pageable, final Long targetFilterQueryId) {
+    public Slice<Target> findByTargetFilterQuery(final Pageable pageable, final long targetFilterQueryId) {
         final TargetFilterQuery targetFilterQuery = targetFilterQueryRepository.findById(targetFilterQueryId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));
 
         return findTargetsBySpec(
-                RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class, virtualPropertyReplacer), pageable);
+                RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class, virtualPropertyReplacer, database),
+                pageable);
     }
 
     @Override
     public Page<Target> findByRsql(final Pageable pageable, final String targetFilterQuery) {
-        return findTargetsBySpec(RSQLUtility.parse(targetFilterQuery, TargetFields.class, virtualPropertyReplacer),
-                pageable);
+        return findTargetsBySpec(
+                RSQLUtility.parse(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database), pageable);
     }
 
     private Page<Target> findTargetsBySpec(final Specification<JpaTarget> spec, final Pageable pageable) {
@@ -205,18 +220,19 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Page<Target> findByAssignedDistributionSet(final Pageable pageReq, final Long distributionSetID) {
+    public Page<Target> findByAssignedDistributionSet(final Pageable pageReq, final long distributionSetID) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetID);
 
         return targetRepository.findByAssignedDistributionSetId(pageReq, distributionSetID);
     }
 
     @Override
-    public Page<Target> findByAssignedDistributionSetAndRsql(final Pageable pageReq, final Long distributionSetID,
+    public Page<Target> findByAssignedDistributionSetAndRsql(final Pageable pageReq, final long distributionSetID,
             final String rsqlParam) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetID);
 
-        final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class, virtualPropertyReplacer);
+        final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class, virtualPropertyReplacer,
+                database);
 
         return convertPage(
                 targetRepository
@@ -242,17 +258,18 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Page<Target> findByInstalledDistributionSet(final Pageable pageReq, final Long distributionSetID) {
+    public Page<Target> findByInstalledDistributionSet(final Pageable pageReq, final long distributionSetID) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetID);
         return targetRepository.findByInstalledDistributionSetId(pageReq, distributionSetID);
     }
 
     @Override
-    public Page<Target> findByInstalledDistributionSetAndRsql(final Pageable pageable, final Long distributionSetId,
+    public Page<Target> findByInstalledDistributionSetAndRsql(final Pageable pageable, final long distributionSetId,
             final String rsqlParam) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetId);
 
-        final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class, virtualPropertyReplacer);
+        final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class, virtualPropertyReplacer,
+                database);
 
         return convertPage(
                 targetRepository
@@ -372,7 +389,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public List<Target> assignTag(final Collection<String> controllerIds, final Long tagId) {
+    public List<Target> assignTag(final Collection<String> controllerIds, final long tagId) {
 
         final List<JpaTarget> allTargets = targetRepository
                 .findAll(TargetSpecifications.byControllerIdWithTagsInJoin(controllerIds));
@@ -399,7 +416,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Target unAssignTag(final String controllerID, final Long targetTagId) {
+    public Target unAssignTag(final String controllerID, final long targetTagId) {
         final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerID)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerID));
 
@@ -417,7 +434,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Slice<Target> findByFilterOrderByLinkedDistributionSet(final Pageable pageable,
-            final Long orderByDistributionId, final FilterParams filterParams) {
+            final long orderByDistributionId, final FilterParams filterParams) {
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<JpaTarget> query = cb.createQuery(JpaTarget.class);
         final Root<JpaTarget> targetRoot = query.from(JpaTarget.class);
@@ -431,8 +448,6 @@ public class JpaTargetManagement implements TargetManagement {
                 .when(cb.equal(targetRoot.get(JpaTarget_.assignedDistributionSet).get(JpaDistributionSet_.id),
                         orderByDistributionId), 2)
                 .otherwise(100);
-        // multiselect statement order by the select case and controllerId
-        query.distinct(true);
         // build the specifications and then to predicates necessary by the
         // given filters
         final Predicate[] specificationsForMultiSelect = specificationsToPredicate(buildSpecificationList(filterParams),
@@ -450,8 +465,7 @@ public class JpaTargetManagement implements TargetManagement {
         // be mapped directly to a Target entity because the selectCase is not a
         // attribute of the
         // Target entity, the the Object array contains the Target on the first
-        // index (case of the
-        // multiselect order) of the array and
+        // index of the array and
         // the 2nd contains the selectCase int value.
         final int pageSize = pageable.getPageSize();
         final List<JpaTarget> resultList = entityManager.createQuery(query).setFirstResult(pageable.getOffset())
@@ -470,26 +484,26 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public long countByAssignedDistributionSet(final Long distId) {
+    public long countByAssignedDistributionSet(final long distId) {
         throwEntityNotFoundIfDsDoesNotExist(distId);
 
         return targetRepository.countByAssignedDistributionSetId(distId);
     }
 
     @Override
-    public long countByInstalledDistributionSet(final Long distId) {
+    public long countByInstalledDistributionSet(final long distId) {
         throwEntityNotFoundIfDsDoesNotExist(distId);
 
         return targetRepository.countByInstalledDistributionSetId(distId);
     }
 
     @Override
-    public Page<Target> findByTargetFilterQueryAndNonDS(final Pageable pageRequest, final Long distributionSetId,
+    public Page<Target> findByTargetFilterQueryAndNonDS(final Pageable pageRequest, final long distributionSetId,
             final String targetFilterQuery) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetId);
 
         final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery, TargetFields.class,
-                virtualPropertyReplacer);
+                virtualPropertyReplacer, database);
 
         return findTargetsBySpec(
                 (root, cq,
@@ -504,7 +518,7 @@ public class JpaTargetManagement implements TargetManagement {
             final Collection<Long> groups, final String targetFilterQuery) {
 
         final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery, TargetFields.class,
-                virtualPropertyReplacer);
+                virtualPropertyReplacer, database);
 
         return findTargetsBySpec((root, cq, cb) -> cb.and(spec.toPredicate(root, cq, cb),
                 TargetSpecifications.isNotInRolloutGroups(groups).toPredicate(root, cq, cb)), pageRequest);
@@ -512,8 +526,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Page<Target> findByInRolloutGroupWithoutAction(@NotNull final Pageable pageRequest,
-            @NotNull final Long group) {
+    public Page<Target> findByInRolloutGroupWithoutAction(final Pageable pageRequest, final long group) {
         if (!rolloutGroupRepository.exists(group)) {
             throw new EntityNotFoundException(RolloutGroup.class, group);
         }
@@ -526,7 +539,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public long countByRsqlAndNotInRolloutGroups(final Collection<Long> groups, final String targetFilterQuery) {
         final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery, TargetFields.class,
-                virtualPropertyReplacer);
+                virtualPropertyReplacer, database);
         final List<Specification<JpaTarget>> specList = Arrays.asList(spec,
                 TargetSpecifications.isNotInRolloutGroups(groups));
 
@@ -534,12 +547,12 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public long countByRsqlAndNonDS(final Long distributionSetId, final String targetFilterQuery) {
+    public long countByRsqlAndNonDS(final long distributionSetId, final String targetFilterQuery) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetId);
 
         final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery, TargetFields.class,
-                virtualPropertyReplacer);
-        final List<Specification<JpaTarget>> specList = new ArrayList<>(2);
+                virtualPropertyReplacer, database);
+        final List<Specification<JpaTarget>> specList = Lists.newArrayListWithExpectedSize(2);
         specList.add(spec);
         specList.add(TargetSpecifications.hasNotDistributionSetInActions(distributionSetId));
 
@@ -564,7 +577,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Page<Target> findByTag(final Pageable pageable, final Long tagId) {
+    public Page<Target> findByTag(final Pageable pageable, final long tagId) {
         throwEntityNotFoundExceptionIfTagDoesNotExist(tagId);
 
         return convertPage(targetRepository.findByTag(pageable, tagId), pageable);
@@ -577,11 +590,12 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Page<Target> findByRsqlAndTag(final Pageable pageable, final String rsqlParam, final Long tagId) {
+    public Page<Target> findByRsqlAndTag(final Pageable pageable, final String rsqlParam, final long tagId) {
 
         throwEntityNotFoundExceptionIfTagDoesNotExist(tagId);
 
-        final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class, virtualPropertyReplacer);
+        final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class, virtualPropertyReplacer,
+                database);
 
         return convertPage(targetRepository.findAll((Specification<JpaTarget>) (root, query, cb) -> cb.and(
                 TargetSpecifications.hasTag(tagId).toPredicate(root, query, cb), spec.toPredicate(root, query, cb)),
@@ -589,19 +603,19 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public long countByTargetFilterQuery(final Long targetFilterQueryId) {
+    public long countByTargetFilterQuery(final long targetFilterQueryId) {
         final TargetFilterQuery targetFilterQuery = targetFilterQueryRepository.findById(targetFilterQueryId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));
 
         final Specification<JpaTarget> specs = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class,
-                virtualPropertyReplacer);
+                virtualPropertyReplacer, database);
         return targetRepository.count(specs);
     }
 
     @Override
     public long countByRsql(final String targetFilterQuery) {
         final Specification<JpaTarget> specs = RSQLUtility.parse(targetFilterQuery, TargetFields.class,
-                virtualPropertyReplacer);
+                virtualPropertyReplacer, database);
         return targetRepository.count((root, query, cb) -> {
             query.distinct(true);
             return specs.toPredicate(root, query, cb);
@@ -609,7 +623,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Optional<Target> get(final Long id) {
+    public Optional<Target> get(final long id) {
         return Optional.ofNullable(targetRepository.findOne(id));
     }
 

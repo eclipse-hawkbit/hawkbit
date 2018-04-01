@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -128,30 +127,29 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     @Override
     public SystemUsageReport getSystemUsageStatistics() {
 
-        BigDecimal sumOfArtifacts = (BigDecimal) entityManager
-                .createNativeQuery(
-                        "select SUM(file_size) from sp_artifact a INNER JOIN sp_base_software_module sm ON a.software_module = sm.id WHERE sm.deleted = 0")
+        final Number count = (Number) entityManager.createNativeQuery(
+                "select SUM(file_size) from sp_artifact a INNER JOIN sp_base_software_module sm ON a.software_module = sm.id WHERE sm.deleted = 0")
                 .getSingleResult();
 
-        if (sumOfArtifacts == null) {
-            sumOfArtifacts = new BigDecimal(0);
+        long sumOfArtifacts = 0;
+        if (count != null) {
+            sumOfArtifacts = count.longValue();
         }
 
         // we use native queries to punch through the tenant boundaries. This
         // has to be used with care!
-        final Long targets = (Long) entityManager.createNativeQuery("SELECT COUNT(id) FROM sp_target")
-                .getSingleResult();
+        final long targets = ((Number) entityManager.createNativeQuery("SELECT COUNT(id) FROM sp_target")
+                .getSingleResult()).longValue();
 
-        final Long artifacts = (Long) entityManager
-                .createNativeQuery(
-                        "SELECT COUNT(a.id) FROM sp_artifact a INNER JOIN sp_base_software_module sm ON a.software_module = sm.id WHERE sm.deleted = 0")
-                .getSingleResult();
+        final long artifacts = ((Number) entityManager.createNativeQuery(
+                "SELECT COUNT(a.id) FROM sp_artifact a INNER JOIN sp_base_software_module sm ON a.software_module = sm.id WHERE sm.deleted = 0")
+                .getSingleResult()).longValue();
 
-        final Long actions = (Long) entityManager.createNativeQuery("SELECT COUNT(id) FROM sp_action")
-                .getSingleResult();
+        final long actions = ((Number) entityManager.createNativeQuery("SELECT COUNT(id) FROM sp_action")
+                .getSingleResult()).longValue();
 
-        return new SystemUsageReportWithTenants(targets, artifacts, actions,
-                sumOfArtifacts.setScale(0, BigDecimal.ROUND_HALF_UP).longValue(), tenantMetaDataRepository.count());
+        return new SystemUsageReportWithTenants(targets, artifacts, actions, sumOfArtifacts,
+                tenantMetaDataRepository.count());
     }
 
     @Override
@@ -281,7 +279,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public TenantMetaData updateTenantMetadata(final Long defaultDsType) {
+    public TenantMetaData updateTenantMetadata(final long defaultDsType) {
         final JpaTenantMetaData data = (JpaTenantMetaData) getTenantMetadata();
 
         data.setDefaultDsType(distributionSetTypeRepository.findOne(defaultDsType));
@@ -319,7 +317,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    public TenantMetaData getTenantMetadata(final Long tenantId) {
+    public TenantMetaData getTenantMetadata(final long tenantId) {
         return tenantMetaDataRepository.findOne(tenantId);
     }
 

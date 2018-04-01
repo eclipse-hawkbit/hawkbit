@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 
@@ -79,8 +80,8 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             fileName = file.getOriginalFilename();
         }
 
-        try {
-            final Artifact result = artifactManagement.create(file.getInputStream(), softwareModuleId, fileName,
+        try (InputStream in = file.getInputStream()) {
+            final Artifact result = artifactManagement.create(in, softwareModuleId, fileName,
                     md5Sum == null ? null : md5Sum.toLowerCase(), sha1Sum == null ? null : sha1Sum.toLowerCase(), false,
                     file.getContentType());
 

@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
+import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
@@ -206,19 +207,23 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Description("Ensures that multi target assignment through API is reflected by the repository.")
     public void assignMultipleTargetsToDistributionSet() throws Exception {
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
-        final List<Target> targets = testdataFactory.createTargets(5);
-        final JSONArray list = new JSONArray();
-        targets.forEach(target -> list.put(new JSONObject().put("id", target.getControllerId())));
 
+        // prepare targets
+        final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
+        final JSONArray list = new JSONArray();
+        for (final String targetId : knownTargetIds) {
+            testdataFactory.createTarget(targetId);
+            list.put(new JSONObject().put("id", Long.valueOf(targetId)));
+        }
         // assign already one target to DS
-        assignDistributionSet(createdDs.getId(), targets.get(0).getControllerId());
+        assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
 
         mvc.perform(post(
                 MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId() + "/assignedTargets")
                         .contentType(MediaType.APPLICATION_JSON).content(list.toString()))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.assigned", equalTo(targets.size() - 1)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.assigned", equalTo(knownTargetIds.length - 1)))
                 .andExpect(jsonPath("$.alreadyAssigned", equalTo(1)))
-                .andExpect(jsonPath("$.total", equalTo(targets.size())));
+                .andExpect(jsonPath("$.total", equalTo(knownTargetIds.length)));
 
         assertThat(targetManagement.findByAssignedDistributionSet(PAGE, createdDs.getId()).getContent())
                 .as("Five targets in repository have DS assigned").hasSize(5);
@@ -245,6 +250,129 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .as("Five targets in repository have DS assigned").hasSize(5);
 
         assertThat(targetManagement.findByInstalledDistributionSet(PAGE, createdDs.getId()).getContent()).hasSize(4);
+    }
+
+    @Test
+    @Description("Assigns multiple targets to distribution set with only maintenance schedule.")
+    public void assignMultipleTargetsToDistributionSetWithMaintenanceWindowStartOnly() throws Exception {
+        // prepare distribution set
+        final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
+        final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
+        // prepare targets
+        final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
+        final JSONArray list = new JSONArray();
+        for (final String targetId : knownTargetIds) {
+            testdataFactory.createTarget(targetId);
+            list.put(new JSONObject().put("id", Long.valueOf(targetId)).put("maintenanceWindow",
+                    AbstractIntegrationTest.getMaintenanceWindow(AbstractIntegrationTest.getTestSchedule(0), "", "")));
+        }
+        // assign already one target to DS
+        assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
+
+        mvc.perform(post(
+                MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId() + "/assignedTargets")
+                        .contentType(MediaType.APPLICATION_JSON).content(list.toString()))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Description("Assigns multiple targets to distribution set with only maintenance window duration.")
+    public void assignMultipleTargetsToDistributionSetWithMaintenanceWindowEndOnly() throws Exception {
+        // prepare distribution set
+        final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
+        final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
+        // prepare targets
+        final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
+        final JSONArray list = new JSONArray();
+        for (final String targetId : knownTargetIds) {
+            testdataFactory.createTarget(targetId);
+            list.put(new JSONObject().put("id", Long.valueOf(targetId)).put("maintenanceWindow",
+                    AbstractIntegrationTest.getMaintenanceWindow("", AbstractIntegrationTest.getTestDuration(10), "")));
+        }
+        // assign already one target to DS
+        assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
+
+        mvc.perform(post(
+                MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId() + "/assignedTargets")
+                        .contentType(MediaType.APPLICATION_JSON).content(list.toString()))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Description("Assigns multiple targets to distribution set with valid maintenance window.")
+    public void assignMultipleTargetsToDistributionSetWithValidMaintenanceWindow() throws Exception {
+        // prepare distribution set
+        final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
+        final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
+        // prepare targets
+        final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
+        final JSONArray list = new JSONArray();
+        for (final String targetId : knownTargetIds) {
+            testdataFactory.createTarget(targetId);
+            list.put(new JSONObject().put("id", Long.valueOf(targetId)).put("maintenanceWindow",
+                    AbstractIntegrationTest.getMaintenanceWindow(AbstractIntegrationTest.getTestSchedule(10),
+                            AbstractIntegrationTest.getTestDuration(10), AbstractIntegrationTest.getTestTimeZone())));
+        }
+        // assign already one target to DS
+        assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
+
+        mvc.perform(post(
+                MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId() + "/assignedTargets")
+                        .contentType(MediaType.APPLICATION_JSON).content(list.toString()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @Description("Assigns multiple targets to distribution set with last maintenance window scheduled before current time.")
+    public void assignMultipleTargetsToDistributionSetWithMaintenanceWindowEndTimeBeforeStartTime() throws Exception {
+        // prepare distribution set
+        final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
+        final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
+        // prepare targets
+        final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
+        final JSONArray list = new JSONArray();
+        for (final String targetId : knownTargetIds) {
+            testdataFactory.createTarget(targetId);
+            list.put(new JSONObject().put("id", Long.valueOf(targetId)).put("maintenanceWindow",
+                    AbstractIntegrationTest.getMaintenanceWindow(AbstractIntegrationTest.getTestSchedule(-30),
+                            AbstractIntegrationTest.getTestDuration(5), AbstractIntegrationTest.getTestTimeZone())));
+        }
+        // assign already one target to DS
+        assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
+
+        mvc.perform(post(
+                MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId() + "/assignedTargets")
+                        .contentType(MediaType.APPLICATION_JSON).content(list.toString()))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Description("Assigns multiple targets to distribution set with and without maintenance window.")
+    public void assignMultipleTargetsToDistributionSetWithAndWithoutMaintenanceWindow() throws Exception {
+        // prepare distribution set
+        final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
+        final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
+        // prepare targets
+        final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
+        final JSONArray list = new JSONArray();
+        for (final String targetId : knownTargetIds) {
+            testdataFactory.createTarget(targetId);
+            if (Integer.parseInt(targetId) % 2 == 0) {
+                list.put(new JSONObject().put("id", Long.valueOf(targetId)).put("maintenanceWindow",
+                        AbstractIntegrationTest.getMaintenanceWindow(AbstractIntegrationTest.getTestSchedule(10),
+                                AbstractIntegrationTest.getTestDuration(5),
+                                AbstractIntegrationTest.getTestTimeZone())));
+            } else {
+                list.put(new JSONObject().put("id", Long.valueOf(targetId)));
+            }
+        }
+        // assign already one target to DS
+        assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
+
+        mvc.perform(post(
+                MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId() + "/assignedTargets")
+                        .contentType(MediaType.APPLICATION_JSON).content(list.toString()))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -481,6 +609,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("$.requiredMigrationStep", equalTo(set.isRequiredMigrationStep())))
                 .andExpect(jsonPath("$.createdBy", equalTo(set.getCreatedBy())))
                 .andExpect(jsonPath("$.complete", equalTo(Boolean.TRUE)))
+                .andExpect(jsonPath("$.deleted", equalTo(set.isDeleted())))
                 .andExpect(jsonPath("$.createdAt", equalTo(set.getCreatedAt())))
                 .andExpect(jsonPath("$.lastModifiedBy", equalTo(set.getLastModifiedBy())))
                 .andExpect(jsonPath("$.lastModifiedAt", equalTo(set.getLastModifiedAt())))
@@ -643,9 +772,14 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(1);
 
-        // perform request
-        mvc.perform(delete("/rest/v1/distributionsets/{smId}", set.getId())).andDo(MockMvcResultPrinter.print())
+        mvc.perform(get("/rest/v1/distributionsets/{dsId}", set.getId())).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.deleted", equalTo(false)));
+
+        mvc.perform(delete("/rest/v1/distributionsets/{dsId}", set.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
+
+        mvc.perform(get("/rest/v1/distributionsets/{dsId}", set.getId())).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.deleted", equalTo(true)));
 
         // check repository content
         assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(0);
@@ -662,16 +796,22 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         assertThat(distributionSetManagement.count()).isEqualTo(1);
 
-        mvc.perform(put("/rest/v1/distributionsets/{dsId}", set.getId())
-                .content("{\"version\":\"anotherVersion\",\"requiredMigrationStep\":\"true\"}")
+        final String body = new JSONObject().put("version", "anotherVersion").put("requiredMigrationStep", true)
+                .put("deleted", true).toString();
+
+        mvc.perform(put("/rest/v1/distributionsets/{dsId}", set.getId()).content(body)
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$.version", equalTo("anotherVersion")))
+                .andExpect(jsonPath("$.requiredMigrationStep", equalTo(true)))
+                .andExpect(jsonPath("$.deleted", equalTo(false)));
 
         final DistributionSet setupdated = distributionSetManagement.get(set.getId()).get();
 
         assertThat(setupdated.isRequiredMigrationStep()).isEqualTo(true);
         assertThat(setupdated.getVersion()).isEqualTo("anotherVersion");
         assertThat(setupdated.getName()).isEqualTo(set.getName());
+        assertThat(setupdated.isDeleted()).isEqualTo(false);
     }
 
     @Test
@@ -728,7 +868,8 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
-        final DistributionSet toLongName = testdataFactory.generateDistributionSet(RandomStringUtils.randomAscii(80));
+        final DistributionSet toLongName = testdataFactory
+                .generateDistributionSet(RandomStringUtils.randomAlphanumeric(80));
         mvc.perform(post("/rest/v1/distributionsets").content(JsonBuilder.distributionSets(Arrays.asList(toLongName)))
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());

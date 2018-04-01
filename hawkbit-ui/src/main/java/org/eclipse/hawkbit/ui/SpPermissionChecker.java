@@ -14,11 +14,11 @@ import org.eclipse.hawkbit.im.authentication.PermissionService;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 
 /**
- * Bean which contains all SP permissions.
+ * Bean which contains all permissions.
  *
  */
 public class SpPermissionChecker implements Serializable {
-    private static final long serialVersionUID = 2757865286212875704L;
+    private static final long serialVersionUID = 1L;
 
     protected transient PermissionService permissionService;
 
@@ -27,25 +27,7 @@ public class SpPermissionChecker implements Serializable {
     }
 
     /**
-     * Gets the SP monitor View Permission.
-     * 
-     * @return SYSTEM_MONITOR boolean value
-     */
-    public boolean hasSpMonitorViewPermission() {
-        return permissionService.hasPermission(SpPermission.SYSTEM_MONITOR);
-    }
-
-    /**
-     * Gets the SP diagnosis retrieval Permission.
-     * 
-     * @return SYSTEM_DIAG boolean value
-     */
-    public boolean hasSpdiagnosisViewPermission() {
-        return permissionService.hasPermission(SpPermission.SYSTEM_DIAG);
-    }
-
-    /**
-     * Gets the SP read Target & Dist Permission.
+     * Gets the read Target & Dist Permission.
      * 
      * @return TARGET_REPOSITORY_READ boolean value
      */
@@ -54,7 +36,7 @@ public class SpPermissionChecker implements Serializable {
     }
 
     /**
-     * Gets the SP read Target Permission.
+     * Gets the read Target Permission.
      * 
      * @return READ_TARGET boolean value
      */
@@ -63,7 +45,7 @@ public class SpPermissionChecker implements Serializable {
     }
 
     /**
-     * Gets the SP create Target Permission.
+     * Gets the create Target Permission.
      * 
      * @return READ_TARGET boolean value
      */
@@ -72,7 +54,7 @@ public class SpPermissionChecker implements Serializable {
     }
 
     /**
-     * Gets the SP update Target Permission.
+     * Gets the update Target Permission.
      * 
      * @return READ_TARGET boolean value
      */
@@ -81,7 +63,7 @@ public class SpPermissionChecker implements Serializable {
     }
 
     /**
-     * Gets the SP delete Target Permission.
+     * Gets the delete Target Permission.
      * 
      * @return READ_TARGET boolean value
      */
@@ -90,7 +72,7 @@ public class SpPermissionChecker implements Serializable {
     }
 
     /**
-     * Gets the SP READ Repository Permission.
+     * Gets the READ Repository Permission.
      * 
      * @return READ_REPOSITORY boolean value
      */
@@ -99,7 +81,7 @@ public class SpPermissionChecker implements Serializable {
     }
 
     /**
-     * Gets the SP create Repository Permission.
+     * Gets the create Repository Permission.
      * 
      * @return CREATE_REPOSITORY boolean value
      */
@@ -108,7 +90,7 @@ public class SpPermissionChecker implements Serializable {
     }
 
     /**
-     * Gets the SP update Repository Permission.
+     * Gets the update Repository Permission.
      * 
      * @return UPDATE_REPOSITORY boolean value
      */
@@ -117,7 +99,7 @@ public class SpPermissionChecker implements Serializable {
     }
 
     /**
-     * Gets the SP delete Repository Permission.
+     * Has the delete Repository Permission.
      * 
      * @return DELETE_REPOSITORY boolean value
      */
@@ -126,41 +108,47 @@ public class SpPermissionChecker implements Serializable {
     }
 
     /**
-     * Gets the SP rollout create permission.
+     * Has the rollout update permission.
      * 
      * @return permission for rollout update
      */
     public boolean hasRolloutUpdatePermission() {
-        return hasUpdateTargetPermission() && hasReadRepositoryPermission()
-                && permissionService.hasPermission(SpPermission.ROLLOUT_MANAGEMENT);
+        return hasRolloutReadPermission() && permissionService.hasPermission(SpPermission.UPDATE_ROLLOUT);
     }
 
     /**
-     * Gets the SP rollout create permission.
-     * 
-     * @return permission for rollout create
+     * @return <code>true</code> if rollout create permission
      */
     public boolean hasRolloutCreatePermission() {
-        return hasUpdateTargetPermission() && hasReadRepositoryPermission()
-                && permissionService.hasPermission(SpPermission.ROLLOUT_MANAGEMENT);
+        return hasTargetReadPermission() && hasReadRepositoryPermission()
+                && permissionService.hasPermission(SpPermission.CREATE_ROLLOUT);
     }
 
     /**
-     * 
-     * Gets the SP rollout read permission.
-     * 
-     * @return Gets the SP rollout read permission.
+     * @return <code>true</code> if rollout read permission
      */
     public boolean hasRolloutReadPermission() {
-        return permissionService.hasPermission(SpPermission.ROLLOUT_MANAGEMENT);
+        return permissionService.hasPermission(SpPermission.READ_ROLLOUT);
     }
 
     /**
-     * Gets the SP rollout targets read permission.
-     * 
+     * @return <code>true</code> if rollout delete permission
+     */
+    public boolean hasRolloutDeletePermission() {
+        return hasRolloutReadPermission() && permissionService.hasPermission(SpPermission.DELETE_ROLLOUT);
+    }
+
+    /**
+     * @return <code>true</code> if rollout handle permission.
+     */
+    public boolean hasRolloutHandlePermission() {
+        return hasRolloutReadPermission() && permissionService.hasPermission(SpPermission.HANDLE_ROLLOUT);
+    }
+
+    /**
      * @return permission to read rollout targets
      */
     public boolean hasRolloutTargetsReadPermission() {
-        return hasTargetReadPermission() && permissionService.hasPermission(SpPermission.ROLLOUT_MANAGEMENT);
+        return hasTargetReadPermission() && permissionService.hasPermission(SpPermission.READ_ROLLOUT);
     }
 }

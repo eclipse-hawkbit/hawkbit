@@ -85,6 +85,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.integration.support.locks.LockRegistry;
+import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
@@ -148,14 +149,17 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Autowired
     private ApplicationContext applicationContext;
 
+    private final Database database;
+
     JpaRolloutManagement(final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
             final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
             final ApplicationEventPublisher eventPublisher, final VirtualPropertyReplacer virtualPropertyReplacer,
-            final PlatformTransactionManager txManager, final TenantAware tenantAware,
-            final LockRegistry lockRegistry) {
+            final PlatformTransactionManager txManager, final TenantAware tenantAware, final LockRegistry lockRegistry,
+            final Database database) {
         super(targetManagement, deploymentManagement, rolloutGroupManagement, distributionSetManagement, context,
                 eventPublisher, virtualPropertyReplacer, txManager, tenantAware, lockRegistry);
+        this.database = database;
     }
 
     @Override
@@ -167,7 +171,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Override
     public Page<Rollout> findByRsql(final Pageable pageable, final String rsqlParam, final boolean deleted) {
         final List<Specification<JpaRollout>> specList = Lists.newArrayListWithExpectedSize(2);
-        specList.add(RSQLUtility.parse(rsqlParam, RolloutFields.class, virtualPropertyReplacer));
+        specList.add(RSQLUtility.parse(rsqlParam, RolloutFields.class, virtualPropertyReplacer, database));
         specList.add(RolloutSpecification.isDeletedWithDistributionSet(deleted));
 
         return JpaRolloutHelper.convertPage(findByCriteriaAPI(pageable, specList), pageable);
@@ -186,7 +190,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    public Optional<Rollout> get(final Long rolloutId) {
+    public Optional<Rollout> get(final long rolloutId) {
         return Optional.ofNullable(rolloutRepository.findOne(rolloutId));
     }
 
@@ -439,7 +443,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Rollout start(final Long rolloutId) {
+    public Rollout start(final long rolloutId) {
         LOGGER.debug("startRollout called for rollout {}", rolloutId);
 
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
@@ -571,7 +575,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void pauseRollout(final Long rolloutId) {
+    public void pauseRollout(final long rolloutId) {
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
         if (!RolloutStatus.RUNNING.equals(rollout.getStatus())) {
             throw new RolloutIllegalStateException("Rollout can only be paused in state running but current state is "
@@ -590,7 +594,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void resumeRollout(final Long rolloutId) {
+    public void resumeRollout(final long rolloutId) {
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
         if (!(RolloutStatus.PAUSED.equals(rollout.getStatus()))) {
             throw new RolloutIllegalStateException("Rollout can only be resumed in state paused but current state is "
@@ -818,7 +822,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void delete(final Long rolloutId) {
+    public void delete(final long rolloutId) {
         final JpaRollout jpaRollout = rolloutRepository.findOne(rolloutId);
 
         if (jpaRollout == null) {
@@ -982,7 +986,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    public Optional<Rollout> getWithDetailedStatus(final Long rolloutId) {
+    public Optional<Rollout> getWithDetailedStatus(final long rolloutId) {
         final Optional<Rollout> rollout = get(rolloutId);
 
         if (!rollout.isPresent()) {
@@ -1041,7 +1045,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
-    public boolean exists(final Long rolloutId) {
+    public boolean exists(final long rolloutId) {
         return rolloutRepository.exists(rolloutId);
     }
 }

@@ -72,14 +72,15 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
             @ConversionValue(objectValue = "RETRIEVED", dataValue = "6"),
             @ConversionValue(objectValue = "DOWNLOAD", dataValue = "7"),
             @ConversionValue(objectValue = "SCHEDULED", dataValue = "8"),
-            @ConversionValue(objectValue = "CANCEL_REJECTED", dataValue = "9") })
+            @ConversionValue(objectValue = "CANCEL_REJECTED", dataValue = "9"),
+            @ConversionValue(objectValue = "DOWNLOADED", dataValue = "10")})
     @Convert("status")
     @NotNull
     private Status status;
 
     @CascadeOnDelete
     @ElementCollection(fetch = FetchType.LAZY, targetClass = String.class)
-    @CollectionTable(name = "sp_action_status_messages", joinColumns = @JoinColumn(name = "action_status_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_stat_msg_act_stat")), indexes = {
+    @CollectionTable(name = "sp_action_status_messages", joinColumns = @JoinColumn(name = "action_status_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_stat_msg_act_stat"), updatable = false, nullable = false), indexes = {
             @Index(name = "sp_idx_action_status_msgs_01", columnList = "action_status_id") })
     @Column(name = "detail_message", length = MESSAGE_ENTRY_LENGTH, nullable = false, updatable = false)
     private List<String> messages;

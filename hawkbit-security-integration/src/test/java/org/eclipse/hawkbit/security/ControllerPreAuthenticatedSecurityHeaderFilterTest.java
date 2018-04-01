@@ -51,9 +51,10 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
 
     private static final String SINGLE_HASH = "hash1";
     private static final String SECOND_HASH = "hash2";
+    private static final String THIRD_HASH = "hash3";
     private static final String UNKNOWN_HASH = "unknown";
 
-    private static final String MULTI_HASH = "hash1;hash2;hash3";
+    private static final String MULTI_HASH = "HASH1;hash2,HASH3,HASH1";
 
     private static final TenantConfigurationValue<String> CONFIG_VALUE_SINGLE_HASH = TenantConfigurationValue
             .<String> builder().value(SINGLE_HASH).build();
@@ -81,12 +82,13 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
     @Test
     @Description("Tests the filter for issuer hash based authentication with multiple known hashes")
     public void testIssuerHashBasedAuthenticationWithMultipleKnownHashes() {
-        final DmfTenantSecurityToken securityToken = prepareSecurityToken(SINGLE_HASH);
         // use multiple known hashes
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME), eq(String.class)))
                         .thenReturn(CONFIG_VALUE_MULTI_HASH);
-        assertThat(underTest.getPreAuthenticatedPrincipal(securityToken)).isNotNull();
+        assertThat(underTest.getPreAuthenticatedPrincipal(prepareSecurityToken(SINGLE_HASH))).isNotNull();
+        assertThat(underTest.getPreAuthenticatedPrincipal(prepareSecurityToken(SECOND_HASH))).isNotNull();
+        assertThat(underTest.getPreAuthenticatedPrincipal(prepareSecurityToken(THIRD_HASH))).isNotNull();
     }
 
     @Test

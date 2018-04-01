@@ -10,6 +10,9 @@ package org.eclipse.hawkbit.repository.builder;
 
 import java.util.Optional;
 
+import org.eclipse.hawkbit.repository.ValidString;
+import org.springframework.util.StringUtils;
+
 /**
  * Create and update builder DTO.
  *
@@ -17,8 +20,11 @@ import java.util.Optional;
  *            update or create builder interface
  */
 public abstract class AbstractSoftwareModuleTypeUpdateCreate<T> extends AbstractNamedEntityBuilder<T> {
+    @ValidString
     protected String colour;
+    @ValidString
     protected String key;
+
     protected int maxAssignments = 1;
 
     public T maxAssignments(final int maxAssignments) {
@@ -31,7 +37,7 @@ public abstract class AbstractSoftwareModuleTypeUpdateCreate<T> extends Abstract
     }
 
     public T colour(final String colour) {
-        this.colour = colour;
+        this.colour = StringUtils.trimWhitespace(colour);
         return (T) this;
     }
 
@@ -40,7 +46,7 @@ public abstract class AbstractSoftwareModuleTypeUpdateCreate<T> extends Abstract
     }
 
     public T key(final String key) {
-        this.key = key;
+        this.key = StringUtils.trimWhitespace(key);
         return (T) this;
     }
 

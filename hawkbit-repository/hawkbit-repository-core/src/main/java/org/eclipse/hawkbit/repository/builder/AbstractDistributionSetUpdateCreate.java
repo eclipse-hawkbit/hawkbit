@@ -11,6 +11,9 @@ package org.eclipse.hawkbit.repository.builder;
 import java.util.Collection;
 import java.util.Optional;
 
+import org.eclipse.hawkbit.repository.ValidString;
+import org.springframework.util.StringUtils;
+
 /**
  * Create and update builder DTO.
  *
@@ -18,9 +21,11 @@ import java.util.Optional;
  *            update or create builder interface
  */
 public abstract class AbstractDistributionSetUpdateCreate<T> extends AbstractNamedEntityBuilder<T> {
+    @ValidString
     protected String version;
     protected Boolean requiredMigrationStep;
-    protected String type;
+
+
     protected Collection<Long> modules;
 
     public T modules(final Collection<Long> modules) {
@@ -30,15 +35,6 @@ public abstract class AbstractDistributionSetUpdateCreate<T> extends AbstractNam
 
     public Collection<Long> getModules() {
         return modules;
-    }
-
-    public T type(final String type) {
-        this.type = type;
-        return (T) this;
-    }
-
-    public String getType() {
-        return type;
     }
 
     public T requiredMigrationStep(final Boolean requiredMigrationStep) {
@@ -51,7 +47,7 @@ public abstract class AbstractDistributionSetUpdateCreate<T> extends AbstractNam
     }
 
     public T version(final String version) {
-        this.version = version;
+        this.version = StringUtils.trimWhitespace(version);
         return (T) this;
     }
 

@@ -25,11 +25,16 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.eclipse.hawkbit.repository.event.remote.DistributionSetTypeDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTypeCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTypeUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
+import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -46,7 +51,7 @@ import org.springframework.util.CollectionUtils;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
-public class JpaDistributionSetType extends AbstractJpaNamedEntity implements DistributionSetType {
+public class JpaDistributionSetType extends AbstractJpaNamedEntity implements DistributionSetType, EventAwareEntity {
     private static final long serialVersionUID = 1L;
 
     @CascadeOnDelete
@@ -230,4 +235,21 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
         return "DistributionSetType [key=" + key + ", isDeleted()=" + isDeleted() + ", getId()=" + getId() + "]";
     }
 
+    @Override
+    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
+                new DistributionSetTypeCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+    }
+
+    @Override
+    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
+                new DistributionSetTypeUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+    }
+
+    @Override
+    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new DistributionSetTypeDeletedEvent(
+                getTenant(), getId(), getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
+    }
 }

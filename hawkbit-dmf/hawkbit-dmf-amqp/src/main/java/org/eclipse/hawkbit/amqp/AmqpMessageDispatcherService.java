@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.api.URLPlaceholder.SoftwareData;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
+import org.eclipse.hawkbit.dmf.json.model.DmfActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfArtifact;
 import org.eclipse.hawkbit.dmf.json.model.DmfArtifactHash;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
@@ -143,9 +144,26 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
             targetManagement.getByControllerID(assignedEvent.getActions().keySet())
                     .forEach(target -> sendUpdateMessageToTarget(assignedEvent.getTenant(), target,
-                            assignedEvent.getActions().get(target.getControllerId()), modules));
+                            assignedEvent.getActions().get(target.getControllerId()), modules,
+                            assignedEvent.isMaintenanceWindowAvailable()));
 
         });
+    }
+
+    /**
+     * Method to get the type of event depending on whether the action has a
+     * valid maintenance window available or not based on defined maintenance
+     * schedule. In case of no maintenance schedule or if there is a valid
+     * window available, the topic {@link EventTopic#DOWNLOAD_AND_INSTALL} is
+     * returned else {@link EventTopic#DOWNLOAD} is returned.
+     *
+     * @param target
+     *            for which to find the event type
+     *
+     * @return {@link EventTopic} to use for message.
+     */
+    private static EventTopic getEventTypeForTarget(final boolean maintenanceWindowAvailable) {
+        return maintenanceWindowAvailable ? EventTopic.DOWNLOAD_AND_INSTALL : EventTopic.DOWNLOAD;
     }
 
     /**
@@ -182,7 +200,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     protected void sendUpdateMessageToTarget(final String tenant, final Target target, final Long actionId,
-            final Map<SoftwareModule, List<SoftwareModuleMetadata>> modules) {
+            final Map<SoftwareModule, List<SoftwareModuleMetadata>> modules, final boolean maintenanceWindowAvailable) {
 
         final URI targetAdress = target.getAddress();
         if (!IpUtil.isAmqpUri(targetAdress)) {
@@ -203,7 +221,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
         final Message message = getMessageConverter().toMessage(downloadAndUpdateRequest,
                 createConnectorMessagePropertiesEvent(tenant, target.getControllerId(),
-                        EventTopic.DOWNLOAD_AND_INSTALL));
+                        getEventTypeForTarget(maintenanceWindowAvailable)));
         amqpSenderService.sendMessage(message, targetAdress);
     }
 
@@ -241,7 +259,11 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         if (!IpUtil.isAmqpUri(address)) {
             return;
         }
-        final Message message = getMessageConverter().toMessage(actionId,
+
+        final DmfActionRequest actionRequest = new DmfActionRequest();
+        actionRequest.setActionId(actionId);
+
+        final Message message = getMessageConverter().toMessage(actionRequest,
                 createConnectorMessagePropertiesEvent(tenant, controllerId, EventTopic.CANCEL_DOWNLOAD));
 
         amqpSenderService.sendMessage(message, address);

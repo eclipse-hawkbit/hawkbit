@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.validation.ConstraintViolationException;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -31,7 +33,6 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -56,7 +57,7 @@ public interface TargetManagement {
      *             if given tagId or at least one of the targets do not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    List<Target> assignTag(@NotEmpty Collection<String> controllerIds, @NotNull Long tagId);
+    List<Target> assignTag(@NotEmpty Collection<String> controllerIds, long tagId);
 
     /**
      * Counts number of targets with given
@@ -72,7 +73,7 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    long countByAssignedDistributionSet(@NotNull Long distId);
+    long countByAssignedDistributionSet(long distId);
 
     /**
      * Count {@link Target}s for all the given filter parameters.
@@ -120,7 +121,7 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    long countByInstalledDistributionSet(@NotNull Long distId);
+    long countByInstalledDistributionSet(long distId);
 
     /**
      * Count {@link TargetFilterQuery}s for given target filter query.
@@ -143,7 +144,7 @@ public interface TargetManagement {
      *             if {@link TargetFilterQuery} with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByTargetFilterQuery(@NotNull Long targetFilterQueryId);
+    long countByTargetFilterQuery(long targetFilterQueryId);
 
     /**
      * Counts all {@link Target}s in the repository.
@@ -168,7 +169,7 @@ public interface TargetManagement {
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
-    Target create(@NotNull TargetCreate create);
+    Target create(@NotNull @Valid TargetCreate create);
 
     /**
      * creates multiple {@link Target}s. If some of the given {@link Target}s
@@ -187,7 +188,7 @@ public interface TargetManagement {
      *             {@link TargetCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
-    List<Target> create(@NotNull Collection<TargetCreate> creates);
+    List<Target> create(@NotNull @Valid Collection<TargetCreate> creates);
 
     /**
      * Deletes all targets with the given IDs.
@@ -230,7 +231,7 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findByTargetFilterQueryAndNonDS(@NotNull Pageable pageRequest, @NotNull Long distributionSetId,
+    Page<Target> findByTargetFilterQueryAndNonDS(@NotNull Pageable pageRequest, long distributionSetId,
             @NotNull String rsqlParam);
 
     /**
@@ -248,7 +249,7 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByRsqlAndNonDS(@NotNull Long distributionSetId, @NotNull String rsqlParam);
+    long countByRsqlAndNonDS(long distributionSetId, @NotNull String rsqlParam);
 
     /**
      * Finds all targets for all the given parameter {@link TargetFilterQuery}
@@ -293,7 +294,7 @@ public interface TargetManagement {
      *             if rollout group with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findByInRolloutGroupWithoutAction(@NotNull Pageable pageRequest, @NotNull Long group);
+    Page<Target> findByInRolloutGroupWithoutAction(@NotNull Pageable pageRequest, long group);
 
     /**
      * retrieves {@link Target}s by the assigned {@link DistributionSet}.
@@ -310,7 +311,7 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
-    Page<Target> findByAssignedDistributionSet(@NotNull Pageable pageReq, @NotNull Long distributionSetID);
+    Page<Target> findByAssignedDistributionSet(@NotNull Pageable pageReq, long distributionSetID);
 
     /**
      * Retrieves {@link Target}s by the assigned {@link DistributionSet}
@@ -333,7 +334,7 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
-    Page<Target> findByAssignedDistributionSetAndRsql(@NotNull Pageable pageReq, @NotNull Long distributionSetID,
+    Page<Target> findByAssignedDistributionSetAndRsql(@NotNull Pageable pageReq, long distributionSetID,
             @NotNull String rsqlParam);
 
     /**
@@ -388,7 +389,7 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
-    Page<Target> findByInstalledDistributionSet(@NotNull Pageable pageReq, @NotNull Long distributionSetID);
+    Page<Target> findByInstalledDistributionSet(@NotNull Pageable pageReq, long distributionSetID);
 
     /**
      * retrieves {@link Target}s by the installed {@link DistributionSet}
@@ -413,7 +414,7 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
-    Page<Target> findByInstalledDistributionSetAndRsql(@NotNull Pageable pageReq, @NotNull Long distributionSetId,
+    Page<Target> findByInstalledDistributionSetAndRsql(@NotNull Pageable pageReq, long distributionSetId,
             @NotNull String rsqlParam);
 
     /**
@@ -478,7 +479,7 @@ public interface TargetManagement {
      *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<Target> findByTargetFilterQuery(@NotNull Pageable pageable, @NotNull Long targetFilterQueryId);
+    Slice<Target> findByTargetFilterQuery(@NotNull Pageable pageable, long targetFilterQueryId);
 
     /**
      * method retrieves all {@link Target}s from the repo in the following
@@ -507,8 +508,8 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<Target> findByFilterOrderByLinkedDistributionSet(@NotNull Pageable pageable,
-            @NotNull Long orderByDistributionId, @NotNull FilterParams filterParams);
+    Slice<Target> findByFilterOrderByLinkedDistributionSet(@NotNull Pageable pageable, long orderByDistributionId,
+            @NotNull FilterParams filterParams);
 
     /**
      * Find targets by tag name.
@@ -523,7 +524,7 @@ public interface TargetManagement {
      *             if target tag with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findByTag(@NotNull Pageable pageable, @NotNull Long tagId);
+    Page<Target> findByTag(@NotNull Pageable pageable, long tagId);
 
     /**
      * Find targets by tag name.
@@ -546,7 +547,7 @@ public interface TargetManagement {
      *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findByRsqlAndTag(@NotNull Pageable pageable, @NotNull String rsqlParam, @NotNull Long tagId);
+    Page<Target> findByRsqlAndTag(@NotNull Pageable pageable, @NotNull String rsqlParam, long tagId);
 
     /**
      * Toggles {@link TargetTag} assignment to given {@link Target}s by means
@@ -579,7 +580,7 @@ public interface TargetManagement {
      *             if TAG with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    Target unAssignTag(@NotEmpty String controllerID, @NotNull Long targetTagId);
+    Target unAssignTag(@NotEmpty String controllerID, long targetTagId);
 
     /**
      * updates the {@link Target}.
@@ -596,7 +597,7 @@ public interface TargetManagement {
      *             {@link TargetUpdate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    Target update(@NotNull TargetUpdate update);
+    Target update(@NotNull @Valid TargetUpdate update);
 
     /**
      * Find a {@link Target} based a given ID.
@@ -606,7 +607,7 @@ public interface TargetManagement {
      * @return {@link Target}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Optional<Target> get(@NotNull Long id);
+    Optional<Target> get(long id);
 
     /**
      * Retrieves all targets.
