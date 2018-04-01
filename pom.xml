@@ -165,7 +165,7 @@
       <validation-api.version>2.0.1.Final</validation-api.version>
       <allure.version>1.5.4</allure.version>
       <eclipselink.version>2.7.1</eclipselink.version>
-      <gwtmockito.version>1.1.6</gwtmockito.version>
+      <gwtmockito.version>1.1.8</gwtmockito.version>
       <powermock.version>1.6.5</powermock.version>
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
       <guava.version>24.1-jre</guava.version>
