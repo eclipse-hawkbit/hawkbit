@@ -12,17 +12,11 @@ import javax.servlet.MultipartConfigElement;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
-import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent.UploadStatusEventType;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -64,8 +58,6 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
 
     private final transient MultipartConfigElement multipartConfigElement;
 
-    private UploadConfirmationWindow currentUploadConfirmationwindow;
-
     private final UI ui;
 
     private HorizontalLayout fileUploadButtonLayout;
@@ -104,27 +96,24 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
-    void onEvent(final UploadArtifactUIEvent event) {
-        // if (event == UploadArtifactUIEvent.MINIMIZED_STATUS_POPUP) {
-        // ui.access(this::minimizeStatusPopup);
-        // } else if (event == UploadArtifactUIEvent.MAXIMIZED_STATUS_POPUP) {
-        // ui.access(this::maximizeStatusPopup);
-        // } else if (event ==
-        // UploadArtifactUIEvent.ARTIFACT_RESULT_POPUP_CLOSED) {
-        // ui.access(this::closeUploadStatusPopup);
-        // }
-    }
-
-    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final UploadStatusEvent event) {
-        if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_STARTED) {
+        final UploadStatusEventType uploadProgressEventType = event.getUploadStatusEventType();
+        switch (uploadProgressEventType) {
+        case UPLOAD_STARTED:
             ui.access(this::onStartOfUpload);
-        } else if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_FINISHED) {
+            break;
+
+        case UPLOAD_FAILED:
+        case UPLOAD_SUCCESSFUL:
+        case UPLOAD_FINISHED:
+        case UPLOAD_ABORTED_BY_USER:
             ui.access(this::onUploadFinished);
-        } else if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_STREAMING_FAILED) {
-            ui.access(() -> onUploadStreamingFailure(event));
-        } else if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_STREAMING_FINISHED) {
-            ui.access(this::onUploadStreamingSuccess);
+            break;
+        case UPLOAD_IN_PROGRESS:
+            break;
+        default:
+            throw new IllegalArgumentException("Enum " + UploadStatusEventType.class.getSimpleName()
+                    + " doesn't contain value " + uploadProgressEventType);
         }
     }
 
@@ -143,9 +132,8 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
     private void buildLayout() {
 
         final Upload upload = new Upload();
-        final FileTransferHandler uploadHandler = new FileTransferHandler(null, 0, uploadLogic,
-                multipartConfigElement.getMaxFileSize(),
-                upload, null, null, softwareModuleManagement);
+        final FileTransferHandlerVaadinUpload uploadHandler = new FileTransferHandlerVaadinUpload(uploadLogic,
+                multipartConfigElement.getMaxFileSize(), upload, softwareModuleManagement);
         upload.setButtonCaption(i18n.getMessage("upload.file"));
         upload.setImmediate(true);
         upload.setReceiver(uploadHandler);
@@ -184,132 +172,22 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
 
     }
 
-    private void displayCompositeMessage() {
-        uploadMessageBuilder.buildCompositeMessage()
-                .ifPresent(value -> uiNotification.displayValidationError(value));
-    }
-
-    // private void createProcessButton() {
-    // processBtn =
-    // SPUIComponentProvider.getButton(UIComponentIdProvider.UPLOAD_PROCESS_BUTTON,
-    // SPUILabelDefinitions.PROCESS, SPUILabelDefinitions.PROCESS, null, false,
-    // null,
-    // SPUIButtonStyleSmall.class);
-    // processBtn.setIcon(FontAwesome.BELL);
-    // processBtn.addStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
-    // processBtn.addClickListener(this::displayConfirmWindow);
-    // processBtn.setHtmlContentAllowed(true);
-    // processBtn.setEnabled(false);
-    // }
-
-    // private void createDiscardBtn() {
-    // discardBtn =
-    // SPUIComponentProvider.getButton(UIComponentIdProvider.UPLOAD_DISCARD_BUTTON,
-    // SPUILabelDefinitions.DISCARD, SPUILabelDefinitions.DISCARD, null, false,
-    // null,
-    // SPUIButtonStyleSmall.class);
-    // discardBtn.setIcon(FontAwesome.TRASH_O);
-    // discardBtn.addStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
-    // discardBtn.addClickListener(this::discardUploadData);
-    // }
-
-
-    // /**
-    // * Update pending action count.
-    // */
-    // private void updateActionCount() {
-    // if (!artifactUploadState.getFileSelected().isEmpty()) {
-    // processBtn.setCaption(SPUILabelDefinitions.PROCESS + "<div
-    // class='unread'>"
-    // + artifactUploadState.getFileSelected().size() + HTML_DIV);
-    // } else {
-    // processBtn.setCaption(SPUILabelDefinitions.PROCESS);
+    // private void displayDuplicateValidationMessage() {
+    // // check if streaming of all dropped files are completed
+    // if (artifactUploadState.getNumberOfFilesActuallyUploading().intValue() ==
+    // artifactUploadState
+    // .getNumberOfFileUploadsExpected().intValue()) {
+    // displayCompositeMessage();
+    // uploadLogic.clearDuplicateFileNamesList();
     // }
     // }
-
-    private void displayDuplicateValidationMessage() {
-        // check if streaming of all dropped files are completed
-        if (artifactUploadState.getNumberOfFilesActuallyUploading().intValue() == artifactUploadState
-                .getNumberOfFileUploadsExpected().intValue()) {
-            displayCompositeMessage();
-            uploadLogic.clearDuplicateFileNamesList();
-        }
-    }
-
-    // private void discardUploadData(final Button.ClickEvent event) {
-    // if (event.getButton().equals(discardBtn)) {
-    // if (artifactUploadState.getFileSelected().isEmpty()) {
-    // uiNotification.displayValidationError(i18n.getMessage("message.error.noFileSelected"));
-    // } else {
-    // clearUploadedFileDetails();
-    // }
-    // }
-    // }
-
-    // protected void clearUploadedFileDetails() {
-    // uploadLogic.clearUploadDetailsIfAllUploadsFinished();
-    // closeUploadStatusPopup();
-    // }
-
-    private void closeUploadStatusPopup() {
-        uploadInfoWindow.close();
-        artifactUploadState.setStatusPopupMinimized(false);
-    }
-
-
-
-    // private void setConfirmationPopupHeightWidth(final float newWidth, final
-    // float newHeight) {
-    // if (currentUploadConfirmationwindow != null) {
-    // currentUploadConfirmationwindow.getUploadArtifactDetails().setWidth(HawkbitCommonUtil
-    // .getArtifactUploadPopupWidth(newWidth,
-    // SPUIDefinitions.MIN_UPLOAD_CONFIRMATION_POPUP_WIDTH),
-    // Unit.PIXELS);
-    // currentUploadConfirmationwindow.getUploadDetailsTable().setHeight(HawkbitCommonUtil
-    // .getArtifactUploadPopupHeight(newHeight,
-    // SPUIDefinitions.MIN_UPLOAD_CONFIRMATION_POPUP_HEIGHT),
-    // Unit.PIXELS);
-    // }
-    // }
-
-    /**
-     * Set artifact upload result pop up size changes.
-     *
-     * @param newWidth
-     *            new width of result pop up
-     * @param newHeight
-     *            new height of result pop up
-     */
-    void setResultPopupHeightWidth(final float newWidth, final float newHeight) {
-        if (currentUploadConfirmationwindow != null
-                && currentUploadConfirmationwindow.getCurrentUploadResultWindow() != null) {
-            final UploadResultWindow uploadResultWindow = currentUploadConfirmationwindow
-                    .getCurrentUploadResultWindow();
-            uploadResultWindow.getUploadResultsWindow().setWidth(HawkbitCommonUtil.getArtifactUploadPopupWidth(newWidth,
-                    SPUIDefinitions.MIN_UPLOAD_CONFIRMATION_POPUP_WIDTH), Unit.PIXELS);
-            uploadResultWindow.getUploadResultTable().setHeight(HawkbitCommonUtil.getArtifactUploadPopupHeight(
-                    newHeight, SPUIDefinitions.MIN_UPLOAD_CONFIRMATION_POPUP_HEIGHT), Unit.PIXELS);
-        }
-    }
 
     VaadinMessageSource getI18n() {
         return i18n;
     }
 
-    void setCurrentUploadConfirmationwindow(final UploadConfirmationWindow currentUploadConfirmationwindow) {
-        this.currentUploadConfirmationwindow = currentUploadConfirmationwindow;
-    }
-
     private void onStartOfUpload() {
         showUploadStatusButton();
-        updateUploadStatusButtonCount();
-    }
-
-    private void onUploadStreamingSuccess() {
-        updateUploadStatusButtonCount();
-    }
-
-    private void onUploadStreamingFailure(final UploadStatusEvent event) {
         updateUploadStatusButtonCount();
     }
 
@@ -319,16 +197,9 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
     private void onUploadFinished() {
         updateUploadStatusButtonCount();
         if (uploadLogic.isUploadComplete()) {
-            displayDuplicateValidationMessage();
+            // displayDuplicateValidationMessage();
             hideUploadStatusButton();
         }
-    }
-
-    // TODO rollouts: remove
-    void refreshArtifactDetailsLayout(final Long selectedBaseSoftwareModuleId) {
-        final SoftwareModule softwareModule = softwareModuleManagement.get(selectedBaseSoftwareModuleId)
-                .orElse(null);
-        eventBus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.ARTIFACTS_CHANGED, softwareModule));
     }
 
     public HorizontalLayout getFileUploadButtonLayout() {

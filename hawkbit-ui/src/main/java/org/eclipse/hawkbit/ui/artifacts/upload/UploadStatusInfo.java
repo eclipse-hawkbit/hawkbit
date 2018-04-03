@@ -13,27 +13,25 @@ import java.io.Serializable;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
 /**
- * 
- * Holds uploaded file status.Used to display the details in upload status
- * popup.
- *
+ * Represents the data of a row in the {@link UploadStatusInfoWindow}.
  */
-public class UploadStatusObject implements Serializable {
+public class UploadStatusInfo implements Serializable {
+
     private static final long serialVersionUID = 1L;
+
+    private final FileUploadId fileUploadId;
 
     private String status;
     private Double progress;
-    private String filename;
     private String reason;
-    private final SoftwareModule selectedSoftwareModule;
 
-    UploadStatusObject(final String fileName, final SoftwareModule selectedSoftwareModule) {
-        this.filename = fileName;
-        this.selectedSoftwareModule = selectedSoftwareModule;
+
+    UploadStatusInfo(final FileUploadId fileUploadId) {
+        this.fileUploadId = fileUploadId;
     }
 
     public SoftwareModule getSelectedSoftwareModule() {
-        return selectedSoftwareModule;
+        return fileUploadId.getSoftwareModule();
     }
 
     public String getStatus() {
@@ -53,11 +51,7 @@ public class UploadStatusObject implements Serializable {
     }
 
     public String getFilename() {
-        return filename;
-    }
-
-    public void setFilename(final String filename) {
-        this.filename = filename;
+        return fileUploadId.getFilename();
     }
 
     public String getReason() {
@@ -70,10 +64,7 @@ public class UploadStatusObject implements Serializable {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((filename == null) ? 0 : filename.hashCode());
-        return result;
+        return fileUploadId.hashCode();
     }
 
     @Override
@@ -87,15 +78,8 @@ public class UploadStatusObject implements Serializable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final UploadStatusObject other = (UploadStatusObject) obj;
-        if (filename == null) {
-            if (other.filename != null) {
-                return false;
-            }
-        } else if (!filename.equals(other.filename)) {
-            return false;
-        }
-        return true;
+        final UploadStatusInfo other = (UploadStatusInfo) obj;
+        return fileUploadId.equals(other.fileUploadId);
     }
 
 }

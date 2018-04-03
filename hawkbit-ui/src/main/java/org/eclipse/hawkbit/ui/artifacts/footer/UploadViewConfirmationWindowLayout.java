@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
-import org.eclipse.hawkbit.ui.artifacts.state.CustomFile;
+import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadId;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.AbstractConfirmationWindowLayout;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
@@ -161,21 +161,22 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
          * Check if any information / files pending to upload for the deleted
          * software modules. If so, then delete the files from the upload list.
          */
-        final List<CustomFile> tobeRemoved = new ArrayList<>();
+        final List<FileUploadId> tobeRemoved = new ArrayList<>();
         for (final Long id : swmoduleIds) {
             final String deleteSoftwareNameVersion = artifactUploadState.getDeleteSofwareModules().get(id);
 
-            for (final CustomFile customFile : artifactUploadState.getFileSelected()) {
+            for (final FileUploadId fileUploadId : artifactUploadState.getFilesInUploadState().keySet()) {
                 final String swNameVersion = HawkbitCommonUtil.getFormattedNameVersion(
-                        customFile.getBaseSoftwareModuleName(), customFile.getBaseSoftwareModuleVersion());
+                        fileUploadId.getSoftwareModule().getName(), fileUploadId.getSoftwareModule().getVersion());
                 if (deleteSoftwareNameVersion != null && deleteSoftwareNameVersion.equals(swNameVersion)) {
-                    tobeRemoved.add(customFile);
+                    tobeRemoved.add(fileUploadId);
                 }
             }
         }
         if (!tobeRemoved.isEmpty()) {
-            artifactUploadState.getFileSelected().removeAll(tobeRemoved);
+            artifactUploadState.removeFilesInUploadState(tobeRemoved);
         }
+
         artifactUploadState.getDeleteSofwareModules().clear();
         removeCurrentTab(tab);
         setActionMessage(i18n.getMessage("message.software.delete.success"));

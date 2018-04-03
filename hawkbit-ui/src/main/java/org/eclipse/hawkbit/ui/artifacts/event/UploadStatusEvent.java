@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.event;
 
+import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress;
+
 /**
  * 
  * Holds the upload file status.
@@ -20,36 +22,65 @@ public class UploadStatusEvent {
      * life-cycle from receiving the upload until the process end.
      */
     public enum UploadStatusEventType {
-        UPLOAD_STARTED, UPLOAD_IN_PROGRESS, UPLOAD_FAILED, UPLOAD_STREAMING_FAILED, UPLOAD_SUCCESSFUL, UPLOAD_STREAMING_FINISHED, UPLOAD_FINISHED, ABORT_UPLOAD
+
+        /**
+         * An upload for a file has been started.
+         */
+        UPLOAD_STARTED,
+
+        /**
+         * Progress changed for one file upload.
+         */
+        UPLOAD_IN_PROGRESS,
+
+        /**
+         * Upload of one file failed.
+         */
+        UPLOAD_FAILED,
+
+        /**
+         * One file upload succeeded.
+         */
+        UPLOAD_SUCCESSFUL,
+
+        /**
+         * One file upload finished ()
+         */
+        UPLOAD_FINISHED,
+
+        /**
+         * Upload of one file was aborted by the user.
+         */
+        UPLOAD_ABORTED_BY_USER
     }
 
-    private final UploadStatusEventType uploadProgressEventType;
+    private final UploadStatusEventType uploadStatusEventType;
 
-    private UploadFileStatus uploadStatus;
+    private FileUploadProgress fileUploadProgress;
 
     /**
      * Constructor.
      * 
      * @param eventType
      *            the type of the event
-     * @param uploadStatus
+     * @param fileUploadProgress
      *            the upload status of this event
      */
-    public UploadStatusEvent(final UploadStatusEventType eventType, final UploadFileStatus uploadStatus) {
-        this.uploadProgressEventType = eventType;
-        this.uploadStatus = uploadStatus;
+    public UploadStatusEvent(final UploadStatusEventType eventType, final FileUploadProgress fileUploadProgress) {
+        this.uploadStatusEventType = eventType;
+        this.fileUploadProgress = fileUploadProgress;
     }
 
-    public UploadFileStatus getUploadStatus() {
-        return uploadStatus;
+    public FileUploadProgress getFileUploadProgress() {
+        return fileUploadProgress;
     }
 
-    public void setUploadStatus(final UploadFileStatus uploadStatus) {
-        this.uploadStatus = uploadStatus;
+    public void setFileUploadProgress(final FileUploadProgress uploadStatus) {
+        this.fileUploadProgress = uploadStatus;
     }
 
-    public UploadStatusEventType getUploadProgressEventType() {
-        return uploadProgressEventType;
+    public UploadStatusEventType getUploadStatusEventType() {
+        return uploadStatusEventType;
     }
 
 }

@@ -10,14 +10,12 @@ import org.eclipse.hawkbit.ui.dd.criteria.ServerItemIdClientCriterion.Mode;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.event.dd.acceptcriteria.Not;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.StreamVariable;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.DragAndDropWrapper;
@@ -37,8 +35,6 @@ public class UploadDropAreaLayout {
 
     private final UINotification uiNotification;
 
-    private final UIEventBus eventBus;
-
     private final ArtifactUploadState artifactUploadState;
 
     private final MultipartConfigElement multipartConfigElement;
@@ -50,12 +46,10 @@ public class UploadDropAreaLayout {
     private final UploadMessageBuilder uploadMessageBuilder;
 
     public UploadDropAreaLayout(final VaadinMessageSource i18n, final UINotification uiNotification,
-            final UIEventBus eventBus, final ArtifactUploadState artifactUploadState,
-            final MultipartConfigElement multipartConfigElement, final SoftwareModuleManagement softwareManagement,
-            final UploadLogic uploadLogic) {
+            final ArtifactUploadState artifactUploadState, final MultipartConfigElement multipartConfigElement,
+            final SoftwareModuleManagement softwareManagement, final UploadLogic uploadLogic) {
         this.i18n = i18n;
         this.uiNotification = uiNotification;
-        this.eventBus = eventBus;
         this.artifactUploadState = artifactUploadState;
         this.multipartConfigElement = multipartConfigElement;
         this.softwareManagement = softwareManagement;
@@ -112,17 +106,31 @@ public class UploadDropAreaLayout {
                 // considered for upload
 
                 artifactUploadState.getSelectedBaseSwModuleId().ifPresent(selectedSwId -> {
-                    // reset the flag
-                    uploadLogic.setHasDirectory(false);
                     final SoftwareModule softwareModule = softwareManagement.get(selectedSwId).orElse(null);
+
+                    boolean isDirectory = false;
+                    boolean isDuplicate = false;
+
                     for (final Html5File file : files) {
-                        processFile(file, softwareModule);
+
+                        isDirectory = uploadLogic.isDirectory(file);
+                        isDuplicate = uploadLogic.isFileInUploadState(file.getFileName(), softwareModule);
+
+                        if (!isDirectory || !isDuplicate) {
+                            artifactUploadState.incrementNumberOfFileUploadsExpected();
+                            file.setStreamVariable(new FileTransferHandlerStreamVariable(file.getFileName(), file.getFileSize(), uploadLogic,
+                                            multipartConfigElement.getMaxFileSize(), null, file.getType(),
+                                            softwareModule, softwareManagement));
+                        }
                     }
-                    if (artifactUploadState.getNumberOfFileUploadsExpected().get() == 0) {
-                        // If the upload is not started, it signifies all
-                        // dropped files as either duplicate or directory.So
-                        // display message accordingly
-                        displayCompositeMessage();
+                    if (isDirectory && isDuplicate) {
+                        uiNotification.displayValidationError(
+                                uploadMessageBuilder.buildMessageForDuplicateFileErrorAndDirectoryUploadNotAllowed());
+                    } else if (isDirectory) {
+                        uiNotification.displayValidationError(
+                                uploadMessageBuilder.buildMessageForDirectoryUploadNotAllowed());
+                    } else if (isDuplicate) {
+                        uiNotification.displayValidationError(uploadMessageBuilder.buildMessageForDuplicateFileError());
                     }
                 });
             }
@@ -145,31 +153,6 @@ public class UploadDropAreaLayout {
             }
             return false;
         }
-
-        private void processFile(final Html5File file, final SoftwareModule selectedSw) {
-            if (!uploadLogic.isDirectory(file)) {
-                if (!uploadLogic.checkForDuplicate(file.getFileName(), selectedSw,
-                        artifactUploadState.getFileSelected())) {
-
-                    artifactUploadState.incrementNumberOfFileUploadsExpected();
-                    file.setStreamVariable(createStreamVariable(file, selectedSw));
-                }
-            } else {
-                uploadLogic.setHasDirectory(true);
-            }
-        }
-
-        private StreamVariable createStreamVariable(final Html5File file, final SoftwareModule selectedSw) {
-            return new FileTransferHandler(file.getFileName(), file.getFileSize(), uploadLogic,
-                    multipartConfigElement.getMaxFileSize(), null, file.getType(), selectedSw,
-                    softwareManagement);
-        }
-
-        private void displayCompositeMessage() {
-            uploadMessageBuilder.buildCompositeMessage()
-                    .ifPresent(value -> uiNotification.displayValidationError(value));
-        }
-
     }
 
     boolean checkIfSoftwareModuleIsSelected() {
@@ -179,6 +162,5 @@ public class UploadDropAreaLayout {
         }
         return true;
     }
-
 
 }
