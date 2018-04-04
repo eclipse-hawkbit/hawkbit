@@ -25,25 +25,23 @@ public class FileUploadProgress implements Serializable {
 
     private long bytesRead;
 
-    private Double progress;
-
     private String failureReason;
 
     private String filePath;
 
-    private final boolean isValid = true;
-
-    private boolean hasDirectory;
+    private String mimeType;
 
     public FileUploadProgress(final FileUploadId fileUploadId) {
         this.fileUploadId = fileUploadId;
     }
 
     public FileUploadProgress(final FileUploadId fileUploadId, final long bytesRead, final long contentLength,
+            final String mimeType,
             final String filePath) {
         this.fileUploadId = fileUploadId;
         this.contentLength = contentLength;
         this.bytesRead = bytesRead;
+        this.mimeType = mimeType;
         this.filePath = filePath;
     }
 
@@ -74,28 +72,15 @@ public class FileUploadProgress implements Serializable {
         return failureReason;
     }
 
-    public Double getProgress() {
-        return progress;
-    }
-
-    public void setProgress(final Double progress) {
-        this.progress = progress;
-    }
-
-
-    public boolean isValid() {
-        return isValid;
-    }
-
     public String getFilePath() {
         return filePath;
     }
 
-    public void setHasDirectory(final boolean hasDirectory) {
-        this.hasDirectory = hasDirectory;
+    public void setMimeType(final String mimeType) {
+        this.mimeType = mimeType;
     }
 
-    public boolean isHasDirectory() {
-        return hasDirectory;
+    public String getMimeType() {
+        return mimeType;
     }
 }

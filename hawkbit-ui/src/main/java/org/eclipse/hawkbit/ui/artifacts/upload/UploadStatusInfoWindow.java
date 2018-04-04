@@ -8,21 +8,11 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.upload;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
-import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
-import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
-import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
@@ -77,8 +67,6 @@ public class UploadStatusInfoWindow extends Window {
 
     private final ArtifactUploadState artifactUploadState;
 
-    private final Map<FileUploadId, UploadStatusInfo> uploadStatusInfos = new HashMap<>();
-
     private final VaadinMessageSource i18n;
 
     private static final String PROGRESS = "Progress";
@@ -89,6 +77,12 @@ public class UploadStatusInfoWindow extends Window {
 
     private static final String REASON = "Reason";
 
+    private static final String STATUS_INPROGRESS = "InProgress";
+
+    private static final String STATUS_FINISHED = "Finished";
+
+    private static final String STATUS_FAILED = "Failed";
+
     private static final long serialVersionUID = 1L;
 
     private final Grid grid;
@@ -97,13 +91,13 @@ public class UploadStatusInfoWindow extends Window {
 
     private volatile boolean errorOccured;
 
-    private volatile boolean uploadAborted;
-
-    private Button minimizeButton;
+    private volatile boolean uploadAbortedByUser;
 
     private final VerticalLayout mainLayout;
 
     private Label windowCaption;
+
+    private Button minimizeButton;
 
     private Button closeButton;
 
@@ -165,74 +159,35 @@ public class UploadStatusInfoWindow extends Window {
             ui.access(() -> onUploadFailure(event));
             break;
         case UPLOAD_SUCCESSFUL:
-            // fall through here
-            ui.access(() -> onUploadSuccess(event));
+            onUploadSuccess(event);
             break;
         case UPLOAD_FINISHED:
-            ui.access(() -> onUploadFinished());
+            ui.access(() -> onUploadFinished(event));
             break;
         default:
             break;
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void onUploadStarted(final UploadStatusEvent event) {
-        // TODO rollouts: ungleich null????
         final FileUploadProgress fileUploadProgress = event.getFileUploadProgress();
         final FileUploadId fileUploadId = fileUploadProgress.getFileUploadId();
-        final String fileName = fileUploadId.getFilename();
-        final SoftwareModule softwareModule = fileUploadId.getSoftwareModule();
         
-        artifactUploadState.addFileToUploadState(fileUploadId, fileUploadProgress);
-        uploadLogic.updateUploadProcessCountersDueToUploadAdded();
-
-        // final String itemId =
-        // getItemid(event.getFileUploadProgress().getFileName(),
-        // event.getFileUploadProgress().getSoftwareModule());
-
-        final Item item = uploads.addItem(fileUploadId);
-        if (item != null) {
-            item.getItemProperty(FILE_NAME).setValue(fileName);
-            item.getItemProperty(SPUILabelDefinitions.NAME_VERSION).setValue(
-                    HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(), softwareModule.getVersion()));
-
-            // final UploadStatusObject uploadStatus = new
-            // UploadStatusObject(fileName, softwareModule);
-            // uploadStatus.setStatus("Active");
-            final UploadStatusInfo uploadStatusInfo = new UploadStatusInfo(fileUploadId);
-            uploadStatusInfo.setStatus("Active");
-            uploadStatusInfo.setProgress(fileUploadProgress.getProgress());
-            uploadStatusInfos.put(fileUploadId, uploadStatusInfo);
-
-            // TODO rollouts: ist der uploadStatus schon in der liste???
-            // artifactUploadState.addFileUploadStatus(uploadStatus);
-
-            // final Optional<UploadStatusObject> uploadStatus3 =
-            // artifactUploadState.getFileUploadStatusList()
-            // .stream().filter(e ->
-            // e.getFilename().equals(fileName)).findFirst();
-            // uploadStatus3.setStatus("Active");
+        uploadLogic.uploadStarted(fileUploadId, fileUploadProgress);
+        updateUploadStatusInfoRowObject(fileUploadId);
+        
+        if (isFirstFileUpload()) {
+            maximizeWindow();
         }
-        
-        startUploadSession();
  
         grid.scrollTo(fileUploadId);
     }   
 
     private void restoreState() {
         final Indexed container = grid.getContainerDataSource();
-        if (container.getItemIds().isEmpty()) {
-            container.removeAllItems();
-            for (final Map.Entry<FileUploadId, UploadStatusInfo> entry : uploadStatusInfos.entrySet()) {
-                final FileUploadId fileUploadId = entry.getKey();
-                final UploadStatusInfo uploadStatusInfo = entry.getValue();
-                updateUploadStatusInfoRowObject(fileUploadId, uploadStatusInfo.getStatus(),
-                        uploadStatusInfo.getReason(), uploadStatusInfo.getProgress());
-            }
-            if (uploadLogic.isUploadComplete()) {
-                minimizeButton.setEnabled(false);
-            }
+        container.removeAllItems();
+        for (final FileUploadId fileUploadId : artifactUploadState.getAllFilesFromOverallUploadProcessList().keySet()) {
+            updateUploadStatusInfoRowObject(fileUploadId);
         }
     }
 
@@ -314,32 +269,31 @@ public class UploadStatusInfoWindow extends Window {
 
         @Override
         public JsonValue encode(final String value) {
-            String result;
+            if (value == null) {
+                return super.encode(getNullRepresentation());
+            }
+
+            final String result;
             switch (value) {
-            case "Finished":
+            case STATUS_FINISHED:
                 result = "<div class=\"statusIconGreen\">" + FontAwesome.CHECK_CIRCLE.getHtml() + "</div>";
                 break;
-            case "Failed":
+            case STATUS_FAILED:
                 result = "<div class=\"statusIconRed\">" + FontAwesome.EXCLAMATION_CIRCLE.getHtml() + "</div>";
                 break;
-            default:
+            case STATUS_INPROGRESS:
                 result = "<div class=\"statusIconActive\"></div>";
+                break;
+            default:
+                throw new IllegalArgumentException("Argument " + value + " wasn't expected.");
             }
 
             return super.encode(result);
         }
     }
 
-    private void startUploadSession() {
-        if (artifactUploadState.getNumberOfFilesActuallyUploading().intValue() == 0
-                && artifactUploadState.getNumberOfFileUploadsFailed().intValue() == 0
-                && !artifactUploadState.isStatusPopupMinimized()) {
-            openWindow();
-        }
-        if (!uploadAborted) {
-            minimizeButton.setEnabled(true);
-            closeButton.setEnabled(true);
-        }
+    private boolean isFirstFileUpload() {
+        return artifactUploadState.getAllFilesFromOverallUploadProcessList().size() == 1;
     }
 
     private void openWindow() {
@@ -354,27 +308,20 @@ public class UploadStatusInfoWindow extends Window {
     }
 
     private void minimizeWindow() {
-        this.close();
         artifactUploadState.setStatusPopupMinimized(true);
+        closeWindow();
+
+        if (uploadLogic.isUploadComplete()) {
+            cleanupStates();
+        }
     }
 
     private void onUploadInProgress(final UploadStatusEvent event) {
         final FileUploadProgress fileUploadProgress = event.getFileUploadProgress();
         final FileUploadId fileUploadId = fileUploadProgress.getFileUploadId();
 
-        final long readBytes = fileUploadProgress.getBytesRead();
-        final long contentLength = fileUploadProgress.getContentLength();
-
-        final Item item = uploads.getItem(fileUploadId);
-        final double progress = (double) readBytes / (double) contentLength;
-        if (item != null) {
-            item.getItemProperty(PROGRESS).setValue(progress);
-        }
-
-        final UploadStatusInfo uploadStatusInfo = uploadStatusInfos.get(fileUploadId);
-        if (uploadStatusInfo != null) {
-            uploadStatusInfo.setProgress(progress);
-        }
+        uploadLogic.uploadInProgress(fileUploadId, fileUploadProgress);
+        updateUploadStatusInfoRowObject(fileUploadId);
     }
 
     /**
@@ -384,118 +331,47 @@ public class UploadStatusInfoWindow extends Window {
         final FileUploadProgress fileUploadProgress = event.getFileUploadProgress();
         final FileUploadId fileUploadId = fileUploadProgress.getFileUploadId();
 
-        uploadLogic.updateUploadProcessCountersDueToUploadSucceeded();
-
-        final UploadStatusInfo uploadStatusInfo = uploadStatusInfos.get(fileUploadId);
-        if (uploadStatusInfo != null) {
-            uploadStatusInfo.setStatus("Finished");
-            uploadStatusInfo.setProgress(1d);
-        }
-
-        // uploadLogic.updateFileSize(fileUploadId.getFilename(),
-        // fileUploadProgress.getContentLength(),
-        // fileUploadId.getSoftwareModule(),
-        // artifactUploadState.getFileSelected());
-        // recorded that we now one more uploaded
-        // artifactUploadState.incrementNumberOfFilesActuallyUploading();
-        // uploadLogic.resetUploadState();
-        // uploadSucceeded(event.getFileUploadProgress().getFileName(),
-        // event.getFileUploadProgress().getSoftwareModule());
-
-        processArtifactUpload();
+        uploadLogic.uploadSucceeded(fileUploadId, fileUploadProgress);
+        updateUploadStatusInfoRowObject(fileUploadId);
     }
-    //
-    // private void uploadSucceeded(final String filename, final SoftwareModule
-    // softwareModule) {
-    // final Item item = uploads.getItem(getItemid(filename, softwareModule));
-    // final String status = "Finished";
-    // if (item != null) {
-    // item.getItemProperty(STATUS).setValue(status);
-    // }
-    // final List<UploadStatusObject> uploadStatusObjectList =
-    // artifactUploadState.getFileUploadStatusList().stream()
-    // .filter(e ->
-    // e.getFilename().equals(filename)).collect(Collectors.toList());
-    // if (!uploadStatusObjectList.isEmpty()) {
-    // final UploadStatusObject uploadStatusObject =
-    // uploadStatusObjectList.get(0);
-    // uploadStatusObject.setStatus(status);
-    // uploadStatusObject.setProgress(1d);
-    // }
-    //
-    // // TODO rollouts: uploadconfirmationwindow
-    // processArtifactUpload();
-    // }
 
 
     /**
      * Called for every failed upload.
      */
     private void onUploadFailure(final UploadStatusEvent event) {
-        /**
-         * If upload interrupted because of duplicate file, do not remove the
-         * file already in upload list
-         **/
         final FileUploadProgress fileUploadProgress = event.getFileUploadProgress();
         final FileUploadId fileUploadId = fileUploadProgress.getFileUploadId();
 
-        // TODO rollouts: i18n
-        updateUploadStatusInfoRowObject(fileUploadId, "Failed", fileUploadProgress.getFailureReason(), 1d);
-        uploadLogic.updateUploadProcessCountersDueToUploadFailed();
-
-        // if
-        // (!uploadLogic.containsFileName(event.getFileUploadProgress().getFileName()))
-        // {
-        // final SoftwareModule sw =
-        // event.getFileUploadProgress().getSoftwareModule();
-        // if (sw != null) {
-        // artifactUploadState.removeSelectedFile(
-        // new CustomFile(event.getFileUploadProgress().getFileName(),
-        // sw.getName(), sw.getVersion()));
-        // }
-        // // failed reason to be updated only if there is error other than
-        // // duplicate file error
-        // uploadFailed(event.getFileUploadProgress().getFileName(),
-        // event.getFileUploadProgress().getFailureReason(),
-        // event.getFileUploadProgress().getSoftwareModule());
-        // artifactUploadState.incrementNumberOfFileUploadsFailed();
-        // artifactUploadState.decrementNumberOfFileUploadsExpected();
-        // uploadLogic.resetUploadState();
-        // }
+        uploadLogic.uploadFailed(fileUploadId, fileUploadProgress);
+        updateUploadStatusInfoRowObject(fileUploadId);
     }
-
-    // private void uploadFailed(final String filename, final String
-    // errorReason, final SoftwareModule softwareModule) {
-    // errorOccured = true;
-    // final String status = "Failed";
-    //
-    // final List<UploadStatusObject> uploadStatusObjectList =
-    // artifactUploadState.getFileUploadStatusList().stream()
-    // .filter(e ->
-    // e.getFilename().equals(filename)).collect(Collectors.toList());
-    // if (!uploadStatusObjectList.isEmpty()) {
-    // final UploadStatusObject uploadStatusObject =
-    // uploadStatusObjectList.get(0);
-    // uploadStatusObject.setStatus(status);
-    // uploadStatusObject.setReason(errorReason);
-    // }
-    // }
 
     /**
      * Called for every finished (succeeded or failed) upload.
      */
-    private void onUploadFinished() {
+    private void onUploadFinished(final UploadStatusEvent event) {
+
         // check if we are finished
         if (uploadLogic.isUploadComplete()) {
-            uploadAborted = false;
+
+            // processArtifactUpload();
+
             if (artifactUploadState.isStatusPopupMinimized()) {
-                maximizeWindow();
+                if (artifactUploadState.getFilesInFailedState().isEmpty()) {
+                    cleanupStates();
+                } else {
+                    openWindow();
+                }
             }
-            minimizeButton.setEnabled(false);
-            closeButton.setEnabled(true);
-            uploadLogic.clearUploadDetailsIfAllUploadsFinished();
         }
-        // uploadLogic.resetUploadCounters();
+    }
+
+    private void cleanupStates() {
+        errorOccured = false;
+        uploadAbortedByUser = false;
+        uploads.removeAllItems();
+        uploadLogic.clearUploadDetails();
     }
 
     private void setPopupSizeInMinMode() {
@@ -552,6 +428,7 @@ public class UploadStatusInfoWindow extends Window {
 
     private void onClose() {
         if (uploadLogic.isUploadComplete()) {
+            cleanupStates();
             closeWindow();
         } else {
             confirmAbortAction();
@@ -559,13 +436,10 @@ public class UploadStatusInfoWindow extends Window {
     }
 
     private void closeWindow() {
-        errorOccured = false;
-        uploads.removeAllItems();
         setWindowMode(WindowMode.NORMAL);
         setColumnWidth();
         setPopupSizeInMinMode();
         resizeButton.setIcon(FontAwesome.EXPAND);
-        uploadLogic.clearUploadDetailsIfAllUploadsFinished();
         this.close();
     }
 
@@ -579,79 +453,81 @@ public class UploadStatusInfoWindow extends Window {
                 i18n.getMessage("message.abort.upload"), i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
                     if (ok) {
                         eventBus.publish(this, UploadStatusEventType.UPLOAD_ABORTED_BY_USER);
-                        uploadAborted = true;
+                        uploadAbortedByUser = true;
                         errorOccured = true;
-                        minimizeButton.setEnabled(false);
-                        closeButton.setEnabled(false);
+                        cleanupStates();
+                        closeWindow();
                     }
                 });
     }
 
-    // private String getItemid(final String filename, final SoftwareModule
-    // softwareModule) {
-    // return new StringBuilder(filename).append(
-    // HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(),
-    // softwareModule.getVersion()))
-    // .toString();
+    // // Exception squid:S3655 - Optional access is checked in
+    // // checkIfArtifactDetailsDispalyed subroutine
+    // @SuppressWarnings("squid:S3655")
+    // private void processArtifactUpload() {
+    //
+    //
+    // // TODO separate from per file topics and overall finished upload
+    // // process
+    //
+    // final Set<Long> softwareModuleIdsWithNewArtifacts = new HashSet<>();
+    // for (final FileUploadId fileUploadId :
+    // artifactUploadState.getFilesInSucceededState()) {
+    //
+    // final FileUploadProgress fileUploadProgress =
+    // artifactUploadState.getFileUploadProgress(fileUploadId);
+    //
+    // // TODO rollouts: check if file/upload is still valid
+    // // TODO bulk process or single succeeded file???
+    //
+    // final SoftwareModule softwareModule = fileUploadId.getSoftwareModule();
+    // final File newFile = new File(fileUploadProgress.getFilePath());
+    //
+    // final String filename = fileUploadId.getFilename();
+    // softwareModule.getVersion();
+    // LOG.info("Transfering tempfile {} to repository",
+    // fileUploadProgress.getFilePath());
+    // try (FileInputStream fis = new FileInputStream(newFile)) {
+    //
+    // artifactManagement.create(fis, softwareModule.getId(), filename, null,
+    // null, true,
+    // fileUploadProgress.getMimeType());
+    // softwareModuleIdsWithNewArtifacts.add(softwareModule.getId());
+    //
+    // uploadLogic.uploadSucceeded(fileUploadId, fileUploadProgress);
+    // // TODO rollouts: i18n
+    // updateUploadStatusInfoRowObject(fileUploadId, null, null);
+    //
+    // } catch (final ArtifactUploadFailedException | InvalidSHA1HashException |
+    // InvalidMD5HashException
+    // | FileNotFoundException e) {
+    // uploadLogic.uploadFailed(fileUploadId, new
+    // FileUploadProgress(fileUploadId, e.getMessage()));
+    // // TODO rollouts: i18n
+    // updateUploadStatusInfoRowObject(fileUploadId, , null);
+    // LOG.error(ARTIFACT_UPLOAD_EXCEPTION, e);
+    // } catch (final IOException ex) {
+    // artifactUploadState.addFileToFailedState(fileUploadId);
+    // // TODO rollouts: i18n
+    // updateUploadStatusInfoRowObject(fileUploadId, ex.getMessage(), null);
+    // LOG.error(ARTIFACT_UPLOAD_EXCEPTION, ex);
+    // } finally {
+    // LOG.info("Deleting tempfile {}", newFile.getAbsolutePath());
+    // if (newFile.exists() && !newFile.delete()) {
+    // LOG.error("Could not delete temporary file: {}",
+    // newFile.getAbsolutePath());
     // }
-
-    // Exception squid:S3655 - Optional access is checked in
-    // checkIfArtifactDetailsDispalyed subroutine
-    @SuppressWarnings("squid:S3655")
-    private void processArtifactUpload() {
-
-        
-        // TODO separate from per file topics and overall finished upload
-        // process
-
-        final Set<Long> softwareModuleIdsWithNewArtifacts = new HashSet<>();
-        for (final Map.Entry<FileUploadId, FileUploadProgress> entry : artifactUploadState.getFilesInUploadState()
-                .entrySet()) {
-
-            final FileUploadId fileUploadId = entry.getKey();
-            final FileUploadProgress fileUploadProgress = entry.getValue();
-
-            // TODO rollouts: check if file/upload is still valid
-            // TODO bulk process or single succeeded file???
-
-            final SoftwareModule softwareModule = fileUploadId.getSoftwareModule();
-            final File newFile = new File(fileUploadProgress.getFilePath());
-
-            final String filename = fileUploadId.getFilename();
-            softwareModule.getVersion();
-            LOG.info("Transfering tempfile {} to repository", fileUploadProgress.getFilePath());
-            try (FileInputStream fis = new FileInputStream(newFile)) {
-
-                artifactManagement.create(fis, softwareModule.getId(), filename, null, null, true,
-                        fileUploadId.getMimeType());
-                // TODO rollouts: i18n
-                updateUploadStatusInfoRowObject(fileUploadId, SPUILabelDefinitions.SUCCESS, "", 1d);
-                softwareModuleIdsWithNewArtifacts.add(softwareModule.getId());
-            } catch (final ArtifactUploadFailedException | InvalidSHA1HashException | InvalidMD5HashException
-                    | FileNotFoundException e) {
-                // TODO rollouts: i18n
-                updateUploadStatusInfoRowObject(fileUploadId, SPUILabelDefinitions.FAILED, e.getMessage(), 1d);
-                LOG.error(ARTIFACT_UPLOAD_EXCEPTION, e);
-
-            } catch (final IOException ex) {
-                LOG.error(ARTIFACT_UPLOAD_EXCEPTION, ex);
-            } finally {
-                if (newFile.exists() && !newFile.delete()) {
-                    LOG.error("Could not delete temporary file: {}", newFile);
-                }
-            }
-        }
-
-        final Long selectedSoftwareModulId = artifactUploadState.getSelectedBaseSwModuleId().get();
-        if (isArtifactAddedToTheSelectedSoftwareModule(selectedSoftwareModulId, softwareModuleIdsWithNewArtifacts)) {
-            refreshArtifactDetailsLayout(selectedSoftwareModulId);
-        }
-        uploadLogic.clearUploadDetailsIfAllUploadsFinished();
-
-        // uploadLayout.setResultPopupHeightWidth(Page.getCurrent().getBrowserWindowWidth(),
-        // Page.getCurrent().getBrowserWindowHeight());
-        //
-    }
+    // }
+    // }
+    //
+    // final Long selectedSoftwareModulId =
+    // artifactUploadState.getSelectedBaseSwModuleId().get();
+    // if (isArtifactAddedToTheSelectedSoftwareModule(selectedSoftwareModulId,
+    // softwareModuleIdsWithNewArtifacts)) {
+    // refreshArtifactDetailsLayout(selectedSoftwareModulId);
+    // }
+    //
+    // }
 
     boolean isArtifactAddedToTheSelectedSoftwareModule(final Long selectedSoftwareModulId,
             final Set<Long> softwareModuleIdsWithNewArtifacts) {
@@ -663,13 +539,8 @@ public class UploadStatusInfoWindow extends Window {
         eventBus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.ARTIFACTS_CHANGED, softwareModule));
     }
 
-    private void updateUploadStatusInfoRowObject(final FileUploadId fileUploadId, final String status,
-            final String failureReason, final Double progress) {
-        UploadStatusInfo uploadStatusInfo = uploadStatusInfos.get(fileUploadId);
-        if (uploadStatusInfo == null) {
-            uploadStatusInfo = new UploadStatusInfo(fileUploadId);
-            uploadStatusInfos.put(fileUploadId, uploadStatusInfo);
-        }
+    @SuppressWarnings("unchecked")
+    private void updateUploadStatusInfoRowObject(final FileUploadId fileUploadId) {
         Item item = uploads.getItem(fileUploadId);
         if (item == null) {
             item = grid.getContainerDataSource().addItem(fileUploadId);
@@ -679,17 +550,26 @@ public class UploadStatusInfoWindow extends Window {
                             fileUploadId.getSoftwareModule().getVersion()));
         }
 
-        if (!StringUtils.isEmpty(status)) {
-            uploadStatusInfo.setStatus(status);
-            item.getItemProperty(STATUS).setValue(status);
+        final String status;
+        if (artifactUploadState.getFilesInFailedState().contains(fileUploadId)) {
+            status = STATUS_FAILED;
+        } else if (artifactUploadState.getFilesInSucceededState().contains(fileUploadId)) {
+            status = STATUS_FINISHED;
+        } else {
+            status = STATUS_INPROGRESS;
         }
-        if (!StringUtils.isEmpty(failureReason)) {
-            uploadStatusInfo.setReason(failureReason);
+        item.getItemProperty(STATUS).setValue(status);
+
+        final String failureReason = artifactUploadState.getFileUploadProgress(fileUploadId).getFailureReason();
+        if (StringUtils.isNotBlank(failureReason)) {
             item.getItemProperty(REASON).setValue(failureReason);
         }
-        if (progress != null) {
-            uploadStatusInfo.setProgress(progress);
-            item.getItemProperty(PROGRESS).setValue(uploadStatusInfo.getProgress());
+
+        final FileUploadProgress fileUploadProgress = artifactUploadState.getFileUploadProgress(fileUploadId);
+        final long bytesRead = fileUploadProgress.getBytesRead();
+        final long fileSize = fileUploadProgress.getContentLength();
+        if (bytesRead > 0 && fileSize > 0) {
+            item.getItemProperty(PROGRESS).setValue((double) bytesRead / (double) fileSize);
         }
     }
 }

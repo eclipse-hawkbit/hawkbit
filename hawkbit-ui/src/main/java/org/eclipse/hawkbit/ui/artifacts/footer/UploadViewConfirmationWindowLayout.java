@@ -165,7 +165,7 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
         for (final Long id : swmoduleIds) {
             final String deleteSoftwareNameVersion = artifactUploadState.getDeleteSofwareModules().get(id);
 
-            for (final FileUploadId fileUploadId : artifactUploadState.getFilesInUploadState().keySet()) {
+            for (final FileUploadId fileUploadId : artifactUploadState.getAllFilesFromOverallUploadProcessList().keySet()) {
                 final String swNameVersion = HawkbitCommonUtil.getFormattedNameVersion(
                         fileUploadId.getSoftwareModule().getName(), fileUploadId.getSoftwareModule().getVersion());
                 if (deleteSoftwareNameVersion != null && deleteSoftwareNameVersion.equals(swNameVersion)) {
@@ -174,7 +174,7 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
             }
         }
         if (!tobeRemoved.isEmpty()) {
-            artifactUploadState.removeFilesInUploadState(tobeRemoved);
+            artifactUploadState.removeFilesFromOverallUploadProcessList(tobeRemoved);
         }
 
         artifactUploadState.getDeleteSofwareModules().clear();

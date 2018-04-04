@@ -8,9 +8,11 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.upload;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -27,6 +29,8 @@ public class UploadLogic {
     private final List<String> duplicateFileNamesList = new ArrayList<>();
 
     private final ArtifactUploadState artifactUploadState;
+
+    private final Object fileStateListWriteLock = new Object();
 
     public UploadLogic(final ArtifactUploadState artifactUploadState) {
         this.artifactUploadState = artifactUploadState;
@@ -48,17 +52,6 @@ public class UploadLogic {
         return !duplicateFileNamesList.isEmpty();
     }
 
-    // boolean checkForDuplicate(final String filename, final SoftwareModule
-    // selectedSw,
-    // final Set<CustomFile> selectedFiles) {
-    // final Boolean isDuplicate = checkIfFileIsDuplicate(filename, selectedSw,
-    // selectedFiles);
-    // if (isDuplicate) {
-    // getDuplicateFileNamesList().add(filename);
-    // }
-    // return isDuplicate;
-    // }
-
     boolean containsFileName(final String fileName) {
         if (duplicateFileNamesList.isEmpty()) {
             return false;
@@ -67,64 +60,106 @@ public class UploadLogic {
     }
 
     boolean isFileInUploadState(final FileUploadId fileUploadId) {
-        return artifactUploadState.getFilesInUploadState().containsKey(fileUploadId);
+        return artifactUploadState.getAllFilesFromOverallUploadProcessList().containsKey(fileUploadId);
     }
 
     boolean isFileInUploadState(final String filename, final SoftwareModule softwareModule) {
-        return artifactUploadState.getFilesInUploadState().containsKey(createFileUploadId(filename, softwareModule));
+        return artifactUploadState.getAllFilesFromOverallUploadProcessList()
+                .containsKey(new FileUploadId(filename, softwareModule));
     }
 
     boolean isUploadComplete() {
-        final int uploadedCount = artifactUploadState.getNumberOfFilesActuallyUploading().intValue();
-        final int expectedUploadsCount = artifactUploadState.getNumberOfFileUploadsExpected().intValue();
-        return uploadedCount == expectedUploadsCount;
+        final int inProgressCount = artifactUploadState.getFilesInUploadProgressState().size();
+        final int succeededUploadCount = artifactUploadState.getFilesInSucceededState().size();
+        final int failedUploadCount = artifactUploadState.getFilesInFailedState().size();
+        final int overallUploadCount = artifactUploadState.getAllFilesFromOverallUploadProcessList().size();
+
+        // check consistency
+        if (inProgressCount + succeededUploadCount + failedUploadCount != overallUploadCount) {
+            LOG.error("IllegalState: \n{}", getStateListslogMessage());
+            throw new IllegalStateException();
+        }
+
+        return inProgressCount == 0;
+    }
+
+    String getStateListslogMessage() {
+        final StringBuilder buffer = new StringBuilder();
+        buffer.append("Overall uploads: " + artifactUploadState.getAllFilesFromOverallUploadProcessList().size());
+        buffer.append("\n");
+        buffer.append("succeeded uploads: " + artifactUploadState.getFilesInSucceededState().size());
+        buffer.append("\n");
+        buffer.append("Failed Uploads: " + artifactUploadState.getFilesInFailedState().size());
+        buffer.append("\n");
+        buffer.append("Uploads in progress: " + artifactUploadState.getFilesInUploadProgressState().size());
+        return buffer.toString();
     }
 
     boolean isUploadRunning() {
-        return artifactUploadState.getNumberOfFileUploadsExpected().intValue() > 0
-                || artifactUploadState.getNumberOfFilesActuallyUploading().intValue() > 0;
+        final int inProgressCount = artifactUploadState.getFilesInUploadProgressState().size();
+        final int succeededUploadCount = artifactUploadState.getFilesInSucceededState().size();
+        final int failedUploadCount = artifactUploadState.getFilesInFailedState().size();
+        final int overallUploadCount = artifactUploadState.getAllFilesFromOverallUploadProcessList().size();
+
+        // check consistency
+        if (inProgressCount + succeededUploadCount + failedUploadCount != overallUploadCount) {
+            LOG.error("IllegalState: \n{}", getStateListslogMessage());
+            throw new IllegalStateException();
+        }
+
+        return inProgressCount > 0;
     }
 
     /**
      * Clears all temp data collected while uploading files.
      */
-    void clearUploadDetailsIfAllUploadsFinished() {
-        if (isUploadComplete()) {
-            // delete file system zombies
-            // artifactUploadState.getFileSelected()
-            // .forEach(customFile -> FileUtils.deleteQuietly(new
-            // File(customFile.getFilePath())));
-            // artifactUploadState.clearFileSelected();
-            artifactUploadState.clearBaseSwModuleList();
-            artifactUploadState.clearNumberOfFilesActuallyUploading();
-            artifactUploadState.clearNumberOfFileUploadsExpected();
-            artifactUploadState.clearNumberOfFileUploadsFailed();
-            // artifactUploadState.clearFileUploadStatus();
-            clearDuplicateFileNamesList();
-            artifactUploadState.clearFilesInUploadState();
+    void clearUploadDetails() {
+        // delete file system zombies
+        for (final FileUploadProgress fileUploadProgress : artifactUploadState.getAllFilesFromOverallUploadProcessList()
+                .values()) {
+            FileUtils.deleteQuietly(new File(fileUploadProgress.getFilePath()));
+        }
+        artifactUploadState.clearBaseSwModuleList();
+        clearDuplicateFileNamesList();
+        clearFileStates();
+    }
+
+    void uploadStarted(final FileUploadId fileUploadId, final FileUploadProgress fileUploadProgress) {
+        synchronized (fileStateListWriteLock) {
+            artifactUploadState.addFileToOverallUploadProcessList(fileUploadId, fileUploadProgress);
+            artifactUploadState.addFileToUploadInProgressState(fileUploadId);
         }
     }
 
-    void resetUploadCounters() {
-        artifactUploadState.clearNumberOfFilesActuallyUploading();
-        artifactUploadState.clearNumberOfFileUploadsExpected();
-        artifactUploadState.clearNumberOfFileUploadsFailed();
+    void uploadInProgress(final FileUploadId fileUploadId, final FileUploadProgress fileUploadProgress) {
+        synchronized (fileStateListWriteLock) {
+            artifactUploadState.updateFileProgressInOverallUploadProcessList(fileUploadId, fileUploadProgress);
+        }
     }
 
-    void updateUploadProcessCountersDueToUploadAdded() {
-        artifactUploadState.incrementNumberOfFilesActuallyUploading();
-        artifactUploadState.incrementNumberOfFileUploadsExpected();
+    void uploadFailed(final FileUploadId fileUploadId, final FileUploadProgress fileUploadProgress) {
+        synchronized (fileStateListWriteLock) {
+            artifactUploadState.updateFileProgressInOverallUploadProcessList(fileUploadId, fileUploadProgress);
+            artifactUploadState.removeFileInUploadProgressState(fileUploadId);
+            artifactUploadState.addFileToFailedState(fileUploadId);
+        }
     }
 
-    void updateUploadProcessCountersDueToUploadFailed() {
-        artifactUploadState.incrementNumberOfFileUploadsFailed();
-        artifactUploadState.decrementNumberOfFilesActuallyUploading();
-        artifactUploadState.decrementNumberOfFileUploadsExpected();
+    void uploadSucceeded(final FileUploadId fileUploadId, final FileUploadProgress fileUploadProgress) {
+        synchronized (fileStateListWriteLock) {
+            artifactUploadState.updateFileProgressInOverallUploadProcessList(fileUploadId, fileUploadProgress);
+            artifactUploadState.removeFileInUploadProgressState(fileUploadId);
+            artifactUploadState.addFileToSucceededState(fileUploadId);
+        }
     }
 
-    void updateUploadProcessCountersDueToUploadSucceeded() {
-        artifactUploadState.decrementNumberOfFilesActuallyUploading();
-        artifactUploadState.decrementNumberOfFileUploadsExpected();
+    void clearFileStates() {
+        synchronized (fileStateListWriteLock) {
+            artifactUploadState.clearFilesInFailedState();
+            artifactUploadState.clearFilesInSucceededState();
+            artifactUploadState.clearFilesInUploadProgressState();
+            artifactUploadState.clearOverallUploadProcessList();
+        }
     }
 
     static String createFileUploadId(final String filename, final SoftwareModule softwareModule) {

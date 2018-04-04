@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -42,8 +41,6 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String HTML_DIV = "</div>";
-
     private static final Logger LOG = LoggerFactory.getLogger(UploadAndStatusButtonLayout.class);
 
     private final UploadStatusInfoWindow uploadInfoWindow;
@@ -51,10 +48,6 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
     private final VaadinMessageSource i18n;
 
     private final UINotification uiNotification;
-
-    private final transient EventBus.UIEventBus eventBus;
-
-    private final ArtifactUploadState artifactUploadState;
 
     private final transient MultipartConfigElement multipartConfigElement;
 
@@ -66,25 +59,23 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
 
     private final transient SoftwareModuleManagement softwareModuleManagement;
 
-    private final transient ArtifactManagement artifactManagement;
-
     private final UploadLogic uploadLogic;
 
     private final UploadMessageBuilder uploadMessageBuilder;
+
+    private final ArtifactManagement artifactManagement;
 
     public UploadAndStatusButtonLayout(final VaadinMessageSource i18n, final UINotification uiNotification, final UIEventBus eventBus,
             final ArtifactUploadState artifactUploadState, final MultipartConfigElement multipartConfigElement,
             final ArtifactManagement artifactManagement, final SoftwareModuleManagement softwareManagement,
             final UploadLogic uploadLogic) {
+        this.artifactManagement = artifactManagement;
         this.uploadLogic = uploadLogic;
         this.uploadInfoWindow = new UploadStatusInfoWindow(eventBus, artifactUploadState, i18n, artifactManagement,
                 softwareManagement, uploadLogic);
         this.i18n = i18n;
         this.uiNotification = uiNotification;
-        this.eventBus = eventBus;
-        this.artifactUploadState = artifactUploadState;
         this.multipartConfigElement = multipartConfigElement;
-        this.artifactManagement = artifactManagement;
         this.softwareModuleManagement = softwareManagement;
         this.uploadMessageBuilder = new UploadMessageBuilder(uploadLogic, i18n);
 
@@ -133,7 +124,7 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
 
         final Upload upload = new Upload();
         final FileTransferHandlerVaadinUpload uploadHandler = new FileTransferHandlerVaadinUpload(uploadLogic,
-                multipartConfigElement.getMaxFileSize(), upload, softwareModuleManagement);
+                multipartConfigElement.getMaxFileSize(), upload, softwareModuleManagement, artifactManagement);
         upload.setButtonCaption(i18n.getMessage("upload.file"));
         upload.setImmediate(true);
         upload.setReceiver(uploadHandler);
@@ -159,28 +150,14 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
     }
 
     private void restoreState() {
-
         if (uploadLogic.isUploadComplete()) {
-            artifactUploadState.clearNumberOfFilesActuallyUploading();
-            artifactUploadState.clearNumberOfFileUploadsExpected();
-            artifactUploadState.clearNumberOfFileUploadsFailed();
+            uploadLogic.clearUploadDetails();
+
             hideUploadStatusButton();
         } else if (uploadLogic.isUploadRunning()) {
             showUploadStatusButton();
-            updateUploadStatusButtonCount();
         }
-
     }
-
-    // private void displayDuplicateValidationMessage() {
-    // // check if streaming of all dropped files are completed
-    // if (artifactUploadState.getNumberOfFilesActuallyUploading().intValue() ==
-    // artifactUploadState
-    // .getNumberOfFileUploadsExpected().intValue()) {
-    // displayCompositeMessage();
-    // uploadLogic.clearDuplicateFileNamesList();
-    // }
-    // }
 
     VaadinMessageSource getI18n() {
         return i18n;
@@ -188,16 +165,13 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
 
     private void onStartOfUpload() {
         showUploadStatusButton();
-        updateUploadStatusButtonCount();
     }
 
     /**
      * Called for every finished (succeeded or failed) upload.
      */
     private void onUploadFinished() {
-        updateUploadStatusButtonCount();
         if (uploadLogic.isUploadComplete()) {
-            // displayDuplicateValidationMessage();
             hideUploadStatusButton();
         }
     }
@@ -210,24 +184,6 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
         return uiNotification;
     }
 
-    private void updateUploadStatusButtonCount() {
-        final int uploadsPending = artifactUploadState.getNumberOfFileUploadsExpected().get()
-                - artifactUploadState.getNumberOfFilesActuallyUploading().get();
-        final int uploadsFailed = artifactUploadState.getNumberOfFileUploadsFailed().get();
-        final StringBuilder builder = new StringBuilder("");
-        if (uploadsFailed != 0) {
-            if (uploadsPending != 0) {
-                builder.append("<div class='error-count error-count-color'>" + uploadsFailed + HTML_DIV);
-            } else {
-                builder.append("<div class='unread error-count-color'>" + uploadsFailed + HTML_DIV);
-            }
-        }
-        if (uploadsPending != 0) {
-            builder.append("<div class='unread'>" + uploadsPending + HTML_DIV);
-        }
-        uploadStatusButton.setCaption(builder.toString());
-    }
-
     private void onClickOfUploadStatusButton() {
         uploadInfoWindow.maximizeWindow();
     }
@@ -237,7 +193,6 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
             return;
         }
         uploadStatusButton.setVisible(true);
-        updateUploadStatusButtonCount();
     }
 
     private void hideUploadStatusButton() {

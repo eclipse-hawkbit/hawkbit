@@ -8,10 +8,19 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.upload;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
+import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
+import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
+import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent.UploadStatusEventType;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
@@ -80,33 +89,32 @@ public abstract class AbstractFileTransferHandler {
     }
 
     protected void publishUploadProgressEvent(final FileUploadId fileUploadId, final long bytesReceived,
-            final long fileSize, final String tempFilePath) {
+            final long fileSize, final String mimeType, final String tempFilePath) {
 
         LOG.info("Upload in progress for file {} - {}", fileUploadId, (double) bytesReceived / (double) fileSize);
-        eventBus.publish(this,
-                new UploadStatusEvent(UploadStatusEventType.UPLOAD_IN_PROGRESS, new FileUploadProgress(fileUploadId,
-                        bytesReceived, fileSize, tempFilePath)));
+        eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_IN_PROGRESS,
+                new FileUploadProgress(fileUploadId, bytesReceived, fileSize, mimeType, tempFilePath)));
     }
 
-    protected void publishUploadSucceeded(final FileUploadId fileUploadId, final long fileSize,
+    protected void publishUploadSucceeded(final FileUploadId fileUploadId, final long fileSize, final String mimeType,
             final String tempFilePath) {
         LOG.info("Upload succeeded for file {}", fileUploadId);
         eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_SUCCESSFUL,
-                new FileUploadProgress(fileUploadId, 0, fileSize, tempFilePath)));
+                new FileUploadProgress(fileUploadId, fileSize, fileSize, mimeType, tempFilePath)));
     }
 
     protected void publishUploadFinishedEvent(final FileUploadId fileUploadId, final long fileSize,
-            final String tempFilePath) {
+            final String mimeType, final String tempFilePath) {
         LOG.info("Upload finished for file {}", fileUploadId);
         eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_FINISHED,
-                new FileUploadProgress(fileUploadId, fileSize, fileSize, tempFilePath)));
+                new FileUploadProgress(fileUploadId, fileSize, fileSize, mimeType, tempFilePath)));
     }
 
     protected void publishUploadFailedEvent(final FileUploadId fileUploadId, final String failureReason,
             final Exception uploadException) {
 
-        eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_FAILED,
-                new FileUploadProgress(fileUploadId,
+        eventBus.publish(this,
+                new UploadStatusEvent(UploadStatusEventType.UPLOAD_FAILED, new FileUploadProgress(fileUploadId,
                         StringUtils.isEmpty(failureReason) ? uploadException.getMessage() : failureReason)));
 
         if (isAbortedByUser()) {
@@ -121,6 +129,42 @@ public abstract class AbstractFileTransferHandler {
             throw new IllegalStateException("Event filename " + filenameExtractedFromEvent + " but stored filename "
                     + fileUploadId.getFilename());
         }
+    }
+
+    // Exception squid:S3655 - Optional access is checked in
+    // checkIfArtifactDetailsDispalyed subroutine
+    @SuppressWarnings("squid:S3655")
+    protected void transferArtifactToRepository(final ArtifactManagement artifactManagement,
+            final FileUploadId fileUploadId, final long fileSize, final String mimeType, final String tempFilePath) {
+
+        final SoftwareModule softwareModule = fileUploadId.getSoftwareModule();
+        final File newFile = new File(tempFilePath);
+
+        final String filename = fileUploadId.getFilename();
+        softwareModule.getVersion();
+        LOG.info("Transfering tempfile {} - {} to repository", filename, tempFilePath);
+        try (FileInputStream fis = new FileInputStream(newFile)) {
+
+            artifactManagement.create(fis, softwareModule.getId(), filename, null, null, true,
+                    mimeType);
+
+            publishUploadSucceeded(fileUploadId, fileSize, mimeType, tempFilePath);
+
+            eventBus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.ARTIFACTS_CHANGED, softwareModule));
+
+        } catch (final ArtifactUploadFailedException | InvalidSHA1HashException | InvalidMD5HashException
+                | IOException e) {
+            // TODO rollouts: i18n
+            publishUploadFailedEvent(fileUploadId, e.getMessage(), e);
+            LOG.error("Failed to transfer file to repository", e);
+        } finally {
+            LOG.info("Deleting tempfile {} - {}", filename, newFile.getAbsolutePath());
+            if (newFile.exists() && !newFile.delete()) {
+                LOG.error("Could not delete temporary file: {}", newFile.getAbsolutePath());
+            }
+        }
+
+        publishUploadFinishedEvent(fileUploadId, fileSize, mimeType, tempFilePath);
     }
 
 }

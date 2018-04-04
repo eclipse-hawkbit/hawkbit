@@ -22,8 +22,6 @@ public class FileUploadId implements Serializable {
 
     private final String id;
 
-    private String mimeType;
-
     public FileUploadId(final String filename, final SoftwareModule softwareModule) {
         this.filename = filename;
         this.softwareModule = softwareModule;
@@ -65,13 +63,5 @@ public class FileUploadId implements Serializable {
 
     public SoftwareModule getSoftwareModule() {
         return softwareModule;
-    }
-
-    public void setMimeType(final String mimeType) {
-        this.mimeType = mimeType;
-    }
-
-    public String getMimeType() {
-        return mimeType;
     }
 }

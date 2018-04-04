@@ -14,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent;
@@ -65,22 +66,21 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
 
     private final transient SoftwareModuleManagement softwareModuleManagement;
 
+    private final ArtifactManagement artifactManagement;
+
     // TODO rollouts: remove all state handling and UI code, communicate only
     // per events
 
     FileTransferHandlerStreamVariable(final String fileName, final long fileSize, final UploadLogic uploadLogic,
             final long maxSize, final Upload upload, final String mimeType, final SoftwareModule selectedSw,
-            final SoftwareModuleManagement softwareManagement) {
+            final SoftwareModuleManagement softwareManagement, final ArtifactManagement artifactManagement) {
         this.fileName = fileName;
         this.fileSize = fileSize;
         this.uploadLogic = uploadLogic;
         this.maxSize = maxSize;
         this.upload = upload;
-        // is null in case of vaadin.Upload but filled in case of
-        // StreamingVariable
         this.mimeType = mimeType;
-        // is null in case of vaadin.Upload but filled in case of
-        // StreamingVariable
+        this.artifactManagement = artifactManagement;
         this.fileUploadId = new FileUploadId(fileName, selectedSw);
         this.selectedSw = selectedSw;
         this.i18n = SpringContextHelper.getBean(VaadinMessageSource.class);
@@ -117,10 +117,9 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
             @SuppressWarnings("squid:S2095")
             final OutputStream out = new FileOutputStream(tempFile);
 
-            fileUploadId.setMimeType(mimeType);
             tempFilePath = tempFile.getAbsolutePath();
             eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_IN_PROGRESS,
-                    new FileUploadProgress(fileUploadId, 0, fileSize, tempFilePath)));
+                    new FileUploadProgress(fileUploadId, 0, fileSize, mimeType, tempFilePath)));
 
             return out;
         } catch (final FileNotFoundException e) {
@@ -171,7 +170,9 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
             return;
         }
 
-        publishUploadProgressEvent(fileUploadId, event.getBytesReceived(), event.getContentLength(), tempFilePath);
+        publishUploadProgressEvent(fileUploadId, event.getBytesReceived(), event.getContentLength(),
+                event.getMimeType(),
+                tempFilePath);
     }
 
     private void interruptFileStreaming() {
@@ -189,8 +190,8 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
     public void streamingFinished(final StreamingEndEvent event) {
         assertStateConsistency(fileUploadId, event.getFileName());
 
-        publishUploadFinishedEvent(fileUploadId, event.getContentLength(), tempFilePath);
-
+        transferArtifactToRepository(artifactManagement, fileUploadId, event.getContentLength(), event.getMimeType(),
+                tempFilePath);
     }
 
     /**

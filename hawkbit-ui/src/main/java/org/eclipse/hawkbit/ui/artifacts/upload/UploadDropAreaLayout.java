@@ -2,6 +2,7 @@ package org.eclipse.hawkbit.ui.artifacts.upload;
 
 import javax.servlet.MultipartConfigElement;
 
+import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
@@ -45,15 +46,19 @@ public class UploadDropAreaLayout {
 
     private final UploadMessageBuilder uploadMessageBuilder;
 
+    private final ArtifactManagement artifactManagement;
+
     public UploadDropAreaLayout(final VaadinMessageSource i18n, final UINotification uiNotification,
             final ArtifactUploadState artifactUploadState, final MultipartConfigElement multipartConfigElement,
-            final SoftwareModuleManagement softwareManagement, final UploadLogic uploadLogic) {
+            final SoftwareModuleManagement softwareManagement, final UploadLogic uploadLogic,
+            final ArtifactManagement artifactManagement) {
         this.i18n = i18n;
         this.uiNotification = uiNotification;
         this.artifactUploadState = artifactUploadState;
         this.multipartConfigElement = multipartConfigElement;
         this.softwareManagement = softwareManagement;
         this.uploadLogic = uploadLogic;
+        this.artifactManagement = artifactManagement;
         this.uploadMessageBuilder = new UploadMessageBuilder(uploadLogic, i18n);
 
         buildLayout();
@@ -116,11 +121,10 @@ public class UploadDropAreaLayout {
                         isDirectory = uploadLogic.isDirectory(file);
                         isDuplicate = uploadLogic.isFileInUploadState(file.getFileName(), softwareModule);
 
-                        if (!isDirectory || !isDuplicate) {
-                            artifactUploadState.incrementNumberOfFileUploadsExpected();
+                        if (!isDirectory && !isDuplicate) {
                             file.setStreamVariable(new FileTransferHandlerStreamVariable(file.getFileName(), file.getFileSize(), uploadLogic,
                                             multipartConfigElement.getMaxFileSize(), null, file.getType(),
-                                            softwareModule, softwareManagement));
+                                    softwareModule, softwareManagement, artifactManagement));
                         }
                     }
                     if (isDirectory && isDuplicate) {
