@@ -295,6 +295,11 @@ public final class UIComponentIdProvider {
     public static final String ACTION_BUTTON_LAYOUT = "ActionButtonLayout";
 
     /**
+     * Id for maintenance window layout
+     */
+    public static final String MAINTENANCE_WINDOW_LAYOUT_ID = "maintenance.window.layout";
+
+    /**
      * Id for maintenance window - enabled checkbox
      */
     public static final String MAINTENANCE_WINDOW_ENABLED_ID = "maintenance.window.enabled";

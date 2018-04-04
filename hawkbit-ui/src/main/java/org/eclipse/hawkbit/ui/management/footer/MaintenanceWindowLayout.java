@@ -76,6 +76,7 @@ public class MaintenanceWindowLayout extends VerticalLayout {
         addComponent(scheduleTranslator);
 
         setStyleName("dist-window-maintenance-window-layout");
+        setId(UIComponentIdProvider.MAINTENANCE_WINDOW_LAYOUT_ID);
     }
 
     /**
