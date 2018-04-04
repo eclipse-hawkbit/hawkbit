@@ -41,6 +41,7 @@ import com.vaadin.data.validator.NullValidator;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.event.FieldEvents.TextChangeNotifier;
+import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.AbstractField;
@@ -466,6 +467,7 @@ public class CommonDialogWindow extends Window {
         saveButton.addStyleName("default-color");
         addCloseListenerForSaveButton();
         saveButton.setEnabled(false);
+        saveButton.setClickShortcut(KeyCode.ENTER);
         buttonsLayout.addComponent(saveButton);
         buttonsLayout.setComponentAlignment(saveButton, Alignment.MIDDLE_RIGHT);
         buttonsLayout.setExpandRatio(saveButton, 1.0F);

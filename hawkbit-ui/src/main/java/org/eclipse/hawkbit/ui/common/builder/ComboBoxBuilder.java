@@ -26,6 +26,8 @@ public class ComboBoxBuilder {
 
     private String prompt;
 
+    private String caption;
+
     public ComboBoxBuilder setValueChangeListener(final Property.ValueChangeListener valueChangeListener) {
         this.valueChangeListener = valueChangeListener;
         return this;
@@ -36,8 +38,13 @@ public class ComboBoxBuilder {
         return this;
     }
 
-    public ComboBoxBuilder setPrompt(String prompt) {
+    public ComboBoxBuilder setPrompt(final String prompt) {
         this.prompt = prompt;
+        return this;
+    }
+
+    public ComboBoxBuilder setCaption(final String caption) {
+        this.caption = caption;
         return this;
     }
 
@@ -45,18 +52,21 @@ public class ComboBoxBuilder {
      * @return a new ComboBox
      */
     public ComboBox buildCombBox() {
-        final ComboBox targetFilter = SPUIComponentProvider.getComboBox(null, "", null, ValoTheme.COMBOBOX_SMALL, false,
-                "", prompt);
-        targetFilter.setImmediate(true);
-        targetFilter.setPageLength(7);
-        targetFilter.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
-        targetFilter.setSizeUndefined();
+        final ComboBox comboBox = SPUIComponentProvider.getComboBox(null, "", null, ValoTheme.COMBOBOX_SMALL, false, "",
+                prompt);
+        comboBox.setImmediate(true);
+        comboBox.setPageLength(7);
+        comboBox.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
+        comboBox.setSizeUndefined();
+        if (caption != null) {
+            comboBox.setCaption(caption);
+        }
         if (id != null) {
-            targetFilter.setId(id);
+            comboBox.setId(id);
         }
         if (valueChangeListener != null) {
-            targetFilter.addValueChangeListener(valueChangeListener);
+            comboBox.addValueChangeListener(valueChangeListener);
         }
-        return targetFilter;
+        return comboBox;
     }
 }

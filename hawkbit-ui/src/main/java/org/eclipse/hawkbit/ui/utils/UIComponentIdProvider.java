@@ -295,6 +295,36 @@ public final class UIComponentIdProvider {
     public static final String ACTION_BUTTON_LAYOUT = "ActionButtonLayout";
 
     /**
+     * Id for maintenance window layout
+     */
+    public static final String MAINTENANCE_WINDOW_LAYOUT_ID = "maintenance.window.layout";
+
+    /**
+     * Id for maintenance window - enabled checkbox
+     */
+    public static final String MAINTENANCE_WINDOW_ENABLED_ID = "maintenance.window.enabled";
+
+    /**
+     * Id for maintenance window - field schedule
+     */
+    public static final String MAINTENANCE_WINDOW_SCHEDULE_ID = "maintenance.window.schedule";
+
+    /**
+     * Id for maintenance window - field duration
+     */
+    public static final String MAINTENANCE_WINDOW_DURATION_ID = "maintenance.window.duration";
+
+    /**
+     * Id for maintenance window - field time zone
+     */
+    public static final String MAINTENANCE_WINDOW_TIME_ZONE_ID = "maintenance.window.time.zone";
+
+    /**
+     * Id for maintenance window - label schedule translator
+     */
+    public static final String MAINTENANCE_WINDOW_SCHEDULE_TRANSLATOR_ID = "maintenance.window.schedule.translator";
+
+    /**
      * Delete button wrapper id.
      */
     public static final String DELETE_BUTTON_WRAPPER_ID = "delete.button";
