@@ -164,7 +164,7 @@ public class HawkbitSecurityProperties {
         /**
          * Maximum software module artifact size in bytes
          */
-        private long maxArtifactSize = 100000;
+        private long maxArtifactSize = 1_000_000_000;
 
         private final Filter filter = new Filter();
         private final Filter uiFilter = new Filter();
