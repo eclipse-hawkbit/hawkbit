@@ -29,6 +29,9 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class ArtifactFilesystemRepositoryTest {
     private static final String TENANT = "test_tenant";
 
+    /**
+     * Maximum artifact size in bytes
+     */
     private static final int MAX_ARTIFACT_SIZE = 1_000_000;
 
     private final ArtifactFilesystemProperties artifactResourceProperties = new ArtifactFilesystemProperties();
@@ -52,7 +55,8 @@ public class ArtifactFilesystemRepositoryTest {
     @Description("Verfies that an artifact that exceeds the maximum artifact size cannot be stored.")
     public void storeFailsBecauseArtifactIsTooLarge() throws IOException {
         final byte[] fileContent = randomBytes(MAX_ARTIFACT_SIZE + 1);
-        assertThatExceptionOfType(ArtifactStoreException.class).isThrownBy(() -> storeRandomArtifact(fileContent));
+        assertThatExceptionOfType(ArtifactExceedsMaxSizeException.class)
+                .isThrownBy(() -> storeRandomArtifact(fileContent));
     }
 
     @Test
