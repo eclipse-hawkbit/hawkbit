@@ -109,7 +109,6 @@ public class JpaArtifactManagement implements ArtifactManagement {
         } catch (final ArtifactStoreException e) {
             throw new ArtifactUploadFailedException(e);
         } catch (final ArtifactExceedsMaxSizeException e) {
-            // throw new ArtifactUploadFailedException(e.getMessage(), e);
             throw new QuotaExceededException(e.getMessage(), e);
         } catch (final HashNotMatchException e) {
             if (e.getHashFunction().equals(HashNotMatchException.SHA1)) {
