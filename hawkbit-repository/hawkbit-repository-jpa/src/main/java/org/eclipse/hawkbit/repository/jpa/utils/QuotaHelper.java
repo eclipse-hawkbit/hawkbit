@@ -115,8 +115,9 @@ public final class QuotaHelper {
         }
 
         if (requested > limit) {
+            final String parentIdStr = parentId != null ? String.valueOf(parentId) : "<new>";
             LOG.warn("Cannot assign {} {} entities to {} '{}' because of the configured quota limit {}.", requested,
-                    type, parentType, parentId, limit);
+                    type, parentType, parentIdStr, limit);
             throw new QuotaExceededException(type, parentType, parentId, requested, limit);
         }
 

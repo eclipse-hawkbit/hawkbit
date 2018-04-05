@@ -143,7 +143,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
                         testdataFactory.createDistributionSet("ds").getId(), "id==target*",
                         new RolloutGroupConditionBuilder().withDefaults().build()))
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden());
     }
 
     @Test

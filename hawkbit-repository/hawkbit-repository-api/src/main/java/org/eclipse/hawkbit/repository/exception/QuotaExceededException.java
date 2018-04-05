@@ -31,15 +31,18 @@ public final class QuotaExceededException extends AbstractServerRtException {
     }
 
     /**
-     * @param cause
-     *            for the exception
+     * Creates a new QuotaExceededException with a custom error message.
+     * 
+     * @param message
+     *            The custom error message.
      */
-    public QuotaExceededException(final Throwable cause) {
-        super(SpServerError.SP_QUOTA_EXCEEDED, cause);
+    public QuotaExceededException(final String message) {
+        super(message, SpServerError.SP_QUOTA_EXCEEDED);
     }
 
     /**
-     * Creates a QuotaExceededException with a custom error message.
+     * Creates a QuotaExceededException with a custom error message and a root
+     * cause.
      * 
      * @param message
      *            The custom error message.
@@ -119,8 +122,8 @@ public final class QuotaExceededException extends AbstractServerRtException {
      */
     public QuotaExceededException(final String type, final String parentType, final Long parentId, final long requested,
             final long quota) {
-        super(String.format(ASSIGNMENT_QUOTA_EXCEEDED_MESSAGE, requested, type, parentType, parentId, quota),
-                SpServerError.SP_QUOTA_EXCEEDED);
+        super(String.format(ASSIGNMENT_QUOTA_EXCEEDED_MESSAGE, requested, type, parentType,
+                parentId != null ? String.valueOf(parentId) : "<new>", quota), SpServerError.SP_QUOTA_EXCEEDED);
     }
 
 }
