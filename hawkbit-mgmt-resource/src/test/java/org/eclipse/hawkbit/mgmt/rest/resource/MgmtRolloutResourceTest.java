@@ -132,11 +132,26 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
     }
 
     @Test
-    @Description("Testing that rollout cannot be created if the 'max targets per rollout group' quota would be violated for one of the groups.")
+    @Description("Verifies that rollout cannot be created if too many rollout groups are specified.")
+    public void createRolloutWithTooManyRolloutGroups() throws Exception {
+
+        final int maxGroups = quotaManagement.getMaxRolloutGroupsPerRollout();
+        testdataFactory.createTargets(20, "target", "rollout");
+
+        mvc.perform(post("/rest/v1/rollouts")
+                .content(JsonBuilder.rollout("rollout1", "rollout1Desc", maxGroups + 1,
+                        testdataFactory.createDistributionSet("ds").getId(), "id==target*",
+                        new RolloutGroupConditionBuilder().withDefaults().build()))
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Description("Verifies that rollout cannot be created if the 'max targets per rollout group' quota would be violated for one of the groups.")
     public void createRolloutFailsIfRolloutGroupQuotaIsViolated() throws Exception {
 
-        final int quota = quotaManagement.getMaxTargetsPerRolloutGroup();
-        testdataFactory.createTargets(quota + 1, "target", "rollout");
+        final int maxTargets = quotaManagement.getMaxTargetsPerRolloutGroup();
+        testdataFactory.createTargets(maxTargets + 1, "target", "rollout");
 
         mvc.perform(post("/rest/v1/rollouts")
                 .content(JsonBuilder.rollout("rollout1", "rollout1Desc", 1,
@@ -148,7 +163,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing that rollout can be created with groups")
-    public void createRolloutWithGroupsDefinitions() throws Exception {
+    public void createRolloutWithGroupDefinitions() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("ro");
 
         final int amountTargets = 10;
@@ -175,7 +190,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing that no rollout with groups that have illegal percentages can be created")
-    public void createRolloutWithToLowlPercentage() throws Exception {
+    public void createRolloutWithTooLowPercentage() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("ro2");
 
         final int amountTargets = 10;
@@ -200,7 +215,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing that no rollout with groups that have illegal percentages can be created")
-    public void createRolloutWithToHighPercentage() throws Exception {
+    public void createRolloutWithTooHighPercentage() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("ro2");
 
         final int amountTargets = 10;
