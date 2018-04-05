@@ -13,7 +13,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Optional;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -110,16 +109,13 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
         this.fileName = fileName;
         this.mimeType = mimeType;
 
-        final Optional<Long> selectedBaseSwModuleId = artifactUploadState.getSelectedBaseSwModuleId();
-        if (selectedBaseSwModuleId.isPresent()) {
-            this.selectedSw = softwareModuleManagement.get(selectedBaseSwModuleId.get()).orElse(null);
-        }
+        assertThatOneSoftwareModulIsSelected();
 
-        if (selectedSw == null) {
-            uiNotification.displayValidationError(i18n.getMessage("message.error.noSwModuleSelected"));
-            return;
-        }
-
+        // selected software module at the time of this callback is considered
+        artifactUploadState.getSelectedBaseSwModuleId().ifPresent(selectedSwId -> {
+            this.selectedSw = softwareModuleManagement.get(selectedSwId).orElse(null);
+        });
+        
         this.fileName = event.getFilename();
         this.fileUploadId = new FileUploadId(fileName, selectedSw);
 
@@ -134,6 +130,16 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
         } else {
             publishUploadStarted(fileUploadId);
             checkForDuplicateFileInSoftwareModul(fileUploadId, selectedSw);
+        }
+    }
+
+    private void assertThatOneSoftwareModulIsSelected() {
+        // FileUpload button should be disabled if no SoftwareModul or more
+        // than one is selected!
+        if (uploadLogic.isNoSoftwareModuleSelected()) {
+            throw new IllegalStateException("No SoftwareModul selected");
+        } else if (uploadLogic.isMoreThanOneSoftwareModulesSelected()) {
+            throw new IllegalStateException("More than one SoftwareModul selected but only one is allowed");
         }
     }
 

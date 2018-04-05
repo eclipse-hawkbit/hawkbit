@@ -12,14 +12,15 @@ import javax.servlet.MultipartConfigElement;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent.UploadStatusEventType;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,8 +48,6 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
 
     private final VaadinMessageSource i18n;
 
-    private final UINotification uiNotification;
-
     private final transient MultipartConfigElement multipartConfigElement;
 
     private final UI ui;
@@ -64,11 +63,12 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
     private final UploadMessageBuilder uploadMessageBuilder;
 
     private final ArtifactManagement artifactManagement;
+    private Upload upload;
 
-    public UploadAndStatusButtonLayout(final VaadinMessageSource i18n, final UINotification uiNotification,
-            final UIEventBus eventBus, final ArtifactUploadState artifactUploadState,
-            final MultipartConfigElement multipartConfigElement, final ArtifactManagement artifactManagement,
-            final SoftwareModuleManagement softwareManagement, final UploadLogic uploadLogic) {
+    public UploadAndStatusButtonLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
+            final ArtifactUploadState artifactUploadState, final MultipartConfigElement multipartConfigElement,
+            final ArtifactManagement artifactManagement, final SoftwareModuleManagement softwareManagement,
+            final UploadLogic uploadLogic) {
         this.artifactManagement = artifactManagement;
         this.uploadLogic = uploadLogic;
         this.uploadInfoWindow = new UploadStatusInfoWindow(eventBus, artifactUploadState, i18n, artifactManagement,
@@ -79,7 +79,6 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
             }
         });
         this.i18n = i18n;
-        this.uiNotification = uiNotification;
         this.multipartConfigElement = multipartConfigElement;
         this.softwareModuleManagement = softwareManagement;
         this.uploadMessageBuilder = new UploadMessageBuilder(uploadLogic, i18n);
@@ -113,6 +112,20 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
         }
     }
 
+    @EventBusListenerMethod(scope = EventScope.UI)
+    void onEvent(final SoftwareModuleEvent event) {
+        final BaseEntityEventType eventType = event.getEventType();
+        if (eventType == BaseEntityEventType.SELECTED_ENTITY) {
+            ui.access(() -> {
+                if (uploadLogic.isNoSoftwareModuleSelected() || uploadLogic.isMoreThanOneSoftwareModulesSelected()) {
+                    upload.setEnabled(false);
+                } else {
+                    upload.setEnabled(true);
+                }
+            });
+        }
+    }
+
     private void createComponents() {
         uploadStatusButton = SPUIComponentProvider.getButton(UIComponentIdProvider.UPLOAD_STATUS_BUTTON, "", "", "",
                 false, null, SPUIButtonStyleSmall.class);
@@ -127,7 +140,7 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
 
     private void buildLayout() {
 
-        final Upload upload = new Upload();
+        upload = new Upload();
         final FileTransferHandlerVaadinUpload uploadHandler = new FileTransferHandlerVaadinUpload(uploadLogic,
                 multipartConfigElement.getMaxFileSize(), upload, softwareModuleManagement, artifactManagement,
                 uploadMessageBuilder);
@@ -165,10 +178,6 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
         }
     }
 
-    VaadinMessageSource getI18n() {
-        return i18n;
-    }
-
     private void onStartOfUpload() {
         showUploadStatusButton();
     }
@@ -184,10 +193,6 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
 
     public HorizontalLayout getFileUploadButtonLayout() {
         return fileUploadButtonLayout;
-    }
-
-    public UINotification getUINotification() {
-        return uiNotification;
     }
 
     private void onClickOfUploadStatusButton() {

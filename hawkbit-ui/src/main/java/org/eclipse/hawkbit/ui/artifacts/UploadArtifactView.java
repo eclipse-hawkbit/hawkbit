@@ -115,7 +115,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         this.artifactDetailsLayout = new ArtifactDetailsLayout(i18n, eventBus, artifactUploadState, uiNotification,
                 artifactManagement, softwareModuleManagement);
         this.uploadLogic = new UploadLogic(artifactUploadState);
-        this.uploadLayout = new UploadAndStatusButtonLayout(i18n, uiNotification, eventBus, artifactUploadState,
+        this.uploadLayout = new UploadAndStatusButtonLayout(i18n, eventBus, artifactUploadState,
                 multipartConfigElement, artifactManagement, softwareModuleManagement, uploadLogic);
         this.dropAreaLayout = new UploadDropAreaLayout(i18n, uiNotification, artifactUploadState,
                 multipartConfigElement, softwareModuleManagement, uploadLogic, artifactManagement);

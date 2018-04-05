@@ -109,7 +109,6 @@ public class UploadDropAreaLayout {
                 final Html5File[] files = ((WrapperTransferable) event.getTransferable()).getFiles();
                 // selected software module at the time of file drop is
                 // considered for upload
-
                 artifactUploadState.getSelectedBaseSwModuleId().ifPresent(selectedSwId -> {
                     final SoftwareModule softwareModule = softwareManagement.get(selectedSwId).orElse(null);
 
@@ -147,7 +146,7 @@ public class UploadDropAreaLayout {
                 uiNotification.displayValidationError(i18n.getMessage("message.action.not.allowed"));
                 return false;
             }
-            return checkIfSoftwareModuleIsSelected();
+            return validateSoftwareModuleSelection();
         }
 
         private boolean isFilesDropped(final DragAndDropEvent event) {
@@ -159,9 +158,13 @@ public class UploadDropAreaLayout {
         }
     }
 
-    boolean checkIfSoftwareModuleIsSelected() {
-        if (!artifactUploadState.getSelectedBaseSwModuleId().isPresent()) {
+    boolean validateSoftwareModuleSelection() {
+        if (uploadLogic.isNoSoftwareModuleSelected()) {
             uiNotification.displayValidationError(i18n.getMessage("message.error.noSwModuleSelected"));
+            return false;
+        }
+        if (uploadLogic.isMoreThanOneSoftwareModulesSelected()) {
+            uiNotification.displayValidationError(i18n.getMessage("message.error.multiSwModuleSelected"));
             return false;
         }
         return true;

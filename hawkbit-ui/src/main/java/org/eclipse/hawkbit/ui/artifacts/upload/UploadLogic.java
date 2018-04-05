@@ -175,4 +175,13 @@ public class UploadLogic {
                 HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(), softwareModule.getVersion()))
                 .toString();
     }
+
+    boolean isMoreThanOneSoftwareModulesSelected() {
+        return artifactUploadState.getSelectedSoftwareModules().size() > 1;
+    }
+
+    boolean isNoSoftwareModuleSelected() {
+        return !artifactUploadState.getSelectedBaseSwModuleId().isPresent();
+    }
+
 }
