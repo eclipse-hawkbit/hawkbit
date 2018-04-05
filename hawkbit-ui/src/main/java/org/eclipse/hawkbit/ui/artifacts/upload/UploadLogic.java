@@ -13,12 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import com.vaadin.ui.Html5File;
 
@@ -37,7 +37,7 @@ public class UploadLogic {
     }
 
     boolean isDirectory(final Html5File file) {
-        return StringUtils.isEmpty(file.getType()) && file.getFileSize() % 4096 == 0;
+        return StringUtils.isBlank(file.getType()) && file.getFileSize() % 4096 == 0;
     }
 
     List<String> getDuplicateFileNamesList() {
@@ -45,6 +45,8 @@ public class UploadLogic {
     }
 
     void clearDuplicateFileNamesList() {
+        // TODO rollouts: remove logging
+        LOG.info("duplicateFileNamesList");
         duplicateFileNamesList.clear();
     }
 
@@ -114,10 +116,14 @@ public class UploadLogic {
      * Clears all temp data collected while uploading files.
      */
     void clearUploadDetails() {
+        // TODO rollouts: remove logging
+        LOG.info("Cleaning up temp data...");
         // delete file system zombies
         for (final FileUploadProgress fileUploadProgress : artifactUploadState.getAllFilesFromOverallUploadProcessList()
                 .values()) {
-            FileUtils.deleteQuietly(new File(fileUploadProgress.getFilePath()));
+            if (StringUtils.isNoneBlank(fileUploadProgress.getFilePath())) {
+                FileUtils.deleteQuietly(new File(fileUploadProgress.getFilePath()));
+            }
         }
         artifactUploadState.clearBaseSwModuleList();
         clearDuplicateFileNamesList();
@@ -153,8 +159,10 @@ public class UploadLogic {
         }
     }
 
-    void clearFileStates() {
+    private void clearFileStates() {
         synchronized (fileStateListWriteLock) {
+            // TODO rollouts: remove logging
+            LOG.info("Cleaning up file states");
             artifactUploadState.clearFilesInFailedState();
             artifactUploadState.clearFilesInSucceededState();
             artifactUploadState.clearFilesInUploadProgressState();

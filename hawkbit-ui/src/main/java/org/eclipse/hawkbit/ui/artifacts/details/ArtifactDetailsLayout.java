@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -286,9 +287,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                         uINotification.displaySuccess(i18n.getMessage("message.artifact.deleted", fileName));
                         final Optional<SoftwareModule> softwareModule = findSelectedSoftwareModule();
                         if (softwareModule.isPresent()) {
-                            populateArtifactDetails(softwareModule.get().getId(),
-                                    HawkbitCommonUtil.getFormattedNameVersion(softwareModule.get().getName(),
-                                            softwareModule.get().getVersion()));
+                            populateArtifactDetails(softwareModule.get());
                         } else {
                             populateArtifactDetails(null, null);
                         }
@@ -414,6 +413,11 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         eventBus.publish(this, ArtifactDetailsEvent.MINIMIZED);
     }
 
+    public void populateArtifactDetails(final SoftwareModule softwareModule) {
+        populateArtifactDetails(softwareModule.getId(), HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(),
+                        softwareModule.getVersion()));
+    }
+
     /**
      * Populate artifact details.
      *
@@ -456,18 +460,31 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SoftwareModuleEvent softwareModuleEvent) {
-        if (softwareModuleEvent.getEventType() == BaseEntityEventType.SELECTED_ENTITY
-                || softwareModuleEvent.getSoftwareModuleEventType() == SoftwareModuleEventType.ARTIFACTS_CHANGED) {
+        if (softwareModuleEvent.getEventType() == BaseEntityEventType.SELECTED_ENTITY) {
             UI.getCurrent().access(() -> {
                 if (softwareModuleEvent.getEntity() != null) {
-                    populateArtifactDetails(softwareModuleEvent.getEntity().getId(),
-                            HawkbitCommonUtil.getFormattedNameVersion(softwareModuleEvent.getEntity().getName(),
-                                    softwareModuleEvent.getEntity().getVersion()));
+                    populateArtifactDetails(softwareModuleEvent.getEntity());
                 } else {
                     populateArtifactDetails(null, null);
                 }
             });
         }
+        if (softwareModuleEvent.getSoftwareModuleEventType() == SoftwareModuleEventType.ARTIFACTS_CHANGED
+                && softwareModuleEvent.getEntity() != null) {
+            UI.getCurrent().access(() -> {
+                findSelectedSoftwareModule().ifPresent(selectedSoftwareModule -> {
+                    if (softwareModulsAreEqual(softwareModuleEvent.getEntity(), selectedSoftwareModule)) {
+                        populateArtifactDetails(softwareModuleEvent.getEntity());
+                    }
+                });
+
+            });
+        }
+    }
+
+    private boolean softwareModulsAreEqual(final SoftwareModule left, final SoftwareModule right) {
+        return new EqualsBuilder().append(left.getName(), right.getName()).append(left.getId(), right.getId())
+                .isEquals();
     }
 
     public Table getArtifactDetailsTable() {

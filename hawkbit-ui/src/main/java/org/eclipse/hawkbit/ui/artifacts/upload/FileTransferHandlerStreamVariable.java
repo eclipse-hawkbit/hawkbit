@@ -14,11 +14,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent.UploadStatusEventType;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -56,8 +56,6 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
     private volatile SoftwareModule selectedSw;
     private volatile FileUploadId fileUploadId;
 
-    private volatile boolean streamingInterrupted;
-
     private String failureReason;
     private final VaadinMessageSource i18n;
     private transient EventBus.UIEventBus eventBus;
@@ -66,21 +64,23 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
 
     private final transient SoftwareModuleManagement softwareModuleManagement;
 
-    private final ArtifactManagement artifactManagement;
+    private final UploadMessageBuilder uploadMessageBuilder;
 
     // TODO rollouts: remove all state handling and UI code, communicate only
     // per events
 
     FileTransferHandlerStreamVariable(final String fileName, final long fileSize, final UploadLogic uploadLogic,
             final long maxSize, final Upload upload, final String mimeType, final SoftwareModule selectedSw,
-            final SoftwareModuleManagement softwareManagement, final ArtifactManagement artifactManagement) {
+            final SoftwareModuleManagement softwareManagement, final ArtifactManagement artifactManagement,
+            final UploadMessageBuilder uploadMessageBuilder) {
+        super(artifactManagement, uploadMessageBuilder);
         this.fileName = fileName;
         this.fileSize = fileSize;
         this.uploadLogic = uploadLogic;
         this.maxSize = maxSize;
         this.upload = upload;
         this.mimeType = mimeType;
-        this.artifactManagement = artifactManagement;
+        this.uploadMessageBuilder = uploadMessageBuilder;
         this.fileUploadId = new FileUploadId(fileName, selectedSw);
         this.selectedSw = selectedSw;
         this.i18n = SpringContextHelper.getBean(VaadinMessageSource.class);
@@ -89,16 +89,17 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
         this.uiNotification = SpringContextHelper.getBean(UINotification.class);
         this.softwareModuleManagement = softwareManagement;
         eventBus.subscribe(this);
+
+        LOG.info("File {} uploading for SW module {}", fileName, selectedSw);
     }
 
     @Override
     public void streamingStarted(final StreamingStartEvent event) {
-        LOG.debug("Streaming started for file :{}", fileName);
-
         assertStateConsistency(fileUploadId, event.getFileName());
 
-        final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId, 0, -1);
-        eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_STARTED, fileUploadProgress));
+        publishUploadStarted(fileUploadId);
+
+        checkForDuplicateFileInSoftwareModul(fileUploadId, selectedSw);
     }
 
     /**
@@ -108,6 +109,10 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
      */
     @Override
     public final OutputStream getOutputStream() {
+        if (isUploadInterrupted()) {
+            return new NullOutputStream();
+        }
+
         File tempFile = null;
 
         try {
@@ -118,8 +123,7 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
             final OutputStream out = new FileOutputStream(tempFile);
 
             tempFilePath = tempFile.getAbsolutePath();
-            eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_IN_PROGRESS,
-                    new FileUploadProgress(fileUploadId, 0, fileSize, mimeType, tempFilePath)));
+            publishUploadProgressEvent(fileUploadId, 0, fileSize, mimeType, tempFilePath);
 
             return out;
         } catch (final FileNotFoundException e) {
@@ -130,8 +134,7 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
             failureReason = i18n.getMessage("message.upload.failed");
         }
 
-        streamingInterrupted = true;
-
+        setUploadInterrupted();
         return new NullOutputStream();
     }
 
@@ -154,29 +157,24 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
     public void onProgress(final StreamingProgressEvent event) {
         assertStateConsistency(fileUploadId, event.getFileName());
 
-        if (streamingInterrupted) {
-            return;
-        }
         if (isAbortedByUser()) {
             LOG.info("User aborted  the upload for file : {}", event.getFileName());
-            failureReason = i18n.getMessage("message.uploadedfile.aborted");
-            interruptFileStreaming();
+            failureReason = uploadMessageBuilder.buildMessageForUploadAbortedByUser();
+            setUploadInterrupted();
             return;
         }
         if (event.getBytesReceived() > maxSize || event.getContentLength() > maxSize) {
             LOG.error("User tried to upload more than was allowed ({}).", maxSize);
-            failureReason = i18n.getMessage("message.uploadedfile.size.exceeded", maxSize);
-            interruptFileStreaming();
+            failureReason = uploadMessageBuilder.buildMessageForFileSizeExceeded(maxSize);
+            setUploadInterrupted();
+            return;
+        }
+        if (isUploadInterrupted()) {
             return;
         }
 
         publishUploadProgressEvent(fileUploadId, event.getBytesReceived(), event.getContentLength(),
-                event.getMimeType(),
-                tempFilePath);
-    }
-
-    private void interruptFileStreaming() {
-        streamingInterrupted = true;
+                event.getMimeType(), tempFilePath);
     }
 
     /**
@@ -190,7 +188,7 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
     public void streamingFinished(final StreamingEndEvent event) {
         assertStateConsistency(fileUploadId, event.getFileName());
 
-        transferArtifactToRepository(artifactManagement, fileUploadId, event.getContentLength(), event.getMimeType(),
+        transferArtifactToRepository(fileUploadId, event.getContentLength(), event.getMimeType(),
                 tempFilePath);
     }
 
@@ -204,7 +202,13 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
     public void streamingFailed(final StreamingErrorEvent event) {
         assertStateConsistency(fileUploadId, event.getFileName());
 
-        publishUploadFailedEvent(fileUploadId, failureReason, event.getException());
+        if (isUnknownError()) {
+            publishUploadFailedEvent(fileUploadId, failureReason, event.getException());
+        }
+    }
+
+    private boolean isUnknownError() {
+        return !isAbortedByUser() && !isDuplicateFile();
     }
 
     /**
@@ -212,36 +216,27 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
      */
     @Override
     public boolean isInterrupted() {
-        return streamingInterrupted;
+        return isUploadInterrupted();
     }
+
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((fileName == null) ? 0 : fileName.hashCode());
-        return result;
+        return new HashCodeBuilder().append(fileUploadId).toHashCode();
     }
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj.getClass() != getClass()) {
             return false;
         }
         final FileTransferHandlerStreamVariable other = (FileTransferHandlerStreamVariable) obj;
-        if (fileName == null) {
-            if (other.fileName != null) {
-                return false;
-            }
-        } else if (!fileName.equals(other.fileName)) {
-            return false;
-        }
-        return true;
+        return new EqualsBuilder().append(fileUploadId, other.fileUploadId).isEquals();
     }
 }

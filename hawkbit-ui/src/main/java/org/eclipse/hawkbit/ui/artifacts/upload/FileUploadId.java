@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.ui.artifacts.upload;
 
 import java.io.Serializable;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
 public class FileUploadId implements Serializable {
@@ -44,12 +46,13 @@ public class FileUploadId implements Serializable {
             return false;
         }
         final FileUploadId other = (FileUploadId) obj;
-        return id.equals(other.id);
+        return new EqualsBuilder().append(id, other.id).isEquals();
     }
+
 
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return new HashCodeBuilder().append(id).toHashCode();
     }
 
     @Override

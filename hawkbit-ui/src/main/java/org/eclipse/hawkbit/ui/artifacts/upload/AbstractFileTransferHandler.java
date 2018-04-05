@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
+import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
@@ -49,9 +50,26 @@ public abstract class AbstractFileTransferHandler {
 
     private volatile boolean aborted;
 
+    private volatile boolean duplicateFile;
+
+    private volatile boolean uploadInterrupted;
+
     private final UIEventBus eventBus;
 
-    public AbstractFileTransferHandler() {
+    private final ArtifactManagement artifactManagement;
+
+    private final UploadMessageBuilder uploadMessageBuilder;
+
+    AbstractFileTransferHandler() {
+        artifactManagement = null;
+        uploadMessageBuilder = null;
+        eventBus = null;
+    }
+
+    public AbstractFileTransferHandler(final ArtifactManagement artifactManagement,
+            final UploadMessageBuilder uploadMessageBuilder) {
+        this.artifactManagement = artifactManagement;
+        this.uploadMessageBuilder = uploadMessageBuilder;
         this.eventBus = SpringContextHelper.getBean(EventBus.UIEventBus.class);
     }
 
@@ -66,17 +84,57 @@ public abstract class AbstractFileTransferHandler {
         return aborted;
     }
 
-    protected void resetAbortedByUserFlag() {
+    protected void resetAbortedByUser() {
         aborted = false;
     }
 
+    protected boolean isDuplicateFile() {
+        return duplicateFile;
+    }
+
+    protected void resetDuplicateFile() {
+        duplicateFile = false;
+    }
+
+    protected void setDuplicateFile() {
+        duplicateFile = true;
+    }
+
+    protected void setUploadInterrupted() {
+        uploadInterrupted = true;
+    }
+
+    protected boolean isUploadInterrupted() {
+        return uploadInterrupted;
+    }
+
+    protected void resetUploadInterrupted() {
+        uploadInterrupted = false;
+    }
+
+    protected void checkForDuplicateFileInSoftwareModul(final FileUploadId fileUploadId,
+            final SoftwareModule softwareModule) {
+        if (isFileAlreadyContainedInSoftwareModul(fileUploadId, softwareModule)) {
+            setDuplicateFile();
+            setUploadInterrupted();
+            publishUploadFailedEvent(fileUploadId, uploadMessageBuilder.buildMessageForDuplicateFileError(), null);
+        }
+
+    }
+
+    protected boolean isFileAlreadyContainedInSoftwareModul(final FileUploadId newFileUploadId,
+            final SoftwareModule softwareModule) {
+        for (final Artifact artifact : softwareModule.getArtifacts()) {
+            final FileUploadId existingId = new FileUploadId(artifact.getFilename(), softwareModule);
+            if (existingId.equals(newFileUploadId)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     static class NullOutputStream extends OutputStream {
-        /**
-         * null output stream.
-         * 
-         * @param i
-         *            byte
-         */
         @Override
         public void write(final int i) throws IOException {
             // do nothing
@@ -88,10 +146,19 @@ public abstract class AbstractFileTransferHandler {
         }
     }
 
+    protected void publishUploadStarted(final FileUploadId fileUploadId) {
+        LOG.debug("Upload started for file {}", fileUploadId);
+        final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId);
+        eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_STARTED, fileUploadProgress));
+    }
+
     protected void publishUploadProgressEvent(final FileUploadId fileUploadId, final long bytesReceived,
             final long fileSize, final String mimeType, final String tempFilePath) {
-
-        LOG.info("Upload in progress for file {} - {}", fileUploadId, (double) bytesReceived / (double) fileSize);
+        // TODO rollouts: set level to trace
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Upload in progress for file {} - {}%", fileUploadId,
+                    String.format("%.0f", (double) bytesReceived / (double) fileSize * 100));
+        }
         eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_IN_PROGRESS,
                 new FileUploadProgress(fileUploadId, bytesReceived, fileSize, mimeType, tempFilePath)));
     }
@@ -115,12 +182,13 @@ public abstract class AbstractFileTransferHandler {
 
         eventBus.publish(this,
                 new UploadStatusEvent(UploadStatusEventType.UPLOAD_FAILED, new FileUploadProgress(fileUploadId,
-                        StringUtils.isEmpty(failureReason) ? uploadException.getMessage() : failureReason)));
+                        StringUtils.isBlank(failureReason) ? uploadException.getMessage() : failureReason)));
 
         if (isAbortedByUser()) {
             LOG.info("Upload aborted by user for file :{}", fileUploadId);
         } else {
-            LOG.info("Upload failed for file {} due to {}", fileUploadId, uploadException);
+            LOG.info("Upload failed for file {} due to {}", fileUploadId,
+                    StringUtils.isBlank(failureReason) ? uploadException.getMessage() : failureReason);
         }
     }
 
@@ -134,8 +202,8 @@ public abstract class AbstractFileTransferHandler {
     // Exception squid:S3655 - Optional access is checked in
     // checkIfArtifactDetailsDispalyed subroutine
     @SuppressWarnings("squid:S3655")
-    protected void transferArtifactToRepository(final ArtifactManagement artifactManagement,
-            final FileUploadId fileUploadId, final long fileSize, final String mimeType, final String tempFilePath) {
+    protected void transferArtifactToRepository(final FileUploadId fileUploadId, final long fileSize,
+            final String mimeType, final String tempFilePath) {
 
         final SoftwareModule softwareModule = fileUploadId.getSoftwareModule();
         final File newFile = new File(tempFilePath);
@@ -145,8 +213,7 @@ public abstract class AbstractFileTransferHandler {
         LOG.info("Transfering tempfile {} - {} to repository", filename, tempFilePath);
         try (FileInputStream fis = new FileInputStream(newFile)) {
 
-            artifactManagement.create(fis, softwareModule.getId(), filename, null, null, true,
-                    mimeType);
+            artifactManagement.create(fis, softwareModule.getId(), filename, null, null, true, mimeType);
 
             publishUploadSucceeded(fileUploadId, fileSize, mimeType, tempFilePath);
 

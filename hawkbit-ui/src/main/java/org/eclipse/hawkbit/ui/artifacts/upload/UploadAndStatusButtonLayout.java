@@ -65,14 +65,19 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
 
     private final ArtifactManagement artifactManagement;
 
-    public UploadAndStatusButtonLayout(final VaadinMessageSource i18n, final UINotification uiNotification, final UIEventBus eventBus,
-            final ArtifactUploadState artifactUploadState, final MultipartConfigElement multipartConfigElement,
-            final ArtifactManagement artifactManagement, final SoftwareModuleManagement softwareManagement,
-            final UploadLogic uploadLogic) {
+    public UploadAndStatusButtonLayout(final VaadinMessageSource i18n, final UINotification uiNotification,
+            final UIEventBus eventBus, final ArtifactUploadState artifactUploadState,
+            final MultipartConfigElement multipartConfigElement, final ArtifactManagement artifactManagement,
+            final SoftwareModuleManagement softwareManagement, final UploadLogic uploadLogic) {
         this.artifactManagement = artifactManagement;
         this.uploadLogic = uploadLogic;
         this.uploadInfoWindow = new UploadStatusInfoWindow(eventBus, artifactUploadState, i18n, artifactManagement,
                 softwareManagement, uploadLogic);
+        this.uploadInfoWindow.addCloseListener(event -> {
+            if (uploadLogic.isUploadComplete()) {
+                hideUploadStatusButton();
+            }
+        });
         this.i18n = i18n;
         this.uiNotification = uiNotification;
         this.multipartConfigElement = multipartConfigElement;
@@ -124,7 +129,8 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
 
         final Upload upload = new Upload();
         final FileTransferHandlerVaadinUpload uploadHandler = new FileTransferHandlerVaadinUpload(uploadLogic,
-                multipartConfigElement.getMaxFileSize(), upload, softwareModuleManagement, artifactManagement);
+                multipartConfigElement.getMaxFileSize(), upload, softwareModuleManagement, artifactManagement,
+                uploadMessageBuilder);
         upload.setButtonCaption(i18n.getMessage("upload.file"));
         upload.setImmediate(true);
         upload.setReceiver(uploadHandler);
@@ -134,7 +140,7 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
         upload.addProgressListener(uploadHandler);
         upload.addStartedListener(uploadHandler);
         upload.addStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
-        upload.addStyleName("no-border");        
+        upload.addStyleName("no-border");
 
         fileUploadButtonLayout = new HorizontalLayout();
         fileUploadButtonLayout.setSpacing(true);

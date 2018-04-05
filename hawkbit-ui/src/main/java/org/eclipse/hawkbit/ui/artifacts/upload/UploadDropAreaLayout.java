@@ -124,7 +124,7 @@ public class UploadDropAreaLayout {
                         if (!isDirectory && !isDuplicate) {
                             file.setStreamVariable(new FileTransferHandlerStreamVariable(file.getFileName(), file.getFileSize(), uploadLogic,
                                             multipartConfigElement.getMaxFileSize(), null, file.getType(),
-                                    softwareModule, softwareManagement, artifactManagement));
+                                    softwareModule, softwareManagement, artifactManagement, uploadMessageBuilder));
                         }
                     }
                     if (isDirectory && isDuplicate) {

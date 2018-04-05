@@ -18,11 +18,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadId;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress;
 import org.eclipse.hawkbit.ui.common.ManagementEntityState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
@@ -36,6 +39,8 @@ import com.vaadin.spring.annotation.VaadinSessionScope;
 public class ArtifactUploadState implements ManagementEntityState, Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    private static final Logger LOG = LoggerFactory.getLogger(ArtifactUploadState.class);
 
     private final SoftwareModuleFilters softwareModuleFilters;
 
@@ -98,6 +103,8 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
     }
 
     public void clearBaseSwModuleList() {
+        // TODO rollouts: remove
+        LOG.info("Cleaning up baseSwModuleList");
         baseSwModuleList.clear();
     }
 
@@ -124,12 +131,19 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
 
     @Override
     public void setLastSelectedEntityId(final Long value) {
+        // TODO rollouts: remove logging
+        final Optional<Long> previousSelection = this.selectedBaseSwModuleId;
         this.selectedBaseSwModuleId = Optional.ofNullable(value);
+        LOG.info("Changed selectedBaseSwModuleId from {} to {}", previousSelection, value);
     }
 
     @Override
     public void setSelectedEnitities(final Set<Long> values) {
+        // TODO rollouts: remove logging
+        final Set<Long> previousSelectedSoftwareModules = this.selectedSoftwareModules;
         this.selectedSoftwareModules = values;
+        LOG.info("Changed selectedSoftwareModules from \n\t{} to \n\t{}",
+                StringUtils.join(previousSelectedSoftwareModules, ", "), StringUtils.join(values, ", "));
     }
 
     public boolean isSwTypeFilterClosed() {

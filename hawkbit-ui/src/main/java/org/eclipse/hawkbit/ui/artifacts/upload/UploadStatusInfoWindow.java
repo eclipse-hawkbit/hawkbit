@@ -8,14 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.upload;
 
-import java.util.Set;
-
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent.UploadStatusEventType;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
@@ -88,10 +83,6 @@ public class UploadStatusInfoWindow extends Window {
     private final Grid grid;
 
     private final IndexedContainer uploads;
-
-    private volatile boolean errorOccured;
-
-    private volatile boolean uploadAbortedByUser;
 
     private final VerticalLayout mainLayout;
 
@@ -361,15 +352,13 @@ public class UploadStatusInfoWindow extends Window {
                 if (artifactUploadState.getFilesInFailedState().isEmpty()) {
                     cleanupStates();
                 } else {
-                    openWindow();
+                    maximizeWindow();
                 }
             }
         }
     }
 
     private void cleanupStates() {
-        errorOccured = false;
-        uploadAbortedByUser = false;
         uploads.removeAllItems();
         uploadLogic.clearUploadDetails();
     }
@@ -394,7 +383,7 @@ public class UploadStatusInfoWindow extends Window {
                 UIComponentIdProvider.UPLOAD_STATUS_POPUP_RESIZE_BUTTON_ID, "", "", "", true, FontAwesome.EXPAND,
                 SPUIButtonStyleSmallNoBorder.class);
         resizeBtn.addStyleName(ValoTheme.BUTTON_BORDERLESS);
-        resizeBtn.addClickListener(event -> resizeWindow(event));
+        resizeBtn.addClickListener(this::resizeWindow);
         return resizeBtn;
     }
 
@@ -453,90 +442,10 @@ public class UploadStatusInfoWindow extends Window {
                 i18n.getMessage("message.abort.upload"), i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
                     if (ok) {
                         eventBus.publish(this, UploadStatusEventType.UPLOAD_ABORTED_BY_USER);
-                        uploadAbortedByUser = true;
-                        errorOccured = true;
                         cleanupStates();
                         closeWindow();
                     }
                 });
-    }
-
-    // // Exception squid:S3655 - Optional access is checked in
-    // // checkIfArtifactDetailsDispalyed subroutine
-    // @SuppressWarnings("squid:S3655")
-    // private void processArtifactUpload() {
-    //
-    //
-    // // TODO separate from per file topics and overall finished upload
-    // // process
-    //
-    // final Set<Long> softwareModuleIdsWithNewArtifacts = new HashSet<>();
-    // for (final FileUploadId fileUploadId :
-    // artifactUploadState.getFilesInSucceededState()) {
-    //
-    // final FileUploadProgress fileUploadProgress =
-    // artifactUploadState.getFileUploadProgress(fileUploadId);
-    //
-    // // TODO rollouts: check if file/upload is still valid
-    // // TODO bulk process or single succeeded file???
-    //
-    // final SoftwareModule softwareModule = fileUploadId.getSoftwareModule();
-    // final File newFile = new File(fileUploadProgress.getFilePath());
-    //
-    // final String filename = fileUploadId.getFilename();
-    // softwareModule.getVersion();
-    // LOG.info("Transfering tempfile {} to repository",
-    // fileUploadProgress.getFilePath());
-    // try (FileInputStream fis = new FileInputStream(newFile)) {
-    //
-    // artifactManagement.create(fis, softwareModule.getId(), filename, null,
-    // null, true,
-    // fileUploadProgress.getMimeType());
-    // softwareModuleIdsWithNewArtifacts.add(softwareModule.getId());
-    //
-    // uploadLogic.uploadSucceeded(fileUploadId, fileUploadProgress);
-    // // TODO rollouts: i18n
-    // updateUploadStatusInfoRowObject(fileUploadId, null, null);
-    //
-    // } catch (final ArtifactUploadFailedException | InvalidSHA1HashException |
-    // InvalidMD5HashException
-    // | FileNotFoundException e) {
-    // uploadLogic.uploadFailed(fileUploadId, new
-    // FileUploadProgress(fileUploadId, e.getMessage()));
-    // // TODO rollouts: i18n
-    // updateUploadStatusInfoRowObject(fileUploadId, , null);
-    // LOG.error(ARTIFACT_UPLOAD_EXCEPTION, e);
-    // } catch (final IOException ex) {
-    // artifactUploadState.addFileToFailedState(fileUploadId);
-    // // TODO rollouts: i18n
-    // updateUploadStatusInfoRowObject(fileUploadId, ex.getMessage(), null);
-    // LOG.error(ARTIFACT_UPLOAD_EXCEPTION, ex);
-    // } finally {
-    // LOG.info("Deleting tempfile {}", newFile.getAbsolutePath());
-    // if (newFile.exists() && !newFile.delete()) {
-    // LOG.error("Could not delete temporary file: {}",
-    // newFile.getAbsolutePath());
-    // }
-    // }
-    // }
-    //
-    // final Long selectedSoftwareModulId =
-    // artifactUploadState.getSelectedBaseSwModuleId().get();
-    // if (isArtifactAddedToTheSelectedSoftwareModule(selectedSoftwareModulId,
-    // softwareModuleIdsWithNewArtifacts)) {
-    // refreshArtifactDetailsLayout(selectedSoftwareModulId);
-    // }
-    //
-    // }
-
-    boolean isArtifactAddedToTheSelectedSoftwareModule(final Long selectedSoftwareModulId,
-            final Set<Long> softwareModuleIdsWithNewArtifacts) {
-        return softwareModuleIdsWithNewArtifacts.contains(selectedSoftwareModulId);
-    }
-
-    private void refreshArtifactDetailsLayout(final Long softwareModuleId) {
-        final SoftwareModule softwareModule = softwareModuleManagement.get(softwareModuleId).orElse(null);
-        eventBus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.ARTIFACTS_CHANGED, softwareModule));
     }
 
     @SuppressWarnings("unchecked")
