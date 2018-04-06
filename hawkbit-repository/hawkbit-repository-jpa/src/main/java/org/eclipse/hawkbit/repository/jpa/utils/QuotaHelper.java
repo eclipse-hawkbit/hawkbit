@@ -13,7 +13,6 @@ import java.util.function.Function;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
-import org.eclipse.hawkbit.repository.jpa.JpaDistributionSetManagement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.validation.annotation.Validated;
@@ -24,7 +23,7 @@ public final class QuotaHelper {
     /**
      * Class logger
      */
-    private static final Logger LOG = LoggerFactory.getLogger(JpaDistributionSetManagement.class);
+    private static final Logger LOG = LoggerFactory.getLogger(QuotaHelper.class);
 
     private QuotaHelper() {
         // no need to instantiate this class
@@ -111,6 +110,7 @@ public final class QuotaHelper {
 
         // check if the quota is unlimited
         if (limit <= 0) {
+            LOG.debug("Quota max {} entities per {} is unlimited.", type, parentType);
             return;
         }
 
