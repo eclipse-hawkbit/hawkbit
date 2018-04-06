@@ -61,6 +61,7 @@ import com.vaadin.ui.UI;
 /**
  * Layout for the action button footer on the Deployment View.
  */
+// TODO MR Delete
 public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private static final long serialVersionUID = 1L;

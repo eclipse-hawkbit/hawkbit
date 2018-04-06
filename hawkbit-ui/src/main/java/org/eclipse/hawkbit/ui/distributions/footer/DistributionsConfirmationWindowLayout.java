@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.distributions.footer;
 
+//TODO MR DELETE!
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -473,8 +475,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
         final int deleteDistTypeCount = manageDistUIState.getSelectedDeleteDistSetTypes().size();
         manageDistUIState.getSelectedDeleteDistSetTypes().stream()
-                .map(deleteDistTypeName -> distributionSetTypeManagement
-                        .getByName(deleteDistTypeName).get().getId())
+                .map(deleteDistTypeName -> distributionSetTypeManagement.getByName(deleteDistTypeName).get().getId())
                 .forEach(distributionSetTypeManagement::delete);
 
         addToConsolitatedMsg(FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE

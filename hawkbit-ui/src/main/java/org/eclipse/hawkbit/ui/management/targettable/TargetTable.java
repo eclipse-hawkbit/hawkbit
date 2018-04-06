@@ -109,8 +109,6 @@ public class TargetTable extends AbstractTable<Target> {
 
     private final transient TargetTagManagement tagManagement;
 
-    private final SpPermissionChecker permChecker;
-
     private final ManagementViewClientCriterion managementViewClientCriterion;
 
     private final ManagementUIState managementUIState;
@@ -123,9 +121,8 @@ public class TargetTable extends AbstractTable<Target> {
             final TargetManagement targetManagement, final ManagementUIState managementUIState,
             final SpPermissionChecker permChecker, final ManagementViewClientCriterion managementViewClientCriterion,
             final DistributionSetManagement distributionSetManagement, final TargetTagManagement tagManagement) {
-        super(eventBus, i18n, notification);
+        super(eventBus, i18n, notification, permChecker);
         this.targetManagement = targetManagement;
-        this.permChecker = permChecker;
         this.managementViewClientCriterion = managementViewClientCriterion;
         this.managementUIState = managementUIState;
         this.distributionSetManagement = distributionSetManagement;
@@ -589,14 +586,12 @@ public class TargetTable extends AbstractTable<Target> {
             return;
         }
         final TargetIdName createTargetIdName = new TargetIdName(target.get());
-
         final List<DistributionSet> findDistributionSetAllById = distributionSetManagement.get(ids);
 
         if (findDistributionSetAllById.isEmpty()) {
             notification.displayWarning(i18n.getMessage("distributionsets.not.exists"));
             return;
         }
-
         addNewTargetToAssignmentList(createTargetIdName, findDistributionSetAllById);
     }
 
@@ -622,9 +617,16 @@ public class TargetTable extends AbstractTable<Target> {
         showOrHidePopupAndNotification(message);
     }
 
+    private String getPendingActionMessage(final String message, final String distName, final String controllerId) {
+        if (message == null) {
+            return i18n.getMessage("message.dist.pending.action", controllerId, distName);
+        }
+        return i18n.getMessage("message.target.assigned.pending");
+    }
+
     /**
      * Hide and show Notification Msg.
-     *
+     * 
      * @param message
      *            as msg
      */
@@ -635,13 +637,6 @@ public class TargetTable extends AbstractTable<Target> {
         if (null != message) {
             notification.displayValidationError(message);
         }
-    }
-
-    private String getPendingActionMessage(final String message, final String distName, final String controllerId) {
-        if (message == null) {
-            return i18n.getMessage("message.dist.pending.action", controllerId, distName);
-        }
-        return i18n.getMessage("message.target.assigned.pending");
     }
 
     /**
@@ -710,17 +705,15 @@ public class TargetTable extends AbstractTable<Target> {
             if (distPinned.equals(installedDistributionSetId)) {
                 return SPUIDefinitions.HIGHLIGHT_GREEN;
             }
-
             if (distPinned.equals(assignedDistributionSetId)) {
                 return SPUIDefinitions.HIGHLIGHT_ORANGE;
             }
-
             return null;
         }).orElse(null);
     }
 
     private String createTargetTableStyle(final Object itemId, final Object propertyId) {
-        if (null == propertyId) {
+        if (propertyId == null) {
             final Item item = getItem(itemId);
             final Long assignedDistributionSetId = (Long) item
                     .getItemProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_ID).getValue();
@@ -896,5 +889,45 @@ public class TargetTable extends AbstractTable<Target> {
 
     private boolean isFilteredByTags() {
         return !managementUIState.getTargetTableFilters().getClickedTargetTags().isEmpty();
+    }
+
+    @Override
+    protected void handleOkDelete(final List<Long> entitiesToDelete) {
+        targetManagement.delete(entitiesToDelete);
+        eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.REMOVE_ENTITY, entitiesToDelete));
+        notification.displaySuccess(i18n.getMessage("message.delete.success", entitiesToDelete.size() + " Target(s) "));
+        managementUIState.getDistributionTableFilters().getPinnedTarget().ifPresent(this::unPinDeletedTarget);
+        managementUIState.getSelectedTargetId().clear();
+    }
+
+    private void unPinDeletedTarget(final TargetIdName pinnedTarget) {
+        final Set<Long> deletedTargetIds = managementUIState.getSelectedTargetId();
+        if (deletedTargetIds.contains(pinnedTarget.getTargetId())) {
+            managementUIState.getDistributionTableFilters().setPinnedTarget(null);
+            eventBus.publish(this, PinUnpinEvent.UNPIN_TARGET);
+        }
+    }
+
+    @Override
+    protected String getEntityId(final Object itemId) {
+        final String targetId = String.valueOf(
+                getContainerDataSource().getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_ID).getValue());
+        return "target." + targetId;
+    }
+
+    @Override
+    protected Set<Long> getSelectedEntities() {
+        return managementUIState.getSelectedTargetId();
+    }
+
+    @Override
+    protected String getEntityName() {
+        // TODO MR use constant
+        return "Target";
+    }
+
+    @Override
+    protected boolean hasDeletePermission() {
+        return permChecker.hasDeleteRepositoryPermission() || permChecker.hasDeleteTargetPermission();
     }
 }

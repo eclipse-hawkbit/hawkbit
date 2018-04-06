@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -33,8 +34,8 @@ public abstract class AbstractNamedVersionTable<E extends NamedVersionedEntity> 
     private static final long serialVersionUID = 780050712209750719L;
 
     protected AbstractNamedVersionTable(final UIEventBus eventBus, final VaadinMessageSource i18n,
-            final UINotification notification) {
-        super(eventBus, i18n, notification);
+            final UINotification notification, final SpPermissionChecker permChecker) {
+        super(eventBus, i18n, notification, permChecker);
         setMultiSelect(true);
         setSelectable(true);
     }

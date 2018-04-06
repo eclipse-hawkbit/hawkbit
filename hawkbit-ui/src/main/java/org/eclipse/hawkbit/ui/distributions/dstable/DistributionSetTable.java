@@ -75,6 +75,7 @@ import com.vaadin.ui.UI;
 /**
  * Distribution set table.
  */
+// TODO MR implement inherit methods!!
 public class DistributionSetTable extends AbstractNamedVersionTable<DistributionSet> {
 
     private static final long serialVersionUID = 1L;
@@ -101,7 +102,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             final SoftwareModuleManagement softwareManagement,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final TargetManagement targetManagement, final DsMetadataPopupLayout dsMetadataPopupLayout) {
-        super(eventBus, i18n, notification);
+        super(eventBus, i18n, notification, permissionChecker);
         this.permissionChecker = permissionChecker;
         this.manageDistUIState = manageDistUIState;
         this.distributionSetManagement = distributionSetManagement;
@@ -497,6 +498,34 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     private void updateDistributionInTable(final DistributionSet editedDs) {
         final Item item = getContainerDataSource().getItem(editedDs.getId());
         updateEntity(editedDs, item);
+    }
+
+    @Override
+    protected void handleOkDelete(final List<Long> entitiesToDelete) {
+        distributionSetManagement.delete(entitiesToDelete);
+        eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.REMOVE_ENTITY, entitiesToDelete));
+        notification.displaySuccess(
+                i18n.getMessage("message.delete.success", entitiesToDelete.size() + " Distribution Set(s) "));
+
+        manageDistUIState.getSelectedDistributions().clear();
+        eventBus.publish(this, SaveActionWindowEvent.DELETED_DISTRIBUTIONS);
+    }
+
+    @Override
+    protected String getEntityName() {
+        return "Distribution Set";
+    }
+
+    @Override
+    protected Set<Long> getSelectedEntities() {
+        return manageDistUIState.getSelectedDistributions();
+    }
+
+    @Override
+    protected String getEntityId(final Object itemId) {
+        final String entityId = String.valueOf(
+                getContainerDataSource().getItem(itemId).getItemProperty(SPUILabelDefinitions.DIST_ID).getValue());
+        return "distributionSet." + entityId;
     }
 
 }

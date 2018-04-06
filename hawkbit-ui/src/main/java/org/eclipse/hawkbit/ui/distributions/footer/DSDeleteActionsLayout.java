@@ -50,6 +50,7 @@ import com.vaadin.ui.UI;
 /**
  * Distributions footer layout implementation.
  */
+// TODO MR Delete
 public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private static final long serialVersionUID = 3494052985006132714L;
@@ -190,8 +191,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
     private void addInDeleteDistributionList(final Table sourceTable, final TableTransferable transferable) {
         final AbstractTable<?> table = (AbstractTable<?>) sourceTable;
         final Set<Long> ids = table.getDeletedEntityByTransferable(transferable);
-        final List<DistributionSet> findDistributionSetAllById = distributionSetManagement
-                .get(ids);
+        final List<DistributionSet> findDistributionSetAllById = distributionSetManagement.get(ids);
 
         if (findDistributionSetAllById.isEmpty()) {
             notification.displayWarning(i18n.getMessage("distributionsets.not.exists"));

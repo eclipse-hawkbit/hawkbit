@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -189,7 +190,7 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
         updateTagStr = i18n.getMessage("label.update.tag");
         comboLabel = new LabelBuilder().name(i18n.getMessage("label.choose.tag")).buildLabel();
         colorLabel = new LabelBuilder().name(i18n.getMessage("label.choose.tag.color")).buildLabel();
-        colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
+        colorLabel.addStyleName(SPUIStyleDefinitions.COLOR_LABEL_STYLE);
 
         tagName = new TextFieldBuilder().caption(i18n.getMessage("textfield.name"))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_NAME).required(true)
@@ -205,7 +206,7 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
 
         tagNameComboBox = SPUIComponentProvider.getComboBox(null, "", null, null, false, "",
                 i18n.getMessage("label.combobox.tag"));
-        tagNameComboBox.addStyleName(SPUIDefinitions.FILTER_TYPE_COMBO_STYLE);
+        tagNameComboBox.addStyleName(SPUIStyleDefinitions.FILTER_TYPE_COMBO_STYLE);
         tagNameComboBox.setImmediate(true);
         tagNameComboBox.setId(UIComponentIdProvider.DIST_TAG_COMBO);
 

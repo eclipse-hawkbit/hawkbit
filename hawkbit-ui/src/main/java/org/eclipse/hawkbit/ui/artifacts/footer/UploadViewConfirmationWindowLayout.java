@@ -39,6 +39,8 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Table.Align;
 
+// TODO MR DELETE
+
 /**
  * Layout of confirm actions window on the Upload View.
  */
@@ -73,7 +75,7 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
     @Override
     protected Map<String, ConfirmationTab> getConfirmationTabs() {
         final Map<String, ConfirmationTab> tabs = Maps.newHashMapWithExpectedSize(2);
-        if (!artifactUploadState.getDeleteSofwareModules().isEmpty()) {
+        if (!artifactUploadState.getDeleteSoftwareModules().isEmpty()) {
             tabs.put(i18n.getMessage("caption.delete.swmodule.accordion.tab"), createSMDeleteConfirmationTab());
         }
         if (!artifactUploadState.getSelectedDeleteSWModuleTypes().isEmpty()) {
@@ -123,11 +125,11 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
         final IndexedContainer swcontactContainer = new IndexedContainer();
         swcontactContainer.addContainerProperty("SWModuleId", String.class, "");
         swcontactContainer.addContainerProperty(SW_MODULE_NAME_MSG, String.class, "");
-        for (final Long swModuleID : artifactUploadState.getDeleteSofwareModules().keySet()) {
+        for (final Long swModuleID : artifactUploadState.getDeleteSoftwareModules().keySet()) {
             final Item item = swcontactContainer.addItem(swModuleID);
             item.getItemProperty("SWModuleId").setValue(swModuleID.toString());
             item.getItemProperty(SW_MODULE_NAME_MSG)
-                    .setValue(artifactUploadState.getDeleteSofwareModules().get(swModuleID));
+                    .setValue(artifactUploadState.getDeleteSoftwareModules().get(swModuleID));
         }
         return swcontactContainer;
     }
@@ -135,10 +137,10 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
     private void discardSoftwareDelete(final Button.ClickEvent event, final Object itemId, final ConfirmationTab tab) {
 
         final Long swmoduleId = (Long) ((Button) event.getComponent()).getData();
-        if (null != artifactUploadState.getDeleteSofwareModules()
-                && !artifactUploadState.getDeleteSofwareModules().isEmpty()
-                && artifactUploadState.getDeleteSofwareModules().containsKey(swmoduleId)) {
-            artifactUploadState.getDeleteSofwareModules().remove(swmoduleId);
+        if (null != artifactUploadState.getDeleteSoftwareModules()
+                && !artifactUploadState.getDeleteSoftwareModules().isEmpty()
+                && artifactUploadState.getDeleteSoftwareModules().containsKey(swmoduleId)) {
+            artifactUploadState.getDeleteSoftwareModules().remove(swmoduleId);
         }
         tab.getTable().getContainerDataSource().removeItem(itemId);
         final int deleteCount = tab.getTable().size();
@@ -151,19 +153,19 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
     }
 
     private void deleteSMAll(final ConfirmationTab tab) {
-        final Set<Long> swmoduleIds = artifactUploadState.getDeleteSofwareModules().keySet();
+        final Set<Long> swmoduleIds = artifactUploadState.getDeleteSoftwareModules().keySet();
         softwareModuleManagement.delete(swmoduleIds);
         eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.REMOVE_ENTITY, swmoduleIds));
 
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
-                + i18n.getMessage("message.swModule.deleted", artifactUploadState.getDeleteSofwareModules().size()));
+                + i18n.getMessage("message.swModule.deleted", artifactUploadState.getDeleteSoftwareModules().size()));
         /*
          * Check if any information / files pending to upload for the deleted
          * software modules. If so, then delete the files from the upload list.
          */
         final List<CustomFile> tobeRemoved = new ArrayList<>();
         for (final Long id : swmoduleIds) {
-            final String deleteSoftwareNameVersion = artifactUploadState.getDeleteSofwareModules().get(id);
+            final String deleteSoftwareNameVersion = artifactUploadState.getDeleteSoftwareModules().get(id);
 
             for (final CustomFile customFile : artifactUploadState.getFileSelected()) {
                 final String swNameVersion = HawkbitCommonUtil.getFormattedNameVersion(
@@ -176,15 +178,15 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
         if (!tobeRemoved.isEmpty()) {
             artifactUploadState.getFileSelected().removeAll(tobeRemoved);
         }
-        artifactUploadState.getDeleteSofwareModules().clear();
+        artifactUploadState.getDeleteSoftwareModules().clear();
         removeCurrentTab(tab);
         setActionMessage(i18n.getMessage("message.software.delete.success"));
-        eventBus.publish(this, UploadArtifactUIEvent.DELETED_ALL_SOFWARE);
+        eventBus.publish(this, UploadArtifactUIEvent.DELETED_ALL_SOFTWARE);
     }
 
     private void discardSMAll(final ConfirmationTab tab) {
         removeCurrentTab(tab);
-        artifactUploadState.getDeleteSofwareModules().clear();
+        artifactUploadState.getDeleteSoftwareModules().clear();
         setActionMessage(i18n.getMessage("message.software.discard.success"));
         eventBus.publish(this, UploadArtifactUIEvent.DISCARD_ALL_DELETE_SOFTWARE);
     }

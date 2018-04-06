@@ -43,7 +43,7 @@ public class SwModuleTableLayout extends AbstractTableLayout<SwModuleTable> {
 
         this.swModuleTable = new SwModuleTable(eventBus, i18n, uiNotification, manageDistUIState,
                 softwareModuleManagement, distributionsViewClientCriterion, artifactManagement, swMetadataPopupLayout,
-                artifactUploadState);
+                artifactUploadState, permChecker);
 
         final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow = new SoftwareModuleAddUpdateWindow(i18n,
                 uiNotification, eventBus, softwareModuleManagement, softwareModuleTypeManagement, entityFactory,

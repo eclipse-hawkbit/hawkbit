@@ -139,7 +139,7 @@ public class UploadLayout extends VerticalLayout {
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final UploadArtifactUIEvent event) {
-        if (event == UploadArtifactUIEvent.DELETED_ALL_SOFWARE) {
+        if (event == UploadArtifactUIEvent.DELETED_ALL_SOFTWARE) {
             ui.access(this::updateActionCount);
         } else if (event == UploadArtifactUIEvent.MINIMIZED_STATUS_POPUP) {
             ui.access(this::showUploadStatusButton);

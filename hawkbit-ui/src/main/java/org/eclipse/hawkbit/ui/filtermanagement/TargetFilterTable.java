@@ -157,7 +157,7 @@ public class TargetFilterTable extends Table {
                 new TableColumn(SPUILabelDefinitions.VAR_MODIFIED_DATE, i18n.getMessage("header.modifiedDate"), 0.2F));
         columnList.add(new TableColumn(SPUILabelDefinitions.AUTO_ASSIGN_DISTRIBUTION_SET,
                 i18n.getMessage("header.auto.assignment.ds"), 0.1F));
-        columnList.add(new TableColumn(SPUIDefinitions.CUSTOM_FILTER_DELETE, i18n.getMessage("header.delete"), 0.1F));
+        columnList.add(new TableColumn(SPUIDefinitions.DELETE, i18n.getMessage("header.delete"), 0.1F));
         return columnList;
 
     }
@@ -208,8 +208,7 @@ public class TargetFilterTable extends Table {
     }
 
     protected void addCustomGeneratedColumns() {
-        addGeneratedColumn(SPUIDefinitions.CUSTOM_FILTER_DELETE,
-                (source, itemId, columnId) -> getDeleteButton((Long) itemId));
+        addGeneratedColumn(SPUIDefinitions.DELETE, (source, itemId, columnId) -> getDeleteButton((Long) itemId));
 
         addGeneratedColumn(SPUILabelDefinitions.NAME,
                 (source, itemId, columnId) -> customFilterDetailButton((Long) itemId));

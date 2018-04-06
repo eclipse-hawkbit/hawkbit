@@ -113,7 +113,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             final DsMetadataPopupLayout dsMetadataPopupLayout,
             final DistributionSetManagement distributionSetManagement, final DeploymentManagement deploymentManagement,
             final TargetTagManagement targetTagManagement) {
-        super(eventBus, i18n, notification);
+        super(eventBus, i18n, notification, permissionChecker);
         this.permissionChecker = permissionChecker;
         this.managementUIState = managementUIState;
         this.managementViewClientCriterion = managementViewClientCriterion;
@@ -265,6 +265,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     @Override
     protected void addCustomGeneratedColumns() {
+        super.addCustomGeneratedColumns();
         addGeneratedColumn(SPUILabelDefinitions.PIN_COLUMN, new Table.ColumnGenerator() {
             private static final long serialVersionUID = 1L;
 
@@ -731,6 +732,42 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             return;
         }
         UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds.get(), null));
+    }
+
+    @Override
+    protected void handleOkDelete(final List<Long> entitiesToDelete) {
+        distributionSetManagement.delete(entitiesToDelete);
+        eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.REMOVE_ENTITY, entitiesToDelete));
+        notification.displaySuccess(
+                i18n.getMessage("message.delete.success", entitiesToDelete.size() + " Distribution Set(s) "));
+
+        managementUIState.getTargetTableFilters().getPinnedDistId()
+                .ifPresent(distId -> unPinDeletedDS(entitiesToDelete, distId));
+        managementUIState.getSelectedDsIdName().clear();
+    }
+
+    private void unPinDeletedDS(final Collection<Long> deletedDsIds, final Long pinnedDsId) {
+        if (deletedDsIds.contains(pinnedDsId)) {
+            managementUIState.getTargetTableFilters().setPinnedDistId(null);
+            eventBus.publish(this, PinUnpinEvent.UNPIN_DISTRIBUTION);
+        }
+    }
+
+    @Override
+    protected String getEntityName() {
+        return "Distribution Set";
+    }
+
+    @Override
+    protected Set<Long> getSelectedEntities() {
+        return managementUIState.getSelectedDsIdName();
+    }
+
+    @Override
+    protected String getEntityId(final Object itemId) {
+        final String entityId = String.valueOf(
+                getContainerDataSource().getItem(itemId).getItemProperty(SPUILabelDefinitions.DIST_ID).getValue());
+        return "distributionSet." + entityId;
     }
 
 }

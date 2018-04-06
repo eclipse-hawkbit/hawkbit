@@ -115,7 +115,7 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
         return softwareModuleFilters;
     }
 
-    public Map<Long, String> getDeleteSofwareModules() {
+    public Map<Long, String> getDeleteSoftwareModules() {
         return deleteSofwareModules;
     }
 

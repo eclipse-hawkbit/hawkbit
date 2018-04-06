@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsLayout;
 import org.eclipse.hawkbit.ui.artifacts.event.RefreshSoftwareModuleByFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -66,6 +67,8 @@ import com.vaadin.ui.Window;
 /**
  * Implementation of software module table using generic abstract table styles .
  */
+
+// TODO MR implement inherit methods!!
 public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
 
     private static final long serialVersionUID = 1L;
@@ -84,8 +87,8 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
             final ManageDistUIState manageDistUIState, final SoftwareModuleManagement softwareManagement,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final ArtifactManagement artifactManagement, final SwMetadataPopupLayout swMetadataPopupLayout,
-            final ArtifactUploadState artifactUploadState) {
-        super(eventBus, i18n, uiNotification);
+            final ArtifactUploadState artifactUploadState, final SpPermissionChecker permChecker) {
+        super(eventBus, i18n, uiNotification, permChecker);
         this.manageDistUIState = manageDistUIState;
         this.softwareModuleManagement = softwareManagement;
         this.distributionsViewClientCriterion = distributionsViewClientCriterion;
@@ -135,16 +138,14 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
         final List<Long> visibleItemIds = (List<Long>) getVisibleItemIds();
         handleSelectedAndUpdatedSoftwareModules(eventContainer.getEvents());
         eventContainer.getEvents().stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
-                .filter(Objects::nonNull)
-                .forEach(event -> updateSoftwareModuleInTable(event.getEntity()));
+                .filter(Objects::nonNull).forEach(event -> updateSoftwareModuleInTable(event.getEntity()));
     }
 
     private void handleSelectedAndUpdatedSoftwareModules(final List<SoftwareModuleUpdatedEvent> events) {
         manageDistUIState.getLastSelectedSoftwareModule()
                 .ifPresent(lastSelectedModuleId -> events.stream()
-                        .filter(event -> lastSelectedModuleId.equals(event.getEntityId()))
-                        .filter(Objects::nonNull).findAny()
-                        .ifPresent(lastEvent -> eventBus.publish(this,
+                        .filter(event -> lastSelectedModuleId.equals(event.getEntityId())).filter(Objects::nonNull)
+                        .findAny().ifPresent(lastEvent -> eventBus.publish(this,
                                 new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, lastEvent.getEntity()))));
     }
 
@@ -165,7 +166,8 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
         final BeanQueryFactory<SwModuleBeanQuery> swQF = new BeanQueryFactory<>(SwModuleBeanQuery.class);
         swQF.setQueryConfiguration(queryConfiguration);
 
-        return new LazyQueryContainer(new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, "swId"), swQF);
+        return new LazyQueryContainer(
+                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_SWM_ID), swQF);
     }
 
     private Map<String, Object> prepareQueryConfigFilters() {
@@ -177,13 +179,12 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
         manageDistUIState.getLastSelectedDistribution()
                 .ifPresent(id -> queryConfig.put(SPUIDefinitions.ORDER_BY_DISTRIBUTION, id));
         return queryConfig;
-
     }
 
     @Override
     protected void addContainerProperties(final Container container) {
         final LazyQueryContainer lazyContainer = (LazyQueryContainer) container;
-        lazyContainer.addContainerProperty("nameAndVersion", String.class, null, false, false);
+        lazyContainer.addContainerProperty(SPUILabelDefinitions.NAME_VERSION, String.class, null, false, false);
         lazyContainer.addContainerProperty(SPUILabelDefinitions.VAR_ID, Long.class, null, false, false);
         lazyContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, "", false, true);
         lazyContainer.addContainerProperty(SPUILabelDefinitions.VAR_VERSION, String.class, null, false, false);
@@ -365,7 +366,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
         final String swNameVersion = HawkbitCommonUtil.concatStrings(":", baseEntity.getName(),
                 baseEntity.getVersion());
         item.getItemProperty(SPUILabelDefinitions.NAME_VERSION).setValue(swNameVersion);
-        item.getItemProperty("swId").setValue(baseEntity.getId());
+        item.getItemProperty(SPUILabelDefinitions.VAR_SWM_ID).setValue(baseEntity.getId());
         item.getItemProperty(SPUILabelDefinitions.VAR_VENDOR).setValue(baseEntity.getVendor());
         item.getItemProperty(SPUILabelDefinitions.VAR_COLOR).setValue(baseEntity.getType().getColour());
         super.updateEntity(baseEntity, item);
@@ -417,8 +418,35 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
     }
 
     private void showMetadataDetails(final Long itemId) {
-        softwareModuleManagement.get(itemId)
-                .ifPresent(swmodule -> UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null)));
+        softwareModuleManagement.get(itemId).ifPresent(
+
+                swmodule -> UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null)));
+    }
+
+    @Override
+    protected void handleOkDelete(final List<Long> entitiesToDelete) {
+        softwareModuleManagement.delete(entitiesToDelete);
+        eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.REMOVE_ENTITY, entitiesToDelete));
+        notification.displaySuccess(
+                i18n.getMessage("message.delete.success", entitiesToDelete.size() + " Software Module(s) "));
+        manageDistUIState.getSelectedSoftwareModules().clear();
+    }
+
+    @Override
+    protected String getEntityName() {
+        return "Software Module";
+    }
+
+    @Override
+    protected Set<Long> getSelectedEntities() {
+        return manageDistUIState.getSelectedSoftwareModules();
+    }
+
+    @Override
+    protected String getEntityId(final Object itemId) {
+        final String entityId = String.valueOf(
+                getContainerDataSource().getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_SWM_ID).getValue());
+        return "softwareModule." + entityId;
     }
 
 }

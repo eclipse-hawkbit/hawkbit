@@ -331,15 +331,6 @@ public final class SPUIDefinitions {
     public static final String TYPE_KEY = "type-key";
 
     /**
-     * Tag combo style.
-     */
-    public static final String FILTER_TYPE_COMBO_STYLE = "filter-combo-specific-style";
-    /**
-     * Color label style.
-     */
-    public static final String COLOR_LABEL_STYLE = "color-label-style";
-
-    /**
      * Minimum width required to show tags for both target and distribution
      * table without horizontal scroll. In case browser width is less than this
      * width, the tags will get hidden automatically and also horizontal scroll
@@ -484,9 +475,9 @@ public final class SPUIDefinitions {
     public static final String NO_TAG_BUTTON_ID = "no_tag_button";
 
     /**
-     * CUSTOM_FILTER_DELETE.
+     * DELETE column/button.
      */
-    public static final String CUSTOM_FILTER_DELETE = "Delete";
+    public static final String DELETE = "Delete";
 
     /**
      * TARGET_FILTER_MANAGEMENT - header caption .
@@ -527,6 +518,11 @@ public final class SPUIDefinitions {
      * BUTTON- STATUS.
      */
     public static final String SP_BUTTON_STATUS_STYLE = "targetStatusBtn";
+
+    /**
+     * id for delete icon in entity table
+     */
+    public static final String DELETE_ENTITY = "deleteEntity";
 
     /**
      * /** Constructor.

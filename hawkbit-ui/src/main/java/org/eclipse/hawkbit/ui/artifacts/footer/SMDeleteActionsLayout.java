@@ -36,6 +36,7 @@ import com.vaadin.ui.UI;
 /**
  * Upload view footer layout implementation.
  */
+// TODO MR Delete
 public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private static final long serialVersionUID = -3273982053389866299L;
@@ -80,7 +81,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private boolean isSoftwareEvent(final UploadArtifactUIEvent event) {
         return event == UploadArtifactUIEvent.DISCARD_ALL_DELETE_SOFTWARE
-                || event == UploadArtifactUIEvent.DELETED_ALL_SOFWARE
+                || event == UploadArtifactUIEvent.DELETED_ALL_SOFTWARE
                 || event == UploadArtifactUIEvent.DISCARD_DELETE_SOFTWARE;
     }
 
@@ -155,12 +156,12 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
         swModuleIdNameSet.forEach(id -> {
             final String swModuleName = (String) sourceTable.getContainerDataSource().getItem(id)
                     .getItemProperty(SPUILabelDefinitions.NAME_VERSION).getValue();
-            artifactUploadState.getDeleteSofwareModules().put(id, swModuleName);
+            artifactUploadState.getDeleteSoftwareModules().put(id, swModuleName);
         });
     }
 
     private void updateSWActionCount() {
-        final int count = artifactUploadState.getDeleteSofwareModules().size()
+        final int count = artifactUploadState.getDeleteSoftwareModules().size()
                 + artifactUploadState.getSelectedDeleteSWModuleTypes().size();
         updateActionsCount(count);
     }
@@ -186,7 +187,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected boolean hasUnsavedActions() {
-        return !artifactUploadState.getDeleteSofwareModules().isEmpty()
+        return !artifactUploadState.getDeleteSoftwareModules().isEmpty()
                 || !artifactUploadState.getSelectedDeleteSWModuleTypes().isEmpty();
     }
 

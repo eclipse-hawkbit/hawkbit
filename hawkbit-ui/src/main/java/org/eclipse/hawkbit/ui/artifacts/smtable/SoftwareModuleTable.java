@@ -8,17 +8,21 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.RefreshSoftwareModuleByFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
+import org.eclipse.hawkbit.ui.artifacts.state.CustomFile;
 import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -70,8 +74,8 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     SoftwareModuleTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification uiNotification,
             final ArtifactUploadState artifactUploadState, final SoftwareModuleManagement softwareManagement,
             final UploadViewClientCriterion uploadViewClientCriterion,
-            final SwMetadataPopupLayout swMetadataPopupLayout) {
-        super(eventBus, i18n, uiNotification);
+            final SwMetadataPopupLayout swMetadataPopupLayout, final SpPermissionChecker permChecker) {
+        super(eventBus, i18n, uiNotification, permChecker);
         this.artifactUploadState = artifactUploadState;
         this.softwareModuleManagement = softwareManagement;
         this.uploadViewClientCriterion = uploadViewClientCriterion;
@@ -99,7 +103,8 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         final BeanQueryFactory<BaseSwModuleBeanQuery> swQF = new BeanQueryFactory<>(BaseSwModuleBeanQuery.class);
         swQF.setQueryConfiguration(queryConfiguration);
 
-        return new LazyQueryContainer(new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, "swId"), swQF);
+        return new LazyQueryContainer(
+                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_SWM_ID), swQF);
     }
 
     private Map<String, Object> prepareQueryConfigFilters() {
@@ -166,7 +171,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final UploadArtifactUIEvent event) {
-        if (event == UploadArtifactUIEvent.DELETED_ALL_SOFWARE) {
+        if (event == UploadArtifactUIEvent.DELETED_ALL_SOFTWARE) {
             UI.getCurrent().access(this::refreshFilter);
         }
     }
@@ -176,8 +181,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         @SuppressWarnings("unchecked")
         final List<Long> visibleItemIds = (List<Long>) getVisibleItemIds();
         eventContainer.getEvents().stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
-                .filter(Objects::nonNull)
-                .forEach(event -> updateSoftwareModuleInTable(event.getEntity()));
+                .filter(Objects::nonNull).forEach(event -> updateSoftwareModuleInTable(event.getEntity()));
     }
 
     private void updateSoftwareModuleInTable(final SoftwareModule editedSm) {
@@ -204,7 +208,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
             @Override
             public Object generateCell(final Table source, final Object itemId, final Object columnId) {
-                final String nameVersionStr = getNameAndVerion(itemId);
+                final String nameVersionStr = getNameAndVersion(itemId);
                 final Button manageMetaDataBtn = createManageMetadataButton(nameVersionStr);
                 manageMetaDataBtn.addClickListener(event -> showMetadataDetails((Long) itemId));
                 return manageMetaDataBtn;
@@ -247,7 +251,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         return manageMetadataBtn;
     }
 
-    private String getNameAndVerion(final Object itemId) {
+    private String getNameAndVersion(final Object itemId) {
         final Item item = getItem(itemId);
         final String name = (String) item.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
         final String version = (String) item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).getValue();
@@ -257,6 +261,56 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     private void showMetadataDetails(final Long itemId) {
         softwareModuleManagement.get(itemId)
                 .ifPresent(swmodule -> UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null)));
+    }
+
+    @Override
+    protected void handleOkDelete(final List<Long> entitiesToDelete) {
+        softwareModuleManagement.delete(entitiesToDelete);
+        eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.REMOVE_ENTITY, entitiesToDelete));
+        notification.displaySuccess(
+                i18n.getMessage("message.delete.success", entitiesToDelete.size() + " Software Module(s) "));
+
+        /*
+         * Check if any information / files pending to upload for the deleted
+         * software modules. If so, then delete the files from the upload list.
+         */
+        final List<CustomFile> toBeRemoved = new ArrayList<>();
+        for (final Long id : entitiesToDelete) {
+            final Optional<SoftwareModule> deleteSoftwareNameVersion = softwareModuleManagement.get(id);
+            deleteSoftwareNameVersion.ifPresent(dsnv -> {
+                // TODO Refactor this when PR for branch
+                // 'feature_improve_upload_ux' is merged / merge branch into
+                // this one
+                for (final CustomFile customFile : artifactUploadState.getFileSelected()) {
+                    if (dsnv.getName().equals(customFile.getBaseSoftwareModuleName())
+                            && dsnv.getVersion().equals(customFile.getBaseSoftwareModuleVersion())) {
+                        toBeRemoved.add(customFile);
+                    }
+                }
+            });
+        }
+        if (!toBeRemoved.isEmpty()) {
+            artifactUploadState.getFileSelected().removeAll(toBeRemoved);
+        }
+        artifactUploadState.getSelectedSoftwareModules().clear();
+        eventBus.publish(this, UploadArtifactUIEvent.DELETED_ALL_SOFTWARE);
+    }
+
+    @Override
+    protected String getEntityName() {
+        return "Software Module";
+    }
+
+    @Override
+    protected Set<Long> getSelectedEntities() {
+        return artifactUploadState.getSelectedSoftwareModules();
+    }
+
+    @Override
+    protected String getEntityId(final Object itemId) {
+        final String entityId = String.valueOf(
+                getContainerDataSource().getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_SWM_ID).getValue());
+        return "softwareModule." + entityId;
     }
 
 }

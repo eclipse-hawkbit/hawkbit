@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -64,12 +65,12 @@ public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends Abst
         updateTagStr = i18n.getMessage("label.update.type");
         comboLabel = new LabelBuilder().name(i18n.getMessage("label.choose.type")).buildLabel();
         colorLabel = new LabelBuilder().name(i18n.getMessage("label.choose.type.color")).buildLabel();
-        colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
+        colorLabel.addStyleName(SPUIStyleDefinitions.COLOR_LABEL_STYLE);
 
         tagNameComboBox = SPUIComponentProvider.getComboBox(i18n.getMessage("label.combobox.type"), "", null, null,
                 false, "", i18n.getMessage("label.combobox.type"));
         tagNameComboBox.setId(SPUIDefinitions.NEW_DISTRIBUTION_SET_TYPE_NAME_COMBO);
-        tagNameComboBox.addStyleName(SPUIDefinitions.FILTER_TYPE_COMBO_STYLE);
+        tagNameComboBox.addStyleName(SPUIStyleDefinitions.FILTER_TYPE_COMBO_STYLE);
         tagNameComboBox.setImmediate(true);
         tagNameComboBox.setPageLength(SPUIDefinitions.DIST_TYPE_SIZE);
 

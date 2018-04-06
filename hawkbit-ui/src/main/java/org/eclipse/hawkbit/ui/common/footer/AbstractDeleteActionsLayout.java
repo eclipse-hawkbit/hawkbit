@@ -38,6 +38,7 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * Parent class for footer layout.
  */
+// TODO MR Delete
 public abstract class AbstractDeleteActionsLayout extends VerticalLayout implements DropHandler {
 
     private static final long serialVersionUID = 1L;

@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -38,8 +38,8 @@ public class TargetFilterCountMessageLabel extends Label {
 
     private final VaadinMessageSource i18n;
 
-    public TargetFilterCountMessageLabel(final FilterManagementUIState filterManagementUIState, final VaadinMessageSource i18n,
-            final UIEventBus eventBus) {
+    public TargetFilterCountMessageLabel(final FilterManagementUIState filterManagementUIState,
+            final VaadinMessageSource i18n, final UIEventBus eventBus) {
         this.filterManagementUIState = filterManagementUIState;
         this.i18n = i18n;
 
@@ -59,7 +59,7 @@ public class TargetFilterCountMessageLabel extends Label {
     }
 
     private void applyStyle() {
-        addStyleName(SPUILabelDefinitions.SP_LABEL_MESSAGE_STYLE);
+        addStyleName(SPUIStyleDefinitions.SP_LABEL_MESSAGE_STYLE);
         setContentMode(ContentMode.HTML);
         setId(UIComponentIdProvider.COUNT_LABEL);
     }
@@ -74,8 +74,8 @@ public class TargetFilterCountMessageLabel extends Label {
             if (filterManagementUIState.getTargetsTruncated() != null) {
                 // set the icon
                 setIcon(FontAwesome.INFO_CIRCLE);
-                setDescription(i18n.getMessage("label.target.filter.truncated", filterManagementUIState.getTargetsTruncated(),
-                        SPUIDefinitions.MAX_TABLE_ENTRIES));
+                setDescription(i18n.getMessage("label.target.filter.truncated",
+                        filterManagementUIState.getTargetsTruncated(), SPUIDefinitions.MAX_TABLE_ENTRIES));
 
             } else {
                 setIcon(null);

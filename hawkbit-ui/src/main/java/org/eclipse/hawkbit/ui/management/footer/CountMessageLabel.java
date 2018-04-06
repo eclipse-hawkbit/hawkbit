@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.ui.management.state.TargetTableFilters;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -117,7 +117,7 @@ public class CountMessageLabel extends Label {
     */
     private void applyStyle() {
         /* Create label for Targets count message displaying below the table */
-        addStyleName(SPUILabelDefinitions.SP_LABEL_MESSAGE_STYLE);
+        addStyleName(SPUIStyleDefinitions.SP_LABEL_MESSAGE_STYLE);
         setContentMode(ContentMode.HTML);
         setId(UIComponentIdProvider.COUNT_LABEL);
     }
@@ -234,7 +234,6 @@ public class CountMessageLabel extends Label {
      * @return String as msg.
      */
     private static String getTagsMsg(final Boolean noTargetTagSelected, final List<String> tags, final String param) {
-        return tags.isEmpty() && (noTargetTagSelected == null || !noTargetTagSelected.booleanValue())
-                ? " " : param;
+        return tags.isEmpty() && (noTargetTagSelected == null || !noTargetTagSelected.booleanValue()) ? " " : param;
     }
 }

@@ -18,16 +18,21 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.model.NamedEntity;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
+import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.ManagementEntityState;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
+import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -40,6 +45,9 @@ import com.vaadin.event.Transferable;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
+import com.vaadin.server.FontAwesome;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.Table;
@@ -66,11 +74,14 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
 
     protected UINotification notification;
 
+    protected SpPermissionChecker permChecker;
+
     protected AbstractTable(final UIEventBus eventBus, final VaadinMessageSource i18n,
-            final UINotification notification) {
+            final UINotification notification, final SpPermissionChecker permChecker) {
         this.eventBus = eventBus;
         this.i18n = i18n;
         this.notification = notification;
+        this.permChecker = permChecker;
         setStyleName("sp-table");
         setSizeFull();
         setImmediate(true);
@@ -80,10 +91,22 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
         setSortEnabled(false);
         setId(getTableId());
         addCustomGeneratedColumns();
+        addDeleteColumn();
         setDefault();
         addValueChangeListener(event -> onValueChange());
         setPageLength(SPUIDefinitions.PAGE_SIZE);
         eventBus.subscribe(this);
+    }
+
+    // can be overriden
+    protected boolean hasDeletePermission() {
+        return permChecker.hasDeleteRepositoryPermission();
+    }
+
+    private void addDeleteColumn() {
+        if (hasDeletePermission()) {
+            addGeneratedColumn(SPUIDefinitions.DELETE_ENTITY, (source, itemId, columnId) -> getDeleteButton(itemId));
+        }
     }
 
     /**
@@ -165,6 +188,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
 
     protected void setColumnProperties() {
         final List<TableColumn> columnList = getTableVisibleColumns();
+        addDeleteButtonToColumnList(columnList);
         final List<Object> swColumnIds = new ArrayList<>();
         for (final TableColumn column : columnList) {
             setColumnHeader(column.getColumnPropertyId(), column.getColumnHeader());
@@ -172,6 +196,12 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
             swColumnIds.add(column.getColumnPropertyId());
         }
         setVisibleColumns(swColumnIds.toArray());
+    }
+
+    private void addDeleteButtonToColumnList(final List<TableColumn> columnList) {
+        if (hasDeletePermission()) {
+            columnList.add(new TableColumn(SPUIDefinitions.DELETE_ENTITY, "", 0.0F));
+        }
     }
 
     private void selectFirstRow() {
@@ -312,6 +342,55 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
         // can be overriden
     }
 
+    private Object getDeleteButton(final Object itemId) {
+        final Button deleteButton = SPUIComponentProvider.getButton("", "", "", "", true, FontAwesome.TRASH_O,
+                SPUIButtonStyleSmallNoBorder.class);
+        final String id = getEntityId(itemId);
+        if (StringUtils.hasText(id)) {
+            deleteButton.setId("delete.entity." + id);
+            deleteButton.addStyleName("highlightIconIfSelected");
+            deleteButton.setDescription(SPUIDefinitions.DELETE);
+            deleteButton.addClickListener(this::addDeleteButtonClickListener);
+        }
+
+        return deleteButton;
+    }
+
+    private void addDeleteButtonClickListener(final ClickEvent event) {
+        openConfirmationWindow(event);
+    }
+
+    private void openConfirmationWindow(final ClickEvent event) {
+        final String id = getId(event.getButton().getId());
+        final Set<Long> selectedEntities = getSelectedEntities();
+        final List<Long> allEntities = selectedEntities.stream().collect(Collectors.toList());
+        if (!allEntities.contains(Long.parseLong(id))) {
+            allEntities.add(Long.parseLong(id));
+        }
+        final ConfirmationDialog confirmDialog = new ConfirmationDialog(
+                i18n.getMessage("caption.entity.delete.action.confirmbox", getEntityName()),
+                i18n.getMessage("message.confirm.delete.entity", allEntities.size(), getEntityName().toLowerCase()),
+                i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
+                    if (ok) {
+                        handleOkDelete(allEntities);
+                    }
+                });
+        UI.getCurrent().addWindow(confirmDialog.getWindow());
+        confirmDialog.getWindow().bringToFront();
+    }
+
+    protected abstract void handleOkDelete(List<Long> allEntities);
+
+    protected abstract String getEntityName();
+
+    protected abstract Set<Long> getSelectedEntities();
+
+    private static String getId(final String buttonId) {
+        return buttonId.substring(buttonId.lastIndexOf('.') + 1);
+    }
+
+    protected abstract String getEntityId(Object itemId);
+
     /**
      * Check if the first row should be selected by default on load. (if there
      * is no other item selected)
@@ -345,29 +424,34 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
         if (!isMaximized()) {
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.getMessage("header.name"),
                     getColumnNameMinimizedSize()));
-            return columnList;
+        } else {
+            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.getMessage("header.name"), 0.2F));
+            columnList.add(
+                    new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.getMessage("header.createdBy"), 0.1F));
+            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.getMessage("header.createdDate"),
+                    0.1F));
+            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY,
+                    i18n.getMessage("header.modifiedBy"), 0.1F));
+            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE,
+                    i18n.getMessage("header.modifiedDate"), 0.1F));
+            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.getMessage("header.description"), 0.2F));
+            setItemDescriptionGenerator((source, itemId, propertyId) -> {
+
+                if (SPUILabelDefinitions.VAR_CREATED_BY.equals(propertyId)) {
+                    return getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_CREATED_BY).getValue().toString();
+                }
+                if (SPUILabelDefinitions.VAR_LAST_MODIFIED_BY.equals(propertyId)) {
+                    return getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).getValue()
+                            .toString();
+                }
+                return null;
+            });
         }
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.getMessage("header.name"), 0.2F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.getMessage("header.createdBy"), 0.1F));
-        columnList.add(
-                new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.getMessage("header.createdDate"), 0.1F));
-        columnList.add(
-                new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.getMessage("header.modifiedBy"), 0.1F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE,
-                i18n.getMessage("header.modifiedDate"), 0.1F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.getMessage("header.description"), 0.2F));
-        setItemDescriptionGenerator((source, itemId, propertyId) -> {
-
-            if (SPUILabelDefinitions.VAR_CREATED_BY.equals(propertyId)) {
-                return getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_CREATED_BY).getValue().toString();
-            }
-            if (SPUILabelDefinitions.VAR_LAST_MODIFIED_BY.equals(propertyId)) {
-                return getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).getValue().toString();
-            }
-            return null;
-        });
-
         return columnList;
+    }
+
+    protected static void moveDeleteColumnAtTheEnd(final List<TableColumn> columnList) {
+        Collections.swap(columnList, 0, columnList.size() - 1);
     }
 
     protected float getColumnNameMinimizedSize() {

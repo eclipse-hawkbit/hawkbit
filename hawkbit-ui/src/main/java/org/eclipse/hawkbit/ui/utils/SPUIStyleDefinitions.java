@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.utils;
 
+import com.vaadin.ui.themes.ValoTheme;
+
 /**
  * RepositoryConstants required for Style.
  *
@@ -256,6 +258,42 @@ public final class SPUIStyleDefinitions {
      * Footer layout style.
      */
     public static final String FOOTER_LAYOUT = "footer-layout";
+
+    /**
+     * Tag combo style.
+     */
+    public static final String FILTER_TYPE_COMBO_STYLE = "filter-combo-specific-style";
+
+    /**
+     * Color label style.
+     */
+    public static final String COLOR_LABEL_STYLE = "color-label-style";
+
+    /**
+     * Style - Message.
+     */
+    public static final String SP_LABEL_MESSAGE_STYLE = "count-msg-box";
+
+    /**
+     * Message hint text style.
+     */
+    public static final String SP_MESSAGE_HINT_TEXT = "message-hint-text";
+    /**
+     * Style - Success.
+     */
+    public static final String SP_NOTIFICATION_SUCCESS_MESSAGE_STYLE = ValoTheme.NOTIFICATION_SUCCESS + " "
+            + ValoTheme.NOTIFICATION_TRAY;
+    /**
+     * Style - Error.
+     */
+    public static final String SP_NOTIFICATION_ERROR_MESSAGE_STYLE = ValoTheme.NOTIFICATION_ERROR + " "
+            + ValoTheme.NOTIFICATION_TRAY;
+
+    /**
+     * Style - Warning.
+     */
+    public static final String SP_NOTIFICATION_WARNING_MESSAGE_STYLE = ValoTheme.NOTIFICATION_WARNING + " "
+            + ValoTheme.NOTIFICATION_TRAY;
 
     /**
      * Constructor.
