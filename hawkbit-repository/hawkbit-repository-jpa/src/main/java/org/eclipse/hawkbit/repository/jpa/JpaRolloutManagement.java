@@ -284,9 +284,13 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         RolloutHelper.verifyRemainingTargets(
                 calculateRemainingTargets(groups, savedRollout.getTargetFilterQuery(), savedRollout.getCreatedAt()));
 
-        final long totalTargets = rollout.getTotalTargets();
+        // check if we need to enforce the 'max targets per group' quota
+        if (quotaManagement.getMaxTargetsPerRolloutGroup() > 0) {
+            validateTargetsInGroups(groups, savedRollout.getTargetFilterQuery(), savedRollout.getCreatedAt())
+                    .getTargetsPerGroup().forEach(this::assertTargetsPerRolloutGroupQuota);
+        }
 
-        // Persisting the groups
+        // create the groups (w/o filling them with targets)
         RolloutGroup lastSavedGroup = null;
         for (final RolloutGroup srcGroup : groups) {
             final JpaRolloutGroup group = new JpaRolloutGroup();
@@ -296,12 +300,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             group.setParent(lastSavedGroup);
             group.setStatus(RolloutGroupStatus.CREATING);
 
-            final float perc = srcGroup.getTargetPercentage();
-
-            // enforce the 'max targets per group' quota
-            assertTargetsPerRolloutGroupQuota(Math.round(totalTargets * perc / 100));
-
-            group.setTargetPercentage(perc);
+            group.setTargetPercentage(srcGroup.getTargetPercentage());
             if (srcGroup.getTargetFilterQuery() != null) {
                 group.setTargetFilterQuery(srcGroup.getTargetFilterQuery());
             } else {
@@ -1075,7 +1074,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
      * @param requested
      *            number of targets to check
      */
-    private void assertTargetsPerRolloutGroupQuota(final int requested) {
+    private void assertTargetsPerRolloutGroupQuota(final long requested) {
         final int quota = quotaManagement.getMaxTargetsPerRolloutGroup();
         QuotaHelper.assertAssignmentQuota(requested, quota, Target.class, RolloutGroup.class);
     }
