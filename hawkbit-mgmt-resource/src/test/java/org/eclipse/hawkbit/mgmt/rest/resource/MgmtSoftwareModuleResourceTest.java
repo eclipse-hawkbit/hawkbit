@@ -355,14 +355,13 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     @Test
     @Description("Verifies that artifacts which exceed the configured maximum size cannot be uploaded.")
     public void uploadArtifactFailsIfTooLarge() throws Exception {
-        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
+        final SoftwareModule sm = testdataFactory.createSoftwareModule("uploadArtifactFailsIfTooLarge");
         final long maxSize = quotaManagement.getMaxArtifactSize();
 
         // create a file which exceeds the configured maximum size
-        final byte[] random = randomBytes(Math.toIntExact(maxSize) + 1); // RandomStringUtils.random(Math.toIntExact(maxSize
-                                                                         // +
-                                                                         // 1)).getBytes();
-        final MockMultipartFile file = new MockMultipartFile("file", "origFilename", null, random);
+        final byte[] random = RandomStringUtils.random(Math.toIntExact(maxSize) + 32).getBytes();
+        final MockMultipartFile file = new MockMultipartFile("file", "origFilename" + System.currentTimeMillis(), null,
+                random);
 
         // try to upload
         mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)

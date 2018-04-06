@@ -172,14 +172,14 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     public void createArtifactFailsIfTooLarge() throws NoSuchAlgorithmException, IOException {
 
         // create a software module
-        final JpaSoftwareModule sm1 = softwareModuleRepository
+        final JpaSoftwareModule sm = softwareModuleRepository
                 .save(new JpaSoftwareModule(osType, "sm1", "1.0", null, null));
 
         // create an artifact that exceeds the configured quota
         final long maxSize = quotaManagement.getMaxArtifactSize();
-        final byte random[] = RandomStringUtils.random(Math.toIntExact(maxSize) + 10).getBytes();
-        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(
-                () -> artifactManagement.create(new ByteArrayInputStream(random), sm1.getId(), "file", false));
+        final byte random[] = RandomStringUtils.random(Math.toIntExact(maxSize) + 32).getBytes();
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> artifactManagement
+                .create(new ByteArrayInputStream(random), sm.getId(), "file" + System.currentTimeMillis(), false));
     }
 
     @Test
