@@ -232,7 +232,10 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         RolloutHelper.verifyRolloutGroupConditions(conditions);
 
         final JpaRollout savedRollout = rollout;
-        final long totalTargets = rollout.getTotalTargets();
+
+        // we can enforce the 'max targets per group' quota right here because
+        // we want to distribute the targets equally to the different groups
+        assertTargetsPerRolloutGroupQuota(rollout.getTotalTargets() / amountOfGroups);
 
         RolloutGroup lastSavedGroup = null;
         for (int i = 0; i < amountOfGroups; i++) {
@@ -256,11 +259,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             group.setErrorAction(conditions.getErrorAction());
             group.setErrorActionExp(conditions.getErrorActionExp());
 
-            final float groupFactor = 1.0F / (amountOfGroups - i);
-            group.setTargetPercentage(groupFactor * 100);
-
-            // enforce the 'max targets per group' quota
-            assertTargetsPerRolloutGroupQuota(Math.round(groupFactor * totalTargets));
+            group.setTargetPercentage(1.0F / (amountOfGroups - i) * 100);
 
             lastSavedGroup = rolloutGroupRepository.save(group);
             publishRolloutGroupCreatedEventAfterCommit(lastSavedGroup, rollout);
@@ -275,7 +274,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.CREATING);
         final JpaRollout savedRollout = (JpaRollout) rollout;
 
-        // Preparing the groups
+        // prepare the groups
         final List<RolloutGroup> groups = groupList.stream()
                 .map(group -> JpaRolloutHelper.prepareRolloutGroupWithDefaultConditions(group, conditions))
                 .collect(Collectors.toList());
@@ -290,7 +289,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
                     .getTargetsPerGroup().forEach(this::assertTargetsPerRolloutGroupQuota);
         }
 
-        // create the groups (w/o filling them with targets)
+        // create and persist the groups (w/o filling them with targets)
         RolloutGroup lastSavedGroup = null;
         for (final RolloutGroup srcGroup : groups) {
             final JpaRolloutGroup group = new JpaRolloutGroup();
