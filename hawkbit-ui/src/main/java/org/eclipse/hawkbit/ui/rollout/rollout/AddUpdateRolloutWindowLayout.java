@@ -93,7 +93,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public class AddUpdateRolloutWindowLayout extends GridLayout {
 
-    private static final long serialVersionUID = 2999293468801479916L;
+    private static final long serialVersionUID = 1L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AddUpdateRolloutWindowLayout.class);
 
@@ -858,7 +858,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     class ErrorThresholdOptionValidator implements Validator {
-        private static final long serialVersionUID = 0L;
+        private static final long serialVersionUID = 1L;
 
         @Override
         public void validate(final Object value) {
@@ -886,6 +886,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     class TargetExistsValidator implements Validator {
+
+        /**
+         * 
+         */
         private static final long serialVersionUID = 1L;
 
         @Override
@@ -898,7 +902,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     class ThresholdFieldValidator implements Validator {
-        private static final long serialVersionUID = 0L;
+        private static final long serialVersionUID = 1L;
 
         @Override
         public void validate(final Object value) {
@@ -910,7 +914,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     class GroupNumberValidator implements Validator {
-        private static final long serialVersionUID = 0L;
+        private static final long serialVersionUID = 1L;
 
         @Override
         public void validate(final Object value) {
