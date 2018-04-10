@@ -312,13 +312,13 @@ public class HawkbitSecurityProperties {
              * # Maximum number of allowed REST read/GET requests per second per
              * client IP.
              */
-            int maxRead = 200;
+            private int maxRead = 200;
 
             /**
              * Maximum number of allowed REST write/(PUT/POST/etc.) requests per
              * second per client IP.
              */
-            int maxWrite = 50;
+            private int maxWrite = 50;
 
             public boolean isEnabled() {
                 return enabled;

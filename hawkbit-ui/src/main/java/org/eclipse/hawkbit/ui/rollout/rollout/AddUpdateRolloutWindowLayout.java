@@ -91,6 +91,7 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * Rollout add or update popup layout.
  */
+@SuppressWarnings({ "squid:MaximumInheritanceDepth", "squid:S2160" })
 public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private static final long serialVersionUID = 1L;
@@ -169,6 +170,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private final NullValidator nullValidator = new NullValidator(null, false);
 
+    @SuppressWarnings("squid:S00107")
     AddUpdateRolloutWindowLayout(final RolloutManagement rolloutManagement, final TargetManagement targetManagement,
             final UINotification uiNotification, final UiProperties uiProperties, final EntityFactory entityFactory,
             final VaadinMessageSource i18n, final UIEventBus eventBus,
@@ -1048,9 +1050,12 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private enum ERROR_THRESHOLD_OPTIONS {
-        PERCENT("%"), COUNT("Count");
 
-        String value;
+        PERCENT("%"),
+
+        COUNT("Count");
+
+        private final String value;
 
         ERROR_THRESHOLD_OPTIONS(final String val) {
             value = val;

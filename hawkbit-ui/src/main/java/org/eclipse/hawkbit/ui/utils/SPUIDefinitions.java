@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort.Direction;
  * Class to provide the unchanged constants.
  */
 public final class SPUIDefinitions {
+
     /**
      * Available locales.
      */
@@ -27,10 +28,12 @@ public final class SPUIDefinitions {
      * Default locale.
      */
     public static final String DEFAULT_LOCALE = "en";
+
     /**
      * Locale cookie name.
      */
     public static final String COOKIE_NAME = "BOSCHSI_UII_LOCALE";
+
     /**
      * Lazy query container page size.
      */
@@ -166,10 +169,12 @@ public final class SPUIDefinitions {
      * New Software Module desc field id.
      */
     public static final String NEW_SOFTWARE_TYPE_DESC = "software.type.add.desc";
+
     /**
      * Hide filter by dist type layout button.
      */
     public static final String HIDE_FILTER_DIST_TYPE = "hide.filter.dist.type.layout";
+
     /**
      * New Distribution Type distribution field id.
      */
@@ -184,18 +189,22 @@ public final class SPUIDefinitions {
      * New Software Module key field id.
      */
     public static final String NEW_SOFTWARE_TYPE_KEY = "software.type.add.key";
+
     /**
      * New Target tag desc field id.
      */
     public static final String NEW_TARGET_TAG_DESC = "target.tag.add.desc";
+
     /**
      * New distribution Type set tag add icon id.
      */
     public static final String ADD_DISTRIBUTION_TYPE_TAG = "distribution.type.tag.add";
+
     /**
      * New software module set type add icon id.
      */
     public static final String ADD_SOFTWARE_MODULE_TYPE = "softwaremodule.type.add";
+
     /**
      * No data.
      */
@@ -220,10 +229,12 @@ public final class SPUIDefinitions {
      * Filter by tag key.
      */
     public static final String FILTER_BY_TAG = "FilterByTag";
+
     /**
      * Filter by no tag button.
      */
     public static final String FILTER_BY_NO_TAG = "FilterByNoTag";
+
     /**
      * Filter by target filter query.
      */
@@ -233,34 +244,42 @@ public final class SPUIDefinitions {
      * Filter by distribution key.
      */
     public static final String FILTER_BY_DISTRIBUTION = "FilterByDistribution";
+
     /**
      * Filter by distributionSet Type.
      */
     public static final String FILTER_BY_DISTRIBUTION_SET_TYPE = "FilterByDistributionSetType";
+
     /**
      * Order by pinnedTarget.
      */
     public static final String ORDER_BY_PINNED_TARGET = "OrderByPinnedTarget";
+
     /**
      * Filter by text key.
      */
     public static final String FILTER_BY_TEXT = "FilterByText";
+
     /**
      * Text field style.
      */
     public static final String TEXT_STYLE = "text-style";
+
     /**
      * Show actions for a target.
      */
     public static final String ACTIONS_BY_TARGET = "ActionsByTarget";
+
     /**
      * Show action-states for a action.
      */
     public static final String ACTIONSTATES_BY_ACTION = "ActionStatesByAction";
+
     /**
      * Show messages for a action-status.
      */
     public static final String MESSAGES_BY_ACTIONSTATUS = "MessagesByActionStatus";
+
     /**
      * Key for no-message MessageProxy.
      */
@@ -290,22 +309,27 @@ public final class SPUIDefinitions {
      * Target and distribution column width in save popup window.
      */
     public static final float TARGET_DISTRIBUTION_COLUMN_WIDTH = 2.8F;
+
     /**
      * Discard column width in save window popup.
      */
     public static final float DISCARD_COLUMN_WIDTH = 1.2F;
+
     /**
      * Target tag name.
      */
     public static final String TAG_NAME = "target-tag-name";
+
     /**
      * Target tag desc.
      */
     public static final String TAG_DESC = "target-tag-desc";
+
     /**
      * Software type name.
      */
     public static final String TYPE_NAME = "type-name";
+
     /**
      * DistributionSet type name.
      */
@@ -320,6 +344,7 @@ public final class SPUIDefinitions {
      * DistributionSet type key.
      */
     public static final String DIST_SET_TYPE_KEY = "dist-set-type-key";
+
     /**
      * Software type desc.
      */
@@ -334,6 +359,7 @@ public final class SPUIDefinitions {
      * Tag combo style.
      */
     public static final String FILTER_TYPE_COMBO_STYLE = "filter-combo-specific-style";
+
     /**
      * Color label style.
      */
@@ -351,6 +377,7 @@ public final class SPUIDefinitions {
      * Target tag button id prefix.
      */
     public static final String TARGET_TAG_ID_PREFIXS = "target.tag.";
+
     /**
      * Distribution tag button id prefix.
      */
@@ -359,7 +386,7 @@ public final class SPUIDefinitions {
     /**
      * Space.
      */
-    static final String SPACE = "&nbsp;";
+    public static final String SPACE = "&nbsp;";
 
     /**
      * Distribution tag button id prefix.
@@ -370,26 +397,32 @@ public final class SPUIDefinitions {
      * DistributionSet Type tag button id prefix.
      */
     public static final String DISTRIBUTION_SET_TYPE_ID_PREFIXS = "dist.set.type.";
+
     /**
      * Target last query date format .
      */
     public static final String LAST_QUERY_DATE_FORMAT = "EEE MMM d HH:mm:ss z yyyy";
+
     /**
      * Target last query date format .
      */
     public static final String LAST_QUERY_DATE_FORMAT_SHORT = "MMM d HH:mm z ''yy";
+
     /**
      * Item Id used in drop comparisons.
      */
     public static final String ITEMID = "itemId";
+
     /**
      * Expand action history.
      */
     public static final String EXPAND_ACTION_HISTORY = "expand.action.history";
+
     /**
      * Filter by distribution key.
      */
     public static final String ORDER_BY_DISTRIBUTION = "OrderByDistribution";
+
 
     /** Artifact upload related entries - start **/
     /**
@@ -408,15 +441,15 @@ public final class SPUIDefinitions {
      * automatically and also horizontal scroll bars get displayed. Used for
      * Responsive UI.
      */
-    static final int REQ_MIN_UPLOAD_BROWSER_WIDTH = 1250;
+    public static final int REQ_MIN_UPLOAD_BROWSER_WIDTH = 1250;
 
     public static final int MIN_UPLOAD_CONFIRMATION_POPUP_WIDTH = 1000;
 
     public static final int MIN_UPLOAD_CONFIRMATION_POPUP_HEIGHT = 310;
 
-    static final int MAX_UPLOAD_CONFIRMATION_POPUP_WIDTH = 1050;
+    public static final int MAX_UPLOAD_CONFIRMATION_POPUP_WIDTH = 1050;
 
-    static final int MAX_UPLOAD_CONFIRMATION_POPUP_HEIGHT = 360;
+    public static final int MAX_UPLOAD_CONFIRMATION_POPUP_HEIGHT = 360;
 
     /** Artifact upload related entries - end. **/
 
