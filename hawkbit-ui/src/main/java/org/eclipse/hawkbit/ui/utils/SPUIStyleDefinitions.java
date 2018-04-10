@@ -45,7 +45,7 @@ public final class SPUIStyleDefinitions {
     /**
      * Confirm box window style.
      */
-    public static final String CONFIRMBOX_WINDOW_SYLE = "confirmbox-window-style";
+    public static final String CONFIRMBOX_WINDOW_STYLE = "confirmbox-window-style";
 
     /**
      * Error label style.

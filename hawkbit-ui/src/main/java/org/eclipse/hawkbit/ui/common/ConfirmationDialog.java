@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.util.StringUtils;
 
+import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.Resource;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
@@ -129,29 +130,35 @@ public class ConfirmationDialog implements Button.ClickListener {
             window.setIcon(icon);
         }
 
-        okButton = SPUIComponentProvider.getButton(UIComponentIdProvider.OK_BUTTON, okLabel, "",
-                ValoTheme.BUTTON_PRIMARY, false, null, SPUIButtonStyleTiny.class);
-        okButton.addClickListener(this);
+        okButton = createOkButton(okLabel);
 
-        final Button cancelButton = SPUIComponentProvider.getButton(null, cancelLabel, "", null, false, null,
-                SPUIButtonStyleTiny.class);
-        cancelButton.addClickListener(this);
-        cancelButton.setId(UIComponentIdProvider.CANCEL_BUTTON);
+        final Button cancelButton = createCancelButton(cancelLabel);
         window.setModal(true);
-        window.addStyleName(SPUIStyleDefinitions.CONFIRMBOX_WINDOW_SYLE);
+        window.addStyleName(SPUIStyleDefinitions.CONFIRMBOX_WINDOW_STYLE);
         if (this.callback == null) {
             this.callback = callback;
         }
         final VerticalLayout vLayout = new VerticalLayout();
-
         if (question != null) {
-            final Label questionLbl = new Label(String.format("<p>%s</p>", question.replaceAll("\n", "<br/>")),
-                    ContentMode.HTML);
-            questionLbl.addStyleName(SPUIStyleDefinitions.CONFIRMBOX_QUESTION_LABEL);
-            vLayout.addComponent(questionLbl);
-
+            vLayout.addComponent(createConfirmationQuestion(question));
         }
 
+        final HorizontalLayout hButtonLayout = createButtonLayout(cancelButton);
+        vLayout.addComponent(hButtonLayout);
+        vLayout.setComponentAlignment(hButtonLayout, Alignment.BOTTOM_CENTER);
+
+        window.setContent(vLayout);
+        window.setResizable(false);
+    }
+
+    private static Label createConfirmationQuestion(final String question) {
+        final Label questionLbl = new Label(String.format("<p>%s</p>", question.replaceAll("\n", "<br/>")),
+                ContentMode.HTML);
+        questionLbl.addStyleName(SPUIStyleDefinitions.CONFIRMBOX_QUESTION_LABEL);
+        return questionLbl;
+    }
+
+    private HorizontalLayout createButtonLayout(final Button cancelButton) {
         final HorizontalLayout hButtonLayout = new HorizontalLayout();
         hButtonLayout.setSpacing(true);
         hButtonLayout.addComponent(okButton);
@@ -159,11 +166,23 @@ public class ConfirmationDialog implements Button.ClickListener {
         hButtonLayout.setSizeUndefined();
         hButtonLayout.setComponentAlignment(okButton, Alignment.TOP_CENTER);
         hButtonLayout.setComponentAlignment(cancelButton, Alignment.TOP_CENTER);
+        return hButtonLayout;
+    }
 
-        vLayout.addComponent(hButtonLayout);
-        vLayout.setComponentAlignment(hButtonLayout, Alignment.BOTTOM_CENTER);
-        window.setContent(vLayout);
-        window.setResizable(false);
+    private Button createCancelButton(final String cancelLabel) {
+        final Button button = SPUIComponentProvider.getButton(UIComponentIdProvider.CANCEL_BUTTON, cancelLabel, "",
+                null, false, null, SPUIButtonStyleTiny.class);
+        button.addClickListener(this);
+        button.setClickShortcut(KeyCode.ESCAPE);
+        return button;
+    }
+
+    private Button createOkButton(final String okLabel) {
+        final Button button = SPUIComponentProvider.getButton(UIComponentIdProvider.OK_BUTTON, okLabel, "",
+                ValoTheme.BUTTON_PRIMARY, false, null, SPUIButtonStyleTiny.class);
+        button.addClickListener(this);
+        button.setClickShortcut(KeyCode.ENTER);
+        return button;
     }
 
     /**
