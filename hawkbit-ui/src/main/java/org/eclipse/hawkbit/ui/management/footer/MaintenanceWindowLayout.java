@@ -11,22 +11,26 @@ package org.eclipse.hawkbit.ui.management.footer;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
+import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
+import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.springframework.util.StringUtils;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
+import com.cronutils.descriptor.CronDescriptor;
 import com.vaadin.data.Validator;
-import com.vaadin.ui.CheckBox;
+import com.vaadin.event.FieldEvents.TextChangeEvent;
+import com.vaadin.event.FieldEvents.TextChangeListener;
+import com.vaadin.server.Page;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Notification;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
@@ -36,15 +40,16 @@ import com.vaadin.ui.themes.ValoTheme;
  * maintenance schedule while assigning distribution set(s) to the target(s).
  */
 public class MaintenanceWindowLayout extends VerticalLayout {
-
-    private static final long serialVersionUID = 722511089585562455L;
+    private static final long serialVersionUID = 1L;
 
     private final VaadinMessageSource i18n;
 
-    private CheckBox maintenanceWindowSelection;
+    private static final String CRON_VALIDATION_ERROR = "message.maintenancewindow.schedule.validation.error";
+
     private TextField schedule;
     private TextField duration;
     private ComboBox timeZone;
+    private Label scheduleTranslator;
 
     /**
      * Constructor for the control to specify the maintenance schedule.
@@ -55,123 +60,137 @@ public class MaintenanceWindowLayout extends VerticalLayout {
      */
     public MaintenanceWindowLayout(final VaadinMessageSource i18n) {
 
-        HorizontalLayout optionContainer;
-        HorizontalLayout controlContainer;
-
         this.i18n = i18n;
 
-        optionContainer = new HorizontalLayout();
-        controlContainer = new HorizontalLayout();
-        addComponent(optionContainer);
-        addComponent(controlContainer);
-
-        createMaintenanceWindowOption();
         createMaintenanceScheduleControl();
         createMaintenanceDurationControl();
         createMaintenanceTimeZoneControl();
+        createMaintenanceScheduleTranslatorControl();
 
-        optionContainer.addComponent(maintenanceWindowSelection);
+        final HorizontalLayout controlContainer = new HorizontalLayout();
         controlContainer.addComponent(schedule);
         controlContainer.addComponent(duration);
         controlContainer.addComponent(timeZone);
+        addComponent(controlContainer);
 
-        addValueChangeListener();
-        maintenanceWindowSelection.setValue(false);
+        addComponent(scheduleTranslator);
+
         setStyleName("dist-window-maintenance-window-layout");
-    }
-
-    /**
-     * Validates if the maintenance schedule is a valid cron expression.
-     */
-    private static class CronValidation implements Validator {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public void validate(final Object value) throws InvalidValueException {
-            try {
-                final String expr = (String) value;
-                if (!expr.isEmpty()) {
-                    MaintenanceScheduleHelper.validateMaintenanceSchedule((String) value, "00:00:00",
-                            getClientTimeZone());
-                }
-            } catch (final IllegalArgumentException e) {
-                Notification.show(e.getMessage());
-                throw e;
-            }
-        }
-    }
-
-    /**
-     * Validates if the duration is specified in expected format.
-     */
-    private static class DurationValidator implements Validator {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public void validate(final Object value) {
-            try {
-                final String expr = (String) value;
-                if (!StringUtils.isEmpty(expr)) {
-                    MaintenanceScheduleHelper.convertToISODuration((String) value);
-                }
-            } catch (final DateTimeParseException e) {
-                Notification.show(e.getMessage());
-                throw e;
-            }
-        }
-    }
-
-    /**
-     * Create check box to enable or disable maintenance window.
-     */
-    private void createMaintenanceWindowOption() {
-        maintenanceWindowSelection = new CheckBox(i18n.getMessage("caption.maintenancewindow.enable"));
-        maintenanceWindowSelection.addStyleName(ValoTheme.CHECKBOX_SMALL);
+        setId(UIComponentIdProvider.MAINTENANCE_WINDOW_LAYOUT_ID);
     }
 
     /**
      * Text field to specify the schedule.
      */
     private void createMaintenanceScheduleControl() {
-        schedule = new TextField();
-        schedule.setCaption(i18n.getMessage("caption.maintenancewindow.schedule"));
-        schedule.addValidator(new CronValidation());
-        schedule.setEnabled(false);
-        schedule.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+        schedule = new TextFieldBuilder().id(UIComponentIdProvider.MAINTENANCE_WINDOW_SCHEDULE_ID)
+                .caption(i18n.getMessage("caption.maintenancewindow.schedule")).immediate(true)
+                .validator(new CronValidator()).prompt("0 0 3 ? * 6").required(true).buildTextComponent();
+        schedule.addTextChangeListener(new CronTranslationListener());
+    }
+
+    /**
+     * Validates if the maintenance schedule is a valid cron expression.
+     */
+    private class CronValidator implements Validator {
+        private static final long serialVersionUID = 1L;
+
+        // Exception squid:S1166 - Vaadin validation class,
+        // InvalidValueException,
+        // doesn't have the constructor to pass throwable, but shows the
+        // validation
+        // errors to the user
+        @SuppressWarnings("squid:S1166")
+        @Override
+        public void validate(final Object value) {
+            try {
+                MaintenanceScheduleHelper.validateCronSchedule((String) value);
+            } catch (final InvalidMaintenanceScheduleException e) {
+                throw new InvalidValueException(i18n.getMessage(CRON_VALIDATION_ERROR) + ": " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Used for cron expression translation.
+     */
+    private class CronTranslationListener implements TextChangeListener {
+        private static final long serialVersionUID = 1L;
+
+        private final transient CronDescriptor cronDescriptor;
+
+        public CronTranslationListener() {
+            cronDescriptor = CronDescriptor.instance(getClientsLocale());
+        }
+
+        @Override
+        public void textChange(final TextChangeEvent event) {
+            scheduleTranslator.setValue(translateCron(event.getText()));
+        }
+
+        // Exception squid:S1166 - when the format of the cron expression is not
+        // valid, the hint is shown to provide the valid one
+        @SuppressWarnings("squid:S1166")
+        private String translateCron(final String cronExpression) {
+            try {
+                return cronDescriptor.describe(MaintenanceScheduleHelper.getCronFromExpression(cronExpression));
+            } catch (final IllegalArgumentException ex) {
+                return i18n.getMessage(CRON_VALIDATION_ERROR);
+            }
+        }
+
+        private Locale getClientsLocale() {
+            return Page.getCurrent().getWebBrowser().getLocale();
+        }
     }
 
     /**
      * Text field to specify the duration.
      */
     private void createMaintenanceDurationControl() {
-        duration = new TextField();
-        duration.setCaption(i18n.getMessage("caption.maintenancewindow.duration"));
-        duration.addValidator(new DurationValidator());
-        duration.setEnabled(false);
-        schedule.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+        duration = new TextFieldBuilder().id(UIComponentIdProvider.MAINTENANCE_WINDOW_DURATION_ID)
+                .caption(i18n.getMessage("caption.maintenancewindow.duration")).immediate(true)
+                .validator(new DurationValidator()).prompt("hh:mm:ss").required(true).buildTextComponent();
+    }
+
+    /**
+     * Validates if the duration is specified in expected format.
+     */
+    private class DurationValidator implements Validator {
+        private static final long serialVersionUID = 1L;
+
+        // Exception squid:S1166 - Vaadin validation class,
+        // InvalidValueException,
+        // doesn't have the constructor to pass throwable, but shows the
+        // validation
+        // errors to the user
+        @SuppressWarnings("squid:S1166")
+        @Override
+        public void validate(final Object value) {
+            try {
+                MaintenanceScheduleHelper.validateDuration((String) value);
+            } catch (final InvalidMaintenanceScheduleException e) {
+                throw new InvalidValueException(i18n.getMessage("message.maintenancewindow.duration.validation.error",
+                        e.getDurationErrorIndex()));
+            }
+        }
     }
 
     /**
      * Combo box to pick the time zone offset.
      */
     private void createMaintenanceTimeZoneControl() {
+        // ComboBoxBuilder cannot be used here, because Builder do
+        // 'comboBox.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);'
+        // which interferes our code: 'timeZone.addItems(getAllTimeZones());'
         timeZone = new ComboBox();
+        timeZone.setId(UIComponentIdProvider.MAINTENANCE_WINDOW_TIME_ZONE_ID);
         timeZone.setCaption(i18n.getMessage("caption.maintenancewindow.timezone"));
-
         timeZone.addItems(getAllTimeZones());
-        timeZone.setTextInputAllowed(false);
         timeZone.setValue(getClientTimeZone());
-
-        timeZone.setEnabled(false);
         timeZone.addStyleName(ValoTheme.COMBOBOX_SMALL);
-    }
-
-    /**
-     * Get time zone of the browser client to be used as default.
-     */
-    private static String getClientTimeZone() {
-        return ZonedDateTime.now(ZoneId.of(SPDateTimeUtil.getBrowserTimeZone().getID())).getOffset().getId()
-                .replaceAll("Z", "+00:00");
+        timeZone.setTextInputAllowed(false);
+        timeZone.setNullSelectionAllowed(false);
     }
 
     /**
@@ -186,36 +205,20 @@ public class MaintenanceWindowLayout extends VerticalLayout {
     }
 
     /**
-     * Create a listener to enable and disable maintenance schedule controls.
+     * Get time zone of the browser client to be used as default.
      */
-    private void addValueChangeListener() {
-        maintenanceWindowSelection.addValueChangeListener(new ValueChangeListener() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void valueChange(final ValueChangeEvent event) {
-                schedule.setEnabled(maintenanceWindowSelection.getValue());
-                schedule.setRequired(maintenanceWindowSelection.getValue());
-                schedule.setValue("");
-
-                duration.setEnabled(maintenanceWindowSelection.getValue());
-                duration.setRequired(maintenanceWindowSelection.getValue());
-                duration.setValue("");
-
-                timeZone.setEnabled(maintenanceWindowSelection.getValue());
-                timeZone.setRequired(maintenanceWindowSelection.getValue());
-                timeZone.setValue(getClientTimeZone());
-            }
-        });
+    private static String getClientTimeZone() {
+        return ZonedDateTime.now(ZoneId.of(SPDateTimeUtil.getBrowserTimeZone().getID())).getOffset().getId()
+                .replaceAll("Z", "+00:00");
     }
 
     /**
-     * Get whether the maintenance schedule option is enabled or not.
-     *
-     * @return boolean.
+     * Label to translate the cron schedule to human readable format.
      */
-    public boolean isMaintenanceWindowEnabled() {
-        return maintenanceWindowSelection.getValue();
+    private void createMaintenanceScheduleTranslatorControl() {
+        scheduleTranslator = new LabelBuilder().id(UIComponentIdProvider.MAINTENANCE_WINDOW_SCHEDULE_TRANSLATOR_ID)
+                .name(i18n.getMessage(CRON_VALIDATION_ERROR)).buildLabel();
+        scheduleTranslator.addStyleName(ValoTheme.LABEL_TINY);
     }
 
     /**
@@ -237,12 +240,63 @@ public class MaintenanceWindowLayout extends VerticalLayout {
     }
 
     /**
-     * Get the cron expression for maintenance window timezone.
+     * Get the timezone for maintenance window.
      *
      * @return {@link String}.
      */
 
     public String getMaintenanceTimeZone() {
         return timeZone.getValue().toString();
+    }
+
+    /**
+     * Set all the controls to their default values.
+     */
+    public void clearAllControls() {
+        schedule.setValue("");
+        duration.setValue("");
+        timeZone.setValue(getClientTimeZone());
+    }
+
+    /**
+     * Method, used for validity check, when schedule text is changed.
+     *
+     * @param event
+     *            (@link TextChangeEvent} the event object after schedule text
+     *            change.
+     * @return validity of maintenance window controls.
+     */
+    public boolean onScheduleChange(final TextChangeEvent event) {
+        schedule.setValue(event.getText());
+        return isScheduleAndDurationValid();
+    }
+
+    /**
+     * Method, used for validity check, when duration text is changed.
+     *
+     * @param event
+     *            (@link TextChangeEvent} the event object after duration text
+     *            change.
+     * @return validity of maintenance window controls.
+     */
+    public boolean onDurationChange(final TextChangeEvent event) {
+        duration.setValue(event.getText());
+        return isScheduleAndDurationValid();
+    }
+
+    private boolean isScheduleAndDurationValid() {
+        if (schedule.isEmpty() || duration.isEmpty()) {
+            return false;
+        }
+
+        return schedule.isValid() && duration.isValid();
+    }
+
+    public TextField getScheduleControl() {
+        return schedule;
+    }
+
+    public TextField getDurationControl() {
+        return duration;
     }
 }

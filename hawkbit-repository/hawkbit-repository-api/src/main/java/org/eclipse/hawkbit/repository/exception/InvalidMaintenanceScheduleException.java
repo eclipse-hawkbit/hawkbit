@@ -20,6 +20,8 @@ import org.eclipse.hawkbit.exception.SpServerError;
 public class InvalidMaintenanceScheduleException extends AbstractServerRtException {
     private static final long serialVersionUID = 1L;
 
+    private final int durationErrorIndex;
+
     /**
      * Constructor for {@link InvalidMaintenanceScheduleException}.
      *
@@ -27,7 +29,20 @@ public class InvalidMaintenanceScheduleException extends AbstractServerRtExcepti
      *            the message for this exception.
      */
     public InvalidMaintenanceScheduleException(final String message) {
+        this(message, -1);
+    }
+
+    /**
+     * Constructor for {@link InvalidMaintenanceScheduleException}.
+     *
+     * @param message
+     *            the message for this exception.
+     * @param errorIndex
+     *            the error index of maintenance duration.
+     */
+    public InvalidMaintenanceScheduleException(final String message, final int errorIndex) {
         super(message, SpServerError.SP_MAINTENANCE_SCHEDULE_INVALID);
+        this.durationErrorIndex = errorIndex;
     }
 
     /**
@@ -39,6 +54,30 @@ public class InvalidMaintenanceScheduleException extends AbstractServerRtExcepti
      *            the cause for this exception.
      */
     public InvalidMaintenanceScheduleException(final String message, final Throwable cause) {
+        this(message, cause, -1);
+    }
+
+    /**
+     * Constructor for {@link InvalidMaintenanceScheduleException}.
+     *
+     * @param message
+     *            the message for this exception
+     * @param cause
+     *            the cause for this exception.
+     * @param errorIndex
+     *            the error index of maintenance duration.
+     */
+    public InvalidMaintenanceScheduleException(final String message, final Throwable cause, final int errorIndex) {
         super(message, SpServerError.SP_MAINTENANCE_SCHEDULE_INVALID, cause);
+        this.durationErrorIndex = errorIndex;
+    }
+
+    /**
+     * Get the error index position for maintenance window duration.
+     *
+     * @return error index.
+     */
+    public int getDurationErrorIndex() {
+        return durationErrorIndex;
     }
 }

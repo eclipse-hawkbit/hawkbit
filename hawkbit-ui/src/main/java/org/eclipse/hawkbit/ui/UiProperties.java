@@ -123,6 +123,11 @@ public class UiProperties implements Serializable {
             private String uploadView = "";
 
             /**
+             * Link to documentation of maintenance window view.
+             */
+            private String maintenanceWindowView = "";
+
+            /**
              * Link to documentation of system configuration view.
              */
             private String systemConfigurationView = "";
@@ -174,6 +179,10 @@ public class UiProperties implements Serializable {
                 return uploadView;
             }
 
+            public String getMaintenanceWindowView() {
+                return maintenanceWindowView;
+            }
+
             public void setDeploymentView(final String deploymentView) {
                 this.deploymentView = deploymentView;
             }
@@ -204,6 +213,10 @@ public class UiProperties implements Serializable {
 
             public void setUploadView(final String uploadView) {
                 this.uploadView = uploadView;
+            }
+
+            public void setMaintenanceWindowView(final String maintenanceWindowView) {
+                this.maintenanceWindowView = maintenanceWindowView;
             }
 
         }
