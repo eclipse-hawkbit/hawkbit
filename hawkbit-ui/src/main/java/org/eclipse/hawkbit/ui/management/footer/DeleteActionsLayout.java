@@ -283,7 +283,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private void addInDeleteDistributionList(final Table sourceTable, final TableTransferable transferable) {
         final AbstractTable<?> distTable = (AbstractTable<?>) sourceTable;
-        final Set<Long> ids = distTable.getDeletedEntityByTransferable(transferable);
+        final Set<Long> ids = distTable.getSelectedEntitiesByTransferable(transferable);
 
         final Long dsInBulkUpload = managementUIState.getTargetTableFilters().getBulkUpload().getDsNameAndVersion();
         if (isDsInUseInBulkUpload(ids, dsInBulkUpload)) {
@@ -351,7 +351,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private void addInDeleteTargetList(final Table sourceTable, final TableTransferable transferable) {
         final TargetTable targetTable = (TargetTable) sourceTable;
-        final Set<Long> targetIdSet = targetTable.getDeletedEntityByTransferable(transferable);
+        final Set<Long> targetIdSet = targetTable.getSelectedEntitiesByTransferable(transferable);
         final Collection<Target> findTargetAllById = targetManagement.get(targetIdSet);
         if (findTargetAllById.isEmpty()) {
             notification.displayWarning(i18n.getMessage("targets.not.exists"));

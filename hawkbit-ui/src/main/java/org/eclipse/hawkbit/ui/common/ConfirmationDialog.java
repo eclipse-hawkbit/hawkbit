@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.common;
 
+import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleTiny;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -28,12 +29,13 @@ import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- *
- * module.
- *
+ * Class for the confirmation dialog which pops up when deleting, assigning...
+ * entities.
  */
 public class ConfirmationDialog implements Button.ClickListener {
+
     private static final long serialVersionUID = 1L;
+
     /** The confirmation callback. */
     private transient ConfirmationDialogCallback callback;
     private final Button okButton;
@@ -52,10 +54,32 @@ public class ConfirmationDialog implements Button.ClickListener {
      *            the cancel button label.
      * @param callback
      *            the callback.
+     * @param tab
+     *            ConfirmationTab which consists of a table for visualizing more
+     *            information about the action which has to be confirmed.
+     */
+    public ConfirmationDialog(final String caption, final String question, final String okLabel,
+            final String cancelLabel, final ConfirmationDialogCallback callback, final ConfirmationTab tab) {
+        this(caption, question, okLabel, cancelLabel, callback, null, null, tab);
+    }
+
+    /**
+     * Constructor for configuring confirmation dialog.
+     * 
+     * @param caption
+     *            the dialog caption.
+     * @param question
+     *            the question.
+     * @param okLabel
+     *            the Ok button label.
+     * @param cancelLabel
+     *            the cancel button label.
+     * @param callback
+     *            the callback.
      */
     public ConfirmationDialog(final String caption, final String question, final String okLabel,
             final String cancelLabel, final ConfirmationDialogCallback callback) {
-        this(caption, question, okLabel, cancelLabel, callback, null, null);
+        this(caption, question, okLabel, cancelLabel, callback, null, null, null);
     }
 
     /**
@@ -76,7 +100,7 @@ public class ConfirmationDialog implements Button.ClickListener {
      */
     public ConfirmationDialog(final String caption, final String question, final String okLabel,
             final String cancelLabel, final ConfirmationDialogCallback callback, final String id) {
-        this(caption, question, okLabel, cancelLabel, callback, null, id);
+        this(caption, question, okLabel, cancelLabel, callback, null, id, null);
     }
 
     /**
@@ -97,7 +121,7 @@ public class ConfirmationDialog implements Button.ClickListener {
      */
     public ConfirmationDialog(final String caption, final String question, final String okLabel,
             final String cancelLabel, final ConfirmationDialogCallback callback, final Resource icon) {
-        this(caption, question, okLabel, cancelLabel, callback, icon, null);
+        this(caption, question, okLabel, cancelLabel, callback, icon, null, null);
     }
 
     /**
@@ -119,7 +143,8 @@ public class ConfirmationDialog implements Button.ClickListener {
      *            the id of the confirmation dialog
      */
     public ConfirmationDialog(final String caption, final String question, final String okLabel,
-            final String cancelLabel, final ConfirmationDialogCallback callback, final Resource icon, final String id) {
+            final String cancelLabel, final ConfirmationDialogCallback callback, final Resource icon, final String id,
+            final ConfirmationTab tab) {
         window = new Window(caption);
         if (!StringUtils.isEmpty(id)) {
             window.setId(id);
@@ -142,8 +167,12 @@ public class ConfirmationDialog implements Button.ClickListener {
         if (question != null) {
             vLayout.addComponent(createConfirmationQuestion(question));
         }
+        if (tab != null) {
+            vLayout.addComponent(tab);
+        }
 
         final HorizontalLayout hButtonLayout = createButtonLayout(cancelButton);
+        hButtonLayout.addStyleName("marginTop");
         vLayout.addComponent(hButtonLayout);
         vLayout.setComponentAlignment(hButtonLayout, Alignment.BOTTOM_CENTER);
 
@@ -220,6 +249,10 @@ public class ConfirmationDialog implements Button.ClickListener {
          *            True if user clicked ok.
          */
         void response(boolean ok);
+    }
+
+    public Button getOkButton() {
+        return okButton;
     }
 
 }

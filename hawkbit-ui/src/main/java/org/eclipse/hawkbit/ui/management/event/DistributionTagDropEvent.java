@@ -135,7 +135,7 @@ public class DistributionTagDropEvent implements DropHandler {
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
         final AbstractTable<?> source = (AbstractTable<?>) transferable.getSourceComponent();
 
-        final Set<Long> distSelected = source.getDeletedEntityByTransferable(transferable);
+        final Set<Long> distSelected = source.getSelectedEntitiesByTransferable(transferable);
 
         final String distTagName = HawkbitCommonUtil.removePrefix(targetDetails.getTarget().getId(),
                 SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS);

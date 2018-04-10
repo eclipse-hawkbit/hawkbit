@@ -190,7 +190,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private void addInDeleteDistributionList(final Table sourceTable, final TableTransferable transferable) {
         final AbstractTable<?> table = (AbstractTable<?>) sourceTable;
-        final Set<Long> ids = table.getDeletedEntityByTransferable(transferable);
+        final Set<Long> ids = table.getSelectedEntitiesByTransferable(transferable);
         final List<DistributionSet> findDistributionSetAllById = distributionSetManagement.get(ids);
 
         if (findDistributionSetAllById.isEmpty()) {
@@ -214,7 +214,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private void addToSWDeleteList(final Table sourceTable, final TableTransferable transferable) {
         final AbstractTable<?> swTable = (AbstractTable<?>) sourceTable;
-        final Set<Long> swModuleIdNameSet = swTable.getDeletedEntityByTransferable(transferable);
+        final Set<Long> swModuleIdNameSet = swTable.getSelectedEntitiesByTransferable(transferable);
 
         swModuleIdNameSet.forEach(id -> {
             final String swModuleName = (String) sourceTable.getContainerDataSource().getItem(id)

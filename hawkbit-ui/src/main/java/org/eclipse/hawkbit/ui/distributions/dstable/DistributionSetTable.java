@@ -18,6 +18,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -29,6 +30,8 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
+import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
+import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
 import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.entity.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
@@ -64,6 +67,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
+import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
@@ -95,6 +99,10 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     private final transient TargetManagement targetManagement;
 
     private final DsMetadataPopupLayout dsMetadataPopupLayout;
+
+    private static final String DIST_NAME = "DistributionName";
+
+    private static final String SOFTWARE_MODULE_NAME = "SoftwareModuleName";
 
     DistributionSetTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification notification,
             final SpPermissionChecker permissionChecker, final ManageDistUIState manageDistUIState,
@@ -218,13 +226,13 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     protected void onDropEventFromTable(final DragAndDropEvent event) {
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
         final AbstractTable<?> source = (AbstractTable<?>) transferable.getSourceComponent();
-        final Set<Long> softwareModulesIdList = source.getDeletedEntityByTransferable(transferable);
+        final Set<Long> softwareModulesIdList = source.getSelectedEntitiesByTransferable(transferable);
 
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
 
         final Object distItemId = dropData.getItemIdOver();
         if (distItemId != null) {
-            handleDropEvent(source, softwareModulesIdList, distItemId);
+            assignSwmToDs(source, softwareModulesIdList, distItemId);
         }
     }
 
@@ -243,7 +251,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         return super.isDropValid(dragEvent);
     }
 
-    private void handleDropEvent(final Table source, final Set<Long> softwareModulesIdList, final Object distId) {
+    private void assignSwmToDs(final Table source, final Set<Long> softwareModulesIdList, final Object distId) {
         final Optional<DistributionSet> distributionSet = distributionSetManagement.get((Long) distId);
 
         if (!distributionSet.isPresent()) {
@@ -254,11 +262,11 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distributionSet.get());
 
         final HashMap<Long, HashSet<SoftwareModuleIdName>> map;
-        if (manageDistUIState.getConsolidatedDistSoftwarewList().containsKey(distributionSetIdName)) {
-            map = manageDistUIState.getConsolidatedDistSoftwarewList().get(distributionSetIdName);
+        if (manageDistUIState.getConsolidatedDistSoftwareList().containsKey(distributionSetIdName)) {
+            map = manageDistUIState.getConsolidatedDistSoftwareList().get(distributionSetIdName);
         } else {
             map = new HashMap<>();
-            manageDistUIState.getConsolidatedDistSoftwarewList().put(distributionSetIdName, map);
+            manageDistUIState.getConsolidatedDistSoftwareList().put(distributionSetIdName, map);
         }
 
         for (final Long softwareModuleId : softwareModulesIdList) {
@@ -283,7 +291,9 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         final HashSet<SoftwareModuleIdName> softwareModules = new HashSet<>();
         map.keySet().forEach(typeId -> softwareModules.addAll(map.get(typeId)));
 
-        updateDropedDetails(distributionSetIdName, softwareModules);
+        LOG.debug("Adding a log to check if distributionSetIdName is null : {} ", distributionSetIdName);
+        manageDistUIState.getAssignedList().put(distributionSetIdName, softwareModules);
+        openConfirmationWindowForAssignment();
     }
 
     private void publishAssignEvent(final Long distId, final SoftwareModule softwareModule) {
@@ -314,12 +324,76 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         }
     }
 
-    private void updateDropedDetails(final DistributionSetIdName distributionSetIdName,
-            final HashSet<SoftwareModuleIdName> softwareModules) {
-        LOG.debug("Adding a log to check if distributionSetIdName is null : {} ", distributionSetIdName);
-        manageDistUIState.getAssignedList().put(distributionSetIdName, softwareModules);
-        eventBus.publish(this, DistributionsUIEvent.UPDATE_COUNT);
+    // Assign Software to Distribution START
+    private void openConfirmationWindowForAssignment() {
+        final ConfirmationDialog confirmDialog = new ConfirmationDialog(
+                i18n.getMessage("caption.entity.assign.action.confirmbox"),
+                i18n.getMessage("message.confirm.assign.entity"), i18n.getMessage("button.ok"),
+                i18n.getMessage("button.cancel"), ok -> {
+                    if (ok) {
+                        saveAllAssignments();
+                    }
+                    if (!ok) {
+                        manageDistUIState.getAssignedList().clear();
+                        manageDistUIState.getConsolidatedDistSoftwareList().clear();
+                    }
+                }, createAssignmentTab());
+        UI.getCurrent().addWindow(confirmDialog.getWindow());
+        confirmDialog.getWindow().bringToFront();
     }
+
+    private void saveAllAssignments() {
+        manageDistUIState.getAssignedList().forEach((distIdName, softIdNameSet) -> {
+            final List<Long> softIds = softIdNameSet.stream().map(softIdName -> softIdName.getId())
+                    .collect(Collectors.toList());
+            distributionSetManagement.assignSoftwareModules(distIdName.getId(), softIds);
+        });
+
+        int count = 0;
+        for (final Entry<DistributionSetIdName, HashSet<SoftwareModuleIdName>> entry : manageDistUIState
+                .getAssignedList().entrySet()) {
+            count += entry.getValue().size();
+        }
+
+        notification.displaySuccess(i18n.getMessage("message.software.assignment", new Object[] { count }));
+        manageDistUIState.getAssignedList().clear();
+        manageDistUIState.getConsolidatedDistSoftwareList().clear();
+        eventBus.publish(this, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
+    }
+
+    private ConfirmationTab createAssignmentTab() {
+        return new ConfirmationTab(getAssignmentsTableContainer(), getAssignmentsTableVisibleColumns(),
+                getAssignmentsTableColumnHeaders());
+    }
+
+    private String[] getAssignmentsTableColumnHeaders() {
+        return new String[] { i18n.getMessage("header.dist.first.assignment.table"),
+                i18n.getMessage("header.dist.second.assignment.table") };
+    }
+
+    private static Object[] getAssignmentsTableVisibleColumns() {
+        return new Object[] { DIST_NAME, SOFTWARE_MODULE_NAME };
+    }
+
+    @SuppressWarnings("unchecked")
+    private IndexedContainer getAssignmentsTableContainer() {
+        final IndexedContainer contactContainer = new IndexedContainer();
+        contactContainer.addContainerProperty(DIST_NAME, String.class, "");
+        contactContainer.addContainerProperty(SOFTWARE_MODULE_NAME, String.class, "");
+
+        final Map<DistributionSetIdName, HashSet<SoftwareModuleIdName>> assignedList = manageDistUIState
+                .getAssignedList();
+
+        assignedList.forEach((distIdname, softIdNameSet) -> softIdNameSet.forEach(softIdName -> {
+            final String itemId = HawkbitCommonUtil.concatStrings("|||", distIdname.getId().toString(),
+                    softIdName.getId().toString());
+            final Item saveTblitem = contactContainer.addItem(itemId);
+            saveTblitem.getItemProperty(DIST_NAME).setValue(distIdname.getName().concat(":" + distIdname.getVersion()));
+            saveTblitem.getItemProperty(SOFTWARE_MODULE_NAME).setValue(softIdName.getName());
+        }));
+        return contactContainer;
+    }
+    // Assign Software to Distribution END
 
     private boolean validSoftwareModule(final Long distId, final SoftwareModule sm) {
         if (!isSoftwareModuleDragged(distId, sm)) {

@@ -168,7 +168,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
             return false;
         }
 
-        final Set<Long> deletedEntityByTransferable = source.getDeletedEntityByTransferable(tabletransferable);
+        final Set<Long> deletedEntityByTransferable = source.getSelectedEntitiesByTransferable(tabletransferable);
         if (deletedEntityByTransferable.isEmpty()) {
             final String actionDidNotWork = i18n.getMessage("message.action.did.not.work", new Object[] {});
             notification.displayValidationError(actionDidNotWork);
@@ -198,7 +198,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
 
         final TargetTable targetTable = (TargetTable) transferable.getSourceComponent();
-        final Set<Long> targetList = targetTable.getDeletedEntityByTransferable(transferable);
+        final Set<Long> targetList = targetTable.getSelectedEntitiesByTransferable(transferable);
         final String targTagName = HawkbitCommonUtil.removePrefix(targetDetails.getTarget().getId(),
                 SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
 

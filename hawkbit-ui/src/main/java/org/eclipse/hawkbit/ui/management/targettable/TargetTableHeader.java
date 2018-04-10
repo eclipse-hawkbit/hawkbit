@@ -378,7 +378,7 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     private static Set<Long> getDropppedDistributionDetails(final TableTransferable transferable) {
         final AbstractTable<?> distTable = (AbstractTable<?>) transferable.getSourceComponent();
-        return distTable.getDeletedEntityByTransferable(transferable);
+        return distTable.getSelectedEntitiesByTransferable(transferable);
     }
 
     private void addFilterTextField(final DistributionSetIdName distributionSetIdName) {

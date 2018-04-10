@@ -256,6 +256,7 @@ public class MaintenanceWindowLayout extends VerticalLayout {
         schedule.setValue("");
         duration.setValue("");
         timeZone.setValue(getClientTimeZone());
+        scheduleTranslator.setValue(i18n.getMessage(CRON_VALIDATION_ERROR));
     }
 
     /**

@@ -124,7 +124,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
             final DistributionTableFilters distFilterParameters,
             final DistributionSetManagement distributionSetManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement, final TargetManagement targetManagement,
-            final EntityFactory entityFactory, final UiProperties uiproperties,
+            final EntityFactory entityFactory, final UiProperties uiProperties,
             final ManagementViewClientCriterion managementViewClientCriterion,
             final TargetTagManagement targetTagManagement,
             final DistributionSetTagManagement distributionSetTagManagement,
@@ -151,15 +151,15 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
                     targetFilterQueryManagement);
             final TargetTable targetTable = new TargetTable(eventBus, i18n, uiNotification, targetManagement,
                     managementUIState, permChecker, managementViewClientCriterion, distributionSetManagement,
-                    targetTagManagement);
+                    targetTagManagement, deploymentManagement, uiProperties);
 
             this.targetTableLayout = new TargetTableLayout(eventbus, targetTable, targetManagement, entityFactory, i18n,
                     eventBus, uiNotification, managementUIState, managementViewClientCriterion, deploymentManagement,
-                    uiproperties, permChecker, uiNotification, targetTagManagement, distributionSetManagement,
+                    uiProperties, permChecker, uiNotification, targetTagManagement, distributionSetManagement,
                     uiExecutor);
             this.deleteAndActionsLayout = new DeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
                     targetTagManagement, distributionSetTagManagement, managementViewClientCriterion, managementUIState,
-                    targetManagement, targetTable, deploymentManagement, distributionSetManagement, uiproperties);
+                    targetManagement, targetTable, deploymentManagement, distributionSetManagement, uiProperties);
 
             actionHistoryLayout.registerDetails(((ActionStatusGrid) actionStatusLayout.getGrid()).getDetailsSupport());
             actionStatusLayout
@@ -180,7 +180,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
             this.distributionTableLayout = new DistributionTableLayout(i18n, eventBus, permChecker, managementUIState,
                     distributionSetManagement, distributionSetTypeManagement, managementViewClientCriterion,
                     entityFactory, uiNotification, distributionSetTagManagement, targetTagManagement, systemManagement,
-                    targetManagement, deploymentManagement);
+                    targetManagement, deploymentManagement, uiProperties);
         } else {
             this.distributionTagLayout = null;
             this.distributionTableLayout = null;

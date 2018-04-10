@@ -24,9 +24,7 @@ import org.eclipse.hawkbit.ui.common.confirmwindow.layout.AbstractConfirmationWi
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -36,8 +34,6 @@ import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Table.Align;
 
 // TODO MR DELETE
 
@@ -86,33 +82,39 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
     }
 
     private ConfirmationTab createSMDeleteConfirmationTab() {
-        final ConfirmationTab tab = new ConfirmationTab();
+        // final ConfirmationTab tab = new ConfirmationTab();
 
-        tab.getConfirmAll().setId(UIComponentIdProvider.SW_DELETE_ALL);
-        tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
-        tab.getConfirmAll().setCaption(i18n.getMessage("button.delete.all"));
-        tab.getConfirmAll().addClickListener(event -> deleteSMAll(tab));
-
-        tab.getDiscardAll().setCaption(i18n.getMessage("button.discard.all"));
-        tab.getDiscardAll().addClickListener(event -> discardSMAll(tab));
+        // tab.getConfirmAll().setId(UIComponentIdProvider.SW_DELETE_ALL);
+        // tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
+        // tab.getConfirmAll().setCaption(i18n.getMessage("button.delete.all"));
+        // tab.getConfirmAll().addClickListener(event -> deleteSMAll(tab));
+        //
+        // tab.getDiscardAll().setCaption(i18n.getMessage("button.discard.all"));
+        // tab.getDiscardAll().addClickListener(event -> discardSMAll(tab));
 
         // Add items container to the table.
-        tab.getTable().setContainerDataSource(getSWModuleTableContainer());
-
-        // Add the discard action column
-        tab.getTable().addGeneratedColumn(SW_DISCARD_CHGS, (source, itemId, columnId) -> {
-            final ClickListener clickListener = event -> discardSoftwareDelete(event, itemId, tab);
-            return createDiscardButton(itemId, clickListener);
-        });
-
-        tab.getTable().setVisibleColumns(SW_MODULE_NAME_MSG, SW_DISCARD_CHGS);
-        tab.getTable().setColumnHeaders(i18n.getMessage("upload.swModuleTable.header"),
-                i18n.getMessage("header.second.deletetarget.table"));
-
-        tab.getTable().setColumnExpandRatio(SW_MODULE_NAME_MSG, SPUIDefinitions.TARGET_DISTRIBUTION_COLUMN_WIDTH);
-        tab.getTable().setColumnExpandRatio(SW_DISCARD_CHGS, SPUIDefinitions.DISCARD_COLUMN_WIDTH);
-        tab.getTable().setColumnAlignment(SW_DISCARD_CHGS, Align.CENTER);
-        return tab;
+        // tab.getTable().setContainerDataSource(getSWModuleTableContainer());
+        //
+        // // Add the discard action column
+        // tab.getTable().addGeneratedColumn(SW_DISCARD_CHGS, (source, itemId,
+        // columnId) -> {
+        // final ClickListener clickListener = event ->
+        // discardSoftwareDelete(event, itemId, tab);
+        // return createDiscardButton(itemId, clickListener);
+        // });
+        //
+        // tab.getTable().setVisibleColumns(SW_MODULE_NAME_MSG,
+        // SW_DISCARD_CHGS);
+        // tab.getTable().setColumnHeaders(i18n.getMessage("upload.swModuleTable.header"),
+        // i18n.getMessage("header.second.deletetarget.table"));
+        //
+        // tab.getTable().setColumnExpandRatio(SW_MODULE_NAME_MSG,
+        // SPUIDefinitions.TARGET_DISTRIBUTION_COLUMN_WIDTH);
+        // tab.getTable().setColumnExpandRatio(SW_DISCARD_CHGS,
+        // SPUIDefinitions.DISCARD_COLUMN_WIDTH);
+        // tab.getTable().setColumnAlignment(SW_DISCARD_CHGS, Align.CENTER);
+        // return tab;
+        return null;
     }
 
     /**
@@ -192,34 +194,37 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
     }
 
     private ConfirmationTab createSMtypeDeleteConfirmationTab() {
-        final ConfirmationTab tab = new ConfirmationTab();
+        // final ConfirmationTab tab = new ConfirmationTab();
 
-        tab.getConfirmAll().setId(UIComponentIdProvider.SAVE_DELETE_SW_MODULE_TYPE);
-        tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
-        tab.getConfirmAll().setCaption(i18n.getMessage("button.delete.all"));
-        tab.getConfirmAll().addClickListener(event -> deleteSMtypeAll(tab));
-
-        tab.getDiscardAll().setCaption(i18n.getMessage("button.discard.all"));
-        tab.getDiscardAll().addClickListener(event -> discardSMtypeAll(tab));
+        // tab.getConfirmAll().setId(UIComponentIdProvider.SAVE_DELETE_SW_MODULE_TYPE);
+        // tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
+        // tab.getConfirmAll().setCaption(i18n.getMessage("button.delete.all"));
+        // tab.getConfirmAll().addClickListener(event -> deleteSMtypeAll(tab));
+        //
+        // tab.getDiscardAll().setCaption(i18n.getMessage("button.discard.all"));
+        // tab.getDiscardAll().addClickListener(event -> discardSMtypeAll(tab));
 
         // Add items container to the table.
-        tab.getTable().setContainerDataSource(getSWModuleTypeTableContainer());
-
-        // Add the discard action column
-        tab.getTable().addGeneratedColumn(DISCARD, (source, itemId, columnId) -> {
-            final ClickListener clickListener = event -> discardSoftwareTypeDelete(
-                    (String) ((Button) event.getComponent()).getData(), itemId, tab);
-            return createDiscardButton(itemId, clickListener);
-        });
-
-        tab.getTable().setVisibleColumns(SW_MODULE_TYPE_NAME, DISCARD);
-        tab.getTable().setColumnHeaders(i18n.getMessage("header.first.delete.swmodule.type.table"),
-                i18n.getMessage("header.second.delete.swmodule.type.table"));
-
-        tab.getTable().setColumnExpandRatio(SW_MODULE_TYPE_NAME, 2);
-        tab.getTable().setColumnExpandRatio(SW_DISCARD_CHGS, SPUIDefinitions.DISCARD_COLUMN_WIDTH);
-        tab.getTable().setColumnAlignment(SW_DISCARD_CHGS, Align.CENTER);
-        return tab;
+        // tab.getTable().setContainerDataSource(getSWModuleTypeTableContainer());
+        //
+        // // Add the discard action column
+        // tab.getTable().addGeneratedColumn(DISCARD, (source, itemId, columnId)
+        // -> {
+        // final ClickListener clickListener = event ->
+        // discardSoftwareTypeDelete(
+        // (String) ((Button) event.getComponent()).getData(), itemId, tab);
+        // return createDiscardButton(itemId, clickListener);
+        // });
+        //
+        // tab.getTable().setVisibleColumns(SW_MODULE_TYPE_NAME, DISCARD);
+        // tab.getTable().setColumnHeaders(i18n.getMessage("header.first.delete.swmodule.type.table"),
+        // i18n.getMessage("header.second.delete.swmodule.type.table"));
+        //
+        // tab.getTable().setColumnExpandRatio(SW_MODULE_TYPE_NAME, 2);
+        // tab.getTable().setColumnExpandRatio(SW_DISCARD_CHGS,
+        // SPUIDefinitions.DISCARD_COLUMN_WIDTH);
+        // tab.getTable().setColumnAlignment(SW_DISCARD_CHGS, Align.CENTER);
+        return null;
     }
 
     private Container getSWModuleTypeTableContainer() {

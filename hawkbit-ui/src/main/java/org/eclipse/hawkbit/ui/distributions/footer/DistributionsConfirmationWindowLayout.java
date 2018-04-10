@@ -29,16 +29,11 @@ import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
 import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.entity.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
-import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.CollectionUtils;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -51,9 +46,6 @@ import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Table.Align;
-import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Abstract layout of confirm actions window.
@@ -142,33 +134,38 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     }
 
     private ConfirmationTab createSMDeleteConfirmationTab() {
-        final ConfirmationTab tab = new ConfirmationTab();
+        // final ConfirmationTab tab = new ConfirmationTab();
 
-        tab.getConfirmAll().setId(UIComponentIdProvider.SW_DELETE_ALL);
-        tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
-        tab.getConfirmAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DELETE_ALL));
-        tab.getConfirmAll().addClickListener(event -> deleteSMAll(tab));
-
-        tab.getDiscardAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
-        tab.getDiscardAll().addClickListener(event -> discardSMAll(tab));
+        // tab.getConfirmAll().setId(UIComponentIdProvider.SW_DELETE_ALL);
+        // tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
+        // tab.getConfirmAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DELETE_ALL));
+        // tab.getConfirmAll().addClickListener(event -> deleteSMAll(tab));
+        //
+        // tab.getDiscardAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
+        // tab.getDiscardAll().addClickListener(event -> discardSMAll(tab));
 
         /* Add items container to the table. */
-        tab.getTable().setContainerDataSource(getSWModuleTableContainer());
+        // tab.getTable().setContainerDataSource(getSWModuleTableContainer());
 
         /* Add the discard action column */
-        tab.getTable().addGeneratedColumn(SW_DISCARD_CHGS, (source, itemId, columnId) -> {
-            final ClickListener clickListener = event -> discardSoftwareDelete(event, itemId, tab);
-            return createDiscardButton(itemId, clickListener);
-        });
-
-        tab.getTable().setVisibleColumns(SW_MODULE_NAME_MSG, SW_DISCARD_CHGS);
-        tab.getTable().setColumnHeaders(i18n.getMessage("upload.swModuleTable.header"),
-                i18n.getMessage("header.second.deletetarget.table"));
-
-        tab.getTable().setColumnExpandRatio(SW_MODULE_NAME_MSG, SPUIDefinitions.TARGET_DISTRIBUTION_COLUMN_WIDTH);
-        tab.getTable().setColumnExpandRatio(SW_DISCARD_CHGS, SPUIDefinitions.DISCARD_COLUMN_WIDTH);
-        tab.getTable().setColumnAlignment(SW_DISCARD_CHGS, Align.CENTER);
-        return tab;
+        // tab.getTable().addGeneratedColumn(SW_DISCARD_CHGS, (source, itemId,
+        // columnId) -> {
+        // final ClickListener clickListener = event ->
+        // discardSoftwareDelete(event, itemId, tab);
+        // return createDiscardButton(itemId, clickListener);
+        // });
+        //
+        // tab.getTable().setVisibleColumns(SW_MODULE_NAME_MSG,
+        // SW_DISCARD_CHGS);
+        // tab.getTable().setColumnHeaders(i18n.getMessage("upload.swModuleTable.header"),
+        // i18n.getMessage("header.second.deletetarget.table"));
+        //
+        // tab.getTable().setColumnExpandRatio(SW_MODULE_NAME_MSG,
+        // SPUIDefinitions.TARGET_DISTRIBUTION_COLUMN_WIDTH);
+        // tab.getTable().setColumnExpandRatio(SW_DISCARD_CHGS,
+        // SPUIDefinitions.DISCARD_COLUMN_WIDTH);
+        // tab.getTable().setColumnAlignment(SW_DISCARD_CHGS, Align.CENTER);
+        return null;
     }
 
     private void deleteSMAll(final ConfirmationTab tab) {
@@ -252,42 +249,46 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     }
 
     private ConfirmationTab createSMtypeDeleteConfirmationTab() {
-        final ConfirmationTab tab = new ConfirmationTab();
+        // final ConfirmationTab tab = new ConfirmationTab();
 
-        tab.getConfirmAll().setId(UIComponentIdProvider.SAVE_DELETE_SW_MODULE_TYPE);
-        tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
-        tab.getConfirmAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DELETE_ALL));
-        tab.getConfirmAll().addClickListener(event -> deleteSMtypeAll(tab));
-
-        tab.getDiscardAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
-        tab.getDiscardAll().setId(UIComponentIdProvider.DISCARD_SW_MODULE_TYPE);
-        tab.getDiscardAll().addClickListener(event -> discardSMtypeAll(tab));
+        // tab.getConfirmAll().setId(UIComponentIdProvider.SAVE_DELETE_SW_MODULE_TYPE);
+        // tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
+        // tab.getConfirmAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DELETE_ALL));
+        // tab.getConfirmAll().addClickListener(event -> deleteSMtypeAll(tab));
+        //
+        // tab.getDiscardAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
+        // tab.getDiscardAll().setId(UIComponentIdProvider.DISCARD_SW_MODULE_TYPE);
+        // tab.getDiscardAll().addClickListener(event -> discardSMtypeAll(tab));
 
         // Add items container to the table.
-        tab.getTable().setContainerDataSource(getSWModuleTypeTableContainer());
-
-        // Add the discard action column
-        tab.getTable().addGeneratedColumn(DISCARD, (source, itemId, columnId) -> {
-            final StringBuilder style = new StringBuilder(ValoTheme.BUTTON_TINY);
-            style.append(' ');
-            style.append(SPUIStyleDefinitions.REDICON);
-            final Button deleteIcon = SPUIComponentProvider.getButton("", "", SPUILabelDefinitions.DISCARD,
-                    style.toString(), true, FontAwesome.REPLY, SPUIButtonStyleSmallNoBorder.class);
-            deleteIcon.setData(itemId);
-            deleteIcon.setImmediate(true);
-            deleteIcon.addClickListener(event -> discardSoftwareTypeDelete(
-                    (String) ((Button) event.getComponent()).getData(), itemId, tab));
-            return deleteIcon;
-        });
-
-        tab.getTable().setVisibleColumns(SW_MODULE_TYPE_NAME, DISCARD);
-        tab.getTable().setColumnHeaders(i18n.getMessage("header.first.delete.swmodule.type.table"),
-                i18n.getMessage("header.second.delete.swmodule.type.table"));
-
-        tab.getTable().setColumnExpandRatio(SW_MODULE_TYPE_NAME, 2);
-        tab.getTable().setColumnExpandRatio(SW_DISCARD_CHGS, SPUIDefinitions.DISCARD_COLUMN_WIDTH);
-        tab.getTable().setColumnAlignment(SW_DISCARD_CHGS, Align.CENTER);
-        return tab;
+        // tab.getTable().setContainerDataSource(getSWModuleTypeTableContainer());
+        //
+        // // Add the discard action column
+        // tab.getTable().addGeneratedColumn(DISCARD, (source, itemId, columnId)
+        // -> {
+        // final StringBuilder style = new StringBuilder(ValoTheme.BUTTON_TINY);
+        // style.append(' ');
+        // style.append(SPUIStyleDefinitions.REDICON);
+        // final Button deleteIcon = SPUIComponentProvider.getButton("", "",
+        // SPUILabelDefinitions.DISCARD,
+        // style.toString(), true, FontAwesome.REPLY,
+        // SPUIButtonStyleSmallNoBorder.class);
+        // deleteIcon.setData(itemId);
+        // deleteIcon.setImmediate(true);
+        // deleteIcon.addClickListener(event -> discardSoftwareTypeDelete(
+        // (String) ((Button) event.getComponent()).getData(), itemId, tab));
+        // return deleteIcon;
+        // });
+        //
+        // tab.getTable().setVisibleColumns(SW_MODULE_TYPE_NAME, DISCARD);
+        // tab.getTable().setColumnHeaders(i18n.getMessage("header.first.delete.swmodule.type.table"),
+        // i18n.getMessage("header.second.delete.swmodule.type.table"));
+        //
+        // tab.getTable().setColumnExpandRatio(SW_MODULE_TYPE_NAME, 2);
+        // tab.getTable().setColumnExpandRatio(SW_DISCARD_CHGS,
+        // SPUIDefinitions.DISCARD_COLUMN_WIDTH);
+        // tab.getTable().setColumnAlignment(SW_DISCARD_CHGS, Align.CENTER);
+        return null;
     }
 
     private void deleteSMtypeAll(final ConfirmationTab tab) {
@@ -343,34 +344,38 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
     /* for Distributions */
     private ConfirmationTab createDistDeleteConfirmationTab() {
-        final ConfirmationTab tab = new ConfirmationTab();
+        // final ConfirmationTab tab = new ConfirmationTab();
 
-        tab.getConfirmAll().setId(UIComponentIdProvider.DIST_DELETE_ALL);
-        tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
-        tab.getConfirmAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DELETE_ALL));
-        tab.getConfirmAll().addClickListener(event -> deleteDistAll(tab));
+        // tab.getConfirmAll().setId(UIComponentIdProvider.DIST_DELETE_ALL);
+        // tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
+        // tab.getConfirmAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DELETE_ALL));
+        // tab.getConfirmAll().addClickListener(event -> deleteDistAll(tab));
+        //
+        // tab.getDiscardAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
+        // tab.getDiscardAll().addClickListener(event -> discardDistAll(tab));
 
-        tab.getDiscardAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
-        tab.getDiscardAll().addClickListener(event -> discardDistAll(tab));
-
-        /* Add items container to the table. */
-        tab.getTable().setContainerDataSource(getDistTableContainer());
-
-        /* Add the discard action column */
-        tab.getTable().addGeneratedColumn(DISCARD, (source, itemId, columnId) -> {
-            final ClickListener clickListener = event -> discardDistDelete(event, itemId, tab);
-            return createDiscardButton(itemId, clickListener);
-
-        });
-
-        tab.getTable().setVisibleColumns(DIST_NAME, DISCARD);
-        tab.getTable().setColumnHeaders(i18n.getMessage("header.one.deletedist.table"),
-                i18n.getMessage("header.second.deletedist.table"));
-
-        tab.getTable().setColumnExpandRatio(DIST_NAME, SPUIDefinitions.TARGET_DISTRIBUTION_COLUMN_WIDTH);
-        tab.getTable().setColumnExpandRatio(DISCARD, SPUIDefinitions.DISCARD_COLUMN_WIDTH);
-        tab.getTable().setColumnAlignment(DISCARD, Align.CENTER);
-        return tab;
+        // /* Add items container to the table. */
+        // tab.getTable().setContainerDataSource(getDistTableContainer());
+        //
+        // /* Add the discard action column */
+        // tab.getTable().addGeneratedColumn(DISCARD, (source, itemId, columnId)
+        // -> {
+        // final ClickListener clickListener = event -> discardDistDelete(event,
+        // itemId, tab);
+        // return createDiscardButton(itemId, clickListener);
+        //
+        // });
+        //
+        // tab.getTable().setVisibleColumns(DIST_NAME, DISCARD);
+        // tab.getTable().setColumnHeaders(i18n.getMessage("header.one.deletedist.table"),
+        // i18n.getMessage("header.second.deletedist.table"));
+        //
+        // tab.getTable().setColumnExpandRatio(DIST_NAME,
+        // SPUIDefinitions.TARGET_DISTRIBUTION_COLUMN_WIDTH);
+        // tab.getTable().setColumnExpandRatio(DISCARD,
+        // SPUIDefinitions.DISCARD_COLUMN_WIDTH);
+        // tab.getTable().setColumnAlignment(DISCARD, Align.CENTER);
+        return null;
     }
 
     /* Delete Distributions. */
@@ -439,36 +444,40 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     /* For Distribution set Type */
 
     private ConfirmationTab createDistSetTypeDeleteConfirmationTab() {
-        final ConfirmationTab tab = new ConfirmationTab();
+        // final ConfirmationTab tab = new ConfirmationTab();
 
-        tab.getConfirmAll().setId(UIComponentIdProvider.SAVE_DELETE_DIST_SET_TYPE);
-        tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
-        tab.getConfirmAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DELETE_ALL));
-        tab.getConfirmAll().addClickListener(event -> deleteDistSetTypeAll(tab));
-
-        tab.getDiscardAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
-        tab.getDiscardAll().setId(UIComponentIdProvider.DISCARD_DIST_SET_TYPE);
-        tab.getDiscardAll().addClickListener(event -> discardDistSetTypeAll(tab));
+        // tab.getConfirmAll().setId(UIComponentIdProvider.SAVE_DELETE_DIST_SET_TYPE);
+        // tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
+        // tab.getConfirmAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DELETE_ALL));
+        // tab.getConfirmAll().addClickListener(event ->
+        // deleteDistSetTypeAll(tab));
+        //
+        // tab.getDiscardAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
+        // tab.getDiscardAll().setId(UIComponentIdProvider.DISCARD_DIST_SET_TYPE);
+        // tab.getDiscardAll().addClickListener(event ->
+        // discardDistSetTypeAll(tab));
 
         // Add items container to the table.
-        tab.getTable().setContainerDataSource(getDistSetTypeTableContainer());
-
-        // Add the discard action column
-        tab.getTable().addGeneratedColumn(DISCARD, (source, itemId, columnId) -> {
-            final ClickListener clickListener = event -> discardDistTypeDelete(
-                    (String) ((Button) event.getComponent()).getData(), itemId, tab);
-            return createDiscardButton(itemId, clickListener);
-
-        });
-
-        tab.getTable().setVisibleColumns(DIST_SET_NAME, DISCARD);
-        tab.getTable().setColumnHeaders(i18n.getMessage("header.first.delete.dist.type.table"),
-                i18n.getMessage("header.second.delete.dist.type.table"));
-
-        tab.getTable().setColumnExpandRatio(DIST_SET_NAME, 2);
-        tab.getTable().setColumnExpandRatio(DISCARD, SPUIDefinitions.DISCARD_COLUMN_WIDTH);
-        tab.getTable().setColumnAlignment(DISCARD, Align.CENTER);
-        return tab;
+        // tab.getTable().setContainerDataSource(getDistSetTypeTableContainer());
+        //
+        // // Add the discard action column
+        // tab.getTable().addGeneratedColumn(DISCARD, (source, itemId, columnId)
+        // -> {
+        // final ClickListener clickListener = event -> discardDistTypeDelete(
+        // (String) ((Button) event.getComponent()).getData(), itemId, tab);
+        // return createDiscardButton(itemId, clickListener);
+        //
+        // });
+        //
+        // tab.getTable().setVisibleColumns(DIST_SET_NAME, DISCARD);
+        // tab.getTable().setColumnHeaders(i18n.getMessage("header.first.delete.dist.type.table"),
+        // i18n.getMessage("header.second.delete.dist.type.table"));
+        //
+        // tab.getTable().setColumnExpandRatio(DIST_SET_NAME, 2);
+        // tab.getTable().setColumnExpandRatio(DISCARD,
+        // SPUIDefinitions.DISCARD_COLUMN_WIDTH);
+        // tab.getTable().setColumnAlignment(DISCARD, Align.CENTER);
+        return null;
     }
 
     private void deleteDistSetTypeAll(final ConfirmationTab tab) {
@@ -526,49 +535,58 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     /* For Assign software modules */
     private ConfirmationTab createAssignSWModuleConfirmationTab() {
 
-        assignmnetTab = new ConfirmationTab();
+        // final ConfirmationTab assignmentTab = new ConfirmationTab();
 
-        assignmnetTab.getConfirmAll().setId(UIComponentIdProvider.SAVE_ASSIGNMENT);
-        assignmnetTab.getConfirmAll().setIcon(FontAwesome.SAVE);
-        assignmnetTab.getConfirmAll().setCaption(i18n.getMessage("button.assign.all"));
-        assignmnetTab.getConfirmAll().addClickListener(event -> saveAllAssignments(assignmnetTab));
-
-        assignmnetTab.getDiscardAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
-        assignmnetTab.getDiscardAll().setId(UIComponentIdProvider.DISCARD_ASSIGNMENT);
-        assignmnetTab.getDiscardAll().addClickListener(event -> discardAllSWAssignments(assignmnetTab));
+        // assignmnetTab.getConfirmAll().setId(UIComponentIdProvider.SAVE_ASSIGNMENT);
+        // assignmnetTab.getConfirmAll().setIcon(FontAwesome.SAVE);
+        // assignmnetTab.getConfirmAll().setCaption(i18n.getMessage("button.assign.all"));
+        // assignmnetTab.getConfirmAll().addClickListener(event ->
+        // saveAllAssignments(assignmnetTab));
+        //
+        // assignmnetTab.getDiscardAll().setCaption(i18n.getMessage(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
+        // assignmnetTab.getDiscardAll().setId(UIComponentIdProvider.DISCARD_ASSIGNMENT);
+        // assignmnetTab.getDiscardAll().addClickListener(event ->
+        // discardAllSWAssignments(assignmnetTab));
 
         // Add items container to the table.
-        assignmnetTab.getTable().setContainerDataSource(getSWAssignmentsTableContainer());
-
-        // Add the discard action column
-        assignmnetTab.getTable().addGeneratedColumn(DISCARD, (source, itemId, columnId) -> {
-            final StringBuilder style = new StringBuilder(ValoTheme.BUTTON_TINY);
-            style.append(' ');
-            style.append(SPUIStyleDefinitions.REDICON);
-            final Button deleteIcon = SPUIComponentProvider.getButton("", "", SPUILabelDefinitions.DISCARD,
-                    style.toString(), true, FontAwesome.REPLY, SPUIButtonStyleSmallNoBorder.class);
-            deleteIcon.setData(itemId);
-            deleteIcon.setImmediate(true);
-            deleteIcon.addClickListener(event -> discardSWAssignment((String) ((Button) event.getComponent()).getData(),
-                    itemId, assignmnetTab));
-            return deleteIcon;
-        });
-
-        assignmnetTab.getTable().setVisibleColumns(DIST_NAME, SOFTWARE_MODULE_NAME, DISCARD);
-        assignmnetTab.getTable().setColumnHeaders(i18n.getMessage("header.dist.first.assignment.table"),
-                i18n.getMessage("header.dist.second.assignment.table"),
-                i18n.getMessage("header.third.assignment.table"));
-
-        assignmnetTab.getTable().setColumnExpandRatio(DIST_NAME, 2);
-        assignmnetTab.getTable().setColumnExpandRatio(SOFTWARE_MODULE_NAME, 2);
-        assignmnetTab.getTable().setColumnExpandRatio(DISCARD, SPUIDefinitions.DISCARD_COLUMN_WIDTH);
-        assignmnetTab.getTable().setColumnAlignment(DISCARD, Align.CENTER);
-        return assignmnetTab;
+        // assignmentTab.getTable().setContainerDataSource(getAssignmentsTableContainer());
+        //
+        // // Add the discard action column
+        // assignmentTab.getTable().addGeneratedColumn(DISCARD, (source, itemId,
+        // columnId) -> {
+        // final StringBuilder style = new StringBuilder(ValoTheme.BUTTON_TINY);
+        // style.append(' ');
+        // style.append(SPUIStyleDefinitions.REDICON);
+        // final Button deleteIcon = SPUIComponentProvider.getButton("", "",
+        // SPUILabelDefinitions.DISCARD,
+        // style.toString(), true, FontAwesome.REPLY,
+        // SPUIButtonStyleSmallNoBorder.class);
+        // deleteIcon.setData(itemId);
+        // deleteIcon.setImmediate(true);
+        // deleteIcon.addClickListener(event -> discardSWAssignment((String)
+        // ((Button) event.getComponent()).getData(),
+        // itemId, assignmentTab));
+        // return deleteIcon;
+        // });
+        //
+        // assignmentTab.getTable().setVisibleColumns(DIST_NAME,
+        // SOFTWARE_MODULE_NAME, DISCARD);
+        // assignmentTab.getTable().setColumnHeaders(i18n.getMessage("header.dist.first.assignment.table"),
+        // i18n.getMessage("header.dist.second.assignment.table"),
+        // i18n.getMessage("header.third.assignment.table"));
+        //
+        // assignmentTab.getTable().setColumnExpandRatio(DIST_NAME, 2);
+        // assignmentTab.getTable().setColumnExpandRatio(SOFTWARE_MODULE_NAME,
+        // 2);
+        // assignmentTab.getTable().setColumnExpandRatio(DISCARD,
+        // SPUIDefinitions.DISCARD_COLUMN_WIDTH);
+        // assignmentTab.getTable().setColumnAlignment(DISCARD, Align.CENTER);
+        return null;
 
     }
 
     @SuppressWarnings("unchecked")
-    private IndexedContainer getSWAssignmentsTableContainer() {
+    private IndexedContainer getAssignmentsTableContainer() {
         final IndexedContainer contactContainer = new IndexedContainer();
         contactContainer.addContainerProperty(DIST_NAME, String.class, "");
         contactContainer.addContainerProperty(SOFTWARE_MODULE_NAME, String.class, "");
@@ -609,7 +627,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         addToConsolitatedMsg(FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.getMessage("message.software.assignment", new Object[] { count }));
         manageDistUIState.getAssignedList().clear();
-        manageDistUIState.getConsolidatedDistSoftwarewList().clear();
+        manageDistUIState.getConsolidatedDistSoftwareList().clear();
         removeCurrentTab(tab);
         eventBus.publish(this, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
     }
@@ -617,7 +635,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     private void discardAllSWAssignments(final ConfirmationTab tab) {
         removeCurrentTab(tab);
         manageDistUIState.getAssignedList().clear();
-        manageDistUIState.getConsolidatedDistSoftwarewList().clear();
+        manageDistUIState.getConsolidatedDistSoftwareList().clear();
         setActionMessage(i18n.getMessage("message.assign.discard.success"));
         eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS);
     }
@@ -637,7 +655,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         if (softIdNameSet.isEmpty()) {
             manageDistUIState.getAssignedList().remove(discardDistIdName);
         }
-        final Map<Long, HashSet<SoftwareModuleIdName>> map = manageDistUIState.getConsolidatedDistSoftwarewList()
+        final Map<Long, HashSet<SoftwareModuleIdName>> map = manageDistUIState.getConsolidatedDistSoftwareList()
                 .get(discardDistIdName);
         map.keySet().forEach(typeId -> map.get(typeId).remove(discardSoftIdName));
 
@@ -654,7 +672,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEventDiscard(final SaveActionWindowEvent saveActionWindowEvent) {
         if (saveActionWindowEvent == SaveActionWindowEvent.DELETE_ALL_SOFWARE) {
-            getSWAssignmentsTableContainer();
+            getAssignmentsTableContainer();
         }
     }
 

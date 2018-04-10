@@ -267,7 +267,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
      *            the table transferable
      * @return set of entities id which will deleted
      */
-    public Set<Long> getDeletedEntityByTransferable(final TableTransferable transferable) {
+    public Set<Long> getSelectedEntitiesByTransferable(final TableTransferable transferable) {
         final Set<Long> selectedEntities = getTableValue(this);
         final Set<Long> ids = new HashSet<>();
         final Long tranferableData = (Long) transferable.getData(SPUIDefinitions.ITEMID);
@@ -499,7 +499,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
     private Set<Long> getDraggedTargetList(final TableTransferable transferable, final Table source) {
         @SuppressWarnings("unchecked")
         final AbstractTable<NamedEntity> table = (AbstractTable<NamedEntity>) source;
-        return table.getDeletedEntityByTransferable(transferable);
+        return table.getSelectedEntitiesByTransferable(transferable);
     }
 
     private boolean validateDropList(final Set<?> droplist) {

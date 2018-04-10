@@ -151,7 +151,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private void addToDeleteList(final Table sourceTable, final TableTransferable transferable) {
         final AbstractTable<?> swTable = (AbstractTable<?>) sourceTable;
-        final Set<Long> swModuleIdNameSet = swTable.getDeletedEntityByTransferable(transferable);
+        final Set<Long> swModuleIdNameSet = swTable.getSelectedEntitiesByTransferable(transferable);
 
         swModuleIdNameSet.forEach(id -> {
             final String swModuleName = (String) sourceTable.getContainerDataSource().getItem(id)
