@@ -359,7 +359,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final long maxSize = quotaManagement.getMaxArtifactSize();
 
         // create a file which exceeds the configured maximum size
-        final byte[] random = RandomStringUtils.random(Math.toIntExact(maxSize) + 32).getBytes();
+        final byte[] random = RandomStringUtils.random(Math.toIntExact(maxSize) + 1024).getBytes();
         final MockMultipartFile file = new MockMultipartFile("file", "origFilename" + System.currentTimeMillis(), null,
                 random);
 
