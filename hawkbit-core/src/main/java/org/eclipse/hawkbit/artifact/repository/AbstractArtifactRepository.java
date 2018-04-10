@@ -90,7 +90,7 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
      * @param maxBytes
      *            The maximum file size that is allowed.
      */
-    private void checkFile(final String filename, final File file, final long maxBytes) {
+    private static void checkFile(final String filename, final File file, final long maxBytes) {
         if (file == null || file.isDirectory()) {
             return;
         }

@@ -17,6 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.validation.annotation.Validated;
 
+/**
+ * Helper class to check assignment quotas.
+ */
 @Validated
 public final class QuotaHelper {
 

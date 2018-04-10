@@ -25,6 +25,14 @@ public interface DistributionSetMetadataRepository
         extends PagingAndSortingRepository<JpaDistributionSetMetadata, DsMetadataCompositeKey>,
         JpaSpecificationExecutor<JpaDistributionSetMetadata> {
 
+    /**
+     * Counts the meta data entries that match the given distribution set ID.
+     * 
+     * @param id
+     *            of the distribution set.
+     * 
+     * @return The number of matching meta data entries.
+     */
     @Query("SELECT COUNT (dmd.key) from JpaDistributionSetMetadata dmd WHERE dmd.distributionSet.id = :id")
     long countByDistributionSetId(@Param("id") Long id);
 
