@@ -66,7 +66,8 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
             final String sha1Hash16 = BaseEncoding.base16().lowerCase().encode(mdSHA1.digest());
             final String md5Hash16 = BaseEncoding.base16().lowerCase().encode(mdMD5.digest());
 
-            LOG.debug("Temporary file {} stored. Calculated sha1: {} and md5: {} hashes", file, sha1Hash16, md5Hash16);
+            LOG.info("Temporary file {} stored. File size: {} bytes. Calculated sha1: {} and md5: {} hashes", file,
+                    file != null ? file.length() : -1, sha1Hash16, md5Hash16);
 
             checkHashes(sha1Hash16, md5Hash16, hash);
 
