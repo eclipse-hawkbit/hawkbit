@@ -22,8 +22,6 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -38,13 +36,11 @@ import com.vaadin.ui.VerticalLayout;
 /**
  * Upload files layout.
  */
-public class UploadAndStatusButtonLayout extends VerticalLayout {
+public class UploadProgressButtonLayout extends VerticalLayout {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Logger LOG = LoggerFactory.getLogger(UploadAndStatusButtonLayout.class);
-
-    private final UploadStatusInfoWindow uploadInfoWindow;
+    private final UploadProgressInfoWindow uploadInfoWindow;
 
     private final VaadinMessageSource i18n;
 
@@ -54,37 +50,34 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
 
     private HorizontalLayout fileUploadButtonLayout;
 
-    private Button uploadStatusButton;
+    private Button uploadProgressButton;
 
     private final transient SoftwareModuleManagement softwareModuleManagement;
 
     private final UploadLogic uploadLogic;
 
-    private final UploadMessageBuilder uploadMessageBuilder;
+    private final Upload upload;
 
-    private final ArtifactManagement artifactManagement;
-    private Upload upload;
-
-    public UploadAndStatusButtonLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
+    public UploadProgressButtonLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final ArtifactUploadState artifactUploadState, final MultipartConfigElement multipartConfigElement,
             final ArtifactManagement artifactManagement, final SoftwareModuleManagement softwareManagement,
             final UploadLogic uploadLogic) {
-        this.artifactManagement = artifactManagement;
         this.uploadLogic = uploadLogic;
-        this.uploadInfoWindow = new UploadStatusInfoWindow(eventBus, artifactUploadState, i18n, artifactManagement,
-                softwareManagement, uploadLogic);
+        this.uploadInfoWindow = new UploadProgressInfoWindow(eventBus, artifactUploadState, i18n, uploadLogic);
         this.uploadInfoWindow.addCloseListener(event -> {
-            if (uploadLogic.isUploadComplete()) {
-                hideUploadStatusButton();
+            // ensure that the progress button is hidden when the progress
+            // window is closed and no more uploads running
+            if (uploadLogic.areAllUploadsFinished()) {
+                hideUploadProgressButton();
             }
         });
         this.i18n = i18n;
         this.multipartConfigElement = multipartConfigElement;
         this.softwareModuleManagement = softwareManagement;
-        this.uploadMessageBuilder = new UploadMessageBuilder(uploadLogic, i18n);
+        this.upload = new Upload();
 
         createComponents();
-        buildLayout();
+        buildLayout(artifactManagement);
         restoreState();
         eventBus.subscribe(this);
         ui = UI.getCurrent();
@@ -101,8 +94,10 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
         case UPLOAD_FAILED:
         case UPLOAD_SUCCESSFUL:
         case UPLOAD_FINISHED:
-        case UPLOAD_ABORTED_BY_USER:
             ui.access(this::onUploadFinished);
+            break;
+        case UPLOAD_ABORTED_BY_USER:
+            ui.access(this::onUploadAbortedByUser);
             break;
         case UPLOAD_IN_PROGRESS:
             break;
@@ -127,23 +122,21 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
     }
 
     private void createComponents() {
-        uploadStatusButton = SPUIComponentProvider.getButton(UIComponentIdProvider.UPLOAD_STATUS_BUTTON, "", "", "",
+        uploadProgressButton = SPUIComponentProvider.getButton(UIComponentIdProvider.UPLOAD_STATUS_BUTTON, "", "", "",
                 false, null, SPUIButtonStyleSmall.class);
-        uploadStatusButton.setStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
-        uploadStatusButton.addStyleName(SPUIStyleDefinitions.UPLOAD_PROGRESS_INDICATOR_STYLE);
-        uploadStatusButton.setIcon(null);
-        uploadStatusButton.setWidth("100px");
-        uploadStatusButton.setHtmlContentAllowed(true);
-        uploadStatusButton.addClickListener(event -> onClickOfUploadStatusButton());
-        uploadStatusButton.setVisible(false);
+        uploadProgressButton.setStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
+        uploadProgressButton.addStyleName(SPUIStyleDefinitions.UPLOAD_PROGRESS_INDICATOR_STYLE);
+        uploadProgressButton.setIcon(null);
+        uploadProgressButton.setWidth("100px");
+        uploadProgressButton.setHtmlContentAllowed(true);
+        uploadProgressButton.addClickListener(event -> onClickOfUploadProgressButton());
+        uploadProgressButton.setVisible(false);
     }
 
-    private void buildLayout() {
+    private void buildLayout(final ArtifactManagement artifactManagement) {
 
-        upload = new Upload();
         final FileTransferHandlerVaadinUpload uploadHandler = new FileTransferHandlerVaadinUpload(uploadLogic,
-                multipartConfigElement.getMaxFileSize(), upload, softwareModuleManagement, artifactManagement,
-                uploadMessageBuilder);
+                multipartConfigElement.getMaxFileSize(), softwareModuleManagement, artifactManagement, i18n);
         upload.setButtonCaption(i18n.getMessage("upload.file"));
         upload.setImmediate(true);
         upload.setReceiver(uploadHandler);
@@ -160,8 +153,8 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
         fileUploadButtonLayout.addStyleName(SPUIStyleDefinitions.FOOTER_LAYOUT);
         fileUploadButtonLayout.addComponent(upload);
         fileUploadButtonLayout.setComponentAlignment(upload, Alignment.MIDDLE_LEFT);
-        fileUploadButtonLayout.addComponent(uploadStatusButton);
-        fileUploadButtonLayout.setComponentAlignment(uploadStatusButton, Alignment.MIDDLE_RIGHT);
+        fileUploadButtonLayout.addComponent(uploadProgressButton);
+        fileUploadButtonLayout.setComponentAlignment(uploadProgressButton, Alignment.MIDDLE_RIGHT);
         setMargin(false);
 
         setSizeFull();
@@ -169,25 +162,28 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
     }
 
     private void restoreState() {
-        if (uploadLogic.isUploadComplete()) {
+        if (uploadLogic.areAllUploadsFinished()) {
             uploadLogic.clearUploadDetails();
-
-            hideUploadStatusButton();
-        } else if (uploadLogic.isUploadRunning()) {
-            showUploadStatusButton();
+            hideUploadProgressButton();
+        } else if (uploadLogic.isAtLeastOneUploadInProgress()) {
+            showUploadProgressButton();
         }
     }
 
     private void onStartOfUpload() {
-        showUploadStatusButton();
+        showUploadProgressButton();
+    }
+
+    private void onUploadAbortedByUser() {
+        upload.interruptUpload();
     }
 
     /**
      * Called for every finished (succeeded or failed) upload.
      */
     private void onUploadFinished() {
-        if (uploadLogic.isUploadComplete()) {
-            hideUploadStatusButton();
+        if (uploadLogic.areAllUploadsFinished()) {
+            hideUploadProgressButton();
         }
     }
 
@@ -195,21 +191,15 @@ public class UploadAndStatusButtonLayout extends VerticalLayout {
         return fileUploadButtonLayout;
     }
 
-    private void onClickOfUploadStatusButton() {
+    private void onClickOfUploadProgressButton() {
         uploadInfoWindow.maximizeWindow();
     }
 
-    private void showUploadStatusButton() {
-        if (uploadStatusButton == null) {
-            return;
-        }
-        uploadStatusButton.setVisible(true);
+    private void showUploadProgressButton() {
+        uploadProgressButton.setVisible(true);
     }
 
-    private void hideUploadStatusButton() {
-        if (uploadStatusButton == null) {
-            return;
-        }
-        uploadStatusButton.setVisible(false);
+    private void hideUploadProgressButton() {
+        uploadProgressButton.setVisible(false);
     }
 }

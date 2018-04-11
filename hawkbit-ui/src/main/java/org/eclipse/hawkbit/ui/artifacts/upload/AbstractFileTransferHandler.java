@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.artifacts.upload;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -24,7 +25,9 @@ import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent.UploadStatusEventType;
+import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vaadin.spring.events.EventBus;
@@ -32,71 +35,79 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.server.StreamVariable;
-import com.vaadin.ui.Upload;
-
 /**
- * Implementation to read and upload a file. For {@link Upload} one instance is
- * used to handle the upload, in case of {@link StreamVariable} variant one
- * instance per file is used.
- *
- * The handler manages the output to the user and at the same time ensures that
- * the upload does not exceed the configured max file size.
- *
+ * Abstract base class for transferring files from the browser to the
+ * repository.
  */
 public abstract class AbstractFileTransferHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractFileTransferHandler.class);
 
-    private volatile boolean aborted;
+    private volatile boolean abortedByUser;
 
     private volatile boolean duplicateFile;
 
     private volatile boolean uploadInterrupted;
 
+    private volatile String tempFilePath;
+
+    private volatile String failureReason;
+
+    private final ArtifactUploadState artifactUploadState;
+
     private final UIEventBus eventBus;
 
     private final ArtifactManagement artifactManagement;
 
-    private final UploadMessageBuilder uploadMessageBuilder;
+    private final VaadinMessageSource i18n;
 
+    // TODO rollouts: ???
     AbstractFileTransferHandler() {
         artifactManagement = null;
-        uploadMessageBuilder = null;
         eventBus = null;
+        artifactUploadState = null;
+        i18n = null;
     }
 
     public AbstractFileTransferHandler(final ArtifactManagement artifactManagement,
-            final UploadMessageBuilder uploadMessageBuilder) {
+            final VaadinMessageSource i18n) {
         this.artifactManagement = artifactManagement;
-        this.uploadMessageBuilder = uploadMessageBuilder;
+        this.i18n = i18n;
         this.eventBus = SpringContextHelper.getBean(EventBus.UIEventBus.class);
+        this.artifactUploadState = SpringContextHelper.getBean(ArtifactUploadState.class);
+
+        eventBus.subscribe(this);
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
-    protected void onEvent(final UploadStatusEventType event) {
-        if (event == UploadStatusEventType.UPLOAD_ABORTED_BY_USER) {
-            aborted = true;
+    protected void onEvent(final UploadStatusEvent event) {
+        if (event.getUploadStatusEventType() == UploadStatusEventType.UPLOAD_ABORTED_BY_USER) {
+            setAbortedbyUser();
+            setFailureReasonUploadAbortedByUser();
+            handleUploadAbortedByUser();
         }
     }
 
+    /**
+     * Override to deal with user interruption.
+     */
+    abstract void handleUploadAbortedByUser();
+
     protected boolean isAbortedByUser() {
-        return aborted;
+        return abortedByUser;
     }
 
-    protected void resetAbortedByUser() {
-        aborted = false;
+    protected void setAbortedbyUser() {
+        abortedByUser = true;
+        uploadInterrupted = true;
     }
 
     protected boolean isDuplicateFile() {
         return duplicateFile;
     }
 
-    protected void resetDuplicateFile() {
-        duplicateFile = false;
-    }
-
     protected void setDuplicateFile() {
+        uploadInterrupted = true;
         duplicateFile = true;
     }
 
@@ -108,16 +119,45 @@ public abstract class AbstractFileTransferHandler {
         return uploadInterrupted;
     }
 
-    protected void resetUploadInterrupted() {
+    protected boolean isUnknownError() {
+        return !isAbortedByUser() && !isDuplicateFile();
+    }
+
+    protected void resetState() {
+        duplicateFile = false;
         uploadInterrupted = false;
+        abortedByUser = false;
+        failureReason = null;
+    }
+
+    protected ArtifactUploadState getUploadState() {
+        return artifactUploadState;
+    }
+
+    protected VaadinMessageSource getI18n() {
+        return i18n;
+    }
+
+    protected void setFailureReason(final String failureReason) {
+        this.failureReason = failureReason;
+    }
+
+    protected void setFailureReasonUploadFailed() {
+        setFailureReason(i18n.getMessage("message.upload.failed"));
+    }
+
+    protected void setFailureReasonUploadAbortedByUser() {
+        setFailureReason(i18n.getMessage("message.uploadedfile.aborted"));
+    }
+
+    protected void setFailureReasonFileSizeExceeded(final long maxSize) {
+        setFailureReason(i18n.getMessage("message.uploadedfile.size.exceeded", maxSize));
     }
 
     protected void checkForDuplicateFileInSoftwareModul(final FileUploadId fileUploadId,
             final SoftwareModule softwareModule) {
         if (isFileAlreadyContainedInSoftwareModul(fileUploadId, softwareModule)) {
             setDuplicateFile();
-            setUploadInterrupted();
-            publishUploadFailedEvent(fileUploadId, uploadMessageBuilder.buildMessageForDuplicateFileError(), null);
         }
 
     }
@@ -179,7 +219,6 @@ public abstract class AbstractFileTransferHandler {
 
     protected void publishUploadFailedEvent(final FileUploadId fileUploadId, final String failureReason,
             final Exception uploadException) {
-
         eventBus.publish(this,
                 new UploadStatusEvent(UploadStatusEventType.UPLOAD_FAILED, new FileUploadProgress(fileUploadId,
                         StringUtils.isBlank(failureReason) ? uploadException.getMessage() : failureReason)));
@@ -192,11 +231,36 @@ public abstract class AbstractFileTransferHandler {
         }
     }
 
+    protected void publishUploadFailedEvent(final FileUploadId fileUploadId, final Exception uploadException) {
+        publishUploadFailedEvent(fileUploadId, failureReason, uploadException);
+    }
+
     protected void assertStateConsistency(final FileUploadId fileUploadId, final String filenameExtractedFromEvent) {
         if (!filenameExtractedFromEvent.equals(fileUploadId.getFilename())) {
             throw new IllegalStateException("Event filename " + filenameExtractedFromEvent + " but stored filename "
                     + fileUploadId.getFilename());
         }
+    }
+
+    protected OutputStream createOutputStreamForTempFile() throws IOException {
+
+        if (isUploadInterrupted()) {
+            return new NullOutputStream();
+        }
+
+        final File tempFile = File.createTempFile("spUiArtifactUpload", null);
+
+        // we return the outputstream so we cannot close it here
+        @SuppressWarnings("squid:S2095")
+        final OutputStream out = new FileOutputStream(tempFile);
+
+        tempFilePath = tempFile.getAbsolutePath();
+
+        return out;
+    }
+
+    protected String getTempFilePath() {
+        return tempFilePath;
     }
 
     // Exception squid:S3655 - Optional access is checked in
@@ -221,10 +285,10 @@ public abstract class AbstractFileTransferHandler {
 
         } catch (final ArtifactUploadFailedException | InvalidSHA1HashException | InvalidMD5HashException
                 | IOException e) {
-            // TODO rollouts: i18n
-            publishUploadFailedEvent(fileUploadId, e.getMessage(), e);
+            publishUploadFailedEvent(fileUploadId, i18n.getMessage("message.upload.failed"), e);
             LOG.error("Failed to transfer file to repository", e);
         } finally {
+            // TODO rollouts: change to debug
             LOG.info("Deleting tempfile {} - {}", filename, newFile.getAbsolutePath());
             if (newFile.exists() && !newFile.delete()) {
                 LOG.error("Could not delete temporary file: {}", newFile.getAbsolutePath());

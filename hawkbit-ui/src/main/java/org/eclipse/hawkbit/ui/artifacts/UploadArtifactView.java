@@ -25,9 +25,9 @@ import org.eclipse.hawkbit.ui.artifacts.footer.SMDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleTableLayout;
 import org.eclipse.hawkbit.ui.artifacts.smtype.SMTypeFilterLayout;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
-import org.eclipse.hawkbit.ui.artifacts.upload.UploadAndStatusButtonLayout;
 import org.eclipse.hawkbit.ui.artifacts.upload.UploadDropAreaLayout;
 import org.eclipse.hawkbit.ui.artifacts.upload.UploadLogic;
+import org.eclipse.hawkbit.ui.artifacts.upload.UploadProgressButtonLayout;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -79,7 +79,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
 
     private final ArtifactDetailsLayout artifactDetailsLayout;
 
-    private final UploadAndStatusButtonLayout uploadLayout;
+    private final UploadProgressButtonLayout uploadLayout;
 
     private final UploadDropAreaLayout dropAreaLayout;
 
@@ -115,7 +115,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         this.artifactDetailsLayout = new ArtifactDetailsLayout(i18n, eventBus, artifactUploadState, uiNotification,
                 artifactManagement, softwareModuleManagement);
         this.uploadLogic = new UploadLogic(artifactUploadState);
-        this.uploadLayout = new UploadAndStatusButtonLayout(i18n, eventBus, artifactUploadState,
+        this.uploadLayout = new UploadProgressButtonLayout(i18n, eventBus, artifactUploadState,
                 multipartConfigElement, artifactManagement, softwareModuleManagement, uploadLogic);
         this.dropAreaLayout = new UploadDropAreaLayout(i18n, uiNotification, artifactUploadState,
                 multipartConfigElement, softwareModuleManagement, uploadLogic, artifactManagement);

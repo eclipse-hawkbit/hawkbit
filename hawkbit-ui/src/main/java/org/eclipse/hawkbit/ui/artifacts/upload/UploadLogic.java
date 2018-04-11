@@ -9,8 +9,7 @@
 package org.eclipse.hawkbit.ui.artifacts.upload;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Serializable;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -22,15 +21,15 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.ui.Html5File;
 
-public class UploadLogic {
+public class UploadLogic implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private static final Logger LOG = LoggerFactory.getLogger(UploadLogic.class);
 
-    private final List<String> duplicateFileNamesList = new ArrayList<>();
-
     private final ArtifactUploadState artifactUploadState;
 
-    private final Object fileStateListWriteLock = new Object();
+    private final transient Object fileStateListWriteLock = new Object();
 
     public UploadLogic(final ArtifactUploadState artifactUploadState) {
         this.artifactUploadState = artifactUploadState;
@@ -38,27 +37,6 @@ public class UploadLogic {
 
     boolean isDirectory(final Html5File file) {
         return StringUtils.isBlank(file.getType()) && file.getFileSize() % 4096 == 0;
-    }
-
-    List<String> getDuplicateFileNamesList() {
-        return duplicateFileNamesList;
-    }
-
-    void clearDuplicateFileNamesList() {
-        // TODO rollouts: remove logging
-        LOG.info("duplicateFileNamesList");
-        duplicateFileNamesList.clear();
-    }
-
-    boolean containsDuplicateFiles() {
-        return !duplicateFileNamesList.isEmpty();
-    }
-
-    boolean containsFileName(final String fileName) {
-        if (duplicateFileNamesList.isEmpty()) {
-            return false;
-        }
-        return duplicateFileNamesList.contains(fileName);
     }
 
     boolean isFileInUploadState(final FileUploadId fileUploadId) {
@@ -70,19 +48,34 @@ public class UploadLogic {
                 .containsKey(new FileUploadId(filename, softwareModule));
     }
 
-    boolean isUploadComplete() {
-        final int inProgressCount = artifactUploadState.getFilesInUploadProgressState().size();
+    boolean isFileInFailedState(final FileUploadId fileUploadId) {
+        return artifactUploadState.getFilesInFailedState().contains(fileUploadId);
+    }
+
+    boolean isAtLeastOneUploadInProgress() {
+        return getInProgressCount() > 0;
+    }
+
+    boolean areAllUploadsFinished() {
+        return getInProgressCount() == 0;
+    }
+
+    private int getInProgressCount() {
         final int succeededUploadCount = artifactUploadState.getFilesInSucceededState().size();
         final int failedUploadCount = artifactUploadState.getFilesInFailedState().size();
         final int overallUploadCount = artifactUploadState.getAllFilesFromOverallUploadProcessList().size();
+        final int inProgressCount = overallUploadCount - failedUploadCount - succeededUploadCount;
 
-        // check consistency
-        if (inProgressCount + succeededUploadCount + failedUploadCount != overallUploadCount) {
+        assertFileStateConsistency(inProgressCount);
+
+        return inProgressCount;
+    }
+
+    private void assertFileStateConsistency(final int inProgressCount) {
+        if (inProgressCount < 0) {
             LOG.error("IllegalState: \n{}", getStateListslogMessage());
             throw new IllegalStateException();
         }
-
-        return inProgressCount == 0;
     }
 
     String getStateListslogMessage() {
@@ -92,31 +85,14 @@ public class UploadLogic {
         buffer.append("succeeded uploads: " + artifactUploadState.getFilesInSucceededState().size());
         buffer.append("\n");
         buffer.append("Failed Uploads: " + artifactUploadState.getFilesInFailedState().size());
-        buffer.append("\n");
-        buffer.append("Uploads in progress: " + artifactUploadState.getFilesInUploadProgressState().size());
         return buffer.toString();
-    }
-
-    boolean isUploadRunning() {
-        final int inProgressCount = artifactUploadState.getFilesInUploadProgressState().size();
-        final int succeededUploadCount = artifactUploadState.getFilesInSucceededState().size();
-        final int failedUploadCount = artifactUploadState.getFilesInFailedState().size();
-        final int overallUploadCount = artifactUploadState.getAllFilesFromOverallUploadProcessList().size();
-
-        // check consistency
-        if (inProgressCount + succeededUploadCount + failedUploadCount != overallUploadCount) {
-            LOG.error("IllegalState: \n{}", getStateListslogMessage());
-            throw new IllegalStateException();
-        }
-
-        return inProgressCount > 0;
     }
 
     /**
      * Clears all temp data collected while uploading files.
      */
     void clearUploadDetails() {
-        // TODO rollouts: remove logging
+        // TODO rollouts: change to debug
         LOG.info("Cleaning up temp data...");
         // delete file system zombies
         for (final FileUploadProgress fileUploadProgress : artifactUploadState.getAllFilesFromOverallUploadProcessList()
@@ -126,18 +102,24 @@ public class UploadLogic {
             }
         }
         artifactUploadState.clearBaseSwModuleList();
-        clearDuplicateFileNamesList();
         clearFileStates();
     }
 
     void uploadStarted(final FileUploadId fileUploadId, final FileUploadProgress fileUploadProgress) {
+        if (isFileInFailedState(fileUploadId)) {
+            LOG.warn("Upload already failed, upload started is ignored");
+            return;
+        }
         synchronized (fileStateListWriteLock) {
             artifactUploadState.addFileToOverallUploadProcessList(fileUploadId, fileUploadProgress);
-            artifactUploadState.addFileToUploadInProgressState(fileUploadId);
         }
     }
 
     void uploadInProgress(final FileUploadId fileUploadId, final FileUploadProgress fileUploadProgress) {
+        if (isFileInFailedState(fileUploadId)) {
+            LOG.warn("Upload already failed, progress update is ignored");
+            return;
+        }
         synchronized (fileStateListWriteLock) {
             artifactUploadState.updateFileProgressInOverallUploadProcessList(fileUploadId, fileUploadProgress);
         }
@@ -146,26 +128,33 @@ public class UploadLogic {
     void uploadFailed(final FileUploadId fileUploadId, final FileUploadProgress fileUploadProgress) {
         synchronized (fileStateListWriteLock) {
             artifactUploadState.updateFileProgressInOverallUploadProcessList(fileUploadId, fileUploadProgress);
-            artifactUploadState.removeFileInUploadProgressState(fileUploadId);
             artifactUploadState.addFileToFailedState(fileUploadId);
         }
     }
 
+    void allUploadsAbortedByUser() {
+        synchronized (fileStateListWriteLock) {
+            artifactUploadState
+                    .addAllFilesToFailedState(artifactUploadState.getAllFilesFromOverallUploadProcessList().keySet());
+            artifactUploadState.clearFilesInSucceededState();
+        }
+    }
+
     void uploadSucceeded(final FileUploadId fileUploadId, final FileUploadProgress fileUploadProgress) {
+        if (isFileInFailedState(fileUploadId)) {
+            LOG.warn("Upload already failed, progress success is ignored");
+            return;
+        }
         synchronized (fileStateListWriteLock) {
             artifactUploadState.updateFileProgressInOverallUploadProcessList(fileUploadId, fileUploadProgress);
-            artifactUploadState.removeFileInUploadProgressState(fileUploadId);
             artifactUploadState.addFileToSucceededState(fileUploadId);
         }
     }
 
     private void clearFileStates() {
         synchronized (fileStateListWriteLock) {
-            // TODO rollouts: remove logging
-            LOG.info("Cleaning up file states");
             artifactUploadState.clearFilesInFailedState();
             artifactUploadState.clearFilesInSucceededState();
-            artifactUploadState.clearFilesInUploadProgressState();
             artifactUploadState.clearOverallUploadProcessList();
         }
     }
@@ -183,5 +172,4 @@ public class UploadLogic {
     boolean isNoSoftwareModuleSelected() {
         return !artifactUploadState.getSelectedBaseSwModuleId().isPresent();
     }
-
 }

@@ -8,9 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.upload;
 
+import java.io.Serializable;
+
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent.UploadStatusEventType;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
@@ -22,8 +22,6 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
@@ -50,27 +48,19 @@ import com.vaadin.ui.themes.ValoTheme;
 import elemental.json.JsonValue;
 
 /**
- * Shows upload status during upload.
+ * Shows the progress of all uploads.
  */
-public class UploadStatusInfoWindow extends Window {
+public class UploadProgressInfoWindow extends Window implements Serializable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(UploadStatusInfoWindow.class);
+    private static final long serialVersionUID = 1L;
 
-    private static final String ARTIFACT_UPLOAD_EXCEPTION = "Artifact upload exception:";
+    private static final String COLUMN_PROGRESS = "Progress";
 
-    private final transient EventBus.UIEventBus eventBus;
+    private static final String COLUMN_FILE_NAME = "File name";
 
-    private final ArtifactUploadState artifactUploadState;
+    private static final String COLUMN_STATUS = "Status";
 
-    private final VaadinMessageSource i18n;
-
-    private static final String PROGRESS = "Progress";
-
-    private static final String FILE_NAME = "File name";
-
-    private static final String STATUS = "Status";
-
-    private static final String REASON = "Reason";
+    private static final String COLUMN_REASON = "Reason";
 
     private static final String STATUS_INPROGRESS = "InProgress";
 
@@ -78,13 +68,19 @@ public class UploadStatusInfoWindow extends Window {
 
     private static final String STATUS_FAILED = "Failed";
 
-    private static final long serialVersionUID = 1L;
+    private final transient EventBus.UIEventBus eventBus;
+
+    private final ArtifactUploadState artifactUploadState;
+
+    private final VaadinMessageSource i18n;
 
     private final Grid grid;
 
     private final IndexedContainer uploads;
 
     private final VerticalLayout mainLayout;
+
+    private final UI ui;
 
     private Label windowCaption;
 
@@ -94,24 +90,15 @@ public class UploadStatusInfoWindow extends Window {
 
     private Button resizeButton;
 
-    private final UI ui;
+    private final UploadLogic uploadLogic;
 
     private ConfirmationDialog confirmDialog;
 
-    private final ArtifactManagement artifactManagement;
-
-    private final SoftwareModuleManagement softwareModuleManagement;
-
-    private final UploadLogic uploadLogic;
-
-    UploadStatusInfoWindow(final UIEventBus eventBus, final ArtifactUploadState artifactUploadState,
-            final VaadinMessageSource i18n, final ArtifactManagement artifactManagement,
-            final SoftwareModuleManagement softwareModuleManagement, final UploadLogic uploadLogic) {
+    UploadProgressInfoWindow(final UIEventBus eventBus, final ArtifactUploadState artifactUploadState,
+            final VaadinMessageSource i18n, final UploadLogic uploadLogic) {
         this.eventBus = eventBus;
         this.artifactUploadState = artifactUploadState;
         this.i18n = i18n;
-        this.artifactManagement = artifactManagement;
-        this.softwareModuleManagement = softwareModuleManagement;
         this.uploadLogic = uploadLogic;
 
         setPopupProperties();
@@ -137,8 +124,6 @@ public class UploadStatusInfoWindow extends Window {
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final UploadStatusEvent event) {
-
-        event.getFileUploadProgress();
         switch (event.getUploadStatusEventType()) {
         case UPLOAD_STARTED:
             ui.access(() -> onUploadStarted(event));
@@ -153,7 +138,7 @@ public class UploadStatusInfoWindow extends Window {
             onUploadSuccess(event);
             break;
         case UPLOAD_FINISHED:
-            ui.access(() -> onUploadFinished(event));
+            ui.access(this::onUploadFinished);
             break;
         default:
             break;
@@ -163,22 +148,22 @@ public class UploadStatusInfoWindow extends Window {
     private void onUploadStarted(final UploadStatusEvent event) {
         final FileUploadProgress fileUploadProgress = event.getFileUploadProgress();
         final FileUploadId fileUploadId = fileUploadProgress.getFileUploadId();
-        
+
         uploadLogic.uploadStarted(fileUploadId, fileUploadProgress);
-        updateUploadStatusInfoRowObject(fileUploadId);
-        
+        updateUploadProgressInfoRowObject(fileUploadId);
+
         if (isFirstFileUpload()) {
             maximizeWindow();
         }
- 
+
         grid.scrollTo(fileUploadId);
-    }   
+    }
 
     private void restoreState() {
         final Indexed container = grid.getContainerDataSource();
         container.removeAllItems();
         for (final FileUploadId fileUploadId : artifactUploadState.getAllFilesFromOverallUploadProcessList().keySet()) {
-            updateUploadStatusInfoRowObject(fileUploadId);
+            updateUploadProgressInfoRowObject(fileUploadId);
         }
     }
 
@@ -193,11 +178,13 @@ public class UploadStatusInfoWindow extends Window {
     }
 
     private void setGridColumnProperties() {
-        grid.getColumn(STATUS).setRenderer(new StatusRenderer());
-        grid.getColumn(PROGRESS).setRenderer(new ProgressBarRenderer());
-        grid.setColumnOrder(STATUS, PROGRESS, FILE_NAME, SPUILabelDefinitions.NAME_VERSION, REASON);
+        grid.getColumn(COLUMN_STATUS).setRenderer(new StatusRenderer());
+        grid.getColumn(COLUMN_PROGRESS).setRenderer(new ProgressBarRenderer());
+        grid.setColumnOrder(COLUMN_STATUS, COLUMN_PROGRESS, COLUMN_FILE_NAME, SPUILabelDefinitions.NAME_VERSION,
+                COLUMN_REASON);
         setColumnWidth();
-        grid.getColumn(SPUILabelDefinitions.NAME_VERSION).setHeaderCaption(i18n.getMessage("upload.swModuleTable.header"));
+        grid.getColumn(SPUILabelDefinitions.NAME_VERSION)
+                .setHeaderCaption(i18n.getMessage("upload.swModuleTable.header"));
         grid.setFrozenColumnCount(5);
     }
 
@@ -213,10 +200,10 @@ public class UploadStatusInfoWindow extends Window {
 
     private IndexedContainer getGridContainer() {
         final IndexedContainer uploadContainer = new IndexedContainer();
-        uploadContainer.addContainerProperty(STATUS, String.class, "Active");
-        uploadContainer.addContainerProperty(FILE_NAME, String.class, null);
-        uploadContainer.addContainerProperty(PROGRESS, Double.class, 0D);
-        uploadContainer.addContainerProperty(REASON, String.class, "");
+        uploadContainer.addContainerProperty(COLUMN_STATUS, String.class, "Active");
+        uploadContainer.addContainerProperty(COLUMN_FILE_NAME, String.class, null);
+        uploadContainer.addContainerProperty(COLUMN_PROGRESS, Double.class, 0D);
+        uploadContainer.addContainerProperty(COLUMN_REASON, String.class, "");
         uploadContainer.addContainerProperty(SPUILabelDefinitions.NAME_VERSION, String.class, "");
         return uploadContainer;
     }
@@ -239,18 +226,18 @@ public class UploadStatusInfoWindow extends Window {
     }
 
     private void setColumnWidth() {
-        grid.getColumn(STATUS).setWidth(60);
-        grid.getColumn(PROGRESS).setWidth(150);
-        grid.getColumn(FILE_NAME).setWidth(200);
-        grid.getColumn(REASON).setWidth(290);
+        grid.getColumn(COLUMN_STATUS).setWidth(60);
+        grid.getColumn(COLUMN_PROGRESS).setWidth(150);
+        grid.getColumn(COLUMN_FILE_NAME).setWidth(200);
+        grid.getColumn(COLUMN_REASON).setWidth(290);
         grid.getColumn(SPUILabelDefinitions.NAME_VERSION).setWidth(200);
     }
 
     private void resetColumnWidth() {
-        grid.getColumn(STATUS).setWidthUndefined();
-        grid.getColumn(PROGRESS).setWidthUndefined();
-        grid.getColumn(FILE_NAME).setWidthUndefined();
-        grid.getColumn(REASON).setWidthUndefined();
+        grid.getColumn(COLUMN_STATUS).setWidthUndefined();
+        grid.getColumn(COLUMN_PROGRESS).setWidthUndefined();
+        grid.getColumn(COLUMN_FILE_NAME).setWidthUndefined();
+        grid.getColumn(COLUMN_REASON).setWidthUndefined();
         grid.getColumn(SPUILabelDefinitions.NAME_VERSION).setWidthUndefined();
     }
 
@@ -293,16 +280,22 @@ public class UploadStatusInfoWindow extends Window {
     }
 
     protected void maximizeWindow() {
+        // TODO rollouts: remove
+        System.err.println("maximize clicked");
+
         openWindow();
         restoreState();
         artifactUploadState.setStatusPopupMinimized(false);
     }
 
     private void minimizeWindow() {
+        // TODO rollouts: remove
+        System.err.println("minimize clicked");
+
         artifactUploadState.setStatusPopupMinimized(true);
         closeWindow();
 
-        if (uploadLogic.isUploadComplete()) {
+        if (uploadLogic.areAllUploadsFinished()) {
             cleanupStates();
         }
     }
@@ -312,7 +305,7 @@ public class UploadStatusInfoWindow extends Window {
         final FileUploadId fileUploadId = fileUploadProgress.getFileUploadId();
 
         uploadLogic.uploadInProgress(fileUploadId, fileUploadProgress);
-        updateUploadStatusInfoRowObject(fileUploadId);
+        updateUploadProgressInfoRowObject(fileUploadId);
     }
 
     /**
@@ -323,9 +316,8 @@ public class UploadStatusInfoWindow extends Window {
         final FileUploadId fileUploadId = fileUploadProgress.getFileUploadId();
 
         uploadLogic.uploadSucceeded(fileUploadId, fileUploadProgress);
-        updateUploadStatusInfoRowObject(fileUploadId);
+        updateUploadProgressInfoRowObject(fileUploadId);
     }
-
 
     /**
      * Called for every failed upload.
@@ -335,25 +327,25 @@ public class UploadStatusInfoWindow extends Window {
         final FileUploadId fileUploadId = fileUploadProgress.getFileUploadId();
 
         uploadLogic.uploadFailed(fileUploadId, fileUploadProgress);
-        updateUploadStatusInfoRowObject(fileUploadId);
+        updateUploadProgressInfoRowObject(fileUploadId);
     }
 
     /**
      * Called for every finished (succeeded or failed) upload.
      */
-    private void onUploadFinished(final UploadStatusEvent event) {
+    private void onUploadFinished() {
+        // TODO rollouts: handle uploads aborted
 
-        // check if we are finished
-        if (uploadLogic.isUploadComplete()) {
-
-            // processArtifactUpload();
-
+        if (uploadLogic.areAllUploadsFinished()) {
             if (artifactUploadState.isStatusPopupMinimized()) {
                 if (artifactUploadState.getFilesInFailedState().isEmpty()) {
                     cleanupStates();
                 } else {
                     maximizeWindow();
                 }
+            } else {
+                // TODO rollouts: check aborted by user
+                cleanupStates();
             }
         }
     }
@@ -392,10 +384,10 @@ public class UploadStatusInfoWindow extends Window {
             event.getButton().setIcon(FontAwesome.COMPRESS);
             setWindowMode(WindowMode.MAXIMIZED);
             resetColumnWidth();
-            grid.getColumn(STATUS).setExpandRatio(0);
-            grid.getColumn(PROGRESS).setExpandRatio(1);
-            grid.getColumn(FILE_NAME).setExpandRatio(2);
-            grid.getColumn(REASON).setExpandRatio(3);
+            grid.getColumn(COLUMN_STATUS).setExpandRatio(0);
+            grid.getColumn(COLUMN_PROGRESS).setExpandRatio(1);
+            grid.getColumn(COLUMN_FILE_NAME).setExpandRatio(2);
+            grid.getColumn(COLUMN_REASON).setExpandRatio(3);
             grid.getColumn(SPUILabelDefinitions.NAME_VERSION).setExpandRatio(4);
             mainLayout.setSizeFull();
         } else {
@@ -416,7 +408,7 @@ public class UploadStatusInfoWindow extends Window {
     }
 
     private void onClose() {
-        if (uploadLogic.isUploadComplete()) {
+        if (uploadLogic.areAllUploadsFinished()) {
             cleanupStates();
             closeWindow();
         } else {
@@ -439,24 +431,29 @@ public class UploadStatusInfoWindow extends Window {
 
     private void createConfirmDialog() {
         confirmDialog = new ConfirmationDialog(i18n.getMessage("caption.confirm.abort.action"),
-                i18n.getMessage("message.abort.upload"), i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
+                i18n.getMessage("message.abort.upload"), i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"),
+                ok -> {
                     if (ok) {
-                        eventBus.publish(this, UploadStatusEventType.UPLOAD_ABORTED_BY_USER);
-                        cleanupStates();
+
+                        // TODO rollouts: remove
+                        System.err.println("All Uploads aborted");
+
+                        uploadLogic.allUploadsAbortedByUser();
+                        uploads.removeAllItems();
                         closeWindow();
+                        eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_ABORTED_BY_USER));
                     }
                 });
     }
 
     @SuppressWarnings("unchecked")
-    private void updateUploadStatusInfoRowObject(final FileUploadId fileUploadId) {
+    private void updateUploadProgressInfoRowObject(final FileUploadId fileUploadId) {
         Item item = uploads.getItem(fileUploadId);
         if (item == null) {
             item = grid.getContainerDataSource().addItem(fileUploadId);
-            item.getItemProperty(FILE_NAME).setValue(fileUploadId.getFilename());
-            item.getItemProperty(SPUILabelDefinitions.NAME_VERSION)
-                    .setValue(HawkbitCommonUtil.getFormattedNameVersion(fileUploadId.getSoftwareModule().getName(),
-                            fileUploadId.getSoftwareModule().getVersion()));
+            item.getItemProperty(COLUMN_FILE_NAME).setValue(fileUploadId.getFilename());
+            item.getItemProperty(SPUILabelDefinitions.NAME_VERSION).setValue(HawkbitCommonUtil.getFormattedNameVersion(
+                    fileUploadId.getSoftwareModule().getName(), fileUploadId.getSoftwareModule().getVersion()));
         }
 
         final String status;
@@ -467,18 +464,18 @@ public class UploadStatusInfoWindow extends Window {
         } else {
             status = STATUS_INPROGRESS;
         }
-        item.getItemProperty(STATUS).setValue(status);
+        item.getItemProperty(COLUMN_STATUS).setValue(status);
 
         final String failureReason = artifactUploadState.getFileUploadProgress(fileUploadId).getFailureReason();
         if (StringUtils.isNotBlank(failureReason)) {
-            item.getItemProperty(REASON).setValue(failureReason);
+            item.getItemProperty(COLUMN_REASON).setValue(failureReason);
         }
 
         final FileUploadProgress fileUploadProgress = artifactUploadState.getFileUploadProgress(fileUploadId);
         final long bytesRead = fileUploadProgress.getBytesRead();
         final long fileSize = fileUploadProgress.getContentLength();
         if (bytesRead > 0 && fileSize > 0) {
-            item.getItemProperty(PROGRESS).setValue((double) bytesRead / (double) fileSize);
+            item.getItemProperty(COLUMN_PROGRESS).setValue((double) bytesRead / (double) fileSize);
         }
     }
 }

@@ -11,9 +11,7 @@ package org.eclipse.hawkbit.ui.artifacts.upload;
 import java.io.Serializable;
 
 /**
- * 
- * Holds file and upload status details.Meta data sent with upload events.
- *
+ * Holds file and upload progress details that are sent with upload events.
  */
 public class FileUploadProgress implements Serializable {
 

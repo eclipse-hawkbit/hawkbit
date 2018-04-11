@@ -1,5 +1,7 @@
 package org.eclipse.hawkbit.ui.artifacts.upload;
 
+import java.io.Serializable;
+
 import javax.servlet.MultipartConfigElement;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
@@ -25,7 +27,9 @@ import com.vaadin.ui.Html5File;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 
-public class UploadDropAreaLayout {
+public class UploadDropAreaLayout implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private static AcceptCriterion acceptAllExceptBlacklisted = new Not(new ServerItemIdClientCriterion(Mode.PREFIX,
             UIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE, UIComponentIdProvider.UPLOAD_TYPE_BUTTON_PREFIX));
@@ -38,15 +42,13 @@ public class UploadDropAreaLayout {
 
     private final ArtifactUploadState artifactUploadState;
 
-    private final MultipartConfigElement multipartConfigElement;
+    private final transient MultipartConfigElement multipartConfigElement;
 
-    private final SoftwareModuleManagement softwareManagement;
+    private final transient SoftwareModuleManagement softwareManagement;
+
+    private final transient ArtifactManagement artifactManagement;
 
     private final UploadLogic uploadLogic;
-
-    private final UploadMessageBuilder uploadMessageBuilder;
-
-    private final ArtifactManagement artifactManagement;
 
     public UploadDropAreaLayout(final VaadinMessageSource i18n, final UINotification uiNotification,
             final ArtifactUploadState artifactUploadState, final MultipartConfigElement multipartConfigElement,
@@ -59,7 +61,6 @@ public class UploadDropAreaLayout {
         this.softwareManagement = softwareManagement;
         this.uploadLogic = uploadLogic;
         this.artifactManagement = artifactManagement;
-        this.uploadMessageBuilder = new UploadMessageBuilder(uploadLogic, i18n);
 
         buildLayout();
     }
@@ -121,19 +122,20 @@ public class UploadDropAreaLayout {
                         isDuplicate = uploadLogic.isFileInUploadState(file.getFileName(), softwareModule);
 
                         if (!isDirectory && !isDuplicate) {
-                            file.setStreamVariable(new FileTransferHandlerStreamVariable(file.getFileName(), file.getFileSize(), uploadLogic,
-                                            multipartConfigElement.getMaxFileSize(), null, file.getType(),
-                                    softwareModule, softwareManagement, artifactManagement, uploadMessageBuilder));
+                            file.setStreamVariable(new FileTransferHandlerStreamVariable(file.getFileName(),
+                                    file.getFileSize(), multipartConfigElement.getMaxFileSize(), file.getType(),
+                                    softwareModule, artifactManagement, i18n));
                         }
                     }
                     if (isDirectory && isDuplicate) {
                         uiNotification.displayValidationError(
-                                uploadMessageBuilder.buildMessageForDuplicateFileErrorAndDirectoryUploadNotAllowed());
+                                i18n.getMessage("message.no.duplicateFiles") + "<br>"
+                                        + i18n.getMessage("message.no.directory.upload"));
                     } else if (isDirectory) {
                         uiNotification.displayValidationError(
-                                uploadMessageBuilder.buildMessageForDirectoryUploadNotAllowed());
+                                i18n.getMessage("message.no.directory.upload"));
                     } else if (isDuplicate) {
-                        uiNotification.displayValidationError(uploadMessageBuilder.buildMessageForDuplicateFileError());
+                        uiNotification.displayValidationError(i18n.getMessage("message.no.duplicateFiles"));
                     }
                 });
             }
