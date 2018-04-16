@@ -80,7 +80,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
-import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
@@ -125,10 +124,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     private ConfirmationDialog confirmDialog;
 
-    private static final String TARGET_NAME = "TargetName";
-
-    private static final String DISTRIBUTION_NAME = "DistributionName";
-
     private final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout;
 
     private final MaintenanceWindowLayout maintenanceWindowLayout;
@@ -159,7 +154,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         addNewContainerDS();
         setColumnProperties();
         setDataAvailable(getContainerDataSource().size() != 0);
-
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -347,11 +341,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     @Override
-    protected boolean isFirstRowSelectedOnLoad() {
-        return managementUIState.getSelectedDsIdName().isEmpty();
-    }
-
-    @Override
     protected Object getItemIdToSelect() {
         return managementUIState.getSelectedDsIdName().isEmpty() ? null : managementUIState.getSelectedDsIdName();
     }
@@ -474,7 +463,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         assignTargetToDs(getItem(distItemId), targetManagement.get(targetIdSet));
     }
 
-    private void assignTargetToDs(final Item item, final Collection<Target> targetDetailsList) {
+    private void assignTargetToDs(final Item item, final List<Target> targetDetailsList) {
         if (item == null || item.getItemProperty("id") == null) {
             return;
         }
@@ -492,10 +481,10 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         }
 
         addNewDistributionToAssignmentList(targetDetailsList, findDistributionSetById.get());
-        openConfirmationWindowForAssignment(targetDetailsList, findDistributionSetById.get());
+        openConfirmationWindowForAssignment(findDistributionSetById.get().getName(), targetDetailsList);
     }
 
-    private void addNewDistributionToAssignmentList(final Collection<Target> targetDetailsList,
+    private void addNewDistributionToAssignmentList(final List<Target> targetDetailsList,
             final DistributionSet distributionSet) {
         String pendingActionMessage = null;
         final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distributionSet);
@@ -514,11 +503,19 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         }
     }
 
-    private void openConfirmationWindowForAssignment(final Collection<Target> targetDetailsList,
-            final DistributionSet distributionSet) {
+    private void openConfirmationWindowForAssignment(final String distributionNameToAssign,
+            final List<Target> targetDetailsList) {
+        String confirmQuestion;
+        if (targetDetailsList.size() == 1) {
+            confirmQuestion = i18n.getMessage("message.confirm.assign.entity", distributionNameToAssign, "target",
+                    targetDetailsList.get(0).getName());
+        } else {
+            confirmQuestion = i18n.getMessage("message.confirm.assign.multiple.entities", targetDetailsList.size(),
+                    "targets", distributionNameToAssign);
+        }
+
         confirmDialog = new ConfirmationDialog(i18n.getMessage("caption.entity.assign.action.confirmbox"),
-                i18n.getMessage("message.confirm.assign.entity"), i18n.getMessage("button.ok"),
-                i18n.getMessage("button.cancel"), ok -> {
+                confirmQuestion, i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
                     if (ok) {
                         if (isMaintenanceWindowValid()) {
                             saveAllAssignments();
@@ -622,15 +619,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     private ConfirmationTab createAssignmentTab() {
-        final ConfirmationTab assignmentTab = new ConfirmationTab(getAssignmentsTableContainer(),
-                getAssignmentsTableVisibleColumns(), getAssignmentsTableColumnHeaders());
-        // Add items container to the table.
-        final int tableRows = assignmentTab.getTable().getContainerDataSource().size();
-        if (tableRows > 10) {
-            assignmentTab.getTable().setPageLength(10);
-        } else {
-            assignmentTab.getTable().setPageLength(tableRows);
-        }
+        final ConfirmationTab assignmentTab = new ConfirmationTab();
 
         actionTypeOptionGroupLayout.selectDefaultOption();
         assignmentTab.addComponent(actionTypeOptionGroupLayout);
@@ -639,15 +628,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         assignmentTab.addComponent(maintenanceWindowLayout);
 
         return assignmentTab;
-    }
-
-    private static Object[] getAssignmentsTableVisibleColumns() {
-        return new Object[] { TARGET_NAME, DISTRIBUTION_NAME };
-    }
-
-    private String[] getAssignmentsTableColumnHeaders() {
-        return new String[] { i18n.getMessage("header.first.assignment.table"),
-                i18n.getMessage("header.second.assignment.table") };
     }
 
     private HorizontalLayout enableMaintenanceWindowLayout() {
@@ -692,21 +672,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         confirmDialog.getOkButton().setEnabled(enabled);
     }
 
-    private IndexedContainer getAssignmentsTableContainer() {
-        final IndexedContainer contactContainer = new IndexedContainer();
-        contactContainer.addContainerProperty(TARGET_NAME, String.class, "");
-        contactContainer.addContainerProperty(DISTRIBUTION_NAME, String.class, "");
-        final Map<TargetIdName, DistributionSetIdName> assignedList = managementUIState.getAssignedList();
-
-        for (final Map.Entry<TargetIdName, DistributionSetIdName> entry : assignedList.entrySet()) {
-            final Item saveTblitem = contactContainer.addItem(entry.getKey());
-            saveTblitem.getItemProperty(TARGET_NAME).setValue(entry.getKey().getTargetName());
-            saveTblitem.getItemProperty(DISTRIBUTION_NAME).setValue(HawkbitCommonUtil
-                    .getDistributionNameAndVersion(entry.getValue().getName(), entry.getValue().getVersion()));
-        }
-
-        return contactContainer;
-    }
     // Code for target / distribution assignment END
 
     @Override
@@ -1006,6 +971,15 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         final String entityId = String.valueOf(
                 getContainerDataSource().getItem(itemId).getItemProperty(SPUILabelDefinitions.DIST_ID).getValue());
         return "distributionSet." + entityId;
+    }
+
+    @Override
+    protected String getDeletedEntityName(final Long entityId) {
+        final Optional<DistributionSet> distribution = distributionSetManagement.get(entityId);
+        if (distribution.isPresent()) {
+            return distribution.get().getName();
+        }
+        return "";
     }
 
     // Code for delete entity END

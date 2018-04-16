@@ -134,11 +134,6 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     }
 
     @Override
-    protected boolean isFirstRowSelectedOnLoad() {
-        return artifactUploadState.getSelectedSoftwareModules().isEmpty();
-    }
-
-    @Override
     protected Object getItemIdToSelect() {
         return artifactUploadState.getSelectedSoftwareModules().isEmpty() ? null
                 : artifactUploadState.getSelectedSoftwareModules();
@@ -311,6 +306,15 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         final String entityId = String.valueOf(
                 getContainerDataSource().getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_SWM_ID).getValue());
         return "softwareModule." + entityId;
+    }
+
+    @Override
+    protected String getDeletedEntityName(final Long entityId) {
+        final Optional<SoftwareModule> softwareModule = softwareModuleManagement.get(entityId);
+        if (softwareModule.isPresent()) {
+            return softwareModule.get().getName();
+        }
+        return "";
     }
 
 }

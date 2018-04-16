@@ -194,8 +194,6 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
                         entryDeleteSM.getValue());
                 if (entryAssignSM.getValue().contains(smIdName)) {
                     entryAssignSM.getValue().remove(smIdName);
-                    assignmnetTab.getTable().removeItem(HawkbitCommonUtil.concatStrings("|||",
-                            entryAssignSM.getKey().getId().toString(), smIdName.getId().toString()));
                 }
 
                 if (entryAssignSM.getValue().isEmpty()) {
@@ -237,14 +235,6 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
                 && !manageDistUIState.getDeleteSofwareModulesList().isEmpty()
                 && manageDistUIState.getDeleteSofwareModulesList().containsKey(swmoduleId)) {
             manageDistUIState.getDeleteSofwareModulesList().remove(swmoduleId);
-        }
-        tab.getTable().getContainerDataSource().removeItem(itemId);
-        final int deleteCount = tab.getTable().size();
-        if (0 == deleteCount) {
-            removeCurrentTab(tab);
-            eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_SOFTWARE);
-        } else {
-            eventBus.publish(this, SaveActionWindowEvent.DISCARD_DELETE_SOFTWARE);
         }
     }
 
@@ -331,14 +321,6 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         if (!CollectionUtils.isEmpty(manageDistUIState.getSelectedDeleteSWModuleTypes())
                 && manageDistUIState.getSelectedDeleteSWModuleTypes().contains(discardSWModuleType)) {
             manageDistUIState.getSelectedDeleteSWModuleTypes().remove(discardSWModuleType);
-        }
-        tab.getTable().getContainerDataSource().removeItem(itemId);
-        final int deleteCount = tab.getTable().size();
-        if (0 == deleteCount) {
-            removeCurrentTab(tab);
-            eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_DELETE_SW_MODULE_TYPES);
-        } else {
-            eventBus.publish(this, SaveActionWindowEvent.DISCARD_DELETE_SW_MODULE_TYPE);
         }
     }
 
@@ -431,14 +413,6 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
                 && manageDistUIState.getDeletedDistributionList().contains(distId)) {
             manageDistUIState.getDeletedDistributionList().remove(distId);
         }
-        tab.getTable().getContainerDataSource().removeItem(itemId);
-        final int deleteCount = tab.getTable().size();
-        if (0 == deleteCount) {
-            removeCurrentTab(tab);
-            eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_DISTRIBUTIONS);
-        } else {
-            eventBus.publish(this, SaveActionWindowEvent.DISCARD_DEL_DISTRIBUTION);
-        }
     }
 
     /* For Distribution set Type */
@@ -521,14 +495,6 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         if (!CollectionUtils.isEmpty(manageDistUIState.getSelectedDeleteDistSetTypes())
                 && manageDistUIState.getSelectedDeleteDistSetTypes().contains(discardDSType)) {
             manageDistUIState.getSelectedDeleteDistSetTypes().remove(discardDSType);
-        }
-        tab.getTable().getContainerDataSource().removeItem(itemId);
-        final int deleteCount = tab.getTable().size();
-        if (0 == deleteCount) {
-            removeCurrentTab(tab);
-            eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_DELETE_DIST_SET_TYPES);
-        } else {
-            eventBus.publish(this, SaveActionWindowEvent.DISCARD_DELETE_DIST_SET_TYPE);
         }
     }
 
@@ -641,31 +607,6 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     }
 
     private void discardSWAssignment(final String discardSW, final Object itemId, final ConfirmationTab tab) {
-
-        final Item rowitem = tab.getTable().getContainerDataSource().getItem(discardSW);
-        final DistributionSetIdName discardDistIdName = (DistributionSetIdName) rowitem.getItemProperty(DIST_ID_NAME)
-                .getValue();
-        final SoftwareModuleIdName discardSoftIdName = (SoftwareModuleIdName) rowitem
-                .getItemProperty(SOFTWARE_MODULE_ID_NAME).getValue();
-
-        final Set<SoftwareModuleIdName> softIdNameSet = manageDistUIState.getAssignedList().get(discardDistIdName);
-        manageDistUIState.getAssignedList().get(discardDistIdName).remove(discardSoftIdName);
-        softIdNameSet.remove(discardSoftIdName);
-        tab.getTable().getContainerDataSource().removeItem(itemId);
-        if (softIdNameSet.isEmpty()) {
-            manageDistUIState.getAssignedList().remove(discardDistIdName);
-        }
-        final Map<Long, HashSet<SoftwareModuleIdName>> map = manageDistUIState.getConsolidatedDistSoftwareList()
-                .get(discardDistIdName);
-        map.keySet().forEach(typeId -> map.get(typeId).remove(discardSoftIdName));
-
-        final int assigCount = tab.getTable().getContainerDataSource().size();
-        if (0 == assigCount) {
-            removeCurrentTab(tab);
-            eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS);
-        } else {
-            eventBus.publish(this, SaveActionWindowEvent.DISCARD_ASSIGNMENT);
-        }
 
     }
 

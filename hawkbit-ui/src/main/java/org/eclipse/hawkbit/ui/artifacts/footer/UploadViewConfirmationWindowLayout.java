@@ -144,14 +144,6 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
                 && artifactUploadState.getDeleteSoftwareModules().containsKey(swmoduleId)) {
             artifactUploadState.getDeleteSoftwareModules().remove(swmoduleId);
         }
-        tab.getTable().getContainerDataSource().removeItem(itemId);
-        final int deleteCount = tab.getTable().size();
-        if (0 == deleteCount) {
-            removeCurrentTab(tab);
-            eventBus.publish(this, UploadArtifactUIEvent.DISCARD_ALL_DELETE_SOFTWARE);
-        } else {
-            eventBus.publish(this, UploadArtifactUIEvent.DISCARD_DELETE_SOFTWARE);
-        }
     }
 
     private void deleteSMAll(final ConfirmationTab tab) {
@@ -243,14 +235,6 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
                 && !artifactUploadState.getSelectedDeleteSWModuleTypes().isEmpty()
                 && artifactUploadState.getSelectedDeleteSWModuleTypes().contains(discardSWModuleType)) {
             artifactUploadState.getSelectedDeleteSWModuleTypes().remove(discardSWModuleType);
-        }
-        tab.getTable().getContainerDataSource().removeItem(itemId);
-        final int deleteCount = tab.getTable().size();
-        if (0 == deleteCount) {
-            removeCurrentTab(tab);
-            eventBus.publish(this, UploadArtifactUIEvent.DISCARD_ALL_DELETE_SOFTWARE_TYPE);
-        } else {
-            eventBus.publish(this, UploadArtifactUIEvent.DISCARD_DELETE_SOFTWARE_TYPE);
         }
     }
 

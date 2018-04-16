@@ -91,7 +91,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
-import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
@@ -319,11 +318,6 @@ public class TargetTable extends AbstractTable<Target> {
                 (source, itemId, columnId) -> getTagetPinButton(itemId));
         addGeneratedColumn(SPUIDefinitions.TARGET_STATUS_POLL_TIME,
                 (source, itemId, columnId) -> getTargetPollTime(itemId));
-    }
-
-    @Override
-    protected boolean isFirstRowSelectedOnLoad() {
-        return managementUIState.getSelectedTargetId().isEmpty();
     }
 
     @Override
@@ -791,7 +785,7 @@ public class TargetTable extends AbstractTable<Target> {
 
     @Override
     protected void setDataAvailable(final boolean available) {
-        managementUIState.setNoDataAvilableTarget(!available);
+        managementUIState.setNoDataAvailableTarget(!available);
     }
 
     /**
@@ -990,15 +984,16 @@ public class TargetTable extends AbstractTable<Target> {
             notification.displayWarning(i18n.getMessage("distributionsets.not.exists"));
             return;
         }
-
-        addNewTargetToAssignmentList(createTargetIdName, findDistributionSetAllById);
-        openConfirmationWindowForAssignment(findDistributionSetAllById);
+        // only one distribution can be assigned to a target
+        final DistributionSet distributionSetToAssign = findDistributionSetAllById.get(0);
+        addNewTargetToAssignmentList(createTargetIdName, distributionSetToAssign);
+        openConfirmationWindowForAssignment(distributionSetToAssign.getName(), createTargetIdName.getTargetName());
     }
 
-    private void openConfirmationWindowForAssignment(final List<DistributionSet> findDistributionSetAllById) {
+    private void openConfirmationWindowForAssignment(final String distributionNameToAssign, final String targetName) {
         confirmDialog = new ConfirmationDialog(i18n.getMessage("caption.entity.assign.action.confirmbox"),
-                i18n.getMessage("message.confirm.assign.entity"), i18n.getMessage("button.ok"),
-                i18n.getMessage("button.cancel"), ok -> {
+                i18n.getMessage("message.confirm.assign.entity", distributionNameToAssign, "target", targetName),
+                i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
                     if (ok) {
                         if (isMaintenanceWindowValid()) {
                             saveAllAssignments();
@@ -1015,41 +1010,13 @@ public class TargetTable extends AbstractTable<Target> {
     }
 
     private ConfirmationTab createAssignmentTab() {
-        final ConfirmationTab assignmentTab = new ConfirmationTab(getAssignmentsTableContainer(),
-                getAssignmentsTableVisibleColumns(), getAssignmentsTableColumnHeaders());
-
+        final ConfirmationTab assignmentTab = new ConfirmationTab();
         actionTypeOptionGroupLayout.selectDefaultOption();
         assignmentTab.addComponent(actionTypeOptionGroupLayout);
         assignmentTab.addComponent(enableMaintenanceWindowLayout());
         initMaintenanceWindow();
         assignmentTab.addComponent(maintenanceWindowLayout);
-
         return assignmentTab;
-    }
-
-    private String[] getAssignmentsTableColumnHeaders() {
-        return new String[] { i18n.getMessage("header.first.assignment.table"),
-                i18n.getMessage("header.second.assignment.table") };
-    }
-
-    private static Object[] getAssignmentsTableVisibleColumns() {
-        return new Object[] { TARGET_NAME, DISTRIBUTION_NAME };
-    }
-
-    private IndexedContainer getAssignmentsTableContainer() {
-        final IndexedContainer contactContainer = new IndexedContainer();
-        contactContainer.addContainerProperty(TARGET_NAME, String.class, "");
-        contactContainer.addContainerProperty(DISTRIBUTION_NAME, String.class, "");
-        final Map<TargetIdName, DistributionSetIdName> assignedList = managementUIState.getAssignedList();
-
-        for (final Map.Entry<TargetIdName, DistributionSetIdName> entry : assignedList.entrySet()) {
-            final Item saveTblitem = contactContainer.addItem(entry.getKey());
-            saveTblitem.getItemProperty(TARGET_NAME).setValue(entry.getKey().getTargetName());
-            saveTblitem.getItemProperty(DISTRIBUTION_NAME).setValue(HawkbitCommonUtil
-                    .getDistributionNameAndVersion(entry.getValue().getName(), entry.getValue().getVersion()));
-        }
-
-        return contactContainer;
     }
 
     private HorizontalLayout enableMaintenanceWindowLayout() {
@@ -1095,45 +1062,11 @@ public class TargetTable extends AbstractTable<Target> {
     }
 
     private void addNewTargetToAssignmentList(final TargetIdName createTargetIdName,
-            final List<DistributionSet> findDistributionSetAllById) {
-        String message = null;
-        final Set<DistributionSetIdName> distributionIdNameSet = findDistributionSetAllById.stream()
-                .map(DistributionSetIdName::new).collect(Collectors.toSet());
-
-        for (final DistributionSetIdName distributionNameId : distributionIdNameSet) {
-            if (distributionNameId != null) {
-                if (managementUIState.getAssignedList().keySet().contains(createTargetIdName)
-                        && managementUIState.getAssignedList().get(createTargetIdName).equals(distributionNameId)) {
-                    message = getPendingActionMessage(message,
-                            HawkbitCommonUtil.getDistributionNameAndVersion(distributionNameId.getName(),
-                                    distributionNameId.getVersion()),
-                            createTargetIdName.getControllerId());
-                } else {
-                    managementUIState.getAssignedList().put(createTargetIdName, distributionNameId);
-                }
-            }
-        }
-        showOrHidePopupAndNotification(message);
+            final DistributionSet findDistributionSetAllById) {
+        final DistributionSetIdName distributionNameId = new DistributionSetIdName(findDistributionSetAllById);
+        managementUIState.getAssignedList().put(createTargetIdName, distributionNameId);
     }
 
-    /**
-     * Hide and show Notification Msg.
-     * 
-     * @param message
-     *            as msg
-     */
-    private void showOrHidePopupAndNotification(final String message) {
-        if (null != message) {
-            notification.displayValidationError(message);
-        }
-    }
-
-    private String getPendingActionMessage(final String message, final String distName, final String controllerId) {
-        if (message == null) {
-            return i18n.getMessage("message.dist.pending.action", controllerId, distName);
-        }
-        return i18n.getMessage("message.target.assigned.pending");
-    }
     // Code for assignment end
 
     // Code for delete icon start
@@ -1175,6 +1108,15 @@ public class TargetTable extends AbstractTable<Target> {
     @Override
     protected boolean hasDeletePermission() {
         return permChecker.hasDeleteRepositoryPermission() || permChecker.hasDeleteTargetPermission();
+    }
+
+    @Override
+    protected String getDeletedEntityName(final Long entityId) {
+        final Optional<Target> target = targetManagement.get(entityId);
+        if (target.isPresent()) {
+            return target.get().getName();
+        }
+        return "";
     }
 
     // Code for delete icon end

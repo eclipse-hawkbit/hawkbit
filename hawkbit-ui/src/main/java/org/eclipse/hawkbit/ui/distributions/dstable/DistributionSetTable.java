@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
-import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
 import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.entity.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
@@ -67,7 +66,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
-import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
@@ -183,13 +181,9 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     @Override
-    protected boolean isFirstRowSelectedOnLoad() {
-        return manageDistUIState.getSelectedDistributions().isEmpty();
-    }
-
-    @Override
     protected Object getItemIdToSelect() {
-        return isFirstRowSelectedOnLoad() ? null : manageDistUIState.getSelectedDistributions();
+        return manageDistUIState.getSelectedDistributions().isEmpty() ? null
+                : manageDistUIState.getSelectedDistributions();
     }
 
     @Override
@@ -293,7 +287,8 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
         LOG.debug("Adding a log to check if distributionSetIdName is null : {} ", distributionSetIdName);
         manageDistUIState.getAssignedList().put(distributionSetIdName, softwareModules);
-        openConfirmationWindowForAssignment();
+        openConfirmationWindowForAssignment(distributionSetIdName.getName(),
+                softwareModules.toArray(new SoftwareModuleIdName[softwareModules.size()]));
     }
 
     private void publishAssignEvent(final Long distId, final SoftwareModule softwareModule) {
@@ -325,11 +320,19 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     // Assign Software to Distribution START
-    private void openConfirmationWindowForAssignment() {
+    private void openConfirmationWindowForAssignment(final String distributionNameToAssign,
+            final SoftwareModuleIdName[] softwareModules) {
+        final String confirmQuestion;
+        if (softwareModules.length == 1) {
+            confirmQuestion = i18n.getMessage("message.confirm.assign.entity", distributionNameToAssign,
+                    "software module", softwareModules[0].getName());
+        } else {
+            confirmQuestion = i18n.getMessage("message.confirm.assign.multiple.entities", softwareModules.length,
+                    "software modules", distributionNameToAssign);
+        }
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
-                i18n.getMessage("caption.entity.assign.action.confirmbox"),
-                i18n.getMessage("message.confirm.assign.entity"), i18n.getMessage("button.ok"),
-                i18n.getMessage("button.cancel"), ok -> {
+                i18n.getMessage("caption.entity.assign.action.confirmbox"), confirmQuestion,
+                i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
                     if (ok) {
                         saveAllAssignments();
                     }
@@ -337,7 +340,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
                         manageDistUIState.getAssignedList().clear();
                         manageDistUIState.getConsolidatedDistSoftwareList().clear();
                     }
-                }, createAssignmentTab());
+                });
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
     }
@@ -361,38 +364,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         eventBus.publish(this, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
     }
 
-    private ConfirmationTab createAssignmentTab() {
-        return new ConfirmationTab(getAssignmentsTableContainer(), getAssignmentsTableVisibleColumns(),
-                getAssignmentsTableColumnHeaders());
-    }
-
-    private String[] getAssignmentsTableColumnHeaders() {
-        return new String[] { i18n.getMessage("header.dist.first.assignment.table"),
-                i18n.getMessage("header.dist.second.assignment.table") };
-    }
-
-    private static Object[] getAssignmentsTableVisibleColumns() {
-        return new Object[] { DIST_NAME, SOFTWARE_MODULE_NAME };
-    }
-
-    @SuppressWarnings("unchecked")
-    private IndexedContainer getAssignmentsTableContainer() {
-        final IndexedContainer contactContainer = new IndexedContainer();
-        contactContainer.addContainerProperty(DIST_NAME, String.class, "");
-        contactContainer.addContainerProperty(SOFTWARE_MODULE_NAME, String.class, "");
-
-        final Map<DistributionSetIdName, HashSet<SoftwareModuleIdName>> assignedList = manageDistUIState
-                .getAssignedList();
-
-        assignedList.forEach((distIdname, softIdNameSet) -> softIdNameSet.forEach(softIdName -> {
-            final String itemId = HawkbitCommonUtil.concatStrings("|||", distIdname.getId().toString(),
-                    softIdName.getId().toString());
-            final Item saveTblitem = contactContainer.addItem(itemId);
-            saveTblitem.getItemProperty(DIST_NAME).setValue(distIdname.getName().concat(":" + distIdname.getVersion()));
-            saveTblitem.getItemProperty(SOFTWARE_MODULE_NAME).setValue(softIdName.getName());
-        }));
-        return contactContainer;
-    }
     // Assign Software to Distribution END
 
     private boolean validSoftwareModule(final Long distId, final SoftwareModule sm) {
@@ -600,6 +571,15 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         final String entityId = String.valueOf(
                 getContainerDataSource().getItem(itemId).getItemProperty(SPUILabelDefinitions.DIST_ID).getValue());
         return "distributionSet." + entityId;
+    }
+
+    @Override
+    protected String getDeletedEntityName(final Long entityId) {
+        final Optional<DistributionSet> distribution = distributionSetManagement.get(entityId);
+        if (distribution.isPresent()) {
+            return distribution.get().getName();
+        }
+        return "";
     }
 
 }

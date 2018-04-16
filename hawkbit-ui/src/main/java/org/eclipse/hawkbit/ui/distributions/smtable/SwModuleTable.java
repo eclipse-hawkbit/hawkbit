@@ -223,11 +223,6 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
     }
 
     @Override
-    protected boolean isFirstRowSelectedOnLoad() {
-        return manageDistUIState.getSelectedSoftwareModules().isEmpty();
-    }
-
-    @Override
     protected Object getItemIdToSelect() {
         return manageDistUIState.getSelectedSoftwareModules().isEmpty() ? null
                 : manageDistUIState.getSelectedSoftwareModules();
@@ -245,11 +240,17 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
 
     @Override
     protected void setLastSelectedEntityId(final Long selectedLastEntityId) {
+        if (selectedLastEntityId == null) {
+            return;
+        }
         manageDistUIState.setLastSelectedSoftwareModule(selectedLastEntityId);
     }
 
     @Override
     protected void setManagementEntityStateValues(final Set<Long> values, final Long lastId) {
+        if (values == null || lastId == null) {
+            return;
+        }
         manageDistUIState.setLastSelectedSoftwareModule(lastId);
         manageDistUIState.setSelectedSoftwareModules(values);
     }
@@ -447,6 +448,15 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
         final String entityId = String.valueOf(
                 getContainerDataSource().getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_SWM_ID).getValue());
         return "softwareModule." + entityId;
+    }
+
+    @Override
+    protected String getDeletedEntityName(final Long entityId) {
+        final Optional<SoftwareModule> softwareModule = softwareModuleManagement.get(entityId);
+        if (softwareModule.isPresent()) {
+            return softwareModule.get().getName();
+        }
+        return "";
     }
 
 }

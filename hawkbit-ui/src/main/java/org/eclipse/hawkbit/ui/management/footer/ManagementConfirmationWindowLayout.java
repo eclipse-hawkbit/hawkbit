@@ -327,15 +327,7 @@ public class ManagementConfirmationWindowLayout extends AbstractConfirmationWind
     }
 
     private void discardAssignment(final TargetIdName targetId, final ConfirmationTab tab) {
-        tab.getTable().getContainerDataSource().removeItem(targetId);
         managementUIState.getAssignedList().remove(targetId);
-        final int assigCount = tab.getTable().getContainerDataSource().size();
-        if (0 == assigCount) {
-            removeCurrentTab(tab);
-            eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS);
-        } else {
-            eventBus.publish(this, SaveActionWindowEvent.DISCARD_ASSIGNMENT);
-        }
     }
 
     private IndexedContainer getAssignmentsTableContainer() {
@@ -436,14 +428,6 @@ public class ManagementConfirmationWindowLayout extends AbstractConfirmationWind
 
     private void discardDSDelete(final DistributionSetIdName discardDsIdName, final ConfirmationTab tab) {
         managementUIState.getDeletedDistributionList().remove(discardDsIdName);
-        tab.getTable().getContainerDataSource().removeItem(discardDsIdName);
-        final int deleteCount = tab.getTable().size();
-        if (0 == deleteCount) {
-            removeCurrentTab(tab);
-            eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_DISTRIBUTIONS);
-        } else {
-            eventBus.publish(this, SaveActionWindowEvent.DISCARD_DELETE_DS);
-        }
     }
 
     private IndexedContainer getDSModuleTableContainer() {
@@ -521,7 +505,6 @@ public class ManagementConfirmationWindowLayout extends AbstractConfirmationWind
     private void removeFromAssignmentTab(final Entry<TargetIdName, DistributionSetIdName> entry,
             final DistributionSetIdName value) {
         if (Objects.equals(entry.getValue(), value)) {
-            assignmentTab.getTable().removeItem(entry.getKey().getTargetId());
         }
     }
 
@@ -540,15 +523,7 @@ public class ManagementConfirmationWindowLayout extends AbstractConfirmationWind
 
     private void discardTargetDelete(final TargetIdName itemId, final ConfirmationTab tab) {
         managementUIState.getDeletedTargetList().remove(itemId);
-        tab.getTable().getContainerDataSource().removeItem(itemId);
 
-        final int assigCount = tab.getTable().getContainerDataSource().size();
-        if (0 == assigCount) {
-            removeCurrentTab(tab);
-            eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_TARGETS);
-        } else {
-            eventBus.publish(this, SaveActionWindowEvent.DISCARD_DELETE_TARGET);
-        }
     }
 
     private void discardAllTargets(final ConfirmationTab tab) {
@@ -582,7 +557,6 @@ public class ManagementConfirmationWindowLayout extends AbstractConfirmationWind
         for (final TargetIdName targetNameId : managementUIState.getDeletedTargetList()) {
             if (managementUIState.getAssignedList().containsKey(targetNameId)) {
                 managementUIState.getAssignedList().remove(targetNameId);
-                assignmentTab.getTable().removeItem(targetNameId.getTargetId());
             }
         }
     }

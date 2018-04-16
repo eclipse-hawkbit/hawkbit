@@ -76,6 +76,8 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
 
     protected SpPermissionChecker permChecker;
 
+    private Button deleteButton;
+
     protected AbstractTable(final UIEventBus eventBus, final VaadinMessageSource i18n,
             final UINotification notification, final SpPermissionChecker permChecker) {
         this.eventBus = eventBus;
@@ -105,7 +107,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
 
     private void addDeleteColumn() {
         if (hasDeletePermission()) {
-            addGeneratedColumn(SPUIDefinitions.DELETE_ENTITY, (source, itemId, columnId) -> getDeleteButton(itemId));
+            addGeneratedColumn(SPUIDefinitions.DELETE_ENTITY, (source, itemId, columnId) -> createDeleteButton(itemId));
         }
     }
 
@@ -168,11 +170,11 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
 
     protected void selectRow() {
         if (!isMaximized()) {
-            if (isFirstRowSelectedOnLoad()) {
-                selectFirstRow();
-            } else {
-                setValue(getItemIdToSelect());
+            final Object itemIdToSelect = getItemIdToSelect();
+            if (itemIdToSelect == null) {
+                return;
             }
+            setValue(itemIdToSelect);
         }
     }
 
@@ -201,14 +203,6 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
     private void addDeleteButtonToColumnList(final List<TableColumn> columnList) {
         if (hasDeletePermission()) {
             columnList.add(new TableColumn(SPUIDefinitions.DELETE_ENTITY, "", 0.0F));
-        }
-    }
-
-    private void selectFirstRow() {
-        final Container container = getContainerDataSource();
-        final int size = container.size();
-        if (size > 0) {
-            select(firstItemId());
         }
     }
 
@@ -310,6 +304,9 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
     protected abstract void publishSelectedEntityEvent(final E selectedLastEntity);
 
     protected void setLastSelectedEntityId(final Long selectedLastEntityId) {
+        if (selectedLastEntityId == null) {
+            return;
+        }
         getManagementEntityState().setLastSelectedEntityId(selectedLastEntityId);
     }
 
@@ -342,8 +339,8 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
         // can be overriden
     }
 
-    private Object getDeleteButton(final Object itemId) {
-        final Button deleteButton = SPUIComponentProvider.getButton("", "", "", "", true, FontAwesome.TRASH_O,
+    private Object createDeleteButton(final Object itemId) {
+        deleteButton = SPUIComponentProvider.getButton("", "", "", "", true, FontAwesome.TRASH_O,
                 SPUIButtonStyleSmallNoBorder.class);
         final String id = getEntityId(itemId);
         if (StringUtils.hasText(id)) {
@@ -357,19 +354,27 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
     }
 
     private void addDeleteButtonClickListener(final ClickEvent event) {
-        openConfirmationWindow(event);
+        openConfirmationWindowDeleteAction(event);
     }
 
-    private void openConfirmationWindow(final ClickEvent event) {
+    private void openConfirmationWindowDeleteAction(final ClickEvent event) {
         final String id = getId(event.getButton().getId());
         final Set<Long> selectedEntities = getSelectedEntities();
         final List<Long> allEntities = selectedEntities.stream().collect(Collectors.toList());
         if (!allEntities.contains(Long.parseLong(id))) {
             allEntities.add(Long.parseLong(id));
         }
+        String confirmationQuestion;
+        if (allEntities.size() == 1) {
+            final String entityName = getDeletedEntityName(allEntities.get(0));
+            confirmationQuestion = i18n.getMessage("message.confirm.delete.entity", getEntityName().toLowerCase(),
+                    entityName, "");
+        } else {
+            confirmationQuestion = i18n.getMessage("message.confirm.delete.entity", allEntities.size(),
+                    getEntityName().toLowerCase(), "s");
+        }
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
-                i18n.getMessage("caption.entity.delete.action.confirmbox", getEntityName()),
-                i18n.getMessage("message.confirm.delete.entity", allEntities.size(), getEntityName().toLowerCase()),
+                i18n.getMessage("caption.entity.delete.action.confirmbox", getEntityName()), confirmationQuestion,
                 i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
                     if (ok) {
                         handleOkDelete(allEntities);
@@ -378,6 +383,8 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
     }
+
+    protected abstract String getDeletedEntityName(Long entityId);
 
     protected abstract void handleOkDelete(List<Long> allEntities);
 
@@ -390,15 +397,6 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
     }
 
     protected abstract String getEntityId(Object itemId);
-
-    /**
-     * Check if the first row should be selected by default on load. (if there
-     * is no other item selected)
-     * 
-     * @return true if it should be selected otherwise return false, if there is
-     *         a different item already selected.
-     */
-    protected abstract boolean isFirstRowSelectedOnLoad();
 
     /**
      * Get Item Id which should be displayed as selected.
@@ -585,5 +583,13 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
     protected abstract AcceptCriterion getDropAcceptCriterion();
 
     protected abstract void setDataAvailable(boolean available);
+
+    public Button getDeleteButton() {
+        return deleteButton;
+    }
+
+    public void setDeleteButton(final Button deleteButton) {
+        this.deleteButton = deleteButton;
+    }
 
 }

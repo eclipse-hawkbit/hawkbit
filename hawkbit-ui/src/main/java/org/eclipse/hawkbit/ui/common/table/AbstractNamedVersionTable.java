@@ -36,8 +36,6 @@ public abstract class AbstractNamedVersionTable<E extends NamedVersionedEntity> 
     protected AbstractNamedVersionTable(final UIEventBus eventBus, final VaadinMessageSource i18n,
             final UINotification notification, final SpPermissionChecker permChecker) {
         super(eventBus, i18n, notification, permChecker);
-        setMultiSelect(true);
-        setSelectable(true);
     }
 
     @Override
