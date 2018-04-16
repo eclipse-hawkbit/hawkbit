@@ -363,6 +363,10 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
         final List<Long> allEntities = selectedEntities.stream().collect(Collectors.toList());
         if (!allEntities.contains(Long.parseLong(id))) {
             allEntities.add(Long.parseLong(id));
+            getSelectedEntities().add(Long.parseLong(id));
+            final Button source = (Button) event.getSource();
+            final Table parent = (Table) source.getParent();
+            parent.select(Long.parseLong(id));
         }
         String confirmationQuestion;
         if (allEntities.size() == 1) {
@@ -568,6 +572,15 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
 
         setLastSelectedEntityId(entityId);
         publishSelectedEntityEvent(entity);
+    }
+
+    protected void selectDroppedEntities(final Long targetId) {
+        getSelectedEntities().forEach(this::unselect);
+        select(targetId);
+    }
+
+    protected void selectDraggedEntities(final AbstractTable<?> source, final Set<Long> ids) {
+        source.setValue(ids);
     }
 
     protected abstract List<String> hasMissingPermissionsForDrop();

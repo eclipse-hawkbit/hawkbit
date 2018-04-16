@@ -962,6 +962,7 @@ public class TargetTable extends AbstractTable<Target> {
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
         final AbstractTable<?> source = (AbstractTable<?>) transferable.getSourceComponent();
         final Set<Long> ids = source.getSelectedEntitiesByTransferable(transferable);
+        selectDraggedEntities(source, ids);
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
         final Object targetItemId = dropData.getItemIdOver();
         LOG.debug("Adding a log to check if targetItemId is null : {} ", targetItemId);
@@ -971,6 +972,7 @@ public class TargetTable extends AbstractTable<Target> {
         }
 
         final Long targetId = (Long) targetItemId;
+        selectDroppedEntities(targetId);
         final Optional<Target> target = targetManagement.get(targetId);
         if (!target.isPresent()) {
             getNotification().displayWarning(i18n.getMessage("target.not.exists", ""));

@@ -458,6 +458,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
         final TargetTable targetTable = (TargetTable) transferable.getSourceComponent();
         final Set<Long> targetIdSet = targetTable.getSelectedEntitiesByTransferable(transferable);
+        selectDraggedEntities(targetTable, targetIdSet);
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
         final Object distItemId = dropData.getItemIdOver();
         assignTargetToDs(getItem(distItemId), targetManagement.get(targetIdSet));
@@ -474,6 +475,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         }
 
         final Long distId = (Long) item.getItemProperty("id").getValue();
+        selectDroppedEntities(distId);
         final Optional<DistributionSet> findDistributionSetById = distributionSetManagement.get(distId);
         if (!findDistributionSetById.isPresent()) {
             notification.displayWarning(i18n.getMessage("distributionset.not.exists"));

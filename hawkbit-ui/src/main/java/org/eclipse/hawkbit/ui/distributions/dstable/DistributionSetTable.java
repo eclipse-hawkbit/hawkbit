@@ -221,6 +221,8 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
         final AbstractTable<?> source = (AbstractTable<?>) transferable.getSourceComponent();
         final Set<Long> softwareModulesIdList = source.getSelectedEntitiesByTransferable(transferable);
+        source.setValue(softwareModulesIdList);
+        selectDraggedEntities(source, softwareModulesIdList);
 
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
 
@@ -254,7 +256,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         }
 
         final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distributionSet.get());
-
+        selectDroppedEntities(distributionSetIdName.getId());
         final HashMap<Long, HashSet<SoftwareModuleIdName>> map;
         if (manageDistUIState.getConsolidatedDistSoftwareList().containsKey(distributionSetIdName)) {
             map = manageDistUIState.getConsolidatedDistSoftwareList().get(distributionSetIdName);
