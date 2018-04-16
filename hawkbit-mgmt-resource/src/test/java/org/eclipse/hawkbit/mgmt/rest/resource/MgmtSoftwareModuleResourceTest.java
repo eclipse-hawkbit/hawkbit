@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -1006,13 +1005,6 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                     .description(str).vendor(str).version(str));
             character++;
         }
-    }
-
-    private static byte[] randomBytes(final int len) {
-        final byte[] randomBytes = new byte[len];
-        final Random ran = new Random();
-        ran.nextBytes(randomBytes);
-        return randomBytes;
     }
 
 }
