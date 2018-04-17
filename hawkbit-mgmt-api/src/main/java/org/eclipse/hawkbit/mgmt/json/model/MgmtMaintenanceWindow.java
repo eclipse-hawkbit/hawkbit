@@ -8,88 +8,32 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model;
 
+import java.util.concurrent.TimeUnit;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * JSON model for Management API to define the maintenance window based on a
- * schedule defined as cron expression, duration in HH:mm:ss format and time
- * zone as offset from UTC.
+ * JSON model for Management API to define the maintenance window.
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MgmtMaintenanceWindow {
-
-    private String maintenanceSchedule;
-    private String maintenanceWindowDuration;
-    private String maintenanceWindowTimeZone;
+public class MgmtMaintenanceWindow extends MgmtMaintenanceWindowRequestBody {
 
     /**
-     * Sets the maintenance schedule.
-     *
-     * @param maintenanceSchedule
-     *            is the cron expression to be used for scheduling maintenance
-     *            window(s). Expression has 6 mandatory fields and a last
-     *            optional field: "second minute hour dayofmonth month weekday
-     *            year".
+     * Time in {@link TimeUnit#MILLISECONDS} of the next maintenance window
+     * start
      */
-    @JsonSetter("schedule")
-    public void setMaintenanceSchedule(final String maintenanceSchedule) {
-        this.maintenanceSchedule = maintenanceSchedule;
+    @JsonProperty
+    private Long nextStartAt;
+
+    public Long getNextStartAt() {
+        return nextStartAt;
     }
 
-    /**
-     * Sets the maintenance window duration.
-     *
-     * @param maintenanceWindowDuration
-     *            in HH:mm:ss format specifying the duration of a maintenance
-     *            window, for example 00:30:00 for 30 minutes.
-     */
-    @JsonSetter("duration")
-    public void setMaintenanceWindowDuration(final String maintenanceWindowDuration) {
-        this.maintenanceWindowDuration = maintenanceWindowDuration;
-    }
-
-    /**
-     * Sets the maintenance window timezone.
-     *
-     * @param maintenanceWindowTimeZone
-     *            is the time zone specified as +/-hh:mm offset from UTC. For
-     *            example +02:00 for CET summer time and +00:00 for UTC. The
-     *            start time of a maintenance window calculated based on the
-     *            cron expression is relative to this time zone.
-     */
-    @JsonSetter("timezone")
-    public void setMaintenanceWindowTimeZone(final String maintenanceWindowTimeZone) {
-        this.maintenanceWindowTimeZone = maintenanceWindowTimeZone;
-    }
-
-    /**
-     * Returns the maintenance schedule for the {@link Action}.
-     *
-     * @return cron expression as {@link String}.
-     */
-    public String getMaintenanceSchedule() {
-        return maintenanceSchedule;
-    }
-
-    /**
-     * Returns the duration of maintenance window for the {@link Action}.
-     *
-     * @return duration in HH:mm:ss format as {@link String}.
-     */
-    public String getMaintenanceWindowDuration() {
-        return maintenanceWindowDuration;
-    }
-
-    /**
-     * Returns the timezone of maintenance window for the {@link Action}.
-     *
-     * @return the timezone offset from UTC in +/-hh:mm as {@link String}.
-     */
-    public String getMaintenanceWindowTimeZone() {
-        return maintenanceWindowTimeZone;
+    public void setNextStartAt(final Long nextStartAt) {
+        this.nextStartAt = nextStartAt;
     }
 }

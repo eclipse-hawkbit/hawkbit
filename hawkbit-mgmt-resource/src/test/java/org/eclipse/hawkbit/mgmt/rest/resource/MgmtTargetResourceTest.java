@@ -853,7 +853,56 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     }
 
     @Test
-    @Description("Ensures that the expected response is return when update was cancelled.")
+    @Description("Ensures that the expected response is returned for update action.")
+    public void getUpdateAction() throws Exception {
+        final String knownTargetId = "targetId";
+        final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
+
+        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
+                + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actions.get(1).getId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("id", equalTo(actions.get(1).getId().intValue())))
+                .andExpect(jsonPath("type", equalTo("update"))).andExpect(jsonPath("status", equalTo("pending")))
+                .andExpect(jsonPath("forceType", equalTo("forced")))
+                .andExpect(jsonPath("_links.self.href",
+                        equalTo(generateActionSelfLink(knownTargetId, actions.get(1).getId()))))
+                .andExpect(jsonPath("_links.distributionset.href",
+                        equalTo(generateActionDsLink(actions.get(1).getDistributionSet().getId()))))
+                .andExpect(jsonPath("_links.status.href",
+                        equalTo(generateStatusreferenceLink(knownTargetId, actions.get(1).getId()))));
+    }
+
+    @Test
+    @Description("Ensures that the expected response is returned for update action with maintenance window.")
+    public void getUpdateActionWithMaintenanceWindow() throws Exception {
+        final String knownTargetId = "targetId";
+        final String schedule = getTestSchedule(10);
+        final String duration = getTestDuration(10);
+        final String timezone = getTestTimeZone();
+        final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverrideWithMaintenanceWindow(knownTargetId,
+                schedule, duration, timezone);
+
+        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
+                + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actions.get(1).getId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("id", equalTo(actions.get(1).getId().intValue())))
+                .andExpect(jsonPath("type", equalTo("update"))).andExpect(jsonPath("status", equalTo("pending")))
+                .andExpect(jsonPath("forceType", equalTo("forced")))
+                .andExpect(jsonPath("maintenanceWindow.schedule", equalTo(schedule)))
+                .andExpect(jsonPath("maintenanceWindow.duration", equalTo(duration)))
+                .andExpect(jsonPath("maintenanceWindow.timezone", equalTo(timezone)))
+                .andExpect(jsonPath("maintenanceWindow.nextStartAt",
+                        equalTo(actions.get(1).getMaintenanceWindowStartTime().get().toInstant().toEpochMilli())))
+                .andExpect(jsonPath("_links.self.href",
+                        equalTo(generateActionSelfLink(knownTargetId, actions.get(1).getId()))))
+                .andExpect(jsonPath("_links.distributionset.href",
+                        equalTo(generateActionDsLink(actions.get(1).getDistributionSet().getId()))))
+                .andExpect(jsonPath("_links.status.href",
+                        equalTo(generateStatusreferenceLink(knownTargetId, actions.get(1).getId()))));
+    }
+
+    @Test
+    @Description("Ensures that the expected response is returned when update action was cancelled.")
     public void getCancelAction() throws Exception {
         final String knownTargetId = "targetId";
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
@@ -864,6 +913,35 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath("id", equalTo(actions.get(0).getId().intValue())))
                 .andExpect(jsonPath("forceType", equalTo("forced"))).andExpect(jsonPath("type", equalTo("cancel")))
                 .andExpect(jsonPath("status", equalTo("pending")))
+                .andExpect(jsonPath("_links.self.href",
+                        equalTo(generateActionSelfLink(knownTargetId, actions.get(0).getId()))))
+                .andExpect(jsonPath("_links.canceledaction.href",
+                        equalTo(generateCanceledactionreferenceLink(knownTargetId, actions.get(0)))))
+                .andExpect(jsonPath("_links.status.href",
+                        equalTo(generateStatusreferenceLink(knownTargetId, actions.get(0).getId()))));
+    }
+
+    @Test
+    @Description("Ensures that the expected response is returned when update action with maintenance window was cancelled.")
+    public void getCancelActionWithMaintenanceWindow() throws Exception {
+        final String knownTargetId = "targetId";
+        final String schedule = getTestSchedule(10);
+        final String duration = getTestDuration(10);
+        final String timezone = getTestTimeZone();
+        final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverrideWithMaintenanceWindow(knownTargetId,
+                schedule, duration, timezone);
+
+        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
+                + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actions.get(0).getId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("id", equalTo(actions.get(0).getId().intValue())))
+                .andExpect(jsonPath("forceType", equalTo("forced"))).andExpect(jsonPath("type", equalTo("cancel")))
+                .andExpect(jsonPath("status", equalTo("pending")))
+                .andExpect(jsonPath("maintenanceWindow.schedule", equalTo(schedule)))
+                .andExpect(jsonPath("maintenanceWindow.duration", equalTo(duration)))
+                .andExpect(jsonPath("maintenanceWindow.timezone", equalTo(timezone)))
+                .andExpect(jsonPath("maintenanceWindow.nextStartAt",
+                        equalTo(actions.get(0).getMaintenanceWindowStartTime().get().toInstant().toEpochMilli())))
                 .andExpect(jsonPath("_links.self.href",
                         equalTo(generateActionSelfLink(knownTargetId, actions.get(0).getId()))))
                 .andExpect(jsonPath("_links.canceledaction.href",
@@ -889,6 +967,44 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath("content.[0].id", equalTo(actions.get(0).getId().intValue())))
                 .andExpect(jsonPath("content.[0].type", equalTo("cancel")))
                 .andExpect(jsonPath("content.[0].status", equalTo("pending")))
+                .andExpect(jsonPath("content.[0]._links.self.href",
+                        equalTo(generateActionSelfLink(knownTargetId, actions.get(0).getId()))))
+                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
+                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(2)))
+                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(2)));
+    }
+
+    @Test
+    @Description("Ensures that the expected response of geting actions with maintenance window of a target is returned.")
+    public void getMultipleActionsWithMaintenanceWindow() throws Exception {
+        final String knownTargetId = "targetId";
+        final String schedule = getTestSchedule(10);
+        final String duration = getTestDuration(10);
+        final String timezone = getTestTimeZone();
+        final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverrideWithMaintenanceWindow(knownTargetId,
+                schedule, duration, timezone);
+
+        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
+                + MgmtRestConstants.TARGET_V1_ACTIONS).param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("content.[1].id", equalTo(actions.get(1).getId().intValue())))
+                .andExpect(jsonPath("content.[1].type", equalTo("update")))
+                .andExpect(jsonPath("content.[1].status", equalTo("pending")))
+                .andExpect(jsonPath("content.[1].maintenanceWindow.schedule", equalTo(schedule)))
+                .andExpect(jsonPath("content.[1].maintenanceWindow.duration", equalTo(duration)))
+                .andExpect(jsonPath("content.[1].maintenanceWindow.timezone", equalTo(timezone)))
+                .andExpect(jsonPath("content.[1].maintenanceWindow.nextStartAt",
+                        equalTo(actions.get(1).getMaintenanceWindowStartTime().get().toInstant().toEpochMilli())))
+                .andExpect(jsonPath("content.[1]._links.self.href",
+                        equalTo(generateActionSelfLink(knownTargetId, actions.get(1).getId()))))
+                .andExpect(jsonPath("content.[0].id", equalTo(actions.get(0).getId().intValue())))
+                .andExpect(jsonPath("content.[0].type", equalTo("cancel")))
+                .andExpect(jsonPath("content.[0].status", equalTo("pending")))
+                .andExpect(jsonPath("content.[0].maintenanceWindow.schedule", equalTo(schedule)))
+                .andExpect(jsonPath("content.[0].maintenanceWindow.duration", equalTo(duration)))
+                .andExpect(jsonPath("content.[0].maintenanceWindow.timezone", equalTo(timezone)))
+                .andExpect(jsonPath("content.[0].maintenanceWindow.nextStartAt",
+                        equalTo(actions.get(0).getMaintenanceWindowStartTime().get().toInstant().toEpochMilli())))
                 .andExpect(jsonPath("content.[0]._links.self.href",
                         equalTo(generateActionSelfLink(knownTargetId, actions.get(0).getId()))))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
@@ -1054,6 +1170,10 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId;
     }
 
+    private String generateActionDsLink(final Long dsId) {
+        return "http://localhost" + MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + dsId;
+    }
+
     private String generateCanceledactionreferenceLink(final String knownTargetId, final Action action) {
         return "http://localhost" + MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
                 + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + action.getId();
@@ -1067,20 +1187,33 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
 
     private List<Action> generateTargetWithTwoUpdatesWithOneOverride(final String knownTargetId)
             throws InterruptedException {
+        return generateTargetWithTwoUpdatesWithOneOverrideWithMaintenanceWindow(knownTargetId, null, null, null);
+    }
 
+    private List<Action> generateTargetWithTwoUpdatesWithOneOverrideWithMaintenanceWindow(final String knownTargetId,
+            final String schedule, final String duration, final String timezone) throws InterruptedException {
         final Target target = testdataFactory.createTarget(knownTargetId);
-        final List<Target> targets = Arrays.asList(target);
 
         final Iterator<DistributionSet> sets = testdataFactory.createDistributionSets(2).iterator();
         final DistributionSet one = sets.next();
         final DistributionSet two = sets.next();
 
         // Update
-        final List<Target> updatedTargets = assignDistributionSet(one, targets).getAssignedEntity();
-        // 2nd update
-        // sleep 10ms to ensure that we can sort by reportedAt
-        Thread.sleep(10);
-        assignDistributionSet(two, updatedTargets);
+        if (schedule == null) {
+            final List<Target> updatedTargets = assignDistributionSet(one, Arrays.asList(target)).getAssignedEntity();
+            // 2nd update
+            // sleep 10ms to ensure that we can sort by reportedAt
+            Thread.sleep(10);
+            assignDistributionSet(two, updatedTargets);
+        } else {
+            final List<Target> updatedTargets = assignDistributionSetWithMaintenanceWindow(one.getId(),
+                    target.getControllerId(), schedule, duration, timezone).getAssignedEntity();
+            // 2nd update
+            // sleep 10ms to ensure that we can sort by reportedAt
+            Thread.sleep(10);
+            assignDistributionSetWithMaintenanceWindow(two.getId(), updatedTargets.get(0).getControllerId(), schedule,
+                    duration, timezone);
+        }
 
         // two updates, one cancellation
         final List<Action> actions = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE)
@@ -1088,26 +1221,6 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
 
         assertThat(actions).hasSize(2);
         return actions;
-    }
-
-    @Test
-    public void getUpdateAction() throws Exception {
-        final String knownTargetId = "targetId";
-        final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
-
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actions.get(1).getId()))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(jsonPath("id", equalTo(actions.get(1).getId().intValue())))
-                .andExpect(jsonPath("type", equalTo("update"))).andExpect(jsonPath("status", equalTo("pending")))
-                .andExpect(jsonPath("forceType", equalTo("forced")))
-                .andExpect(jsonPath("_links.self.href",
-                        equalTo(generateActionSelfLink(knownTargetId, actions.get(1).getId()))))
-                .andExpect(jsonPath("_links.distributionset.href",
-                        equalTo("http://localhost/rest/v1/distributionsets/"
-                                + actions.get(1).getDistributionSet().getId())))
-                .andExpect(jsonPath("_links.status.href",
-                        equalTo(generateStatusreferenceLink(knownTargetId, actions.get(1).getId()))));
     }
 
     @Test
@@ -1264,6 +1377,28 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
                 .content(body).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @Description("Assigns distribution set to target with maintenance window next execution start (should be ignored, calculated automaticaly based on schedule, duration and timezone)")
+    public void assignDistributionSetToTargetWithWithMaintenanceWindowNextExecutionStart() throws Exception {
+
+        final Target target = testdataFactory.createTarget("fsdfsd");
+        final DistributionSet set = testdataFactory.createDistributionSet("one");
+        final long nextExecutionStart = System.currentTimeMillis();
+
+        final String body = new JSONObject().put("id", set.getId()).put("type", "forced").put("forcetime", "0")
+                .put("maintenanceWindow", getMaintenanceWindowWithNextStart(getTestSchedule(10), getTestDuration(10),
+                        getTestTimeZone(), nextExecutionStart))
+                .toString();
+
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
+                .content(body).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+
+        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/"
+                + MgmtRestConstants.TARGET_V1_ACTIONS)).andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
+                .andExpect(jsonPath("content.[0].maintenanceWindow.nextStartAt", not(nextExecutionStart)));
     }
 
     @Test

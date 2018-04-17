@@ -70,7 +70,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
 import org.springframework.context.ApplicationEventPublisher;
@@ -90,7 +90,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ActiveProfiles({ "test" })
 @WithUser(principal = "bumlux", allSpPermissions = true, authorities = { CONTROLLER_ROLE, SYSTEM_ROLE })
-@SpringApplicationConfiguration(classes = { TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
+@SpringBootTest(classes = { TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
 // destroy the context after each test class because otherwise we get problem
 // when context is
 // refreshed we e.g. get two instances of CacheManager which leads to very
@@ -253,8 +253,8 @@ public abstract class AbstractIntegrationTest {
      *            start time of a maintenance window calculated based on the
      *            cron expression is relative to this time zone
      *
-     * @return result of the assignment as
-     *         {@link DistributionSetAssignmentResult}.
+     * @return result of the assignment as { @link
+     *         DistributionSetAssignmentResult}.
      */
     protected DistributionSetAssignmentResult assignDistributionSetWithMaintenanceWindow(final Long dsID,
             final String controllerId, final String maintenanceSchedule, final String maintenanceWindowDuration,
@@ -396,6 +396,13 @@ public abstract class AbstractIntegrationTest {
         maintenanceWindowMap.put("schedule", schedule);
         maintenanceWindowMap.put("duration", duration);
         maintenanceWindowMap.put("timezone", timezone);
+        return maintenanceWindowMap;
+    }
+
+    public static Map<String, String> getMaintenanceWindowWithNextStart(final String schedule, final String duration,
+            final String timezone, final long nextStartAt) {
+        final Map<String, String> maintenanceWindowMap = getMaintenanceWindow(schedule, duration, timezone);
+        maintenanceWindowMap.put("nextStartAt", String.valueOf(nextStartAt));
         return maintenanceWindowMap;
     }
 }

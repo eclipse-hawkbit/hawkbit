@@ -55,7 +55,7 @@ public final class MaintenanceScheduleHelper {
      *            start time of a maintenance window calculated based on the
      *            cron expression is relative to this time zone.
      *
-     * @return {@link Optional<ZonedDateTime>} of the next available window. In
+     * @return { @link Optional<ZonedDateTime>} of the next available window. In
      *         case there is none, or there are maintenance window validation
      *         errors, returns empty value.
      * 

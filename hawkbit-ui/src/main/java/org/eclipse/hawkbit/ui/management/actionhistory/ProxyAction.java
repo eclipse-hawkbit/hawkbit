@@ -26,6 +26,7 @@ public class ProxyAction implements Serializable {
     public static final String PXY_ACTION = "action";
     public static final String PXY_ACTION_LAST_MODIFIED_AT = "lastModifiedAt";
     public static final String PXY_ACTION_ROLLOUT_NAME = "rolloutName";
+    public static final String PXY_ACTION_MAINTENANCE_WINDOW = "maintenanceWindow";
 
     private Action.Status status;
     private boolean isActive;
@@ -35,6 +36,15 @@ public class ProxyAction implements Serializable {
     private Action action;
     private Long lastModifiedAt;
     private String rolloutName;
+    private String maintenanceWindow;
+
+    public String getMaintenanceWindow() {
+        return maintenanceWindow;
+    }
+
+    public void setMaintenanceWindow(final String maintenanceWindow) {
+        this.maintenanceWindow = maintenanceWindow;
+    }
 
     /**
      * Get id for the entry.
@@ -51,7 +61,7 @@ public class ProxyAction implements Serializable {
      * @param id
      *            of the action entry.
      */
-    public void setId(Long id) {
+    public void setId(final Long id) {
         this.id = id;
     }
 
@@ -70,7 +80,7 @@ public class ProxyAction implements Serializable {
      * @param status
      *            literal
      */
-    public void setStatus(Action.Status status) {
+    public void setStatus(final Action.Status status) {
         this.status = status;
     }
 
@@ -91,7 +101,7 @@ public class ProxyAction implements Serializable {
      *            <code>true</code> if the action is active, otherwise
      *            <code>false</code>
      */
-    public void setActive(boolean isActive) {
+    public void setActive(final boolean isActive) {
         this.isActive = isActive;
     }
 
@@ -113,7 +123,7 @@ public class ProxyAction implements Serializable {
      * @param isActiveDecoration
      *            pre-calculated literal
      */
-    public void setIsActiveDecoration(IsActiveDecoration isActiveDecoration) {
+    public void setIsActiveDecoration(final IsActiveDecoration isActiveDecoration) {
         this.isActiveDecoration = isActiveDecoration;
     }
 
@@ -133,7 +143,7 @@ public class ProxyAction implements Serializable {
      * @param dsNameVersion
      *            combined value
      */
-    public void setDsNameVersion(String dsNameVersion) {
+    public void setDsNameVersion(final String dsNameVersion) {
         this.dsNameVersion = dsNameVersion;
     }
 
@@ -151,7 +161,7 @@ public class ProxyAction implements Serializable {
      *
      * @param action
      */
-    public void setAction(Action action) {
+    public void setAction(final Action action) {
         this.action = action;
     }
 
@@ -170,7 +180,7 @@ public class ProxyAction implements Serializable {
      * @param lastModifiedAt
      *            raw long-value for lastModifiedAt-date
      */
-    public void setLastModifiedAt(Long lastModifiedAt) {
+    public void setLastModifiedAt(final Long lastModifiedAt) {
         this.lastModifiedAt = lastModifiedAt;
     }
 
@@ -188,7 +198,7 @@ public class ProxyAction implements Serializable {
      *
      * @param rolloutName
      */
-    public void setRolloutName(String rolloutName) {
+    public void setRolloutName(final String rolloutName) {
         this.rolloutName = rolloutName;
     }
 

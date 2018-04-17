@@ -115,10 +115,16 @@ public class ActionBeanQuery extends AbstractBeanQuery<ProxyAction> {
             proxyAction.setLastModifiedAt(action.getLastModifiedAt());
             proxyAction.setRolloutName(action.getRollout() != null ? action.getRollout().getName() : "");
             proxyAction.setStatus(action.getStatus());
+            proxyAction.setMaintenanceWindow(action.hasMaintenanceSchedule() ? buildMaintenanceWindowView(action) : "");
 
             proxyActions.add(proxyAction);
         }
         return proxyActions;
+    }
+
+    private static String buildMaintenanceWindowView(final Action action) {
+        return action.getMaintenanceWindowSchedule() + "/" + action.getMaintenanceWindowDuration() + "/"
+                + action.getMaintenanceWindowTimeZone();
     }
 
     /**

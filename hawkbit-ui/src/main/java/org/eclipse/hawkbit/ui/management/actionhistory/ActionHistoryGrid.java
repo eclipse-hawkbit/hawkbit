@@ -78,13 +78,14 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
 
     private static final Object[] maxColumnOrder = new Object[] { ProxyAction.PXY_ACTION_IS_ACTIVE_DECO,
             ProxyAction.PXY_ACTION_ID, ProxyAction.PXY_ACTION_DS_NAME_VERSION, ProxyAction.PXY_ACTION_LAST_MODIFIED_AT,
-            ProxyAction.PXY_ACTION_STATUS, ProxyAction.PXY_ACTION_ROLLOUT_NAME, VIRT_PROP_FORCED, VIRT_PROP_TIMEFORCED,
-            VIRT_PROP_ACTION_CANCEL, VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT };
+            ProxyAction.PXY_ACTION_STATUS, ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW,
+            ProxyAction.PXY_ACTION_ROLLOUT_NAME, VIRT_PROP_FORCED, VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL,
+            VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT };
 
     private static final Object[] minColumnOrder = new Object[] { ProxyAction.PXY_ACTION_IS_ACTIVE_DECO,
             ProxyAction.PXY_ACTION_DS_NAME_VERSION, ProxyAction.PXY_ACTION_LAST_MODIFIED_AT,
-            ProxyAction.PXY_ACTION_STATUS, VIRT_PROP_FORCED, VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL,
-            VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT };
+            ProxyAction.PXY_ACTION_STATUS, ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW, VIRT_PROP_FORCED,
+            VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL, VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT };
 
     private static final String[] leftAlignedColumns = new String[] { VIRT_PROP_TIMEFORCED };
 
@@ -99,7 +100,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
 
     private Target selectedTarget;
     private final AlignCellStyleGenerator alignGenerator;
-    private final ModifiedTimeTooltipGenerator modTimetooltipGenerator;
+    private final TooltipGenerator tooltipGenerator;
 
     private final Map<Action.Status, StatusFontIcon> states;
     private final Map<IsActiveDecoration, StatusFontIcon> activeStates;
@@ -139,7 +140,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         activeStates = conf
                 .createActiveStatusLabelConfig(UIComponentIdProvider.ACTION_HISTORY_TABLE_ACTIVESTATE_LABEL_ID);
         alignGenerator = new AlignCellStyleGenerator(leftAlignedColumns, centerAlignedColumns, rightAlignedColumns);
-        modTimetooltipGenerator = new ModifiedTimeTooltipGenerator(ProxyAction.PXY_ACTION_LAST_MODIFIED_AT);
+        tooltipGenerator = new TooltipGenerator();
 
         init();
     }
@@ -208,6 +209,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
 
         rawCont.addContainerProperty(ProxyAction.PXY_ACTION_ID, String.class, null, true, true);
         rawCont.addContainerProperty(ProxyAction.PXY_ACTION_ROLLOUT_NAME, String.class, null, true, true);
+        rawCont.addContainerProperty(ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW, String.class, null, true, false);
     }
 
     @Override
@@ -436,11 +438,14 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         getColumn(VIRT_PROP_ACTION_CANCEL).setHidable(false);
         getColumn(VIRT_PROP_ACTION_FORCE).setHidable(false);
         getColumn(VIRT_PROP_ACTION_FORCE_QUIT).setHidable(false);
+
+        getColumn(ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW).setHidden(true);
+        getColumn(ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW).setHidable(true);
     }
 
     @Override
     protected CellDescriptionGenerator getDescriptionGenerator() {
-        return modTimetooltipGenerator;
+        return tooltipGenerator;
     }
 
     @Override
@@ -451,6 +456,8 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         getColumn(ProxyAction.PXY_ACTION_DS_NAME_VERSION).setHeaderCaption(SPUIDefinitions.ACTION_HIS_TBL_DIST);
         getColumn(ProxyAction.PXY_ACTION_LAST_MODIFIED_AT).setHeaderCaption(SPUIDefinitions.ACTION_HIS_TBL_DATETIME);
         getColumn(ProxyAction.PXY_ACTION_STATUS).setHeaderCaption(SPUIDefinitions.ACTION_HIS_TBL_STATUS);
+        getColumn(ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW)
+                .setHeaderCaption(SPUIDefinitions.ACTION_HIS_TBL_MAINTENANCE_WINDOW);
         getColumn(VIRT_PROP_FORCED).setHeaderCaption(String.valueOf(forceClientRefreshToggle));
         forceClientRefreshToggle = !forceClientRefreshToggle;
 
@@ -463,8 +470,9 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     protected void setColumnExpandRatio() {
         setColumnsSize(50.0, 50.0, ProxyAction.PXY_ACTION_IS_ACTIVE_DECO);
         setColumnsSize(107.0, 500.0, ProxyAction.PXY_ACTION_DS_NAME_VERSION);
-        setColumnsSize(100.0, 120.0, ProxyAction.PXY_ACTION_LAST_MODIFIED_AT);
+        setColumnsSize(100.0, 130.0, ProxyAction.PXY_ACTION_LAST_MODIFIED_AT);
         setColumnsSize(53.0, 55.0, ProxyAction.PXY_ACTION_STATUS);
+        setColumnsSize(150.0, 200.0, ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW);
         setColumnsSize(FIXED_PIX_MIN, FIXED_PIX_MIN, VIRT_PROP_FORCED, VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL,
                 VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT);
     }
