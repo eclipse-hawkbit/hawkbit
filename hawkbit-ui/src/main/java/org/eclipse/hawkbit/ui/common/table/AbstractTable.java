@@ -62,7 +62,21 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public abstract class AbstractTable<E extends NamedEntity> extends Table implements RefreshableContainer {
 
-    private static final String MESSAGE_CONFIRM_DELETE_ENTITY = "message.confirm.delete.entity";
+    protected static final String MESSAGE_CONFIRM_DELETE_ENTITY = "message.confirm.delete.entity";
+
+    protected static final String DISTRIBUTIONSET_NOT_EXISTS = "distributionset.not.exists";
+
+    protected static final String TARGETS_NOT_EXISTS = "targets.not.exists";
+
+    protected static final String CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX = "caption.entity.assign.action.confirmbox";
+
+    protected static final String MESSAGE_CONFIRM_ASSIGN_ENTITY = "message.confirm.assign.entity";
+
+    protected static final String BUTTON_CANCEL = "button.cancel";
+
+    protected static final String BUTTON_OK = "button.ok";
+
+    protected static final String MESSAGE_CONFIRM_ASSIGN_MULTIPLE_ENTITIES = "message.confirm.assign.multiple.entities";
 
     private static final long serialVersionUID = 1L;
 
@@ -271,7 +285,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
             return ids;
         }
 
-        if (!selectedEntities.contains(tranferableData)) {
+        if (entityToBeDeletedIsSelectedInTable(tranferableData, selectedEntities)) {
             ids.add(tranferableData);
         } else {
             ids.addAll(selectedEntities);
@@ -360,39 +374,62 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
     }
 
     private void openConfirmationWindowDeleteAction(final ClickEvent event) {
+        List<Long> entitiesToBeDeleted;
         final Long id = getDeleteButtonId(event);
         final Set<Long> selectedEntities = getSelectedEntities();
-        if (!selectedEntities.contains(id)) {
-            selectEntityToBeDeletedInTable(event, id, selectedEntities);
+        if (entityToBeDeletedIsSelectedInTable(id, selectedEntities)) {
+            final Table table = getTable(event);
+            unselectSelectedEntitiesInTable(selectedEntities, table);
+            selectEntityToDeleteInTable(id, table);
+            entitiesToBeDeleted = new ArrayList<>();
+            entitiesToBeDeleted.add(id);
+        } else {
+            entitiesToBeDeleted = selectedEntities.stream().collect(Collectors.toList());
         }
         String confirmationQuestion;
-        if (selectedEntities.size() == 1) {
-            final String entityName = getDeletedEntityName(selectedEntities.iterator().next());
+        if (entitiesToBeDeleted.size() == 1) {
+            final String entityName = getDeletedEntityName(entitiesToBeDeleted.get(0));
             confirmationQuestion = i18n.getMessage(MESSAGE_CONFIRM_DELETE_ENTITY, getEntityName().toLowerCase(),
                     entityName, "");
         } else {
-            confirmationQuestion = i18n.getMessage(MESSAGE_CONFIRM_DELETE_ENTITY, selectedEntities.size(),
+            confirmationQuestion = i18n.getMessage(MESSAGE_CONFIRM_DELETE_ENTITY, entitiesToBeDeleted.size(),
                     getEntityName().toLowerCase(), "s");
         }
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
                 i18n.getMessage("caption.entity.delete.action.confirmbox", getEntityName()), confirmationQuestion,
                 i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
                     if (ok) {
-                        handleOkDelete(selectedEntities);
+                        handleOkDelete(entitiesToBeDeleted);
                     }
                 });
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
     }
 
-    private void selectEntityToBeDeletedInTable(final ClickEvent event, final Long id,
-            final Set<Long> selectedEntities) {
+    private static boolean entityToBeDeletedIsSelectedInTable(final Long id, final Set<Long> selectedEntities) {
+        return !selectedEntities.contains(id);
+    }
+
+    private static Table getTable(final ClickEvent event) {
+        final Button source = (Button) event.getSource();
+        return (Table) source.getParent();
+    }
+
+    private static void selectEntityToDeleteInTable(final Long id, final Table table) {
+        table.select(id);
+    }
+
+    private static void unselectSelectedEntitiesInTable(final Set<Long> selectedEntities, final Table table) {
+        selectedEntities.forEach(entity -> table.unselect(entity));
+    }
+
+    private static List<Long> selectEntityToBeDeletedInTable(final ClickEvent event, final Long id,
+            final List<Long> selectedEntities) {
         final Button source = (Button) event.getSource();
         final Table table = (Table) source.getParent();
-        selectedEntities.forEach(this::unselect);
-        selectedEntities.clear();
         selectedEntities.add(id);
         table.select(id);
+        return selectedEntities;
     }
 
     private static long getDeleteButtonId(final ClickEvent event) {
@@ -402,7 +439,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
 
     protected abstract String getDeletedEntityName(Long entityId);
 
-    protected abstract void handleOkDelete(Set<Long> allEntities);
+    protected abstract void handleOkDelete(List<Long> allEntities);
 
     protected abstract String getEntityName();
 
@@ -499,7 +536,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
         final Long targetItemId = (Long) dropData.getItemIdOver();
 
-        if (!targetSelected.contains(targetItemId)) {
+        if (entityToBeDeletedIsSelectedInTable(targetItemId, targetSelected)) {
             return Sets.newHashSet(targetItemId);
         }
 

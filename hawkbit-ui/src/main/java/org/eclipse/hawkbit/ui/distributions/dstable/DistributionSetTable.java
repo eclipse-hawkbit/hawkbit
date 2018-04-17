@@ -221,7 +221,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
         final AbstractTable<?> source = (AbstractTable<?>) transferable.getSourceComponent();
         final Set<Long> softwareModulesIdList = source.getSelectedEntitiesByTransferable(transferable);
-        source.setValue(softwareModulesIdList);
         selectDraggedEntities(source, softwareModulesIdList);
 
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
@@ -326,15 +325,15 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             final SoftwareModuleIdName[] softwareModules) {
         final String confirmQuestion;
         if (softwareModules.length == 1) {
-            confirmQuestion = i18n.getMessage("message.confirm.assign.entity", distributionNameToAssign,
+            confirmQuestion = i18n.getMessage(MESSAGE_CONFIRM_ASSIGN_ENTITY, distributionNameToAssign,
                     "software module", softwareModules[0].getName());
         } else {
-            confirmQuestion = i18n.getMessage("message.confirm.assign.multiple.entities", softwareModules.length,
+            confirmQuestion = i18n.getMessage(MESSAGE_CONFIRM_ASSIGN_MULTIPLE_ENTITIES, softwareModules.length,
                     "software modules", distributionNameToAssign);
         }
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
-                i18n.getMessage("caption.entity.assign.action.confirmbox"), confirmQuestion,
-                i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
+                i18n.getMessage(CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX), confirmQuestion, i18n.getMessage(BUTTON_OK),
+                i18n.getMessage(BUTTON_CANCEL), ok -> {
                     if (ok) {
                         saveAllAssignments();
                     }
@@ -548,7 +547,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     @Override
-    protected void handleOkDelete(final Set<Long> entitiesToDelete) {
+    protected void handleOkDelete(final List<Long> entitiesToDelete) {
         distributionSetManagement.delete(entitiesToDelete);
         eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.REMOVE_ENTITY, entitiesToDelete));
         notification.displaySuccess(

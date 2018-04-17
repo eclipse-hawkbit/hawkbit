@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -951,6 +952,7 @@ public class TargetTable extends AbstractTable<Target> {
                         maintenanceWindowLayout.getMaintenanceDuration(),
                         maintenanceWindowLayout.getMaintenanceTimeZone());
             } catch (final InvalidMaintenanceScheduleException e) {
+                LOG.error("Maintenance window is not valid", e);
                 notification.displayValidationError(e.getMessage());
                 return false;
             }
@@ -962,12 +964,14 @@ public class TargetTable extends AbstractTable<Target> {
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
         final AbstractTable<?> source = (AbstractTable<?>) transferable.getSourceComponent();
         final Set<Long> ids = source.getSelectedEntitiesByTransferable(transferable);
-        selectDraggedEntities(source, ids);
+        // only one distribution can be assigned to a target
+        final Long idToSelect = ids.iterator().next();
+        selectDraggedEntities(source, new HashSet<>(Arrays.asList(idToSelect)));
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
         final Object targetItemId = dropData.getItemIdOver();
         LOG.debug("Adding a log to check if targetItemId is null : {} ", targetItemId);
         if (targetItemId == null) {
-            getNotification().displayWarning(i18n.getMessage("target.not.exists", ""));
+            getNotification().displayWarning(i18n.getMessage(TARGETS_NOT_EXISTS, ""));
             return;
         }
 
@@ -975,33 +979,30 @@ public class TargetTable extends AbstractTable<Target> {
         selectDroppedEntities(targetId);
         final Optional<Target> target = targetManagement.get(targetId);
         if (!target.isPresent()) {
-            getNotification().displayWarning(i18n.getMessage("target.not.exists", ""));
+            getNotification().displayWarning(i18n.getMessage(TARGETS_NOT_EXISTS, ""));
             return;
         }
 
         final TargetIdName createTargetIdName = new TargetIdName(target.get());
-        final List<DistributionSet> findDistributionSetAllById = distributionSetManagement.get(ids);
+        final List<DistributionSet> findDistributionSetById = distributionSetManagement
+                .get(new HashSet<>(Arrays.asList(idToSelect)));
 
-        if (findDistributionSetAllById.isEmpty()) {
-            notification.displayWarning(i18n.getMessage("distributionsets.not.exists"));
+        if (findDistributionSetById.isEmpty()) {
+            notification.displayWarning(i18n.getMessage(DISTRIBUTIONSET_NOT_EXISTS));
             return;
         }
         // only one distribution can be assigned to a target
-        final DistributionSet distributionSetToAssign = findDistributionSetAllById.get(0);
+        final DistributionSet distributionSetToAssign = findDistributionSetById.get(0);
         addNewTargetToAssignmentList(createTargetIdName, distributionSetToAssign);
         openConfirmationWindowForAssignment(distributionSetToAssign.getName(), createTargetIdName.getTargetName());
     }
 
     private void openConfirmationWindowForAssignment(final String distributionNameToAssign, final String targetName) {
-        confirmDialog = new ConfirmationDialog(i18n.getMessage("caption.entity.assign.action.confirmbox"),
-                i18n.getMessage("message.confirm.assign.entity", distributionNameToAssign, "target", targetName),
-                i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
-                    if (ok) {
-                        if (isMaintenanceWindowValid()) {
-                            saveAllAssignments();
-                        } else {
-                            notification.displayValidationError("Maintenance window not valid");
-                        }
+        confirmDialog = new ConfirmationDialog(i18n.getMessage(CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX),
+                i18n.getMessage(MESSAGE_CONFIRM_ASSIGN_ENTITY, distributionNameToAssign, "target", targetName),
+                i18n.getMessage(BUTTON_OK), i18n.getMessage(BUTTON_CANCEL), ok -> {
+                    if (ok && isMaintenanceWindowValid()) {
+                        saveAllAssignments();
                     }
                     if (!ok) {
                         managementUIState.getAssignedList().clear();
@@ -1041,8 +1042,8 @@ public class TargetTable extends AbstractTable<Target> {
             enableSaveButton(!isMaintenanceWindowEnabled);
             maintenanceWindowLayout.clearAllControls();
         });
-
         return enableMaintenanceWindow;
+
     }
 
     private Link maintenanceWindowHelpLinkControl() {
@@ -1053,10 +1054,13 @@ public class TargetTable extends AbstractTable<Target> {
     private void initMaintenanceWindow() {
         maintenanceWindowLayout.setVisible(false);
         maintenanceWindowLayout.setEnabled(false);
-        maintenanceWindowLayout.getScheduleControl()
-                .addTextChangeListener(event -> enableSaveButton(maintenanceWindowLayout.onScheduleChange(event)));
-        maintenanceWindowLayout.getDurationControl()
-                .addTextChangeListener(event -> enableSaveButton(maintenanceWindowLayout.onDurationChange(event)));
+        maintenanceWindowLayout.getScheduleControl().addTextChangeListener(
+
+                event -> enableSaveButton(maintenanceWindowLayout.onScheduleChange(event)));
+        maintenanceWindowLayout.getDurationControl().addTextChangeListener(
+
+                event -> enableSaveButton(maintenanceWindowLayout.onDurationChange(event)));
+
     }
 
     private void enableSaveButton(final boolean enabled) {
@@ -1073,7 +1077,7 @@ public class TargetTable extends AbstractTable<Target> {
 
     // Code for delete icon start
     @Override
-    protected void handleOkDelete(final Set<Long> entitiesToDelete) {
+    protected void handleOkDelete(final List<Long> entitiesToDelete) {
         targetManagement.delete(entitiesToDelete);
         eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.REMOVE_ENTITY, entitiesToDelete));
         notification.displaySuccess(i18n.getMessage("message.delete.success", entitiesToDelete.size() + " Target(s) "));

@@ -67,6 +67,8 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.view.filter.OnlyEventsFromDeploymentViewFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -99,6 +101,8 @@ import com.vaadin.ui.themes.ValoTheme;
 public class DistributionTable extends AbstractNamedVersionTable<DistributionSet> {
 
     private static final long serialVersionUID = 1L;
+
+    private static final Logger LOG = LoggerFactory.getLogger(DistributionTable.class);
 
     private final SpPermissionChecker permissionChecker;
 
@@ -470,7 +474,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         }
 
         if (targetDetailsList.isEmpty()) {
-            getNotification().displayWarning(i18n.getMessage("targets.not.exists"));
+            getNotification().displayWarning(i18n.getMessage(TARGETS_NOT_EXISTS));
             return;
         }
 
@@ -478,7 +482,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         selectDroppedEntities(distId);
         final Optional<DistributionSet> findDistributionSetById = distributionSetManagement.get(distId);
         if (!findDistributionSetById.isPresent()) {
-            notification.displayWarning(i18n.getMessage("distributionset.not.exists"));
+            notification.displayWarning(i18n.getMessage(DISTRIBUTIONSET_NOT_EXISTS));
             return;
         }
 
@@ -509,21 +513,17 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             final List<Target> targetDetailsList) {
         String confirmQuestion;
         if (targetDetailsList.size() == 1) {
-            confirmQuestion = i18n.getMessage("message.confirm.assign.entity", distributionNameToAssign, "target",
+            confirmQuestion = i18n.getMessage(MESSAGE_CONFIRM_ASSIGN_ENTITY, distributionNameToAssign, "target",
                     targetDetailsList.get(0).getName());
         } else {
-            confirmQuestion = i18n.getMessage("message.confirm.assign.multiple.entities", targetDetailsList.size(),
+            confirmQuestion = i18n.getMessage(MESSAGE_CONFIRM_ASSIGN_MULTIPLE_ENTITIES, targetDetailsList.size(),
                     "targets", distributionNameToAssign);
         }
 
-        confirmDialog = new ConfirmationDialog(i18n.getMessage("caption.entity.assign.action.confirmbox"),
-                confirmQuestion, i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
-                    if (ok) {
-                        if (isMaintenanceWindowValid()) {
-                            saveAllAssignments();
-                        } else {
-                            notification.displayValidationError("Maintenance window not valid");
-                        }
+        confirmDialog = new ConfirmationDialog(i18n.getMessage(CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX),
+                confirmQuestion, i18n.getMessage(BUTTON_OK), i18n.getMessage(BUTTON_CANCEL), ok -> {
+                    if (ok && isMaintenanceWindowValid()) {
+                        saveAllAssignments();
                     }
                     if (!ok) {
                         managementUIState.getAssignedList().clear();
@@ -540,6 +540,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
                         maintenanceWindowLayout.getMaintenanceDuration(),
                         maintenanceWindowLayout.getMaintenanceTimeZone());
             } catch (final InvalidMaintenanceScheduleException e) {
+                LOG.error("Maintenance window is not valid", e);
                 notification.displayValidationError(e.getMessage());
                 return false;
             }
@@ -930,7 +931,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     private void showMetadataDetails(final Object itemId) {
         final Optional<DistributionSet> ds = distributionSetManagement.get((Long) itemId);
         if (!ds.isPresent()) {
-            notification.displayWarning(i18n.getMessage("distributionset.not.exists"));
+            notification.displayWarning(i18n.getMessage(DISTRIBUTIONSET_NOT_EXISTS));
             return;
         }
         UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds.get(), null));
@@ -938,7 +939,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     // Code for delete entity START
     @Override
-    protected void handleOkDelete(final Set<Long> entitiesToDelete) {
+    protected void handleOkDelete(final List<Long> entitiesToDelete) {
         distributionSetManagement.delete(entitiesToDelete);
         eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.REMOVE_ENTITY, entitiesToDelete));
         notification.displaySuccess(
