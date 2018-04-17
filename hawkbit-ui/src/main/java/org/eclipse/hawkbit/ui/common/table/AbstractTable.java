@@ -62,6 +62,8 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public abstract class AbstractTable<E extends NamedEntity> extends Table implements RefreshableContainer {
 
+    private static final String MESSAGE_CONFIRM_DELETE_ENTITY = "message.confirm.delete.entity";
+
     private static final long serialVersionUID = 1L;
 
     private static final float DEFAULT_COLUMN_NAME_MIN_SIZE = 0.8F;
@@ -358,47 +360,53 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
     }
 
     private void openConfirmationWindowDeleteAction(final ClickEvent event) {
-        final String id = getId(event.getButton().getId());
+        final Long id = getDeleteButtonId(event);
         final Set<Long> selectedEntities = getSelectedEntities();
-        final List<Long> allEntities = selectedEntities.stream().collect(Collectors.toList());
-        if (!allEntities.contains(Long.parseLong(id))) {
-            allEntities.add(Long.parseLong(id));
-            getSelectedEntities().add(Long.parseLong(id));
-            final Button source = (Button) event.getSource();
-            final Table parent = (Table) source.getParent();
-            parent.select(Long.parseLong(id));
+        if (!selectedEntities.contains(id)) {
+            selectEntityToBeDeletedInTable(event, id, selectedEntities);
         }
         String confirmationQuestion;
-        if (allEntities.size() == 1) {
-            final String entityName = getDeletedEntityName(allEntities.get(0));
-            confirmationQuestion = i18n.getMessage("message.confirm.delete.entity", getEntityName().toLowerCase(),
+        if (selectedEntities.size() == 1) {
+            final String entityName = getDeletedEntityName(selectedEntities.iterator().next());
+            confirmationQuestion = i18n.getMessage(MESSAGE_CONFIRM_DELETE_ENTITY, getEntityName().toLowerCase(),
                     entityName, "");
         } else {
-            confirmationQuestion = i18n.getMessage("message.confirm.delete.entity", allEntities.size(),
+            confirmationQuestion = i18n.getMessage(MESSAGE_CONFIRM_DELETE_ENTITY, selectedEntities.size(),
                     getEntityName().toLowerCase(), "s");
         }
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
                 i18n.getMessage("caption.entity.delete.action.confirmbox", getEntityName()), confirmationQuestion,
                 i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
                     if (ok) {
-                        handleOkDelete(allEntities);
+                        handleOkDelete(selectedEntities);
                     }
                 });
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
     }
 
+    private void selectEntityToBeDeletedInTable(final ClickEvent event, final Long id,
+            final Set<Long> selectedEntities) {
+        final Button source = (Button) event.getSource();
+        final Table table = (Table) source.getParent();
+        selectedEntities.forEach(this::unselect);
+        selectedEntities.clear();
+        selectedEntities.add(id);
+        table.select(id);
+    }
+
+    private static long getDeleteButtonId(final ClickEvent event) {
+        final String id = event.getButton().getId();
+        return Long.parseLong(id.substring(id.lastIndexOf('.') + 1));
+    }
+
     protected abstract String getDeletedEntityName(Long entityId);
 
-    protected abstract void handleOkDelete(List<Long> allEntities);
+    protected abstract void handleOkDelete(Set<Long> allEntities);
 
     protected abstract String getEntityName();
 
     protected abstract Set<Long> getSelectedEntities();
-
-    private static String getId(final String buttonId) {
-        return buttonId.substring(buttonId.lastIndexOf('.') + 1);
-    }
 
     protected abstract String getEntityId(Object itemId);
 

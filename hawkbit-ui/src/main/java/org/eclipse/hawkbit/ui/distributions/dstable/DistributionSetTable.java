@@ -548,7 +548,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     @Override
-    protected void handleOkDelete(final List<Long> entitiesToDelete) {
+    protected void handleOkDelete(final Set<Long> entitiesToDelete) {
         distributionSetManagement.delete(entitiesToDelete);
         eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.REMOVE_ENTITY, entitiesToDelete));
         notification.displaySuccess(

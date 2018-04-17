@@ -1073,7 +1073,7 @@ public class TargetTable extends AbstractTable<Target> {
 
     // Code for delete icon start
     @Override
-    protected void handleOkDelete(final List<Long> entitiesToDelete) {
+    protected void handleOkDelete(final Set<Long> entitiesToDelete) {
         targetManagement.delete(entitiesToDelete);
         eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.REMOVE_ENTITY, entitiesToDelete));
         notification.displaySuccess(i18n.getMessage("message.delete.success", entitiesToDelete.size() + " Target(s) "));

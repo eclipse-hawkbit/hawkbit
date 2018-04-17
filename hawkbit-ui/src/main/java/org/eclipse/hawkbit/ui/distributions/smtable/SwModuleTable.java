@@ -425,7 +425,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
     }
 
     @Override
-    protected void handleOkDelete(final List<Long> entitiesToDelete) {
+    protected void handleOkDelete(final Set<Long> entitiesToDelete) {
         softwareModuleManagement.delete(entitiesToDelete);
         eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.REMOVE_ENTITY, entitiesToDelete));
         notification.displaySuccess(
