@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.common.grid;
 
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
@@ -25,7 +26,6 @@ import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.data.Container.Indexed;
-import com.vaadin.data.Item;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.converter.Converter;
 import com.vaadin.ui.Grid;
@@ -641,16 +641,18 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
                 return SPDateTimeUtil.getFormattedDate(timestamp);
 
             case ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW:
-                final Item item = cell.getItem();
-                final Action action = (Action) item.getItemProperty(ProxyAction.PXY_ACTION).getValue();
-                return action.getMaintenanceWindowStartTime()
-                        .map(nextAt -> "next on " + SPDateTimeUtil.getFormattedDate(nextAt.toInstant().toEpochMilli(),
-                                SPUIDefinitions.LAST_QUERY_DATE_FORMAT_SHORT))
-                        .orElse(null);
+                final Action action = (Action) cell.getItem().getItemProperty(ProxyAction.PXY_ACTION).getValue();
+                return action.getMaintenanceWindowStartTime().map(this::getFormatedNextMaintenanceWindow).orElse(null);
 
             default:
                 return null;
             }
+        }
+
+        private String getFormatedNextMaintenanceWindow(final ZonedDateTime nextAt) {
+            final long nextAtMilli = nextAt.toInstant().toEpochMilli();
+            return "next on "
+                    + SPDateTimeUtil.getFormattedDate(nextAtMilli, SPUIDefinitions.LAST_QUERY_DATE_FORMAT_SHORT);
         }
     }
 
