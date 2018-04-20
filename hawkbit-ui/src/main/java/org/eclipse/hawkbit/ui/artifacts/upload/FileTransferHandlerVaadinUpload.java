@@ -46,7 +46,6 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
 
     private static final Logger LOG = LoggerFactory.getLogger(FileTransferHandlerVaadinUpload.class);
 
-    private final UploadLogic uploadLogic;
     private final transient SoftwareModuleManagement softwareModuleManagement;
     private final long maxSize;
 
@@ -56,8 +55,7 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
     FileTransferHandlerVaadinUpload(final UploadLogic uploadLogic, final long maxSize,
             final SoftwareModuleManagement softwareManagement, final ArtifactManagement artifactManagement,
             final VaadinMessageSource i18n) {
-        super(artifactManagement, i18n);
-        this.uploadLogic = uploadLogic;
+        super(artifactManagement, uploadLogic, i18n);
         this.maxSize = maxSize;
         this.softwareModuleManagement = softwareManagement;
     }
@@ -69,13 +67,7 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
      */
     @Override
     public void uploadStarted(final StartedEvent event) {
-        
-        // TODO rollouts: warum kommt hier final der call nach final dem abort
-        // hin????
-        // https://vaadin.com/forum/thread/16142329/16142718
-        // https://github.com/vaadin/framework/issues/10545
-        
-        
+
         // reset internal state here because instance is reused for next upload!
         resetState();
         this.mimeType = null;
@@ -89,33 +81,34 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
         if (selectedSoftwareModuleId.isPresent()) {
             softwareModule = softwareModuleManagement.get(selectedSoftwareModuleId.get()).orElse(null);
         }
-        
+
         this.fileUploadId = new FileUploadId(event.getFilename(), softwareModule);
         this.mimeType = event.getMIMEType();
 
-
-        if (uploadLogic.isFileInFailedState(fileUploadId)) {
-            setUploadInterrupted();
-            return;
-        } else if (uploadLogic.isFileInUploadState(this.fileUploadId)) {
+        if (getUploadLogic().isFileInUploadState(this.fileUploadId)) {
             setFailureReasonUploadFailed();
             // actual interrupt will happen a bit late so setting the below
             // flag
-            setUploadInterrupted();
             setDuplicateFile();
+            event.getUpload().interruptUpload();
         } else {
             LOG.info("Uploading file {}", fileUploadId);
             publishUploadStarted(fileUploadId);
-            checkForDuplicateFileInSoftwareModul(fileUploadId, softwareModule);
+
+            if (isFileAlreadyContainedInSoftwareModul(fileUploadId, softwareModule)) {
+                LOG.info("File {} already contained in Software Module {}", fileUploadId.getFilename(), softwareModule);
+                setDuplicateFile();
+                event.getUpload().interruptUpload();
+            }
         }
     }
 
     private void assertThatOneSoftwareModulIsSelected() {
         // FileUpload button should be disabled if no SoftwareModul or more
         // than one is selected!
-        if (uploadLogic.isNoSoftwareModuleSelected()) {
+        if (getUploadLogic().isNoSoftwareModuleSelected()) {
             throw new IllegalStateException("No SoftwareModul selected");
-        } else if (uploadLogic.isMoreThanOneSoftwareModulesSelected()) {
+        } else if (getUploadLogic().isMoreThanOneSoftwareModulesSelected()) {
             throw new IllegalStateException("More than one SoftwareModul selected but only one is allowed");
         }
     }
@@ -170,11 +163,6 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
         publishUploadProgressEvent(fileUploadId, readBytes, contentLength, mimeType, getTempFilePath());
     }
 
-    @Override
-    protected void handleUploadAbortedByUser() {
-        LOG.info("File transfer aborted by user for {}", fileUploadId);
-    }
-
     /**
      *
      * Upload sucessfull for {@link Upload} variant.
@@ -213,13 +201,15 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
     public void uploadFailed(final FailedEvent event) {
         assertStateConsistency(fileUploadId, event.getFilename());
 
+        // TODO rollouts: check message properties for unused properties
+
         if (isDuplicateFile()) {
             publishUploadFailedEvent(fileUploadId, getI18n().getMessage("message.no.duplicateFiles"),
                     event.getReason());
-        } else if (isAbortedByUser()) {
-            publishUploadFinishedEvent(fileUploadId, 0, mimeType, getTempFilePath());
         } else {
             publishUploadFailedEvent(fileUploadId, event.getReason());
         }
+        publishUploadFinishedEvent(fileUploadId);
     }
+
 }

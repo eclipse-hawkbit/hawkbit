@@ -12,9 +12,7 @@ import java.io.Serializable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent.UploadStatusEventType;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
-import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -92,8 +90,6 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
 
     private final UploadLogic uploadLogic;
 
-    private ConfirmationDialog confirmDialog;
-
     UploadProgressInfoWindow(final UIEventBus eventBus, final ArtifactUploadState artifactUploadState,
             final VaadinMessageSource i18n, final UploadLogic uploadLogic) {
         this.eventBus = eventBus;
@@ -118,8 +114,6 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
         setContent(mainLayout);
         eventBus.subscribe(this);
         ui = UI.getCurrent();
-
-        createConfirmDialog();
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -149,7 +143,6 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
         final FileUploadProgress fileUploadProgress = event.getFileUploadProgress();
         final FileUploadId fileUploadId = fileUploadProgress.getFileUploadId();
 
-        uploadLogic.uploadStarted(fileUploadId, fileUploadProgress);
         updateUploadProgressInfoRowObject(fileUploadId);
 
         if (isFirstFileUpload()) {
@@ -214,6 +207,7 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
         captionLayout.setHeight("36px");
         captionLayout.addComponents(windowCaption, minimizeButton, resizeButton, closeButton);
         captionLayout.setExpandRatio(windowCaption, 1.0F);
+
         captionLayout.addStyleName("v-window-header");
         return captionLayout;
     }
@@ -280,18 +274,12 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
     }
 
     protected void maximizeWindow() {
-        // TODO rollouts: remove
-        System.err.println("maximize clicked");
-
         openWindow();
         restoreState();
         artifactUploadState.setStatusPopupMinimized(false);
     }
 
     private void minimizeWindow() {
-        // TODO rollouts: remove
-        System.err.println("minimize clicked");
-
         artifactUploadState.setStatusPopupMinimized(true);
         closeWindow();
 
@@ -304,7 +292,6 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
         final FileUploadProgress fileUploadProgress = event.getFileUploadProgress();
         final FileUploadId fileUploadId = fileUploadProgress.getFileUploadId();
 
-        uploadLogic.uploadInProgress(fileUploadId, fileUploadProgress);
         updateUploadProgressInfoRowObject(fileUploadId);
     }
 
@@ -315,7 +302,6 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
         final FileUploadProgress fileUploadProgress = event.getFileUploadProgress();
         final FileUploadId fileUploadId = fileUploadProgress.getFileUploadId();
 
-        uploadLogic.uploadSucceeded(fileUploadId, fileUploadProgress);
         updateUploadProgressInfoRowObject(fileUploadId);
     }
 
@@ -326,7 +312,6 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
         final FileUploadProgress fileUploadProgress = event.getFileUploadProgress();
         final FileUploadId fileUploadId = fileUploadProgress.getFileUploadId();
 
-        uploadLogic.uploadFailed(fileUploadId, fileUploadProgress);
         updateUploadProgressInfoRowObject(fileUploadId);
     }
 
@@ -334,18 +319,12 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
      * Called for every finished (succeeded or failed) upload.
      */
     private void onUploadFinished() {
-        // TODO rollouts: handle uploads aborted
-
-        if (uploadLogic.areAllUploadsFinished()) {
-            if (artifactUploadState.isStatusPopupMinimized()) {
-                if (artifactUploadState.getFilesInFailedState().isEmpty()) {
-                    cleanupStates();
-                } else {
-                    maximizeWindow();
-                }
-            } else {
-                // TODO rollouts: check aborted by user
+        if (uploadLogic.areAllUploadsFinished() && artifactUploadState.isStatusPopupMinimized()) {
+            if (artifactUploadState.getFilesInFailedState().isEmpty()) {
                 cleanupStates();
+                closeWindow();
+            } else {
+                maximizeWindow();
             }
         }
     }
@@ -412,7 +391,7 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
             cleanupStates();
             closeWindow();
         } else {
-            confirmAbortAction();
+            minimizeWindow();
         }
     }
 
@@ -422,28 +401,6 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
         setPopupSizeInMinMode();
         resizeButton.setIcon(FontAwesome.EXPAND);
         this.close();
-    }
-
-    private void confirmAbortAction() {
-        UI.getCurrent().addWindow(confirmDialog.getWindow());
-        confirmDialog.getWindow().bringToFront();
-    }
-
-    private void createConfirmDialog() {
-        confirmDialog = new ConfirmationDialog(i18n.getMessage("caption.confirm.abort.action"),
-                i18n.getMessage("message.abort.upload"), i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"),
-                ok -> {
-                    if (ok) {
-
-                        // TODO rollouts: remove
-                        System.err.println("All Uploads aborted");
-
-                        uploadLogic.allUploadsAbortedByUser();
-                        uploads.removeAllItems();
-                        closeWindow();
-                        eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_ABORTED_BY_USER));
-                    }
-                });
     }
 
     @SuppressWarnings("unchecked")

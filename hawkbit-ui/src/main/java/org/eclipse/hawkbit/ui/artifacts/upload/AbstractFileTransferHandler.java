@@ -32,8 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
-import org.vaadin.spring.events.EventScope;
-import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 /**
  * Abstract base class for transferring files from the browser to the
@@ -42,8 +40,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 public abstract class AbstractFileTransferHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractFileTransferHandler.class);
-
-    private volatile boolean abortedByUser;
 
     private volatile boolean duplicateFile;
 
@@ -61,45 +57,24 @@ public abstract class AbstractFileTransferHandler {
 
     private final VaadinMessageSource i18n;
 
+    private final UploadLogic uploadLogic;
+
     // TODO rollouts: ???
     AbstractFileTransferHandler() {
+        uploadLogic = null;
         artifactManagement = null;
         eventBus = null;
         artifactUploadState = null;
         i18n = null;
     }
 
-    public AbstractFileTransferHandler(final ArtifactManagement artifactManagement,
+    public AbstractFileTransferHandler(final ArtifactManagement artifactManagement, final UploadLogic uploadLogic,
             final VaadinMessageSource i18n) {
         this.artifactManagement = artifactManagement;
+        this.uploadLogic = uploadLogic;
         this.i18n = i18n;
         this.eventBus = SpringContextHelper.getBean(EventBus.UIEventBus.class);
         this.artifactUploadState = SpringContextHelper.getBean(ArtifactUploadState.class);
-
-        eventBus.subscribe(this);
-    }
-
-    @EventBusListenerMethod(scope = EventScope.UI)
-    protected void onEvent(final UploadStatusEvent event) {
-        if (event.getUploadStatusEventType() == UploadStatusEventType.UPLOAD_ABORTED_BY_USER) {
-            setAbortedbyUser();
-            setFailureReasonUploadAbortedByUser();
-            handleUploadAbortedByUser();
-        }
-    }
-
-    /**
-     * Override to deal with user interruption.
-     */
-    abstract void handleUploadAbortedByUser();
-
-    protected boolean isAbortedByUser() {
-        return abortedByUser;
-    }
-
-    protected void setAbortedbyUser() {
-        abortedByUser = true;
-        uploadInterrupted = true;
     }
 
     protected boolean isDuplicateFile() {
@@ -119,19 +94,18 @@ public abstract class AbstractFileTransferHandler {
         return uploadInterrupted;
     }
 
-    protected boolean isUnknownError() {
-        return !isAbortedByUser() && !isDuplicateFile();
-    }
-
     protected void resetState() {
         duplicateFile = false;
         uploadInterrupted = false;
-        abortedByUser = false;
         failureReason = null;
     }
 
     protected ArtifactUploadState getUploadState() {
         return artifactUploadState;
+    }
+
+    protected UploadLogic getUploadLogic() {
+        return uploadLogic;
     }
 
     protected VaadinMessageSource getI18n() {
@@ -146,20 +120,8 @@ public abstract class AbstractFileTransferHandler {
         setFailureReason(i18n.getMessage("message.upload.failed"));
     }
 
-    protected void setFailureReasonUploadAbortedByUser() {
-        setFailureReason(i18n.getMessage("message.uploadedfile.aborted"));
-    }
-
     protected void setFailureReasonFileSizeExceeded(final long maxSize) {
         setFailureReason(i18n.getMessage("message.uploadedfile.size.exceeded", maxSize));
-    }
-
-    protected void checkForDuplicateFileInSoftwareModul(final FileUploadId fileUploadId,
-            final SoftwareModule softwareModule) {
-        if (isFileAlreadyContainedInSoftwareModul(fileUploadId, softwareModule)) {
-            setDuplicateFile();
-        }
-
     }
 
     protected boolean isFileAlreadyContainedInSoftwareModul(final FileUploadId newFileUploadId,
@@ -187,8 +149,9 @@ public abstract class AbstractFileTransferHandler {
     }
 
     protected void publishUploadStarted(final FileUploadId fileUploadId) {
-        LOG.debug("Upload started for file {}", fileUploadId);
+        LOG.info("Upload started for file {}", fileUploadId);
         final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId);
+        uploadLogic.uploadStarted(fileUploadId, fileUploadProgress);
         eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_STARTED, fileUploadProgress));
     }
 
@@ -199,36 +162,40 @@ public abstract class AbstractFileTransferHandler {
             LOG.info("Upload in progress for file {} - {}%", fileUploadId,
                     String.format("%.0f", (double) bytesReceived / (double) fileSize * 100));
         }
+        final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId, bytesReceived, fileSize,
+                mimeType, tempFilePath);
+        uploadLogic.uploadInProgress(fileUploadId, fileUploadProgress);
         eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_IN_PROGRESS,
-                new FileUploadProgress(fileUploadId, bytesReceived, fileSize, mimeType, tempFilePath)));
+                fileUploadProgress));
     }
 
     protected void publishUploadSucceeded(final FileUploadId fileUploadId, final long fileSize, final String mimeType,
             final String tempFilePath) {
         LOG.info("Upload succeeded for file {}", fileUploadId);
+        final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId, fileSize, fileSize, mimeType,
+                tempFilePath);
+        uploadLogic.uploadSucceeded(fileUploadId, fileUploadProgress);
         eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_SUCCESSFUL,
-                new FileUploadProgress(fileUploadId, fileSize, fileSize, mimeType, tempFilePath)));
+                fileUploadProgress));
     }
 
-    protected void publishUploadFinishedEvent(final FileUploadId fileUploadId, final long fileSize,
-            final String mimeType, final String tempFilePath) {
+    protected void publishUploadFinishedEvent(final FileUploadId fileUploadId) {
         LOG.info("Upload finished for file {}", fileUploadId);
         eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_FINISHED,
-                new FileUploadProgress(fileUploadId, fileSize, fileSize, mimeType, tempFilePath)));
+                new FileUploadProgress(fileUploadId)));
     }
 
     protected void publishUploadFailedEvent(final FileUploadId fileUploadId, final String failureReason,
             final Exception uploadException) {
-        eventBus.publish(this,
-                new UploadStatusEvent(UploadStatusEventType.UPLOAD_FAILED, new FileUploadProgress(fileUploadId,
-                        StringUtils.isBlank(failureReason) ? uploadException.getMessage() : failureReason)));
+        LOG.info("Upload failed for file {} due to {}", fileUploadId,
+                StringUtils.isBlank(failureReason) ? uploadException.getMessage() : failureReason);
 
-        if (isAbortedByUser()) {
-            LOG.info("Upload aborted by user for file :{}", fileUploadId);
-        } else {
-            LOG.info("Upload failed for file {} due to {}", fileUploadId,
-                    StringUtils.isBlank(failureReason) ? uploadException.getMessage() : failureReason);
-        }
+        final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
+                StringUtils.isBlank(failureReason) ? uploadException.getMessage() : failureReason);
+
+        uploadLogic.uploadFailed(fileUploadId, fileUploadProgress);
+        eventBus.publish(this,
+                new UploadStatusEvent(UploadStatusEventType.UPLOAD_FAILED, fileUploadProgress));
     }
 
     protected void publishUploadFailedEvent(final FileUploadId fileUploadId, final Exception uploadException) {
@@ -295,7 +262,7 @@ public abstract class AbstractFileTransferHandler {
             }
         }
 
-        publishUploadFinishedEvent(fileUploadId, fileSize, mimeType, tempFilePath);
+        publishUploadFinishedEvent(fileUploadId);
     }
 
 }

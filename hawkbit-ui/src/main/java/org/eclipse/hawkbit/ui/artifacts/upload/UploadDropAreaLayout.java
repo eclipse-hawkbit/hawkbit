@@ -124,7 +124,7 @@ public class UploadDropAreaLayout implements Serializable {
                         if (!isDirectory && !isDuplicate) {
                             file.setStreamVariable(new FileTransferHandlerStreamVariable(file.getFileName(),
                                     file.getFileSize(), multipartConfigElement.getMaxFileSize(), file.getType(),
-                                    softwareModule, artifactManagement, i18n));
+                                    softwareModule, artifactManagement, uploadLogic, i18n));
                         }
                     }
                     if (isDirectory && isDuplicate) {

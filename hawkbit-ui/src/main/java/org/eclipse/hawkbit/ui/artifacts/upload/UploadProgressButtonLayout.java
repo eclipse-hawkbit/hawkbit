@@ -58,10 +58,15 @@ public class UploadProgressButtonLayout extends VerticalLayout {
 
     private final Upload upload;
 
+    private FileTransferHandlerVaadinUpload uploadHandler;
+
+    private final ArtifactManagement artifactManagement;
+
     public UploadProgressButtonLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final ArtifactUploadState artifactUploadState, final MultipartConfigElement multipartConfigElement,
             final ArtifactManagement artifactManagement, final SoftwareModuleManagement softwareManagement,
             final UploadLogic uploadLogic) {
+        this.artifactManagement = artifactManagement;
         this.uploadLogic = uploadLogic;
         this.uploadInfoWindow = new UploadProgressInfoWindow(eventBus, artifactUploadState, i18n, uploadLogic);
         this.uploadInfoWindow.addCloseListener(event -> {
@@ -77,7 +82,7 @@ public class UploadProgressButtonLayout extends VerticalLayout {
         this.upload = new Upload();
 
         createComponents();
-        buildLayout(artifactManagement);
+        buildLayout();
         restoreState();
         eventBus.subscribe(this);
         ui = UI.getCurrent();
@@ -90,14 +95,12 @@ public class UploadProgressButtonLayout extends VerticalLayout {
         case UPLOAD_STARTED:
             ui.access(this::onStartOfUpload);
             break;
-
         case UPLOAD_FAILED:
+            break;
         case UPLOAD_SUCCESSFUL:
+            break;
         case UPLOAD_FINISHED:
             ui.access(this::onUploadFinished);
-            break;
-        case UPLOAD_ABORTED_BY_USER:
-            ui.access(this::onUploadAbortedByUser);
             break;
         case UPLOAD_IN_PROGRESS:
             break;
@@ -133,9 +136,9 @@ public class UploadProgressButtonLayout extends VerticalLayout {
         uploadProgressButton.setVisible(false);
     }
 
-    private void buildLayout(final ArtifactManagement artifactManagement) {
+    private void buildLayout() {
 
-        final FileTransferHandlerVaadinUpload uploadHandler = new FileTransferHandlerVaadinUpload(uploadLogic,
+        uploadHandler = new FileTransferHandlerVaadinUpload(uploadLogic,
                 multipartConfigElement.getMaxFileSize(), softwareModuleManagement, artifactManagement, i18n);
         upload.setButtonCaption(i18n.getMessage("upload.file"));
         upload.setImmediate(true);
@@ -172,10 +175,6 @@ public class UploadProgressButtonLayout extends VerticalLayout {
 
     private void onStartOfUpload() {
         showUploadProgressButton();
-    }
-
-    private void onUploadAbortedByUser() {
-        upload.interruptUpload();
     }
 
     /**

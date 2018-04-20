@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.event;
 
-import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress;
 
 /**
@@ -47,13 +46,7 @@ public class UploadStatusEvent {
         /**
          * One file upload finished ()
          */
-        UPLOAD_FINISHED,
-
-        /**
-         * Upload of all files was aborted by the user. When this event is fired
-         * all states in {@link ArtifactUploadState} were reset.
-         */
-        UPLOAD_ABORTED_BY_USER
+        UPLOAD_FINISHED
     }
 
     private final UploadStatusEventType uploadStatusEventType;

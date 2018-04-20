@@ -44,8 +44,7 @@ public class UploadLogic implements Serializable {
     }
 
     boolean isFileInUploadState(final String filename, final SoftwareModule softwareModule) {
-        return artifactUploadState.getAllFilesFromOverallUploadProcessList()
-                .containsKey(new FileUploadId(filename, softwareModule));
+        return isFileInUploadState(new FileUploadId(filename, softwareModule));
     }
 
     boolean isFileInFailedState(final FileUploadId fileUploadId) {
@@ -66,25 +65,28 @@ public class UploadLogic implements Serializable {
         final int overallUploadCount = artifactUploadState.getAllFilesFromOverallUploadProcessList().size();
         final int inProgressCount = overallUploadCount - failedUploadCount - succeededUploadCount;
 
-        assertFileStateConsistency(inProgressCount);
+        assertFileStateConsistency(inProgressCount, overallUploadCount, succeededUploadCount, failedUploadCount);
 
         return inProgressCount;
     }
 
-    private void assertFileStateConsistency(final int inProgressCount) {
+    private void assertFileStateConsistency(final int inProgressCount, final int overallUploadCount,
+            final int succeededUploadCount, final int failedUploadCount) {
         if (inProgressCount < 0) {
-            LOG.error("IllegalState: \n{}", getStateListslogMessage());
+            LOG.error("IllegalState: \n{}",
+                    getStateListslogMessage(overallUploadCount, succeededUploadCount, failedUploadCount));
             throw new IllegalStateException();
         }
     }
 
-    String getStateListslogMessage() {
+    String getStateListslogMessage(final int overallUploadCount, final int succeededUploadCount,
+            final int failedUploadCount) {
         final StringBuilder buffer = new StringBuilder();
-        buffer.append("Overall uploads: " + artifactUploadState.getAllFilesFromOverallUploadProcessList().size());
+        buffer.append("Overall uploads: " + overallUploadCount);
         buffer.append("\n");
-        buffer.append("succeeded uploads: " + artifactUploadState.getFilesInSucceededState().size());
+        buffer.append("succeeded uploads: " + succeededUploadCount);
         buffer.append("\n");
-        buffer.append("Failed Uploads: " + artifactUploadState.getFilesInFailedState().size());
+        buffer.append("Failed Uploads: " + failedUploadCount);
         return buffer.toString();
     }
 
@@ -102,24 +104,21 @@ public class UploadLogic implements Serializable {
             }
         }
         artifactUploadState.clearBaseSwModuleList();
-        clearFileStates();
+
+        synchronized (fileStateListWriteLock) {
+            artifactUploadState.clearFilesInFailedState();
+            artifactUploadState.clearFilesInSucceededState();
+            artifactUploadState.clearOverallUploadProcessList();
+        }
     }
 
     void uploadStarted(final FileUploadId fileUploadId, final FileUploadProgress fileUploadProgress) {
-        if (isFileInFailedState(fileUploadId)) {
-            LOG.warn("Upload already failed, upload started is ignored");
-            return;
-        }
         synchronized (fileStateListWriteLock) {
             artifactUploadState.addFileToOverallUploadProcessList(fileUploadId, fileUploadProgress);
         }
     }
 
     void uploadInProgress(final FileUploadId fileUploadId, final FileUploadProgress fileUploadProgress) {
-        if (isFileInFailedState(fileUploadId)) {
-            LOG.warn("Upload already failed, progress update is ignored");
-            return;
-        }
         synchronized (fileStateListWriteLock) {
             artifactUploadState.updateFileProgressInOverallUploadProcessList(fileUploadId, fileUploadProgress);
         }
@@ -132,30 +131,10 @@ public class UploadLogic implements Serializable {
         }
     }
 
-    void allUploadsAbortedByUser() {
-        synchronized (fileStateListWriteLock) {
-            artifactUploadState
-                    .addAllFilesToFailedState(artifactUploadState.getAllFilesFromOverallUploadProcessList().keySet());
-            artifactUploadState.clearFilesInSucceededState();
-        }
-    }
-
     void uploadSucceeded(final FileUploadId fileUploadId, final FileUploadProgress fileUploadProgress) {
-        if (isFileInFailedState(fileUploadId)) {
-            LOG.warn("Upload already failed, progress success is ignored");
-            return;
-        }
         synchronized (fileStateListWriteLock) {
             artifactUploadState.updateFileProgressInOverallUploadProcessList(fileUploadId, fileUploadProgress);
             artifactUploadState.addFileToSucceededState(fileUploadId);
-        }
-    }
-
-    private void clearFileStates() {
-        synchronized (fileStateListWriteLock) {
-            artifactUploadState.clearFilesInFailedState();
-            artifactUploadState.clearFilesInSucceededState();
-            artifactUploadState.clearOverallUploadProcessList();
         }
     }
 

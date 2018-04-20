@@ -42,23 +42,26 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
 
     FileTransferHandlerStreamVariable(final String fileName, final long fileSize, final long maxSize,
             final String mimeType, final SoftwareModule selectedSw, final ArtifactManagement artifactManagement,
+            final UploadLogic uploadLogic,
             final VaadinMessageSource i18n) {
-        super(artifactManagement, i18n);
+        super(artifactManagement, uploadLogic, i18n);
         this.fileSize = fileSize;
         this.maxSize = maxSize;
         this.mimeType = mimeType;
         this.fileUploadId = new FileUploadId(fileName, selectedSw);
 
-        LOG.info("File {} uploading for SW module {}", fileName, selectedSw);
+        publishUploadStarted(fileUploadId);
     }
 
     @Override
     public void streamingStarted(final StreamingStartEvent event) {
         assertStateConsistency(fileUploadId, event.getFileName());
 
-        publishUploadStarted(fileUploadId);
-
-        checkForDuplicateFileInSoftwareModul(fileUploadId, fileUploadId.getSoftwareModule());
+        if (isFileAlreadyContainedInSoftwareModul(fileUploadId, fileUploadId.getSoftwareModule())) {
+            LOG.info("File {} already contained in Software Module {}", fileUploadId.getFilename(),
+                    fileUploadId.getSoftwareModule());
+            setDuplicateFile();
+        }
     }
 
     @Override
@@ -141,18 +144,11 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
         if (isDuplicateFile()) {
             publishUploadFailedEvent(fileUploadId, getI18n().getMessage("message.no.duplicateFiles"),
                     event.getException());
-        } else if (isAbortedByUser()) {
-            publishUploadFinishedEvent(fileUploadId, 0, mimeType, getTempFilePath());
         } else {
             publishUploadFailedEvent(fileUploadId, event.getException());
         }
+        publishUploadFinishedEvent(fileUploadId);
     }
-
-    @Override
-    void handleUploadAbortedByUser() {
-        LOG.info("File transfer aborted by user for {}", fileUploadId);
-    }
-
 
     @Override
     public boolean isInterrupted() {
