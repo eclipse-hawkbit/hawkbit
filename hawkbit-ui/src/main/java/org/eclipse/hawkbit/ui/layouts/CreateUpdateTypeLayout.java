@@ -69,7 +69,7 @@ public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends Abst
 
         tagNameComboBox = SPUIComponentProvider.getComboBox(i18n.getMessage("label.combobox.type"), "", null, null,
                 false, "", i18n.getMessage("label.combobox.type"));
-        tagNameComboBox.setId(SPUIDefinitions.NEW_DISTRIBUTION_SET_TYPE_NAME_COMBO);
+        tagNameComboBox.setId(UIComponentIdProvider.NEW_DISTRIBUTION_SET_TYPE_NAME_COMBO);
         tagNameComboBox.addStyleName(SPUIStyleDefinitions.FILTER_TYPE_COMBO_STYLE);
         tagNameComboBox.setImmediate(true);
         tagNameComboBox.setPageLength(SPUIDefinitions.DIST_TYPE_SIZE);

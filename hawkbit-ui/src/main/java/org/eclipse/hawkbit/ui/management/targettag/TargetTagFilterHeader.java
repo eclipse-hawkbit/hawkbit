@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.MenuBar.Command;
 
 /**
  * Target Tag filter by Tag Header.
@@ -27,7 +27,8 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
 
     private final ManagementUIState managementUIState;
 
-    TargetTagFilterHeader(final VaadinMessageSource i18n, final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout,
+    TargetTagFilterHeader(final VaadinMessageSource i18n,
+            final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout,
             final ManagementUIState managementUIState, final SpPermissionChecker permChecker,
             final UIEventBus eventBus) {
         super(permChecker, eventBus, i18n);
@@ -44,18 +45,12 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
 
     @Override
     protected boolean hasCreateUpdatePermission() {
-
         return permChecker.hasCreateTargetPermission() || permChecker.hasUpdateTargetPermission();
     }
 
     @Override
     protected String getTitle() {
         return i18n.getMessage("header.target.filter.tag", new Object[] {});
-    }
-
-    @Override
-    protected void settingsIconClicked(final ClickEvent event) {
-        // Add tag icon not displayed.
     }
 
     @Override
@@ -78,6 +73,24 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
     @Override
     protected boolean isAddTagRequired() {
         return false;
+    }
+
+    @Override
+    protected Command addButtonClicked() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected Command deleteButtonClicked() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected Command updateButtonClicked() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

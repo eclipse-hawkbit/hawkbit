@@ -124,15 +124,15 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
         super.createRequiredComponents();
 
         tagName = createTextField("textfield.name", SPUIDefinitions.DIST_SET_TYPE_NAME,
-                SPUIDefinitions.NEW_DISTRIBUTION_TYPE_NAME);
+                UIComponentIdProvider.NEW_DISTRIBUTION_TYPE_NAME);
 
         typeKey = createTextField("textfield.key", SPUIDefinitions.DIST_SET_TYPE_KEY,
-                SPUIDefinitions.NEW_DISTRIBUTION_TYPE_KEY);
+                UIComponentIdProvider.NEW_DISTRIBUTION_TYPE_KEY);
 
         tagDesc = new TextAreaBuilder().caption(i18n.getMessage("textfield.description"))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.DIST_SET_TYPE_DESC)
                 .prompt(i18n.getMessage("textfield.description")).immediate(true)
-                .id(SPUIDefinitions.NEW_DISTRIBUTION_TYPE_DESC).buildTextComponent();
+                .id(UIComponentIdProvider.NEW_DISTRIBUTION_TYPE_DESC).buildTextComponent();
         tagDesc.setNullRepresentation("");
     }
 
@@ -610,7 +610,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
     protected void createOptionGroup(final boolean hasCreatePermission, final boolean hasUpdatePermission) {
 
         super.createOptionGroup(hasCreatePermission, hasUpdatePermission);
-        optiongroup.setId(SPUIDefinitions.CREATE_OPTION_GROUP_DISTRIBUTION_SET_TYPE_ID);
+        optiongroup.setId(UIComponentIdProvider.CREATE_OPTION_GROUP_DISTRIBUTION_SET_TYPE_ID);
     }
 
 }

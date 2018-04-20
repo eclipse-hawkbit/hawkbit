@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
-import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -39,13 +38,11 @@ import com.vaadin.server.Page;
 import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
@@ -56,17 +53,21 @@ import com.vaadin.ui.components.colorpicker.ColorSelector;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * Abstract class for create/update target tag layout.
+ * Abstract class tag layout.
  *
  * @param <E>
  */
-public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> extends CustomComponent
+public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomComponent
         implements ColorChangeListener, ColorSelector {
 
-    private static final long serialVersionUID = 4229177824620576456L;
+    private static final long serialVersionUID = 1L;
+
     private static final String TAG_NAME_DYNAMIC_STYLE = "new-tag-name";
+
     private static final String TAG_DESC_DYNAMIC_STYLE = "new-tag-desc";
+
     protected static final String TAG_DYNAMIC_STYLE = "tag-color-preview";
+
     protected static final String MESSAGE_ERROR_MISSING_TAGNAME = "message.error.missing.tagname";
 
     protected static final int MAX_TAGS = 500;
@@ -84,35 +85,38 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     private final FormLayout formLayout = new FormLayout();
 
     protected String createTagStr;
-    protected String updateTagStr;
-    protected Label comboLabel;
+
     protected CommonDialogWindow window;
 
     protected Label colorLabel;
-    protected TextField tagName;
-    protected TextArea tagDesc;
-    protected Button tagColorPreviewBtn;
-    protected OptionGroup optiongroup;
-    protected ComboBox tagNameComboBox;
 
-    protected VerticalLayout comboLayout;
+    protected TextField tagName;
+
+    protected TextArea tagDesc;
+
+    protected Button tagColorPreviewBtn;
+
     protected ColorPickerLayout colorPickerLayout;
+
     protected GridLayout mainLayout;
+
     protected VerticalLayout contentLayout;
 
     protected boolean tagPreviewBtnClicked;
 
     private String colorPicked;
+
     protected String tagNameValue;
+
     protected String tagDescValue;
+
+    protected HorizontalLayout colorLabelLayout;
 
     /**
      * Constructor for AbstractCreateUpdateTagLayout
      * 
      * @param i18n
      *            I18N
-     * @param tagManagement
-     *            TagManagement
      * @param entityFactory
      *            EntityFactory
      * @param eventBus
@@ -122,7 +126,7 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
      * @param uiNotification
      *            UINotification
      */
-    public AbstractCreateUpdateTagLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
+    public AbstractTagLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification) {
         this.i18n = i18n;
         this.entityFactory = entityFactory;
@@ -139,23 +143,14 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
 
         @Override
         public void saveOrUpdate() {
-            if (isUpdateAction()) {
-                updateEntity(findEntityByName().orElse(null));
-                return;
-            }
-
-            createEntity();
+            saveEntity();
         }
 
         @Override
         public boolean canWindowSaveOrUpdate() {
             return isUpdateAction() || !isDuplicate();
-
         }
 
-        private boolean isUpdateAction() {
-            return !optiongroup.getValue().equals(createTagStr);
-        }
     }
 
     /**
@@ -166,17 +161,18 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     }
 
     /**
-     * Populate target name combo.
+     * Select tag & set tag name & tag desc values corresponding to selected
+     * tag.
+     *
+     * @param distTagSelected
+     *            as the selected tag from combo
      */
-    protected abstract void populateTagNameCombo();
-
     protected abstract void setTagDetails(final String tagSelected);
 
     /**
      * Init the layout.
      */
     public void init() {
-
         setSizeUndefined();
         createRequiredComponents();
         buildLayout();
@@ -187,8 +183,6 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     protected void createRequiredComponents() {
 
         createTagStr = i18n.getMessage("label.create.tag");
-        updateTagStr = i18n.getMessage("label.update.tag");
-        comboLabel = new LabelBuilder().name(i18n.getMessage("label.choose.tag")).buildLabel();
         colorLabel = new LabelBuilder().name(i18n.getMessage("label.choose.tag.color")).buildLabel();
         colorLabel.addStyleName(SPUIStyleDefinitions.COLOR_LABEL_STYLE);
 
@@ -204,12 +198,6 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
 
         tagDesc.setNullRepresentation("");
 
-        tagNameComboBox = SPUIComponentProvider.getComboBox(null, "", null, null, false, "",
-                i18n.getMessage("label.combobox.tag"));
-        tagNameComboBox.addStyleName(SPUIStyleDefinitions.FILTER_TYPE_COMBO_STYLE);
-        tagNameComboBox.setImmediate(true);
-        tagNameComboBox.setId(UIComponentIdProvider.DIST_TAG_COMBO);
-
         tagColorPreviewBtn = new Button();
         tagColorPreviewBtn.setId(UIComponentIdProvider.TAG_COLOR_PREVIEW_ID);
         getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
@@ -220,17 +208,14 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
 
         mainLayout = new GridLayout(3, 2);
         mainLayout.setSpacing(true);
-        comboLayout = new VerticalLayout();
         colorPickerLayout = new ColorPickerLayout();
         ColorPickerHelper.setRgbSliderValues(colorPickerLayout);
         contentLayout = new VerticalLayout();
 
-        final HorizontalLayout colorLabelLayout = new HorizontalLayout();
+        colorLabelLayout = new HorizontalLayout();
         colorLabelLayout.setMargin(false);
         colorLabelLayout.addComponents(colorLabel, tagColorPreviewBtn);
 
-        formLayout.addComponent(optiongroup);
-        formLayout.addComponent(comboLayout);
         formLayout.addComponent(tagName);
         formLayout.addComponent(tagDesc);
         formLayout.addStyleName("form-lastrow");
@@ -256,9 +241,12 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     protected void addListeners() {
         colorPickerLayout.getColorSelect().addColorChangeListener(this);
         colorPickerLayout.getSelPreview().addColorChangeListener(this);
-        tagColorPreviewBtn.addClickListener(event -> previewButtonClicked());
-        tagNameComboBox.addValueChangeListener(this::tagNameChosen);
+        tagColorPreviewBtn.addClickListener(
+
+                event -> previewButtonClicked());
+
         slidersValueChangeListeners();
+
     }
 
     /**
@@ -267,33 +255,16 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
      */
     private void previewButtonClicked() {
         if (!tagPreviewBtnClicked) {
-            final String selectedOption = (String) optiongroup.getValue();
-            if (selectedOption == null) {
-                return;
-            }
-
-            if (tagNameComboBox.getValue() == null) {
-                colorPickerLayout
-                        .setSelectedColor(ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
-            } else {
-                colorPickerLayout.setSelectedColor(getColorForColorPicker());
-            }
+            colorPickerLayout
+                    .setSelectedColor(ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
         }
 
         tagPreviewBtnClicked = !tagPreviewBtnClicked;
         colorPickerLayout.setVisible(tagPreviewBtnClicked);
     }
 
-    protected abstract Color getColorForColorPicker();
-
-    private void tagNameChosen(final ValueChangeEvent event) {
-        final String tagSelected = (String) event.getProperty().getValue();
-        if (null != tagSelected) {
-            setTagDetails(tagSelected);
-        } else {
-            resetTagNameField();
-        }
-        window.setOrginaleValues();
+    protected Color getColorForColorPicker() {
+        return ColorPickerConstants.START_COLOR;
     }
 
     protected void resetTagNameField() {
@@ -314,22 +285,10 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
      */
     protected void optionValueChanged(final ValueChangeEvent event) {
 
-        if (updateTagStr.equals(event.getProperty().getValue())) {
-            tagName.clear();
-            tagDesc.clear();
-            tagName.setEnabled(false);
-            populateTagNameCombo();
-            // show target name combo
-            comboLayout.addComponent(comboLabel);
-            comboLayout.addComponent(tagNameComboBox);
-        } else {
-            tagName.setEnabled(true);
-            tagName.clear();
-            tagDesc.clear();
-            // hide target name combo
-            comboLayout.removeComponent(comboLabel);
-            comboLayout.removeComponent(tagNameComboBox);
-        }
+        tagName.setEnabled(true);
+        tagName.clear();
+        tagDesc.clear();
+
         // close the color picker layout
         tagPreviewBtnClicked = false;
         // reset the selected color - Set default color
@@ -348,10 +307,6 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
         tagName.clear();
         tagDesc.clear();
         restoreComponentStyles();
-
-        // hide target name combo
-        comboLayout.removeComponent(comboLabel);
-        comboLayout.removeComponent(tagNameComboBox);
 
         // Default green color
         colorPickerLayout.setVisible(false);
@@ -399,7 +354,6 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
      */
     protected void createDynamicStyleForComponents(final TextField tagName, final TextArea tagDesc,
             final String taregtTagColor) {
-
         tagName.removeStyleName(SPUIDefinitions.TAG_NAME);
         tagDesc.removeStyleName(SPUIDefinitions.TAG_DESC);
         getTargetDynamicStyles(taregtTagColor);
@@ -442,41 +396,9 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
         colorPickerLayout.setSelectedColor(color);
         colorPickerLayout.getSelPreview().setColor(colorPickerLayout.getSelectedColor());
         final String colorPickedPreview = colorPickerLayout.getSelPreview().getColor().getCSS();
-        if (tagName.isEnabled() && null != colorPickerLayout.getColorSelect()) {
+        if (colorPickerLayout.getColorSelect() != null) {
             createDynamicStyleForComponents(tagName, tagDesc, colorPickedPreview);
             colorPickerLayout.getColorSelect().setColor(colorPickerLayout.getSelPreview().getColor());
-        }
-
-    }
-
-    /**
-     * create option group with Create tag/Update tag based on permissions.
-     */
-    protected void createOptionGroup(final boolean hasCreatePermission, final boolean hasUpdatePermission) {
-
-        optiongroup = new OptionGroup("Select Action");
-        optiongroup.setId(UIComponentIdProvider.OPTION_GROUP);
-        optiongroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
-        optiongroup.addStyleName("custom-option-group");
-        optiongroup.setNullSelectionAllowed(false);
-
-        if (hasCreatePermission) {
-            optiongroup.addItem(createTagStr);
-        }
-        if (hasUpdatePermission) {
-            optiongroup.addItem(updateTagStr);
-        }
-
-        setOptionGroupDefaultValue(hasCreatePermission, hasUpdatePermission);
-    }
-
-    protected void setOptionGroupDefaultValue(final boolean hasCreatePermission, final boolean hasUpdatePermission) {
-
-        if (hasCreatePermission) {
-            optiongroup.select(createTagStr);
-        }
-        if (hasUpdatePermission && !hasCreatePermission) {
-            optiongroup.select(updateTagStr);
         }
     }
 
@@ -490,6 +412,7 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
                 .cancelButtonClickListener(event -> discard()).layout(mainLayout).i18n(i18n)
                 .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
         return window;
+
     }
 
     /**
@@ -567,8 +490,11 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
         final Optional<E> existingType = findEntityByName();
         existingType.ifPresent(type -> uiNotification.displayValidationError(
                 i18n.getMessage("message.tag.duplicate.check", new Object[] { type.getName() })));
-
         return existingType.isPresent();
+    }
+
+    protected boolean isUpdateAction() {
+        return false;
     }
 
     protected boolean isDuplicate() {
@@ -619,8 +545,6 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
 
     protected abstract String getWindowCaption();
 
-    protected abstract void updateEntity(E entity);
-
-    protected abstract void createEntity();
+    protected abstract void saveEntity();
 
 }

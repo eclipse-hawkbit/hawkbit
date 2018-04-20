@@ -657,9 +657,98 @@ public final class UIComponentIdProvider {
     public static final String ADD_TARGET_TAG = "target.tag.add";
 
     /**
+     * Target tag configure icon id.
+     */
+    public static final String CONFIGURE_TARGET_TAG = "target.tag.configure";
+
+    /**
      * New distribution set tag add icon id.
      */
     public static final String ADD_DISTRIBUTION_TAG = "distribution.tag.add";
+
+    /**
+     * New distribution set tag configure icon id.
+     */
+    public static final String CONFIGURE_DISTRIBUTION_TAG = "distribution.tag.configure";
+
+    /**
+     * New Target tag name field id.
+     */
+    public static final String NEW_TARGET_TAG_NAME = "target.tag.add.name";
+
+    /**
+     * New Software Module name field id.
+     */
+    public static final String NEW_SOFTWARE_TYPE_NAME = "software.type.add.name";
+
+    /**
+     * New Distribution Type name field id.
+     */
+    public static final String NEW_DISTRIBUTION_TYPE_NAME = "distribution.set.type.add.name";
+
+    /**
+     * New Distribution Type key field id.
+     */
+    public static final String NEW_DISTRIBUTION_TYPE_KEY = "distribution.set.type.add.key";
+
+    /**
+     * New Create Update option group id.
+     */
+    public static final String CREATE_OPTION_GROUP_DISTRIBUTION_SET_TYPE_ID = "create.option.group.dist.set.type.id";
+
+    /**
+     * Assign option group id(Firmware/Software).
+     */
+    public static final String ASSIGN_OPTION_GROUP_SOFTWARE_MODULE_TYPE_ID = "assign.option.group.soft.module.type.id";
+
+    /**
+     * New Software Module desc field id.
+     */
+    public static final String NEW_SOFTWARE_TYPE_DESC = "software.type.add.desc";
+    /**
+     * Hide filter by dist type layout button.
+     */
+    public static final String HIDE_FILTER_DIST_TYPE = "hide.filter.dist.type.layout";
+    /**
+     * New Distribution Type distribution field id.
+     */
+    public static final String NEW_DISTRIBUTION_TYPE_DESC = "distribution.set.type.add.desc";
+
+    /**
+     * New Distribution Type distribution field id.
+     */
+    public static final String NEW_DISTRIBUTION_SET_TYPE_NAME_COMBO = "distribution.set.type.name.combo";
+
+    /**
+     * New Software Module key field id.
+     */
+    public static final String NEW_SOFTWARE_TYPE_KEY = "software.type.add.key";
+
+    /**
+     * New Target tag desc field id.
+     */
+    public static final String NEW_TARGET_TAG_DESC = "target.tag.add.desc";
+
+    /**
+     * New distribution Type set tag add icon id.
+     */
+    public static final String ADD_DISTRIBUTION_TYPE_TAG = "distribution.type.tag.add";
+
+    /**
+     * New distribution Type set tag configure icon id.
+     */
+    public static final String CONFIGURE_DISTRIBUTION_TYPE_TAG = "distribution.type.tag.configure";
+
+    /**
+     * New software module set type add icon id.
+     */
+    public static final String ADD_SOFTWARE_MODULE_TYPE = "softwaremodule.type.add";
+
+    /**
+     * New software module set type configure icon id.
+     */
+    public static final String CONFIGURE_SOFTWARE_MODULE_TYPE = "softwaremodule.type.configure";
+
     /**
      * Bulk target upload - distribution set combo.
      */
@@ -669,10 +758,12 @@ public final class UIComponentIdProvider {
      * Bulk target upload - description.
      */
     public static final String BULK_UPLOAD_DESC = "bulkupload.description";
+
     /**
      * Bulk target upload - tag field.
      */
     public static final String BULK_UPLOAD_TAG = "bulkupload.tag";
+
     /**
      * Bulk target upload - count label.
      */
@@ -765,7 +856,6 @@ public final class UIComponentIdProvider {
     /**
      * Target bulk upload minimize button id.
      */
-
     public static final String BULK_UPLOAD_CLOSE_BUTTON_ID = "bulk.upload.close.button.id";
 
     /**

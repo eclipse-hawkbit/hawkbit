@@ -295,6 +295,8 @@ public final class SPUIStyleDefinitions {
     public static final String SP_NOTIFICATION_WARNING_MESSAGE_STYLE = ValoTheme.NOTIFICATION_WARNING + " "
             + ValoTheme.NOTIFICATION_TRAY;
 
+    public static final String NEW_TARGET_TAG_NAME = "target.tag.add.name";
+
     /**
      * Constructor.
      */

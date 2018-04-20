@@ -14,16 +14,13 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
-import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
+import com.vaadin.ui.MenuBar.Command;
 
 /**
  * Software module type filter buttons header.
@@ -49,20 +46,8 @@ public class SMTypeFilterHeader extends AbstractFilterHeader {
     }
 
     @Override
-    protected boolean hasCreateUpdatePermission() {
-        return permChecker.hasCreateRepositoryPermission() || permChecker.hasUpdateRepositoryPermission();
-    }
-
-    @Override
     protected String getTitle() {
         return SPUILabelDefinitions.TYPE;
-    }
-
-    @Override
-    protected void settingsIconClicked(final ClickEvent event) {
-        final Window addUpdateWindow = createUpdateSWTypeLayout.getWindow();
-        UI.getCurrent().addWindow(addUpdateWindow);
-        addUpdateWindow.setVisible(Boolean.TRUE);
     }
 
     @Override
@@ -78,7 +63,7 @@ public class SMTypeFilterHeader extends AbstractFilterHeader {
 
     @Override
     protected String getConfigureFilterButtonId() {
-        return SPUIDefinitions.ADD_SOFTWARE_MODULE_TYPE;
+        return UIComponentIdProvider.ADD_SOFTWARE_MODULE_TYPE;
     }
 
     @Override
@@ -89,5 +74,25 @@ public class SMTypeFilterHeader extends AbstractFilterHeader {
     @Override
     protected boolean isAddTagRequired() {
         return true;
+    }
+
+    @Override
+    protected Command addButtonClicked() {
+        // final Window addUpdateWindow = createUpdateSWTypeLayout.getWindow();
+        // UI.getCurrent().addWindow(addUpdateWindow);
+        // addUpdateWindow.setVisible(Boolean.TRUE);
+        return null;
+    }
+
+    @Override
+    protected Command deleteButtonClicked() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected Command updateButtonClicked() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

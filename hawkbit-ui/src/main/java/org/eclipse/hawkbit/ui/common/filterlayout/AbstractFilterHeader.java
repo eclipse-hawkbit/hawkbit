@@ -22,14 +22,18 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.MenuBar.Command;
+import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Parent class for filter button header layout.
  */
 public abstract class AbstractFilterHeader extends VerticalLayout {
 
-    private static final long serialVersionUID = -1388340600522323332L;
+    private static final long serialVersionUID = 1L;
 
     protected SpPermissionChecker permChecker;
 
@@ -37,13 +41,14 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
 
     private Label title;
 
-    private Button config;
-
     private Button hideIcon;
+
+    private MenuBar menu;
 
     protected final VaadinMessageSource i18n;
 
-    protected AbstractFilterHeader(final SpPermissionChecker permChecker, final UIEventBus eventBus, final VaadinMessageSource i18n) {
+    protected AbstractFilterHeader(final SpPermissionChecker permChecker, final UIEventBus eventBus,
+            final VaadinMessageSource i18n) {
         this.permChecker = permChecker;
         this.eventBus = eventBus;
         this.i18n = i18n;
@@ -58,14 +63,29 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
         title = createHeaderCaption();
 
         if (hasCreateUpdatePermission() && isAddTagRequired()) {
-            config = SPUIComponentProvider.getButton(getConfigureFilterButtonId(), "", "", "", true, FontAwesome.COG,
-                    SPUIButtonStyleSmallNoBorder.class);
-            config.addClickListener(this::settingsIconClicked);
+            menu = new MenuBar();
+            menu.setStyleName(ValoTheme.MENUBAR_BORDERLESS);
+            menu.addStyleName("menubar-position");
+            final MenuItem configure = menu.addItem("", FontAwesome.COG, null);
+            configure.setStyleName("tags");
+            if (hasCreateUpdatePermission()) {
+                configure.addItem("create", FontAwesome.PLUS, addButtonClicked());
+                configure.addItem("update", FontAwesome.EDIT, updateButtonClicked());
+            }
+            if (permChecker.hasDeleteRepositoryPermission()) {
+                configure.addItem("delete", FontAwesome.TRASH_O, deleteButtonClicked());
+            }
         }
         hideIcon = SPUIComponentProvider.getButton(getHideButtonId(), "", "", "", true, FontAwesome.TIMES,
                 SPUIButtonStyleSmallNoBorder.class);
         hideIcon.addClickListener(event -> hideFilterButtonLayout());
     }
+
+    protected abstract Command deleteButtonClicked();
+
+    protected abstract Command updateButtonClicked();
+
+    protected abstract Command addButtonClicked();
 
     /**
      * Build layout.
@@ -73,17 +93,17 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
     private void buildLayout() {
         setStyleName("filter-btns-header-layout");
         final HorizontalLayout typeHeaderLayout = new HorizontalLayout();
-        typeHeaderLayout.setWidth(100.0f, Unit.PERCENTAGE);
+        typeHeaderLayout.setWidth(100.0F, Unit.PERCENTAGE);
         typeHeaderLayout.addComponentAsFirst(title);
         typeHeaderLayout.addStyleName(SPUIStyleDefinitions.WIDGET_TITLE);
         typeHeaderLayout.setComponentAlignment(title, Alignment.TOP_LEFT);
-        if (config != null && hasCreateUpdatePermission()) {
-            typeHeaderLayout.addComponent(config);
-            typeHeaderLayout.setComponentAlignment(config, Alignment.TOP_RIGHT);
+        if (menu != null && hasCreateUpdatePermission()) {
+            typeHeaderLayout.addComponent(menu);
+            typeHeaderLayout.setComponentAlignment(menu, Alignment.TOP_LEFT);
         }
         typeHeaderLayout.addComponent(hideIcon);
         typeHeaderLayout.setComponentAlignment(hideIcon, Alignment.TOP_RIGHT);
-        typeHeaderLayout.setExpandRatio(title, 1.0f);
+        typeHeaderLayout.setExpandRatio(title, 1.0F);
         addComponent(typeHeaderLayout);
     }
 
@@ -102,7 +122,9 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
      * 
      * @return true if user has permission otherwise false.
      */
-    protected abstract boolean hasCreateUpdatePermission();
+    protected boolean hasCreateUpdatePermission() {
+        return permChecker.hasCreateRepositoryPermission() || permChecker.hasUpdateRepositoryPermission();
+    }
 
     /**
      * Get the title to be displayed on the header of filter button layout.
@@ -110,14 +132,6 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
      * @return title to be displayed.
      */
     protected abstract String getTitle();
-
-    /**
-     * This method will be called when settings icon (or) clicked on the header.
-     * 
-     * @param event
-     *            reference of {@link Button.ClicEvent}.
-     */
-    protected abstract void settingsIconClicked(final Button.ClickEvent event);
 
     /**
      * Space required to show drop hits in the filter layout header.

@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
-import org.eclipse.hawkbit.ui.components.RefreshableContainer;
+import org.eclipse.hawkbit.ui.layouts.AbstractTagLayout;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -20,7 +20,9 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.MenuBar.Command;
+import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 
@@ -28,24 +30,27 @@ import com.vaadin.ui.Window;
  *
  *
  */
-public class DistributionTagHeader extends AbstractFilterHeader implements RefreshableContainer {
+public class DistributionTagHeader extends AbstractFilterHeader {
 
-    private static final long serialVersionUID = -1439667766337270066L;
+    private static final long serialVersionUID = 1L;
 
     private final ManagementUIState managementUIState;
-    private final CreateUpdateDistributionTagLayoutWindow createORUpdateDistributionTagLayout;
+
+    private final transient EntityFactory entityFactory;
+
+    private final UINotification uiNotification;
+
+    private final transient DistributionSetTagManagement distributionSetTagManagement;
 
     DistributionTagHeader(final VaadinMessageSource i18n, final ManagementUIState managementUIState,
             final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final DistributionSetTagManagement distributionSetTagManagement, final EntityFactory entityFactory,
             final UINotification uiNotification) {
         super(permChecker, eventBus, i18n);
+        this.entityFactory = entityFactory;
         this.managementUIState = managementUIState;
-        this.createORUpdateDistributionTagLayout = new CreateUpdateDistributionTagLayoutWindow(i18n,
-                distributionSetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
-        if (hasCreateUpdatePermission()) {
-            createORUpdateDistributionTagLayout.init();
-        }
+        this.uiNotification = uiNotification;
+        this.distributionSetTagManagement = distributionSetTagManagement;
     }
 
     @Override
@@ -54,21 +59,8 @@ public class DistributionTagHeader extends AbstractFilterHeader implements Refre
     }
 
     @Override
-    protected boolean hasCreateUpdatePermission() {
-        return permChecker.hasCreateRepositoryPermission() || permChecker.hasUpdateRepositoryPermission();
-    }
-
-    @Override
     protected String getTitle() {
         return i18n.getMessage("header.filter.tag", new Object[] {});
-    }
-
-    @Override
-    protected void settingsIconClicked(final ClickEvent event) {
-        final Window addUpdateWindow = createORUpdateDistributionTagLayout.getWindow();
-        UI.getCurrent().addWindow(addUpdateWindow);
-        addUpdateWindow.setModal(true);
-        addUpdateWindow.setVisible(Boolean.TRUE);
     }
 
     @Override
@@ -93,8 +85,60 @@ public class DistributionTagHeader extends AbstractFilterHeader implements Refre
     }
 
     @Override
-    public void refreshContainer() {
-        createORUpdateDistributionTagLayout.refreshContainer();
+    protected Command addButtonClicked() {
+        return new MenuBar.Command() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void menuSelected(final MenuItem selectedItem) {
+                final CreateDistributionTagLayoutWindow createDistributionTagLayout = new CreateDistributionTagLayoutWindow(
+                        i18n, distributionSetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
+                createDistributionTagLayout.init();
+                openConfigureWindow(createDistributionTagLayout);
+            }
+        };
+    }
+
+    @Override
+    protected Command deleteButtonClicked() {
+        return new MenuBar.Command() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void menuSelected(final MenuItem selectedItem) {
+                final DeleteDistributionTagLayoutWindow deleteDistributionTagLayout = new DeleteDistributionTagLayoutWindow(
+                        i18n, distributionSetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
+                deleteDistributionTagLayout.init();
+                deleteDistributionTagLayout
+                        .setSelectedTags(managementUIState.getDistributionTableFilters().getDistSetTags());
+                openConfigureWindow(deleteDistributionTagLayout);
+            }
+        };
+    }
+
+    @Override
+    protected Command updateButtonClicked() {
+        return new MenuBar.Command() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void menuSelected(final MenuItem selectedItem) {
+                final UpdateDistributionTagLayoutWindow updateDistributionTagLayout = new UpdateDistributionTagLayoutWindow(
+                        i18n, distributionSetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
+                updateDistributionTagLayout.init();
+                openConfigureWindow(updateDistributionTagLayout);
+            }
+        };
+    }
+
+    private static void openConfigureWindow(final AbstractTagLayout distributionTagLayout) {
+        final Window window = distributionTagLayout.getWindow();
+        UI.getCurrent().addWindow(window);
+        window.setModal(true);
+        window.setVisible(Boolean.TRUE);
     }
 
 }

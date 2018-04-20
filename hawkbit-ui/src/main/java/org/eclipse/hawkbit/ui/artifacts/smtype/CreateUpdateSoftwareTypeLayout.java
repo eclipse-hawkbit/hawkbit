@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.ui.layouts.CreateUpdateTypeLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
@@ -101,14 +102,16 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
 
         multiAssign = new LabelBuilder().name(multiAssignStr).buildLabel();
 
-        tagName = createTextField("textfield.name", SPUIDefinitions.TYPE_NAME, SPUIDefinitions.NEW_SOFTWARE_TYPE_NAME);
+        tagName = createTextField("textfield.name", SPUIDefinitions.TYPE_NAME,
+                UIComponentIdProvider.NEW_SOFTWARE_TYPE_NAME);
 
-        typeKey = createTextField("textfield.key", SPUIDefinitions.TYPE_KEY, SPUIDefinitions.NEW_SOFTWARE_TYPE_KEY);
+        typeKey = createTextField("textfield.key", SPUIDefinitions.TYPE_KEY,
+                UIComponentIdProvider.NEW_SOFTWARE_TYPE_KEY);
 
         tagDesc = new TextAreaBuilder().caption(i18n.getMessage("textfield.description"))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_DESC)
                 .prompt(i18n.getMessage("textfield.description")).immediate(true)
-                .id(SPUIDefinitions.NEW_SOFTWARE_TYPE_DESC).buildTextComponent();
+                .id(UIComponentIdProvider.NEW_SOFTWARE_TYPE_DESC).buildTextComponent();
         tagDesc.setNullRepresentation("");
 
         singleMultiOptionGroup();
@@ -219,7 +222,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
         assignOptiongroup.setStyleName(ValoTheme.OPTIONGROUP_SMALL);
         assignOptiongroup.addStyleName("custom-option-group");
         assignOptiongroup.setNullSelectionAllowed(false);
-        assignOptiongroup.setId(SPUIDefinitions.ASSIGN_OPTION_GROUP_SOFTWARE_MODULE_TYPE_ID);
+        assignOptiongroup.setId(UIComponentIdProvider.ASSIGN_OPTION_GROUP_SOFTWARE_MODULE_TYPE_ID);
         assignOptiongroup.select(tagOptions.get(0));
     }
 

@@ -8,106 +8,50 @@
  */
 package org.eclipse.hawkbit.ui.management.dstag;
 
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.builder.TagUpdate;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
-import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
-import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
+import org.eclipse.hawkbit.ui.layouts.AbstractTagLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
-import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.util.StringUtils;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.ui.UI;
 
 /**
  * Class for Create/Update Tag Layout of distribution set
  */
-public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdateTagLayout<DistributionSetTag>
+public class CreateDistributionTagLayoutWindow extends AbstractTagLayout<DistributionSetTag>
         implements RefreshableContainer {
 
     private static final long serialVersionUID = 1L;
 
     private static final String TARGET_TAG_NAME_DYNAMIC_STYLE = "new-target-tag-name";
+
     private static final String MSG_TEXTFIELD_NAME = "textfield.name";
 
     private final transient DistributionSetTagManagement distributionSetTagManagement;
 
-    CreateUpdateDistributionTagLayoutWindow(final VaadinMessageSource i18n,
+    CreateDistributionTagLayoutWindow(final VaadinMessageSource i18n,
             final DistributionSetTagManagement distributionSetTagManagement, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification) {
         super(i18n, entityFactory, eventBus, permChecker, uiNotification);
         this.distributionSetTagManagement = distributionSetTagManagement;
     }
 
-    /**
-     * @return the color which should be selected in the color-picker component.
-     */
     @Override
-    protected Color getColorForColorPicker() {
-        return ColorPickerHelper.rgbToColorConverter(distributionSetTagManagement
-                .getByName(tagNameComboBox.getValue().toString()).map(DistributionSetTag::getColour)
-                .filter(Objects::nonNull).orElse(ColorPickerConstants.DEFAULT_COLOR));
-
-    }
-
-    /**
-     * update tag.
-     */
-    protected void updateExistingTag(final Tag targetObj) {
-        final TagUpdate update = entityFactory.tag().update(targetObj.getId()).name(tagName.getValue())
-                .description(tagDesc.getValue());
-
-        distributionSetTagManagement.update(update);
-        eventBus.publish(this,
-                new DistributionSetTagTableEvent(BaseEntityEventType.UPDATED_ENTITY, (DistributionSetTag) targetObj));
-        uiNotification.displaySuccess(i18n.getMessage("message.update.success", new Object[] { targetObj.getName() }));
-
-    }
-
-    @Override
-    protected void populateTagNameCombo() {
-        if (tagNameComboBox == null) {
-            return;
-        }
-
-        tagNameComboBox.removeAllItems();
-        final List<DistributionSetTag> distTagNameList = distributionSetTagManagement
-                .findAll(new PageRequest(0, MAX_TAGS)).getContent();
-        distTagNameList.forEach(value -> tagNameComboBox.addItem(value.getName()));
-    }
-
-    @Override
-    protected void addListeners() {
-        super.addListeners();
-        optiongroup.addValueChangeListener(this::optionValueChanged);
-    }
-
-    @Override
-    protected void createEntity() {
+    protected void saveEntity() {
         createNewTag();
-
-    }
-
-    @Override
-    protected void updateEntity(final DistributionSetTag entity) {
-        updateExistingTag(findEntityByName()
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, tagName.getValue())));
     }
 
     @Override
@@ -147,7 +91,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
      */
     private void resetDistTagValues() {
         tagName.removeStyleName(TARGET_TAG_NAME_DYNAMIC_STYLE);
-        tagName.addStyleName(SPUIDefinitions.NEW_TARGET_TAG_NAME);
+        tagName.addStyleName(SPUIStyleDefinitions.NEW_TARGET_TAG_NAME);
         tagName.setValue("");
         tagName.setInputPrompt(i18n.getMessage(MSG_TEXTFIELD_NAME));
         setColor(ColorPickerConstants.START_COLOR);
@@ -179,26 +123,14 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     }
 
     @Override
-    protected void createRequiredComponents() {
-        super.createRequiredComponents();
-        createOptionGroup(permChecker.hasCreateRepositoryPermission(), permChecker.hasUpdateRepositoryPermission());
-    }
+    public void refreshContainer() {
+        // TODO Auto-generated method stub
 
-    @Override
-    protected void reset() {
-
-        super.reset();
-        setOptionGroupDefaultValue(permChecker.hasCreateRepositoryPermission(),
-                permChecker.hasUpdateRepositoryPermission());
     }
 
     @Override
     protected String getWindowCaption() {
-        return i18n.getMessage("caption.add.tag");
+        return i18n.getMessage("caption.configure", i18n.getMessage("caption.new"), i18n.getMessage("caption.tag"));
     }
 
-    @Override
-    public void refreshContainer() {
-        populateTagNameCombo();
-    }
 }

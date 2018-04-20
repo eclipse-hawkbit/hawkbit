@@ -991,7 +991,6 @@ public class TargetTable extends AbstractTable<Target> {
             notification.displayWarning(i18n.getMessage(DISTRIBUTIONSET_NOT_EXISTS));
             return;
         }
-        // only one distribution can be assigned to a target
         final DistributionSet distributionSetToAssign = findDistributionSetById.get(0);
         addNewTargetToAssignmentList(createTargetIdName, distributionSetToAssign);
         openConfirmationWindowForAssignment(distributionSetToAssign.getName(), createTargetIdName.getTargetName());
