@@ -45,7 +45,6 @@ import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTableLayout;
-import org.eclipse.hawkbit.ui.management.targettag.CreateUpdateTargetTagLayoutWindow;
 import org.eclipse.hawkbit.ui.management.targettag.TargetTagFilterLayout;
 import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
 import org.eclipse.hawkbit.ui.push.DistributionSetCreatedEventContainer;
@@ -144,11 +143,9 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
                     managementUIState);
             this.actionStatusLayout = new ActionStatusLayout(i18n, eventBus, managementUIState);
             this.actionStatusMsgLayout = new ActionStatusMsgLayout(i18n, eventBus, managementUIState);
-            final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout = new CreateUpdateTargetTagLayoutWindow(
-                    i18n, targetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
-            this.targetTagFilterLayout = new TargetTagFilterLayout(i18n, createUpdateTargetTagLayout, managementUIState,
+            this.targetTagFilterLayout = new TargetTagFilterLayout(i18n, managementUIState,
                     managementViewClientCriterion, permChecker, eventBus, uiNotification, entityFactory,
-                    targetFilterQueryManagement);
+                    targetFilterQueryManagement, targetTagManagement);
             final TargetTable targetTable = new TargetTable(eventBus, i18n, uiNotification, targetManagement,
                     managementUIState, permChecker, managementViewClientCriterion, distributionSetManagement,
                     targetTagManagement, deploymentManagement, uiProperties);

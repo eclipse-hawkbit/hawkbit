@@ -10,10 +10,12 @@ package org.eclipse.hawkbit.ui.management.targettag;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.components.ConfigMenuBar;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.layouts.AbstractTagLayout;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -26,8 +28,10 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Accordion;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.MenuBar.Command;
+import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -39,38 +43,52 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public class MultipleTargetFilter extends Accordion implements SelectedTabChangeListener {
 
-    private static final long serialVersionUID = -2887693289126893943L;
+    private static final long serialVersionUID = 1L;
 
     private final TargetTagFilterButtons filterByButtons;
+
     private final TargetFilterQueryButtons targetFilterQueryButtonsTab;
-    private final FilterByStatusLayout filterByStatusFotter;
+
+    private final FilterByStatusLayout filterByStatusFooter;
+
     private final CustomTargetTagFilterButtonClick customTargetTagFilterButtonClick;
-    private final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout;
+
     private final SpPermissionChecker permChecker;
+
     private final ManagementUIState managementUIState;
+
     private final VaadinMessageSource i18n;
+
     private final transient EventBus.UIEventBus eventBus;
 
     private VerticalLayout simpleFilterTab;
 
-    private Button config;
+    private ConfigMenuBar menu;
 
-    MultipleTargetFilter(final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout,
-            final SpPermissionChecker permChecker, final ManagementUIState managementUIState, final VaadinMessageSource i18n,
-            final UIEventBus eventBus, final ManagementViewClientCriterion managementViewClientCriterion,
-            final UINotification notification, final EntityFactory entityFactory,
-            final TargetFilterQueryManagement targetFilterQueryManagement) {
+    private final UINotification uiNotification;
+
+    private final EntityFactory entityFactory;
+
+    private final TargetTagManagement targetTagManagement;
+
+    MultipleTargetFilter(final SpPermissionChecker permChecker, final ManagementUIState managementUIState,
+            final VaadinMessageSource i18n, final UIEventBus eventBus,
+            final ManagementViewClientCriterion managementViewClientCriterion, final UINotification notification,
+            final EntityFactory entityFactory, final TargetFilterQueryManagement targetFilterQueryManagement,
+            final TargetTagManagement targetTagManagement) {
         this.filterByButtons = new TargetTagFilterButtons(eventBus, managementUIState, managementViewClientCriterion,
                 i18n, notification, permChecker, entityFactory);
         this.targetFilterQueryButtonsTab = new TargetFilterQueryButtons(managementUIState, eventBus);
-        this.filterByStatusFotter = new FilterByStatusLayout(i18n, eventBus, managementUIState);
+        this.filterByStatusFooter = new FilterByStatusLayout(i18n, eventBus, managementUIState);
         this.customTargetTagFilterButtonClick = new CustomTargetTagFilterButtonClick(eventBus, managementUIState,
                 targetFilterQueryManagement);
-        this.createUpdateTargetTagLayout = createUpdateTargetTagLayout;
         this.permChecker = permChecker;
         this.managementUIState = managementUIState;
         this.i18n = i18n;
         this.eventBus = eventBus;
+        this.uiNotification = notification;
+        this.entityFactory = entityFactory;
+        this.targetTagManagement = targetTagManagement;
         buildComponents();
     }
 
@@ -82,14 +100,17 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
      * Intialize component.
      */
     private void buildComponents() {
-        filterByStatusFotter.init();
+        filterByStatusFooter.init();
 
         filterByButtons.addStyleName(SPUIStyleDefinitions.NO_TOP_BORDER);
         targetFilterQueryButtonsTab.init(customTargetTagFilterButtonClick);
         if (permChecker.hasCreateTargetPermission() || permChecker.hasUpdateTargetPermission()) {
-            config = SPUIComponentProvider.getButton(UIComponentIdProvider.ADD_TARGET_TAG, "", "", "", true,
-                    FontAwesome.COG, SPUIButtonStyleSmallNoBorder.class);
-            config.addClickListener(event -> settingsIconClicked());
+            menu = new ConfigMenuBar();
+            menu.getConfig().addItem("create", FontAwesome.PLUS, addButtonClicked());
+            menu.getConfig().addItem("update", FontAwesome.EDIT, updateButtonClicked());
+            if (permChecker.hasDeleteRepositoryPermission()) {
+                menu.getConfig().addItem("delete", FontAwesome.TRASH_O, deleteButtonClicked());
+            }
         }
         addStyleName(ValoTheme.ACCORDION_BORDERLESS);
         addTabs();
@@ -121,9 +142,9 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
         simpleFilterTab = new VerticalLayout();
         final VerticalLayout targetTagTableLayout = new VerticalLayout();
         targetTagTableLayout.setSizeFull();
-        if (null != config) {
-            targetTagTableLayout.addComponent(config);
-            targetTagTableLayout.setComponentAlignment(config, Alignment.TOP_RIGHT);
+        if (menu != null) {
+            targetTagTableLayout.addComponent(menu);
+            targetTagTableLayout.setComponentAlignment(menu, Alignment.TOP_RIGHT);
         }
         targetTagTableLayout.addComponent(filterByButtons);
         targetTagTableLayout.setComponentAlignment(filterByButtons, Alignment.MIDDLE_CENTER);
@@ -132,8 +153,8 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
         simpleFilterTab.setCaption(i18n.getMessage("caption.filter.simple"));
         simpleFilterTab.addComponent(targetTagTableLayout);
         simpleFilterTab.setExpandRatio(targetTagTableLayout, 1.0F);
-        simpleFilterTab.addComponent(filterByStatusFotter);
-        simpleFilterTab.setComponentAlignment(filterByStatusFotter, Alignment.MIDDLE_CENTER);
+        simpleFilterTab.addComponent(filterByStatusFooter);
+        simpleFilterTab.setComponentAlignment(filterByStatusFooter, Alignment.MIDDLE_CENTER);
         simpleFilterTab.setSizeFull();
         simpleFilterTab.addStyleName(SPUIStyleDefinitions.SIMPLE_FILTER_HEADER);
         return simpleFilterTab;
@@ -162,10 +183,54 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
         }
     }
 
-    protected void settingsIconClicked() {
-        final Window addUpdateWindow = createUpdateTargetTagLayout.getWindow();
-        UI.getCurrent().addWindow(addUpdateWindow);
-        addUpdateWindow.setVisible(true);
+    protected Command addButtonClicked() {
+        return new MenuBar.Command() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void menuSelected(final MenuItem selectedItem) {
+                final CreateTargetTagLayoutWindow createTargetTagLayout = new CreateTargetTagLayoutWindow(i18n,
+                        targetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
+                openConfigureWindow(createTargetTagLayout);
+            }
+        };
+    }
+
+    protected Command deleteButtonClicked() {
+        return new MenuBar.Command() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void menuSelected(final MenuItem selectedItem) {
+                final DeleteTargetTagLayoutWindow deleteTargetTagLayout = new DeleteTargetTagLayoutWindow(i18n,
+                        targetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
+                deleteTargetTagLayout.setSelectedTags(managementUIState.getTargetTableFilters().getClickedTargetTags());
+                openConfigureWindow(deleteTargetTagLayout);
+            }
+        };
+    }
+
+    protected Command updateButtonClicked() {
+        return new MenuBar.Command() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void menuSelected(final MenuItem selectedItem) {
+                final UpdateTargetTagLayoutWindow updateTargetTagLayout = new UpdateTargetTagLayoutWindow(i18n,
+                        targetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
+                openConfigureWindow(updateTargetTagLayout);
+            }
+        };
+    }
+
+    private static void openConfigureWindow(final AbstractTagLayout<TargetTag> tagLayout) {
+        final Window window = tagLayout.getWindow();
+        UI.getCurrent().addWindow(window);
+        window.setModal(true);
+        window.setVisible(Boolean.TRUE);
     }
 
 }

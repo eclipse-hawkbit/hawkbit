@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.management.targettag;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
@@ -28,19 +29,17 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
  */
 public class TargetTagFilterLayout extends AbstractTargetTagFilterLayout implements RefreshableContainer {
 
-    private static final long serialVersionUID = 2153612878428575009L;
-    private final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout;
+    private static final long serialVersionUID = 1L;
 
-    public TargetTagFilterLayout(final VaadinMessageSource i18n, final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout,
-            final ManagementUIState managementUIState,
+    public TargetTagFilterLayout(final VaadinMessageSource i18n, final ManagementUIState managementUIState,
             final ManagementViewClientCriterion managementViewClientCriterion, final SpPermissionChecker permChecker,
             final UIEventBus eventBus, final UINotification notification, final EntityFactory entityFactory,
-            final TargetFilterQueryManagement targetFilterQueryManagement) {
-        super(new TargetTagFilterHeader(i18n, createUpdateTargetTagLayout, managementUIState, permChecker, eventBus),
-                new MultipleTargetFilter(createUpdateTargetTagLayout, permChecker, managementUIState, i18n, eventBus,
-                        managementViewClientCriterion, notification, entityFactory, targetFilterQueryManagement),
+            final TargetFilterQueryManagement targetFilterQueryManagement,
+            final TargetTagManagement targetTagManagement) {
+        super(new TargetTagFilterHeader(i18n, managementUIState, permChecker, eventBus),
+                new MultipleTargetFilter(permChecker, managementUIState, i18n, eventBus, managementViewClientCriterion,
+                        notification, entityFactory, targetFilterQueryManagement, targetTagManagement),
                 managementUIState);
-        this.createUpdateTargetTagLayout = createUpdateTargetTagLayout;
         eventBus.subscribe(this);
     }
 
@@ -71,6 +70,5 @@ public class TargetTagFilterLayout extends AbstractTargetTagFilterLayout impleme
     @Override
     public void refreshContainer() {
         getMultipleFilterTabs().getFilterByButtons().refreshContainer();
-        createUpdateTargetTagLayout.refreshContainer();
     }
 }

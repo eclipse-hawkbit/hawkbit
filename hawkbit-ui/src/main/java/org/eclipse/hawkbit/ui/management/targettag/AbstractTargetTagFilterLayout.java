@@ -21,7 +21,7 @@ import com.vaadin.ui.VerticalLayout;
  */
 public abstract class AbstractTargetTagFilterLayout extends VerticalLayout {
 
-    private static final long serialVersionUID = 9190616426688385851L;
+    private static final long serialVersionUID = 1L;
 
     private final AbstractFilterHeader filterHeader;
 

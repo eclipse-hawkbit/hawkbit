@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.management.dstag;
 
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.layouts.AbstractTagLayout;
@@ -94,7 +95,6 @@ public class DistributionTagHeader extends AbstractFilterHeader {
             public void menuSelected(final MenuItem selectedItem) {
                 final CreateDistributionTagLayoutWindow createDistributionTagLayout = new CreateDistributionTagLayoutWindow(
                         i18n, distributionSetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
-                createDistributionTagLayout.init();
                 openConfigureWindow(createDistributionTagLayout);
             }
         };
@@ -110,7 +110,6 @@ public class DistributionTagHeader extends AbstractFilterHeader {
             public void menuSelected(final MenuItem selectedItem) {
                 final DeleteDistributionTagLayoutWindow deleteDistributionTagLayout = new DeleteDistributionTagLayoutWindow(
                         i18n, distributionSetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
-                deleteDistributionTagLayout.init();
                 deleteDistributionTagLayout
                         .setSelectedTags(managementUIState.getDistributionTableFilters().getDistSetTags());
                 openConfigureWindow(deleteDistributionTagLayout);
@@ -128,13 +127,12 @@ public class DistributionTagHeader extends AbstractFilterHeader {
             public void menuSelected(final MenuItem selectedItem) {
                 final UpdateDistributionTagLayoutWindow updateDistributionTagLayout = new UpdateDistributionTagLayoutWindow(
                         i18n, distributionSetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
-                updateDistributionTagLayout.init();
                 openConfigureWindow(updateDistributionTagLayout);
             }
         };
     }
 
-    private static void openConfigureWindow(final AbstractTagLayout distributionTagLayout) {
+    private static void openConfigureWindow(final AbstractTagLayout<DistributionSetTag> distributionTagLayout) {
         final Window window = distributionTagLayout.getWindow();
         UI.getCurrent().addWindow(window);
         window.setModal(true);

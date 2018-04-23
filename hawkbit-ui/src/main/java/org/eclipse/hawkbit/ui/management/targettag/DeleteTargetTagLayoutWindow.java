@@ -6,21 +6,21 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.management.dstag;
+package org.eclipse.hawkbit.ui.management.targettag;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
-import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
+import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -29,19 +29,19 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 /**
  * Class for Update Tag Layout of distribution set
  */
-public class DeleteDistributionTagLayoutWindow extends UpdateDistributionTagLayoutWindow {
+public class DeleteTargetTagLayoutWindow extends UpdateTargetTagLayoutWindow {
 
     private static final long serialVersionUID = 1L;
 
-    private final transient DistributionSetTagManagement distributionSetTagManagement;
+    private final transient TargetTagManagement targetTagManagement;
 
     private List<String> selectedTags;
 
-    DeleteDistributionTagLayoutWindow(final VaadinMessageSource i18n,
-            final DistributionSetTagManagement distributionSetTagManagement, final EntityFactory entityFactory,
-            final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification) {
-        super(i18n, distributionSetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
-        this.distributionSetTagManagement = distributionSetTagManagement;
+    DeleteTargetTagLayoutWindow(final VaadinMessageSource i18n, final TargetTagManagement targetTagManagement,
+            final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
+            final UINotification uiNotification) {
+        super(i18n, targetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
+        this.targetTagManagement = targetTagManagement;
     }
 
     @Override
@@ -65,19 +65,19 @@ public class DeleteDistributionTagLayoutWindow extends UpdateDistributionTagLayo
     @Override
     protected void saveEntity() {
         if (canBeDeleted()) {
-            deleteDistributionTag();
+            deleteTargetTag();
         }
     }
 
-    private void deleteDistributionTag() {
+    private void deleteTargetTag() {
         final String tagNameToDelete = tagName.getValue();
-        final Optional<DistributionSetTag> tagToDelete = distributionSetTagManagement.getByName(tagNameToDelete);
+        final Optional<TargetTag> tagToDelete = targetTagManagement.getByName(tagNameToDelete);
         tagToDelete.ifPresent(tag -> {
             if (selectedTags.contains(tagNameToDelete)) {
                 uiNotification.displayValidationError(i18n.getMessage("message.tag.delete", tagNameToDelete));
             } else {
-                distributionSetTagManagement.delete(tagNameToDelete);
-                eventBus.publish(this, new DistributionSetTagTableEvent(BaseEntityEventType.REMOVE_ENTITY, tag));
+                targetTagManagement.delete(tagNameToDelete);
+                eventBus.publish(this, new TargetTagTableEvent(BaseEntityEventType.REMOVE_ENTITY, tag));
                 uiNotification.displaySuccess(i18n.getMessage("message.delete.success", tagName));
             }
         });

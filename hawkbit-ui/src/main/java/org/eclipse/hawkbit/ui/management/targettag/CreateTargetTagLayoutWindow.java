@@ -8,34 +8,26 @@
  */
 package org.eclipse.hawkbit.ui.management.targettag;
 
-import java.util.Objects;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
-import org.eclipse.hawkbit.repository.builder.TagUpdate;
-import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
-import org.eclipse.hawkbit.ui.components.RefreshableContainer;
-import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
+import org.eclipse.hawkbit.ui.layouts.AbstractTagLayout;
 import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.util.StringUtils;
 import org.vaadin.spring.events.EventBus.UIEventBus;
-
-import com.vaadin.shared.ui.colorpicker.Color;
 
 /**
  * Class for Create / Update Tag Layout of target
  */
-public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLayout<TargetTag>
-        implements RefreshableContainer {
+public class CreateTargetTagLayoutWindow extends AbstractTagLayout<TargetTag> {
 
     private static final long serialVersionUID = 1L;
 
@@ -57,37 +49,12 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
      * @param uiNotification
      *            UINotification
      */
-    public CreateUpdateTargetTagLayoutWindow(final VaadinMessageSource i18n,
-            final TargetTagManagement targetTagManagement, final EntityFactory entityFactory, final UIEventBus eventBus,
-            final SpPermissionChecker permChecker, final UINotification uiNotification) {
+    public CreateTargetTagLayoutWindow(final VaadinMessageSource i18n, final TargetTagManagement targetTagManagement,
+            final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
+            final UINotification uiNotification) {
         super(i18n, entityFactory, eventBus, permChecker, uiNotification);
         this.targetTagManagement = targetTagManagement;
-    }
-
-    @Override
-    protected void addListeners() {
-        super.addListeners();
-        optiongroup.addValueChangeListener(this::optionValueChanged);
-    }
-
-    /**
-     * Populate target name combo.
-     */
-    @Override
-    public void populateTagNameCombo() {
-        tagNameComboBox.removeAllItems();
-        targetTagManagement.findAll(new PageRequest(0, MAX_TAGS))
-                .forEach(value -> tagNameComboBox.addItem(value.getName()));
-    }
-
-    /**
-     * @return the color which should be selected in the color-picker component.
-     */
-    @Override
-    protected Color getColorForColorPicker() {
-        return ColorPickerHelper
-                .rgbToColorConverter(targetTagManagement.getByName(tagNameComboBox.getValue().toString())
-                        .map(TargetTag::getColour).filter(Objects::nonNull).orElse(ColorPickerConstants.DEFAULT_COLOR));
+        init();
     }
 
     /**
@@ -110,16 +77,6 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
                         selectedTargetTag.get().getColour());
             }
         }
-    }
-
-    @Override
-    protected void updateEntity(final TargetTag entity) {
-        updateExistingTag(entity);
-    }
-
-    @Override
-    protected void createEntity() {
-        createNewTag();
     }
 
     @Override
@@ -148,42 +105,14 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
         }
     }
 
-    /**
-     * update tag.
-     */
-    protected void updateExistingTag(final Tag targetObj) {
-        final TagUpdate update = entityFactory.tag().update(targetObj.getId()).name(tagName.getValue())
-                .description(tagDesc.getValue())
-                .colour(ColorPickerHelper.getColorPickedString(colorPickerLayout.getSelPreview()));
-
-        targetTagManagement.update(update);
-        eventBus.publish(this, new TargetTagTableEvent(BaseEntityEventType.UPDATED_ENTITY, (TargetTag) targetObj));
-
-        uiNotification.displaySuccess(i18n.getMessage("message.update.success", new Object[] { targetObj.getName() }));
-
-    }
-
-    @Override
-    protected void createRequiredComponents() {
-        super.createRequiredComponents();
-        createOptionGroup(permChecker.hasCreateTargetPermission(), permChecker.hasUpdateTargetPermission());
-    }
-
-    @Override
-    protected void reset() {
-
-        super.reset();
-        setOptionGroupDefaultValue(permChecker.hasCreateTargetPermission(), permChecker.hasUpdateTargetPermission());
-    }
-
     @Override
     protected String getWindowCaption() {
-        return i18n.getMessage("caption.add.tag");
+        return i18n.getMessage("caption.configure", i18n.getMessage("caption.new"), i18n.getMessage("caption.tag"));
     }
 
     @Override
-    public void refreshContainer() {
-        populateTagNameCombo();
+    protected void saveEntity() {
+        createNewTag();
     }
 
 }

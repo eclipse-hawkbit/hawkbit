@@ -23,19 +23,16 @@ import com.vaadin.ui.MenuBar.Command;
  */
 public class TargetTagFilterHeader extends AbstractFilterHeader {
 
-    private static final long serialVersionUID = 3046367045669148009L;
+    private static final long serialVersionUID = 1L;
 
     private final ManagementUIState managementUIState;
 
     TargetTagFilterHeader(final VaadinMessageSource i18n,
-            final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout,
+
             final ManagementUIState managementUIState, final SpPermissionChecker permChecker,
             final UIEventBus eventBus) {
         super(permChecker, eventBus, i18n);
         this.managementUIState = managementUIState;
-        if (permChecker.hasCreateTargetPermission() || permChecker.hasUpdateTargetPermission()) {
-            createUpdateTargetTagLayout.init();
-        }
     }
 
     @Override

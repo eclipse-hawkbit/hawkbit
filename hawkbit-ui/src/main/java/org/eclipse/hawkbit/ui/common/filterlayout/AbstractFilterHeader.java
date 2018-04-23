@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.common.filterlayout;
 
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
+import org.eclipse.hawkbit.ui.components.ConfigMenuBar;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -22,11 +23,8 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
-import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Parent class for filter button header layout.
@@ -43,7 +41,7 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
 
     private Button hideIcon;
 
-    private MenuBar menu;
+    private ConfigMenuBar menu;
 
     protected final VaadinMessageSource i18n;
 
@@ -63,17 +61,13 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
         title = createHeaderCaption();
 
         if (hasCreateUpdatePermission() && isAddTagRequired()) {
-            menu = new MenuBar();
-            menu.setStyleName(ValoTheme.MENUBAR_BORDERLESS);
-            menu.addStyleName("menubar-position");
-            final MenuItem configure = menu.addItem("", FontAwesome.COG, null);
-            configure.setStyleName("tags");
+            menu = new ConfigMenuBar();
             if (hasCreateUpdatePermission()) {
-                configure.addItem("create", FontAwesome.PLUS, addButtonClicked());
-                configure.addItem("update", FontAwesome.EDIT, updateButtonClicked());
+                menu.getConfig().addItem("create", FontAwesome.PLUS, addButtonClicked());
+                menu.getConfig().addItem("update", FontAwesome.EDIT, updateButtonClicked());
             }
             if (permChecker.hasDeleteRepositoryPermission()) {
-                configure.addItem("delete", FontAwesome.TRASH_O, deleteButtonClicked());
+                menu.getConfig().addItem("delete", FontAwesome.TRASH_O, deleteButtonClicked());
             }
         }
         hideIcon = SPUIComponentProvider.getButton(getHideButtonId(), "", "", "", true, FontAwesome.TIMES,
