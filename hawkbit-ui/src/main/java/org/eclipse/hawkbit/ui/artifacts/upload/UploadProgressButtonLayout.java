@@ -28,7 +28,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
@@ -47,8 +46,6 @@ public class UploadProgressButtonLayout extends VerticalLayout {
     private final transient MultipartConfigElement multipartConfigElement;
 
     private final UI ui;
-
-    private HorizontalLayout fileUploadButtonLayout;
 
     private Button uploadProgressButton;
 
@@ -130,7 +127,7 @@ public class UploadProgressButtonLayout extends VerticalLayout {
         uploadProgressButton.setStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
         uploadProgressButton.addStyleName(SPUIStyleDefinitions.UPLOAD_PROGRESS_INDICATOR_STYLE);
         uploadProgressButton.setIcon(null);
-        uploadProgressButton.setWidth("100px");
+        uploadProgressButton.setSizeFull();
         uploadProgressButton.setHtmlContentAllowed(true);
         uploadProgressButton.addClickListener(event -> onClickOfUploadProgressButton());
         uploadProgressButton.setVisible(false);
@@ -150,16 +147,15 @@ public class UploadProgressButtonLayout extends VerticalLayout {
         upload.addStartedListener(uploadHandler);
         upload.addStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
         upload.addStyleName("no-border");
+        upload.setSizeFull();
 
-        fileUploadButtonLayout = new HorizontalLayout();
-        fileUploadButtonLayout.setSpacing(true);
-        fileUploadButtonLayout.addStyleName(SPUIStyleDefinitions.FOOTER_LAYOUT);
-        fileUploadButtonLayout.addComponent(upload);
-        fileUploadButtonLayout.setComponentAlignment(upload, Alignment.MIDDLE_LEFT);
-        fileUploadButtonLayout.addComponent(uploadProgressButton);
-        fileUploadButtonLayout.setComponentAlignment(uploadProgressButton, Alignment.MIDDLE_RIGHT);
+        addStyleName(SPUIStyleDefinitions.FOOTER_LAYOUT);
+        addComponent(upload);
+        setComponentAlignment(upload, Alignment.TOP_RIGHT);
+        addComponent(uploadProgressButton);
+        setComponentAlignment(uploadProgressButton, Alignment.TOP_RIGHT);
+
         setMargin(false);
-
         setSizeFull();
         setSpacing(true);
     }
@@ -184,10 +180,6 @@ public class UploadProgressButtonLayout extends VerticalLayout {
         if (artifactUploadState.areAllUploadsFinished()) {
             hideUploadProgressButton();
         }
-    }
-
-    public HorizontalLayout getFileUploadButtonLayout() {
-        return fileUploadButtonLayout;
     }
 
     private void onClickOfUploadProgressButton() {
