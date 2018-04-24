@@ -41,6 +41,7 @@ public interface DistributionSetTypeRepository
      * @param isDeleted
      *            to <code>true</code> if only soft deleted entries of
      *            <code>false</code> if undeleted ones
+     * 
      * @return list of found {@link DistributionSetType}s
      */
     Page<JpaDistributionSetType> findByDeleted(Pageable pageable, boolean isDeleted);
@@ -48,7 +49,8 @@ public interface DistributionSetTypeRepository
     /**
      * @param isDeleted
      *            to <code>true</code> if only marked as deleted have to be
-     *            count or all undeleted.
+     *            counted or all undeleted.
+     * 
      * @return number of {@link DistributionSetType}s in the repository.
      */
     long countByDeleted(boolean isDeleted);
@@ -60,6 +62,7 @@ public interface DistributionSetTypeRepository
      * @param softwareModuleType
      *            the software module type to count the distribution set type
      *            which has this software module type assigned
+     * 
      * @return the number of {@link DistributionSetType}s in the repository
      *         assigned to the given software module type
      */
@@ -83,6 +86,9 @@ public interface DistributionSetTypeRepository
      * Retrieves the {@link DistributionSetType}s for the given IDs. Workaround
      * for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
      *
+     * @param ids
+     *            of the types to be located
+     * 
      * @return a list of distribution set types
      */
     @Override
@@ -95,6 +101,7 @@ public interface DistributionSetTypeRepository
      * 
      * @param id
      *            of the distribution set type
+     * 
      * @return the number of associated software module types
      */
     @Query("SELECT COUNT (DISTINCT e.smType) FROM JpaDistributionSetType d JOIN FETCH d.elements e WHERE d.id = :id")

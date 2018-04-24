@@ -48,6 +48,8 @@ public interface ArtifactRepository {
      * @throws HashNotMatchException
      *             in case {@code hash} is provided and not matching to the
      *             calculated hashes during storing
+     * @throws ArtifactExceedsMaxSizeException
+     *             if the artifact exceeds the maximum size
      */
     AbstractDbArtifact store(@NotEmpty String tenant, @NotNull InputStream content, @NotEmpty String filename,
             String contentType, DbArtifactHash hash, long maxBytes);

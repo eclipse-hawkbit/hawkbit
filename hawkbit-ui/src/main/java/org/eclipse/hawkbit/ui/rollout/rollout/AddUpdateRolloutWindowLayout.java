@@ -889,9 +889,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     class TargetExistsValidator implements Validator {
 
-        /**
-         * 
-         */
         private static final long serialVersionUID = 1L;
 
         @Override

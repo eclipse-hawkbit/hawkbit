@@ -905,7 +905,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> controllerManagement
                 .addInformationalActionStatus(entityFactory.actionStatus().create(actionId1).status(Status.WARNING)));
 
-        // test for update status
+        // test for update status (and mixed case)
         final Long actionId2 = assignDistributionSet(testdataFactory.createDistributionSet("ds2"),
                 testdataFactory.createTargets(1, "t2")).getActions().get(0);
         assertThat(actionId2).isNotEqualTo(actionId1);
@@ -914,7 +914,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                     .status(Status.WARNING).message("Msg " + i).occurredAt(System.currentTimeMillis()));
         }
         assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId2).status(Status.WARNING)));
+                .addInformationalActionStatus(entityFactory.actionStatus().create(actionId2).status(Status.WARNING)));
 
     }
 

@@ -30,7 +30,9 @@ import java.util.Set;
 import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
@@ -184,33 +186,38 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("$.size", equalTo(smIDs.size())));
 
         // verify quota enforcement
-        final int quota = quotaManagement.getMaxSoftwareModulesPerDistributionSet();
+        final int maxSoftwareModules = quotaManagement.getMaxSoftwareModulesPerDistributionSet();
         final List<Long> moduleIDs = Lists.newArrayList();
-        for (int i = 0; i < quota + 1; ++i) {
+        for (int i = 0; i < maxSoftwareModules + 1; ++i) {
             moduleIDs.add(testdataFactory.createSoftwareModuleApp("sm" + i).getId());
         }
 
         // post assignment
-        final String jsonIDs = JsonBuilder.ids(moduleIDs.subList(0, quota - smIDs.size()));
+        final String jsonIDs = JsonBuilder.ids(moduleIDs.subList(0, maxSoftwareModules - smIDs.size()));
         mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId() + "/assignedSM")
                 .contentType(MediaType.APPLICATION_JSON).content(jsonIDs)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
         // test if size corresponds with quota
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId()
-                + "/assignedSM?limit={limit}", quota * 2)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk()).andExpect(jsonPath("$.size", equalTo(quota)));
+                + "/assignedSM?limit={limit}", maxSoftwareModules * 2)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.size", equalTo(maxSoftwareModules)));
 
         // post one more to cause the quota to be exceeded
         mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId() + "/assignedSM")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JsonBuilder.ids(Collections.singletonList(moduleIDs.get(moduleIDs.size() - 1)))))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden());
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.exceptionClass", equalTo(QuotaExceededException.class.getName())))
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
 
         // verify quota is also enforced for bulk uploads
         final DistributionSet disSet2 = testdataFactory.createDistributionSetWithNoSoftwareModules("Saturn", "4.0");
         mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet2.getId() + "/assignedSM")
                 .contentType(MediaType.APPLICATION_JSON).content(JsonBuilder.ids(moduleIDs)))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden());
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.exceptionClass", equalTo(QuotaExceededException.class.getName())))
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
+
         // verify size is still 0
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet2.getId() + "/assignedSM"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())

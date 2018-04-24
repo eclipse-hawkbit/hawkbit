@@ -21,6 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
@@ -53,6 +54,8 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     private static final String JSON_PATH_FIELD_SIZE = ".size";
     private static final String JSON_PATH_FIELD_TOTAL = ".total";
     private static final String JSON_PATH_FIELD_AUTO_ASSIGN_DS = ".autoAssignDistributionSet";
+    private static final String JSON_PATH_FIELD_EXCEPTION_CLASS = ".exceptionClass";
+    private static final String JSON_PATH_FIELD_ERROR_CODE = ".errorCode";
 
     // target
     // $.field
@@ -64,6 +67,8 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     private static final String JSON_PATH_ID = JSON_PATH_ROOT + JSON_PATH_FIELD_ID;
     private static final String JSON_PATH_QUERY = JSON_PATH_ROOT + JSON_PATH_FIELD_QUERY;
     private static final String JSON_PATH_AUTO_ASSIGN_DS = JSON_PATH_ROOT + JSON_PATH_FIELD_AUTO_ASSIGN_DS;
+    private static final String JSON_PATH_EXCEPTION_CLASS = JSON_PATH_ROOT + JSON_PATH_FIELD_EXCEPTION_CLASS;
+    private static final String JSON_PATH_ERROR_CODE = JSON_PATH_ROOT + JSON_PATH_FIELD_ERROR_CODE;
 
     @Test
     @Description("Ensures that deletion is executed if permitted.")
@@ -298,7 +303,9 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         mvc.perform(
                 post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId() + "/autoAssignDS")
                         .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden());
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden())
+                .andExpect(jsonPath(JSON_PATH_EXCEPTION_CLASS, equalTo(QuotaExceededException.class.getName())))
+                .andExpect(jsonPath(JSON_PATH_ERROR_CODE, equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
     }
 
     @Test
@@ -326,7 +333,9 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         // update the query of the filter query to trigger a quota hit
         mvc.perform(put(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId())
                 .content("{\"query\":\"controllerId==target*\"}").contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden());
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden())
+                .andExpect(jsonPath(JSON_PATH_EXCEPTION_CLASS, equalTo(QuotaExceededException.class.getName())))
+                .andExpect(jsonPath(JSON_PATH_ERROR_CODE, equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
 
     }
 

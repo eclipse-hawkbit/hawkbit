@@ -469,11 +469,12 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public SoftwareModuleMetadata createMetaData(final SoftwareModuleMetadataCreate c) {
 
-        final Long moduleId = retrieveSoftwareModuleId(c);
+        final JpaSoftwareModuleMetadataCreate create = (JpaSoftwareModuleMetadataCreate) c;
+        final Long moduleId = create.getSoftwareModuleId();
         assertSoftwareModuleExists(moduleId);
         assertMetaDataQuota(moduleId, 1);
 
-        return internalCreateMetaData(c);
+        return saveMetadata(create);
     }
 
     @Override
@@ -482,33 +483,31 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<SoftwareModuleMetadata> createMetaData(final Collection<SoftwareModuleMetadataCreate> create) {
 
-        // check if we need to assert the meta data quota per software module
         if (!create.isEmpty()) {
 
-            // check if all beans refer to the same software module
-            final Long moduleId = retrieveSoftwareModuleId(create.iterator().next());
-            if (create.stream().allMatch(c -> moduleId.equals(retrieveSoftwareModuleId(c)))) {
+            // check if all meta data entries refer to the same software module
+            final Long moduleId = ((JpaSoftwareModuleMetadataCreate) create.iterator().next()).getSoftwareModuleId();
+            if (createJpaMetadataCreateStream(create).allMatch(c -> moduleId.equals(c.getSoftwareModuleId()))) {
 
-                // same module
                 assertSoftwareModuleExists(moduleId);
                 assertMetaDataQuota(moduleId, create.size());
 
-                return create.stream().map(this::internalCreateMetaData).collect(Collectors.toList());
+                return createJpaMetadataCreateStream(create).map(this::saveMetadata).collect(Collectors.toList());
 
             } else {
 
                 // group by software module id to minimize database access
-                final Map<Long, List<SoftwareModuleMetadataCreate>> groups = create.stream()
-                        .collect(Collectors.groupingBy(JpaSoftwareModuleManagement::retrieveSoftwareModuleId));
+                final Map<Long, List<JpaSoftwareModuleMetadataCreate>> groups = createJpaMetadataCreateStream(create)
+                        .collect(Collectors.groupingBy(c -> c.getSoftwareModuleId()));
                 return groups.entrySet().stream().flatMap(e -> {
 
                     final Long id = e.getKey();
-                    final List<SoftwareModuleMetadataCreate> group = e.getValue();
+                    final List<JpaSoftwareModuleMetadataCreate> group = e.getValue();
 
                     assertSoftwareModuleExists(id);
                     assertMetaDataQuota(id, group.size());
 
-                    return group.stream().map(this::internalCreateMetaData);
+                    return group.stream().map(this::saveMetadata);
                 }).collect(Collectors.toList());
             }
         }
@@ -516,14 +515,14 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         return Collections.emptyList();
     }
 
-    private SoftwareModuleMetadata internalCreateMetaData(final SoftwareModuleMetadataCreate c) {
-        final JpaSoftwareModuleMetadataCreate create = (JpaSoftwareModuleMetadataCreate) c;
-        assertSoftwareModuleMetadataDoesNotExist(create.getSoftwareModuleId(), create);
-        return softwareModuleMetadataRepository.save(create.build());
+    private Stream<JpaSoftwareModuleMetadataCreate> createJpaMetadataCreateStream(
+            final Collection<SoftwareModuleMetadataCreate> create) {
+        return create.stream().map(c -> (JpaSoftwareModuleMetadataCreate) c);
     }
 
-    private static Long retrieveSoftwareModuleId(final SoftwareModuleMetadataCreate create) {
-        return ((JpaSoftwareModuleMetadataCreate) create).getSoftwareModuleId();
+    private SoftwareModuleMetadata saveMetadata(final JpaSoftwareModuleMetadataCreate create) {
+        assertSoftwareModuleMetadataDoesNotExist(create.getSoftwareModuleId(), create);
+        return softwareModuleMetadataRepository.save(create.build());
     }
 
     private void assertSoftwareModuleMetadataDoesNotExist(final Long moduleId,

@@ -28,8 +28,10 @@ import java.util.List;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.assertj.core.util.Lists;
+import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
@@ -247,9 +249,9 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     public void assignModuleTypesToDistributionSetTypeUntilQuotaExceeded() throws Exception {
 
         // create software module types
-        final int quota = quotaManagement.getMaxSoftwareModuleTypesPerDistributionSetType();
+        final int maxSoftwareModuleTypes = quotaManagement.getMaxSoftwareModuleTypesPerDistributionSetType();
         final List<Long> moduleTypeIds = Lists.newArrayList();
-        for (int i = 0; i < quota + 1; ++i) {
+        for (int i = 0; i < maxSoftwareModuleTypes + 1; ++i) {
             final SoftwareModuleTypeCreate smCreate = entityFactory.softwareModuleType().create().name("smType_" + i)
                     .description("smType_" + i).maxAssignments(1).colour("blue").key("smType_" + i);
             moduleTypeIds.add(softwareModuleTypeManagement.create(smCreate).getId());
@@ -270,8 +272,9 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
         mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes", testType.getId())
                 .content("{\"id\":" + moduleTypeIds.get(moduleTypeIds.size() - 1) + "}")
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isForbidden());
-
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.exceptionClass", equalTo(QuotaExceededException.class.getName())))
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
 
         // verify quota enforcement for mandatory module types
 
@@ -288,7 +291,9 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
         mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes", testType2.getId())
                 .content("{\"id\":" + moduleTypeIds.get(moduleTypeIds.size() - 1) + "}")
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.exceptionClass", equalTo(QuotaExceededException.class.getName())))
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
 
     }
 

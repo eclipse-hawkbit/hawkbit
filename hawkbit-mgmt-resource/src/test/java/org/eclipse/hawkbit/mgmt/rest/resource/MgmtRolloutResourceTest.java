@@ -26,10 +26,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
+import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
@@ -143,7 +146,10 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
                         testdataFactory.createDistributionSet("ds").getId(), "id==target*",
                         new RolloutGroupConditionBuilder().withDefaults().build()))
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden());
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.exceptionClass", equalTo(QuotaExceededException.class.getName())))
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
+
     }
 
     @Test
@@ -158,7 +164,10 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
                         testdataFactory.createDistributionSet("ds").getId(), "id==target*",
                         new RolloutGroupConditionBuilder().withDefaults().build()))
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden());
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.exceptionClass", equalTo(QuotaExceededException.class.getName())))
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
+
     }
 
     @Test
@@ -898,7 +907,6 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     }
 
-    @SuppressWarnings("squid:S2925")
     protected <T> T doWithTimeout(final Callable<T> callable, final SuccessCondition<T> successCondition,
             final long timeout, final long pollInterval) throws Exception // NOPMD
     {
@@ -918,7 +926,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
             } catch (final Exception ex) {
                 exception = ex;
             }
-            Thread.sleep(pollInterval);
+            TimeUnit.MILLISECONDS.wait(pollInterval);
             duration += pollInterval > 0 ? pollInterval : 1;
             if (exception == null && successCondition.success(returnValue)) {
                 return returnValue;

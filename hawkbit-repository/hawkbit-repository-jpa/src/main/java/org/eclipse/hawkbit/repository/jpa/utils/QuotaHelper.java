@@ -52,7 +52,6 @@ public final class QuotaHelper {
      */
     public static void assertAssignmentQuota(final long requested, final long limit, @NotNull final Class<?> type,
             @NotNull final Class<?> parentType) {
-        // dispatch
         assertAssignmentQuota(null, requested, limit, type.getSimpleName(), parentType.getSimpleName(), null);
     }
 
@@ -81,7 +80,6 @@ public final class QuotaHelper {
      */
     public static void assertAssignmentQuota(final Long parentId, final long requested, final long limit,
             @NotNull final Class<?> type, @NotNull final Class<?> parentType, final Function<Long, Long> countFct) {
-        // dispatch
         assertAssignmentQuota(parentId, requested, limit, type.getSimpleName(), parentType.getSimpleName(), countFct);
     }
 
@@ -113,7 +111,7 @@ public final class QuotaHelper {
 
         // check if the quota is unlimited
         if (limit <= 0) {
-            LOG.debug("Quota max {} entities per {} is unlimited.", type, parentType);
+            LOG.debug("Quota 'Max {} entities per {}' is unlimited.", type, parentType);
             return;
         }
 

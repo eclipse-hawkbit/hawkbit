@@ -811,41 +811,43 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     public void findAllSoftwareModuleMetadataBySwId() {
 
         final SoftwareModule sw1 = testdataFactory.createSoftwareModuleApp();
+        final int metadataCountSw1 = 8;
 
         final SoftwareModule sw2 = testdataFactory.createSoftwareModuleOs();
+        final int metadataCountSw2 = 10;
 
-        for (int index = 0; index < 8; index++) {
+        for (int index = 0; index < metadataCountSw1; index++) {
             softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(sw1.getId())
                     .key("key" + index).value("value" + index).targetVisible(true));
         }
 
-        for (int index = 0; index < 10; index++) {
+        for (int index = 0; index < metadataCountSw2; index++) {
             softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(sw2.getId())
                     .key("key" + index).value("value" + index).targetVisible(false));
         }
 
-        Page<SoftwareModuleMetadata> metadataOfSw1 = softwareModuleManagement
+        Page<SoftwareModuleMetadata> metadataSw1 = softwareModuleManagement
                 .findMetaDataBySoftwareModuleId(new PageRequest(0, 100), sw1.getId());
 
-        Page<SoftwareModuleMetadata> metadataOfSw2 = softwareModuleManagement
+        Page<SoftwareModuleMetadata> metadataSw2 = softwareModuleManagement
                 .findMetaDataBySoftwareModuleId(new PageRequest(0, 100), sw2.getId());
 
-        assertThat(metadataOfSw1.getNumberOfElements()).isEqualTo(8);
-        assertThat(metadataOfSw1.getTotalElements()).isEqualTo(8);
+        assertThat(metadataSw1.getNumberOfElements()).isEqualTo(metadataCountSw1);
+        assertThat(metadataSw1.getTotalElements()).isEqualTo(metadataCountSw1);
 
-        assertThat(metadataOfSw2.getNumberOfElements()).isEqualTo(10);
-        assertThat(metadataOfSw2.getTotalElements()).isEqualTo(10);
+        assertThat(metadataSw2.getNumberOfElements()).isEqualTo(metadataCountSw2);
+        assertThat(metadataSw2.getTotalElements()).isEqualTo(metadataCountSw2);
 
-        metadataOfSw1 = softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(new PageRequest(0, 100),
+        metadataSw1 = softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(new PageRequest(0, 100),
                 sw1.getId());
 
-        metadataOfSw2 = softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(new PageRequest(0, 100),
+        metadataSw2 = softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(new PageRequest(0, 100),
                 sw2.getId());
 
-        assertThat(metadataOfSw1.getNumberOfElements()).isEqualTo(8);
-        assertThat(metadataOfSw1.getTotalElements()).isEqualTo(8);
+        assertThat(metadataSw1.getNumberOfElements()).isEqualTo(metadataCountSw1);
+        assertThat(metadataSw1.getTotalElements()).isEqualTo(metadataCountSw1);
 
-        assertThat(metadataOfSw2.getNumberOfElements()).isEqualTo(0);
-        assertThat(metadataOfSw2.getTotalElements()).isEqualTo(0);
+        assertThat(metadataSw2.getNumberOfElements()).isEqualTo(0);
+        assertThat(metadataSw2.getTotalElements()).isEqualTo(0);
     }
 }

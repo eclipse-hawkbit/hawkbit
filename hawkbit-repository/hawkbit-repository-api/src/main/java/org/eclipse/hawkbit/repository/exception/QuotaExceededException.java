@@ -20,7 +20,7 @@ public final class QuotaExceededException extends AbstractServerRtException {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String ASSIGNMENT_QUOTA_EXCEEDED_MESSAGE = "Quota exceeded: Cannot assign %s more %s entities to %s '%s'. The configured quota is %s.";
+    private static final String ASSIGNMENT_QUOTA_EXCEEDED_MESSAGE = "Quota exceeded: Cannot assign %s more %s entities to %s '%s'. The maximum is %s.";
 
     /**
      * Creates a new QuotaExceededException with

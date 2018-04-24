@@ -1301,9 +1301,9 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         // create group definitions
         final RolloutGroupCreate group1 = entityFactory.rolloutGroup().create().conditions(conditions).name("group1")
-                .targetPercentage(50.0f);
+                .targetPercentage(50.0F);
         final RolloutGroupCreate group2 = entityFactory.rolloutGroup().create().conditions(conditions).name("group2")
-                .targetPercentage(100.0f);
+                .targetPercentage(100.0F);
 
         // group1 exceeds the quota
         assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> rolloutManagement.create(
@@ -1313,9 +1313,9 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         // create group definitions
         final RolloutGroupCreate group3 = entityFactory.rolloutGroup().create().conditions(conditions).name("group3")
-                .targetPercentage(1.0f);
+                .targetPercentage(1.0F);
         final RolloutGroupCreate group4 = entityFactory.rolloutGroup().create().conditions(conditions).name("group4")
-                .targetPercentage(100.0f);
+                .targetPercentage(100.0F);
 
         // group4 exceeds the quota
         assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> rolloutManagement.create(
@@ -1325,11 +1325,11 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         // create group definitions
         final RolloutGroupCreate group5 = entityFactory.rolloutGroup().create().conditions(conditions).name("group5")
-                .targetPercentage(33.3f);
+                .targetPercentage(33.3F);
         final RolloutGroupCreate group6 = entityFactory.rolloutGroup().create().conditions(conditions).name("group6")
-                .targetPercentage(66.6f);
+                .targetPercentage(66.6F);
         final RolloutGroupCreate group7 = entityFactory.rolloutGroup().create().conditions(conditions).name("group7")
-                .targetPercentage(100.0f);
+                .targetPercentage(100.0F);
 
         // should work fine
         assertThat(rolloutManagement.create(
