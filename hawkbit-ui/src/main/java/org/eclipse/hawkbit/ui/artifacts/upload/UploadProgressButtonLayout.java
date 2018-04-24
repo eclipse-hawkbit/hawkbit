@@ -54,25 +54,24 @@ public class UploadProgressButtonLayout extends VerticalLayout {
 
     private final transient SoftwareModuleManagement softwareModuleManagement;
 
-    private final UploadLogic uploadLogic;
-
     private final Upload upload;
 
     private FileTransferHandlerVaadinUpload uploadHandler;
 
     private final ArtifactManagement artifactManagement;
 
+    private final ArtifactUploadState artifactUploadState;
+
     public UploadProgressButtonLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final ArtifactUploadState artifactUploadState, final MultipartConfigElement multipartConfigElement,
-            final ArtifactManagement artifactManagement, final SoftwareModuleManagement softwareManagement,
-            final UploadLogic uploadLogic) {
+            final ArtifactManagement artifactManagement, final SoftwareModuleManagement softwareManagement) {
+        this.artifactUploadState = artifactUploadState;
         this.artifactManagement = artifactManagement;
-        this.uploadLogic = uploadLogic;
-        this.uploadInfoWindow = new UploadProgressInfoWindow(eventBus, artifactUploadState, i18n, uploadLogic);
+        this.uploadInfoWindow = new UploadProgressInfoWindow(eventBus, artifactUploadState, i18n);
         this.uploadInfoWindow.addCloseListener(event -> {
             // ensure that the progress button is hidden when the progress
             // window is closed and no more uploads running
-            if (uploadLogic.areAllUploadsFinished()) {
+            if (artifactUploadState.areAllUploadsFinished()) {
                 hideUploadProgressButton();
             }
         });
@@ -115,7 +114,8 @@ public class UploadProgressButtonLayout extends VerticalLayout {
         final BaseEntityEventType eventType = event.getEventType();
         if (eventType == BaseEntityEventType.SELECTED_ENTITY) {
             ui.access(() -> {
-                if (uploadLogic.isNoSoftwareModuleSelected() || uploadLogic.isMoreThanOneSoftwareModulesSelected()) {
+                if (artifactUploadState.isNoSoftwareModuleSelected()
+                        || artifactUploadState.isMoreThanOneSoftwareModulesSelected()) {
                     upload.setEnabled(false);
                 } else {
                     upload.setEnabled(true);
@@ -138,8 +138,8 @@ public class UploadProgressButtonLayout extends VerticalLayout {
 
     private void buildLayout() {
 
-        uploadHandler = new FileTransferHandlerVaadinUpload(uploadLogic,
-                multipartConfigElement.getMaxFileSize(), softwareModuleManagement, artifactManagement, i18n);
+        uploadHandler = new FileTransferHandlerVaadinUpload(multipartConfigElement.getMaxFileSize(),
+                softwareModuleManagement, artifactManagement, i18n);
         upload.setButtonCaption(i18n.getMessage("upload.file"));
         upload.setImmediate(true);
         upload.setReceiver(uploadHandler);
@@ -165,10 +165,10 @@ public class UploadProgressButtonLayout extends VerticalLayout {
     }
 
     private void restoreState() {
-        if (uploadLogic.areAllUploadsFinished()) {
-            uploadLogic.clearUploadDetails();
+        if (artifactUploadState.areAllUploadsFinished()) {
+            artifactUploadState.clearUploadDetails();
             hideUploadProgressButton();
-        } else if (uploadLogic.isAtLeastOneUploadInProgress()) {
+        } else if (artifactUploadState.isAtLeastOneUploadInProgress()) {
             showUploadProgressButton();
         }
     }
@@ -181,7 +181,7 @@ public class UploadProgressButtonLayout extends VerticalLayout {
      * Called for every finished (succeeded or failed) upload.
      */
     private void onUploadFinished() {
-        if (uploadLogic.areAllUploadsFinished()) {
+        if (artifactUploadState.areAllUploadsFinished()) {
             hideUploadProgressButton();
         }
     }

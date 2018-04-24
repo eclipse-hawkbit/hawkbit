@@ -29,11 +29,11 @@ public class FileUploadProgress implements Serializable {
 
     private String mimeType;
 
-    public FileUploadProgress(final FileUploadId fileUploadId) {
+    FileUploadProgress(final FileUploadId fileUploadId) {
         this.fileUploadId = fileUploadId;
     }
 
-    public FileUploadProgress(final FileUploadId fileUploadId, final long bytesRead, final long contentLength,
+    FileUploadProgress(final FileUploadId fileUploadId, final long bytesRead, final long contentLength,
             final String mimeType,
             final String filePath) {
         this.fileUploadId = fileUploadId;
@@ -43,30 +43,30 @@ public class FileUploadProgress implements Serializable {
         this.filePath = filePath;
     }
 
-    public FileUploadProgress(final FileUploadId fileUploadId, final long bytesRead, final long contentLength) {
+    FileUploadProgress(final FileUploadId fileUploadId, final long bytesRead, final long contentLength) {
         this.fileUploadId = fileUploadId;
         this.contentLength = contentLength;
         this.bytesRead = bytesRead;
     }
 
-    public FileUploadProgress(final FileUploadId fileUploadId, final String failureReason) {
+    FileUploadProgress(final FileUploadId fileUploadId, final String failureReason) {
         this.fileUploadId = fileUploadId;
         this.failureReason = failureReason;
     }
 
-    public FileUploadId getFileUploadId() {
+    FileUploadId getFileUploadId() {
         return fileUploadId;
     }
 
-    public long getContentLength() {
+    long getContentLength() {
         return contentLength;
     }
 
-    public long getBytesRead() {
+    long getBytesRead() {
         return bytesRead;
     }
 
-    public String getFailureReason() {
+    String getFailureReason() {
         return failureReason;
     }
 
@@ -74,11 +74,11 @@ public class FileUploadProgress implements Serializable {
         return filePath;
     }
 
-    public void setMimeType(final String mimeType) {
+    void setMimeType(final String mimeType) {
         this.mimeType = mimeType;
     }
 
-    public String getMimeType() {
+    String getMimeType() {
         return mimeType;
     }
 }

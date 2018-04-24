@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import javax.servlet.MultipartConfigElement;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -48,26 +49,20 @@ public class UploadDropAreaLayout implements Serializable {
 
     private final transient ArtifactManagement artifactManagement;
 
-    private final UploadLogic uploadLogic;
-
     public UploadDropAreaLayout(final VaadinMessageSource i18n, final UINotification uiNotification,
             final ArtifactUploadState artifactUploadState, final MultipartConfigElement multipartConfigElement,
-            final SoftwareModuleManagement softwareManagement, final UploadLogic uploadLogic,
-            final ArtifactManagement artifactManagement) {
+            final SoftwareModuleManagement softwareManagement, final ArtifactManagement artifactManagement) {
         this.i18n = i18n;
         this.uiNotification = uiNotification;
         this.artifactUploadState = artifactUploadState;
         this.multipartConfigElement = multipartConfigElement;
         this.softwareManagement = softwareManagement;
-        this.uploadLogic = uploadLogic;
         this.artifactManagement = artifactManagement;
 
         buildLayout();
     }
 
     private void buildLayout() {
-
-        /* create drag-drop wrapper for drop area */
         dropAreaWrapper = new DragAndDropWrapper(createDropAreaLayout());
         dropAreaWrapper.setDropHandler(new DropAreahandler());
     }
@@ -118,13 +113,13 @@ public class UploadDropAreaLayout implements Serializable {
 
                     for (final Html5File file : files) {
 
-                        isDirectory = uploadLogic.isDirectory(file);
-                        isDuplicate = uploadLogic.isFileInUploadState(file.getFileName(), softwareModule);
+                        isDirectory = isDirectory(file);
+                        isDuplicate = artifactUploadState.isFileInUploadState(file.getFileName(), softwareModule);
 
                         if (!isDirectory && !isDuplicate) {
                             file.setStreamVariable(new FileTransferHandlerStreamVariable(file.getFileName(),
                                     file.getFileSize(), multipartConfigElement.getMaxFileSize(), file.getType(),
-                                    softwareModule, artifactManagement, uploadLogic, i18n));
+                                    softwareModule, artifactManagement, i18n));
                         }
                     }
                     if (isDirectory && isDuplicate) {
@@ -139,6 +134,10 @@ public class UploadDropAreaLayout implements Serializable {
                     }
                 });
             }
+        }
+
+        private boolean isDirectory(final Html5File file) {
+            return StringUtils.isBlank(file.getType()) && file.getFileSize() % 4096 == 0;
         }
 
         private boolean validate(final DragAndDropEvent event) {
@@ -160,12 +159,12 @@ public class UploadDropAreaLayout implements Serializable {
         }
     }
 
-    boolean validateSoftwareModuleSelection() {
-        if (uploadLogic.isNoSoftwareModuleSelected()) {
+    private boolean validateSoftwareModuleSelection() {
+        if (artifactUploadState.isNoSoftwareModuleSelected()) {
             uiNotification.displayValidationError(i18n.getMessage("message.error.noSwModuleSelected"));
             return false;
         }
-        if (uploadLogic.isMoreThanOneSoftwareModulesSelected()) {
+        if (artifactUploadState.isMoreThanOneSoftwareModulesSelected()) {
             uiNotification.displayValidationError(i18n.getMessage("message.error.multiSwModuleSelected"));
             return false;
         }

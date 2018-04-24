@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleTableLayout;
 import org.eclipse.hawkbit.ui.artifacts.smtype.SMTypeFilterLayout;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.upload.UploadDropAreaLayout;
-import org.eclipse.hawkbit.ui.artifacts.upload.UploadLogic;
 import org.eclipse.hawkbit.ui.artifacts.upload.UploadProgressButtonLayout;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
@@ -93,8 +92,6 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
 
     private DragAndDropWrapper dadw;
 
-    private final UploadLogic uploadLogic;
-
     @Autowired
     UploadArtifactView(final UIEventBus eventBus, final SpPermissionChecker permChecker, final VaadinMessageSource i18n,
             final UINotification uiNotification, final ArtifactUploadState artifactUploadState,
@@ -114,11 +111,10 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
                 uploadViewClientCriterion);
         this.artifactDetailsLayout = new ArtifactDetailsLayout(i18n, eventBus, artifactUploadState, uiNotification,
                 artifactManagement, softwareModuleManagement);
-        this.uploadLogic = new UploadLogic(artifactUploadState);
         this.uploadLayout = new UploadProgressButtonLayout(i18n, eventBus, artifactUploadState,
-                multipartConfigElement, artifactManagement, softwareModuleManagement, uploadLogic);
+                multipartConfigElement, artifactManagement, softwareModuleManagement);
         this.dropAreaLayout = new UploadDropAreaLayout(i18n, uiNotification, artifactUploadState,
-                multipartConfigElement, softwareModuleManagement, uploadLogic, artifactManagement);
+                multipartConfigElement, softwareModuleManagement, artifactManagement);
         this.deleteActionsLayout = new SMDeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
                 artifactUploadState, softwareModuleManagement, softwareModuleTypeManagement, uploadViewClientCriterion);
     }

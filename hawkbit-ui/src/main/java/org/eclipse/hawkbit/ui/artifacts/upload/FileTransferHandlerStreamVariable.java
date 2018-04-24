@@ -42,9 +42,8 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
 
     FileTransferHandlerStreamVariable(final String fileName, final long fileSize, final long maxSize,
             final String mimeType, final SoftwareModule selectedSw, final ArtifactManagement artifactManagement,
-            final UploadLogic uploadLogic,
             final VaadinMessageSource i18n) {
-        super(artifactManagement, uploadLogic, i18n);
+        super(artifactManagement, i18n);
         this.fileSize = fileSize;
         this.maxSize = maxSize;
         this.mimeType = mimeType;

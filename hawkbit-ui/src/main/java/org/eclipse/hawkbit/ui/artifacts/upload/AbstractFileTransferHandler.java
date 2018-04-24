@@ -57,21 +57,8 @@ public abstract class AbstractFileTransferHandler {
 
     private final VaadinMessageSource i18n;
 
-    private final UploadLogic uploadLogic;
-
-    // TODO rollouts: ???
-    AbstractFileTransferHandler() {
-        uploadLogic = null;
-        artifactManagement = null;
-        eventBus = null;
-        artifactUploadState = null;
-        i18n = null;
-    }
-
-    public AbstractFileTransferHandler(final ArtifactManagement artifactManagement, final UploadLogic uploadLogic,
-            final VaadinMessageSource i18n) {
+    public AbstractFileTransferHandler(final ArtifactManagement artifactManagement, final VaadinMessageSource i18n) {
         this.artifactManagement = artifactManagement;
-        this.uploadLogic = uploadLogic;
         this.i18n = i18n;
         this.eventBus = SpringContextHelper.getBean(EventBus.UIEventBus.class);
         this.artifactUploadState = SpringContextHelper.getBean(ArtifactUploadState.class);
@@ -104,15 +91,11 @@ public abstract class AbstractFileTransferHandler {
         return artifactUploadState;
     }
 
-    protected UploadLogic getUploadLogic() {
-        return uploadLogic;
-    }
-
     protected VaadinMessageSource getI18n() {
         return i18n;
     }
 
-    protected void setFailureReason(final String failureReason) {
+    private void setFailureReason(final String failureReason) {
         this.failureReason = failureReason;
     }
 
@@ -151,7 +134,7 @@ public abstract class AbstractFileTransferHandler {
     protected void publishUploadStarted(final FileUploadId fileUploadId) {
         LOG.info("Upload started for file {}", fileUploadId);
         final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId);
-        uploadLogic.uploadStarted(fileUploadId, fileUploadProgress);
+        artifactUploadState.uploadInProgress(fileUploadId, fileUploadProgress);
         eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_STARTED, fileUploadProgress));
     }
 
@@ -164,17 +147,17 @@ public abstract class AbstractFileTransferHandler {
         }
         final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId, bytesReceived, fileSize,
                 mimeType, tempFilePath);
-        uploadLogic.uploadInProgress(fileUploadId, fileUploadProgress);
+        artifactUploadState.uploadInProgress(fileUploadId, fileUploadProgress);
         eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_IN_PROGRESS,
                 fileUploadProgress));
     }
 
-    protected void publishUploadSucceeded(final FileUploadId fileUploadId, final long fileSize, final String mimeType,
+    private void publishUploadSucceeded(final FileUploadId fileUploadId, final long fileSize, final String mimeType,
             final String tempFilePath) {
         LOG.info("Upload succeeded for file {}", fileUploadId);
         final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId, fileSize, fileSize, mimeType,
                 tempFilePath);
-        uploadLogic.uploadSucceeded(fileUploadId, fileUploadProgress);
+        artifactUploadState.uploadSucceeded(fileUploadId, fileUploadProgress);
         eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_SUCCESSFUL,
                 fileUploadProgress));
     }
@@ -193,7 +176,7 @@ public abstract class AbstractFileTransferHandler {
         final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
                 StringUtils.isBlank(failureReason) ? uploadException.getMessage() : failureReason);
 
-        uploadLogic.uploadFailed(fileUploadId, fileUploadProgress);
+        artifactUploadState.uploadFailed(fileUploadId, fileUploadProgress);
         eventBus.publish(this,
                 new UploadStatusEvent(UploadStatusEventType.UPLOAD_FAILED, fileUploadProgress));
     }
@@ -255,8 +238,7 @@ public abstract class AbstractFileTransferHandler {
             publishUploadFailedEvent(fileUploadId, i18n.getMessage("message.upload.failed"), e);
             LOG.error("Failed to transfer file to repository", e);
         } finally {
-            // TODO rollouts: change to debug
-            LOG.info("Deleting tempfile {} - {}", filename, newFile.getAbsolutePath());
+            LOG.debug("Deleting tempfile {} - {}", filename, newFile.getAbsolutePath());
             if (newFile.exists() && !newFile.delete()) {
                 LOG.error("Could not delete temporary file: {}", newFile.getAbsolutePath());
             }

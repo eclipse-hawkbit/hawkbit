@@ -20,7 +20,6 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -66,8 +65,6 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
 
     private static final String STATUS_FAILED = "Failed";
 
-    private final transient EventBus.UIEventBus eventBus;
-
     private final ArtifactUploadState artifactUploadState;
 
     private final VaadinMessageSource i18n;
@@ -88,14 +85,10 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
 
     private Button resizeButton;
 
-    private final UploadLogic uploadLogic;
-
     UploadProgressInfoWindow(final UIEventBus eventBus, final ArtifactUploadState artifactUploadState,
-            final VaadinMessageSource i18n, final UploadLogic uploadLogic) {
-        this.eventBus = eventBus;
+            final VaadinMessageSource i18n) {
         this.artifactUploadState = artifactUploadState;
         this.i18n = i18n;
-        this.uploadLogic = uploadLogic;
 
         setPopupProperties();
         createStatusPopupHeaderComponents();
@@ -123,13 +116,9 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
             ui.access(() -> onUploadStarted(event));
             break;
         case UPLOAD_IN_PROGRESS:
-            ui.access(() -> onUploadInProgress(event));
-            break;
         case UPLOAD_FAILED:
-            ui.access(() -> onUploadFailure(event));
-            break;
         case UPLOAD_SUCCESSFUL:
-            onUploadSuccess(event);
+            ui.access(() -> updateUploadProgressinforRowObject(event));
             break;
         case UPLOAD_FINISHED:
             ui.access(this::onUploadFinished);
@@ -155,7 +144,7 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
     private void restoreState() {
         final Indexed container = grid.getContainerDataSource();
         container.removeAllItems();
-        for (final FileUploadId fileUploadId : artifactUploadState.getAllFilesFromOverallUploadProcessList().keySet()) {
+        for (final FileUploadId fileUploadId : artifactUploadState.getAllFileUploadIdsFromOverallUploadProcessList()) {
             updateUploadProgressInfoRowObject(fileUploadId);
         }
     }
@@ -265,7 +254,7 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
     }
 
     private boolean isFirstFileUpload() {
-        return artifactUploadState.getAllFilesFromOverallUploadProcessList().size() == 1;
+        return artifactUploadState.getAllFileUploadIdsFromOverallUploadProcessList().size() == 1;
     }
 
     private void openWindow() {
@@ -283,32 +272,12 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
         artifactUploadState.setStatusPopupMinimized(true);
         closeWindow();
 
-        if (uploadLogic.areAllUploadsFinished()) {
+        if (artifactUploadState.areAllUploadsFinished()) {
             cleanupStates();
         }
     }
 
-    private void onUploadInProgress(final UploadStatusEvent event) {
-        final FileUploadProgress fileUploadProgress = event.getFileUploadProgress();
-        final FileUploadId fileUploadId = fileUploadProgress.getFileUploadId();
-
-        updateUploadProgressInfoRowObject(fileUploadId);
-    }
-
-    /**
-     * Called for every successful file upload.
-     */
-    private void onUploadSuccess(final UploadStatusEvent event) {
-        final FileUploadProgress fileUploadProgress = event.getFileUploadProgress();
-        final FileUploadId fileUploadId = fileUploadProgress.getFileUploadId();
-
-        updateUploadProgressInfoRowObject(fileUploadId);
-    }
-
-    /**
-     * Called for every failed upload.
-     */
-    private void onUploadFailure(final UploadStatusEvent event) {
+    private void updateUploadProgressinforRowObject(final UploadStatusEvent event) {
         final FileUploadProgress fileUploadProgress = event.getFileUploadProgress();
         final FileUploadId fileUploadId = fileUploadProgress.getFileUploadId();
 
@@ -319,7 +288,7 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
      * Called for every finished (succeeded or failed) upload.
      */
     private void onUploadFinished() {
-        if (uploadLogic.areAllUploadsFinished() && artifactUploadState.isStatusPopupMinimized()) {
+        if (artifactUploadState.areAllUploadsFinished() && artifactUploadState.isStatusPopupMinimized()) {
             if (artifactUploadState.getFilesInFailedState().isEmpty()) {
                 cleanupStates();
                 closeWindow();
@@ -331,7 +300,7 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
 
     private void cleanupStates() {
         uploads.removeAllItems();
-        uploadLogic.clearUploadDetails();
+        artifactUploadState.clearUploadDetails();
     }
 
     private void setPopupSizeInMinMode() {
@@ -387,7 +356,7 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
     }
 
     private void onClose() {
-        if (uploadLogic.areAllUploadsFinished()) {
+        if (artifactUploadState.areAllUploadsFinished()) {
             cleanupStates();
             closeWindow();
         } else {

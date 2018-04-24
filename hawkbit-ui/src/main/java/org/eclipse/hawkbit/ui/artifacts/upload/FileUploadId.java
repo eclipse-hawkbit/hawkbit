@@ -13,6 +13,7 @@ import java.io.Serializable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 
 public class FileUploadId implements Serializable {
 
@@ -27,11 +28,13 @@ public class FileUploadId implements Serializable {
     public FileUploadId(final String filename, final SoftwareModule softwareModule) {
         this.filename = filename;
         this.softwareModule = softwareModule;
-        this.id = createId(filename, softwareModule);
+        this.id = createFileUploadIdString(filename, softwareModule);
     }
 
-    private String createId(final String filename, final SoftwareModule softwareModule) {
-        return UploadLogic.createFileUploadId(filename, softwareModule);
+    private static String createFileUploadIdString(final String filename, final SoftwareModule softwareModule) {
+        return new StringBuilder(filename).append(":").append(
+                HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(), softwareModule.getVersion()))
+                .toString();
     }
 
     @Override

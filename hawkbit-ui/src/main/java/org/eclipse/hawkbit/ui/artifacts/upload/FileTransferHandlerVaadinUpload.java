@@ -52,10 +52,9 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
     private volatile String mimeType;
     private volatile FileUploadId fileUploadId;
 
-    FileTransferHandlerVaadinUpload(final UploadLogic uploadLogic, final long maxSize,
-            final SoftwareModuleManagement softwareManagement, final ArtifactManagement artifactManagement,
-            final VaadinMessageSource i18n) {
-        super(artifactManagement, uploadLogic, i18n);
+    FileTransferHandlerVaadinUpload(final long maxSize, final SoftwareModuleManagement softwareManagement,
+            final ArtifactManagement artifactManagement, final VaadinMessageSource i18n) {
+        super(artifactManagement, i18n);
         this.maxSize = maxSize;
         this.softwareModuleManagement = softwareManagement;
     }
@@ -85,7 +84,7 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
         this.fileUploadId = new FileUploadId(event.getFilename(), softwareModule);
         this.mimeType = event.getMIMEType();
 
-        if (getUploadLogic().isFileInUploadState(this.fileUploadId)) {
+        if (getUploadState().isFileInUploadState(this.fileUploadId)) {
             setFailureReasonUploadFailed();
             // actual interrupt will happen a bit late so setting the below
             // flag
@@ -106,9 +105,9 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
     private void assertThatOneSoftwareModulIsSelected() {
         // FileUpload button should be disabled if no SoftwareModul or more
         // than one is selected!
-        if (getUploadLogic().isNoSoftwareModuleSelected()) {
+        if (getUploadState().isNoSoftwareModuleSelected()) {
             throw new IllegalStateException("No SoftwareModul selected");
-        } else if (getUploadLogic().isMoreThanOneSoftwareModulesSelected()) {
+        } else if (getUploadState().isMoreThanOneSoftwareModulesSelected()) {
             throw new IllegalStateException("More than one SoftwareModul selected but only one is allowed");
         }
     }
@@ -200,8 +199,6 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
     @Override
     public void uploadFailed(final FailedEvent event) {
         assertStateConsistency(fileUploadId, event.getFilename());
-
-        // TODO rollouts: check message properties for unused properties
 
         if (isDuplicateFile()) {
             publishUploadFailedEvent(fileUploadId, getI18n().getMessage("message.no.duplicateFiles"),
