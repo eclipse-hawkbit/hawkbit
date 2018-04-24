@@ -414,8 +414,8 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     }
 
     public void populateArtifactDetails(final SoftwareModule softwareModule) {
-        populateArtifactDetails(softwareModule.getId(), HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(),
-                        softwareModule.getVersion()));
+        populateArtifactDetails(softwareModule.getId(),
+                HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(), softwareModule.getVersion()));
     }
 
     /**
@@ -471,14 +471,11 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         }
         if (softwareModuleEvent.getSoftwareModuleEventType() == SoftwareModuleEventType.ARTIFACTS_CHANGED
                 && softwareModuleEvent.getEntity() != null) {
-            UI.getCurrent().access(() -> {
-                findSelectedSoftwareModule().ifPresent(selectedSoftwareModule -> {
-                    if (softwareModulsAreEqual(softwareModuleEvent.getEntity(), selectedSoftwareModule)) {
-                        populateArtifactDetails(softwareModuleEvent.getEntity());
-                    }
-                });
-
-            });
+            UI.getCurrent().access(() -> findSelectedSoftwareModule().ifPresent(selectedSoftwareModule -> {
+                if (softwareModulsAreEqual(softwareModuleEvent.getEntity(), selectedSoftwareModule)) {
+                    populateArtifactDetails(softwareModuleEvent.getEntity());
+                }
+            }));
         }
     }
 

@@ -58,7 +58,7 @@ public class UploadProgressButtonLayout extends VerticalLayout {
 
     private FileTransferHandlerVaadinUpload uploadHandler;
 
-    private final ArtifactManagement artifactManagement;
+    private final transient ArtifactManagement artifactManagement;
 
     private final ArtifactUploadState artifactUploadState;
 

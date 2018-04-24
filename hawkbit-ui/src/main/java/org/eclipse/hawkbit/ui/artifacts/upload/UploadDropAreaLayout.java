@@ -105,34 +105,35 @@ public class UploadDropAreaLayout implements Serializable {
                 final Html5File[] files = ((WrapperTransferable) event.getTransferable()).getFiles();
                 // selected software module at the time of file drop is
                 // considered for upload
-                artifactUploadState.getSelectedBaseSwModuleId().ifPresent(selectedSwId -> {
-                    final SoftwareModule softwareModule = softwareManagement.get(selectedSwId).orElse(null);
+                artifactUploadState.getSelectedBaseSwModuleId()
+                        .ifPresent(selectedSwId -> uploadFilesForSoftwaremodul(files, selectedSwId));
+            }
+        }
 
-                    boolean isDirectory = false;
-                    boolean isDuplicate = false;
+        private void uploadFilesForSoftwaremodul(final Html5File[] files, final Long softwareModuleId) {
+            final SoftwareModule softwareModule = softwareManagement.get(softwareModuleId).orElse(null);
 
-                    for (final Html5File file : files) {
+            boolean isDirectory = false;
+            boolean isDuplicate = false;
 
-                        isDirectory = isDirectory(file);
-                        isDuplicate = artifactUploadState.isFileInUploadState(file.getFileName(), softwareModule);
+            for (final Html5File file : files) {
 
-                        if (!isDirectory && !isDuplicate) {
-                            file.setStreamVariable(new FileTransferHandlerStreamVariable(file.getFileName(),
-                                    file.getFileSize(), multipartConfigElement.getMaxFileSize(), file.getType(),
-                                    softwareModule, artifactManagement, i18n));
-                        }
-                    }
-                    if (isDirectory && isDuplicate) {
-                        uiNotification.displayValidationError(
-                                i18n.getMessage("message.no.duplicateFiles") + "<br>"
-                                        + i18n.getMessage("message.no.directory.upload"));
-                    } else if (isDirectory) {
-                        uiNotification.displayValidationError(
-                                i18n.getMessage("message.no.directory.upload"));
-                    } else if (isDuplicate) {
-                        uiNotification.displayValidationError(i18n.getMessage("message.no.duplicateFiles"));
-                    }
-                });
+                isDirectory = isDirectory(file);
+                isDuplicate = artifactUploadState.isFileInUploadState(file.getFileName(), softwareModule);
+
+                if (!isDirectory && !isDuplicate) {
+                    file.setStreamVariable(new FileTransferHandlerStreamVariable(file.getFileName(), file.getFileSize(),
+                            multipartConfigElement.getMaxFileSize(), file.getType(), softwareModule, artifactManagement,
+                            i18n));
+                }
+            }
+            if (isDirectory && isDuplicate) {
+                uiNotification.displayValidationError(i18n.getMessage("message.no.duplicateFiles") + "<br>"
+                        + i18n.getMessage("message.no.directory.upload"));
+            } else if (isDirectory) {
+                uiNotification.displayValidationError(i18n.getMessage("message.no.directory.upload"));
+            } else if (isDuplicate) {
+                uiNotification.displayValidationError(i18n.getMessage("message.no.duplicateFiles"));
             }
         }
 

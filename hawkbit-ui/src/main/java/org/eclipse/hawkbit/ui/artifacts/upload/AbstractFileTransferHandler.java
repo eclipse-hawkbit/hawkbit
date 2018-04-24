@@ -13,6 +13,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Serializable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
@@ -37,7 +38,9 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
  * Abstract base class for transferring files from the browser to the
  * repository.
  */
-public abstract class AbstractFileTransferHandler {
+public abstract class AbstractFileTransferHandler implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractFileTransferHandler.class);
 
@@ -51,9 +54,9 @@ public abstract class AbstractFileTransferHandler {
 
     private final ArtifactUploadState artifactUploadState;
 
-    private final UIEventBus eventBus;
+    private final transient UIEventBus eventBus;
 
-    private final ArtifactManagement artifactManagement;
+    private final transient ArtifactManagement artifactManagement;
 
     private final VaadinMessageSource i18n;
 

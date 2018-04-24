@@ -294,7 +294,7 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
         }
     }
 
-    String getStateListslogMessage(final int overallUploadCount, final int succeededUploadCount,
+    private String getStateListslogMessage(final int overallUploadCount, final int succeededUploadCount,
             final int failedUploadCount) {
         final StringBuilder buffer = new StringBuilder();
         buffer.append("Overall uploads: " + overallUploadCount);
