@@ -158,18 +158,17 @@ public class UploadDropAreaLayout implements Serializable {
             }
             return false;
         }
-    }
 
-    private boolean validateSoftwareModuleSelection() {
-        if (artifactUploadState.isNoSoftwareModuleSelected()) {
-            uiNotification.displayValidationError(i18n.getMessage("message.error.noSwModuleSelected"));
-            return false;
+        private boolean validateSoftwareModuleSelection() {
+            if (artifactUploadState.isNoSoftwareModuleSelected()) {
+                uiNotification.displayValidationError(i18n.getMessage("message.error.noSwModuleSelected"));
+                return false;
+            }
+            if (artifactUploadState.isMoreThanOneSoftwareModulesSelected()) {
+                uiNotification.displayValidationError(i18n.getMessage("message.error.multiSwModuleSelected"));
+                return false;
+            }
+            return true;
         }
-        if (artifactUploadState.isMoreThanOneSoftwareModulesSelected()) {
-            uiNotification.displayValidationError(i18n.getMessage("message.error.multiSwModuleSelected"));
-            return false;
-        }
-        return true;
     }
-
 }

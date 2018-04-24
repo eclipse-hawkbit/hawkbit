@@ -289,12 +289,12 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
             final int succeededUploadCount, final int failedUploadCount) {
         if (inProgressCount < 0) {
             LOG.error("IllegalState: \n{}",
-                    getStateListslogMessage(overallUploadCount, succeededUploadCount, failedUploadCount));
+                    getStateListLogMessage(overallUploadCount, succeededUploadCount, failedUploadCount));
             throw new IllegalStateException();
         }
     }
 
-    private String getStateListslogMessage(final int overallUploadCount, final int succeededUploadCount,
+    private static String getStateListLogMessage(final int overallUploadCount, final int succeededUploadCount,
             final int failedUploadCount) {
         final StringBuilder buffer = new StringBuilder();
         buffer.append("Overall uploads: " + overallUploadCount);
