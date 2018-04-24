@@ -49,6 +49,8 @@ import org.springframework.amqp.rabbit.test.RabbitListenerTestHarness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 
+import ru.yandex.qatools.allure.annotations.Step;
+
 /**
  *
  * Common class for {@link AmqpMessageHandlerServiceIntegrationTest} and
@@ -233,6 +235,7 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         return replyMessage;
     }
 
+    @Step
     protected void registerAndAssertTargetWithExistingTenant(final String controllerId) {
         registerAndAssertTargetWithExistingTenant(controllerId, 1);
     }
@@ -326,6 +329,7 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
 
     }
 
+    @Step
     protected void assertUpdateAttributes(final String controllerId, final Map<String, String> attributes) {
         final Target findByControllerId = waitUntilIsPresent(
                 () -> controllerManagement.getByControllerId(controllerId));

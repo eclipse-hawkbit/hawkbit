@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.time.Duration;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Collections;
@@ -126,11 +125,6 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
 
     @Column(name = "maintenance_time_zone", updatable = false, length = Action.MAINTENANCE_WINDOW_TIMEZONE_LENGTH)
     private String maintenanceWindowTimeZone;
-
-    /**
-     * A transient (non serialized) maintenance schedule helper.
-     */
-    private transient MaintenanceScheduleHelper scheduleHelper = null;
 
     @Override
     public DistributionSet getDistributionSet() {
@@ -272,28 +266,6 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     }
 
     /**
-     * Get the transient schedule helper. Instantiate one if not already done
-     * after deserialization.
-     *
-     * @return the {@link MaintenanceScheduleHelper} object.
-     */
-    private MaintenanceScheduleHelper getScheduler() {
-        if (this.scheduleHelper == null) {
-            this.scheduleHelper = new MaintenanceScheduleHelper(maintenanceSchedule);
-        }
-        return this.scheduleHelper;
-    }
-
-    /**
-     * Returns the duration of each maintenance window in ISO 8601 format.
-     *
-     * @return the {@link Duration} of each maintenance window.
-     */
-    private Duration getMaintenanceWindowDuration() {
-        return Duration.parse(MaintenanceScheduleHelper.convertToISODuration(this.maintenanceWindowDuration));
-    }
-
-    /**
      * Returns the start time of next available maintenance window for the
      * {@link Action} as {@link ZonedDateTime}. If a maintenance window is
      * already active, the start time of currently active window is returned.
@@ -301,8 +273,8 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
      * @return the start time as {@link Optional<ZonedDateTime>}.
      */
     public Optional<ZonedDateTime> getMaintenanceWindowStartTime() {
-        final ZonedDateTime now = ZonedDateTime.now(ZoneOffset.of(maintenanceWindowTimeZone));
-        return getScheduler().nextExecution(now.minus(getMaintenanceWindowDuration()));
+        return MaintenanceScheduleHelper.getNextMaintenanceWindow(maintenanceSchedule, maintenanceWindowDuration,
+                maintenanceWindowTimeZone);
     }
 
     /**
@@ -313,7 +285,8 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
      * @return the end time of window as {@link Optional<ZonedDateTime>}.
      */
     private Optional<ZonedDateTime> getMaintenanceWindowEndTime() {
-        return getMaintenanceWindowStartTime().map(start -> start.plus(getMaintenanceWindowDuration()));
+        return getMaintenanceWindowStartTime()
+                .map(start -> start.plus(MaintenanceScheduleHelper.convertToISODuration(maintenanceWindowDuration)));
     }
 
     @Override
@@ -323,8 +296,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
 
     @Override
     public boolean isMaintenanceScheduleLapsed() {
-        final ZonedDateTime now = ZonedDateTime.now(ZoneOffset.of(maintenanceWindowTimeZone));
-        return !getScheduler().nextExecution(now.minus(getMaintenanceWindowDuration())).isPresent();
+        return !getMaintenanceWindowStartTime().isPresent();
     }
 
     @Override

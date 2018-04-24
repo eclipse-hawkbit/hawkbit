@@ -57,7 +57,7 @@
    </scm>
 
    <ciManagement>
-      <system>Hudson</system>
+      <system>Jenkins</system>
       <url>https://hudson.eclipse.org/hawkbit/</url>
    </ciManagement>
 
@@ -74,7 +74,13 @@
       </developer>
       <developer>
          <id>michahirsch</id>
-         <email>michael.hirsch@bosch-si.com</email>
+         <roles>
+            <role>Committer</role>
+         </roles>
+      </developer>
+      <developer>
+         <id>schabdo</id>
+         <email>Dominic.Schabel@bosch-si.com</email>
          <organization>Bosch Software Innovations GmbH</organization>
          <organizationUrl>https://www.bosch-si.com</organizationUrl>
          <roles>

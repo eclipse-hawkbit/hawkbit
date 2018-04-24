@@ -319,12 +319,15 @@ public interface ControllerManagement {
     Action registerRetrieved(long actionId, String message);
 
     /**
-     * Updates attributes of the controller.
+     * Updates attributes of the controller according to the given
+     * {@link UpdateMode}.
      *
      * @param controllerId
      *            to update
      * @param attributes
      *            to insert
+     * @param mode
+     *            the update mode or <code>null</code>
      *
      * @return updated {@link Target}
      *
@@ -334,7 +337,8 @@ public interface ControllerManagement {
      *             if maximum number of attribzes per target is exceeded
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Target updateControllerAttributes(@NotEmpty String controllerId, @NotNull Map<String, String> attributes);
+    Target updateControllerAttributes(@NotEmpty String controllerId, @NotNull Map<String, String> attributes,
+            UpdateMode mode);
 
     /**
      * Finds {@link Target} based on given controller ID returns found Target

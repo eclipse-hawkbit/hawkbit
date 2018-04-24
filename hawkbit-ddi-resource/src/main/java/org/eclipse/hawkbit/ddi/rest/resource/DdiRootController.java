@@ -29,9 +29,10 @@ import org.eclipse.hawkbit.ddi.json.model.DdiConfigData;
 import org.eclipse.hawkbit.ddi.json.model.DdiControllerBase;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeployment;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeployment.HandlingType;
-import org.eclipse.hawkbit.ddi.json.model.DdiDeployment.MaintenanceWindowStatus;
+import org.eclipse.hawkbit.ddi.json.model.DdiDeployment.DdiMaintenanceWindowStatus;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeploymentBase;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult.FinalResult;
+import org.eclipse.hawkbit.ddi.json.model.DdiUpdateMode;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
@@ -39,6 +40,7 @@ import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
@@ -295,7 +297,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             final HandlingType downloadType = action.isForce() ? HandlingType.FORCED : HandlingType.ATTEMPT;
             final HandlingType updateType = calculateUpdateType(action, downloadType);
 
-            final MaintenanceWindowStatus maintenanceWindow = calculateMaintenanceWindow(action);
+            final DdiMaintenanceWindowStatus maintenanceWindow = calculateMaintenanceWindow(action);
 
             final DdiDeploymentBase base = new DdiDeploymentBase(Long.toString(action.getId()),
                     new DdiDeployment(downloadType, updateType, chunks, maintenanceWindow), actionHistory);
@@ -311,10 +313,10 @@ public class DdiRootController implements DdiRootControllerRestApi {
         return ResponseEntity.notFound().build();
     }
 
-    private static MaintenanceWindowStatus calculateMaintenanceWindow(final Action action) {
+    private static DdiMaintenanceWindowStatus calculateMaintenanceWindow(final Action action) {
         if (action.hasMaintenanceSchedule()) {
-            return action.isMaintenanceWindowAvailable() ? MaintenanceWindowStatus.AVAILABLE
-                    : MaintenanceWindowStatus.UNAVAILABLE;
+            return action.isMaintenanceWindowAvailable() ? DdiMaintenanceWindowStatus.AVAILABLE
+                    : DdiMaintenanceWindowStatus.UNAVAILABLE;
         }
         return null;
     }
@@ -440,8 +442,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
     @Override
     public ResponseEntity<Void> putConfigData(@Valid @RequestBody final DdiConfigData configData,
             @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId) {
-        controllerManagement.updateControllerAttributes(controllerId, configData.getData());
 
+        controllerManagement.updateControllerAttributes(controllerId, configData.getData(), getUpdateMode(configData));
         return ResponseEntity.ok().build();
     }
 
@@ -579,4 +581,16 @@ public class DdiRootController implements DdiRootControllerRestApi {
             }
         }
     }
+
+    /**
+     * Retrieve the update mode from the given update message.
+     */
+    private static UpdateMode getUpdateMode(final DdiConfigData configData) {
+        final DdiUpdateMode mode = configData.getMode();
+        if (mode != null) {
+            return UpdateMode.valueOf(mode.name());
+        }
+        return null;
+    }
+
 }

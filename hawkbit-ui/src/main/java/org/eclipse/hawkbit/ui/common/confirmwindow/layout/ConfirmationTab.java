@@ -24,9 +24,6 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Confirmation tab of confirmation window.
- * 
- *
- *
  */
 public class ConfirmationTab extends VerticalLayout {
 

@@ -83,39 +83,36 @@
     @include sp-button-icon-only-href;
   }
 
+  .v-slot-dist-window-maintenance-window-enable {
+    padding-left: 9px;
+    padding-top: 5px;
+    padding-right: 5px;
+    font-weight: 400;
+  }
+
   .dist-window-maintenance-window-layout {
      vertical-align: middle;
      horizontal-align: middle;
+     padding-left: 14px;
 
     .v-slot {
       vertical-align: middle;
-      padding-left: 8px;
-      padding-right: 5px;
+      padding-right: 20px;
     }
 
     .v-caption {
       vertical-align: middle;
       margin-top: 0;
-      font-size: 12px;
-    }
-
-    .v-checkbox {
-      font-size: 12px;
-      font-weight: 400;
     }
 
     .v-filterselect {
-      font-size: 12px;
       font-weight: 400;
       width: 160px;
-      height: 24px;
     }
 
     .v-textfield {
-      font-size: 12px;
       font-weight: 400;
       width: 160px;
-      height: 24px;
     }
   }
 
@@ -142,10 +139,6 @@
 
     .v-caption {
       vertical-align: middle;
-      margin-top: 0;
-      font-size: 12px;
-      padding-right: 0;
-      padding-left: 0;
     }
 
     .v-radiobutton {
