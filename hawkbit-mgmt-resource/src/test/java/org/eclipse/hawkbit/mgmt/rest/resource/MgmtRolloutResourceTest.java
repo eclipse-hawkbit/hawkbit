@@ -26,7 +26,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
@@ -926,7 +925,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
             } catch (final Exception ex) {
                 exception = ex;
             }
-            TimeUnit.MILLISECONDS.wait(pollInterval);
+            Thread.sleep(pollInterval);
             duration += pollInterval > 0 ? pollInterval : 1;
             if (exception == null && successCondition.success(returnValue)) {
                 return returnValue;
