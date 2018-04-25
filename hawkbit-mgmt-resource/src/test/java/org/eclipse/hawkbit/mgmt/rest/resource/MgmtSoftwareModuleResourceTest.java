@@ -53,7 +53,6 @@ import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -69,8 +68,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Management API")
 @Stories("Software Module Resource")
-@TestPropertySource(properties = { "hawkbit.server.security.dos.maxArtifactSize=100000",
-        "logging.level.org.springframework.web.servlet=DEBUG" })
 public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Before
