@@ -8,23 +8,17 @@
  */
 package org.eclipse.hawkbit.artifact.repository;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.DigestOutputStream;
+import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import com.google.common.io.BaseEncoding;
-import com.google.common.io.ByteStreams;
 
 /**
  * Abstract utility class for ArtifactRepository implementations with common
@@ -32,11 +26,6 @@ import com.google.common.io.ByteStreams;
  *
  */
 public abstract class AbstractArtifactRepository implements ArtifactRepository {
-
-    private static final String TEMP_FILE_PREFIX = "tmp";
-    private static final String TEMP_FILE_SUFFIX = "artifactrepo";
-
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractArtifactRepository.class);
 
     @Override
     // suppress warning, of not strong enough hashing algorithm, SHA-1 and MD5
@@ -53,29 +42,29 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
             throw new ArtifactStoreException(e.getMessage(), e);
         }
 
-        LOG.debug("Creating temporary file and store the inputstream to it");
+        String tempFile = null;
+        try (final DigestInputStream inputstream = wrapInDigestInputStream(content, mdSHA1, mdMD5)) {
 
-        final File file = createTempFile();
+            tempFile = storeTempFile(inputstream);
 
-        try (final DigestOutputStream outputstream = openFileOutputStream(file, mdSHA1, mdMD5)) {
-            ByteStreams.copy(content, outputstream);
-            outputstream.flush();
             final String sha1Hash16 = BaseEncoding.base16().lowerCase().encode(mdSHA1.digest());
             final String md5Hash16 = BaseEncoding.base16().lowerCase().encode(mdMD5.digest());
 
-            LOG.debug("Temporary file {} stored. Calculated sha1: {} and md5: {} hashes", file, sha1Hash16, md5Hash16);
-
             checkHashes(sha1Hash16, md5Hash16, hash);
 
-            return store(sanitizeTenant(tenant), sha1Hash16, md5Hash16, contentType, file);
+            return store(sanitizeTenant(tenant), sha1Hash16, md5Hash16, contentType, tempFile);
         } catch (final IOException e) {
             throw new ArtifactStoreException(e.getMessage(), e);
         } finally {
-            if (file.exists() && !file.delete()) {
-                LOG.error("Could not delete temp file {}", file);
+            if (!StringUtils.isEmpty(tempFile)) {
+                deleteTempFile(tempFile);
             }
         }
     }
+
+    protected abstract String storeTempFile(final InputStream content) throws IOException;
+
+    protected abstract void deleteTempFile(String tempFile);
 
     private static void checkHashes(final String sha1Hash16, final String md5Hash16, final DbArtifactHash hash) {
         if (hash == null) {
@@ -93,20 +82,11 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
     }
 
     protected abstract AbstractDbArtifact store(final String tenant, final String sha1Hash16, final String mdMD5Hash16,
-            final String contentType, final File file) throws IOException;
+            final String contentType, final String tempFile) throws IOException;
 
-    private static File createTempFile() {
-        try {
-            return File.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_SUFFIX);
-        } catch (final IOException e) {
-            throw new ArtifactStoreException("Cannot create tempfile", e);
-        }
-    }
-
-    private static DigestOutputStream openFileOutputStream(final File file, final MessageDigest mdSHA1,
-            final MessageDigest mdMD5) throws FileNotFoundException {
-        return new DigestOutputStream(
-                new DigestOutputStream(new BufferedOutputStream(new FileOutputStream(file)), mdMD5), mdSHA1);
+    private static DigestInputStream wrapInDigestInputStream(final InputStream input, final MessageDigest mdSHA1,
+            final MessageDigest mdMD5) {
+        return new DigestInputStream(new DigestInputStream(input, mdMD5), mdSHA1);
     }
 
     protected static String sanitizeTenant(final String tenant) {

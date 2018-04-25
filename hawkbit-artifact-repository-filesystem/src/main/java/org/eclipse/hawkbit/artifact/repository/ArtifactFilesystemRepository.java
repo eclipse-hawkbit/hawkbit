@@ -8,8 +8,12 @@
  */
 package org.eclipse.hawkbit.artifact.repository;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -17,9 +21,12 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.base.Splitter;
+import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 
 /**
@@ -36,6 +43,10 @@ import com.google.common.io.Files;
  */
 @Validated
 public class ArtifactFilesystemRepository extends AbstractArtifactRepository {
+    private static final String TEMP_FILE_PREFIX = "tmp";
+    private static final String TEMP_FILE_SUFFIX = "artifactrepo";
+
+    private static final Logger LOG = LoggerFactory.getLogger(ArtifactFilesystemRepository.class);
 
     private final ArtifactFilesystemProperties artifactResourceProperties;
 
@@ -67,9 +78,32 @@ public class ArtifactFilesystemRepository extends AbstractArtifactRepository {
 
     @Override
     protected AbstractDbArtifact store(final String tenant, final String sha1Hash16, final String mdMD5Hash16,
-            final String contentType, final File file) throws IOException {
+            final String contentType, final String tempFile) throws IOException {
+
+        final File file = new File(tempFile);
         return renameFileToSHA1Naming(tenant, file, new ArtifactFilesystem(file, sha1Hash16,
                 new DbArtifactHash(sha1Hash16, mdMD5Hash16), file.length(), contentType));
+    }
+
+    @Override
+    protected String storeTempFile(final InputStream content) throws IOException {
+        final File file = createTempFile();
+
+        try (final OutputStream outputstream = new BufferedOutputStream(new FileOutputStream(file))) {
+            ByteStreams.copy(content, outputstream);
+            outputstream.flush();
+        }
+
+        return file.getPath();
+    }
+
+    private static File createTempFile() {
+
+        try {
+            return File.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_SUFFIX);
+        } catch (final IOException e) {
+            throw new ArtifactStoreException("Cannot create tempfile", e);
+        }
     }
 
     private ArtifactFilesystem renameFileToSHA1Naming(final String tenant, final File file,
@@ -102,6 +136,15 @@ public class ArtifactFilesystemRepository extends AbstractArtifactRepository {
     @Override
     public void deleteByTenant(final String tenant) {
         FileUtils.deleteQuietly(Paths.get(artifactResourceProperties.getPath(), sanitizeTenant(tenant)).toFile());
+    }
+
+    @Override
+    protected void deleteTempFile(final String tempFile) {
+        final File file = new File(tempFile);
+
+        if (file.exists() && !file.delete()) {
+            LOG.error("Could not delete temp file {}", file);
+        }
     }
 
 }
