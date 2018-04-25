@@ -83,7 +83,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
         try (InputStream in = file.getInputStream()) {
             final Artifact result = artifactManagement.create(in, softwareModuleId, fileName,
                     md5Sum == null ? null : md5Sum.toLowerCase(), sha1Sum == null ? null : sha1Sum.toLowerCase(), false,
-                    file.getContentType());
+                    file.getContentType(), file.getSize());
 
             final MgmtArtifact reponse = MgmtSoftwareModuleMapper.toResponse(result);
             MgmtSoftwareModuleMapper.addLinks(result, reponse);

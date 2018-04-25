@@ -592,7 +592,8 @@ public class UploadConfirmationWindow implements Button.ClickListener {
                             customFile.getBaseSoftwareModuleName(), customFile.getBaseSoftwareModuleVersion());
                     if (customFile.getFileName().equals(fileName)
                             && baseSwModuleNameVersion.equals(baseSoftwareModuleNameVersion)) {
-                        createArtifact(itemId, customFile.getFilePath(), artifactManagement, bSoftwareModule);
+                        createArtifact(itemId, customFile.getFilePath(), customFile.getFileSize(), artifactManagement,
+                                bSoftwareModule);
                     }
                 }
                 refreshArtifactDetailsLayout = checkIfArtifactDetailsDisplayed(bSoftwareModule.getId());
@@ -619,8 +620,8 @@ public class UploadConfirmationWindow implements Button.ClickListener {
         currentUploadResultWindow = null;
     }
 
-    private void createArtifact(final String itemId, final String filePath, final ArtifactManagement artifactManagement,
-            final SoftwareModule baseSw) {
+    private void createArtifact(final String itemId, final String filePath, final long fileSize,
+            final ArtifactManagement artifactManagement, final SoftwareModule baseSw) {
 
         final File newFile = new File(filePath);
         final Item item = tableContainer.getItem(itemId);
@@ -639,7 +640,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
         try (FileInputStream fis = new FileInputStream(newFile)) {
 
             artifactManagement.create(fis, baseSw.getId(), providedFileName, md5Checksum, sha1Checksum, true,
-                    customFile.getMimeType());
+                    customFile.getMimeType(), fileSize);
             saveUploadStatus(providedFileName, swModuleNameVersion, SPUILabelDefinitions.SUCCESS, "");
 
         } catch (final ArtifactUploadFailedException | InvalidSHA1HashException | InvalidMD5HashException

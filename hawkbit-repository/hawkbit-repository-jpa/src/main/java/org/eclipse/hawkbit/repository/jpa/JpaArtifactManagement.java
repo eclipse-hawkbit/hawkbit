@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
@@ -50,6 +51,8 @@ import org.springframework.validation.annotation.Validated;
 public class JpaArtifactManagement implements ArtifactManagement {
 
     private static final Logger LOG = LoggerFactory.getLogger(JpaArtifactManagement.class);
+
+    private static final String MAX_ARTIFACT_SIZE_EXCEEDED = "Quota exceeded: The artifact '%s' (%s bytes) which has been uploaded for software module '%s' exceeds the maximum artifact size of %s bytes.";
 
     private final LocalArtifactRepository localArtifactRepository;
 
@@ -92,7 +95,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Artifact create(final InputStream stream, final long moduleId, final String filename,
             final String providedMd5Sum, final String providedSha1Sum, final boolean overrideExisting,
-            final String contentType) {
+            final String contentType, final long filesize) {
         AbstractDbArtifact result = null;
 
         final SoftwareModule softwareModule = getModuleAndThrowExceptionIfThatFails(moduleId);
@@ -100,6 +103,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
         final Artifact existing = checkForExistingArtifact(filename, overrideExisting, softwareModule);
 
         assertArtifactQuota(moduleId, 1);
+        assertMaxArtifactSizeQuota(filename, moduleId, filesize);
 
         try {
             result = artifactRepository.store(tenantAware.getCurrentTenant(), stream, filename, contentType,
@@ -120,18 +124,21 @@ public class JpaArtifactManagement implements ArtifactManagement {
         return storeArtifactMetadata(softwareModule, filename, result, existing);
     }
 
-    /**
-     * Enforces the 'max artifacts per software module' quota for the software
-     * module with the given ID.
-     * 
-     * @param id
-     *            of the software module
-     * @param requested
-     *            number of artifacts to check
-     */
     private void assertArtifactQuota(final long id, final int requested) {
         QuotaHelper.assertAssignmentQuota(id, requested, quotaManagement.getMaxArtifactsPerSoftwareModule(),
                 Artifact.class, SoftwareModule.class, localArtifactRepository::countBySoftwareModuleId);
+    }
+
+    private void assertMaxArtifactSizeQuota(final String filename, final long id, final long artifactSize) {
+        final long maxArtifactSize = quotaManagement.getMaxArtifactSize();
+        if (maxArtifactSize <= 0) {
+            return;
+        }
+        if (artifactSize > maxArtifactSize) {
+            final String msg = String.format(MAX_ARTIFACT_SIZE_EXCEEDED, filename, artifactSize, id, maxArtifactSize);
+            LOG.warn(msg);
+            throw new QuotaExceededException(msg);
+        }
     }
 
     @Override
@@ -228,8 +235,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Artifact create(final InputStream inputStream, final long moduleId, final String filename,
-            final boolean overrideExisting) {
-        return create(inputStream, moduleId, filename, null, null, overrideExisting, null);
+            final boolean overrideExisting, final long filesize) {
+        return create(inputStream, moduleId, filename, null, null, overrideExisting, null, filesize);
     }
 
     @Override

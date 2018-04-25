@@ -431,7 +431,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 2) })
     public void hasTargetArtifactAssignedIsTrueWithMultipleArtifacts() {
-        final byte[] random = RandomUtils.nextBytes(5 * 1024);
+        final int artifactSize = 5 * 1024;
+        final byte[] random = RandomUtils.nextBytes(artifactSize);
 
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2");
@@ -439,9 +440,9 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         // create two artifacts with identical SHA1 hash
         final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random),
-                ds.findFirstModuleByType(osType).get().getId(), "file1", false);
+                ds.findFirstModuleByType(osType).get().getId(), "file1", false, artifactSize);
         final Artifact artifact2 = artifactManagement.create(new ByteArrayInputStream(random),
-                ds2.findFirstModuleByType(osType).get().getId(), "file1", false);
+                ds2.findFirstModuleByType(osType).get().getId(), "file1", false, artifactSize);
         assertThat(artifact.getSha1Hash()).isEqualTo(artifact2.getSha1Hash());
 
         assertThat(

@@ -91,4 +91,9 @@ public interface QuotaManagement {
      */
     int getMaxActionsPerTarget();
 
+    /**
+     * @return the maximum size of software artifacts in bytes
+     */
+    long getMaxArtifactSize();
+
 }
