@@ -476,7 +476,7 @@ public class DefineGroupsLayout extends GridLayout {
         private TextArea createTargetFilterQuery() {
             final TextArea filterField = new TextAreaBuilder().style("text-area-style")
                     .id(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD)
-                    .maxLengthAllowed(SPUILabelDefinitions.TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH).buildTextComponent();
+                    .maxLengthAllowed(TargetFilterQuery.QUERY_MAX_SIZE).buildTextComponent();
 
             filterField.setNullRepresentation("");
             filterField.setEnabled(false);

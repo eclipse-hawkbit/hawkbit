@@ -106,7 +106,8 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
         descTextArea = new TextAreaBuilder().caption(i18n.getMessage("textfield.description")).style("text-area-style")
                 .prompt(i18n.getMessage("textfield.description")).immediate(true)
-                .id(UIComponentIdProvider.TARGET_ADD_DESC).buildTextComponent();
+                .maxLengthAllowed(Target.DESCRIPTION_MAX_SIZE).id(UIComponentIdProvider.TARGET_ADD_DESC)
+                .buildTextComponent();
         descTextArea.setNullRepresentation("");
     }
 

@@ -194,12 +194,14 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
         tagName = new TextFieldBuilder().caption(i18n.getMessage("textfield.name"))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_NAME).required(true)
                 .prompt(i18n.getMessage("textfield.name")).immediate(true).id(SPUIDefinitions.NEW_TARGET_TAG_NAME)
-                .validator(new EmptyStringValidator(i18n)).buildTextComponent();
+                .maxLengthAllowed(NamedEntity.NAME_MAX_SIZE)
+                .validator(new EmptyStringValidator(i18n, NamedEntity.NAME_MAX_SIZE)).buildTextComponent();
 
         tagDesc = new TextAreaBuilder().caption(i18n.getMessage("textfield.description"))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_DESC)
                 .prompt(i18n.getMessage("textfield.description")).immediate(true)
-                .id(SPUIDefinitions.NEW_TARGET_TAG_DESC).buildTextComponent();
+                .maxLengthAllowed(NamedEntity.DESCRIPTION_MAX_SIZE).id(SPUIDefinitions.NEW_TARGET_TAG_DESC)
+                .buildTextComponent();
 
         tagDesc.setNullRepresentation("");
 

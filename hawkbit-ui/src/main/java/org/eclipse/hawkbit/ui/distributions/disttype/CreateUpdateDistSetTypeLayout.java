@@ -124,22 +124,24 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
         super.createRequiredComponents();
 
         tagName = createTextField("textfield.name", SPUIDefinitions.DIST_SET_TYPE_NAME,
-                SPUIDefinitions.NEW_DISTRIBUTION_TYPE_NAME);
+                SPUIDefinitions.NEW_DISTRIBUTION_TYPE_NAME, DistributionSetType.NAME_MAX_SIZE);
 
         typeKey = createTextField("textfield.key", SPUIDefinitions.DIST_SET_TYPE_KEY,
-                SPUIDefinitions.NEW_DISTRIBUTION_TYPE_KEY);
+                SPUIDefinitions.NEW_DISTRIBUTION_TYPE_KEY, DistributionSetType.KEY_MAX_SIZE);
 
         tagDesc = new TextAreaBuilder().caption(i18n.getMessage("textfield.description"))
+                .maxLengthAllowed(DistributionSetType.DESCRIPTION_MAX_SIZE)
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.DIST_SET_TYPE_DESC)
                 .prompt(i18n.getMessage("textfield.description")).immediate(true)
                 .id(SPUIDefinitions.NEW_DISTRIBUTION_TYPE_DESC).buildTextComponent();
         tagDesc.setNullRepresentation("");
     }
 
-    private TextField createTextField(final String in18Key, final String styleName, final String id) {
+    private TextField createTextField(final String in18Key, final String styleName, final String id,
+            final int maxSize) {
         return new TextFieldBuilder().caption(i18n.getMessage(in18Key))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + styleName).required(true).prompt(i18n.getMessage(in18Key))
-                .validator(new EmptyStringValidator(i18n)).immediate(true).id(id).buildTextComponent();
+                .validator(new EmptyStringValidator(i18n, maxSize)).immediate(true).id(id).buildTextComponent();
     }
 
     @Override

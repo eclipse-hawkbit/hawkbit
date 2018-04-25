@@ -212,10 +212,10 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
     private void createRequiredComponents() {
 
         nameTextField = createTextField("textfield.name", UIComponentIdProvider.SOFT_MODULE_NAME);
-        nameTextField.addValidator(new EmptyStringValidator(i18n));
+        nameTextField.addValidator(new EmptyStringValidator(i18n, SoftwareModule.NAME_MAX_SIZE));
 
         versionTextField = createTextField("textfield.version", UIComponentIdProvider.SOFT_MODULE_VERSION);
-        versionTextField.addValidator(new EmptyStringValidator(i18n));
+        versionTextField.addValidator(new EmptyStringValidator(i18n, SoftwareModule.VERSION_MAX_SIZE));
 
         vendorTextField = createTextField("textfield.vendor", UIComponentIdProvider.SOFT_MODULE_VENDOR);
         vendorTextField.setRequired(false);

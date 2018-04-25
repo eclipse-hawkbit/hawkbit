@@ -101,11 +101,14 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
 
         multiAssign = new LabelBuilder().name(multiAssignStr).buildLabel();
 
-        tagName = createTextField("textfield.name", SPUIDefinitions.TYPE_NAME, SPUIDefinitions.NEW_SOFTWARE_TYPE_NAME);
+        tagName = createTextField("textfield.name", SPUIDefinitions.TYPE_NAME, SPUIDefinitions.NEW_SOFTWARE_TYPE_NAME,
+                SoftwareModuleType.NAME_MAX_SIZE);
 
-        typeKey = createTextField("textfield.key", SPUIDefinitions.TYPE_KEY, SPUIDefinitions.NEW_SOFTWARE_TYPE_KEY);
+        typeKey = createTextField("textfield.key", SPUIDefinitions.TYPE_KEY, SPUIDefinitions.NEW_SOFTWARE_TYPE_KEY,
+                SoftwareModuleType.KEY_MAX_SIZE);
 
         tagDesc = new TextAreaBuilder().caption(i18n.getMessage("textfield.description"))
+                .maxLengthAllowed(SoftwareModuleType.DESCRIPTION_MAX_SIZE)
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_DESC)
                 .prompt(i18n.getMessage("textfield.description")).immediate(true)
                 .id(SPUIDefinitions.NEW_SOFTWARE_TYPE_DESC).buildTextComponent();
@@ -127,10 +130,11 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
         return ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR);
     }
 
-    private TextField createTextField(final String in18Key, final String styleName, final String id) {
+    private TextField createTextField(final String in18Key, final String styleName, final String id,
+            final int maxLength) {
         return new TextFieldBuilder().caption(i18n.getMessage(in18Key))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + styleName).required(true).prompt(i18n.getMessage(in18Key))
-                .validator(new EmptyStringValidator(i18n)).immediate(true).id(id).buildTextComponent();
+                .validator(new EmptyStringValidator(i18n, maxLength)).immediate(true).id(id).buildTextComponent();
     }
 
     @Override

@@ -333,7 +333,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         private Long getScheduledStartTime() {
             return AutoStartOptionGroupLayout.AutoStartOption.SCHEDULED.equals(getAutoStartOption())
-                    ? autoStartOptionGroupLayout.getStartAtDateField().getValue().getTime() : null;
+                    ? autoStartOptionGroupLayout.getStartAtDateField().getValue().getTime()
+                    : null;
         }
 
         private int getErrorThresholdPercentage(final int amountGroup) {
@@ -617,7 +618,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     private static TextArea createTargetFilterQuery() {
         final TextArea filterField = new TextAreaBuilder().style("text-area-style")
                 .id(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD)
-                .maxLengthAllowed(SPUILabelDefinitions.TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH).buildTextComponent();
+                .maxLengthAllowed(TargetFilterQuery.QUERY_MAX_SIZE).buildTextComponent();
 
         filterField.setId(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD);
         filterField.setNullRepresentation("");
@@ -779,7 +780,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     private TextArea createDescription() {
         final TextArea descriptionField = new TextAreaBuilder().style("text-area-style")
                 .prompt(i18n.getMessage("textfield.description")).id(UIComponentIdProvider.ROLLOUT_DESCRIPTION_ID)
-                .buildTextComponent();
+                .maxLengthAllowed(Rollout.DESCRIPTION_MAX_SIZE).buildTextComponent();
         descriptionField.setNullRepresentation("");
         descriptionField.setSizeUndefined();
         return descriptionField;
