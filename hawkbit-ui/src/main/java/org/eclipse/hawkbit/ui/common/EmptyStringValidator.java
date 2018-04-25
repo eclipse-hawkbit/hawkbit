@@ -32,12 +32,12 @@ public class EmptyStringValidator extends StringLengthValidator {
      *            max length of the textfield
      */
     public EmptyStringValidator(final VaadinMessageSource i18n, final int maxLength) {
-        super(i18n.getMessage(MESSAGE_KEY), 1, maxLength, false);
+        super(i18n.getMessage(MESSAGE_KEY, maxLength), 1, maxLength, false);
     }
 
     @Override
-    public boolean isValid(final Object value) {
-        return super.isValid(value != null ? value.toString().trim() : null);
+    public boolean isValidValue(final String value) {
+        return super.isValidValue(value != null ? value.trim() : null);
     }
 
 }

@@ -195,11 +195,9 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     }
 
     private TextArea getDescriptionTextArea() {
-        final TextArea description = new TextAreaBuilder().caption(i18n.getMessage("textfield.description"))
-                .style("text-area-style").prompt(i18n.getMessage("textfield.description")).immediate(true)
-                .maxLengthAllowed(Target.DESCRIPTION_MAX_SIZE).id(UIComponentIdProvider.BULK_UPLOAD_DESC)
-                .buildTextComponent();
-        description.setNullRepresentation("");
+        final TextArea description = new TextAreaBuilder(Target.DESCRIPTION_MAX_SIZE)
+                .caption(i18n.getMessage("textfield.description")).style("text-area-style")
+                .id(UIComponentIdProvider.BULK_UPLOAD_DESC).buildTextComponent();
         description.setWidth("100%");
         return description;
     }

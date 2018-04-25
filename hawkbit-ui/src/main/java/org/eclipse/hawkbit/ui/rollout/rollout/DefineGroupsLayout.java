@@ -50,7 +50,6 @@ import com.vaadin.data.util.converter.StringToFloatConverter;
 import com.vaadin.data.util.converter.StringToIntegerConverter;
 import com.vaadin.data.validator.FloatRangeValidator;
 import com.vaadin.data.validator.IntegerRangeValidator;
-import com.vaadin.data.validator.StringLengthValidator;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.UserError;
 import com.vaadin.ui.Button;
@@ -419,19 +418,17 @@ public class DefineGroupsLayout extends GridLayout {
         }
 
         private TextField createTextField(final String in18Key, final String id) {
-            final TextField textField = new TextFieldBuilder().prompt(i18n.getMessage(in18Key)).immediate(true).id(id)
-                    .buildTextComponent();
+            final TextField textField = new TextFieldBuilder(RolloutGroup.NAME_MAX_SIZE).required(true, i18n)
+                    .prompt(i18n.getMessage(in18Key)).id(id).buildTextComponent();
+
             textField.setSizeUndefined();
-            textField.addValidator(
-                    new StringLengthValidator(i18n.getMessage("message.rollout.group.name.invalid"), 1, 64, false));
             return textField;
         }
 
         private TextField createPercentageField(final String in18Key, final String id) {
-            final TextField textField = new TextFieldBuilder().prompt(i18n.getMessage(in18Key)).immediate(true).id(id)
+            final TextField textField = new TextFieldBuilder(32).prompt(i18n.getMessage(in18Key)).id(id)
                     .buildTextComponent();
             textField.setWidth(80, Unit.PIXELS);
-            textField.setNullRepresentation("");
             textField.setConverter(new StringToIntegerConverter());
             textField.addValidator(this::validateMandatoryPercentage);
             return textField;
@@ -474,11 +471,9 @@ public class DefineGroupsLayout extends GridLayout {
         }
 
         private TextArea createTargetFilterQuery() {
-            final TextArea filterField = new TextAreaBuilder().style("text-area-style")
-                    .id(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD)
-                    .maxLengthAllowed(TargetFilterQuery.QUERY_MAX_SIZE).buildTextComponent();
+            final TextArea filterField = new TextAreaBuilder(TargetFilterQuery.QUERY_MAX_SIZE).style("text-area-style")
+                    .id(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD).buildTextComponent();
 
-            filterField.setNullRepresentation("");
             filterField.setEnabled(false);
             filterField.setSizeUndefined();
             return filterField;

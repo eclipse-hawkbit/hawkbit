@@ -17,13 +17,11 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public class TextAreaBuilder extends AbstractTextFieldBuilder<TextArea> {
 
-    private static final int TEXT_AREA_DEFAULT_MAX_LENGTH = 512;
-
     /**
      * Constructor.
      */
-    public TextAreaBuilder() {
-        maxLengthAllowed(TEXT_AREA_DEFAULT_MAX_LENGTH);
+    public TextAreaBuilder(final int maxLengthAllowed) {
+        super(maxLengthAllowed);
         styleName(ValoTheme.TEXTAREA_SMALL);
     }
 

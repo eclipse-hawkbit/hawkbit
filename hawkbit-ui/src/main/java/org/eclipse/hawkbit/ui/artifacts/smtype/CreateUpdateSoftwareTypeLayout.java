@@ -20,7 +20,6 @@ import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
-import org.eclipse.hawkbit.ui.common.EmptyStringValidator;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
@@ -107,12 +106,10 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
         typeKey = createTextField("textfield.key", SPUIDefinitions.TYPE_KEY, SPUIDefinitions.NEW_SOFTWARE_TYPE_KEY,
                 SoftwareModuleType.KEY_MAX_SIZE);
 
-        tagDesc = new TextAreaBuilder().caption(i18n.getMessage("textfield.description"))
-                .maxLengthAllowed(SoftwareModuleType.DESCRIPTION_MAX_SIZE)
+        tagDesc = new TextAreaBuilder(SoftwareModuleType.DESCRIPTION_MAX_SIZE)
+                .caption(i18n.getMessage("textfield.description"))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_DESC)
-                .prompt(i18n.getMessage("textfield.description")).immediate(true)
                 .id(SPUIDefinitions.NEW_SOFTWARE_TYPE_DESC).buildTextComponent();
-        tagDesc.setNullRepresentation("");
 
         singleMultiOptionGroup();
     }
@@ -132,9 +129,8 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
 
     private TextField createTextField(final String in18Key, final String styleName, final String id,
             final int maxLength) {
-        return new TextFieldBuilder().caption(i18n.getMessage(in18Key))
-                .styleName(ValoTheme.TEXTFIELD_TINY + " " + styleName).required(true).prompt(i18n.getMessage(in18Key))
-                .validator(new EmptyStringValidator(i18n, maxLength)).immediate(true).id(id).buildTextComponent();
+        return new TextFieldBuilder(maxLength).caption(i18n.getMessage(in18Key))
+                .styleName(ValoTheme.TEXTFIELD_TINY + " " + styleName).required(true, i18n).id(id).buildTextComponent();
     }
 
     @Override

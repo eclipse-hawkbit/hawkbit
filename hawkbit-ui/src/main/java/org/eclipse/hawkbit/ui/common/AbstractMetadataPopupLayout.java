@@ -236,10 +236,8 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     }
 
     private TextField createKeyTextField() {
-        final TextField keyField = new TextFieldBuilder().caption(i18n.getMessage("textfield.key")).required(true)
-                .prompt(i18n.getMessage("textfield.key")).immediate(true)
-                .id(UIComponentIdProvider.METADATA_KEY_FIELD_ID).maxLengthAllowed(MetaData.KEY_MAX_SIZE)
-                .validator(new EmptyStringValidator(i18n, MetaData.KEY_MAX_SIZE)).buildTextComponent();
+        final TextField keyField = new TextFieldBuilder(MetaData.KEY_MAX_SIZE).caption(i18n.getMessage("textfield.key"))
+                .required(true, i18n).id(UIComponentIdProvider.METADATA_KEY_FIELD_ID).buildTextComponent();
         keyField.addTextChangeListener(this::onKeyChange);
         keyField.setTextChangeEventMode(TextChangeEventMode.EAGER);
         keyField.setWidth("100%");
@@ -247,11 +245,8 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     }
 
     private TextArea createValueTextField() {
-        valueTextArea = new TextAreaBuilder().caption(i18n.getMessage("textfield.value")).required(true)
-                .validator(new EmptyStringValidator(i18n, MetaData.VALUE_MAX_SIZE))
-                .prompt(i18n.getMessage("textfield.value")).immediate(true).id(UIComponentIdProvider.METADATA_VALUE_ID)
-                .maxLengthAllowed(MetaData.VALUE_MAX_SIZE).buildTextComponent();
-        valueTextArea.setNullRepresentation("");
+        valueTextArea = new TextAreaBuilder(MetaData.VALUE_MAX_SIZE).caption(i18n.getMessage("textfield.value"))
+                .required(true, i18n).id(UIComponentIdProvider.METADATA_VALUE_ID).buildTextComponent();
         valueTextArea.setSizeFull();
         valueTextArea.setHeight(100, Unit.PERCENTAGE);
         valueTextArea.addTextChangeListener(this::onValueChange);

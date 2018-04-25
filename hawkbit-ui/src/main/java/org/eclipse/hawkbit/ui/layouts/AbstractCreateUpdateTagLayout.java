@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerLayout;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
-import org.eclipse.hawkbit.ui.common.EmptyStringValidator;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
@@ -191,19 +190,14 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
         colorLabel = new LabelBuilder().name(i18n.getMessage("label.choose.tag.color")).buildLabel();
         colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
 
-        tagName = new TextFieldBuilder().caption(i18n.getMessage("textfield.name"))
-                .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_NAME).required(true)
-                .prompt(i18n.getMessage("textfield.name")).immediate(true).id(SPUIDefinitions.NEW_TARGET_TAG_NAME)
-                .maxLengthAllowed(NamedEntity.NAME_MAX_SIZE)
-                .validator(new EmptyStringValidator(i18n, NamedEntity.NAME_MAX_SIZE)).buildTextComponent();
+        tagName = new TextFieldBuilder(NamedEntity.NAME_MAX_SIZE).caption(i18n.getMessage("textfield.name"))
+                .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_NAME).required(true, i18n)
+                .id(SPUIDefinitions.NEW_TARGET_TAG_NAME).buildTextComponent();
 
-        tagDesc = new TextAreaBuilder().caption(i18n.getMessage("textfield.description"))
+        tagDesc = new TextAreaBuilder(NamedEntity.DESCRIPTION_MAX_SIZE)
+                .caption(i18n.getMessage("textfield.description"))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_DESC)
-                .prompt(i18n.getMessage("textfield.description")).immediate(true)
-                .maxLengthAllowed(NamedEntity.DESCRIPTION_MAX_SIZE).id(SPUIDefinitions.NEW_TARGET_TAG_DESC)
-                .buildTextComponent();
-
-        tagDesc.setNullRepresentation("");
+                .id(SPUIDefinitions.NEW_TARGET_TAG_DESC).buildTextComponent();
 
         tagNameComboBox = SPUIComponentProvider.getComboBox(null, "", null, null, false, "",
                 i18n.getMessage("label.combobox.tag"));

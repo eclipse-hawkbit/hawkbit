@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
@@ -83,9 +84,10 @@ public class MaintenanceWindowLayout extends VerticalLayout {
      * Text field to specify the schedule.
      */
     private void createMaintenanceScheduleControl() {
-        schedule = new TextFieldBuilder().id(UIComponentIdProvider.MAINTENANCE_WINDOW_SCHEDULE_ID)
-                .caption(i18n.getMessage("caption.maintenancewindow.schedule")).immediate(true)
-                .validator(new CronValidator()).prompt("0 0 3 ? * 6").required(true).buildTextComponent();
+        schedule = new TextFieldBuilder(Action.MAINTENANCE_SCHEDULE_CRON_LENGTH)
+                .id(UIComponentIdProvider.MAINTENANCE_WINDOW_SCHEDULE_ID)
+                .caption(i18n.getMessage("caption.maintenancewindow.schedule")).validator(new CronValidator())
+                .prompt("0 0 3 ? * 6").required(true, i18n).buildTextComponent();
         schedule.addTextChangeListener(new CronTranslationListener());
     }
 
@@ -148,9 +150,10 @@ public class MaintenanceWindowLayout extends VerticalLayout {
      * Text field to specify the duration.
      */
     private void createMaintenanceDurationControl() {
-        duration = new TextFieldBuilder().id(UIComponentIdProvider.MAINTENANCE_WINDOW_DURATION_ID)
-                .caption(i18n.getMessage("caption.maintenancewindow.duration")).immediate(true)
-                .validator(new DurationValidator()).prompt("hh:mm:ss").required(true).buildTextComponent();
+        duration = new TextFieldBuilder(Action.MAINTENANCE_WINDOW_DURATION_LENGTH)
+                .id(UIComponentIdProvider.MAINTENANCE_WINDOW_DURATION_ID)
+                .caption(i18n.getMessage("caption.maintenancewindow.duration")).validator(new DurationValidator())
+                .prompt("hh:mm:ss").required(true, i18n).buildTextComponent();
     }
 
     /**

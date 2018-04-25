@@ -53,7 +53,7 @@ public class CertificateAuthenticationConfigurationItem extends AbstractBooleanT
                 "The SSL Issuer iRules.X509 hash, to validate against the controller request certifcate.");
         caRootAuthorityLabel.setWidthUndefined();
 
-        caRootAuthorityTextField = new TextFieldBuilder().immediate(true).maxLengthAllowed(160).buildTextComponent();
+        caRootAuthorityTextField = new TextFieldBuilder(160).buildTextComponent();
         caRootAuthorityTextField.setWidth("100%");
         caRootAuthorityTextField.addTextChangeListener(event -> caRootAuthorityChanged());
 

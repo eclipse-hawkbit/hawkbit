@@ -22,20 +22,13 @@ public class TextFieldBuilder extends AbstractTextFieldBuilder<TextField> {
 
     /**
      * Constructor.
-     */
-    public TextFieldBuilder() {
-        this(null);
-    }
-
-    /**
-     * Constructor.
      * 
-     * @param id
-     *            the id
+     * @param maxLengthAllowed
+     *            as mandatory field
      */
-    public TextFieldBuilder(final String id) {
+    public TextFieldBuilder(final int maxLengthAllowed) {
+        super(maxLengthAllowed);
         styleName(ValoTheme.TEXTAREA_TINY);
-        id(id);
     }
 
     /**

@@ -24,7 +24,6 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
-import org.eclipse.hawkbit.ui.common.EmptyStringValidator;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -129,19 +128,16 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
         typeKey = createTextField("textfield.key", SPUIDefinitions.DIST_SET_TYPE_KEY,
                 SPUIDefinitions.NEW_DISTRIBUTION_TYPE_KEY, DistributionSetType.KEY_MAX_SIZE);
 
-        tagDesc = new TextAreaBuilder().caption(i18n.getMessage("textfield.description"))
-                .maxLengthAllowed(DistributionSetType.DESCRIPTION_MAX_SIZE)
+        tagDesc = new TextAreaBuilder(DistributionSetType.DESCRIPTION_MAX_SIZE)
+                .caption(i18n.getMessage("textfield.description"))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.DIST_SET_TYPE_DESC)
-                .prompt(i18n.getMessage("textfield.description")).immediate(true)
                 .id(SPUIDefinitions.NEW_DISTRIBUTION_TYPE_DESC).buildTextComponent();
-        tagDesc.setNullRepresentation("");
     }
 
     private TextField createTextField(final String in18Key, final String styleName, final String id,
             final int maxSize) {
-        return new TextFieldBuilder().caption(i18n.getMessage(in18Key))
-                .styleName(ValoTheme.TEXTFIELD_TINY + " " + styleName).required(true).prompt(i18n.getMessage(in18Key))
-                .validator(new EmptyStringValidator(i18n, maxSize)).immediate(true).id(id).buildTextComponent();
+        return new TextFieldBuilder(maxSize).caption(i18n.getMessage(in18Key))
+                .styleName(ValoTheme.TEXTFIELD_TINY + " " + styleName).required(true, i18n).id(id).buildTextComponent();
     }
 
     @Override

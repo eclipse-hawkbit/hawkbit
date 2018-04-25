@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.ui.common.builder;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.hawkbit.ui.common.EmptyStringValidator;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
 
 import com.vaadin.data.Validator;
@@ -29,12 +31,16 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
     private String styleName;
     private String prompt;
     private String id;
-    private boolean immediate;
+    private boolean immediate = true;
     private boolean required;
     private boolean readOnly;
     private boolean enabled = true;
-    private int maxLengthAllowed;
+    private final int maxLengthAllowed;
     private final List<Validator> validators = new LinkedList<>();
+
+    protected AbstractTextFieldBuilder(final int maxLengthAllowed) {
+        this.maxLengthAllowed = maxLengthAllowed;
+    }
 
     /**
      * @param caption
@@ -43,6 +49,7 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
      */
     public AbstractTextFieldBuilder<E> caption(final String caption) {
         this.caption = caption;
+        this.prompt = caption;
         return this;
     }
 
@@ -69,10 +76,13 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
     /**
      * @param required
      *            the required to set
+     * @param i18n
+     *            to translate error message
      * @return the builder
      */
-    public AbstractTextFieldBuilder<E> required(final boolean required) {
+    public AbstractTextFieldBuilder<E> required(final boolean required, final VaadinMessageSource i18n) {
         this.required = required;
+        validators.add(new EmptyStringValidator(i18n, maxLengthAllowed));
         return this;
     }
 
@@ -113,16 +123,6 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
      */
     public AbstractTextFieldBuilder<E> immediate(final boolean immediate) {
         this.immediate = immediate;
-        return this;
-    }
-
-    /**
-     * @param maxLengthAllowed
-     *            the maxLengthAllowed to set
-     * @return the builder
-     */
-    public AbstractTextFieldBuilder<E> maxLengthAllowed(final int maxLengthAllowed) {
-        this.maxLengthAllowed = maxLengthAllowed;
         return this;
     }
 
@@ -186,6 +186,8 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
         if (!validators.isEmpty()) {
             validators.forEach(textComponent::addValidator);
         }
+
+        textComponent.setNullRepresentation("");
 
         return textComponent;
     }

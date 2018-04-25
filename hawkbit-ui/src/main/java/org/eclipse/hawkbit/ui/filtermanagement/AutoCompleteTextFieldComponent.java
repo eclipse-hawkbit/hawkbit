@@ -195,12 +195,11 @@ public class AutoCompleteTextFieldComponent extends HorizontalLayout {
     }
 
     private TextField createSearchField() {
-        final TextField textField = new TextFieldBuilder().immediate(true).id(UIComponentIdProvider.CUSTOM_FILTER_QUERY)
-                .maxLengthAllowed(TargetFilterQuery.QUERY_MAX_SIZE).buildTextComponent();
+        final TextField textField = new TextFieldBuilder(TargetFilterQuery.QUERY_MAX_SIZE)
+                .id(UIComponentIdProvider.CUSTOM_FILTER_QUERY).buildTextComponent();
         textField.addStyleName("target-filter-textfield");
         textField.setWidth(900.0F, Unit.PIXELS);
         textField.setTextChangeEventMode(TextChangeEventMode.EAGER);
-        textField.setImmediate(true);
         textField.setTextChangeTimeout(100);
         return textField;
     }
