@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -188,12 +189,14 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     @Test
     @Description("Verifies that artifacts which exceed the configured maximum size cannot be uploaded.")
     public void uploadArtifactFailsIfTooLarge() throws Exception {
-        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
+        final SoftwareModule sm = testdataFactory.createSoftwareModule("quota", "quota");
         final long maxSize = quotaManagement.getMaxArtifactSize();
 
         // create a file which exceeds the configured maximum size
-        final byte[] random = RandomStringUtils.random(Math.toIntExact(maxSize + 32)).getBytes();
-        final MockMultipartFile file = new MockMultipartFile("file", "origFilename", null, random);
+        final byte[] randomBytes = new byte[Math.toIntExact(maxSize) + 1024];
+        new Random().nextBytes(randomBytes);
+
+        final MockMultipartFile file = new MockMultipartFile("file", "origFilename", null, randomBytes);
 
         // try to upload
         mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
