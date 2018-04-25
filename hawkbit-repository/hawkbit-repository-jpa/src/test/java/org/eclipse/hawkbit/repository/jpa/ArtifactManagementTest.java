@@ -178,23 +178,6 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verifies that you cannot create artifacts which exceed the configured maximum size.")
-    public void createArtifactFailsIfTooLarge() throws NoSuchAlgorithmException, IOException {
-
-        // create a software module
-        final JpaSoftwareModule sm = softwareModuleRepository
-                .save(new JpaSoftwareModule(osType, "sm1", "1.0", null, null));
-
-        // create an artifact that exceeds the configured quota
-        final long maxSize = quotaManagement.getMaxArtifactSize();
-        final byte random[] = RandomStringUtils.random(Math.toIntExact(maxSize) + 1024).getBytes();
-        try (final InputStream inputStream = new ByteArrayInputStream(random)) {
-            assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> artifactManagement
-                    .create(inputStream, sm.getId(), "file" + System.currentTimeMillis(), false));
-        }
-    }
-
-    @Test
     @Description("Tests hard delete directly on repository.")
     public void hardDeleteSoftwareModule() throws NoSuchAlgorithmException, IOException {
 

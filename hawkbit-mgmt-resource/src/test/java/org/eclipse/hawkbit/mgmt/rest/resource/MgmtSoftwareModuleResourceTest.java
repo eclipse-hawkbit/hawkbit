@@ -152,7 +152,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     }
 
     @Test
-    @Description("Tests the uppload of an artifact binary. The upload is executed and the content checked in the repository for completenes.")
+    @Description("Tests the upload of an artifact binary. The upload is executed and the content checked in the repository for completeness.")
     public void uploadArtifact() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
@@ -354,25 +354,6 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(jsonPath("$.exceptionClass", equalTo(QuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
 
-    }
-
-    @Test
-    @Description("Verifies that artifacts which exceed the configured maximum size cannot be uploaded.")
-    public void uploadArtifactFailsIfTooLarge() throws Exception {
-        final SoftwareModule sm = testdataFactory.createSoftwareModule("uploadArtifactFailsIfTooLarge");
-        quotaManagement.getMaxArtifactSize();
-
-        // create a file which exceeds the configured maximum size
-        // final byte[] random =
-        // RandomStringUtils.random(Math.toIntExact(maxSize) + 1024).getBytes();
-        final byte[] random = RandomStringUtils.random(Math.toIntExact(130) + 1024).getBytes();
-        final MockMultipartFile file = new MockMultipartFile("file", "origFilename" + System.currentTimeMillis(), null,
-                random);
-
-        // try to upload
-        mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
-                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isForbidden());
     }
 
     @Test
