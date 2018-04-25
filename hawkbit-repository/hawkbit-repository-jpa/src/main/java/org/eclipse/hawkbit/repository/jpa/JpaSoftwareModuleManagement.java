@@ -515,7 +515,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         return Collections.emptyList();
     }
 
-    private Stream<JpaSoftwareModuleMetadataCreate> createJpaMetadataCreateStream(
+    private static Stream<JpaSoftwareModuleMetadataCreate> createJpaMetadataCreateStream(
             final Collection<SoftwareModuleMetadataCreate> create) {
         return create.stream().map(c -> (JpaSoftwareModuleMetadataCreate) c);
     }
