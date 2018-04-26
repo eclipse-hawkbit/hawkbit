@@ -265,6 +265,14 @@ public abstract class AbstractIntegrationTest {
                         maintenanceWindowTimeZone)));
     }
 
+    protected DistributionSetAssignmentResult assignDistributionSetWithMaintenanceWindowTimeForced(final Long dsID,
+            final String controllerId, final String maintenanceSchedule, final String maintenanceWindowDuration,
+            final String maintenanceWindowTimeZone) {
+        return deploymentManagement.assignDistributionSet(dsID,
+                Arrays.asList(new TargetWithActionType(controllerId, ActionType.TIMEFORCED, System.currentTimeMillis(),
+                        maintenanceSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone)));
+    }
+
     protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset,
             final List<Target> targets) {
         return deploymentManagement.assignDistributionSet(pset.getId(),
@@ -273,6 +281,12 @@ public abstract class AbstractIntegrationTest {
 
     protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset, final Target target) {
         return assignDistributionSet(pset, Arrays.asList(target));
+    }
+
+    protected DistributionSetAssignmentResult assignDistributionSetTimeForced(final DistributionSet pset,
+            final Target target) {
+        return deploymentManagement.assignDistributionSet(pset.getId(), Arrays.asList(
+                new TargetWithActionType(target.getControllerId(), ActionType.TIMEFORCED, System.currentTimeMillis())));
     }
 
     protected DistributionSetMetadata createDistributionSetMetadata(final Long dsId, final MetaData md) {

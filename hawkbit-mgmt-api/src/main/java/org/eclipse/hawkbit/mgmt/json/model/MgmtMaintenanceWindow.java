@@ -27,13 +27,13 @@ public class MgmtMaintenanceWindow extends MgmtMaintenanceWindowRequestBody {
      * start
      */
     @JsonProperty
-    private Long nextStartAt;
+    private long nextStartAt;
 
-    public Long getNextStartAt() {
+    public long getNextStartAt() {
         return nextStartAt;
     }
 
-    public void setNextStartAt(final Long nextStartAt) {
+    public void setNextStartAt(final long nextStartAt) {
         this.nextStartAt = nextStartAt;
     }
 }

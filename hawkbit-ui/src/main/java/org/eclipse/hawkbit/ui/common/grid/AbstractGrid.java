@@ -642,14 +642,15 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
 
             case ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW:
                 final Action action = (Action) cell.getItem().getItemProperty(ProxyAction.PXY_ACTION).getValue();
-                return action.getMaintenanceWindowStartTime().map(this::getFormatedNextMaintenanceWindow).orElse(null);
+                return action.getMaintenanceWindowStartTime().map(TooltipGenerator::getFormatedNextMaintenanceWindow)
+                        .orElse(null);
 
             default:
                 return null;
             }
         }
 
-        private String getFormatedNextMaintenanceWindow(final ZonedDateTime nextAt) {
+        private static String getFormatedNextMaintenanceWindow(final ZonedDateTime nextAt) {
             final long nextAtMilli = nextAt.toInstant().toEpochMilli();
             return "next on "
                     + SPDateTimeUtil.getFormattedDate(nextAtMilli, SPUIDefinitions.LAST_QUERY_DATE_FORMAT_SHORT);

@@ -864,6 +864,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath("id", equalTo(actions.get(1).getId().intValue())))
                 .andExpect(jsonPath("type", equalTo("update"))).andExpect(jsonPath("status", equalTo("pending")))
                 .andExpect(jsonPath("forceType", equalTo("forced")))
+                .andExpect(jsonPath("maintenanceWindow").doesNotExist())
                 .andExpect(jsonPath("_links.self.href",
                         equalTo(generateActionSelfLink(knownTargetId, actions.get(1).getId()))))
                 .andExpect(jsonPath("_links.distributionset.href",
@@ -911,8 +912,9 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actions.get(0).getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("id", equalTo(actions.get(0).getId().intValue())))
-                .andExpect(jsonPath("forceType", equalTo("forced"))).andExpect(jsonPath("type", equalTo("cancel")))
-                .andExpect(jsonPath("status", equalTo("pending")))
+                .andExpect(jsonPath("type", equalTo("cancel"))).andExpect(jsonPath("status", equalTo("pending")))
+                .andExpect(jsonPath("forceType", equalTo("forced")))
+                .andExpect(jsonPath("maintenanceWindow").doesNotExist())
                 .andExpect(jsonPath("_links.self.href",
                         equalTo(generateActionSelfLink(knownTargetId, actions.get(0).getId()))))
                 .andExpect(jsonPath("_links.canceledaction.href",
@@ -1381,7 +1383,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
 
     @Test
     @Description("Assigns distribution set to target with maintenance window next execution start (should be ignored, calculated automaticaly based on schedule, duration and timezone)")
-    public void assignDistributionSetToTargetWithWithMaintenanceWindowNextExecutionStart() throws Exception {
+    public void assignDistributionSetToTargetWithMaintenanceWindowNextExecutionStart() throws Exception {
 
         final Target target = testdataFactory.createTarget("fsdfsd");
         final DistributionSet set = testdataFactory.createDistributionSet("one");
