@@ -20,11 +20,14 @@ import com.vaadin.ui.AbstractTextField;
 
 /**
  * Abstract Text field builder.
- *
+ * 
+ * @param <T>
+ *            type of the builder
  * @param <E>
- *            the concrete text component
+ *            the text component
+ *
  */
-public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
+public abstract class AbstractTextFieldBuilder<T, E extends AbstractTextField> {
 
     private String caption;
     private String style;
@@ -47,10 +50,10 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
      *            the caption to set
      * @return the builder
      */
-    public AbstractTextFieldBuilder<E> caption(final String caption) {
+    public T caption(final String caption) {
         this.caption = caption;
         this.prompt = caption;
-        return this;
+        return (T) this;
     }
 
     /**
@@ -58,9 +61,9 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
      *            the style to set * @return the builder
      * @return the builder
      */
-    public AbstractTextFieldBuilder<E> style(final String style) {
+    public T style(final String style) {
         this.style = style;
-        return this;
+        return (T) this;
     }
 
     /**
@@ -68,9 +71,9 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
      *            the styleName to set
      * @return the builder
      */
-    public AbstractTextFieldBuilder<E> styleName(final String styleName) {
+    public T styleName(final String styleName) {
         this.styleName = styleName;
-        return this;
+        return (T) this;
     }
 
     /**
@@ -80,10 +83,12 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
      *            to translate error message
      * @return the builder
      */
-    public AbstractTextFieldBuilder<E> required(final boolean required, final VaadinMessageSource i18n) {
+    public T required(final boolean required, final VaadinMessageSource i18n) {
         this.required = required;
-        validators.add(new EmptyStringValidator(i18n, maxLengthAllowed));
-        return this;
+        if (required) {
+            validators.add(new EmptyStringValidator(i18n, maxLengthAllowed));
+        }
+        return (T) this;
     }
 
     /**
@@ -91,9 +96,9 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
      *            the readOnly to set
      * @return the builder
      */
-    public AbstractTextFieldBuilder<E> readOnly(final boolean readOnly) {
+    public T readOnly(final boolean readOnly) {
         this.readOnly = readOnly;
-        return this;
+        return (T) this;
     }
 
     /**
@@ -101,9 +106,9 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
      *            the enabled to set
      * @return the builder
      */
-    public AbstractTextFieldBuilder<E> enabled(final boolean enabled) {
+    public T enabled(final boolean enabled) {
         this.enabled = enabled;
-        return this;
+        return (T) this;
     }
 
     /**
@@ -111,9 +116,9 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
      *            the prompt to set
      * @return the builder
      */
-    public AbstractTextFieldBuilder<E> prompt(final String prompt) {
+    public T prompt(final String prompt) {
         this.prompt = prompt;
-        return this;
+        return (T) this;
     }
 
     /**
@@ -121,9 +126,9 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
      *            the immediate to set
      * @return the builder
      */
-    public AbstractTextFieldBuilder<E> immediate(final boolean immediate) {
+    public T immediate(final boolean immediate) {
         this.immediate = immediate;
-        return this;
+        return (T) this;
     }
 
     /**
@@ -131,9 +136,9 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
      *            the id to set
      * @return the builder
      */
-    public AbstractTextFieldBuilder<E> id(final String id) {
+    public T id(final String id) {
         this.id = id;
-        return this;
+        return (T) this;
     }
 
     /**
@@ -142,9 +147,9 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
      *            the validator to set for this field
      * @return the builder
      */
-    public AbstractTextFieldBuilder<E> validator(final Validator validator) {
+    public T validator(final Validator validator) {
         validators.add(validator);
-        return this;
+        return (T) this;
     }
 
     /**

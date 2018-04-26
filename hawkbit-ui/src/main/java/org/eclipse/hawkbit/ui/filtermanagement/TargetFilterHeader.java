@@ -122,9 +122,9 @@ public class TargetFilterHeader extends VerticalLayout {
     }
 
     private TextField createSearchField() {
-        final TextField campSearchTextField = ((TextFieldBuilder) new TextFieldBuilder(64)
-                .id(UIComponentIdProvider.TARGET_FILTER_SEARCH_TEXT))
-                        .createSearchField(event -> searchBy(event.getText()));
+        final TextField campSearchTextField = new TextFieldBuilder(64)
+                .id(UIComponentIdProvider.TARGET_FILTER_SEARCH_TEXT)
+                .createSearchField(event -> searchBy(event.getText()));
         campSearchTextField.setWidth(500.0F, Unit.PIXELS);
         return campSearchTextField;
     }

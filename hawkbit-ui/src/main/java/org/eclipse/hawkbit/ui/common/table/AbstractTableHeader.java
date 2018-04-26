@@ -87,7 +87,7 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
     private void createComponents() {
         headerCaption = createHeaderCaption();
-        searchField = ((TextFieldBuilder) new TextFieldBuilder(64).id(getSearchBoxId()))
+        searchField = new TextFieldBuilder(64).id(getSearchBoxId())
                 .createSearchField(event -> searchBy(event.getText()));
 
         searchResetIcon = createSearchResetIcon();

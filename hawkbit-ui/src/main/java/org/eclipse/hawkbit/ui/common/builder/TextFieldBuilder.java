@@ -18,7 +18,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * Textfield builder.
  *
  */
-public class TextFieldBuilder extends AbstractTextFieldBuilder<TextField> {
+public class TextFieldBuilder extends AbstractTextFieldBuilder<TextFieldBuilder, TextField> {
 
     /**
      * Constructor.

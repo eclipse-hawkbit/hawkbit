@@ -73,7 +73,7 @@ public abstract class AbstractGridHeader extends VerticalLayout {
     private void createComponents() {
         headerCaptionLayout = getHeaderCaptionLayout();
         if (isRollout()) {
-            searchField = ((TextFieldBuilder) new TextFieldBuilder(64).id(getSearchBoxId()))
+            searchField = new TextFieldBuilder(64).id(getSearchBoxId())
                     .createSearchField(event -> searchBy(event.getText()));
             searchResetIcon = createSearchResetIcon();
             addButton = createAddButton();

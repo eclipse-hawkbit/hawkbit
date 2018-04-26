@@ -774,7 +774,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         errorThresholdOptionGroup.setValue(ERRORTHRESOLDOPTIONS.PERCENT.getValue());
     }
 
-    private TextArea createDescription() {
+    private static TextArea createDescription() {
         final TextArea descriptionField = new TextAreaBuilder(Rollout.DESCRIPTION_MAX_SIZE).style("text-area-style")
                 .id(UIComponentIdProvider.ROLLOUT_DESCRIPTION_ID).buildTextComponent();
         descriptionField.setSizeUndefined();
